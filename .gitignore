@@ -27,3 +27,15 @@
 *.exe
 *.out
 *.app
+
+#Cmake
+CMakeCache.txt
+CMakeFiles
+CMakeScripts
+Makefile
+cmake_install.cmake
+install_manifest.txt
+CTestTestfile.cmake
+
+#ignore build dir
+build/**
