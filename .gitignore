@@ -28,6 +28,10 @@
 *.out
 *.app
 
+# Dr Probe simulation files
+*.sli
+*.wav
+
 #Cmake
 CMakeCache.txt
 CMakeFiles
