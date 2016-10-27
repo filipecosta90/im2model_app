@@ -28,7 +28,7 @@
 119                         ! number of slice files to load
 1                         ! number of frozen lattice variants per slice
 1                         ! minimum number of FL variations averaged
-0                         ! detector readout period in slices
+8                         ! detector readout period in slices
 119                        ! max. number of slices in the object 
 0
 1

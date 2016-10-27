@@ -47,7 +47,7 @@ int main(int argc, char** argv )
   int pos = 0;
   for (int col = 0; col < cols; col++) {
     for (int row = 0; row < rows; row++) {
-      image.at<uchar>(col, row) = (uchar) ( ( p[pos] / 256.0f ) ); 
+      image.at<char>(col, row) =  ( ( p[pos] / 256.0f ) ); 
       pos++;
     }
   }

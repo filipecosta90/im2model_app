@@ -1,10 +1,10 @@
-'wave_sl119.wav'      	     		! wave function file name (complex*8)
-1280, 1440                  		! dimension of wave data (rows and cols)
+'wave_sl080.wav'      	     		! wave function file name (complex*8)
+360, 360                  		! dimension of wave data (rows and cols)
 0.00407, 0.00407             		! sampling of wave data (x, y) [nm/pix]
 200.0                        		! TEM high-tension (as used for wave functiopn calc)
 0                            		! image type option, 0=TEM image, 1=complex wave, 2=wave amp, 3=wave phase, 4=wave re, 5=wave im, 6=dZ-dT map
-'zoom_test_8P5dnm_4P44tnm_noise2.dat' 		! image intensity file name (real*4)
-1280, 1440                  		! image size (x, y) in pixels
+'zoom_test_8P5dnm_4P44tnm_noise2_sl80.dat' 		! image intensity file name (real*4)
+360, 360                  		! image size (x, y) in pixels
 1, 3000, 3.6, 125.0            		! flag and prm for integer image creation with noise (flag: 0=off, 1=32bit, 2=16bit, prm: mean vacuum intensity, El. conversion rate, readout noise)
 1                            		! extract special image frame 
 0.00407                 		! image sampling rate [nm/pix]
@@ -16,18 +16,18 @@
 1, 1.0, '../simulation/mtf/MTF-US2k-300.mtf'   		! flag, scale, and data for detector mtf
 0, 0.03                     		! flag and prm [amplitude nm] for vibration envelope
 2                           		! number of aberration definitions following
-1, 8.5, 0.0                 		! aberration definition (index, ax, ay) (NCSI defocus for 0.8A resolution at 300kV)
-5, -17000.0, 0.0             		! aberration definition (index, ax, ay) (NCSI C3 for 0.8A resolution at 300kV)
+1, 10.0, 0.0                 		! aberration definition (index, ax, ay) (NCSI defocus for 0.8A resolution at 300kV)
+5, -12000.0, 0.0             		! aberration definition (index, ax, ay) (NCSI C3 for 0.8A resolution at 300kV)
 5500.0                      		! objective aperture size in mrad (set to extreme value to deactivate)
 0.0, 0.0                    		! decenter of the objective aperture in mrad
 0                           		! number of loops
 1                           		! loop variable class: 1=aberration ! this is a defocus loop
 1                           		! loop variable id: 1=defocus
 1                           		! loop variation form: 1=ramp
-6.0, 11.0, 5                		! loop variable min., max., # samples
+10.0, 10.0, 5                		! loop variable min., max., # samples
 'foc'                       		! loop id string (for naming purposes, not used here)
 3                           		! loop variable class: 3=wave file ! this is a loop over wavefunctions (here, thickness)
 1                           		! loop variable id: 1 (not used here)
 1                           		! loop variation form: 1=ramp
-119, 119, 3                 		! loop variable min., max., # samples
+80, 80, 3                 		! loop variable min., max., # samples
 '_sl'                       		! loop id string (for wave identification and output naming purposes)
