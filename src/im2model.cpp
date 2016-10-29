@@ -13,6 +13,7 @@
 #include "opencv2/imgproc/imgproc.hpp"
 
 #include "msa_prm.h"
+#include "wavimg_prm.h"
 
 using namespace cv;
 
@@ -51,6 +52,9 @@ int main(int argc, char** argv )
   msa_parameters.set_linear_slices_for_full_object_structure();
   msa_parameters.produce_prm("msa_119_im2model.prm");
   int fd;
+  WAVIMG_prm::WAVIMG_prm wavimg_parameters;
+
+
   fd = open ( argv[1], O_RDONLY );
   if ( fd == -1 ){
     perror("open");
