@@ -280,65 +280,65 @@ void WAVIMG_prm::produce_prm ( std::string filename ) {
   outfile.open(filename);
     
   // line 1
-  outfile <<  file_name_input_wave_function << std::endl;
+  outfile  << file_name_input_wave_function << " !" << std::endl;
   // line 2
-  outfile <<  n_columns_samples_input_wave_function_pixels << ", " << n_rows_samples_input_wave_function_pixels << std::endl;
+  outfile <<  n_columns_samples_input_wave_function_pixels << ", " << n_rows_samples_input_wave_function_pixels << " !" << std::endl;
   // line 3
-  outfile  << physical_columns_sampling_rate_input_wave_function_nm_pixels << ", " << physical_rows_sampling_rate_input_wave_function_nm_pixels << std::endl;
+  outfile  << physical_columns_sampling_rate_input_wave_function_nm_pixels << ", " << physical_rows_sampling_rate_input_wave_function_nm_pixels << " !" << std::endl;
   // line 4
-  outfile <<  primary_electron_energy << std::endl;
+  outfile <<  primary_electron_energy << " !" << std::endl;
   // line 5
-  outfile <<  type_of_output << std::endl;
+  outfile <<  type_of_output << " !" << std::endl;
   // line 6
-  outfile <<  file_name_output_image_wave_function << std::endl;
+  outfile <<  file_name_output_image_wave_function<< " !" << std::endl;
   // line 7
-  outfile <<  n_columns_samples_output_image << ", " << n_rows_samples_output_image << std::endl;
+  outfile <<  n_columns_samples_output_image << ", " << n_rows_samples_output_image << " !" << std::endl;
   // line 8
-  outfile <<  image_data_type << ", " << image_vacuum_mean_intensity << ", " << conversion_rate << ", " <<  readout_noise_rms_amplitude << std::endl;
+  outfile <<  image_data_type << ", " << image_vacuum_mean_intensity << ", " << conversion_rate << ", " <<  readout_noise_rms_amplitude << " !" << std::endl;
   // line 9
-  outfile <<  switch_option_extract_particular_image_frame << std::endl;
+  outfile <<  switch_option_extract_particular_image_frame << " !" << std::endl;
   // line 10
-  outfile <<  image_sampling_rate_nm_pixel << std::endl;
+  outfile <<  image_sampling_rate_nm_pixel << " !" << std::endl;
   // line 11
-  outfile <<  image_frame_offset_x_pixels_input_wave_function << ", " << image_frame_offset_y_pixels_input_wave_function << std::endl;
+  outfile <<  image_frame_offset_x_pixels_input_wave_function << ", " << image_frame_offset_y_pixels_input_wave_function << " !" << std::endl;
   // line 12
-  outfile <<  image_frame_rotation << std::endl;
+  outfile <<  image_frame_rotation << " !" << std::endl;
   // line 13
-  outfile <<  switch_coherence_model << std::endl;
+  outfile <<  switch_coherence_model << " !" << std::endl;
   // line 14
-  outfile <<  partial_temporal_coherence_switch << ", " << partial_temporal_coherence_focus_spread << std::endl;
+  outfile <<  partial_temporal_coherence_switch << ", " << partial_temporal_coherence_focus_spread << " !" << std::endl;
   // line 15
-  outfile <<  partial_spacial_coherence_switch << ", " << partial_spacial_coherence_semi_convergence_angle << std::endl;
+  outfile <<  partial_spacial_coherence_switch << ", " << partial_spacial_coherence_semi_convergence_angle << " !" << std::endl;
   // line 16
-  outfile <<  mtf_simulation_switch << ", " << k_space_scaling << ", " <<  file_name_simulation_frequency_modulated_detector_transfer_function << std::endl;
+  outfile <<  mtf_simulation_switch << ", " << k_space_scaling << ", " <<  file_name_simulation_frequency_modulated_detector_transfer_function << " !" << std::endl;
   // line 17
-    outfile <<  simulation_image_spread_envelope_switch << ", " << isotropic_one_rms_amplitude << " ----!" << std::endl;
+    outfile <<  simulation_image_spread_envelope_switch << ", " << isotropic_one_rms_amplitude << " !" << std::endl;
   // float anisotropic_second_rms_amplitude;
   //float azimuth_orientation_angle;
   // line 18
-  outfile <<  number_image_aberrations_set << std::endl;
+  outfile <<  number_image_aberrations_set << " !" << std::endl;
   // line 19
 
   for ( int pos = 0 ; pos < number_image_aberrations_set ; pos++){
-    outfile << aberration_definition_index_number.at(pos) << ", " << aberration_definition_1st_coefficient_value_nm.at(pos) << ", "<< aberration_definition_2nd_coefficient_value_nm.at(pos) << std::endl;
+    outfile << aberration_definition_index_number.at(pos) << ", " << aberration_definition_1st_coefficient_value_nm.at(pos) << ", "<< aberration_definition_2nd_coefficient_value_nm.at(pos) << " !" << std::endl;
   }
   // line 19 + aberration_definition_index_number
-  outfile <<  objective_aperture_radius << std::endl;
+  outfile <<  objective_aperture_radius << " !" << std::endl;
   // line 20 + aberration_definition_index_number
-  outfile <<  center_x_of_objective_aperture << ", " << center_y_of_objective_aperture << std::endl;
+  outfile <<  center_x_of_objective_aperture << ", " << center_y_of_objective_aperture << " !" << std::endl;
   // line 21
   outfile <<  number_parameter_loops << std::endl;
   for ( int pos = 0 ; pos < number_parameter_loops ; pos++){
     // line 22 + aberration_definition_index_number
-    outfile << loop_parameter_class.at(pos) << std::endl;
+      outfile << loop_parameter_class.at(pos) << " !" << std::endl;
     // line 23 + aberration_definition_index_number
-    outfile <<  loop_parameter_index.at(pos) << std::endl;
+    outfile <<  loop_parameter_index.at(pos) << " !" << std::endl;
     // line 24 + aberration_definition_index_number
-    outfile << loop_variation_form.at(pos) << std::endl;
+    outfile << loop_variation_form.at(pos) << " !" << std::endl;
     // line 25 + aberration_definition_index_number
-    outfile << loop_range_0.at(pos) << ", " << loop_range_1.at(pos) << ", " << loop_range_n.at(pos) << std::endl;
+    outfile << loop_range_0.at(pos) << ", " << loop_range_1.at(pos) << ", " << loop_range_n.at(pos) << " !" << std::endl;
     // line 26 + aberration_definition_index_number
-    outfile << loop_string_indentifier.at(pos) << std::endl;
+    outfile << loop_string_indentifier.at(pos) << " !" << std::endl;
   }
   outfile.close();
 }
