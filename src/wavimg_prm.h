@@ -54,9 +54,9 @@ class WAVIMG_prm {
     // line 18
     int number_image_aberrations_set;
     // line 19
-    int aberration_definition_index_number;
-    float aberration_definition_1st_coefficient_value_nm;
-    float aberration_definition_2nd_coefficient_value_nm;
+    std::vector<int> aberration_definition_index_number;
+    std::vector<float>  aberration_definition_1st_coefficient_value_nm;
+    std::vector<float>  aberration_definition_2nd_coefficient_value_nm;
     // line 19 + aberration_definition_index_number
     float objective_aperture_radius;
     // line 20 + aberration_definition_index_number
@@ -85,8 +85,8 @@ class WAVIMG_prm {
     void set_n_columns_samples_input_wave_function_pixels( int n_columns );
     void set_n_rows_samples_input_wave_function_pixels( int n_rows );
     // setters line 3
-    void set_physical_columns_sampling_rate_input_wave_function_nm_pixels( int columns_sampling_rate );
-    void set_physical_rows_sampling_rate_input_wave_function_nm_pixels( int rows_sampling_rate );
+    void set_physical_columns_sampling_rate_input_wave_function_nm_pixels( float columns_sampling_rate );
+    void set_physical_rows_sampling_rate_input_wave_function_nm_pixels( float rows_sampling_rate );
     // setters line 4
     void set_primary_electron_energy( float electron_energy );
     // setters line 5
@@ -130,9 +130,7 @@ class WAVIMG_prm {
     // setters line 18
     void set_number_image_aberrations_set( int number_image_aberrations );
     // setters line 19
-    void set_aberration_definition_index_number(int index_number );
-    void set_aberration_definition_1st_coefficient_value_nm( float value );
-    void set_aberration_definition_2nd_coefficient_value_nm( float value );
+    void add_aberration_definition ( int index_number, float first_coefficient_value_nm, float second_coefficient_value_nm );
     // setters line 19 + aberration_definition_index_number
     void set_objective_aperture_radius( float radius );
     // setters line 20 + aberration_definition_index_number

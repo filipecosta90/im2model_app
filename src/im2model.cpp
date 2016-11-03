@@ -39,6 +39,9 @@ int main(int argc, char** argv )
     return -1;
   }
 
+  int rows = atoi(argv[2]);
+  int cols = atoi(argv[3]);
+
   MSA_prm::MSA_prm msa_parameters;
   msa_parameters.set_electron_wavelength( 0.00196875 );
   msa_parameters.set_internal_repeat_factor_of_super_cell_along_x ( 1 );
@@ -54,6 +57,69 @@ int main(int argc, char** argv )
   int fd;
   WAVIMG_prm::WAVIMG_prm wavimg_parameters;
 
+  // setters line 1
+  wavimg_parameters.set_file_name_input_wave_function( "'wave_sl112.wav'" );
+  // setters line 2
+  wavimg_parameters.set_n_columns_samples_input_wave_function_pixels( cols );
+  wavimg_parameters.set_n_rows_samples_input_wave_function_pixels( rows );
+  // setters line 3
+  wavimg_parameters.set_physical_columns_sampling_rate_input_wave_function_nm_pixels( 0.00407f );
+  wavimg_parameters.set_physical_rows_sampling_rate_input_wave_function_nm_pixels( 0.00407f );
+  // setters line 4
+  wavimg_parameters.set_primary_electron_energy( 200.0 );
+  // setters line 5
+  wavimg_parameters.set_type_of_output( 0 );
+  // setters line 6
+  wavimg_parameters.set_file_name_output_image_wave_function( "'zoom_test_8P5dnm_4P44tnm_noise2_sl112_def_0.dat'" );
+  // setters line 7
+  wavimg_parameters.set_n_columns_samples_output_image( cols );
+  wavimg_parameters.set_n_rows_samples_output_image( rows );
+  // setters line 8
+  wavimg_parameters.set_image_data_type( 1 );
+  wavimg_parameters.set_image_vacuum_mean_intensity( 3000.0f );
+  wavimg_parameters.set_conversion_rate( 3.6f );
+  wavimg_parameters.set_readout_noise_rms_amplitude( 125.0f );
+  // setters line 9
+  wavimg_parameters.set_switch_option_extract_particular_image_frame( 1 );
+  // setters line 10
+  wavimg_parameters.set_image_sampling_rate_nm_pixel( 0.00407f );
+  // setters line 11
+  wavimg_parameters.set_image_frame_offset_x_pixels_input_wave_function( 0.0f );
+  wavimg_parameters.set_image_frame_offset_y_pixels_input_wave_function( 0.0f );
+  // setters line 12
+  wavimg_parameters.set_image_frame_rotation( 0.0f );
+  // setters line 13
+  wavimg_parameters.set_switch_coherence_model( 1 );
+  // setters line 14
+  wavimg_parameters.set_partial_temporal_coherence_switch( 1 );
+  wavimg_parameters.set_partial_temporal_coherence_focus_spread( 4.0f );
+  // setters line 15
+  wavimg_parameters.set_partial_spacial_coherence_switch( 1 );
+  wavimg_parameters.set_partial_spacial_coherence_semi_convergence_angle( 0.2f );
+  // setters line 16
+  wavimg_parameters.set_mtf_simulation_switch( 1 );
+  wavimg_parameters.set_k_space_scaling( 1.0f );
+  wavimg_parameters.set_file_name_simulation_frequency_modulated_detector_transfer_function( "'../simulation/mtf/MTF-US2k-300.mtf'" );
+  // setters line 17
+  wavimg_parameters.set_simulation_image_spread_envelope_switch( 0 );
+  wavimg_parameters.set_isotropic_one_rms_amplitude( 0.03 );
+//  wavimg_parameters.set_anisotropic_second_rms_amplitude( 0.0f );
+ // wavimg_parameters.set_azimuth_orientation_angle( 0.0f );
+  // setters line 18
+  wavimg_parameters.set_number_image_aberrations_set( 2 );
+  // setters line 19
+  wavimg_parameters.add_aberration_definition ( 1, 0.0f, 0.0f );
+  wavimg_parameters.add_aberration_definition ( 5, -12000.0f, 0.0f );
+  // setters line 19 + aberration_definition_index_number
+  wavimg_parameters.set_objective_aperture_radius( 5500.0f );
+  // setters line 20 + aberration_definition_index_number
+  wavimg_parameters.set_center_x_of_objective_aperture( 0.0f );
+  wavimg_parameters.set_center_y_of_objective_aperture( 0.0f );
+  // setters line 21 + aberration_definition_index_number
+  wavimg_parameters.set_number_parameter_loops( 0 );
+  wavimg_parameters.add_parameter_loop ( 1 , 1 , 1, 0.0f, 0.0f, 5.0f, "'foc'" );
+  wavimg_parameters.add_parameter_loop ( 3 , 1 , 1, 112.0f, 112.0f, 3.0f, "'_sl'" );
+  wavimg_parameters.produce_prm("wavimg_112_def_0_im2model.prm");
 
   fd = open ( argv[1], O_RDONLY );
   if ( fd == -1 ){
@@ -73,10 +139,7 @@ int main(int argc, char** argv )
 
   if (close (fd) == -1) {                                                       
     perror ("close");                                                           
-  }                                                                             
-
-  int rows = atoi(argv[2]);
-  int cols = atoi(argv[3]);
+  }
 
   // Load image and template
   cv::Mat image ( cols, rows , CV_8SC1);
