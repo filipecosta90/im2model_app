@@ -39,7 +39,7 @@ int main(int argc, char** argv )
 {
   if ( argc != 10 )
   {
-    printf("usage: im2model <Width> <Height> <slices_load> <slices_samples> <slices_lower_bound> <slices_upper_bound> <Defocus_samples> <defocus_lower_bound> <defocus_upper_bound>\n");
+    printf("usage: im2model <Width> <Height> <slices_load> <slices_samples> <slices_upper_bound> <slices_max_thickness> <Defocus_samples> <defocus_lower_bound> <defocus_upper_bound>\n");
     return -1;
   }
 
@@ -47,12 +47,14 @@ int main(int argc, char** argv )
   int cols = atoi(argv[2]);
   int slices_load = atoi(argv[3]);
   int slice_samples = atoi(argv[4]);
-  float slices_lower_bound = atof(argv[5]);
-  float slices_upper_bound = atof(argv[6]);
-    int slice_period = (slices_upper_bound - slices_lower_bound) / slice_samples;
+  float slices_upper_bound = atof(argv[5]);
+  int number_slices_to_max_thickness = atoi( argv[6] );
+  int slice_period =  slices_upper_bound  / slice_samples;
+  int slices_lower_bound = slice_period;
   int defocus_samples = atoi(argv[7]);
   float defocus_lower_bound = atof(argv[8]);
   float defocus_upper_bound = atof(argv[9]);
+  float defocus_period =  ( defocus_upper_bound - defocus_lower_bound) / ( defocus_samples - 1 );
 
   MSA_prm::MSA_prm msa_parameters;
   msa_parameters.set_electron_wavelength( 0.00196875 );
@@ -63,10 +65,9 @@ int main(int argc, char** argv )
   msa_parameters.set_number_frozen_lattice_variants_considered_per_slice( 1 );
   msa_parameters.set_minimum_number_frozen_phonon_configurations_used_generate_wave_functions ( 1 );
   msa_parameters.set_period_readout_or_detection_in_units_of_slices ( slice_period );
-  msa_parameters.set_number_slices_used_describe_full_object_structure_up_to_its_maximum_thickness ( slices_load );
+  msa_parameters.set_number_slices_used_describe_full_object_structure_up_to_its_maximum_thickness ( number_slices_to_max_thickness );
   msa_parameters.set_linear_slices_for_full_object_structure();
   msa_parameters.produce_prm("temporary_msa_im2model.prm");
-
 
   std::vector<char*> msa_vector;
   msa_vector.push_back((char*) "../bin/drprobe_clt_bin_osx/msa");
@@ -119,10 +120,10 @@ int main(int argc, char** argv )
   wavimg_parameters.set_n_columns_samples_output_image( cols );
   wavimg_parameters.set_n_rows_samples_output_image( rows );
   // setters line 8
-  wavimg_parameters.set_image_data_type( 1 );
+  wavimg_parameters.set_image_data_type( 0 );
   wavimg_parameters.set_image_vacuum_mean_intensity( 3000.0f );
-  wavimg_parameters.set_conversion_rate( 3.6f );
-  wavimg_parameters.set_readout_noise_rms_amplitude( 125.0f );
+  wavimg_parameters.set_conversion_rate( 1.0f );
+  wavimg_parameters.set_readout_noise_rms_amplitude( 0.0f );
   // setters line 9
   wavimg_parameters.set_switch_option_extract_particular_image_frame( 1 );
   // setters line 10
@@ -186,13 +187,14 @@ int main(int argc, char** argv )
     int status;
     wait(&status);
 
-    for (int thickness = 2; thickness <= slice_samples; thickness ++ ){
+    for (int thickness = 1; thickness <= slice_samples; thickness ++ ){
       for (int defocus = 1; defocus <= defocus_samples; defocus ++ ){
 
         std::stringstream output_dat_name_stream;
-        output_dat_name_stream << "image_" << std::setw(3) << std::setfill('0') << std::to_string(thickness) << "_" << std::setw(3) << std::setfill('0') << std::to_string(thickness) << ".dat";
+        output_dat_name_stream << "image_" << std::setw(3) << std::setfill('0') << std::to_string(thickness) << "_" << std::setw(3) << std::setfill('0') << std::to_string(defocus) << ".dat";
         std::string file_name_output_dat = output_dat_name_stream.str();
 
+        // Load image 
         std::cout << "opening " << file_name_output_dat << std::endl;
         fd = open ( file_name_output_dat.c_str() , O_RDONLY );
         if ( fd == -1 ){
@@ -201,10 +203,10 @@ int main(int argc, char** argv )
 
         off_t fsize;
         fsize = lseek(fd, 0, SEEK_END);
-        int* p;
+        float* p;
         std::cout << "Total file size in bytes " << fsize << std::endl;
 
-        p = (int*) mmap (0, fsize, PROT_READ, MAP_SHARED, fd, 0);
+        p = (float*) mmap (0, fsize, PROT_READ, MAP_SHARED, fd, 0);
 
         if (p == MAP_FAILED) {
           perror ("mmap");
@@ -214,35 +216,41 @@ int main(int argc, char** argv )
           perror ("close");
         }
 
-        // Load image and template
-        cv::Mat image ( rows , cols , CV_8S);
-        cv::Mat image_save ( rows,  cols , CV_8S);
-
+        cv::Mat image ( rows , cols , CV_32FC1);
+        double min, max;
 
         int pos = 0;
         for (int col = 0; col < cols; col++) {
           for (int row = 0; row < rows; row++) {
-            image.at<char>(row, col) =  ( ( p[pos]) / 255.f );
+            image.at<float>(row, col) = (float)  p[pos] ;
             pos++;
           }
         }
-        // Create windows
+        cv::minMaxLoc(image, &min, &max);
+        std::cout << "min: " << min << " max: " << max << std::endl;
 
-        if ( !image.data )
-        {
+        // Create a new matrix to hold the gray image
+        Mat draw;
+        image.convertTo(draw, CV_8U , 255.0/(max - min), -min * 255.0/(max - min));
+
+        std::stringstream output_dat_draw_image;
+        output_dat_draw_image << "Thickness: " << thickness * slice_period <<  " Defocus: " << ( (defocus-1) * defocus_period )+ defocus_lower_bound ; //<< "\nfrom .dat: " << file_name_output_dat ;
+        std::string image_info = output_dat_draw_image.str();
+        putText(draw, image_info , cvPoint(30,30), FONT_HERSHEY_SIMPLEX, 0.65, cvScalar(255,255,255), 1, CV_AA);
+
+        // Create windows
+        if ( !draw.data ){
           perror("No image data \n");
           return -1;
 
         }
-        cv::normalize(image, image_save, 0, 255, NORM_MINMAX, CV_8S);
         namedWindow( "Display window", WINDOW_AUTOSIZE );// Create a window for display.
-        // image.convertTo(image_save, CV_32F);
-        imshow( "Display window", image );
-
-
-        //  imwrite( file_name_output_image_tiff, image_save );
+        imshow( "Display window", draw );
+        std::stringstream output_file_image;
+        output_file_image << "thickness_" << thickness * slice_period <<  "defocus_" << ( (defocus-1) * defocus_period )+ defocus_lower_bound << "_from_dat_" << file_name_output_dat << ".tiff" ;
+        std::string file_name_image = output_file_image.str();
+        imwrite( file_name_image, draw );
         waitKey(0);                                          // Wait for a keystroke in the window
-
       }
     }
   }

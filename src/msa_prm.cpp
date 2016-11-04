@@ -32,7 +32,7 @@ MSA_prm::MSA_prm()
   a_posteriori_convolution_by_source_distribution_function_switch = 0;
   internal_repeat_factor_of_super_cell_along_x = 0;
   internal_repeat_factor_of_super_cell_along_y = 0;
-  internal_repeat_factor_of_super_cell_along_z = 0;
+  internal_repeat_factor_of_super_cell_along_z = 1;
   slice_filename_prefix = "";
   number_slices_to_load = 0; 
   number_frozen_lattice_variants_considered_per_slice = 0;
