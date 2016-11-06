@@ -12,7 +12,6 @@
 #include <iostream>     // std::cout
 #include <iomanip>
 
-
 #include <stdio.h>
 #include <opencv2/opencv.hpp>
 #include "opencv2/highgui/highgui.hpp"
@@ -24,22 +23,54 @@
 using namespace cv;
 
 // Global Variables
-int match_method;
-int max_Trackbar = 5;
+cv::Mat experimental_image(2048,2048,CV_32FC1);
+cv::Mat experimental_image_roi;
+cv::Mat experimental_working(2048,2048,CV_32FC1);
 
 cv::Mat img;
 cv::Mat templ; 
 cv::Mat result;
 
+Rect roi_rectangle;
+int roi_x_size;
+int roi_y_size;
 
 /// Function Headers
 void MatchingMethod( int, void* );
 
+void CallBackFunc(int event, int x, int y, int flags, void* userdata)
+{
+  if  ( event == EVENT_LBUTTONDOWN )
+  {
+    std::cout << "New ROI center - position (" << x << ", " << y << ")" << std::endl;
+    roi_rectangle.x = x - ( roi_x_size / 2 );
+    roi_rectangle.y = y - ( roi_y_size / 2) ;
+    roi_rectangle.width = roi_x_size;
+    roi_rectangle.height = roi_y_size;
+    experimental_working = experimental_image.clone();
+    // copy the roi
+    cv::Mat roi = experimental_image(roi_rectangle);
+    roi.copyTo(experimental_image_roi);
+    //draw the roi
+    rectangle(experimental_working, roi_rectangle, Scalar(0,0,255), 5);
+    imshow("Experimental Window", experimental_working);
+  }
+  else if  ( event == EVENT_LBUTTONUP )
+  {
+    //  std::cout << "Left button released" << std::endl;
+  }
+  else if ( event == EVENT_MOUSEMOVE )
+  {
+    //  std::cout << "Mouse move over the window - position (" << x << ", " << y << ")" << std::endl;
+  }
+}
+
 int main(int argc, char** argv )
 {
-  if ( argc != 10 )
+
+  if ( argc != 16 )
   {
-    printf("usage: im2model <Width> <Height> <slices_load> <slices_samples> <slices_upper_bound> <slices_max_thickness> <Defocus_samples> <defocus_lower_bound> <defocus_upper_bound>\n");
+    printf("usage: im2model <Width> <Height> <slices_load> <slices_samples> <slices_upper_bound> <slices_max_thickness> <Defocus_samples> <defocus_lower_bound> <defocus_upper_bound> <experimental_image_path> <nm_per_pixel> <roi_pixel_size> <roi_center_x> <roi_center_y> <ignore_edge_pixels>\n");
     return -1;
   }
 
@@ -55,6 +86,18 @@ int main(int argc, char** argv )
   float defocus_lower_bound = atof(argv[8]);
   float defocus_upper_bound = atof(argv[9]);
   float defocus_period =  ( defocus_upper_bound - defocus_lower_bound) / ( defocus_samples - 1 );
+  float nm_per_pixel = atof( argv[11] );
+  int roi_pixel_size = atoi( argv[12] );
+  roi_x_size = roi_pixel_size;
+  roi_y_size = roi_pixel_size;
+  int roi_center_x = atoi( argv[13] );
+  int roi_center_y = atoi( argv[14] );
+  int ignore_edge_pixels = atoi ( argv[15] );
+  Rect ignore_edge_pixels_rectangle;
+  ignore_edge_pixels_rectangle.x = ignore_edge_pixels;
+  ignore_edge_pixels_rectangle.y = ignore_edge_pixels;
+  ignore_edge_pixels_rectangle.width = rows - ( 2 * ignore_edge_pixels );
+  ignore_edge_pixels_rectangle.height = cols - ( 2 * ignore_edge_pixels );
 
   MSA_prm::MSA_prm msa_parameters;
   msa_parameters.set_electron_wavelength( 0.00196875 );
@@ -184,6 +227,38 @@ int main(int argc, char** argv )
     execv(wavimg_vector[0], &wavimg_vector.front());
   }
   else {
+    // Read the experimental image from file
+    experimental_image = imread(argv[10]);
+    bool bDraw = false;
+    bool isDragging = false;
+
+    // initialize your temp images
+    experimental_working = experimental_image.clone();
+
+    //if fail to read the image
+    if ( experimental_image.empty() ) 
+    { 
+      std::cout << "Error loading the experimental image" << std::endl;
+      return -1; 
+    }
+    //Create a window
+    namedWindow("Experimental Window", WINDOW_AUTOSIZE );
+    setMouseCallback("Experimental Window", CallBackFunc, NULL);
+    imshow("Experimental Window", experimental_image);
+    std::cout << "Width : " << experimental_image.cols << std::endl;
+    std::cout << "Heigth : " << experimental_image.rows << std::endl;
+    roi_rectangle.x = roi_center_x  - ( roi_x_size / 2 );
+    roi_rectangle.y = roi_center_y - ( roi_y_size / 2) ;
+    roi_rectangle.width = roi_x_size;
+    roi_rectangle.height = roi_y_size;
+    experimental_working = experimental_image.clone();
+    //copy the roi
+    cv::Mat roi = experimental_image(roi_rectangle);
+    roi.copyTo(experimental_image_roi);
+    //draw the roi 
+    rectangle(experimental_working, roi_rectangle, Scalar(0,0,255), 5);
+    imshow("Experimental Window", experimental_working);
+
     int status;
     wait(&status);
 
@@ -245,14 +320,20 @@ int main(int argc, char** argv )
 
         }
         namedWindow( "Display window", WINDOW_AUTOSIZE );// Create a window for display.
-        imshow( "Display window", draw );
         std::stringstream output_file_image;
-        output_file_image << "thickness_" << thickness * slice_period <<  "defocus_" << ( (defocus-1) * defocus_period )+ defocus_lower_bound << "_from_dat_" << file_name_output_dat << ".tiff" ;
+        output_file_image << "thickness_" << thickness * slice_period <<  "defocus_" << ( (defocus-1) * defocus_period )+ defocus_lower_bound << "_from_dat_" << file_name_output_dat << ".png" ;
         std::string file_name_image = output_file_image.str();
-        imwrite( file_name_image, draw );
+
+        // remove the ignored edge pixels
+        cv::Mat ignore_removed = draw(ignore_edge_pixels_rectangle);
+        imwrite( file_name_image, ignore_removed );
+        //draw the ignore rectangle 
+        rectangle(draw, ignore_edge_pixels_rectangle, Scalar(0,255,255), 3);
+        imshow( "Display window", draw );
         waitKey(0);                                          // Wait for a keystroke in the window
       }
     }
+
   }
 
   return 0;
