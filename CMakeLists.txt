@@ -1,6 +1,14 @@
 # the minimum version of CMake required
 cmake_minimum_required(VERSION 2.8)
 
+# need to improve this input 
+SET(BOOST_ROOT /usr/local/Cellar/boost/1.62.0)
+SET(BOOST_INCLUDEDIR /usr/local/Cellar/boost/1.62.0/include)
+
+find_package(Boost REQUIRED)
+
+include_directories(${BOOST_INCLUDEDIR})
+
 project( im2model )
 
 set(CMAKE_BINARY_DIR ${CMAKE_SOURCE_DIR}/build)

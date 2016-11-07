@@ -17,23 +17,35 @@
 #include "opencv2/highgui/highgui.hpp"
 #include "opencv2/imgproc/imgproc.hpp"
 
+
+// Include the headers relevant to the boost::program_options
+// library
+#include <boost/program_options/options_description.hpp>
+#include <boost/program_options/parsers.hpp>
+#include <boost/program_options/variables_map.hpp>
+#include <boost/tokenizer.hpp>
+#include <boost/token_functions.hpp>
+
+// Include std::exception so we can handling any argument errors
+// emitted by the command line parser
+#include <exception>
+
 #include "msa_prm.h"
 #include "wavimg_prm.h"
 
 using namespace cv;
 
 // Global Variables
-cv::Mat experimental_image(2048,2048,CV_32FC1);
+cv::Mat experimental_image; 
 cv::Mat experimental_image_roi;
-cv::Mat experimental_working(2048,2048,CV_32FC1);
-
-cv::Mat img;
-cv::Mat templ; 
-cv::Mat result;
+cv::Mat experimental_working; 
 
 Rect roi_rectangle;
 int roi_x_size;
 int roi_y_size;
+
+// 0: SQDIFF  1: SQDIFF NORMED 2: TM CCORR  3: TM CCORR NORMED  4: TM COEFF  5: TM COEFF NORMED
+int match_method = CV_TM_CCOEFF_NORMED; 
 
 /// Function Headers
 void MatchingMethod( int, void* );
@@ -50,6 +62,7 @@ void CallBackFunc(int event, int x, int y, int flags, void* userdata)
     experimental_working = experimental_image.clone();
     // copy the roi
     cv::Mat roi = experimental_image(roi_rectangle);
+    experimental_image_roi.create( roi_x_size, roi_y_size , CV_32FC1 );
     roi.copyTo(experimental_image_roi);
     //draw the roi
     rectangle(experimental_working, roi_rectangle, Scalar(0,0,255), 5);
@@ -67,6 +80,23 @@ void CallBackFunc(int event, int x, int y, int flags, void* userdata)
 
 int main(int argc, char** argv )
 {
+
+  // Add descriptive text for display when help argument is
+  // supplied
+  /*  boost::program_options::options_description desc(
+      "\nAn example command using Boost command line "
+      "arguments.\n\nAllowed arguments");
+      */
+  // Define command line arguments using either formats:
+  //
+  //     (“long-name,short-name”, “Description of argument”)
+  //     for flag values or
+  //
+  //     (“long-name,short-name”, <data-type>, 
+  //     “Description of argument”) arguments with values
+  //
+  // Remember that arguments with values may be multi-values
+  // and must be vectors
 
   if ( argc != 16 )
   {
@@ -122,6 +152,8 @@ int main(int argc, char** argv )
   msa_vector.push_back(0); //end of arguments sentinel is NULL
 
   pid_t pid;
+
+  std::vector< std::vector<cv::Mat> > simulated_grid;
 
   if ((pid = fork()) == -1) // system functions also set a variable called "errno"
   {
@@ -228,9 +260,7 @@ int main(int argc, char** argv )
   }
   else {
     // Read the experimental image from file
-    experimental_image = imread(argv[10]);
-    bool bDraw = false;
-    bool isDragging = false;
+    experimental_image = imread(argv[10] , CV_LOAD_IMAGE_GRAYSCALE );
 
     // initialize your temp images
     experimental_working = experimental_image.clone();
@@ -254,7 +284,9 @@ int main(int argc, char** argv )
     experimental_working = experimental_image.clone();
     //copy the roi
     cv::Mat roi = experimental_image(roi_rectangle);
+    experimental_image_roi.create( roi_x_size, roi_y_size , CV_32FC1 );
     roi.copyTo(experimental_image_roi);
+
     //draw the roi 
     rectangle(experimental_working, roi_rectangle, Scalar(0,0,255), 5);
     imshow("Experimental Window", experimental_working);
@@ -263,6 +295,7 @@ int main(int argc, char** argv )
     wait(&status);
 
     for (int thickness = 1; thickness <= slice_samples; thickness ++ ){
+      std::vector<cv::Mat> simulated_thickness_row;
       for (int defocus = 1; defocus <= defocus_samples; defocus ++ ){
 
         std::stringstream output_dat_name_stream;
@@ -311,14 +344,14 @@ int main(int argc, char** argv )
         std::stringstream output_dat_draw_image;
         output_dat_draw_image << "Thickness: " << thickness * slice_period <<  " Defocus: " << ( (defocus-1) * defocus_period )+ defocus_lower_bound ; //<< "\nfrom .dat: " << file_name_output_dat ;
         std::string image_info = output_dat_draw_image.str();
-        putText(draw, image_info , cvPoint(30,30), FONT_HERSHEY_SIMPLEX, 0.65, cvScalar(255,255,255), 1, CV_AA);
+        //        putText(draw, image_info , cvPoint(30,30), FONT_HERSHEY_SIMPLEX, 0.65, cvScalar(255,255,255), 1, CV_AA);
 
         // Create windows
         if ( !draw.data ){
           perror("No image data \n");
           return -1;
-
         }
+
         namedWindow( "Display window", WINDOW_AUTOSIZE );// Create a window for display.
         std::stringstream output_file_image;
         output_file_image << "thickness_" << thickness * slice_period <<  "defocus_" << ( (defocus-1) * defocus_period )+ defocus_lower_bound << "_from_dat_" << file_name_output_dat << ".png" ;
@@ -327,14 +360,49 @@ int main(int argc, char** argv )
         // remove the ignored edge pixels
         cv::Mat ignore_removed = draw(ignore_edge_pixels_rectangle);
         imwrite( file_name_image, ignore_removed );
+
+        // save the cleaned simulated image
+        cv::Mat simulated_image;
+        ignore_removed.copyTo(simulated_image);
+        simulated_thickness_row.push_back( simulated_image ); 
+
+        /// Do the Matching and Normalize
+        cv::Mat simulated_image_float;
+        simulated_image.convertTo(simulated_image_float, CV_8UC1 );
+
+        /// Create the result matrix
+        cv::Mat result;
+        int result_cols =  experimental_image_roi.cols - simulated_image.cols + 1;
+        int result_rows = experimental_image_roi.rows  - simulated_image.rows + 1;
+        result.create( result_rows, result_cols, CV_8UC1 );
+
+        cv::matchTemplate( experimental_image_roi , simulated_image_float, result, match_method  );
+        //        cv::normalize( result, result, 0, 1, NORM_MINMAX, -1, Mat() );
+
+        // Localizing the best match with minMaxLoc
+
+        double minVal; double maxVal; Point minLoc; Point maxLoc;
+        Point matchLoc;
+
+        cv::minMaxLoc( result, &minVal, &maxVal, &minLoc, &maxLoc, Mat() );
+
+        /// For SQDIFF and SQDIFF_NORMED, the best matches are lower values. For all the other methods, the higher the better
+        if( match_method  == CV_TM_SQDIFF || match_method == CV_TM_SQDIFF_NORMED )
+        { matchLoc = minLoc; }
+        else
+        { matchLoc = maxLoc; }
+
+        std::cout<< "max match: " << maxVal << " at " << matchLoc << std::endl;
+
         //draw the ignore rectangle 
         rectangle(draw, ignore_edge_pixels_rectangle, Scalar(0,255,255), 3);
-        imshow( "Display window", draw );
+        imshow( "Display window", simulated_image_float ); //draw );
         waitKey(0);                                          // Wait for a keystroke in the window
       }
+      simulated_grid.push_back(simulated_thickness_row);
     }
-
+    // now that we have the simulated images lets compare them 
   }
-
   return 0;
 }
+
