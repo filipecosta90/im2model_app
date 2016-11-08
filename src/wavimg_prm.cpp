@@ -261,24 +261,24 @@ void WAVIMG_prm::set_number_parameter_loops( int number_loops ){
 
 // setters lines 22, 23, 24, 25, 26 + aberration_definition_index_number
 void WAVIMG_prm::add_parameter_loop ( int parameter_class , int parameter_index, int variation_form, float range_0, float range_1, float range_n, std::string string_identifier ){
-    // line 22 + aberration_definition_index_number
-    loop_parameter_class.push_back(parameter_class);
-    // line 23 + aberration_definition_index_number
-    loop_parameter_index.push_back(parameter_index);
-    // line 24 + aberration_definition_index_number
-    loop_variation_form.push_back(variation_form);
-    // line 25 + aberration_definition_index_number
-    loop_range_0.push_back(range_0);
-    loop_range_1.push_back(range_1);
-    loop_range_n.push_back(range_n);
-    // line 26 + aberration_definition_index_number
-    loop_string_indentifier.push_back(string_identifier);
+  // line 22 + aberration_definition_index_number
+  loop_parameter_class.push_back(parameter_class);
+  // line 23 + aberration_definition_index_number
+  loop_parameter_index.push_back(parameter_index);
+  // line 24 + aberration_definition_index_number
+  loop_variation_form.push_back(variation_form);
+  // line 25 + aberration_definition_index_number
+  loop_range_0.push_back(range_0);
+  loop_range_1.push_back(range_1);
+  loop_range_n.push_back(range_n);
+  // line 26 + aberration_definition_index_number
+  loop_string_indentifier.push_back(string_identifier);
 }
 
 void WAVIMG_prm::produce_prm ( std::string filename ) {
   std::ofstream outfile;
   outfile.open(filename);
-    
+
   // line 1
   outfile  << file_name_input_wave_function << " !" << std::endl;
   // line 2
@@ -312,7 +312,7 @@ void WAVIMG_prm::produce_prm ( std::string filename ) {
   // line 16
   outfile <<  mtf_simulation_switch << ", " << k_space_scaling << ", " <<  file_name_simulation_frequency_modulated_detector_transfer_function << " !" << std::endl;
   // line 17
-    outfile <<  simulation_image_spread_envelope_switch << ", " << isotropic_one_rms_amplitude << " !" << std::endl;
+  outfile <<  simulation_image_spread_envelope_switch << ", " << isotropic_one_rms_amplitude << " !" << std::endl;
   // float anisotropic_second_rms_amplitude;
   //float azimuth_orientation_angle;
   // line 18
@@ -330,7 +330,7 @@ void WAVIMG_prm::produce_prm ( std::string filename ) {
   outfile <<  number_parameter_loops << std::endl;
   for ( int pos = 0 ; pos < number_parameter_loops ; pos++){
     // line 22 + aberration_definition_index_number
-      outfile << loop_parameter_class.at(pos) << " !" << std::endl;
+    outfile << loop_parameter_class.at(pos) << " !" << std::endl;
     // line 23 + aberration_definition_index_number
     outfile <<  loop_parameter_index.at(pos) << " !" << std::endl;
     // line 24 + aberration_definition_index_number
