@@ -109,35 +109,57 @@ int main(int argc, char** argv )
     return -1;
   }
 
-    float super_cell_size_x = 2;
-    float super_cell_size_y = 2;
-    float super_cell_size_z = 16;
-    int nx_simulated_horizontal_samples = atoi(argv[1]);
-    int ny_simulated_vertical_samples = atoi(argv[2]);
-    int nz_simulated_partitions = atoi(argv[3]);
+  float super_cell_size_x = 2;
+  float super_cell_size_y = 2;
+  float super_cell_size_z = 16;
+  int nx_simulated_horizontal_samples = atoi(argv[1]);
+  int ny_simulated_vertical_samples = atoi(argv[2]);
+  int nz_simulated_partitions = atoi(argv[3]);
 
-    float super_cell_x_nm_pixel = super_cell_size_x / nx_simulated_horizontal_samples;
-    float super_cell_y_nm_pixel = super_cell_size_y / ny_simulated_vertical_samples;
-    float super_cell_z_nm_slice = super_cell_size_z / nz_simulated_partitions;
-    
+  float sampling_rate_super_cell_x_nm_pixel = super_cell_size_x / nx_simulated_horizontal_samples;
+  float sampling_rate_super_cell_y_nm_pixel = super_cell_size_y / ny_simulated_vertical_samples;
+  float super_cell_z_nm_slice = super_cell_size_z / nz_simulated_partitions;
+
   int rows = nx_simulated_horizontal_samples;
   int cols = ny_simulated_vertical_samples;
   int slices_load = atoi(argv[4]);
   int slice_samples = atoi(argv[5]);
-   int slices_lower_bound_int = atoi(argv[6]);
-    float slices_upper_bound_int = atoi(argv[7]);
+  int slices_lower_bound_int = atoi(argv[6]);
+  float slices_upper_bound_int = atoi(argv[7]);
   float fp_slices_upper_bound = atof(argv[7]);
   int number_slices_to_max_thickness = atoi( argv[8] );
   int slice_period =  fp_slices_upper_bound  / slice_samples;
-    if ( slices_lower_bound_int < slice_period ){
-        slices_lower_bound_int = slice_period;
-    }
+  if ( slices_lower_bound_int < slice_period ){
+    slices_lower_bound_int = slice_period;
+  }
   int defocus_samples = atoi(argv[9]);
   float defocus_lower_bound = atof(argv[10]);
   float defocus_upper_bound = atof(argv[11]);
   float defocus_period =  ( defocus_upper_bound - defocus_lower_bound) / ( defocus_samples - 1 );
-  float  simulated_x_nm_per_pixel = atof( argv[13] );
-    float  simulated_y_nm_per_pixel = atof( argv[14] );
+  float  sampling_rate_experimental_x_nm_per_pixel = atof( argv[13] );
+  float  sampling_rate_experimental_y_nm_per_pixel = atof( argv[14] );
+    
+    bool simulated_needs_reshape = false;
+    double reshape_factor_from_supper_cell_to_experimental_x = 1.0f;
+    double reshape_factor_from_supper_cell_to_experimental_y = 1.0f;
+    float max_scale_diff = 0.0005f;
+    float diff_super_cell_and_simulated_x = fabs(sampling_rate_super_cell_x_nm_pixel - sampling_rate_experimental_x_nm_per_pixel);
+    float diff_super_cell_and_simulated_y = fabs(sampling_rate_super_cell_y_nm_pixel - sampling_rate_experimental_x_nm_per_pixel);
+
+    // Check if the numbers are really close -- needed
+    // when comparing numbers near zero.
+    
+    std::cout << "sampling rate simulated [ " << sampling_rate_super_cell_x_nm_pixel << " , " << sampling_rate_super_cell_y_nm_pixel << " ]" << std::endl;
+    
+    std::cout << "sampling rate experimental [ " << sampling_rate_experimental_x_nm_per_pixel << " , " << sampling_rate_experimental_y_nm_per_pixel << " ]" << std::endl;
+    
+    
+    if (( diff_super_cell_and_simulated_x >= max_scale_diff ) ||  (diff_super_cell_and_simulated_y >= max_scale_diff )){
+        simulated_needs_reshape = true;
+        reshape_factor_from_supper_cell_to_experimental_x = fabs(sampling_rate_super_cell_x_nm_pixel) / fabs(sampling_rate_experimental_x_nm_per_pixel);
+        reshape_factor_from_supper_cell_to_experimental_y = fabs(sampling_rate_super_cell_y_nm_pixel) / fabs(sampling_rate_experimental_y_nm_per_pixel);
+        std::cout << "WARNING : simulated and experimental images have different sampling rates. Reshaping simulated images by a factor of [ " << reshape_factor_from_supper_cell_to_experimental_x << " , " << reshape_factor_from_supper_cell_to_experimental_y << " ]" << std::endl;
+    }
 
   int roi_pixel_size = atoi( argv[15] );
   roi_x_size = roi_pixel_size;
@@ -306,24 +328,27 @@ int main(int argc, char** argv )
     experimental_working = experimental_image.clone();
     //copy the roi
     cv::Mat roi = experimental_image(roi_rectangle);
-    experimental_image_roi.create( roi_x_size, roi_y_size , CV_32FC1 );
+    experimental_image_roi.create( roi_x_size, roi_y_size , CV_8UC1 );
     roi.copyTo(experimental_image_roi);
+      
+    // normalize the final simulated image
+    cv::normalize(experimental_image_roi, experimental_image_roi, 0, 255, NORM_MINMAX, CV_8UC1);
 
-    //draw the roi 
+    //draw the roi
     rectangle(experimental_working, roi_rectangle, Scalar(0,0,255), 5);
     imshow("Experimental Window", experimental_working);
 
     int status;
     wait(&status);
 
-      int thickness_lower_pos = 1;
-      for (int thickness = thickness_lower_pos; (slice_period * thickness) < slices_lower_bound_int; thickness ++ ){
-          thickness_lower_pos = thickness;
-      }
-      
+    int thickness_lower_pos = 1;
+    for (int thickness = thickness_lower_pos; (slice_period * thickness) < slices_lower_bound_int; thickness ++ ){
+      thickness_lower_pos = thickness;
+    }
+
     for (int thickness = thickness_lower_pos; thickness <= slice_samples; thickness ++ ){
-        float slice_thickness_nm = super_cell_z_nm_slice * thickness * slice_period;
-        
+      float slice_thickness_nm = super_cell_z_nm_slice * thickness * slice_period;
+
       std::vector<cv::Mat> simulated_thickness_row;
       for (int defocus = 1; defocus <= defocus_samples; defocus ++ ){
 
@@ -380,13 +405,21 @@ int main(int argc, char** argv )
         std::string file_name_image = output_file_image.str();
 
         // remove the ignored edge pixels
-        cv::Mat ignore_removed = draw(ignore_edge_pixels_rectangle);
-        imwrite( file_name_image, ignore_removed );
+        cv::Mat simulated_image = draw(ignore_edge_pixels_rectangle);
+        //imwrite( file_name_image, ignore_removed );
 
         // save the cleaned simulated image
-        cv::Mat simulated_image;
-        ignore_removed.copyTo(simulated_image);
-        simulated_thickness_row.push_back( simulated_image ); 
+       // cv::Mat simulated_image;
+       // ignore_removed.copyTo(simulated_image);
+          if ( simulated_needs_reshape ){
+              resize(simulated_image, simulated_image, Size(0,0), reshape_factor_from_supper_cell_to_experimental_x, reshape_factor_from_supper_cell_to_experimental_x, INTER_LINEAR );
+       }
+          
+          // normalize the final simulated image
+          cv::normalize(simulated_image, simulated_image, 0, 255, NORM_MINMAX, CV_8UC1);
+          
+              simulated_thickness_row.push_back( simulated_image );
+          
 
         /// Do the Matching and Normalize
         cv::Mat simulated_image_float;
@@ -403,10 +436,15 @@ int main(int argc, char** argv )
         int base_result_cols =  experimental_image_roi.cols - simulated_image.cols + 1;
         int base_result_rows = experimental_image_roi.rows  - simulated_image.rows + 1;
         base_result.create( base_result_rows, base_result_cols, CV_8UC1 );
+          
+          /// Create the inverse of result matrix
+          cv::Mat not_base_result;
+          not_base_result.create( base_result_rows, base_result_cols, CV_8UC1 );
+
 
         // patch size
         int simulated_experimental_divider_margin = 50;
-        int simulated_experimental_lower_subtitle_margin = 100;
+        int simulated_experimental_lower_subtitle_margin = 120;
 
         // vars for grid creation
         int matchMethod_grid_width  = simulated_image.cols * 6 + simulated_image.cols + simulated_experimental_divider_margin;
@@ -419,9 +457,16 @@ int main(int argc, char** argv )
 
         // vars for minMaxLoc
         double base_minVal; double base_maxVal;
+          double not_base_minVal; double not_base_maxVal;
+
         double minVal; double maxVal; Point minLoc; Point maxLoc;
+          
         Point matchLoc;
-        double matchVal, base_matchVal;
+        double matchVal, base_matchVal, min_matchVal, min_base_matchVal;
+          double not_base_matchVal, not_min_base_matchVal;
+          Point not_minLoc; Point not_maxLoc;
+
+        double match_factor;
 
         // vars for legend positioning
         int legend_position_x = 0;
@@ -429,7 +474,50 @@ int main(int argc, char** argv )
         int legent_position_y_bottom_left_line_2 = 40;
         int legent_position_y_bottom_left_line_3 = 60;
         int legent_position_y_bottom_left_line_4 = 80;
+        int legent_position_y_bottom_left_line_5 = 100;
 
+          //phase correlation between experimental and simulated  images
+          // Create 2 images (fft1 and fft2) according to getOptimalDFTSize().
+          
+          int width = getOptimalDFTSize(cv::max(experimental_image_roi.cols,simulated_image.cols));
+          int height = getOptimalDFTSize(cv::max(experimental_image_roi.rows,simulated_image.rows));
+          Mat fft1(Size(width,height),CV_32F,Scalar(0));
+          Mat fft2(Size(width,height),CV_32F,Scalar(0));
+          
+          
+          // Filled the created fft images with values from original images (experimental_image_roi and simulated_image).
+          for(int j=0; j<experimental_image_roi.rows; j++)
+              for(int i=0; i<experimental_image_roi.cols; i++)
+                  fft1.at<float>(j,i) = experimental_image_roi.at<unsigned char>(j,i);
+          
+          for(int j=0; j<simulated_image.rows; j++)
+              for(int i=0; i<simulated_image.cols; i++)
+                  fft2.at<float>(j,i) = simulated_image.at<unsigned char>(j,i);
+          
+          
+          dft(fft1,fft1,0,experimental_image_roi.rows);
+          dft(fft2,fft2,0,simulated_image.rows);
+          mulSpectrums(fft1,fft2,fft1,0,true);
+          idft(fft1,fft1);
+          double maxVal_fft;
+          Point maxLoc_fft;
+          minMaxLoc(fft1,NULL,&maxVal_fft,NULL,&maxLoc_fft);
+          
+          mulSpectrums(fft1,fft1,fft1,0,true);
+          idft(fft1,fft1);
+          double base_maxVal_fft;
+          double base_minVal_fft;
+
+          Point base_maxLoc_fft;
+          minMaxLoc(fft1,&base_minVal_fft,&base_maxVal_fft,NULL,&base_maxLoc_fft);
+          double range_fft = base_maxVal_fft - base_minVal_fft;
+          double match_fft = ( maxVal_fft / range_fft ) * 100.0f;
+          
+          double resX = (maxLoc_fft.x<width/2) ? (maxLoc_fft.x) : (maxLoc_fft.x-width);
+          double resY = (maxLoc_fft.y<height/2) ? (maxLoc_fft.y) : (maxLoc_fft.y-height);
+          
+          std::cout << "FFT LOCATION " << maxLoc_fft << " ,, " << resY << " with score " << maxVal_fft << "out of " << base_maxVal_fft << "percentage:" << match_fft << "\n\n" << std::endl;
+          
         /// Apply the template comparison methods
         for( int i = 0; i < 6; i++ )
         {
@@ -437,33 +525,56 @@ int main(int argc, char** argv )
 
           cv::matchTemplate( experimental_image_roi , simulated_image_float, result, compare_method  );
           cv::matchTemplate( experimental_image_roi , experimental_image_roi, base_result, compare_method  );
+            cv::Mat inverse_experimental;
+            bitwise_not ( experimental_image_roi, inverse_experimental );
+            cv::matchTemplate( experimental_image_roi , inverse_experimental, not_base_result, compare_method  );
 
-         // cv::normalize( result, result, 0, 1, NORM_MINMAX, -1, Mat() );
+
+          // cv::normalize( result, result, 0, 1, NORM_MINMAX, -1, Mat() );
 
           // Localizing the best match with minMaxLoc
           cv::minMaxLoc( base_result, &base_minVal, &base_maxVal, &minLoc, &maxLoc, Mat() );
           cv::minMaxLoc( result, &minVal, &maxVal, &minLoc, &maxLoc, Mat() );
+            cv::minMaxLoc( not_base_result, &not_base_minVal, &not_base_maxVal, &not_minLoc, &not_maxLoc, Mat() );
+
+            
 
           // For SQDIFF and SQDIFF_NORMED, the best matches are lower values. For all the other methods, the higher the better
           if( compare_method  == CV_TM_SQDIFF || compare_method == CV_TM_SQDIFF_NORMED ){
             matchLoc = minLoc;
             matchVal = minVal;
             base_matchVal = base_minVal;
+            min_matchVal = maxVal;
+            min_base_matchVal = not_base_minVal;
+            //if (compare_method == CV_TM_SQDIFF_NORMED){
+            //  min_base_matchVal = 1.0f;
+            //}
+
           }
           else{
             matchLoc = maxLoc;
             matchVal = maxVal;
             base_matchVal = base_maxVal;
+            min_matchVal = minVal;
+            min_base_matchVal = not_base_maxVal;
           }
-
-          const char* method_name = i == 0 ? "CV_TM_SQDIFF"
+            
+            const char* method_name = i == 0 ? "CV_TM_SQDIFF"
             : ( i == 1 ? "CV_TM_SQDIFF_NORMED"
-                : ( i == 2 ? "CV_TM_CCORR"
+               : ( i == 2 ? "CV_TM_CCORR"
                   : ( i== 3 ? ("CV_TM_CCORR_NORMED")
-                    : ( i== 4 ? ("CV_TM_CCOEFF")
-                      : ("CV_TM_CCOEFF_NORMED") ) ) ) );
+                     : ( i== 4 ? ("CV_TM_CCOEFF")
+                        : ("CV_TM_CCOEFF_NORMED") ) ) ) );
+            
+            printf( " Method [%s]\n", method_name );
 
-          printf( " Method [%s] Perfect, Base-Test(1) : %f, %f \t\t at [%d,%d]\n", method_name, base_matchVal, matchVal, matchLoc.x, matchLoc.y );
+          double range = fabs( base_matchVal - min_base_matchVal );
+          match_factor = ((fabs( matchVal ) )/ range ) * 100.0f;
+          std::cout << "\t\tbase match: " << base_matchVal << " \t min base: "<< min_base_matchVal <<  "\t equal factor : " << match_factor << "\t range: " << range << std::endl;
+
+
+
+          printf( "\t\t\tPerfect, Base-Test(1) : %f, %f \t\t at [%d,%d]\n", base_matchVal, matchVal, matchLoc.x, matchLoc.y );
 
           //get the roi rectangle
           Rect match_rectangle;
@@ -494,6 +605,10 @@ int main(int argc, char** argv )
           std::stringstream matchloc_output;
           matchloc_output <<  "[ " << matchLoc.x << " , " << matchLoc.y << " ]";
           std::string line4_matchloc_info = matchloc_output.str();
+          // line 5
+          std::stringstream matchfactor_output;
+          matchfactor_output <<  "Match % " << std::fixed << std::setw( 2 ) << std::setprecision( 2 ) <<  match_factor ;
+          std::string line5_matchfactor_info = matchfactor_output.str();
 
           // calculate the legend position on the grid
           legend_position_x = match_rectangle.width + simulated_experimental_divider_margin + match_rectangle.width*i + 10;
@@ -502,6 +617,7 @@ int main(int argc, char** argv )
           putText(matchMethod_grid, line2_matchval_info , cvPoint(legend_position_x , match_rectangle.height + legent_position_y_bottom_left_line_2), FONT_HERSHEY_PLAIN, 1.2, cvScalar(255,255,255), 1, CV_AA);
           putText(matchMethod_grid, line3_base_matchval_info , cvPoint(legend_position_x , match_rectangle.height + legent_position_y_bottom_left_line_3), FONT_HERSHEY_PLAIN, 0.7, cvScalar(255,255,255), 1, CV_AA);
           putText(matchMethod_grid, line4_matchloc_info , cvPoint(legend_position_x , match_rectangle.height + legent_position_y_bottom_left_line_4), FONT_HERSHEY_PLAIN, 1, cvScalar(255,255,255), 1, CV_AA);
+          putText(matchMethod_grid, line5_matchfactor_info , cvPoint(legend_position_x , match_rectangle.height + legent_position_y_bottom_left_line_5), FONT_HERSHEY_PLAIN, 1, cvScalar(255,255,255), 1, CV_AA);
 
         }
 
@@ -536,7 +652,7 @@ int main(int argc, char** argv )
 
         simulated_image_float.copyTo(matchMethod_grid(Rect(0,0,simulated_image_float.rows,simulated_image_float.cols)));
 
-          
+
         //draw the ignore rectangle
         //rectangle(draw, ignore_edge_pixels_rectangle, Scalar(0,255,255), 3);
         // namedWindow( "Display window", WINDOW_AUTOSIZE );// Create a window for display.
@@ -545,13 +661,13 @@ int main(int argc, char** argv )
         namedWindow( "ROI window", WINDOW_AUTOSIZE );// Create a window for display.
         imshow( "ROI window", matchMethod_grid ); //draw );
 
-          // save the matchMethod grid
-          std::stringstream grid_file_image;
-          grid_file_image << "GRID_thickness_" << thickness * slice_period <<  "defocus_" << ( (defocus-1) * defocus_period )+ defocus_lower_bound << ".png" ;
-          std::string grid_file_name_image = grid_file_image.str();
-          
-          imwrite( grid_file_name_image, matchMethod_grid );
-          
+        // save the matchMethod grid
+        std::stringstream grid_file_image;
+        grid_file_image << "GRID_thickness_" << thickness * slice_period <<  "defocus_" << ( (defocus-1) * defocus_period )+ defocus_lower_bound << ".png" ;
+        std::string grid_file_name_image = grid_file_image.str();
+
+        imwrite( grid_file_name_image, matchMethod_grid );
+
         /// Establish the number of bins
         int histSize = 256;
 
