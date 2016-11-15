@@ -6,5 +6,5 @@ file(GLOB im2model_SRC
   )
 
 add_executable( im2model ${im2model_SRC} )
-target_link_libraries( im2model ${OpenCV_LIBS} )
+target_link_libraries( im2model ${OpenCV_LIBS} ${Boost_LIBRARIES} )
 
