@@ -85,7 +85,10 @@ void CallBackFunc(int event, int x, int y, int flags, void* userdata)
 
 int main(int argc, char** argv )
 {
-
+  // Specifies the input super-cell file containing the atomic structure data in CIF file format.
+  std::string super_cell_cif_file;
+  // Specifies the output slice file name prefix.
+  std::string slc_file_name_prefix;
   float projection_dir_h;
   float projection_dir_l;
   float projection_dir_k;
@@ -98,6 +101,14 @@ int main(int argc, char** argv )
   int nx_simulated_horizontal_samples;
   int ny_simulated_vertical_samples;
   int nz_simulated_partitions;
+  int ht_accelaration_voltage;
+  // Switch for applying Debye-Waller factors which effectively dampen the atomic scattering potentials.
+  // Use this option for conventional HR-TEM, STEM bright-field, or STEM annular bright-field image simulations only.
+  bool dwf_switch=false;
+
+  // Switch for applying absorption potentials (imaginary part) according to Weickenmeier and Kohl [Acta Cryst. A47 (1991) p. 590-597].
+  // This absorption calculation considers the loss of intensity in the elastic channel due to thermal diffuse scattering.
+  bool abs_switch=false;
 
   int slices_load; // need more work
   int slice_samples;
@@ -116,6 +127,7 @@ int main(int argc, char** argv )
   int ignore_edge_pixels;
   std::string experimental_image_path;
 
+
   float  sampling_rate_experimental_x_nm_per_pixel;
   float  sampling_rate_experimental_y_nm_per_pixel;
 
@@ -127,23 +139,28 @@ int main(int argc, char** argv )
     boost::program_options::options_description desc("Options");
     desc.add_options()
       ("help,h", "Print help message")
-      ("proj_h",  boost::program_options::value<float>(&projection_dir_h)->required(), "projection direction h of [hkl].")
-      ("proj_l",  boost::program_options::value<float>(&projection_dir_l)->required(), "projection direction l of [hkl].")
-      ("proj_k",  boost::program_options::value<float>(&projection_dir_k)->required(), "projection direction k of [hkl].")
-      ("perp_u",  boost::program_options::value<float>(&perpendicular_dir_u)->required(), "perpendicular direction u for the new y-axis of the projection [uvw].")
-      ("perp_v",  boost::program_options::value<float>(&perpendicular_dir_v)->required(), "perpendicular direction v for the new y-axis of the projection [uvw].")
-      ("perp_w",  boost::program_options::value<float>(&perpendicular_dir_w)->required(), "perpendicular direction w for the new y-axis of the projection [uvw].")
+      ("cif", boost::program_options::value<std::string>(&super_cell_cif_file)->required(), "specifies the input super-cell file containing the atomic structure data in CIF file format.")
+      ("slc", boost::program_options::value<std::string>(&slc_file_name_prefix)->required(), "specifies the output slice file name prefix. Absolute or relative path names can be used. Enclose the file name string using quotation marks if the file name prefix or the disk path contains space characters. The slice file names will be suffixed by '_###.sli', where ### is a 3 digit number denoting the sequence of slices generated from the supercell.")
+      ("prj_h",  boost::program_options::value<float>(&projection_dir_h)->required(), "projection direction h of [hkl].")
+      ("prj_l",  boost::program_options::value<float>(&projection_dir_l)->required(), "projection direction l of [hkl].")
+      ("prj_k",  boost::program_options::value<float>(&projection_dir_k)->required(), "projection direction k of [hkl].")
+      ("prp_u",  boost::program_options::value<float>(&perpendicular_dir_u)->required(), "perpendicular direction u for the new y-axis of the projection [uvw].")
+      ("prp_v",  boost::program_options::value<float>(&perpendicular_dir_v)->required(), "perpendicular direction v for the new y-axis of the projection [uvw].")
+      ("prp_w",  boost::program_options::value<float>(&perpendicular_dir_w)->required(), "perpendicular direction w for the new y-axis of the projection [uvw].")
       ("super_a",  boost::program_options::value<float>(&super_cell_size_x)->required(), "the size(in nanometers) of the new orthorhombic super-cell along the axis x.")
       ("super_b",  boost::program_options::value<float>(&super_cell_size_y)->required(), "the size(in nanometers) of the new orthorhombic super-cell along the axis y.")
       ("super_c",  boost::program_options::value<float>(&super_cell_size_z)->required(), "the size(in nanometers) of the new orthorhombic super-cell along the axis z, where z is the projection direction of the similation.")
       ("nx", boost::program_options::value<int>(&nx_simulated_horizontal_samples)->required(), "number of horizontal samples for the phase grating. The same number of pixels is used to sample the wave function in multislice calculations based on the calculated phase gratings.")
       ("ny", boost::program_options::value<int>(&ny_simulated_vertical_samples)->required(), "number of vertical samples for the phase grating. The same number of pixels is used to sample the wave function in multislice calculations based on the calculated phase gratings.")
       ("nz", boost::program_options::value<int>(&nz_simulated_partitions)->required(), "simulated partitions")
-      ("slices_load", boost::program_options::value<int>(&slices_load), "slices Load")
+      ("ht", boost::program_options::value<int>(&ht_accelaration_voltage)->required(), "accelerating voltage defining the kinetic energy of the incident electron beam in kV.")
+      ("dwf", "switch for applying Debye-Waller factors which effectively dampen the atomic scattering potentials. Use this option for conventional HR-TEM, STEM bright-field, or STEM annular bright-field image simulations only.")
+      ("abs", "switch for applying absorption potentials (imaginary part) according to Weickenmeier and Kohl [Acta Cryst. A47 (1991) p. 590-597]. This absorption calculation considers the loss of intensity in the elastic channel due to thermal diffuse scattering.")
+      ("slices_load", boost::program_options::value<int>(&slices_load), "number of slice files to be loaded.")
       ("slices_samples", boost::program_options::value<int>(&slice_samples)->required(), "slices samples")
       ("slices_lower_bound", boost::program_options::value<int>(&slices_lower_bound_int)->default_value(0), "slices lower bound")
       ("slices_upper_bound", boost::program_options::value<float>(&slices_upper_bound_int), "slices Upper Bound")
-      ("slices_max", boost::program_options::value<int>(&number_slices_to_max_thickness), "slices to max thickness")
+      ("slices_max", boost::program_options::value<int>(&number_slices_to_max_thickness), "number of slices used to describe the full object structure up to its maximum thickness.")
       ("defocus_samples", boost::program_options::value<int>(&defocus_samples)->required(), "defocus samples")
       ("defocus_lower_bound", boost::program_options::value<float>(&defocus_lower_bound)->required(), "defocus lower bound")
       ("defocus_upper_bound", boost::program_options::value<float>(&defocus_upper_bound)->required(), "defocus upper bound")
@@ -153,24 +170,32 @@ int main(int argc, char** argv )
       ("roi_size", boost::program_options::value<int>(&roi_pixel_size)->required(), "region of interest size in pixels.")
       ("roi_x", boost::program_options::value<int>(&roi_center_x)->required(), "region center in x axis.")
       ("roi_y", boost::program_options::value<int>(&roi_center_y)->required(), "region center in y axis.")
-      ("roi_y", boost::program_options::value<int>(&ignore_edge_pixels)->default_value(0), "number of pixels to ignore from the outter limit of the simulated image.")
-
-      ("like", "this");
+      ("ignore_edge_pixels", boost::program_options::value<int>(&ignore_edge_pixels)->default_value(0), "number of pixels to ignore from the outter limit of the simulated image.")
+      ;
 
     boost::program_options::variables_map vm;
     try
     {
-      boost::program_options::store(boost::program_options::parse_command_line(argc, argv, desc),
-          vm); // can throw
+      boost::program_options::store(boost::program_options::parse_command_line(argc, argv, desc),vm); // can throw
 
       /** --help option
       */
       if ( vm.count("help")  )
       {
-        printf("usage: im2model  <ROI pixel size> <ROI center x> <ROI center y> <Ignore edge pixels>\n");
-        std::cout << "Basic Command Line Parameter App" << std::endl
+        std::cout << "\n\n********************************************************************************\n\n" <<
+          "im2model -- Atomic models for TEM image simulation and matching\n"
+          <<
+
+          "Command Line Parameters:" << std::endl
           << desc << std::endl;
         return 0;
+      }
+
+      if ( vm.count("dwf")  ){
+        dwf_switch=true;
+      }
+      if ( vm.count("abs")  ){
+        abs_switch=true;
       }
 
       boost::program_options::notify(vm); // throws on error, so do after help in case
@@ -206,7 +231,6 @@ int main(int argc, char** argv )
     float diff_super_cell_and_simulated_x = fabs(sampling_rate_super_cell_x_nm_pixel - sampling_rate_experimental_x_nm_per_pixel);
     float diff_super_cell_and_simulated_y = fabs(sampling_rate_super_cell_y_nm_pixel - sampling_rate_experimental_x_nm_per_pixel);
 
-
     // Check if the numbers are really close -- needed
     // when comparing numbers near zero.
 
@@ -231,40 +255,25 @@ int main(int argc, char** argv )
     ignore_edge_pixels_rectangle.width = rows - ( 2 * ignore_edge_pixels );
     ignore_edge_pixels_rectangle.height = cols - ( 2 * ignore_edge_pixels );
 
-    // Specifies the input super-cell file containing the atomic structure data in CIF file format.
-    std::string super_cell_cif_file;
-    // Specifies the output slice file name prefix.
-    std::string slc_file_name_prefix;
-    // Number of horizontal samples for the phase grating.
-
-    // Number of vertical samples for the phase grating.
-
-    // Accelerating voltage defining the kinetic energy of the incident electron beam in kV.
-
-    // Equidistant slicing of the super-cell along the c-axis.
-    // Specify an explicit number of slices, or use -nz 0 to let CELSLC determine the number of equidistant slices automatically.
-    // Omitting the -nz option will lead to an automatic non-equidistant slicing.
-
-    // Re-orientation and re-sizing of the input structure model assuming a periodic crystal structure into an orthorhombic target cell.
-    // Example: -prj 2,4,1,-2,2,-1,0.79289,0.79289,0.79289
-
-    // Switch for applying Debye-Waller factors which effectively dampen the atomic scattering potentials.
-    // Use this option for conventional HR-TEM, STEM bright-field, or STEM annular bright-field image simulations only.
-    bool dwf_switch;
-
-    // Switch for applying absorption potentials (imaginary part) according to Weickenmeier and Kohl [Acta Cryst. A47 (1991) p. 590-597].
-    // This absorption calculation considers the loss of intensity in the elastic channel due to thermal diffuse scattering.
-    bool abs_switch;
 
     std::vector<char*> celslc_vector;
     celslc_vector.push_back((char*) "-cif");
-    // celslc_vector.push_back(super_cell_cif_file.c_str());
+    celslc_vector.push_back((char*) super_cell_cif_file.c_str());
     celslc_vector.push_back((char*) "-slc");
-    // celslc_vector.push_back(slc_file_name_prefix.c_str());
+    celslc_vector.push_back((char*) slc_file_name_prefix.c_str());
     celslc_vector.push_back((char*) "-prj");
+      //input prj string
+      celslc_vector.push_back((char*) "-nx");
+      // input nx string
+      celslc_vector.push_back((char*) "-ny");
+      // input ny string
+      celslc_vector.push_back((char*) "-nz");
+      // input nz string
+      celslc_vector.push_back((char*) "-ht");
+      // input ht
+
     celslc_vector.push_back((char*) "/ctem");
 
-    celslc_vector.push_back((char*) "-prj");
     if ( dwf_switch ){
       celslc_vector.push_back((char*) "-dwf");
     }
@@ -420,7 +429,7 @@ int main(int argc, char** argv )
     }
     else {
       // Read the experimental image from file
-      experimental_image = imread(argv[12] , CV_LOAD_IMAGE_GRAYSCALE );
+      experimental_image = imread(experimental_image_path , CV_LOAD_IMAGE_GRAYSCALE );
 
       // initialize your temp images
       experimental_working = experimental_image.clone();
@@ -428,7 +437,7 @@ int main(int argc, char** argv )
       //if fail to read the image
       if ( experimental_image.empty() )
       {
-        std::cout << "Error loading the experimental image" << std::endl;
+        std::cout << "Error loading the experimental image from: " << experimental_image_path << std::endl;
         return -1;
       }
       //Create a window
