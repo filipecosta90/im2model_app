@@ -110,6 +110,15 @@ int main(int argc, char** argv )
   // This absorption calculation considers the loss of intensity in the elastic channel due to thermal diffuse scattering.
   bool abs_switch=false;
 
+  bool celslc_switch = true;
+  bool msa_switch = true;
+  bool wavimg_switch = true;
+  bool im2model_switch = true;
+  bool debug_switch = false;
+  bool roi_gui_switch = false;
+  bool sim_cmp_gui_switch = false;
+  bool sim_grid_switch = false;
+
   int slices_load; // need more work
   int slice_samples;
   int slices_lower_bound_int;
@@ -120,25 +129,27 @@ int main(int argc, char** argv )
   float defocus_lower_bound;
   float defocus_upper_bound;
 
-
   int roi_pixel_size;
   int roi_center_x;
   int roi_center_y;
   int ignore_edge_pixels;
   std::string experimental_image_path;
 
-
   float  sampling_rate_experimental_x_nm_per_pixel;
   float  sampling_rate_experimental_y_nm_per_pixel;
 
-
-  try
-  {
+  try{
     /** Define and parse the program options
     */
     boost::program_options::options_description desc("Options");
     desc.add_options()
       ("help,h", "Print help message")
+      ("no_celslc", "switch for skipping celslc execution.")
+      ("no_msa", "switch for skipping msa execution.")
+      ("no_wavimg", "switch for skipping wavimg execution.")
+      ("no_im2model", "switch for skipping im2model execution.")
+      ("debug,g", "switch for enabling debug info for celslc, msa, and wavimg execution.")
+
       ("cif", boost::program_options::value<std::string>(&super_cell_cif_file)->required(), "specifies the input super-cell file containing the atomic structure data in CIF file format.")
       ("slc", boost::program_options::value<std::string>(&slc_file_name_prefix)->required(), "specifies the output slice file name prefix. Absolute or relative path names can be used. Enclose the file name string using quotation marks if the file name prefix or the disk path contains space characters. The slice file names will be suffixed by '_###.sli', where ### is a 3 digit number denoting the sequence of slices generated from the supercell.")
       ("prj_h",  boost::program_options::value<float>(&projection_dir_h)->required(), "projection direction h of [hkl].")
@@ -159,7 +170,7 @@ int main(int argc, char** argv )
       ("slices_load", boost::program_options::value<int>(&slices_load), "number of slice files to be loaded.")
       ("slices_samples", boost::program_options::value<int>(&slice_samples)->required(), "slices samples")
       ("slices_lower_bound", boost::program_options::value<int>(&slices_lower_bound_int)->default_value(0), "slices lower bound")
-      ("slices_upper_bound", boost::program_options::value<float>(&slices_upper_bound_int), "slices Upper Bound")
+      ("slices_upper_bound", boost::program_options::value<float>(&fp_slices_upper_bound), "slices Upper Bound")
       ("slices_max", boost::program_options::value<int>(&number_slices_to_max_thickness), "number of slices used to describe the full object structure up to its maximum thickness.")
       ("defocus_samples", boost::program_options::value<int>(&defocus_samples)->required(), "defocus samples")
       ("defocus_lower_bound", boost::program_options::value<float>(&defocus_lower_bound)->required(), "defocus lower bound")
@@ -170,6 +181,10 @@ int main(int argc, char** argv )
       ("roi_size", boost::program_options::value<int>(&roi_pixel_size)->required(), "region of interest size in pixels.")
       ("roi_x", boost::program_options::value<int>(&roi_center_x)->required(), "region center in x axis.")
       ("roi_y", boost::program_options::value<int>(&roi_center_y)->required(), "region center in y axis.")
+      ("roi_gui", "switch for enabling gui region of interest selection prior to im2model execution.")
+      ("sim_cmp_gui", "switch for enabling gui im2model simullated and experimental comparation visualization.")
+      ("sim_grid", "switch for enable simmulated image grid generation.")
+
       ("ignore_edge_pixels", boost::program_options::value<int>(&ignore_edge_pixels)->default_value(0), "number of pixels to ignore from the outter limit of the simulated image.")
       ;
 
@@ -197,6 +212,30 @@ int main(int argc, char** argv )
       if ( vm.count("abs")  ){
         abs_switch=true;
       }
+      if ( vm.count("no_celslc")  ){
+        celslc_switch=false;
+      }
+      if ( vm.count("no_msa")  ){
+        msa_switch=false;
+      }
+      if ( vm.count("no_wavimg")  ){
+        wavimg_switch=false;
+      }
+      if ( vm.count("no_im2model")  ){
+        im2model_switch=false;
+      }
+      if ( vm.count("debug")  ){
+        debug_switch=true;
+      }
+      if ( vm.count("roi_gui")  ){
+        roi_gui_switch=true;
+      }
+      if ( vm.count("sim_cmp_gui")  ){
+        sim_cmp_gui_switch=true;
+      }
+      if ( vm.count("sim_grid")  ){
+        sim_grid_switch=true;
+      }
 
       boost::program_options::notify(vm); // throws on error, so do after help in case
       // there are any problems
@@ -223,211 +262,268 @@ int main(int argc, char** argv )
 
     float defocus_period =  ( defocus_upper_bound - defocus_lower_bound) / ( defocus_samples - 1 );
 
-
     bool simulated_needs_reshape = false;
     double reshape_factor_from_supper_cell_to_experimental_x = 1.0f;
     double reshape_factor_from_supper_cell_to_experimental_y = 1.0f;
     float max_scale_diff = 0.0005f;
     float diff_super_cell_and_simulated_x = fabs(sampling_rate_super_cell_x_nm_pixel - sampling_rate_experimental_x_nm_per_pixel);
     float diff_super_cell_and_simulated_y = fabs(sampling_rate_super_cell_y_nm_pixel - sampling_rate_experimental_x_nm_per_pixel);
-
-    // Check if the numbers are really close -- needed
-    // when comparing numbers near zero.
-
-    std::cout << "sampling rate simulated [ " << sampling_rate_super_cell_x_nm_pixel << " , " << sampling_rate_super_cell_y_nm_pixel << " ]" << std::endl;
-
-    std::cout << "sampling rate experimental [ " << sampling_rate_experimental_x_nm_per_pixel << " , " << sampling_rate_experimental_y_nm_per_pixel << " ]" << std::endl;
-
-
-    if (( diff_super_cell_and_simulated_x >= max_scale_diff ) ||  (diff_super_cell_and_simulated_y >= max_scale_diff )){
-      simulated_needs_reshape = true;
-      reshape_factor_from_supper_cell_to_experimental_x = fabs(sampling_rate_super_cell_x_nm_pixel) / fabs(sampling_rate_experimental_x_nm_per_pixel);
-      reshape_factor_from_supper_cell_to_experimental_y = fabs(sampling_rate_super_cell_y_nm_pixel) / fabs(sampling_rate_experimental_y_nm_per_pixel);
-      std::cout << "WARNING : simulated and experimental images have different sampling rates. Reshaping simulated images by a factor of [ " << reshape_factor_from_supper_cell_to_experimental_x << " , " << reshape_factor_from_supper_cell_to_experimental_y << " ]" << std::endl;
-    }
-
-    roi_x_size = roi_pixel_size;
-    roi_y_size = roi_pixel_size;
-
-    Rect ignore_edge_pixels_rectangle;
-    ignore_edge_pixels_rectangle.x = ignore_edge_pixels;
-    ignore_edge_pixels_rectangle.y = ignore_edge_pixels;
-    ignore_edge_pixels_rectangle.width = rows - ( 2 * ignore_edge_pixels );
-    ignore_edge_pixels_rectangle.height = cols - ( 2 * ignore_edge_pixels );
-
-
-    std::vector<char*> celslc_vector;
-    celslc_vector.push_back((char*) "-cif");
-    celslc_vector.push_back((char*) super_cell_cif_file.c_str());
-    celslc_vector.push_back((char*) "-slc");
-    celslc_vector.push_back((char*) slc_file_name_prefix.c_str());
-    celslc_vector.push_back((char*) "-prj");
-      //input prj string
-      celslc_vector.push_back((char*) "-nx");
-      // input nx string
-      celslc_vector.push_back((char*) "-ny");
-      // input ny string
-      celslc_vector.push_back((char*) "-nz");
-      // input nz string
-      celslc_vector.push_back((char*) "-ht");
-      // input ht
-
-    celslc_vector.push_back((char*) "/ctem");
-
-    if ( dwf_switch ){
-      celslc_vector.push_back((char*) "-dwf");
-    }
-    if ( abs_switch ){
-      celslc_vector.push_back((char*) "-abs");
-    }
-    celslc_vector.push_back(0); //end of arguments sentinel is NULL
-
     pid_t pid;
 
-    if ((pid = fork()) == -1) // system functions also set a variable called "errno"
-    {
-      perror("fork"); // this function automatically checks "errno"
-      // and prints the error plus what you give it
-      return EXIT_FAILURE;
-    }
-    // ---- by when you get here there will be two processes
-    if (pid == 0) // child process
-    {
-      execv(celslc_vector[0], &celslc_vector.front());
-    }
-    else {
-      int status;
-      wait(&status);
+    if (celslc_switch == true ){
+      std::vector<char*> celslc_vector;
+      celslc_vector.push_back((char*) "../bin/drprobe_clt_bin_osx/celslc");
+
+      celslc_vector.push_back((char*) "-prj" );
+      //input prj string
+      std::stringstream input_prj_stream;
+      input_prj_stream << projection_dir_h  << "," << projection_dir_l << "," << projection_dir_k << "," << perpendicular_dir_u << "," <<   perpendicular_dir_v << "," << perpendicular_dir_w << "," << super_cell_size_x << "," << super_cell_size_y << "," << super_cell_size_z;
+      std::string input_prj_string = input_prj_stream.str();
+      const char* input_prj_c_string = input_prj_string.c_str();
+      celslc_vector.push_back( (char*) input_prj_c_string );      
+
+      celslc_vector.push_back((char*) "-cif");
+      celslc_vector.push_back((char*) super_cell_cif_file.c_str());
+      celslc_vector.push_back((char*) "-slc");
+      celslc_vector.push_back((char*) slc_file_name_prefix.c_str());
+
+      celslc_vector.push_back((char*) "-nx");
+      // input nx string
+      std::stringstream input_nx_stream;
+      input_nx_stream << nx_simulated_horizontal_samples;
+      std::string input_nx_string = input_nx_stream.str();
+      const char* input_nx_c_string = input_nx_string.c_str();
+      celslc_vector.push_back( (char*) input_nx_c_string );
+
+      celslc_vector.push_back((char*) "-ny");
+      // input ny string
+      std::stringstream input_ny_stream;
+      input_ny_stream << ny_simulated_vertical_samples;
+      std::string input_ny_string = input_ny_stream.str();
+      const char* input_ny_c_string = input_ny_string.c_str();
+      celslc_vector.push_back( (char*) input_ny_c_string );
+
+      celslc_vector.push_back((char*) "-nz");
+      // input nz string
+      std::stringstream input_nz_stream;
+      input_nz_stream << nz_simulated_partitions;
+      std::string input_nz_string = input_nz_stream.str();
+      const char* input_nz_c_string = input_nz_string.c_str();
+      celslc_vector.push_back( (char*) input_nz_c_string );
+
+      celslc_vector.push_back((char*) "-ht");
+      // input ht
+      std::stringstream input_ht_stream;
+      input_ht_stream << ht_accelaration_voltage;
+      std::string input_ht_string = input_ht_stream.str();
+      const char* input_ht_c_string = input_ht_string.c_str();
+      celslc_vector.push_back( (char*) input_ht_c_string );
+
+      if ( dwf_switch ){
+        celslc_vector.push_back((char*) "-dwf");
+      }
+      if ( abs_switch ){
+        celslc_vector.push_back((char*) "-abs");
+      }
+      celslc_vector.push_back(0); //end of arguments sentinel is NULL
+
+      if ((pid = fork()) == -1) // system functions also set a variable called "errno"
+      {
+        perror("fork"); // this function automatically checks "errno"
+        // and prints the error plus what you give it
+        return EXIT_FAILURE;
+      }
+      // ---- by when you get here there will be two processes
+      if (pid == 0) // child process
+      {
+        execv(celslc_vector[0], &celslc_vector.front());
+      }
+      else {
+        int status;
+        wait(&status);
+      }
     }
 
-    MSA_prm::MSA_prm msa_parameters;
-    msa_parameters.set_electron_wavelength( 0.00196875 );
-    msa_parameters.set_internal_repeat_factor_of_super_cell_along_x ( 1 );
-    msa_parameters.set_internal_repeat_factor_of_super_cell_along_y ( 1 );
-    msa_parameters.set_slice_filename_prefix ( "'test'" );
-    msa_parameters.set_number_slices_to_load ( slices_load );
-    msa_parameters.set_number_frozen_lattice_variants_considered_per_slice( 1 );
-    msa_parameters.set_minimum_number_frozen_phonon_configurations_used_generate_wave_functions ( 1 );
-    msa_parameters.set_period_readout_or_detection_in_units_of_slices ( slice_period );
-    msa_parameters.set_number_slices_used_describe_full_object_structure_up_to_its_maximum_thickness ( number_slices_to_max_thickness );
-    msa_parameters.set_linear_slices_for_full_object_structure();
-    msa_parameters.produce_prm("temporary_msa_im2model.prm");
+    if( msa_switch == true ){
+      MSA_prm::MSA_prm msa_parameters;
+      msa_parameters.set_electron_wavelength( 0.00196875 );
+      msa_parameters.set_internal_repeat_factor_of_super_cell_along_x ( 1 );
+      msa_parameters.set_internal_repeat_factor_of_super_cell_along_y ( 1 );
 
-    std::vector<char*> msa_vector;
-    msa_vector.push_back((char*) "../bin/drprobe_clt_bin_osx/msa");
-    msa_vector.push_back((char*) "-prm");
-    msa_vector.push_back((char*) "temporary_msa_im2model.prm");
-    msa_vector.push_back((char*) "-out");
-    msa_vector.push_back((char*) "wave.wav");
-    msa_vector.push_back((char*) "/ctem");
-    msa_vector.push_back(0); //end of arguments sentinel is NULL
+      std::stringstream input_prefix_stream;
+      input_prefix_stream << "'" << slc_file_name_prefix << "'";
+      std::string input_prefix_string = input_prefix_stream.str();
+      msa_parameters.set_slice_filename_prefix ( input_prefix_string );
+      msa_parameters.set_number_slices_to_load ( slices_load );
+      msa_parameters.set_number_frozen_lattice_variants_considered_per_slice( 1 );
+      msa_parameters.set_minimum_number_frozen_phonon_configurations_used_generate_wave_functions ( 1 );
+      msa_parameters.set_period_readout_or_detection_in_units_of_slices ( slice_period );
+      msa_parameters.set_number_slices_used_describe_full_object_structure_up_to_its_maximum_thickness ( number_slices_to_max_thickness );
+      msa_parameters.set_linear_slices_for_full_object_structure();
+      msa_parameters.produce_prm("temporary_msa_im2model.prm");
 
-    std::vector< std::vector<cv::Mat> > simulated_grid;
+      std::vector<char*> msa_vector;
+      msa_vector.push_back((char*) "../bin/drprobe_clt_bin_osx/msa");
+      msa_vector.push_back((char*) "-prm");
+      msa_vector.push_back((char*) "temporary_msa_im2model.prm");
+      msa_vector.push_back((char*) "-out");
+      msa_vector.push_back((char*) "wave.wav");
+      msa_vector.push_back((char*) "/ctem");
+      if ( debug_switch ){
+        msa_vector.push_back((char*) "/debug");
+      }
 
-    if ((pid = fork()) == -1) // system functions also set a variable called "errno"
-    {
-      perror("fork"); // this function automatically checks "errno"
-      // and prints the error plus what you give it
-      return EXIT_FAILURE;
+      msa_vector.push_back(0); //end of arguments sentinel is NULL
+
+      if ((pid = fork()) == -1) // system functions also set a variable called "errno"
+      {
+        perror("fork"); // this function automatically checks "errno"
+        // and prints the error plus what you give it
+        return EXIT_FAILURE;
+      }
+      // ---- by when you get here there will be two processes
+      if (pid == 0) // child process
+      {
+        execv(msa_vector[0], &msa_vector.front());
+      }
+      else {
+        int status;
+        wait(&status);
+      }
     }
-    // ---- by when you get here there will be two processes
-    if (pid == 0) // child process
-    {
-      execv(msa_vector[0], &msa_vector.front());
-    }
-    else {
-      int status;
-      wait(&status);
+
+    if(wavimg_switch == true ){
+      WAVIMG_prm::WAVIMG_prm wavimg_parameters;
+
+      std::string wave_function_name =  "'wave_sl.wav'";
+      std::string wavimg_prm_name = "temporary_wavimg_im2model.prm";
+      std::string file_name_output_image_wave_function = "'image.dat'";
+      // setters line 1
+      wavimg_parameters.set_file_name_input_wave_function( wave_function_name );
+      // setters line 2
+      wavimg_parameters.set_n_columns_samples_input_wave_function_pixels( cols );
+      wavimg_parameters.set_n_rows_samples_input_wave_function_pixels( rows );
+      // setters line 3
+      wavimg_parameters.set_physical_columns_sampling_rate_input_wave_function_nm_pixels( sampling_rate_super_cell_x_nm_pixel );
+      wavimg_parameters.set_physical_rows_sampling_rate_input_wave_function_nm_pixels( sampling_rate_super_cell_y_nm_pixel );
+      // setters line 4
+      wavimg_parameters.set_primary_electron_energy( 200.0 );
+      // setters line 5
+      wavimg_parameters.set_type_of_output( 0 );
+      // setters line 6
+      wavimg_parameters.set_file_name_output_image_wave_function( file_name_output_image_wave_function );
+      // setters line 7
+      wavimg_parameters.set_n_columns_samples_output_image( cols );
+      wavimg_parameters.set_n_rows_samples_output_image( rows );
+      // setters line 8
+      wavimg_parameters.set_image_data_type( 0 );
+      wavimg_parameters.set_image_vacuum_mean_intensity( 3000.0f );
+      wavimg_parameters.set_conversion_rate( 1.0f );
+      wavimg_parameters.set_readout_noise_rms_amplitude( 0.0f );
+      // setters line 9
+      wavimg_parameters.set_switch_option_extract_particular_image_frame( 1 );
+      // setters line 10
+      wavimg_parameters.set_image_sampling_rate_nm_pixel( sampling_rate_super_cell_x_nm_pixel );
+      // setters line 11
+      wavimg_parameters.set_image_frame_offset_x_pixels_input_wave_function( 0.0f );
+      wavimg_parameters.set_image_frame_offset_y_pixels_input_wave_function( 0.0f );
+      // setters line 12
+      wavimg_parameters.set_image_frame_rotation( 0.0f );
+      // setters line 13
+      wavimg_parameters.set_switch_coherence_model( 1 );
+      // setters line 14
+      wavimg_parameters.set_partial_temporal_coherence_switch( 1 );
+      wavimg_parameters.set_partial_temporal_coherence_focus_spread( 4.0f );
+      // setters line 15
+      wavimg_parameters.set_partial_spacial_coherence_switch( 1 );
+      wavimg_parameters.set_partial_spacial_coherence_semi_convergence_angle( 0.2f );
+      // setters line 16
+      wavimg_parameters.set_mtf_simulation_switch( 1 );
+      wavimg_parameters.set_k_space_scaling( 1.0f );
+      wavimg_parameters.set_file_name_simulation_frequency_modulated_detector_transfer_function( "'../simulation/mtf/MTF-US2k-300.mtf'" );
+      // setters line 17
+      wavimg_parameters.set_simulation_image_spread_envelope_switch( 0 );
+      wavimg_parameters.set_isotropic_one_rms_amplitude( 0.03 );
+      //  wavimg_parameters.set_anisotropic_second_rms_amplitude( 0.0f );
+      // wavimg_parameters.set_azimuth_orientation_angle( 0.0f );
+      // setters line 18
+      wavimg_parameters.set_number_image_aberrations_set( 2 );
+      // setters line 19
+      wavimg_parameters.add_aberration_definition ( 1, 8.5f, 0.0f );
+      wavimg_parameters.add_aberration_definition ( 5, -17000.0f, 0.0f );
+      // setters line 19 + aberration_definition_index_number
+      wavimg_parameters.set_objective_aperture_radius( 5500.0f );
+      // setters line 20 + aberration_definition_index_number
+      wavimg_parameters.set_center_x_of_objective_aperture( 0.0f );
+      wavimg_parameters.set_center_y_of_objective_aperture( 0.0f );
+      // setters line 21 + aberration_definition_index_number
+      wavimg_parameters.set_number_parameter_loops( 2 );
+      wavimg_parameters.add_parameter_loop ( 1 , 1 , 1, defocus_lower_bound, defocus_upper_bound, defocus_samples, "'foc'" );
+      wavimg_parameters.add_parameter_loop ( 3 , 1 , 1, slices_lower_bound_int, fp_slices_upper_bound, slice_samples, "'_sl'" );
+      wavimg_parameters.produce_prm( wavimg_prm_name );
+
+      std::vector<char*> wavimg_vector;
+      wavimg_vector.push_back((char*) "../bin/drprobe_clt_bin_osx/wavimg");
+      wavimg_vector.push_back((char*) "-prm");
+      wavimg_vector.push_back((char*) wavimg_prm_name.c_str());
+      if ( debug_switch ){
+        wavimg_vector.push_back((char*) "/dbg");
+      }
+
+      wavimg_vector.push_back(0); //end of arguments sentinel is NULL
+
+      if ((pid = fork()) == -1) // system functions also set a variable called "errno"
+      {
+        perror("fork"); // this function automatically checks "errno"
+        // and prints the error plus what you give it
+        return EXIT_FAILURE;
+      }
+      // ---- by when you get here there will be two processes
+      if (pid == 0) // child process
+      {
+        execv(wavimg_vector[0], &wavimg_vector.front());
+      }
+      else {
+        int status;
+        wait(&status);
+      }
     }
 
-    int fd;
-    WAVIMG_prm::WAVIMG_prm wavimg_parameters;
+    if (im2model_switch == true ){
 
-    std::string wave_function_name =  "'wave_sl.wav'";
-    std::string wavimg_prm_name = "temporary_wavimg_im2model.prm";
-    std::string file_name_output_image_wave_function = "'image.dat'";
-    // setters line 1
-    wavimg_parameters.set_file_name_input_wave_function( wave_function_name );
-    // setters line 2
-    wavimg_parameters.set_n_columns_samples_input_wave_function_pixels( cols );
-    wavimg_parameters.set_n_rows_samples_input_wave_function_pixels( rows );
-    // setters line 3
-    wavimg_parameters.set_physical_columns_sampling_rate_input_wave_function_nm_pixels( sampling_rate_super_cell_x_nm_pixel );
-    wavimg_parameters.set_physical_rows_sampling_rate_input_wave_function_nm_pixels( sampling_rate_super_cell_y_nm_pixel );
-    // setters line 4
-    wavimg_parameters.set_primary_electron_energy( 200.0 );
-    // setters line 5
-    wavimg_parameters.set_type_of_output( 0 );
-    // setters line 6
-    wavimg_parameters.set_file_name_output_image_wave_function( file_name_output_image_wave_function );
-    // setters line 7
-    wavimg_parameters.set_n_columns_samples_output_image( cols );
-    wavimg_parameters.set_n_rows_samples_output_image( rows );
-    // setters line 8
-    wavimg_parameters.set_image_data_type( 0 );
-    wavimg_parameters.set_image_vacuum_mean_intensity( 3000.0f );
-    wavimg_parameters.set_conversion_rate( 1.0f );
-    wavimg_parameters.set_readout_noise_rms_amplitude( 0.0f );
-    // setters line 9
-    wavimg_parameters.set_switch_option_extract_particular_image_frame( 1 );
-    // setters line 10
-    wavimg_parameters.set_image_sampling_rate_nm_pixel( sampling_rate_super_cell_x_nm_pixel );
-    // setters line 11
-    wavimg_parameters.set_image_frame_offset_x_pixels_input_wave_function( 0.0f );
-    wavimg_parameters.set_image_frame_offset_y_pixels_input_wave_function( 0.0f );
-    // setters line 12
-    wavimg_parameters.set_image_frame_rotation( 0.0f );
-    // setters line 13
-    wavimg_parameters.set_switch_coherence_model( 1 );
-    // setters line 14
-    wavimg_parameters.set_partial_temporal_coherence_switch( 1 );
-    wavimg_parameters.set_partial_temporal_coherence_focus_spread( 4.0f );
-    // setters line 15
-    wavimg_parameters.set_partial_spacial_coherence_switch( 1 );
-    wavimg_parameters.set_partial_spacial_coherence_semi_convergence_angle( 0.2f );
-    // setters line 16
-    wavimg_parameters.set_mtf_simulation_switch( 1 );
-    wavimg_parameters.set_k_space_scaling( 1.0f );
-    wavimg_parameters.set_file_name_simulation_frequency_modulated_detector_transfer_function( "'../simulation/mtf/MTF-US2k-300.mtf'" );
-    // setters line 17
-    wavimg_parameters.set_simulation_image_spread_envelope_switch( 0 );
-    wavimg_parameters.set_isotropic_one_rms_amplitude( 0.03 );
-    //  wavimg_parameters.set_anisotropic_second_rms_amplitude( 0.0f );
-    // wavimg_parameters.set_azimuth_orientation_angle( 0.0f );
-    // setters line 18
-    wavimg_parameters.set_number_image_aberrations_set( 2 );
-    // setters line 19
-    wavimg_parameters.add_aberration_definition ( 1, 0.0f, 0.0f );
-    wavimg_parameters.add_aberration_definition ( 5, -12000.0f, 0.0f );
-    // setters line 19 + aberration_definition_index_number
-    wavimg_parameters.set_objective_aperture_radius( 5500.0f );
-    // setters line 20 + aberration_definition_index_number
-    wavimg_parameters.set_center_x_of_objective_aperture( 0.0f );
-    wavimg_parameters.set_center_y_of_objective_aperture( 0.0f );
-    // setters line 21 + aberration_definition_index_number
-    wavimg_parameters.set_number_parameter_loops( 2 );
-    wavimg_parameters.add_parameter_loop ( 1 , 1 , 1, defocus_lower_bound, defocus_upper_bound, defocus_samples, "'foc'" );
-    wavimg_parameters.add_parameter_loop ( 3 , 1 , 1, slices_lower_bound_int, fp_slices_upper_bound, slice_samples, "'_sl'" );
-    wavimg_parameters.produce_prm( wavimg_prm_name );
+      // Check if the numbers are really close -- needed
+      // when comparing numbers near zero.
 
-    std::vector<char*> wavimg_vector;
-    wavimg_vector.push_back((char*) "../bin/drprobe_clt_bin_osx/wavimg");
-    wavimg_vector.push_back((char*) "-prm");
-    wavimg_vector.push_back((char*) wavimg_prm_name.c_str());
-    wavimg_vector.push_back(0); //end of arguments sentinel is NULL
+      std::cout << "sampling rate simulated [ " << sampling_rate_super_cell_x_nm_pixel << " , " << sampling_rate_super_cell_y_nm_pixel << " ]" << std::endl;
 
-    if ((pid = fork()) == -1) // system functions also set a variable called "errno"
-    {
-      perror("fork"); // this function automatically checks "errno"
-      // and prints the error plus what you give it
-      return EXIT_FAILURE;
-    }
-    // ---- by when you get here there will be two processes
-    if (pid == 0) // child process
-    {
-      execv(wavimg_vector[0], &wavimg_vector.front());
-    }
-    else {
+      std::cout << "sampling rate experimental [ " << sampling_rate_experimental_x_nm_per_pixel << " , " << sampling_rate_experimental_y_nm_per_pixel << " ]" << std::endl;
+
+      if (( diff_super_cell_and_simulated_x >= max_scale_diff ) ||  (diff_super_cell_and_simulated_y >= max_scale_diff )){
+        simulated_needs_reshape = true;
+        reshape_factor_from_supper_cell_to_experimental_x = fabs(sampling_rate_super_cell_x_nm_pixel) / fabs(sampling_rate_experimental_x_nm_per_pixel);
+        reshape_factor_from_supper_cell_to_experimental_y = fabs(sampling_rate_super_cell_y_nm_pixel) / fabs(sampling_rate_experimental_y_nm_per_pixel);
+        std::cout << "WARNING : simulated and experimental images have different sampling rates. Reshaping simulated images by a factor of [ " << reshape_factor_from_supper_cell_to_experimental_x << " , " << reshape_factor_from_supper_cell_to_experimental_y << " ]" << std::endl;
+      }
+
+      // rectangle without the ignored edge pixels of the simulated image
+      Rect ignore_edge_pixels_rectangle;
+      ignore_edge_pixels_rectangle.x = ignore_edge_pixels;
+      ignore_edge_pixels_rectangle.y = ignore_edge_pixels;
+      int simulated_image_width = cols - ( 2 * ignore_edge_pixels );
+      int simulated_image_height = rows - ( 2 * ignore_edge_pixels );
+      ignore_edge_pixels_rectangle.width = simulated_image_width;
+      ignore_edge_pixels_rectangle.height = simulated_image_height;
+
+      if (simulated_needs_reshape == true ){
+        simulated_image_width = round ( reshape_factor_from_supper_cell_to_experimental_x * simulated_image_width );
+        simulated_image_height = round ( reshape_factor_from_supper_cell_to_experimental_y * simulated_image_height );
+      }
+
+      // experimental image roi
+      roi_x_size = roi_pixel_size;
+      roi_y_size = roi_pixel_size;
+
+
       // Read the experimental image from file
       experimental_image = imread(experimental_image_path , CV_LOAD_IMAGE_GRAYSCALE );
 
@@ -435,8 +531,7 @@ int main(int argc, char** argv )
       experimental_working = experimental_image.clone();
 
       //if fail to read the image
-      if ( experimental_image.empty() )
-      {
+      if ( experimental_image.empty() ){
         std::cout << "Error loading the experimental image from: " << experimental_image_path << std::endl;
         return -1;
       }
@@ -460,13 +555,18 @@ int main(int argc, char** argv )
       rectangle(experimental_working, roi_rectangle, Scalar(0,0,255), 5);
       imshow("Experimental Window", experimental_working);
 
-      int status;
-      wait(&status);
-
       int thickness_lower_pos = 1;
-      for (int thickness = thickness_lower_pos; (slice_period * thickness) < slices_lower_bound_int; thickness ++ ){
-        thickness_lower_pos = thickness;
-      }
+
+      std::vector< std::vector<cv::Mat> > simulated_grid;
+
+      // vars for grid creation
+      // patch size
+      int sim_grid_width  = (simulated_image_width * defocus_samples);
+      int sim_grid_height = (simulated_image_height * slice_samples);
+      cv::Mat sim_grid;
+      sim_grid.create ( sim_grid_height, sim_grid_width , CV_8UC1 );
+      sim_grid = cv::Mat::zeros(sim_grid_height, sim_grid_width, CV_8UC1);
+      std::cout << "Simulated grid size: " << sim_grid.cols << " x " << sim_grid.rows << std::endl;
 
       // we will iterate through every thickness and defocus. for every thickess we calculate the defocus images and after that, we change the thickness
       for (int thickness = thickness_lower_pos; thickness <= slice_samples; thickness ++ ){
@@ -492,6 +592,7 @@ int main(int argc, char** argv )
 
           // Load image
           std::cout << "opening " << file_name_output_dat << std::endl;
+          int fd;
           fd = open ( file_name_output_dat.c_str() , O_RDONLY );
           if ( fd == -1 ){
             perror("open");
@@ -512,24 +613,24 @@ int main(int argc, char** argv )
             perror ("Error close() of *.dat image file");
           }
 
-          cv::Mat image ( rows , cols , CV_32FC1);
+          cv::Mat raw_simulated_image ( rows , cols , CV_32FC1);
           double min, max;
 
           int pos = 0;
           for (int col = 0; col < cols; col++) {
             for (int row = 0; row < rows; row++) {
-              image.at<float>(row, col) = (float)  p[pos] ;
+              raw_simulated_image.at<float>(row, col) = (float)  p[pos] ;
               pos++;
             }
           }
-          cv::minMaxLoc(image, &min, &max);
+          cv::minMaxLoc(raw_simulated_image, &min, &max);
 
           // Create a new matrix to hold the gray image
-          Mat draw;
-          image.convertTo(draw, CV_8UC1 , 255.0f/(max - min), -min * 255.0f/(max - min));
+          Mat raw_gray_simulated_image;
+          raw_simulated_image.convertTo(raw_gray_simulated_image, CV_8UC1 , 255.0f/(max - min), -min * 255.0f/(max - min));
 
           // Create windows
-          if ( !draw.data ){
+          if ( !raw_gray_simulated_image.data ){
             perror("No image data \n");
             return -1;
           }
@@ -539,29 +640,26 @@ int main(int argc, char** argv )
           std::string file_name_image = output_file_image.str();
 
           // remove the ignored edge pixels
-          cv::Mat simulated_image = draw(ignore_edge_pixels_rectangle);
+          cv::Mat cleaned_simulated_image = raw_gray_simulated_image(ignore_edge_pixels_rectangle);
 
           // confirm if it needs reshaping
           if ( simulated_needs_reshape ){
-            resize(simulated_image, simulated_image, Size(0,0), reshape_factor_from_supper_cell_to_experimental_x, reshape_factor_from_supper_cell_to_experimental_x, INTER_LINEAR );
+            resize(cleaned_simulated_image, cleaned_simulated_image, Size(0,0), reshape_factor_from_supper_cell_to_experimental_x, reshape_factor_from_supper_cell_to_experimental_x, INTER_LINEAR );
           }
 
-          simulated_thickness_row.push_back( simulated_image );
+          simulated_thickness_row.push_back( cleaned_simulated_image );
 
-          /// Do the Matching and Normalize
-          cv::Mat simulated_image_float;
-          simulated_image.convertTo(simulated_image_float, CV_8UC1 );
 
           /// Create the result matrix
           cv::Mat result;
-          int result_cols =  experimental_image_roi.cols - simulated_image.cols + 1;
-          int result_rows = experimental_image_roi.rows  - simulated_image.rows + 1;
+          int result_cols =  experimental_image_roi.cols - cleaned_simulated_image.cols + 1;
+          int result_rows = experimental_image_roi.rows  - cleaned_simulated_image.rows + 1;
           result.create( result_rows, result_cols, CV_8UC1 );
 
           /// Create the result matrix
           cv::Mat base_result;
-          int base_result_cols =  experimental_image_roi.cols - simulated_image.cols + 1;
-          int base_result_rows = experimental_image_roi.rows  - simulated_image.rows + 1;
+          int base_result_cols =  experimental_image_roi.cols - cleaned_simulated_image.cols + 1;
+          int base_result_rows = experimental_image_roi.rows  - cleaned_simulated_image.rows + 1;
           base_result.create( base_result_rows, base_result_cols, CV_8UC1 );
 
           /// Create the inverse of result matrix
@@ -574,8 +672,8 @@ int main(int argc, char** argv )
           int simulated_experimental_lower_subtitle_margin = 120;
 
           // vars for grid creation
-          int matchMethod_grid_width  = simulated_image.cols * 6 + simulated_image.cols + simulated_experimental_divider_margin;
-          int matchMethod_grid_height = simulated_image.rows + simulated_experimental_lower_subtitle_margin;
+          int matchMethod_grid_width  = simulated_image_width * 6 + simulated_image_width + simulated_experimental_divider_margin;
+          int matchMethod_grid_height = simulated_image_height + simulated_experimental_lower_subtitle_margin;
           cv::Mat matchMethod_grid;
 
           matchMethod_grid.create ( matchMethod_grid_height, matchMethod_grid_width , CV_8UC1 );
@@ -605,21 +703,21 @@ int main(int argc, char** argv )
 
           //phase correlation between experimental and simulated  images
           // Create 2 images (fft1 and fft2) according to getOptimalDFTSize().
+          /*
 
-          int width = getOptimalDFTSize(cv::max(experimental_image_roi.cols,simulated_image.cols));
-          int height = getOptimalDFTSize(cv::max(experimental_image_roi.rows,simulated_image.rows));
-          Mat fft1(Size(width,height),CV_32F,Scalar(0));
-          Mat fft2(Size(width,height),CV_32F,Scalar(0));
-
+             int width = getOptimalDFTSize(cv::max(experimental_image_roi.cols,simulated_image.cols));
+             int height = getOptimalDFTSize(cv::max(experimental_image_roi.rows,simulated_image.rows));
+             Mat fft1(Size(width,height),CV_32F,Scalar(0));
+             Mat fft2(Size(width,height),CV_32F,Scalar(0));
 
           // Filled the created fft images with values from original images (experimental_image_roi and simulated_image).
           for(int j=0; j<experimental_image_roi.rows; j++)
-            for(int i=0; i<experimental_image_roi.cols; i++)
-              fft1.at<float>(j,i) = experimental_image_roi.at<unsigned char>(j,i);
+          for(int i=0; i<experimental_image_roi.cols; i++)
+          fft1.at<float>(j,i) = experimental_image_roi.at<unsigned char>(j,i);
 
           for(int j=0; j<simulated_image.rows; j++)
-            for(int i=0; i<simulated_image.cols; i++)
-              fft2.at<float>(j,i) = simulated_image.at<unsigned char>(j,i);
+          for(int i=0; i<simulated_image.cols; i++)
+          fft2.at<float>(j,i) = simulated_image.at<unsigned char>(j,i);
 
 
           dft(fft1,fft1,0,experimental_image_roi.rows);
@@ -644,7 +742,7 @@ int main(int argc, char** argv )
           double resY = (maxLoc_fft.y<height/2) ? (maxLoc_fft.y) : (maxLoc_fft.y-height);
 
           std::cout << "FFT LOCATION " << maxLoc_fft << " ,, " << resY << " with score " << maxVal_fft << "out of " << base_maxVal_fft << "percentage:" << match_fft << "\n\n" << std::endl;
-
+          */
 
           /// Apply the template comparison methods
           for( int i = 0; i < 6; i++ ){
@@ -652,7 +750,7 @@ int main(int argc, char** argv )
 
             std::string method_name = ( i == 0 ? "CV_TM_SQDIFF" : ( i == 1 ? "CV_TM_SQDIFF_NORMED" : ( i == 2 ? "CV_TM_CCORR" : ( i == 3 ? "CV_TM_CCORR_NORMED" : (i == 4 ? "CV_TM_CCOEFF" : "CV_TM_CCOEFF_NORMED") ))));
 
-            cv::matchTemplate( experimental_image_roi , simulated_image_float, result, compare_method  );
+            cv::matchTemplate( experimental_image_roi , cleaned_simulated_image, result, compare_method  );
             cv::matchTemplate( experimental_image_roi , experimental_image_roi, base_result, compare_method  );
 
             cv::Mat inverse_experimental;
@@ -682,14 +780,14 @@ int main(int argc, char** argv )
               match_factor = matchVal * 100.0f;
             }
 
-            printf( "\t\t\tPerfect, Base-Test(1) : %f, %f \t\t at [%d,%d]\n", base_matchVal, matchVal, matchLoc.x, matchLoc.y );
+            //printf( "\t\t\tPerfect, Base-Test(1) : %f, %f \t\t at [%d,%d]\n", base_matchVal, matchVal, matchLoc.x, matchLoc.y );
 
             //get the roi rectangle
             Rect match_rectangle;
             match_rectangle.x = matchLoc.x;
             match_rectangle.y = matchLoc.y;
-            match_rectangle.width = simulated_image.cols;
-            match_rectangle.height = simulated_image.rows;
+            match_rectangle.width = simulated_image_width;
+            match_rectangle.height = simulated_image_height;
 
             //get the roi from the experimental image
             cv::Mat match_roi = experimental_image_roi(match_rectangle);
@@ -728,7 +826,7 @@ int main(int argc, char** argv )
             if ( compare_method  == CV_TM_SQDIFF_NORMED || compare_method == CV_TM_CCORR_NORMED ||  compare_method == CV_TM_CCOEFF_NORMED ){
               putText(matchMethod_grid, line5_matchfactor_info , cvPoint(legend_position_x , match_rectangle.height + legent_position_y_bottom_left_line_5), FONT_HERSHEY_PLAIN, 1, cvScalar(255,255,255), 1, CV_AA);
             }
-
+            /*
             // Histogram common variables
             /// Establish the number of bins
             int histSize = 256;
@@ -755,11 +853,11 @@ int main(int argc, char** argv )
 
             /// Apply the histogram comparison methods
             for( int i = 0; i < 4; i++ ){
-              int compare_method = i;
-              double base_base = compareHist( match_roi_hist, match_roi_hist, compare_method );
-              double base_test1 = compareHist( match_roi_hist, simulated_image_hist, compare_method );
+            int compare_method = i;
+            double base_base = compareHist( match_roi_hist, match_roi_hist, compare_method );
+            double base_test1 = compareHist( match_roi_hist, simulated_image_hist, compare_method );
 
-              printf( " Method [%s] Perfect, Base-Test(1) : %f, %f \n", i == 0 ? "Correlation ( CV_COMP_CORREL )" : ( i == 1 ? "Chi-Square ( CV_COMP_CHISQR )" : ( i == 2 ? "Intersection ( method=CV_COMP_INTERSECT )" : ("Bhattacharyya distance ( CV_COMP_BHATTACHARYYA )") ) ), base_base, base_test1 );
+            printf( " Method [%s] Perfect, Base-Test(1) : %f, %f \n", i == 0 ? "Correlation ( CV_COMP_CORREL )" : ( i == 1 ? "Chi-Square ( CV_COMP_CHISQR )" : ( i == 2 ? "Intersection ( method=CV_COMP_INTERSECT )" : ("Bhattacharyya distance ( CV_COMP_BHATTACHARYYA )") ) ), base_base, base_test1 );
             }
 
             // draw the histograms
@@ -771,19 +869,19 @@ int main(int argc, char** argv )
             // draw the intensity line for histogram
             for(int i = 1; i < 255; i++)
             {
-              // draw the simulated image histogram
-              line(histImage, Point(bin_w*(i-1), cvRound(hist_h - simulated_image_hist.at<float>(i-1))),
-                  Point(bin_w*(i), hist_h - cvRound(simulated_image_hist.at<float>(i))),
-                  Scalar(0,0,0), 1, 8, 0);
-              // draw the experimental image histogram
-              line(histImage, Point(bin_w*(i-1), hist_h - cvRound(match_roi_hist.at<float>(i-1))),
-                  Point(bin_w*(i), hist_h - cvRound(match_roi_hist.at<float>(i))),
-                  Scalar(0,0,255), 1, 8, 0);
+            // draw the simulated image histogram
+            line(histImage, Point(bin_w*(i-1), cvRound(hist_h - simulated_image_hist.at<float>(i-1))),
+            Point(bin_w*(i), hist_h - cvRound(simulated_image_hist.at<float>(i))),
+            Scalar(0,0,0), 1, 8, 0);
+            // draw the experimental image histogram
+            line(histImage, Point(bin_w*(i-1), hist_h - cvRound(match_roi_hist.at<float>(i-1))),
+            Point(bin_w*(i), hist_h - cvRound(match_roi_hist.at<float>(i))),
+            Scalar(0,0,255), 1, 8, 0);
             }
             // display histogram
             //  namedWindow("Intensity Histogram", CV_WINDOW_AUTOSIZE);
             // imshow("Intensity Histogram", histImage);
-
+            */
           }
 
           // put the simulated image info
@@ -805,47 +903,59 @@ int main(int argc, char** argv )
           std::string line3_simulated_info = output_legend_line3.str();
           // line 4
           std::stringstream output_legend_line4;
-          output_legend_line4 <<  "Size {" << ignore_edge_pixels << "} [" << simulated_image_float.cols << "," << simulated_image_float.rows << "]" << " {" << ignore_edge_pixels << "}";
+          output_legend_line4 <<  "Size {" << ignore_edge_pixels << "} [" << simulated_image_width << "," << simulated_image_height << "]" << " {" << ignore_edge_pixels << "}";
           std::string line4_simulated_info = output_legend_line4.str();
 
           legend_position_x = 10;
 
-          putText(matchMethod_grid, line1_simulated_info , cvPoint(legend_position_x , simulated_image_float.rows  + legent_position_y_bottom_left_line_1), FONT_HERSHEY_PLAIN, 1, cvScalar(255,255,255), 1, CV_AA);
-          putText(matchMethod_grid, line2_simulated_info , cvPoint(legend_position_x , simulated_image_float.rows  + legent_position_y_bottom_left_line_2), FONT_HERSHEY_PLAIN, 0.9, cvScalar(255,255,255), 1, CV_AA);
-          putText(matchMethod_grid, line3_simulated_info , cvPoint(legend_position_x , simulated_image_float.rows  + legent_position_y_bottom_left_line_3), FONT_HERSHEY_PLAIN, 1.2, cvScalar(255,255,255), 1, CV_AA);
-          putText(matchMethod_grid, line4_simulated_info , cvPoint(legend_position_x , simulated_image_float.rows  + legent_position_y_bottom_left_line_4), FONT_HERSHEY_PLAIN, 1, cvScalar(255,255,255), 1, CV_AA);
+          putText(matchMethod_grid, line1_simulated_info , cvPoint(legend_position_x , simulated_image_height  + legent_position_y_bottom_left_line_1), FONT_HERSHEY_PLAIN, 1, cvScalar(255,255,255), 1, CV_AA);
 
-          simulated_image_float.copyTo(matchMethod_grid(Rect(0,0,simulated_image_float.rows,simulated_image_float.cols)));
+          putText(matchMethod_grid, line2_simulated_info , cvPoint(legend_position_x , simulated_image_height  + legent_position_y_bottom_left_line_2), FONT_HERSHEY_PLAIN, 0.9, cvScalar(255,255,255), 1, CV_AA);
 
-          namedWindow( "ROI window", WINDOW_AUTOSIZE );// Create a window for display.
-          imshow( "ROI window", matchMethod_grid ); //draw );
+          putText(matchMethod_grid, line3_simulated_info , cvPoint(legend_position_x , simulated_image_height  + legent_position_y_bottom_left_line_3), FONT_HERSHEY_PLAIN, 1.2, cvScalar(255,255,255), 1, CV_AA);
 
-          // save the matchMethod grid
-          std::stringstream grid_file_image;
-          grid_file_image << "GRID_thickness_" << thickness * slice_period <<  "defocus_" << ( (defocus-1) * defocus_period )+ defocus_lower_bound << ".png" ;
-          std::string grid_file_name_image = grid_file_image.str();
+          putText(matchMethod_grid, line4_simulated_info , cvPoint(legend_position_x , simulated_image_height  + legent_position_y_bottom_left_line_4), FONT_HERSHEY_PLAIN, 1, cvScalar(255,255,255), 1, CV_AA);
 
-          imwrite( grid_file_name_image, matchMethod_grid );
+          cleaned_simulated_image.copyTo(matchMethod_grid(Rect(0,0,simulated_image_width,simulated_image_height)));
 
-          waitKey(0);                                          // Wait for a keystroke in the window
+          if ( sim_grid_switch == true ){
+
+            std::cout <<" width [" <<(defocus-1)  <<"]" << simulated_image_width << "heigth[" <<(thickness-1)  <<"]" << simulated_image_height << std::endl;
+            Rect r1 = Rect (simulated_image_width*(defocus-1),simulated_image_height*(thickness-1),simulated_image_width,simulated_image_height);
+            std::cout << r1 << std::endl;
+            cleaned_simulated_image.copyTo(sim_grid(Rect(simulated_image_width*(defocus-1),simulated_image_height*(thickness-1),simulated_image_width,simulated_image_height)));
+          }
+          if (sim_cmp_gui_switch == true ){
+            namedWindow( "simulation comparation window", WINDOW_AUTOSIZE );// Create a window for display.
+            imshow( "simulation comparation window", matchMethod_grid ); //draw );
+            // save the matchMethod grid
+            std::stringstream grid_file_image;
+            grid_file_image << "GRID_thickness_" << thickness * slice_period <<  "defocus_" << ( (defocus-1) * defocus_period )+ defocus_lower_bound << ".png" ;
+            std::string grid_file_name_image = grid_file_image.str();
+            imwrite( grid_file_name_image, matchMethod_grid );
+            // Wait for a keystroke in the window
+            waitKey(0);
+          }
         }
         simulated_grid.push_back(simulated_thickness_row);
       }
-      // now that we have the simulated images lets compare them 
+      if ( sim_grid_switch == true ){
+        std::stringstream sim_grid_file_image;
+        sim_grid_file_image << "sim_grid_thickness_" << slices_lower_bound_int << "_to_" << fp_slices_upper_bound <<  "_defocus_" <<defocus_lower_bound << "_to_" << defocus_upper_bound << ".png" ;
+        std::string sim_grid_file_name_image = sim_grid_file_image.str();
+        imwrite( sim_grid_file_name_image, sim_grid );
+        namedWindow( "SIMGRID window", WINDOW_AUTOSIZE );// Create a window for display.
+        imshow( "SIMGRID window", sim_grid ); //draw );
+        waitKey(0);
+      }
     }
-
-
-
+    // now that we have the simulated images lets compare them
   }
   catch(std::exception& e)
   {
     std::cerr << "Unhandled Exception reached the top of main: "
       << e.what() << ", application will now exit" << std::endl; 
     return -1;
-
-  } 
-
+  }
   return 0;
-
 }
-

@@ -8,9 +8,9 @@ set(Boost_USE_STATIC_LIBS ON)
 set(Boost_USE_MULTITHREADED ON)  
 set(Boost_USE_STATIC_RUNTIME OFF) 
 
-SET(BOOST_ROOT /usr/local/Cellar/boost/1.62.0)
-SET(BOOST_INCLUDEDIR /usr/local/Cellar/boost/1.62.0/include)
-SET(BOOST_LIBRARYDIR /usr/local/Cellar/boost/1.62.0/lib)
+#SET(BOOST_ROOT /usr/local/Cellar/boost/1.62.0)
+#SET(BOOST_INCLUDEDIR /usr/local/Cellar/boost/1.62.0/include)
+#SET(BOOST_LIBRARYDIR /usr/local/Cellar/boost/1.62.0/lib)
 
 find_package(Boost COMPONENTS program_options REQUIRED)
 
