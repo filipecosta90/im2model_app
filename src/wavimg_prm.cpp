@@ -1,8 +1,18 @@
-#include <iostream>
+#include <cctype>
 #include <fstream>
-#include <vector>
-#include <iostream>
+#include <cassert>
+#include <fcntl.h>
+#include <sys/types.h>
+#include <unistd.h>
+#include <sys/stat.h>
+#include <sys/mman.h>
+#include <cstdio>
+#include <sstream>      // std::stringstream
+#include <string>       // std::string
+#include <iostream>     // std::cout
 #include <iomanip>
+#include <vector>
+#include <stdio.h>
 #include <cmath>
 #include <limits>
 
@@ -83,6 +93,9 @@ WAVIMG_prm::WAVIMG_prm()
   //std::vector<int> loop_range_n;
   // line 26 + aberration_definition_index_number
   //loop_string_indentifier = "";
+  prm_filename = "";
+  bin_path = "";
+  debug_switch = false;
 }
 
 // setters line 1
@@ -275,9 +288,53 @@ void WAVIMG_prm::add_parameter_loop ( int parameter_class , int parameter_index,
   loop_string_indentifier.push_back(string_identifier);
 }
 
-void WAVIMG_prm::produce_prm ( std::string filename ) {
+bool WAVIMG_prm::call_bin(){
+  int pid;
+
+  std::vector<char*> wavimg_vector;
+  wavimg_vector.push_back((char*) bin_path.c_str() );
+  wavimg_vector.push_back((char*) "-prm");
+  wavimg_vector.push_back((char*) prm_filename.c_str() );
+  if ( debug_switch ){
+    wavimg_vector.push_back((char*) "/dbg");
+  }
+  wavimg_vector.push_back(0); //end of arguments sentinel is NULL
+
+  if ((pid = vfork()) == -1) // system functions also set a variable called "errno"
+  {
+    perror("ERROR in vfork() of WAVIMG call_bin"); // this function automatically checks "errno"
+    // and prints the error plus what you give it
+    return EXIT_FAILURE;
+  }
+  // ---- by when you get here there will be two processes
+  if (pid == 0) // child process
+  {
+    execv(wavimg_vector[0], &wavimg_vector.front());
+  }
+  else {
+    int status;
+    wait(&status);
+    return EXIT_SUCCESS;
+  }
+  //if you get here something went wrong
+  return EXIT_FAILURE;
+}
+
+void WAVIMG_prm::set_prm_file_name( std::string filename ){
+  prm_filename = filename;
+}
+
+void WAVIMG_prm::set_bin_path( std::string path ){
+  bin_path = path;
+}
+
+void WAVIMG_prm::set_debug_switch(bool deb_switch){
+  debug_switch = deb_switch;
+}
+
+void WAVIMG_prm::produce_prm ( ) {
   std::ofstream outfile;
-  outfile.open(filename);
+  outfile.open(prm_filename);
 
   // line 1
   outfile  << file_name_input_wave_function << " !" << std::endl;

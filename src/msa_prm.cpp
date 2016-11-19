@@ -1,6 +1,19 @@
-#include <iostream>
+
+#include <cctype>
 #include <fstream>
+#include <cassert>
+#include <fcntl.h>
+#include <sys/types.h>
+#include <unistd.h>
+#include <sys/stat.h>
+#include <sys/mman.h>
+#include <cstdio>
+#include <sstream>      // std::stringstream
+#include <string>       // std::string
+#include <iostream>     // std::cout
+#include <iomanip>
 #include <vector>
+#include <stdio.h>
 
 #include "msa_prm.h"
 
@@ -39,6 +52,10 @@ MSA_prm::MSA_prm()
   minimum_number_frozen_phonon_configurations_used_generate_wave_functions = 0;
   period_readout_or_detection_in_units_of_slices = 0;
   number_slices_used_describe_full_object_structure_up_to_its_maximum_thickness = 0;
+  prm_filename = "";
+  wave_function_name = "";
+  bin_path = "";
+  debug_switch = false;
 }
 
 void MSA_prm::set_electron_wavelength( float energy ){
@@ -83,9 +100,61 @@ void MSA_prm::set_linear_slices_for_full_object_structure () {
   }
 }
 
-void MSA_prm::produce_prm ( std::string filename ) {
+bool MSA_prm::call_bin(){
+  int pid;
+
+  std::vector<char*> msa_vector;
+  msa_vector.push_back((char*) bin_path.c_str() );
+  msa_vector.push_back((char*) "-prm");
+  msa_vector.push_back((char*) prm_filename.c_str() );
+  msa_vector.push_back((char*) "-out");
+  msa_vector.push_back((char*) wave_function_name.c_str() );
+  msa_vector.push_back((char*) "/ctem");
+  if ( debug_switch ){
+    msa_vector.push_back((char*) "/debug");
+  }
+
+  msa_vector.push_back(0); //end of arguments sentinel is NULL
+
+  if ((pid = vfork()) == -1) // system functions also set a variable called "errno"
+  {
+    perror("ERROR in vfork() of MSA call_bin"); // this function automatically checks "errno"
+    // and prints the error plus what you give it
+    return EXIT_FAILURE;
+  }
+  // ---- by when you get here there will be two processes
+  if (pid == 0) // child process
+  {
+    execv(msa_vector[0], &msa_vector.front());
+  }
+  else {
+    int status;
+    wait(&status);
+    return EXIT_SUCCESS;
+  }
+  //if you get here something went wrong
+  return EXIT_FAILURE;
+}
+
+void MSA_prm::set_prm_file_name( std::string filename ){
+  prm_filename = filename;
+}
+
+void MSA_prm::set_wave_function_name ( std::string wave_function_filename ){
+  wave_function_name = wave_function_filename;
+}
+
+void MSA_prm::set_bin_path( std::string path ){
+  bin_path = path;
+}
+
+void MSA_prm::set_debug_switch(bool deb_switch){
+  debug_switch = deb_switch;
+}
+
+void MSA_prm::produce_prm () {
   std::ofstream outfile;
-  outfile.open(filename);
+  outfile.open(prm_filename);
   outfile << microscope_parameter_block_name << "\t\t\t! Parameter block name, must be '[Microscope Parameters]'" << std::endl;
   // ! STEM only
   outfile << incident_probe_convergence_half_angle << "\t\t\t! STEM only\t\t\t! Incident probe convergence half angle [mrad]"  << std::endl;

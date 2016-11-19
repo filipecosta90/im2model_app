@@ -76,6 +76,10 @@ class WAVIMG_prm {
     std::vector<int> loop_range_n;
     // line 26 + aberration_definition_index_number
     std::vector<std::string> loop_string_indentifier;
+    // runnable execv info
+    std::string prm_filename;
+    std::string bin_path;
+    bool debug_switch;
 
   public:
     WAVIMG_prm();
@@ -141,7 +145,16 @@ class WAVIMG_prm {
     // setters lines 22, 23, 24, 25, 26 + aberration_definition_index_number
     void add_parameter_loop ( int parameter_class , int parameter_index, int variation_form, float range_0, float range_1, float range_n, std::string string_identifier );
 
-    void produce_prm( std::string filename );
+    void set_prm_file_name( std::string filename );
+
+    void set_bin_path( std::string path );
+
+    void set_debug_switch(bool deb_switch);
+
+    void produce_prm( );
+
+    bool call_bin();
+
 };
 
 #endif

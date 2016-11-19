@@ -37,6 +37,11 @@ class MSA_prm {
     int period_readout_or_detection_in_units_of_slices;
     int number_slices_used_describe_full_object_structure_up_to_its_maximum_thickness;
     std::vector<int> slice_index;
+    // runnable execv info
+    std::string prm_filename;
+    std::string wave_function_name;
+    std::string bin_path;
+    bool debug_switch;
 
   public:
     MSA_prm();
@@ -61,7 +66,18 @@ class MSA_prm {
 
     void set_linear_slices_for_full_object_structure ();
 
-    void produce_prm( std::string filename );
+    void set_prm_file_name( std::string filename );
+
+    void set_wave_function_name ( std::string wave_function_filename );
+
+    void set_bin_path( std::string path );
+
+    void set_debug_switch(bool deb_switch);
+
+    void produce_prm( );
+
+    bool call_bin();
+
 };
 
 #endif
