@@ -26,7 +26,6 @@
 # include "opencv2/nonfree/features2d.hpp"
 
 
-
 // Include the headers relevant to the boost::program_options
 // library
 #include <boost/program_options.hpp>
@@ -39,6 +38,7 @@
 // emitted by the command line parser
 #include <exception>
 
+#include "celslc_prm.h"
 #include "msa_prm.h"
 #include "wavimg_prm.h"
 
@@ -123,9 +123,8 @@ int main(int argc, char** argv )
 
   int slices_load; // need more work
   int slice_samples;
-  int slices_lower_bound_int;
-  float slices_upper_bound_int; // need more work
-  float fp_slices_upper_bound;
+  int slices_lower_bound;
+  int slices_upper_bound;
   int number_slices_to_max_thickness; // need more work
   int defocus_samples;
   float defocus_lower_bound;
@@ -171,8 +170,8 @@ int main(int argc, char** argv )
       ("abs", "switch for applying absorption potentials (imaginary part) according to Weickenmeier and Kohl [Acta Cryst. A47 (1991) p. 590-597]. This absorption calculation considers the loss of intensity in the elastic channel due to thermal diffuse scattering.")
       ("slices_load", boost::program_options::value<int>(&slices_load), "number of slice files to be loaded.")
       ("slices_samples", boost::program_options::value<int>(&slice_samples)->required(), "slices samples")
-      ("slices_lower_bound", boost::program_options::value<int>(&slices_lower_bound_int)->default_value(0), "slices lower bound")
-      ("slices_upper_bound", boost::program_options::value<float>(&fp_slices_upper_bound), "slices Upper Bound")
+      ("slices_lower_bound", boost::program_options::value<int>(&slices_lower_bound)->required(), "slices lower bound")
+      ("slices_upper_bound", boost::program_options::value<int>(&slices_upper_bound)->required(), "slices Upper Bound")
       ("slices_max", boost::program_options::value<int>(&number_slices_to_max_thickness), "number of slices used to describe the full object structure up to its maximum thickness.")
       ("defocus_samples", boost::program_options::value<int>(&defocus_samples)->required(), "defocus samples")
       ("defocus_lower_bound", boost::program_options::value<float>(&defocus_lower_bound)->required(), "defocus lower bound")
@@ -257,9 +256,10 @@ int main(int argc, char** argv )
     int rows = nx_simulated_horizontal_samples;
     int cols = ny_simulated_vertical_samples;
 
-    int slice_period =  fp_slices_upper_bound  / slice_samples;
-    if ( slices_lower_bound_int < slice_period ){
-      slices_lower_bound_int = slice_period;
+    int slice_period = round( ( (slices_upper_bound - slices_lower_bound) ) / (slice_samples-1) );
+
+    if ( slices_lower_bound < slice_period ){
+      slices_lower_bound = slice_period;
     }
 
     float defocus_period =  ( defocus_upper_bound - defocus_lower_bound) / ( defocus_samples - 1 );
@@ -296,77 +296,26 @@ int main(int argc, char** argv )
     }
 
     if (celslc_switch == true ){
-      std::vector<char*> celslc_vector;
-      celslc_vector.push_back((char*) "../bin/drprobe_clt_bin_osx/celslc");
-
-      celslc_vector.push_back((char*) "-prj" );
-      //input prj string
-      std::stringstream input_prj_stream;
-      input_prj_stream << projection_dir_h  << "," << projection_dir_l << "," << projection_dir_k << "," << perpendicular_dir_u << "," <<   perpendicular_dir_v << "," << perpendicular_dir_w << "," << super_cell_size_x << "," << super_cell_size_y << "," << super_cell_size_z;
-      std::string input_prj_string = input_prj_stream.str();
-      const char* input_prj_c_string = input_prj_string.c_str();
-      celslc_vector.push_back( (char*) input_prj_c_string );      
-
-      celslc_vector.push_back((char*) "-cif");
-      celslc_vector.push_back((char*) super_cell_cif_file.c_str());
-      celslc_vector.push_back((char*) "-slc");
-      celslc_vector.push_back((char*) slc_file_name_prefix.c_str());
-
-      celslc_vector.push_back((char*) "-nx");
-      // input nx string
-      std::stringstream input_nx_stream;
-      input_nx_stream << nx_simulated_horizontal_samples;
-      std::string input_nx_string = input_nx_stream.str();
-      const char* input_nx_c_string = input_nx_string.c_str();
-      celslc_vector.push_back( (char*) input_nx_c_string );
-
-      celslc_vector.push_back((char*) "-ny");
-      // input ny string
-      std::stringstream input_ny_stream;
-      input_ny_stream << ny_simulated_vertical_samples;
-      std::string input_ny_string = input_ny_stream.str();
-      const char* input_ny_c_string = input_ny_string.c_str();
-      celslc_vector.push_back( (char*) input_ny_c_string );
-
-      celslc_vector.push_back((char*) "-nz");
-      // input nz string
-      std::stringstream input_nz_stream;
-      input_nz_stream << nz_simulated_partitions;
-      std::string input_nz_string = input_nz_stream.str();
-      const char* input_nz_c_string = input_nz_string.c_str();
-      celslc_vector.push_back( (char*) input_nz_c_string );
-
-      celslc_vector.push_back((char*) "-ht");
-      // input ht
-      std::stringstream input_ht_stream;
-      input_ht_stream << ht_accelaration_voltage;
-      std::string input_ht_string = input_ht_stream.str();
-      const char* input_ht_c_string = input_ht_string.c_str();
-      celslc_vector.push_back( (char*) input_ht_c_string );
-
-      if ( dwf_switch ){
-        celslc_vector.push_back((char*) "-dwf");
-      }
-      if ( abs_switch ){
-        celslc_vector.push_back((char*) "-abs");
-      }
-      celslc_vector.push_back(0); //end of arguments sentinel is NULL
-
-      if ((pid = vfork()) == -1) // system functions also set a variable called "errno"
-      {
-        perror("fork"); // this function automatically checks "errno"
-        // and prints the error plus what you give it
-        return EXIT_FAILURE;
-      }
-      // ---- by when you get here there will be two processes
-      if (pid == 0) // child process
-      {
-        execv(celslc_vector[0], &celslc_vector.front());
-      }
-      else {
-        int status;
-        wait(&status);
-      }
+      CELSLC_prm::CELSLC_prm celslc_parameters;
+      celslc_parameters.set_prj_dir_h(projection_dir_h);
+      celslc_parameters.set_prj_dir_l(projection_dir_l);
+      celslc_parameters.set_prj_dir_k(projection_dir_k);
+      celslc_parameters.set_prp_dir_u(perpendicular_dir_u);
+      celslc_parameters.set_prp_dir_v(perpendicular_dir_v);
+      celslc_parameters.set_prp_dir_w(perpendicular_dir_w);
+      celslc_parameters.set_super_cell_size_x(super_cell_size_x);
+      celslc_parameters.set_super_cell_size_y(super_cell_size_y);
+      celslc_parameters.set_super_cell_size_z(super_cell_size_z);
+      celslc_parameters.set_cif_file(super_cell_cif_file.c_str());
+      celslc_parameters.set_slc_filename_prefix (slc_file_name_prefix.c_str());
+      celslc_parameters.set_nx_simulated_horizontal_samples(nx_simulated_horizontal_samples);
+      celslc_parameters.set_ny_simulated_vertical_samples(ny_simulated_vertical_samples);
+      celslc_parameters.set_nz_simulated_partitions(nz_simulated_partitions);
+      celslc_parameters.set_ht_accelaration_voltage(ht_accelaration_voltage);
+      celslc_parameters.set_dwf_switch(dwf_switch);
+      celslc_parameters.set_abs_switch(abs_switch);
+      celslc_parameters.set_bin_path("../bin/drprobe_clt_bin_osx/celslc");
+      celslc_parameters.call_bin();
     }
 
     if( msa_switch == true ){
@@ -381,7 +330,7 @@ int main(int argc, char** argv )
       msa_parameters.set_number_slices_to_load ( slices_load );
       msa_parameters.set_number_frozen_lattice_variants_considered_per_slice( 1 );
       msa_parameters.set_minimum_number_frozen_phonon_configurations_used_generate_wave_functions ( 1 );
-      msa_parameters.set_period_readout_or_detection_in_units_of_slices ( slice_period );
+      msa_parameters.set_period_readout_or_detection_in_units_of_slices ( 1 ); // bug
       msa_parameters.set_number_slices_used_describe_full_object_structure_up_to_its_maximum_thickness ( number_slices_to_max_thickness );
       msa_parameters.set_linear_slices_for_full_object_structure();
       msa_parameters.set_prm_file_name("temporary_msa_im2model.prm");
@@ -449,7 +398,9 @@ int main(int argc, char** argv )
       // setters line 18
       wavimg_parameters.set_number_image_aberrations_set( 2 );
       // setters line 19
+      //Defocus (a20, C1,0, C1)
       wavimg_parameters.add_aberration_definition ( 1, 8.5f, 0.0f );
+      //Spherical aberration (a40, C3,0, C3)
       wavimg_parameters.add_aberration_definition ( 5, -17000.0f, 0.0f );
       // setters line 19 + aberration_definition_index_number
       wavimg_parameters.set_objective_aperture_radius( 5500.0f );
@@ -459,7 +410,7 @@ int main(int argc, char** argv )
       // setters line 21 + aberration_definition_index_number
       wavimg_parameters.set_number_parameter_loops( 2 );
       wavimg_parameters.add_parameter_loop ( 1 , 1 , 1, defocus_lower_bound, defocus_upper_bound, defocus_samples, "'foc'" );
-      wavimg_parameters.add_parameter_loop ( 3 , 1 , 1, slices_lower_bound_int, fp_slices_upper_bound, slice_samples, "'_sl'" );
+      wavimg_parameters.add_parameter_loop ( 3 , 1 , 1, slices_lower_bound, slices_upper_bound, slice_samples, "'_sl'" );
       wavimg_parameters.set_prm_file_name("temporary_wavimg_im2model.prm");
       wavimg_parameters.produce_prm();
       wavimg_parameters.set_bin_path("../bin/drprobe_clt_bin_osx/wavimg");
@@ -542,7 +493,7 @@ int main(int argc, char** argv )
       for (int thickness = thickness_lower_pos; thickness <= slice_samples; thickness ++ ){
 
         // the slice thickness in nanometers
-        float slice_thickness_nm = super_cell_z_nm_slice * thickness * slice_period;
+        float slice_thickness_nm = super_cell_z_nm_slice * thickness * slice_period + ( super_cell_z_nm_slice * slices_lower_bound);
 
         //will contain the row of simulated images (same thickness, diferent defocus)
         std::vector<cv::Mat> simulated_images_row;
@@ -691,8 +642,6 @@ int main(int argc, char** argv )
             double matchVal, base_matchVal, min_matchVal, min_base_matchVal;
             Point not_minLoc; Point not_maxLoc;
 
-
-
             // vars for legend positioning
             int legend_position_x = 0;
             int legent_position_y_bottom_left_line_1 = 20;
@@ -700,7 +649,6 @@ int main(int argc, char** argv )
             int legent_position_y_bottom_left_line_3 = 60;
             int legent_position_y_bottom_left_line_4 = 80;
             int legent_position_y_bottom_left_line_5 = 100;
-
 
             if ( sim_grid_switch == true ){
               Rect r1 = Rect (simulated_image_width*(defocus-1),simulated_image_height*(thickness-1),simulated_image_width,simulated_image_height);
@@ -924,7 +872,7 @@ int main(int argc, char** argv )
 
       if ( sim_grid_switch == true ){
         std::stringstream sim_grid_file_image;
-        sim_grid_file_image << "sim_grid_thickness_" << slices_lower_bound_int << "_to_" << fp_slices_upper_bound <<  "_defocus_" <<defocus_lower_bound << "_to_" << defocus_upper_bound << ".png" ;
+        sim_grid_file_image << "sim_grid_thickness_" << slices_lower_bound << "_to_" << slices_upper_bound <<  "_defocus_" <<defocus_lower_bound << "_to_" << defocus_upper_bound << ".png" ;
         std::string sim_grid_file_name_image = sim_grid_file_image.str();
         imwrite( "exp_roi.png", experimental_image_roi );
         imwrite( sim_grid_file_name_image, sim_grid );
@@ -933,7 +881,6 @@ int main(int argc, char** argv )
         waitKey(0);
       }
 
-
       // now that we have the simulated images lets compare them
       vector<double>::iterator maxElement;
       maxElement = max_element(simulated_matches.begin(), simulated_matches.end());
@@ -941,12 +888,11 @@ int main(int argc, char** argv )
       int col_defocus = dist % defocus_samples;
       int row_thickness = dist / slice_samples;
 
-      std::cout << "Max element is " << *maxElement << " at slice " << (row_thickness +1 ) * slice_period << ", defocus " << (col_defocus) * defocus_period + defocus_lower_bound << std::endl;
+      std::cout << "Max match % is " << *maxElement << " at slice " << (row_thickness +1 ) * slice_period << ", defocus " << (col_defocus) * defocus_period + defocus_lower_bound << std::endl;
     }
 
   }
-  catch(std::exception& e)
-  {
+  catch(std::exception& e){
     std::cerr << "Unhandled Exception reached the top of main: "
       << e.what() << ", application will now exit" << std::endl; 
     return -1;
