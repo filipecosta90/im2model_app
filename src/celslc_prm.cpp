@@ -20,8 +20,8 @@
 CELSLC_prm::CELSLC_prm()
 {
   prj_dir_h = 0.0f;
-  prj_dir_l = 0.0f;
   prj_dir_k = 0.0f;
+    prj_dir_l = 0.0f;
   prp_dir_u = 0.0f;
   prp_dir_v = 0.0f;
   prp_dir_w = 0.0f;
@@ -42,75 +42,76 @@ CELSLC_prm::CELSLC_prm()
 }
 
 void CELSLC_prm::set_prj_dir_h(float projection_dir_h ){
-    prj_dir_h = projection_dir_h;
+  prj_dir_h = projection_dir_h;
+}
+
+
+void CELSLC_prm::set_prj_dir_k(float projection_dir_k ){
+  prj_dir_k = projection_dir_k;
 }
 
 void CELSLC_prm::set_prj_dir_l(float projection_dir_l ){
     prj_dir_l = projection_dir_l;
 }
 
-void CELSLC_prm::set_prj_dir_k(float projection_dir_k ){
-    prj_dir_k = projection_dir_k;
-}
-
 void CELSLC_prm::set_prp_dir_u(float perpendicular_dir_u){
-    prp_dir_u = perpendicular_dir_u;
+  prp_dir_u = perpendicular_dir_u;
 }
 
 void CELSLC_prm::set_prp_dir_v(float perpendicular_dir_v){
-    prp_dir_v = perpendicular_dir_v;
+  prp_dir_v = perpendicular_dir_v;
 }
 
 void CELSLC_prm::set_prp_dir_w(float perpendicular_dir_w){
-    prp_dir_w = perpendicular_dir_w;
+  prp_dir_w = perpendicular_dir_w;
 }
 
 void CELSLC_prm::set_super_cell_size_x(float size_x){
-    super_cell_size_x = size_x;
+  super_cell_size_x = size_x;
 }
 
 void CELSLC_prm::set_super_cell_size_y(float size_y){
-    super_cell_size_y = size_y;
+  super_cell_size_y = size_y;
 }
 
 void CELSLC_prm::set_super_cell_size_z(float size_z){
-    super_cell_size_z = size_z;
+  super_cell_size_z = size_z;
 }
 
 void CELSLC_prm::set_cif_file( std::string cif_file ){
-    super_cell_cif_file = cif_file;
+  super_cell_cif_file = cif_file;
 }
 
 void CELSLC_prm::set_slc_filename_prefix ( std::string slc_file ){
-    slc_file_name_prefix = slc_file;
+  slc_file_name_prefix = slc_file;
 }
 
 void CELSLC_prm::set_nx_simulated_horizontal_samples( int nx ){
-    nx_simulated_horizontal_samples = nx;
+  nx_simulated_horizontal_samples = nx;
 }
 
 void CELSLC_prm::set_ny_simulated_vertical_samples( int ny ){
-    ny_simulated_vertical_samples = ny;
+  ny_simulated_vertical_samples = ny;
 }
 
 void CELSLC_prm::set_nz_simulated_partitions( int nz ){
-    nz_simulated_partitions = nz;
+  nz_simulated_partitions = nz;
 }
 
 void CELSLC_prm::set_ht_accelaration_voltage( float ht ){
-    ht_accelaration_voltage = ht;
+  ht_accelaration_voltage = ht;
 }
 
 void CELSLC_prm::set_dwf_switch( bool dwf ){
-    dwf_switch = dwf;
+  dwf_switch = dwf;
 }
 
 void CELSLC_prm::set_abs_switch( bool abs ){
-    abs_switch = abs;
+  abs_switch = abs;
 }
 
 void CELSLC_prm::set_bin_path( std::string path ){
-    bin_path = path;
+  bin_path = path;
 }
 
 bool CELSLC_prm::call_bin(){
@@ -122,7 +123,7 @@ bool CELSLC_prm::call_bin(){
 
   //input prj string
   std::stringstream input_prj_stream;
-  input_prj_stream << prj_dir_h  << "," << prj_dir_l << "," << prj_dir_k << "," << prp_dir_u << "," <<   prp_dir_v << "," << prp_dir_w << "," << super_cell_size_x << "," << super_cell_size_y << "," << super_cell_size_z;
+  input_prj_stream << prj_dir_h  << "," << prj_dir_k << "," << prj_dir_l  << "," << prp_dir_u << "," <<   prp_dir_v << "," << prp_dir_w << "," << super_cell_size_x << "," << super_cell_size_y << "," << super_cell_size_z;
   std::string input_prj_string = input_prj_stream.str();
   const char* input_prj_c_string = input_prj_string.c_str();
 

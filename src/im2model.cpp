@@ -91,8 +91,8 @@ int main(int argc, char** argv )
   // Specifies the output slice file name prefix.
   std::string slc_file_name_prefix;
   float projection_dir_h;
-  float projection_dir_l;
   float projection_dir_k;
+    float projection_dir_l;
   float perpendicular_dir_u;
   float perpendicular_dir_v;
   float perpendicular_dir_w;
@@ -154,8 +154,8 @@ int main(int argc, char** argv )
       ("cif", boost::program_options::value<std::string>(&super_cell_cif_file)->required(), "specifies the input super-cell file containing the atomic structure data in CIF file format.")
       ("slc", boost::program_options::value<std::string>(&slc_file_name_prefix)->required(), "specifies the output slice file name prefix. Absolute or relative path names can be used. Enclose the file name string using quotation marks if the file name prefix or the disk path contains space characters. The slice file names will be suffixed by '_###.sli', where ### is a 3 digit number denoting the sequence of slices generated from the supercell.")
       ("prj_h",  boost::program_options::value<float>(&projection_dir_h)->required(), "projection direction h of [hkl].")
-      ("prj_l",  boost::program_options::value<float>(&projection_dir_l)->required(), "projection direction l of [hkl].")
       ("prj_k",  boost::program_options::value<float>(&projection_dir_k)->required(), "projection direction k of [hkl].")
+      ("prj_l",  boost::program_options::value<float>(&projection_dir_l)->required(), "projection direction l of [hkl].")
       ("prp_u",  boost::program_options::value<float>(&perpendicular_dir_u)->required(), "perpendicular direction u for the new y-axis of the projection [uvw].")
       ("prp_v",  boost::program_options::value<float>(&perpendicular_dir_v)->required(), "perpendicular direction v for the new y-axis of the projection [uvw].")
       ("prp_w",  boost::program_options::value<float>(&perpendicular_dir_w)->required(), "perpendicular direction w for the new y-axis of the projection [uvw].")
@@ -312,8 +312,8 @@ int main(int argc, char** argv )
     if (celslc_switch == true ){
       CELSLC_prm::CELSLC_prm celslc_parameters;
       celslc_parameters.set_prj_dir_h(projection_dir_h);
-      celslc_parameters.set_prj_dir_l(projection_dir_l);
       celslc_parameters.set_prj_dir_k(projection_dir_k);
+        celslc_parameters.set_prj_dir_l(projection_dir_l);
       celslc_parameters.set_prp_dir_u(perpendicular_dir_u);
       celslc_parameters.set_prp_dir_v(perpendicular_dir_v);
       celslc_parameters.set_prp_dir_w(perpendicular_dir_w);
