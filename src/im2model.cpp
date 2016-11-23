@@ -20,10 +20,9 @@
 
 #include "opencv2/opencv_modules.hpp"
 
-# include "opencv2/core/core.hpp"
-# include "opencv2/features2d/features2d.hpp"
-# include "opencv2/highgui/highgui.hpp"
-# include "opencv2/nonfree/features2d.hpp"
+#include "opencv2/core/core.hpp"
+#include "opencv2/features2d/features2d.hpp"
+#include "opencv2/nonfree/features2d.hpp"
 
 
 // Include the headers relevant to the boost::program_options
@@ -45,6 +44,8 @@
 using namespace cv;
 
 // Global Variables
+
+// Experimental Image info
 cv::Mat experimental_image; 
 cv::Mat experimental_image_roi;
 cv::Mat experimental_working; 
@@ -52,9 +53,21 @@ cv::Mat experimental_working;
 Rect roi_rectangle;
 int roi_x_size;
 int roi_y_size;
+int roi_center_x;
+int roi_center_y;
+float  sampling_rate_experimental_x_nm_per_pixel;
+float  sampling_rate_experimental_y_nm_per_pixel;
+
+int thresh = 100;
+int max_thresh = 255;
+RNG rng(12345);
+int max_contour_distance_px = 30;
+int max_contour_distance_thresh_px = 255;
+
 
 /// Function Headers
-void MatchingMethod( int, void* );
+void thresh_callback(int, void* );
+
 
 void CallBackFunc(int event, int x, int y, int flags, void* userdata)
 {
@@ -84,6 +97,136 @@ void CallBackFunc(int event, int x, int y, int flags, void* userdata)
   }
 }
 
+void thresh_callback(int, void* )
+{
+  cv::Mat experimental_working_canny, canny_output;
+  std::vector< std::vector<Point> > contours;
+  std::vector< std::vector<Point> > contours_2nd_itt;
+
+  vector<Vec4i> hierarchy;
+
+  cv::Canny( experimental_image, canny_output, thresh, thresh*2, 3 );
+  cv::findContours( canny_output, contours, hierarchy, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE, Point(0, 0) );
+
+  std::cout << "Detected " << contours.size() << " countours" << std::endl;
+  Mat1f dist(contours.size(), contours.size(), 0.f);
+  Mat1i in_range(contours.size(), contours.size(), 0);
+
+
+  for( size_t i = 0; i< contours.size(); i++ ){
+    for( size_t j = (i+1); j< contours.size(); j++ ){
+      const float raw_distance = fabs(cv::pointPolygonTest( contours[i], contours[j][0] , true ));
+      dist[i][j]=raw_distance;
+      dist[j][i]=raw_distance;
+    }
+  }
+
+    cv::Mat raw_edge_drawing = Mat::zeros( canny_output.size(), CV_8UC3 );
+  cv::Mat drawing = Mat::zeros( canny_output.size(), CV_8UC3 );
+
+  int contours_in_range = 0;
+  for( size_t i = 0; i< contours.size(); i++ ){
+    const float raw_distance = fabs(cv::pointPolygonTest( contours[i], Point2f(roi_center_x,roi_center_y), true ));
+    if ( raw_distance < max_contour_distance_px ){
+      in_range[i][1]=1;
+      contours_in_range++;
+    }
+  }
+
+  std::cout << "There are " << contours_in_range << " contours in range("<< max_contour_distance_px <<"px) of the ROI" << std::endl;
+  int itt_num = 1;
+  int added_itt = 1;
+
+  while ( added_itt > 0 ){
+    added_itt = 0;
+    for( size_t i = 0; i< contours.size(); i++ ){
+      if ( in_range[i][1] == 1 ){
+        for( size_t j = 0; j < contours.size(); j++ ){
+          if ( in_range[j][1] == 0 ){
+            if ( ( dist[i][j] < max_contour_distance_px )|| (dist[j][i] < max_contour_distance_px ) ){
+              in_range[j][1]=1;
+              added_itt++;
+            }
+          }
+        }
+      }
+    }
+    std::cout << "Added  " << added_itt << " contours in iteration # "<< itt_num << std::endl;
+    itt_num++;
+  }
+
+  /// Find the convex hull object for each contour
+  vector<vector<Point> > roi_contours;
+
+  for( size_t i = 0; i< contours.size(); i++ ){
+      Scalar color = Scalar( rng.uniform(0, 255), rng.uniform(0,255), rng.uniform(0,255) );
+    if ( in_range[i][1] == 1 ){
+      roi_contours.push_back(contours[i]);
+      drawContours( drawing, contours, i, color, 2, 8, hierarchy, 0, Point() );
+    }
+      drawContours( raw_edge_drawing, contours, i, color, 2, 8, hierarchy, 0, Point() );
+    
+  }
+
+  vector<Point> contours_merged;
+
+  for( int i = 0; i < roi_contours.size(); i++ ){
+    for ( size_t j = 0; j< roi_contours[i].size(); j++  ){
+      contours_merged.push_back(roi_contours[i][j]);
+    }
+  }
+
+  vector<vector<Point>> hull( 1 );
+  convexHull( Mat(contours_merged), hull[0], false );
+
+  Scalar color = Scalar( rng.uniform(0, 255), rng.uniform(0,255), rng.uniform(0,255) );
+  drawContours( drawing, hull, 0, color, 3, 8, vector<Vec4i>(), 0, Point() );
+  double roi_area_px = cv::contourArea(hull[0],false);
+  double roi_area_nm = roi_area_px * sampling_rate_experimental_x_nm_per_pixel * sampling_rate_experimental_y_nm_per_pixel;
+  std::cout << "ROI area " << roi_area_px << " px, " << roi_area_nm << " nm^2" << std::endl;
+
+  namedWindow( "Contours", WINDOW_AUTOSIZE );
+    
+    // line 1
+    
+    
+    std::stringstream output_legend_line1;
+    std::stringstream output_legend_line2;
+    std::stringstream output_legend_line3;
+    std::stringstream output_legend_line4;
+
+    output_legend_line1 <<  "ROI area: " << roi_area_px << " sq. px, " << roi_area_nm << "sq. nm";
+    output_legend_line2 <<  "Canny thresh: " << thresh;
+    output_legend_line3 <<  "Max distance between countours: " << max_contour_distance_px<< " px";
+    output_legend_line4 <<  "# Contours selected: " << roi_contours.size() << " from "<< contours.size() << ", calculated in " << itt_num << " iterations";
+
+    std::string line1_experimental_roi_info = output_legend_line1.str();
+    std::string line2_experimental_roi_info = output_legend_line2.str();
+    std::string line3_experimental_roi_info = output_legend_line3.str();
+    std::string line4_experimental_roi_info = output_legend_line4.str();
+    
+    int legend_position_x = 10;
+    int legent_position_y_bottom_left_line_1 = 25;
+    int legent_position_y_bottom_left_line_2 = 50;
+    int legent_position_y_bottom_left_line_3 = 75;
+    int legent_position_y_bottom_left_line_4 = 100;
+    
+    putText(drawing, line1_experimental_roi_info , cvPoint(legend_position_x , legent_position_y_bottom_left_line_1), FONT_HERSHEY_PLAIN, 1.5, cvScalar(255,255,255), 1, CV_AA);
+    putText(drawing, line2_experimental_roi_info , cvPoint(legend_position_x , legent_position_y_bottom_left_line_2), FONT_HERSHEY_PLAIN, 1.5, cvScalar(255,255,255), 1, CV_AA);
+    putText(drawing, line3_experimental_roi_info , cvPoint(legend_position_x , legent_position_y_bottom_left_line_3), FONT_HERSHEY_PLAIN, 1.5, cvScalar(255,255,255), 1, CV_AA);
+    putText(drawing, line4_experimental_roi_info , cvPoint(legend_position_x , legent_position_y_bottom_left_line_4), FONT_HERSHEY_PLAIN, 1.5, cvScalar(255,255,255), 1, CV_AA);
+
+    imshow( "Contours", drawing );
+
+    
+    // save the experimental calculated roi
+    imwrite( "exp_roi_auto.png", drawing );
+    imwrite( "exp_roi_raw_edge_detected.png", raw_edge_drawing );
+    imwrite( "exp_raw.png", experimental_image );
+
+}
+
+
 int main(int argc, char** argv )
 {
   // Specifies the input super-cell file containing the atomic structure data in CIF file format.
@@ -92,7 +235,7 @@ int main(int argc, char** argv )
   std::string slc_file_name_prefix;
   float projection_dir_h;
   float projection_dir_k;
-    float projection_dir_l;
+  float projection_dir_l;
   float perpendicular_dir_u;
   float perpendicular_dir_v;
   float perpendicular_dir_w;
@@ -131,13 +274,10 @@ int main(int argc, char** argv )
   int defocus_upper_bound;
 
   int roi_pixel_size;
-  int roi_center_x;
-  int roi_center_y;
   int ignore_edge_pixels;
   std::string experimental_image_path;
 
-  float  sampling_rate_experimental_x_nm_per_pixel;
-  float  sampling_rate_experimental_y_nm_per_pixel;
+
 
   try{
     /** Define and parse the program options
@@ -313,7 +453,7 @@ int main(int argc, char** argv )
       CELSLC_prm::CELSLC_prm celslc_parameters;
       celslc_parameters.set_prj_dir_h(projection_dir_h);
       celslc_parameters.set_prj_dir_k(projection_dir_k);
-        celslc_parameters.set_prj_dir_l(projection_dir_l);
+      celslc_parameters.set_prj_dir_l(projection_dir_l);
       celslc_parameters.set_prp_dir_u(perpendicular_dir_u);
       celslc_parameters.set_prp_dir_v(perpendicular_dir_v);
       celslc_parameters.set_prp_dir_w(perpendicular_dir_w);
@@ -469,6 +609,10 @@ int main(int argc, char** argv )
         setMouseCallback("Experimental Window", CallBackFunc, NULL);
         rectangle(experimental_working, roi_rectangle, Scalar(0,0,255), 5);
         imshow("Experimental Window", experimental_working);
+        createTrackbar( " Canny thresh:", "Experimental Window", &thresh, max_thresh, thresh_callback );
+        createTrackbar( "Max Countour px distance: ", "Experimental Window", &max_contour_distance_px, max_contour_distance_thresh_px, thresh_callback );
+
+
         waitKey(0);
       }
 
@@ -843,3 +987,6 @@ int main(int argc, char** argv )
   }
   return 0;
 }
+
+
+
