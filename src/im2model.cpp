@@ -121,7 +121,7 @@ void thresh_callback(int, void* )
     }
   }
 
-    cv::Mat raw_edge_drawing = Mat::zeros( canny_output.size(), CV_8UC3 );
+  cv::Mat raw_edge_drawing = Mat::zeros( canny_output.size(), CV_8UC3 );
   cv::Mat drawing = Mat::zeros( canny_output.size(), CV_8UC3 );
 
   int contours_in_range = 0;
@@ -159,13 +159,13 @@ void thresh_callback(int, void* )
   vector<vector<Point> > roi_contours;
 
   for( size_t i = 0; i< contours.size(); i++ ){
-      Scalar color = Scalar( rng.uniform(0, 255), rng.uniform(0,255), rng.uniform(0,255) );
+    Scalar color = Scalar( rng.uniform(0, 255), rng.uniform(0,255), rng.uniform(0,255) );
     if ( in_range[i][1] == 1 ){
       roi_contours.push_back(contours[i]);
       drawContours( drawing, contours, i, color, 2, 8, hierarchy, 0, Point() );
     }
-      drawContours( raw_edge_drawing, contours, i, color, 2, 8, hierarchy, 0, Point() );
-    
+    drawContours( raw_edge_drawing, contours, i, color, 2, 8, hierarchy, 0, Point() );
+
   }
 
   vector<Point> contours_merged;
@@ -186,43 +186,43 @@ void thresh_callback(int, void* )
   std::cout << "ROI area " << roi_area_px << " px, " << roi_area_nm << " nm^2" << std::endl;
 
   namedWindow( "Contours", WINDOW_AUTOSIZE );
-    
-    // line 1
-    
-    
-    std::stringstream output_legend_line1;
-    std::stringstream output_legend_line2;
-    std::stringstream output_legend_line3;
-    std::stringstream output_legend_line4;
 
-    output_legend_line1 <<  "ROI area: " << roi_area_px << " sq. px, " << roi_area_nm << "sq. nm";
-    output_legend_line2 <<  "Canny thresh: " << thresh;
-    output_legend_line3 <<  "Max distance between countours: " << max_contour_distance_px<< " px";
-    output_legend_line4 <<  "# Contours selected: " << roi_contours.size() << " from "<< contours.size() << ", calculated in " << itt_num << " iterations";
+  // line 1
 
-    std::string line1_experimental_roi_info = output_legend_line1.str();
-    std::string line2_experimental_roi_info = output_legend_line2.str();
-    std::string line3_experimental_roi_info = output_legend_line3.str();
-    std::string line4_experimental_roi_info = output_legend_line4.str();
-    
-    int legend_position_x = 10;
-    int legent_position_y_bottom_left_line_1 = 25;
-    int legent_position_y_bottom_left_line_2 = 50;
-    int legent_position_y_bottom_left_line_3 = 75;
-    int legent_position_y_bottom_left_line_4 = 100;
-    
-    putText(drawing, line1_experimental_roi_info , cvPoint(legend_position_x , legent_position_y_bottom_left_line_1), FONT_HERSHEY_PLAIN, 1.5, cvScalar(255,255,255), 1, CV_AA);
-    putText(drawing, line2_experimental_roi_info , cvPoint(legend_position_x , legent_position_y_bottom_left_line_2), FONT_HERSHEY_PLAIN, 1.5, cvScalar(255,255,255), 1, CV_AA);
-    putText(drawing, line3_experimental_roi_info , cvPoint(legend_position_x , legent_position_y_bottom_left_line_3), FONT_HERSHEY_PLAIN, 1.5, cvScalar(255,255,255), 1, CV_AA);
-    putText(drawing, line4_experimental_roi_info , cvPoint(legend_position_x , legent_position_y_bottom_left_line_4), FONT_HERSHEY_PLAIN, 1.5, cvScalar(255,255,255), 1, CV_AA);
 
-    imshow( "Contours", drawing );
+  std::stringstream output_legend_line1;
+  std::stringstream output_legend_line2;
+  std::stringstream output_legend_line3;
+  std::stringstream output_legend_line4;
 
-    
-    // save the experimental calculated roi
-    imwrite( "exp_roi_auto.png", drawing );
-    imwrite( "exp_roi_raw_edge_detected.png", raw_edge_drawing );
-    imwrite( "exp_raw.png", experimental_image );
+  output_legend_line1 <<  "ROI area: " << roi_area_px << " sq. px, " << roi_area_nm << "sq. nm";
+  output_legend_line2 <<  "Canny thresh: " << thresh;
+  output_legend_line3 <<  "Max distance between countours: " << max_contour_distance_px<< " px";
+  output_legend_line4 <<  "# Contours selected: " << roi_contours.size() << " from "<< contours.size() << ", calculated in " << itt_num << " iterations";
+
+  std::string line1_experimental_roi_info = output_legend_line1.str();
+  std::string line2_experimental_roi_info = output_legend_line2.str();
+  std::string line3_experimental_roi_info = output_legend_line3.str();
+  std::string line4_experimental_roi_info = output_legend_line4.str();
+
+  int legend_position_x = 10;
+  int legent_position_y_bottom_left_line_1 = 25;
+  int legent_position_y_bottom_left_line_2 = 50;
+  int legent_position_y_bottom_left_line_3 = 75;
+  int legent_position_y_bottom_left_line_4 = 100;
+
+  putText(drawing, line1_experimental_roi_info , cvPoint(legend_position_x , legent_position_y_bottom_left_line_1), FONT_HERSHEY_PLAIN, 1.5, cvScalar(255,255,255), 1, CV_AA);
+  putText(drawing, line2_experimental_roi_info , cvPoint(legend_position_x , legent_position_y_bottom_left_line_2), FONT_HERSHEY_PLAIN, 1.5, cvScalar(255,255,255), 1, CV_AA);
+  putText(drawing, line3_experimental_roi_info , cvPoint(legend_position_x , legent_position_y_bottom_left_line_3), FONT_HERSHEY_PLAIN, 1.5, cvScalar(255,255,255), 1, CV_AA);
+  putText(drawing, line4_experimental_roi_info , cvPoint(legend_position_x , legent_position_y_bottom_left_line_4), FONT_HERSHEY_PLAIN, 1.5, cvScalar(255,255,255), 1, CV_AA);
+
+  imshow( "Contours", drawing );
+
+
+  // save the experimental calculated roi
+  imwrite( "exp_roi_auto.png", drawing );
+  imwrite( "exp_roi_raw_edge_detected.png", raw_edge_drawing );
+  imwrite( "exp_raw.png", experimental_image );
 
 }
 
@@ -628,7 +628,17 @@ int main(int argc, char** argv )
       sim_grid.create ( sim_grid_height, sim_grid_width , CV_8UC1 );
       sim_grid = cv::Mat::zeros(sim_grid_height, sim_grid_width, CV_8UC1);
       std::cout << "Simulated grid size: " << sim_grid.cols << " x " << sim_grid.rows << std::endl;
+        std::cout << "Thickness step (nm): " << slice_period * super_cell_z_nm_slice << std::endl;
+        std::cout << "Defocus step: (nm)" << defocus_period << std::endl;
 
+
+        // creating a csv match factor file | thickness in nm | defocus in nm | match_val |
+        std::ofstream match_factor_file;
+        match_factor_file.open ("match_factor_file.csv", std::ofstream::out );
+        match_factor_file << "defocus_nm,thickness_slices,match_val" << std::endl;
+        std::ofstream match_factor_file_matrix;
+        match_factor_file_matrix.open ("match_factor_matrix.csv", std::ofstream::out );
+        
       // we will iterate through every thickness and defocus. for every thickess we calculate the defocus images and after that, we change the thickness
       for (int thickness = 1; thickness <= slice_samples; thickness ++ ){
 
@@ -676,12 +686,14 @@ int main(int argc, char** argv )
           double min, max;
 
           int pos = 0;
-          for (int col = 0; col < n_cols_simulated_image; col++) {
             for (int row = 0; row < n_rows_simulated_image; row++) {
-              raw_simulated_image.at<float>(row, col) = (float)  p[pos] ;
+          for (int col = 0; col < n_cols_simulated_image; col++) {
+                const int inverse_col = n_rows_simulated_image - ( col + 1 );
+              raw_simulated_image.at<float>(row, inverse_col) = (float)  p[pos] ;
               pos++;
             }
           }
+            
           cv::minMaxLoc(raw_simulated_image, &min, &max);
 
           // Create a new matrix to hold the gray image
@@ -793,7 +805,8 @@ int main(int argc, char** argv )
 
             if ( sim_grid_switch == true ){
 
-              Rect r1 = Rect (reshaped_simulated_image_width*(defocus-1),reshaped_simulated_image_height*(thickness-1),reshaped_simulated_image_width,reshaped_simulated_image_height);
+                
+              Rect r1 = Rect (reshaped_simulated_image_width*(defocus-1),reshaped_simulated_image_height*(slice_samples-thickness),reshaped_simulated_image_width,reshaped_simulated_image_height);
               cleaned_simulated_image.copyTo(sim_grid( r1 ));
 
               cv::matchTemplate( experimental_image_roi , cleaned_simulated_image, result, CV_TM_CCOEFF_NORMED  );
@@ -801,7 +814,18 @@ int main(int argc, char** argv )
               matchVal = maxVal;
               match_factor = matchVal * 100.0f;
 
+                // save the match factor into csv file
+                match_factor_file << at_defocus <<"," << at_slice <<"," << match_factor << "\n";
+                if(defocus < defocus_samples){
+                match_factor_file_matrix << match_factor << ",";
+                }
+                else{
+                match_factor_file_matrix << match_factor << "\n";
+                }
               simulated_matches.push_back(match_factor);
+                
+              
+                
 
               std::stringstream output_legend_line2;
               output_legend_line2 <<  "T: " << std::fixed << std::setw( 2 ) << std::setprecision( 2 ) << slice_thickness_nm << "nm, slc " << at_slice ;
@@ -818,7 +842,7 @@ int main(int argc, char** argv )
               // calculate the legend position on the grid
               legend_position_x = reshaped_simulated_image_width*(defocus-1) + 10;
 
-              int legent_position_y_bottom_left = reshaped_simulated_image_height*(thickness-1);
+              int legent_position_y_bottom_left = reshaped_simulated_image_height*(slice_samples-thickness);
 
               putText(sim_grid, line2_simulated_info , cvPoint(legend_position_x , legent_position_y_bottom_left + legent_position_y_bottom_left_line_1), FONT_HERSHEY_PLAIN, 1, cvScalar(255,255,255), 1, CV_AA);
 
@@ -954,6 +978,11 @@ int main(int argc, char** argv )
         }
         simulated_images_grid.push_back(simulated_images_row);
       }
+
+        // closing the match factor csv file
+        match_factor_file.close();
+        match_factor_file_matrix.close();
+
 
       if ( sim_grid_switch == true ){
         std::stringstream sim_grid_file_image;
