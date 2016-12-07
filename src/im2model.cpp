@@ -633,10 +633,16 @@ int main(int argc, char** argv )
 
 
         // creating a csv match factor file | thickness in nm | defocus in nm | match_val |
+        
+        
         std::ofstream match_factor_file;
         match_factor_file.open ("match_factor_file.csv", std::ofstream::out );
         match_factor_file << "defocus_nm,thickness_slices,match_val" << std::endl;
+        std::ofstream defocus_file_matrix;
+        std::ofstream thickness_file_matrix;
         std::ofstream match_factor_file_matrix;
+        defocus_file_matrix.open ("defocus_matrix.csv", std::ofstream::out );
+        thickness_file_matrix.open ("thickness_matrix.csv", std::ofstream::out );
         match_factor_file_matrix.open ("match_factor_matrix.csv", std::ofstream::out );
         
       // we will iterate through every thickness and defocus. for every thickess we calculate the defocus images and after that, we change the thickness
@@ -817,9 +823,13 @@ int main(int argc, char** argv )
                 // save the match factor into csv file
                 match_factor_file << at_defocus <<"," << at_slice <<"," << match_factor << "\n";
                 if(defocus < defocus_samples){
+                    defocus_file_matrix << at_defocus << ",";
+                    thickness_file_matrix << at_slice << ",";
                 match_factor_file_matrix << match_factor << ",";
                 }
                 else{
+                    defocus_file_matrix << at_defocus << "\n";
+                    thickness_file_matrix << at_slice << "\n";
                 match_factor_file_matrix << match_factor << "\n";
                 }
               simulated_matches.push_back(match_factor);
@@ -981,6 +991,8 @@ int main(int argc, char** argv )
 
         // closing the match factor csv file
         match_factor_file.close();
+        defocus_file_matrix.close();
+        thickness_file_matrix.close();
         match_factor_file_matrix.close();
 
 
