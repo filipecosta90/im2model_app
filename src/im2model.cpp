@@ -40,6 +40,7 @@
 #include "celslc_prm.h"
 #include "msa_prm.h"
 #include "wavimg_prm.h"
+#include "simgrid_steplength.h"
 
 using namespace cv;
 
@@ -522,7 +523,7 @@ int main(int argc, char** argv )
       wavimg_parameters.set_image_data_type( 0 );
       wavimg_parameters.set_image_vacuum_mean_intensity( 3000.0f );
       wavimg_parameters.set_conversion_rate( 1.0f );
-      wavimg_parameters.set_readout_noise_rms_amplitude( 0.0f );
+      wavimg_parameters.set_readout_noise_rms_amplitude( 0.0f ); // colocar a zero
       // setters line 9
       wavimg_parameters.set_switch_option_extract_particular_image_frame( 1 );
       // setters line 10
@@ -533,26 +534,26 @@ int main(int argc, char** argv )
       // setters line 12
       wavimg_parameters.set_image_frame_rotation( 0.0f );
       // setters line 13
-      wavimg_parameters.set_switch_coherence_model( 1 );
+      wavimg_parameters.set_switch_coherence_model( 1 ); // colocar a zero
       // setters line 14
       wavimg_parameters.set_partial_temporal_coherence_switch( 1 );
       wavimg_parameters.set_partial_temporal_coherence_focus_spread( 4.0f );
       // setters line 15
-      wavimg_parameters.set_partial_spacial_coherence_switch( 1 );
+      wavimg_parameters.set_partial_spacial_coherence_switch( 1 ); // colocar a zero
       wavimg_parameters.set_partial_spacial_coherence_semi_convergence_angle( 0.2f );
       // setters line 16
-      wavimg_parameters.set_mtf_simulation_switch( 1 );
+      wavimg_parameters.set_mtf_simulation_switch( 1 ); // alterar aqui para 0
       wavimg_parameters.set_k_space_scaling( 1.0f );
       wavimg_parameters.set_file_name_simulation_frequency_modulated_detector_transfer_function( "'../simulation/mtf/MTF-US2k-300.mtf'" );
       // setters line 17
       wavimg_parameters.set_simulation_image_spread_envelope_switch( 0 );
-      wavimg_parameters.set_isotropic_one_rms_amplitude( 0.03 );
+      wavimg_parameters.set_isotropic_one_rms_amplitude( 0.03 ); // colocar a zero
       //  wavimg_parameters.set_anisotropic_second_rms_amplitude( 0.0f );
       // wavimg_parameters.set_azimuth_orientation_angle( 0.0f );
       // setters line 18
       wavimg_parameters.set_number_image_aberrations_set( 2 );
       // setters line 19
-      //Defocus (a20, C1,0, C1)
+      //Defocus (a20, C1,0, C1) // colocar a negativo
       wavimg_parameters.add_aberration_definition ( 1, 8.5f, 0.0f );
       //Spherical aberration (a40, C3,0, C3)
       wavimg_parameters.add_aberration_definition ( 5, -17000.0f, 0.0f );
@@ -573,6 +574,7 @@ int main(int argc, char** argv )
     }
 
     if (im2model_switch == true ){
+        SIMGRID_wavimg_steplength::SIMGRID_wavimg_steplength wavimg_simgrid_steps;
 
       // Read the experimental image from file
       experimental_image = imread( experimental_image_path , CV_LOAD_IMAGE_GRAYSCALE );

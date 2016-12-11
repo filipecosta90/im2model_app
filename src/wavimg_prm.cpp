@@ -98,6 +98,86 @@ WAVIMG_prm::WAVIMG_prm()
   debug_switch = false;
 }
 
+WAVIMG_prm::WAVIMG_prm(const WAVIMG_prm &obj){
+    std::cout << "WAVIMG_prm Copy constructor." << std::endl;
+    // line 1
+    file_name_input_wave_function = obj.file_name_input_wave_function;
+    // line 2
+    n_columns_samples_input_wave_function_pixels = obj.n_columns_samples_input_wave_function_pixels;
+   n_rows_samples_input_wave_function_pixels = obj.n_rows_samples_input_wave_function_pixels;
+    // line 3
+    physical_columns_sampling_rate_input_wave_function_nm_pixels = obj.physical_columns_sampling_rate_input_wave_function_nm_pixels;
+    physical_rows_sampling_rate_input_wave_function_nm_pixels = obj.physical_rows_sampling_rate_input_wave_function_nm_pixels;
+    // line 4
+    primary_electron_energy = obj.primary_electron_energy;
+    // line 5
+    type_of_output = obj.type_of_output;
+    // line 6
+    file_name_output_image_wave_function = obj.file_name_output_image_wave_function;
+    // line 7
+    n_columns_samples_output_image = obj.n_columns_samples_output_image;
+    n_rows_samples_output_image = obj.n_rows_samples_output_image;
+    // line 8
+    image_data_type = obj.image_data_type;
+    image_vacuum_mean_intensity = obj.image_vacuum_mean_intensity;
+    conversion_rate = obj.conversion_rate;
+    readout_noise_rms_amplitude = obj.readout_noise_rms_amplitude;
+    // line 9
+    switch_option_extract_particular_image_frame = obj.switch_option_extract_particular_image_frame;
+    // line 10
+    image_sampling_rate_nm_pixel = obj.image_sampling_rate_nm_pixel;
+    // line 11
+    image_frame_offset_x_pixels_input_wave_function = obj.image_frame_offset_x_pixels_input_wave_function;
+    image_frame_offset_y_pixels_input_wave_function = obj.image_frame_offset_y_pixels_input_wave_function;
+    // line 12
+    image_frame_rotation = obj.image_frame_rotation;
+    // line 13
+    switch_coherence_model = obj.switch_coherence_model;
+    // line 14
+    partial_temporal_coherence_switch = obj.partial_temporal_coherence_switch;
+    partial_temporal_coherence_focus_spread = obj.partial_temporal_coherence_focus_spread;
+    // line 15
+    partial_spacial_coherence_switch = obj.partial_spacial_coherence_switch;
+    partial_spacial_coherence_semi_convergence_angle = obj.partial_spacial_coherence_semi_convergence_angle;
+    // line 16
+    mtf_simulation_switch = obj.mtf_simulation_switch;
+    k_space_scaling = obj.k_space_scaling;
+    file_name_simulation_frequency_modulated_detector_transfer_function = obj.file_name_simulation_frequency_modulated_detector_transfer_function;
+    // line 17
+    simulation_image_spread_envelope_switch = obj.simulation_image_spread_envelope_switch;
+    isotropic_one_rms_amplitude = obj.isotropic_one_rms_amplitude;
+    anisotropic_second_rms_amplitude = obj.anisotropic_second_rms_amplitude;
+    azimuth_orientation_angle = obj.azimuth_orientation_angle;
+    // line 18
+    number_image_aberrations_set = obj.number_image_aberrations_set;
+    // line 19
+    // aberration_definition_index_number = 0;
+    // aberration_definition_1st_coefficient_value_nm = 0.0f;
+    // aberration_definition_2nd_coefficient_value_nm = 0.0f;
+    // line 19 + aberration_definition_index_number
+    objective_aperture_radius = obj.objective_aperture_radius;
+    // line 20 + aberration_definition_index_number
+    center_x_of_objective_aperture = obj.center_x_of_objective_aperture;
+    center_y_of_objective_aperture = obj.center_y_of_objective_aperture;
+    // line 21
+    number_parameter_loops = obj.number_parameter_loops;
+    // line 22 + aberration_definition_index_number
+    //std::vector<int> loop_parameter_class;
+    // line 23 + aberration_definition_index_number
+    //std::vector<int> loop_parameter_index;
+    // line 24 + aberration_definition_index_number
+    //std::vector<int> loop_variation_form;
+    // line 25 + aberration_definition_index_number
+    //std::vector<float> loop_range_0;
+    //std::vector<float> loop_range_1;
+    //std::vector<int> loop_range_n;
+    // line 26 + aberration_definition_index_number
+    //loop_string_indentifier = "";
+    prm_filename = obj.prm_filename;
+    bin_path = obj.bin_path;
+    debug_switch = obj.debug_switch;
+}
+
 // setters line 1
 void WAVIMG_prm::set_file_name_input_wave_function( std::string file_name ){
   file_name_input_wave_function = file_name;

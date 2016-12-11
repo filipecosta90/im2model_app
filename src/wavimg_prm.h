@@ -83,6 +83,8 @@ class WAVIMG_prm {
 
   public:
     WAVIMG_prm();
+    WAVIMG_prm(const WAVIMG_prm &obj);
+
     // setters line 1
     void set_file_name_input_wave_function( std::string file_name );
     // setters line 2
