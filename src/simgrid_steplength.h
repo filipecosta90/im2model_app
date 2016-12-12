@@ -18,6 +18,8 @@ class SIMGRID_wavimg_steplength {
     int slices_upper_bound;
     int number_slices_to_max_thickness;
     int slice_period;
+    float user_estimated_thickness_nm;
+    int user_estimated_thickness_slice;
 
     /***********
       defocus vars
@@ -27,6 +29,7 @@ class SIMGRID_wavimg_steplength {
     int defocus_upper_bound;
     float defocus_period;
     float super_cell_z_nm_slice;
+    int user_estimated_defocus_nm;
 
     /***********
       roi vars
@@ -44,11 +47,11 @@ class SIMGRID_wavimg_steplength {
     /***********
       simulated image vars
      ***********/
-    bool simulated_image_needs_reshape = false;
-    double reshape_factor_from_supper_cell_to_experimental_x = 1.0f;
-    double reshape_factor_from_supper_cell_to_experimental_y = 1.0f;
-    int n_rows_simulated_image; // setter done
-    int n_cols_simulated_image; // setter done
+    bool simulated_image_needs_reshape;
+    double reshape_factor_from_supper_cell_to_experimental_x;
+    double reshape_factor_from_supper_cell_to_experimental_y;
+    int n_rows_simulated_image;
+    int n_cols_simulated_image;
     // rectangle without the ignored edge pixels of the simulated image
     cv::Rect ignore_edge_pixels_rectangle;
     int reshaped_simulated_image_width;
@@ -57,13 +60,18 @@ class SIMGRID_wavimg_steplength {
     /***********
       simulation grid vars
      ***********/
-    int iteration_number = 1;
     int sim_grid_width;
     int sim_grid_height;
     cv::Mat sim_grid;
     std::vector< std::vector<cv::Mat> > simulated_images_grid;
     //will contain the all the simulated images match percentage
     std::vector<double> simulated_matches;
+
+    /***********
+      step-length algorithm vars
+     ***********/
+    int iteration_number;
+    float step_length_minimum_threshold;
 
     WAVIMG_prm* wavimg_parameters;
 
@@ -73,6 +81,10 @@ class SIMGRID_wavimg_steplength {
 
     bool debug_switch;
     bool sim_grid_switch;
+    bool runned_simulation;
+    bool user_estimated_defocus_nm_switch;
+    bool user_estimated_thickness_nm_switch;
+    bool user_estimated_thickness_slice_switch;
 
     std::ofstream match_factor_file;
     std::ofstream defocus_file_matrix;
@@ -155,8 +167,21 @@ class SIMGRID_wavimg_steplength {
 
     void set_sim_grid_switch( bool sgrid_switch );
 
-    bool simulate();
+    void set_user_estimated_defocus_nm_switch( bool estimated_defocus_nm_switch );
 
+    void set_user_estimated_defocus_nm( int estimated_defocus_nm );
+
+    void set_user_estimated_thickness_nm_switch( bool estimated_thickness_nm_switch );
+
+    void set_user_estimated_thickness_nm( float estimated_thickness_nm );
+
+    void set_user_estimated_thickness_slice_switch( bool estimated_thickness_slice_switch );
+
+    void set_user_estimated_thickness_slice( int estimated_thickness_slice );
+
+    bool export_sim_grid();
+
+    bool simulate_from_dat_file();
 };
 
 #endif

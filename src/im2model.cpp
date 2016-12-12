@@ -276,6 +276,9 @@ int main(int argc, char** argv )
   bool sim_cmp_gui_switch = false;
   bool sim_grid_switch = false;
   bool phase_comparation_switch = false;
+  bool user_estimated_defocus_nm_switch = false;
+  bool user_estimated_thickness_nm_switch = false;
+  bool user_estimated_thickness_slice_switch = false;
 
   /////////////////////////
   // Simulated Thickness info
@@ -286,6 +289,8 @@ int main(int argc, char** argv )
   int slices_upper_bound;
   int number_slices_to_max_thickness;
   float slice_period;
+  float user_estimated_thickness_nm;
+  int user_estimated_thickness_slice;
 
   /////////////////////////
   // Simulated Defocus info
@@ -294,6 +299,7 @@ int main(int argc, char** argv )
   int defocus_lower_bound;
   int defocus_upper_bound;
   float defocus_period;
+  int user_estimated_defocus_nm;
 
   /////////////////////////
   // Experimental Image info
@@ -357,6 +363,9 @@ int main(int argc, char** argv )
       ("defocus_lower_bound", boost::program_options::value<int>(&defocus_lower_bound)->required(), "defocus lower bound")
       ("defocus_upper_bound", boost::program_options::value<int>(&defocus_upper_bound)->required(), "defocus upper bound")
       ("exp_image_path,i", boost::program_options::value<std::string>(&experimental_image_path)->required(), "experimental image path")
+      ("estimated_defocus_nm", boost::program_options::value<int>(&user_estimated_defocus_nm), "user prediction of estimated defocus value in nanometers for the experimental image. If an user estimation is given the search algorithm will consider the nearest best match as an interest point even if there are larger match values on other defocus values. The other larger defocus value points will also be considered points of interest for the following iterations (as usual).")
+      ("estimated_thickness_nm", boost::program_options::value<float>(&user_estimated_thickness_nm), "user prediction of estimated thickness value in nanometers for the experimental image. An aproximation to the nearest slice number is computed. If an user estimation is given the search algorithm will consider the nearest best match as an interest point even if there are larger match values on other thickness values. The other larger thickness points will also be considered points of interest for the following iterations (as usual).")
+      ("estimated_thickness_slice", boost::program_options::value<int>(&user_estimated_thickness_slice), "user prediction of estimated thickness value in slice number for the experimental image. If an user estimation is given the search algorithm will consider the nearest best match as an interest point even if there are larger match values on other thickness values. The other larger thickness points will also be considered points of interest for the following iterations (as usual).")
       ("exp_nx", boost::program_options::value<float>(&sampling_rate_experimental_x_nm_per_pixel)->required(), "number of horizontal samples for the loaded experimental image (nm/pixel).")
       ("exp_ny", boost::program_options::value<float>(&sampling_rate_experimental_y_nm_per_pixel)->required(), "number of vertical samples for the loaded experimental image (nm/pixel).")
       ("roi_size", boost::program_options::value<int>(&roi_pixel_size)->required(), "region of interest size in pixels.")
@@ -416,6 +425,15 @@ int main(int argc, char** argv )
       }
       if ( vm.count("sim_grid")  ){
         sim_grid_switch=true;
+      }
+      if ( vm.count("estimated_defocus_nm")  ){
+        user_estimated_defocus_nm_switch=true;
+      }
+      if ( vm.count("estimated_thickness_nm")  ){
+        user_estimated_thickness_nm_switch=true;
+      }
+      if ( vm.count("estimated_thickness_slice")  ){
+        user_estimated_thickness_slice_switch=true;
       }
 
       boost::program_options::notify(vm); // throws on error, so do after help in case
@@ -676,12 +694,29 @@ int main(int argc, char** argv )
 
       wavimg_simgrid_steps.set_iteration_number(1);
       wavimg_simgrid_steps.set_ignore_edge_pixels_rectangle( ignore_edge_pixels_rectangle );
-      wavimg_simgrid_steps.set_simulated_image_needs_reshape ( simulated_image_needs_reshape );
+      wavimg_simgrid_steps.set_simulated_image_needs_reshape( simulated_image_needs_reshape );
       wavimg_simgrid_steps.set_reshape_factor_from_supper_cell_to_experimental_x (reshape_factor_from_supper_cell_to_experimental_x);
       wavimg_simgrid_steps.set_reshape_factor_from_supper_cell_to_experimental_y (reshape_factor_from_supper_cell_to_experimental_y);
       wavimg_simgrid_steps.set_sim_grid_switch(sim_grid_switch);
+      wavimg_simgrid_steps.set_debug_switch(debug_switch);
 
-      wavimg_simgrid_steps.simulate();
+      // user estimation of defocus and thickness
+      if ( user_estimated_defocus_nm_switch ){
+        wavimg_simgrid_steps.set_user_estimated_defocus_nm_switch( user_estimated_defocus_nm_switch );
+        wavimg_simgrid_steps.set_user_estimated_defocus_nm( user_estimated_defocus_nm );
+      }
+
+      if ( user_estimated_thickness_nm_switch ){
+        wavimg_simgrid_steps.set_user_estimated_thickness_nm_switch( user_estimated_thickness_nm_switch );
+        wavimg_simgrid_steps.set_user_estimated_thickness_nm( user_estimated_thickness_nm );
+      }
+
+      if ( user_estimated_thickness_slice_switch ){
+        wavimg_simgrid_steps.set_user_estimated_thickness_slice_switch( user_estimated_thickness_slice_switch );
+        wavimg_simgrid_steps.set_user_estimated_thickness_slice( user_estimated_thickness_slice );
+      }
+
+      wavimg_simgrid_steps.simulate_from_dat_file();
     }
 
   }
