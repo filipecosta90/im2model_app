@@ -500,7 +500,7 @@ int main(int argc, char** argv )
 
     // Simulation Defocus Period (in nm)
     defocus_period = ( defocus_upper_bound - defocus_lower_bound) / ( defocus_samples - 1 );
-      std::cout << "defocus period " <<  defocus_period << std::endl;
+    std::cout << "defocus period " <<  defocus_period << std::endl;
 
     if (celslc_switch == true ){
       CELSLC_prm::CELSLC_prm celslc_parameters;
@@ -677,13 +677,13 @@ int main(int argc, char** argv )
       wavimg_simgrid_steps.set_sampling_rate_super_cell_y_nm_pixel( sampling_rate_super_cell_y_nm_pixel );
       wavimg_simgrid_steps.set_experimental_image_roi( experimental_image_roi );
 
-        // defocus setters
-        wavimg_simgrid_steps.set_defocus_lower_bound( defocus_lower_bound );
-        wavimg_simgrid_steps.set_defocus_upper_bound( defocus_upper_bound );
+      // defocus setters
+      wavimg_simgrid_steps.set_defocus_lower_bound( defocus_lower_bound );
+      wavimg_simgrid_steps.set_defocus_upper_bound( defocus_upper_bound );
       wavimg_simgrid_steps.set_defocus_samples(defocus_samples);
       wavimg_simgrid_steps.set_defocus_period( defocus_period );
 
-        // thicknes/slice setters
+      // thicknes/slice setters
       wavimg_simgrid_steps.set_super_cell_z_nm_slice( super_cell_z_nm_slice );
       wavimg_simgrid_steps.set_slice_samples(slice_samples);
       wavimg_simgrid_steps.set_slice_period( slice_period );
@@ -719,8 +719,9 @@ int main(int argc, char** argv )
         wavimg_simgrid_steps.set_user_estimated_thickness_slice( user_estimated_thickness_slice );
       }
 
-        wavimg_simgrid_steps.set_iteration_number(1);
-        wavimg_simgrid_steps.set_step_size( defocus_period, slice_period );
+      wavimg_simgrid_steps.set_iteration_number(1);
+        wavimg_simgrid_steps.set_step_length_minimum_threshold ( 87.5 );
+      wavimg_simgrid_steps.set_step_size( defocus_period, slice_period );
 
       wavimg_simgrid_steps.simulate_from_dat_file();
     }
