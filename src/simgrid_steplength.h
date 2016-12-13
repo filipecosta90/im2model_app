@@ -66,12 +66,15 @@ class SIMGRID_wavimg_steplength {
     std::vector< std::vector<cv::Mat> > simulated_images_grid;
     //will contain the all the simulated images match percentage
     std::vector<double> simulated_matches;
+    std::vector<cv::Point3d> slice_defocus_match_points;
+
 
     /***********
       step-length algorithm vars
      ***********/
     int iteration_number;
     float step_length_minimum_threshold;
+    cv::Point2f step_size;
 
     WAVIMG_prm* wavimg_parameters;
 
@@ -109,6 +112,13 @@ class SIMGRID_wavimg_steplength {
     const int legend_position_y_bottom_left_line_5 = 100;
 
   public:
+    
+    std::pair<cv::Mat,cv::Mat> gradient(cv::Mat & img, float spaceX, float spaceY);
+    
+    static cv::Mat gradientX(cv::Mat & mat, float spacing);
+    
+    static cv::Mat gradientY(cv::Mat & mat, float spacing);
+    
     SIMGRID_wavimg_steplength();
 
     void set_iteration_number ( int itt );

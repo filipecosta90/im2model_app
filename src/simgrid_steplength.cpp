@@ -26,7 +26,72 @@
 #include "opencv2/features2d/features2d.hpp"
 #include "opencv2/nonfree/features2d.hpp"
 
+#include "opencv2/calib3d/calib3d.hpp"
+
+
 #include "simgrid_steplength.h"
+
+std::pair<cv::Mat,cv::Mat> SIMGRID_wavimg_steplength::gradient(cv::Mat & img, float spaceX, float spaceY) {
+    
+    cv::Mat gradY = gradientY(img,spaceY);
+    cv::Mat gradX = gradientX(img,spaceX);
+    std::pair<cv::Mat,cv::Mat> retValue(gradX,gradY);
+    return retValue;
+}
+
+/// Internal method to get numerical gradient for x components.
+/// @param[in] mat Specify input matrix.
+/// @param[in] spacing Specify input space.
+cv::Mat SIMGRID_wavimg_steplength::gradientX(cv::Mat & mat, float spacing) {
+    cv::Mat grad = cv::Mat::zeros(mat.rows,mat.cols,CV_32FC1);
+    /*  last row */
+    int maxCols = mat.cols;
+    int maxRows = mat.rows;
+    
+    /* get gradients in each border */
+    /* first row */
+    cv::Mat col = (-mat.col(0) + mat.col(1))/(float)spacing;
+    col.copyTo(grad(cv::Rect(0,0,1,maxRows)));
+    col = (-mat.col(maxCols-2) + mat.col(maxCols-1))/(float)spacing;
+
+    col.copyTo(grad(cv::Rect(maxCols-1,0,1,maxRows)));
+    
+    /* centered elements */
+    cv::Mat centeredMat = mat(cv::Rect(0,0,maxCols-2,maxRows));
+    cv::Mat offsetMat = mat(cv::Rect(2,0,maxCols-2,maxRows));
+    cv::Mat resultCenteredMat = (-centeredMat + offsetMat)/(((float)spacing)*2.0);
+    
+    resultCenteredMat.copyTo(grad(cv::Rect(1,0,maxCols-2, maxRows)));
+    return grad;
+}
+
+/// Internal method to get numerical gradient for y components.
+/// @param[in] mat Specify input matrix.
+/// @param[in] spacing Specify input space.
+cv::Mat SIMGRID_wavimg_steplength::gradientY(cv::Mat & mat, float spacing) {
+    cv::Mat grad = cv::Mat::zeros(mat.rows,mat.cols,CV_32FC1);
+    
+    /*  last row */
+    const int maxCols = mat.cols;
+    const int maxRows = mat.rows;
+    
+    /* get gradients in each border */
+    /* first row */
+    cv::Mat row = (-mat.row(0) + mat.row(1))/(float)spacing;
+    row.copyTo(grad(cv::Rect(0,0,maxCols,1)));
+    
+    row = (-mat.row(maxRows-2) + mat.row(maxRows-1))/(float)spacing;
+    row.copyTo(grad(cv::Rect(0,maxRows-1,maxCols,1)));
+    
+    /* centered elements */
+    cv::Mat centeredMat = mat(cv::Rect(0,0,maxCols,maxRows-2));
+    cv::Mat offsetMat = mat(cv::Rect(0,2,maxCols,maxRows-2));
+    cv::Mat resultCenteredMat = (-centeredMat + offsetMat)/(((float)spacing)*2.0);
+    
+    resultCenteredMat.copyTo(grad(cv::Rect(0,1,maxCols, maxRows-2)));
+    return grad;
+}
+
 
 SIMGRID_wavimg_steplength::SIMGRID_wavimg_steplength()
 {
@@ -215,8 +280,8 @@ void SIMGRID_wavimg_steplength::set_user_estimated_thickness_slice( int estimate
 }
 
 bool SIMGRID_wavimg_steplength::export_sim_grid(){
-  /*
      if( runned_simulation ){
+         /*
 
      sim_grid_width  = ( reshaped_simulated_image_width * defocus_samples );
      sim_grid_height = ( reshaped_simulated_image_height * slice_samples );
@@ -303,17 +368,26 @@ imwrite( sim_grid_file_name_image, sim_grid );
 namedWindow( "SIMGRID window", cv::WINDOW_AUTOSIZE );// Create a window for display.
 imshow( "SIMGRID window", sim_grid ); //draw );
 cv::waitKey(0);
-
+*/
 return EXIT_SUCCESS;
 }
 else{
   return EXIT_FAILURE;
-}*/
+}
 }
 
 bool SIMGRID_wavimg_steplength::simulate_from_dat_file(){
 
   // we will iterate through every thickness and defocus. for every thickess we calculate the defocus images and after that, we change the thickness
+    
+    // X
+    cv::Mat defocus_values_matrix ( slice_samples, defocus_samples , CV_32FC1);
+    // Y
+    cv::Mat thickness_values_matrix ( slice_samples, defocus_samples , CV_32FC1);
+    // Z
+    cv::Mat match_values_matrix ( slice_samples, defocus_samples , CV_32FC1);
+
+    
   for (int thickness = 1; thickness <= slice_samples; thickness ++ ){
 
     const float slice_thickness_nm = super_cell_z_nm_slice * slice_period * ( thickness  - 1 )  + ( super_cell_z_nm_slice * slices_lower_bound);
@@ -391,7 +465,6 @@ bool SIMGRID_wavimg_steplength::simulate_from_dat_file(){
         resize(cleaned_simulated_image, cleaned_simulated_image, cv::Size(0,0), reshape_factor_from_supper_cell_to_experimental_x, reshape_factor_from_supper_cell_to_experimental_y, cv::INTER_LINEAR );
       }
 
-      double match_factor;
 
       /// Create the result matrix
       cv::Mat result;
@@ -407,9 +480,18 @@ bool SIMGRID_wavimg_steplength::simulate_from_dat_file(){
 
       cv::matchTemplate( experimental_image_roi , cleaned_simulated_image, result, CV_TM_CCOEFF_NORMED  );
       cv::minMaxLoc( result, &minVal, &maxVal, &minLoc, &maxLoc, cv::Mat() );
+        
       matchVal = maxVal;
-      match_factor = matchVal * 100.0f;
-
+        double slice_match, defocus_match, match_factor;
+        
+      match_factor = matchVal * 100.0;
+        slice_match = (double) at_slice;
+        defocus_match = (double) at_defocus;
+        slice_defocus_match_points.push_back (cv::Point3d ( slice_match, defocus_match, match_factor ));
+        
+        defocus_values_matrix.at<float>(thickness-1, defocus-1) = (float)  at_defocus ;
+        thickness_values_matrix.at<float>(thickness-1, defocus-1) = (float)  at_slice ;
+        match_values_matrix.at<float>( thickness-1, defocus-1) = (float)  match_factor ;
       simulated_images_row.push_back(cleaned_simulated_image);
       simulated_matches.push_back(match_factor);
     }
@@ -417,17 +499,32 @@ bool SIMGRID_wavimg_steplength::simulate_from_dat_file(){
   }
 
   // now that we have the simulated images lets compare them
+    
+   // cv::minMaxIdx( simulated_matches, NULL, &maxVal, NULL, &maxIdx, std::vector<double>() );
+
   std::vector<double>::iterator maxElement;
-  maxElement = max_element(simulated_matches.begin(), simulated_matches.end());
+    maxElement = std::max_element(simulated_matches.begin(), simulated_matches.end());
   int dist = distance(simulated_matches.begin(), maxElement);
+    
   int col_defocus = dist % defocus_samples;
   int row_thickness = (dist - col_defocus ) / defocus_samples;
 
   int best_slice = round( (slice_period * row_thickness ) + slices_lower_bound);
-  int best_defocus = round( (col_defocus * defocus_period )+ defocus_lower_bound);
+  int best_defocus = round( (col_defocus * defocus_period ) + defocus_lower_bound);
 
-  std::cout << "Max match % is " << *maxElement << " at pos ["<< dist << "](" << col_defocus << "," << row_thickness  <<") slice " << best_slice << ", defocus " << best_defocus << std::endl;
+  std::cout << "Max match % is " << *maxElement << " | " << simulated_matches.at(dist) << "\t at pos ["<< dist << "](" << col_defocus << "," << row_thickness  <<") slice " << best_slice << ", defocus " << best_defocus << std::endl;
 
   runned_simulation = true;
+    cv::Mat gradX = gradientX(match_values_matrix, defocus_period);
+    cv::Mat gradY = gradientY(match_values_matrix, slice_period);
+    std::cout << defocus_values_matrix << std::endl;
+    std::cout << thickness_values_matrix << std::endl;
+    std::cout << match_values_matrix << std::endl;
+    
+    std::cout << gradX << std::endl;
+    std::cout << gradY << std::endl;
+
+
+    
   return EXIT_SUCCESS;
 }
