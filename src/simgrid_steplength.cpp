@@ -299,94 +299,99 @@ void SIMGRID_wavimg_steplength::set_step_size( cv::Point2f defocus_slice_step ){
 
 bool SIMGRID_wavimg_steplength::export_sim_grid(){
   if( runned_simulation ){
-    /*
 
-       sim_grid_width  = ( reshaped_simulated_image_width * defocus_samples );
-       sim_grid_height = ( reshaped_simulated_image_height * slice_samples );
+    sim_grid_width  = ( reshaped_simulated_image_width * defocus_samples );
+    sim_grid_height = ( reshaped_simulated_image_height * slice_samples );
+    sim_grid.create ( sim_grid_height, sim_grid_width , CV_8UC1 );
+    sim_grid = cv::Mat::zeros(sim_grid_height, sim_grid_width, CV_8UC1);
 
-       sim_grid.create ( sim_grid_height, sim_grid_width , CV_8UC1 );
-       sim_grid = cv::Mat::zeros(sim_grid_height, sim_grid_width, CV_8UC1);
-       std::cout << "Simulated grid size: " << sim_grid.cols << " x " << sim_grid.rows << std::endl;
-       std::cout << "Thickness step (nm): " << slice_period * super_cell_z_nm_slice << std::endl;
-       std::cout << "Defocus step: (nm)" << defocus_period << std::endl;
+    std::cout << "Simulated grid size: " << sim_grid.cols << " x " << sim_grid.rows << std::endl;
+    std::cout << "Thickness step (nm): " << slice_period * super_cell_z_nm_slice << std::endl;
+    std::cout << "Defocus step: (nm)" << defocus_period << std::endl;
 
-       match_factor_file.open (match_factor_file_name.c_str() , std::ofstream::out );
-       match_factor_file << "defocus_nm,thickness_slices,match_val" << std::endl;
-       defocus_file_matrix.open( defocus_matrix_file_name.c_str(), std::ofstream::out );
-       thickness_file_matrix.open( thickness_matrix_file_name.c_str(), std::ofstream::out );
-       match_factor_file_matrix.open( match_factor_matrix_file_name.c_str(), std::ofstream::out );
+    match_factor_file.open (match_factor_file_name.c_str() , std::ofstream::out );
+    match_factor_file << "defocus_nm,thickness_slices,match_val" << std::endl;
+    defocus_file_matrix.open( defocus_matrix_file_name.c_str(), std::ofstream::out );
+    thickness_file_matrix.open( thickness_matrix_file_name.c_str(), std::ofstream::out );
+    match_factor_file_matrix.open( match_factor_matrix_file_name.c_str(), std::ofstream::out );
 
-       for (int thickness = 1; thickness <= slice_samples; thickness ++ ){
+    int vector_position = 0;
+    for (int thickness = 1; thickness <= slice_samples; thickness ++ ){
 
-    // the slice thickness in nanometers
-    const float slice_thickness_nm = super_cell_z_nm_slice * slice_period * ( thickness  - 1 )  + ( super_cell_z_nm_slice * slices_lower_bound);
+      // the slice thickness in nanometers
+      const float slice_thickness_nm = super_cell_z_nm_slice * slice_period * ( thickness  - 1 )  + ( super_cell_z_nm_slice * slices_lower_bound);
 
-    const int at_slice = round( slice_period * ( thickness  - 1 ) + slices_lower_bound );
+      std::vector<cv::Mat> simulated_images_row = simulated_images_grid.at(thickness-1);
 
-    for (int defocus = 1; defocus <= defocus_samples; defocus ++ ){
+      for (int defocus = 1; defocus <= defocus_samples; defocus ++ ){
 
-    const int at_defocus = round( ((defocus-1) * defocus_period )+ defocus_lower_bound );
+        const int at_defocus = defocus_values_matrix.at<float>(thickness-1, defocus-1);
+        const int at_slice = thickness_values_matrix.at<float>(thickness-1, defocus-1);
+        const float match_factor = match_values_matrix.at<float>( thickness-1, defocus-1);
 
-    // save the match factor into csv file
-    match_factor_file << at_defocus <<"," << at_slice <<"," << match_factor << "\n";
-    if(defocus < defocus_samples){
-    defocus_file_matrix << at_defocus << ",";
-    thickness_file_matrix << at_slice << ",";
-    match_factor_file_matrix << match_factor << ",";
+        cv::Mat cleaned_simulated_image = simulated_images_row.at(defocus-1);
+
+        cv::Rect r1 = cv::Rect (reshaped_simulated_image_width*(defocus-1),reshaped_simulated_image_height*(slice_samples-thickness),reshaped_simulated_image_width,reshaped_simulated_image_height);
+
+        cleaned_simulated_image.copyTo(sim_grid( r1 ));
+
+        // save the match factor into csv file
+        match_factor_file << at_defocus <<"," << at_slice <<"," << match_factor << "\n";
+        if(defocus < defocus_samples){
+          defocus_file_matrix << at_defocus << ",";
+          thickness_file_matrix << at_slice << ",";
+          match_factor_file_matrix << match_factor << ",";
+        }
+        else{
+          defocus_file_matrix << at_defocus << "\n";
+          thickness_file_matrix << at_slice << "\n";
+          match_factor_file_matrix << match_factor << "\n";
+        }
+
+
+        std::stringstream output_legend_line2;
+        output_legend_line2 <<  "T: " << std::fixed << std::setw( 2 ) << std::setprecision( 2 ) << slice_thickness_nm << "nm, slc " << at_slice ;
+        std::string line2_simulated_info = output_legend_line2.str();
+        // line 3
+        std::stringstream output_legend_line3;
+        output_legend_line3 <<  "D: " << at_defocus ;
+        std::string line3_simulated_info = output_legend_line3.str();
+
+        std::stringstream matchfactor_output;
+        matchfactor_output <<  "Match % " << std::fixed << std::setw( 2 ) << std::setprecision( 2 ) <<  match_factor ;
+        std::string line5_matchfactor_info = matchfactor_output.str();
+
+        // calculate the legend position on the grid
+        legend_position_x = reshaped_simulated_image_width*(defocus-1) + 10;
+
+        int legend_position_y_bottom_left = reshaped_simulated_image_height*(slice_samples-thickness);
+
+        putText(sim_grid, line2_simulated_info , cvPoint(legend_position_x , legend_position_y_bottom_left + legend_position_y_bottom_left_line_1), cv::FONT_HERSHEY_PLAIN, 1, cvScalar(255,255,255), 1, CV_AA);
+
+        putText(sim_grid, line3_simulated_info , cvPoint(legend_position_x , legend_position_y_bottom_left + legend_position_y_bottom_left_line_2), cv::FONT_HERSHEY_PLAIN, 1, cvScalar(255,255,255), 1, CV_AA);
+
+        putText(sim_grid, line5_matchfactor_info , cvPoint(legend_position_x , legend_position_y_bottom_left + legend_position_y_bottom_left_line_3), cv::FONT_HERSHEY_PLAIN, 1, cvScalar(255,255,255), 1, CV_AA);
+
+        vector_position++;
+      }
+
     }
-    else{
-    defocus_file_matrix << at_defocus << "\n";
-    thickness_file_matrix << at_slice << "\n";
-    match_factor_file_matrix << match_factor << "\n";
-    }
 
+    // closing the match factor csv file
+    match_factor_file.close();
+    defocus_file_matrix.close();
+    thickness_file_matrix.close();
+    match_factor_file_matrix.close();
 
+    std::stringstream sim_grid_file_image;
+    sim_grid_file_image << "sim_grid_thickness_" << slices_lower_bound << "_to_" << slices_upper_bound <<  "_defocus_" <<defocus_lower_bound << "_to_" << defocus_upper_bound << ".png" ;
+    std::string sim_grid_file_name_image = sim_grid_file_image.str();
+    imwrite( "exp_roi.png", experimental_image_roi );
+    imwrite( sim_grid_file_name_image, sim_grid );
+    namedWindow( "SIMGRID window", cv::WINDOW_AUTOSIZE );// Create a window for display.
+    imshow( "SIMGRID window", sim_grid ); //draw );
+    cv::waitKey(0);
 
-    cv::Rect r1 = cv::Rect (reshaped_simulated_image_width*(defocus-1),reshaped_simulated_image_height*(slice_samples-thickness),reshaped_simulated_image_width,reshaped_simulated_image_height);
-
-    cleaned_simulated_image.copyTo(sim_grid( r1 ));
-
-    std::stringstream output_legend_line2;
-    output_legend_line2 <<  "T: " << std::fixed << std::setw( 2 ) << std::setprecision( 2 ) << slice_thickness_nm << "nm, slc " << at_slice ;
-    std::string line2_simulated_info = output_legend_line2.str();
-    // line 3
-    std::stringstream output_legend_line3;
-    output_legend_line3 <<  "D: " << at_defocus ;
-    std::string line3_simulated_info = output_legend_line3.str();
-
-    std::stringstream matchfactor_output;
-    matchfactor_output <<  "Match % " << std::fixed << std::setw( 2 ) << std::setprecision( 2 ) <<  match_factor ;
-    std::string line5_matchfactor_info = matchfactor_output.str();
-
-    // calculate the legend position on the grid
-    legend_position_x = reshaped_simulated_image_width*(defocus-1) + 10;
-
-    int legend_position_y_bottom_left = reshaped_simulated_image_height*(slice_samples-thickness);
-
-    putText(sim_grid, line2_simulated_info , cvPoint(legend_position_x , legend_position_y_bottom_left + legend_position_y_bottom_left_line_1), cv::FONT_HERSHEY_PLAIN, 1, cvScalar(255,255,255), 1, CV_AA);
-
-    putText(sim_grid, line3_simulated_info , cvPoint(legend_position_x , legend_position_y_bottom_left + legend_position_y_bottom_left_line_2), cv::FONT_HERSHEY_PLAIN, 1, cvScalar(255,255,255), 1, CV_AA);
-
-    putText(sim_grid, line5_matchfactor_info , cvPoint(legend_position_x , legend_position_y_bottom_left + legend_position_y_bottom_left_line_3), cv::FONT_HERSHEY_PLAIN, 1, cvScalar(255,255,255), 1, CV_AA);
-    }
-
-  }
-
-  // closing the match factor csv file
-  match_factor_file.close();
-  defocus_file_matrix.close();
-  thickness_file_matrix.close();
-  match_factor_file_matrix.close();
-
-  std::stringstream sim_grid_file_image;
-  sim_grid_file_image << "sim_grid_thickness_" << slices_lower_bound << "_to_" << slices_upper_bound <<  "_defocus_" <<defocus_lower_bound << "_to_" << defocus_upper_bound << ".png" ;
-  std::string sim_grid_file_name_image = sim_grid_file_image.str();
-  imwrite( "exp_roi.png", experimental_image_roi );
-  imwrite( sim_grid_file_name_image, sim_grid );
-  namedWindow( "SIMGRID window", cv::WINDOW_AUTOSIZE );// Create a window for display.
-  imshow( "SIMGRID window", sim_grid ); //draw );
-  cv::waitKey(0);
-  */
     return EXIT_SUCCESS;
   }
   else{

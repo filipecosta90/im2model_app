@@ -75,12 +75,12 @@ class SIMGRID_wavimg_steplength {
     int iteration_number;
     float step_length_minimum_threshold;
     cv::Point2f step_size;
-    
+
     cv::Mat defocus_values_matrix;
     cv::Mat thickness_values_matrix;
     cv::Mat match_values_matrix;
     cv::Mat imregionalmax_match_values_matrix;
-    
+
     WAVIMG_prm* wavimg_parameters;
 
     // // // // //
@@ -119,7 +119,7 @@ class SIMGRID_wavimg_steplength {
   public:
 
     int imregionalmax(cv::Mat input , cv::Mat locations);
-    
+
     std::pair<cv::Mat,cv::Mat> gradient(cv::Mat & img, float spaceX, float spaceY);
 
     static cv::Mat gradientX(cv::Mat & mat, float spacing);
@@ -129,7 +129,7 @@ class SIMGRID_wavimg_steplength {
     SIMGRID_wavimg_steplength();
 
     void set_iteration_number ( int itt );
-    
+
     void set_step_length_minimum_threshold ( float minimum_threshold );
 
     void set_wavimg_var( WAVIMG_prm::WAVIMG_prm* wavimg_var );

@@ -720,10 +720,11 @@ int main(int argc, char** argv )
       }
 
       wavimg_simgrid_steps.set_iteration_number(1);
-        wavimg_simgrid_steps.set_step_length_minimum_threshold ( 87.5 );
+      wavimg_simgrid_steps.set_step_length_minimum_threshold ( 87.5 );
       wavimg_simgrid_steps.set_step_size( defocus_period, slice_period );
 
       wavimg_simgrid_steps.simulate_from_dat_file();
+      wavimg_simgrid_steps.export_sim_grid();
     }
 
   }
