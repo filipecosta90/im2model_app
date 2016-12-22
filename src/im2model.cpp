@@ -22,7 +22,6 @@
 
 #include "opencv2/core/core.hpp"
 #include "opencv2/features2d/features2d.hpp"
-#include "opencv2/nonfree/features2d.hpp"
 
 
 // Include the headers relevant to the boost::program_options
@@ -104,7 +103,7 @@ void thresh_callback(int, void* )
   std::vector< std::vector<Point> > contours;
   std::vector< std::vector<Point> > contours_2nd_itt;
 
-  vector<Vec4i> hierarchy;
+    std::vector<Vec4i> hierarchy;
 
   cv::Canny( experimental_image, canny_output, thresh, thresh*2, 3 );
   cv::findContours( canny_output, contours, hierarchy, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE, Point(0, 0) );
@@ -157,7 +156,7 @@ void thresh_callback(int, void* )
   }
 
   /// Find the convex hull object for each contour
-  vector<vector<Point> > roi_contours;
+    std::vector<std::vector<Point> > roi_contours;
 
   for( size_t i = 0; i< contours.size(); i++ ){
     Scalar color = Scalar( rng.uniform(0, 255), rng.uniform(0,255), rng.uniform(0,255) );
@@ -169,7 +168,7 @@ void thresh_callback(int, void* )
 
   }
 
-  vector<Point> contours_merged;
+    std::vector<Point> contours_merged;
 
   for( int i = 0; i < roi_contours.size(); i++ ){
     for ( size_t j = 0; j< roi_contours[i].size(); j++  ){
@@ -177,11 +176,11 @@ void thresh_callback(int, void* )
     }
   }
 
-  vector<vector<Point>> hull( 1 );
+    std::vector<std::vector<Point>> hull( 1 );
   convexHull( Mat(contours_merged), hull[0], false );
 
   Scalar color = Scalar( rng.uniform(0, 255), rng.uniform(0,255), rng.uniform(0,255) );
-  drawContours( drawing, hull, 0, color, 3, 8, vector<Vec4i>(), 0, Point() );
+    drawContours( drawing, hull, 0, color, 3, 8, std::vector<Vec4i>(), 0, Point() );
   double roi_area_px = cv::contourArea(hull[0],false);
   double roi_area_nm = roi_area_px * sampling_rate_experimental_x_nm_per_pixel * sampling_rate_experimental_y_nm_per_pixel;
   std::cout << "ROI area " << roi_area_px << " px, " << roi_area_nm << " nm^2" << std::endl;
@@ -606,7 +605,7 @@ int main(int argc, char** argv )
       wavimg_parameters.set_number_image_aberrations_set( 2 );
       // setters line 19
       //Defocus (a20, C1,0, C1) // colocar a negativo
-      wavimg_parameters.add_aberration_definition ( 1, 8.5f, 0.0f );
+      wavimg_parameters.add_aberration_definition ( 1, -8.5f, 0.0f );
       //Spherical aberration (a40, C3,0, C3)
       wavimg_parameters.add_aberration_definition ( 5, -17000.0f, 0.0f );
       // setters line 19 + aberration_definition_index_number

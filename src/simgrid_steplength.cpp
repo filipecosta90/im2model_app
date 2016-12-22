@@ -17,16 +17,27 @@
 #include <limits>
 
 #include <opencv2/opencv.hpp>
-#include "opencv2/highgui/highgui.hpp"
-#include "opencv2/imgproc/imgproc.hpp"
+#include <opencv2/imgproc.hpp>
+#include <opencv2/video.hpp>
 
-#include "opencv2/opencv_modules.hpp"
 
-#include "opencv2/core/core.hpp"
-#include "opencv2/features2d/features2d.hpp"
-#include "opencv2/nonfree/features2d.hpp"
+#include <opencv2/highgui/highgui.hpp>
+#include <opencv2/imgproc/imgproc.hpp>
+#include <opencv2/video/video.hpp>
 
-#include "opencv2/calib3d/calib3d.hpp"
+#include <opencv2/video/video.hpp>
+
+#include <opencv2/core/core.hpp>
+#include <opencv/cv.hpp>
+
+#include <opencv2/imgproc/imgproc.hpp>
+
+#include <opencv2/opencv_modules.hpp>
+
+#include <opencv2/core/core.hpp>
+#include <opencv2/features2d/features2d.hpp>
+
+#include <opencv2/calib3d/calib3d.hpp>
 
 
 #include "simgrid_steplength.h"
@@ -255,7 +266,6 @@ void SIMGRID_wavimg_steplength::set_reshaped_simulated_image_height( int height 
   reshaped_simulated_image_height = height;
 }
 
-
 void SIMGRID_wavimg_steplength::set_debug_switch(bool deb_switch){
   debug_switch = deb_switch;
 }
@@ -296,6 +306,91 @@ void SIMGRID_wavimg_steplength::set_step_size( int defocus_step, int slice_step 
 void SIMGRID_wavimg_steplength::set_step_size( cv::Point2f defocus_slice_step ){
   step_size = defocus_slice_step;
 }
+
+cv::Mat SIMGRID_wavimg_steplength::get_motion_euclidian_matrix( cv::Point experimental_image_match_location, cv::Mat simulated_image_roi ){
+  // Define the motion model
+  const int warp_mode = cv::MOTION_EUCLIDEAN;
+
+  // Set a 2x3 or 3x3 warp matrix depending on the motion model.
+  cv::Mat warp_matrix;
+  // Initialize the matrix to identity
+  warp_matrix = cv::Mat::eye(2, 3, CV_32F);
+
+  // Specify the number of iterations.
+  int number_of_iterations = 20;
+
+  // Specify the threshold of the increment
+  // in the correlation coefficient between two iterations
+  double termination_eps = 1;
+
+  // Define termination criteria
+  cv::TermCriteria criteria ( cv::TermCriteria::COUNT , number_of_iterations, termination_eps);
+
+    cv::Rect pos_exp_rectangle;
+    pos_exp_rectangle.x = experimental_image_match_location.x;
+    pos_exp_rectangle.y = experimental_image_match_location.y;
+    pos_exp_rectangle.width = simulated_image_roi.cols;
+    pos_exp_rectangle.height = simulated_image_roi.rows;
+    
+    cv::Mat positioned_experimental_image = experimental_image_roi(pos_exp_rectangle);
+
+  // Run the ECC algorithm. The results are stored in warp_matrix.
+    std::cout << "ROI size " << positioned_experimental_image.size() << std::endl  << simulated_image_roi.size() << std::endl;
+    
+  try{
+      imwrite( "sim_roi.png", simulated_image_roi );
+      namedWindow( "exp window", cv::WINDOW_AUTOSIZE );// Create a window for display.
+      imshow( "exp window", positioned_experimental_image ); //draw );
+      namedWindow( "sim window", cv::WINDOW_AUTOSIZE );// Create a window for display.
+      imshow( "sim window", simulated_image_roi ); //draw );
+      cv::waitKey(0);
+      
+    double cc =  cv::findTransformECC(
+        positioned_experimental_image,
+        simulated_image_roi,
+        warp_matrix,
+        warp_mode,
+        criteria
+        );
+      std::cout << "correlation coeficient" << cc << std::endl;
+  }
+  catch(cv::Exception e){
+    if (e.code == cv::Error::StsNoConv)
+    {
+      std::cerr << "findTransformECC did not converge";
+    }
+  }
+
+    std::cout << "WARP matrix" <<  warp_matrix  << " angle " << warp_matrix.at<float>( 1, 0) << std::endl;
+    
+  cv::Mat simulated_image_aligned;
+
+  // Use warpAffine for Translation, Euclidean and Affine
+  warpAffine(simulated_image_roi, simulated_image_aligned, warp_matrix, simulated_image_roi.size(), cv::INTER_LINEAR + cv::WARP_INVERSE_MAP);
+
+  cv::RNG rng;
+  double angle;
+  angle = CV_PI/30 + CV_PI*rng.uniform((double)-2.f, (double)2.f)/180;
+  return warp_matrix;
+}
+
+cv::Mat SIMGRID_wavimg_steplength::get_error_matrix( cv::Mat aligned_simulated_image_roi ){
+  // Define the motion model
+  const int warp_mode = cv::MOTION_EUCLIDEAN; //MOTION_EUCLIDEAN;
+
+  // Set a 2x3 or 3x3 warp matrix depending on the motion model.
+  cv::Mat error_matrix;
+
+  subtract(experimental_image_roi, aligned_simulated_image_roi, error_matrix);
+  double max_of_error;
+  minMaxLoc(error_matrix, NULL, &max_of_error);
+
+  cv::imshow ("error (black: no error)",  std::abs(max_of_error)*255/max_of_error);
+  cv::waitKey(0);
+  return error_matrix;
+}
+
+
 
 bool SIMGRID_wavimg_steplength::export_sim_grid(){
   if( runned_simulation ){
@@ -421,6 +516,7 @@ bool SIMGRID_wavimg_steplength::simulate_from_dat_file(){
 
     //will contain the row of simulated images (same thickness, diferent defocus)
     std::vector<cv::Mat> simulated_images_row;
+      std::vector<cv::Point> experimental_images_matchloc_row;
 
     // for the same thickness iterate through every defocus
     for (int defocus = 1; defocus <= defocus_samples; defocus ++ ){
@@ -507,6 +603,7 @@ bool SIMGRID_wavimg_steplength::simulate_from_dat_file(){
       cv::minMaxLoc( result, &minVal, &maxVal, &minLoc, &maxLoc, cv::Mat() );
 
       matchVal = maxVal;
+        
       double slice_match, defocus_match, match_factor;
 
       match_factor = matchVal * 100.0;
@@ -518,15 +615,15 @@ bool SIMGRID_wavimg_steplength::simulate_from_dat_file(){
       thickness_values_matrix.at<float>(thickness-1, defocus-1) = (float)  at_slice ;
       match_values_matrix.at<float>( thickness-1, defocus-1) = (float)  match_factor ;
       simulated_images_row.push_back(cleaned_simulated_image);
+      experimental_images_matchloc_row.push_back(matchLoc);
+
       simulated_matches.push_back(match_factor);
     }
+    experimental_images_match_location_grid.push_back(experimental_images_matchloc_row);
     simulated_images_grid.push_back(simulated_images_row);
   }
 
   // now that we have the simulated images lets compare them
-
-  // cv::minMaxIdx( simulated_matches, NULL, &maxVal, NULL, &maxIdx, std::vector<double>() );
-
 
   std::vector<double>::iterator maxElement;
   maxElement = std::max_element(simulated_matches.begin(), simulated_matches.end());
@@ -539,8 +636,16 @@ bool SIMGRID_wavimg_steplength::simulate_from_dat_file(){
   int best_defocus = round( (col_defocus * defocus_period ) + defocus_lower_bound);
 
   std::cout << "Max match % is " << *maxElement << " | " << simulated_matches.at(dist) << "\t at pos ["<< dist << "](" << col_defocus << "," << row_thickness  <<") slice " << best_slice << ", defocus " << best_defocus << std::endl;
+    
+    std::vector<cv::Mat> simulated_images_row = simulated_images_grid.at(dist);
+    cv::Mat cleaned_simulated_image = simulated_images_row.at(col_defocus);
+    
+    std::vector<cv::Point> experimental_images_match_location_row = experimental_images_match_location_grid.at(dist);
+    cv::Point position_experimental_image = experimental_images_match_location_row.at(col_defocus);
+    
+   get_motion_euclidian_matrix( position_experimental_image , cleaned_simulated_image );
 
-
+    
   cv::Mat gradX = gradientX( match_values_matrix, defocus_period );
   cv::Mat gradY = gradientY( match_values_matrix, slice_period );
 

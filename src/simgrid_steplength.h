@@ -64,6 +64,8 @@ class SIMGRID_wavimg_steplength {
     int sim_grid_height;
     cv::Mat sim_grid;
     std::vector< std::vector<cv::Mat> > simulated_images_grid;
+    std::vector< std::vector<cv::Point> > experimental_images_match_location_grid;
+
     //will contain the all the simulated images match percentage
     std::vector<double> simulated_matches;
     std::vector<cv::Point3d> slice_defocus_match_points;
@@ -201,6 +203,10 @@ class SIMGRID_wavimg_steplength {
     void set_step_size( int defocus_step, int slice_step );
 
     void set_step_size( cv::Point2f defocus_slice_step );
+
+    cv::Mat get_motion_euclidian_matrix(  cv::Point experimental_image_match_location, cv::Mat simulated_image_roi );
+    
+    cv::Mat get_error_matrix( cv::Mat simulated_image_roi );
 
     bool export_sim_grid();
 
