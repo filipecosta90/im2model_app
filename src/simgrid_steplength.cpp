@@ -308,23 +308,27 @@ void SIMGRID_wavimg_steplength::set_step_size( cv::Point2f defocus_slice_step ){
 }
 
 cv::Mat SIMGRID_wavimg_steplength::get_motion_euclidian_matrix( cv::Point experimental_image_match_location, cv::Mat simulated_image_roi ){
-  // Define the motion model
-  const int warp_mode = cv::MOTION_EUCLIDEAN;
+ 
 
   // Set a 2x3 or 3x3 warp matrix depending on the motion model.
   cv::Mat warp_matrix;
   // Initialize the matrix to identity
   warp_matrix = cv::Mat::eye(2, 3, CV_32F);
+    std::cout << "location " << experimental_image_match_location << std::endl;
+    warp_matrix.at<float>(0, 2) = experimental_image_match_location.x;
+    warp_matrix.at<float>(1, 2) = experimental_image_match_location.y;
+    std::cout <<" warp initial " << warp_matrix << std::endl;
 
+    
   // Specify the number of iterations.
-  int number_of_iterations = 20;
+  int number_of_iterations = 5000;
 
   // Specify the threshold of the increment
   // in the correlation coefficient between two iterations
-  double termination_eps = 1;
+  double termination_eps = 1e-10;
 
   // Define termination criteria
-  cv::TermCriteria criteria ( cv::TermCriteria::COUNT , number_of_iterations, termination_eps);
+    cv::TermCriteria criteria ( cv::TermCriteria::COUNT+cv::TermCriteria::EPS, number_of_iterations, termination_eps );
 
     cv::Rect pos_exp_rectangle;
     pos_exp_rectangle.x = experimental_image_match_location.x;
@@ -338,12 +342,15 @@ cv::Mat SIMGRID_wavimg_steplength::get_motion_euclidian_matrix( cv::Point experi
     std::cout << "ROI size " << positioned_experimental_image.size() << std::endl  << simulated_image_roi.size() << std::endl;
     
   try{
+      imwrite("exp_roi_positioned.png", positioned_experimental_image);
       imwrite( "sim_roi.png", simulated_image_roi );
       namedWindow( "exp window", cv::WINDOW_AUTOSIZE );// Create a window for display.
-      imshow( "exp window", positioned_experimental_image ); //draw );
+  //    imshow( "exp window", positioned_experimental_image ); //draw );
       namedWindow( "sim window", cv::WINDOW_AUTOSIZE );// Create a window for display.
-      imshow( "sim window", simulated_image_roi ); //draw );
-      cv::waitKey(0);
+  //    imshow( "sim window", simulated_image_roi ); //draw );
+      
+      // Define the motion model
+      const int warp_mode = cv::MOTION_EUCLIDEAN;
       
     double cc =  cv::findTransformECC(
         positioned_experimental_image,
@@ -361,31 +368,43 @@ cv::Mat SIMGRID_wavimg_steplength::get_motion_euclidian_matrix( cv::Point experi
     }
   }
 
-    std::cout << "WARP matrix" <<  warp_matrix  << " angle " << warp_matrix.at<float>( 1, 0) << std::endl;
+    std::cout << "WARP matrix" <<std::endl <<  warp_matrix  << " angle " << warp_matrix.at<float>( 1, 0) << std::endl;
     
   cv::Mat simulated_image_aligned;
 
-  // Use warpAffine for Translation, Euclidean and Affine
-  warpAffine(simulated_image_roi, simulated_image_aligned, warp_matrix, simulated_image_roi.size(), cv::INTER_LINEAR + cv::WARP_INVERSE_MAP);
-
-  cv::RNG rng;
-  double angle;
-  angle = CV_PI/30 + CV_PI*rng.uniform((double)-2.f, (double)2.f)/180;
   return warp_matrix;
 }
 
-cv::Mat SIMGRID_wavimg_steplength::get_error_matrix( cv::Mat aligned_simulated_image_roi ){
+cv::Mat SIMGRID_wavimg_steplength::get_error_matrix( cv::Point experimental_image_match_location, cv::Mat aligned_simulated_image_roi ){
   // Define the motion model
-  const int warp_mode = cv::MOTION_EUCLIDEAN; //MOTION_EUCLIDEAN;
-
-  // Set a 2x3 or 3x3 warp matrix depending on the motion model.
+    
+    cv::Rect pos_exp_rectangle;
+    pos_exp_rectangle.x = experimental_image_match_location.x;
+    pos_exp_rectangle.y = experimental_image_match_location.y;
+    pos_exp_rectangle.width = aligned_simulated_image_roi.cols;
+    pos_exp_rectangle.height = aligned_simulated_image_roi.rows;
+    
+    cv::Mat positioned_experimental_image = experimental_image_roi(pos_exp_rectangle);
+    
+    cv::Mat normalized_aligned_simulated_image_roi;
+    
+    // vars for minMaxLoc
+    double experimental_minVal; double experimental_maxVal;
+    
+    cv::minMaxLoc( positioned_experimental_image, &experimental_minVal, &experimental_maxVal, NULL, NULL, cv::Mat() );
+    
+    cv::normalize(aligned_simulated_image_roi, normalized_aligned_simulated_image_roi, experimental_minVal, experimental_maxVal, cv::NORM_MINMAX);
   cv::Mat error_matrix;
 
-  subtract(experimental_image_roi, aligned_simulated_image_roi, error_matrix);
+  cv::absdiff(positioned_experimental_image, normalized_aligned_simulated_image_roi, error_matrix);
   double max_of_error;
+    
   minMaxLoc(error_matrix, NULL, &max_of_error);
+    std::cout << " ### Max error" << max_of_error << std::endl;
+    namedWindow( "error (black: no error)", cv::WINDOW_AUTOSIZE );// Create a window for display.
+  cv::imshow ("error (black: no error)",  error_matrix);
+    imwrite( "error_roi.png", error_matrix );
 
-  cv::imshow ("error (black: no error)",  std::abs(max_of_error)*255/max_of_error);
   cv::waitKey(0);
   return error_matrix;
 }
@@ -615,7 +634,8 @@ bool SIMGRID_wavimg_steplength::simulate_from_dat_file(){
       thickness_values_matrix.at<float>(thickness-1, defocus-1) = (float)  at_slice ;
       match_values_matrix.at<float>( thickness-1, defocus-1) = (float)  match_factor ;
       simulated_images_row.push_back(cleaned_simulated_image);
-      experimental_images_matchloc_row.push_back(matchLoc);
+        std::cout << maxLoc << std::endl;
+      experimental_images_matchloc_row.push_back(maxLoc);
 
       simulated_matches.push_back(match_factor);
     }
@@ -641,11 +661,13 @@ bool SIMGRID_wavimg_steplength::simulate_from_dat_file(){
     cv::Mat cleaned_simulated_image = simulated_images_row.at(col_defocus);
     
     std::vector<cv::Point> experimental_images_match_location_row = experimental_images_match_location_grid.at(dist);
-    cv::Point position_experimental_image = experimental_images_match_location_row.at(col_defocus);
+    cv::Point position_at_experimental_image = experimental_images_match_location_row.at(col_defocus);
     
-   get_motion_euclidian_matrix( position_experimental_image , cleaned_simulated_image );
+    std::cout << "experimental position " << position_at_experimental_image << std::endl;
+    get_motion_euclidian_matrix( position_at_experimental_image , cleaned_simulated_image );
+    get_error_matrix( position_at_experimental_image , cleaned_simulated_image );
 
-    
+
   cv::Mat gradX = gradientX( match_values_matrix, defocus_period );
   cv::Mat gradY = gradientY( match_values_matrix, slice_period );
 

@@ -206,7 +206,7 @@ class SIMGRID_wavimg_steplength {
 
     cv::Mat get_motion_euclidian_matrix(  cv::Point experimental_image_match_location, cv::Mat simulated_image_roi );
     
-    cv::Mat get_error_matrix( cv::Mat simulated_image_roi );
+    cv::Mat get_error_matrix( cv::Point experimental_image_match_location, cv::Mat simulated_image_roi );
 
     bool export_sim_grid();
 
