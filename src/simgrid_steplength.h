@@ -43,6 +43,7 @@ class SIMGRID_wavimg_steplength {
     float sampling_rate_super_cell_x_nm_pixel;
     float sampling_rate_super_cell_y_nm_pixel;
     cv::Mat experimental_image_roi;
+    
 
     /***********
       simulated image vars
@@ -64,6 +65,8 @@ class SIMGRID_wavimg_steplength {
     int sim_grid_height;
     cv::Mat sim_grid;
     std::vector< std::vector<cv::Mat> > simulated_images_grid;
+    std::vector< std::vector<cv::Mat> > raw_simulated_images_grid;
+
     std::vector< std::vector<cv::Point> > experimental_images_match_location_grid;
 
     //will contain the all the simulated images match percentage
@@ -82,9 +85,27 @@ class SIMGRID_wavimg_steplength {
     cv::Mat thickness_values_matrix;
     cv::Mat match_values_matrix;
     cv::Mat imregionalmax_match_values_matrix;
-
+   
     WAVIMG_prm* wavimg_parameters;
 
+    /***********
+     image alignement vars
+     ***********/
+    
+    // Set a 2x3 or 3x3 warp matrix depending on the motion model.
+    // in our case we use a 2x3 (euclidean)
+    cv::Mat motion_euclidean_warp_matrix;
+    
+    // Specify the number of iterations.
+    int motion_euclidean_number_of_iterations;
+    
+    // Specify the threshold of the increment
+    // in the correlation coefficient between two iterations
+    double motion_euclidean_termination_eps;
+    
+    // Define the motion model
+  const int motion_euclidean_warp_mode = cv::MOTION_EUCLIDEAN;
+    
     // // // // //
     // debug info
     // // // // //
@@ -204,9 +225,17 @@ class SIMGRID_wavimg_steplength {
 
     void set_step_size( cv::Point2f defocus_slice_step );
 
-    cv::Mat get_motion_euclidian_matrix(  cv::Point experimental_image_match_location, cv::Mat simulated_image_roi );
+    void calculate_motion_euclidian_matrix(  cv::Point experimental_image_match_location, cv::Mat simulated_image_roi );
     
-    cv::Mat get_error_matrix( cv::Point experimental_image_match_location, cv::Mat simulated_image_roi );
+    float get_motion_euclidian_rotation_angle();
+    
+    float get_motion_euclidian_translation_x();
+
+    float get_motion_euclidian_translation_y();
+    
+    cv::Mat calculate_simulated_motion_euclidean_transformed_matrix( cv::Mat raw_simulated_image_roi );
+    
+    cv::Mat calculate_error_matrix( cv::Mat aligned_experimental_image_roi, cv::Mat aligned_simulated_image_roi );
 
     bool export_sim_grid();
 
