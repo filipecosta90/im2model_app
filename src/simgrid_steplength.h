@@ -126,6 +126,8 @@ class SIMGRID_wavimg_steplength {
     std::string defocus_matrix_file_name;
     std::string thickness_matrix_file_name;
     std::string match_factor_matrix_file_name;
+    
+    const float acceptable_rotation_diff = 5.0f;
 
     // // // // //
     // visual info
@@ -225,7 +227,7 @@ class SIMGRID_wavimg_steplength {
 
     void set_step_size( cv::Point2f defocus_slice_step );
 
-    void calculate_motion_euclidian_matrix(  cv::Point experimental_image_match_location, cv::Mat simulated_image_roi );
+    void calculate_motion_euclidian_matrix(  cv::Mat cropped_experimental_image_roi, cv::Mat simulated_image_roi );
     
     float get_motion_euclidian_rotation_angle();
     
