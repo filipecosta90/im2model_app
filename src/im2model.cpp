@@ -248,7 +248,7 @@ int main(int argc, char** argv )
   int nx_simulated_horizontal_samples;
   int ny_simulated_vertical_samples;
   int nz_simulated_partitions;
-  int ht_accelaration_voltage;
+  float ht_accelaration_voltage;
 
   // based on super_cell_size_x and nx_simulated_horizontal_samples
   float sampling_rate_super_cell_x_nm_pixel;
@@ -257,7 +257,15 @@ int main(int argc, char** argv )
   // based on super_cell_size_z and nz_simulated_partitions;
   float super_cell_z_nm_slice;
 
-
+    // wavimg defocus aberration coefficient
+    float coefficient_aberration_defocus;
+    // wavimg spherical aberration coefficient
+    float coefficient_aberration_spherical;
+                                                
+    int number_image_aberrations = 0;
+    bool cd_switch = false;
+    bool cs_switch = false;
+    
   // Switch for applying Debye-Waller factors which effectively dampen the atomic scattering potentials.
   // Use this option for conventional HR-TEM, STEM bright-field, or STEM annular bright-field image simulations only.
   bool dwf_switch=false;
@@ -350,7 +358,9 @@ int main(int argc, char** argv )
       ("nx", boost::program_options::value<int>(&nx_simulated_horizontal_samples)->required(), "number of horizontal samples for the phase grating. The same number of pixels is used to sample the wave function in multislice calculations based on the calculated phase gratings.")
       ("ny", boost::program_options::value<int>(&ny_simulated_vertical_samples)->required(), "number of vertical samples for the phase grating. The same number of pixels is used to sample the wave function in multislice calculations based on the calculated phase gratings.")
       ("nz", boost::program_options::value<int>(&nz_simulated_partitions)->required(), "simulated partitions")
-      ("ht", boost::program_options::value<int>(&ht_accelaration_voltage)->required(), "accelerating voltage defining the kinetic energy of the incident electron beam in kV.")
+      ("ht", boost::program_options::value<float>(&ht_accelaration_voltage)->required(), "accelerating voltage defining the kinetic energy of the incident electron beam in kV.")
+      ("cd", boost::program_options::value<float>(&coefficient_aberration_defocus), "Defocus Aberration definition by two coefficient values given in [nm]. This is the first coefficient value. The second coefficient value is considered to be 0.")
+      ("cs", boost::program_options::value<float>(&coefficient_aberration_spherical), "Spherical Aberration definition by two coefficient values given in [nm]. This is the first coefficient value. The second coefficient value is considered to be 0.")
       ("dwf", "switch for applying Debye-Waller factors which effectively dampen the atomic scattering potentials. Use this option for conventional HR-TEM, STEM bright-field, or STEM annular bright-field image simulations only.")
       ("abs", "switch for applying absorption potentials (imaginary part) according to Weickenmeier and Kohl [Acta Cryst. A47 (1991) p. 590-597]. This absorption calculation considers the loss of intensity in the elastic channel due to thermal diffuse scattering.")
       ("slices_load", boost::program_options::value<int>(&slices_load), "number of slice files to be loaded.")
@@ -394,7 +404,16 @@ int main(int argc, char** argv )
           << desc << std::endl;
         return 0;
       }
-
+        
+        if ( vm.count("cd") ){
+            cd_switch = true;
+            number_image_aberrations++;
+        }
+        
+        if ( vm.count("cs") ){
+            number_image_aberrations++;
+            cs_switch = true;
+        }
       if ( vm.count("dwf")  ){
         dwf_switch=true;
       }
@@ -526,7 +545,8 @@ int main(int argc, char** argv )
 
     if( msa_switch == true ){
       MSA_prm::MSA_prm msa_parameters;
-      msa_parameters.set_electron_wavelength( 0.00196875 );
+       // Since the release of MSA version 0.64 you may alternatively specify the electron energy in keV in line 6
+        msa_parameters.set_electron_wavelength( ht_accelaration_voltage ); //0.00196875 );
       msa_parameters.set_internal_repeat_factor_of_super_cell_along_x ( 1 );
       msa_parameters.set_internal_repeat_factor_of_super_cell_along_y ( 1 );
       std::stringstream input_prefix_stream;
@@ -562,7 +582,7 @@ int main(int argc, char** argv )
       wavimg_parameters.set_physical_columns_sampling_rate_input_wave_function_nm_pixels( sampling_rate_super_cell_x_nm_pixel );
       wavimg_parameters.set_physical_rows_sampling_rate_input_wave_function_nm_pixels( sampling_rate_super_cell_y_nm_pixel );
       // setters line 4
-      wavimg_parameters.set_primary_electron_energy( 200.0 );
+      wavimg_parameters.set_primary_electron_energy( ht_accelaration_voltage );
       // setters line 5
       wavimg_parameters.set_type_of_output( 0 );
       // setters line 6
@@ -602,13 +622,19 @@ int main(int argc, char** argv )
       //  wavimg_parameters.set_anisotropic_second_rms_amplitude( 0.0f );
       // wavimg_parameters.set_azimuth_orientation_angle( 0.0f );
       // setters line 18
-      wavimg_parameters.set_number_image_aberrations_set( 2 );
+      wavimg_parameters.set_number_image_aberrations_set( number_image_aberrations );
       // setters line 19
-      //Defocus (a20, C1,0, C1) // colocar a negativo
-      wavimg_parameters.add_aberration_definition ( 1, -8.5f, 0.0f );
-      //Spherical aberration (a40, C3,0, C3)
-      wavimg_parameters.add_aberration_definition ( 5, -17000.0f, 0.0f );
-      // setters line 19 + aberration_definition_index_number
+        // check for wavimg defocus aberration coefficient
+        if( cd_switch == true ){
+            //Defocus (a20, C1,0, C1)
+            wavimg_parameters.add_aberration_definition ( 1, coefficient_aberration_defocus, 0.0f );
+        }
+        // check for wavimg spherical aberration coefficient
+        if( cs_switch == true ){
+            //Spherical aberration (a40, C3,0, C3)
+            wavimg_parameters.add_aberration_definition ( 5, coefficient_aberration_spherical, 0.0f );
+        }
+            // setters line 19 + aberration_definition_index_number
       wavimg_parameters.set_objective_aperture_radius( 5500.0f );
       // setters line 20 + aberration_definition_index_number
       wavimg_parameters.set_center_x_of_objective_aperture( 0.0f );

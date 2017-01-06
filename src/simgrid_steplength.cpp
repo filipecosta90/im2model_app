@@ -378,8 +378,8 @@ cv::Mat SIMGRID_wavimg_steplength::calculate_simulated_motion_euclidean_transfor
 
   ignore_edge_pixels_rectangle.x *= reshape_factor_from_supper_cell_to_experimental_x;
   ignore_edge_pixels_rectangle.y *= reshape_factor_from_supper_cell_to_experimental_y;
-  ignore_edge_pixels_rectangle.width *= reshape_factor_from_supper_cell_to_experimental_x;
-  ignore_edge_pixels_rectangle.height *= reshape_factor_from_supper_cell_to_experimental_y;
+  ignore_edge_pixels_rectangle.width = reshaped_simulated_image_width;
+  ignore_edge_pixels_rectangle.height = reshaped_simulated_image_height;
 
     if (debug_switch == true ){
   std::cout << ignore_edge_pixels_rectangle <<  std::endl;
@@ -397,7 +397,11 @@ cv::Mat SIMGRID_wavimg_steplength::calculate_simulated_motion_euclidean_transfor
 }
 
 cv::Mat SIMGRID_wavimg_steplength::calculate_error_matrix( cv::Mat aligned_experimental_image_roi, cv::Mat aligned_simulated_image_roi ){
+    std::cout << aligned_experimental_image_roi.size() << "\n";
+    
+    std::cout << aligned_simulated_image_roi.size() << "\n";
 
+    assert(aligned_experimental_image_roi.size() == aligned_simulated_image_roi.size() );
   cv::Mat normalized_aligned_simulated_image_roi;
   normalized_aligned_simulated_image_roi = cv::Mat(aligned_simulated_image_roi.rows, aligned_simulated_image_roi.cols, CV_8UC1);
 
@@ -689,15 +693,21 @@ bool SIMGRID_wavimg_steplength::simulate_from_dat_file(){
   int best_defocus = round( (col_defocus * defocus_period ) + defocus_lower_bound);
 
   std::cout << "Max match % is " << *maxElement << " | " << simulated_matches.at(dist) << "\t at pos ["<< dist << "](" << col_defocus << "," << row_thickness  <<") slice " << best_slice << ", defocus " << best_defocus << std::endl;
+    std::cout << "mark 0" << simulated_images_grid.size() << std::endl;
 
-  std::vector<cv::Mat> simulated_images_row = simulated_images_grid.at(dist);
+  std::vector<cv::Mat> simulated_images_row = simulated_images_grid.at(row_thickness);
+    std::cout << "mark 1" << std::endl;
+
   cv::Mat cleaned_simulated_image = simulated_images_row.at(col_defocus);
+    std::cout << "mark 2" << std::endl;
 
-  std::vector<cv::Mat> raw_simulated_images_row = raw_simulated_images_grid.at(dist);
+  std::vector<cv::Mat> raw_simulated_images_row = raw_simulated_images_grid.at(row_thickness);
+    std::cout << "mark 3" << std::endl;
 
   cv::Mat raw_simulated_image = raw_simulated_images_row.at(col_defocus);
+    std::cout << "mark 4" << std::endl;
 
-  std::vector<cv::Point> experimental_images_match_location_row = experimental_images_match_location_grid.at(dist);
+  std::vector<cv::Point> experimental_images_match_location_row = experimental_images_match_location_grid.at(row_thickness);
   cv::Point position_at_experimental_image = experimental_images_match_location_row.at(col_defocus);
 
   cv::Rect pos_exp_rectangle;
@@ -706,6 +716,8 @@ bool SIMGRID_wavimg_steplength::simulate_from_dat_file(){
   pos_exp_rectangle.width = cleaned_simulated_image.cols;
   pos_exp_rectangle.height = cleaned_simulated_image.rows;
 
+    std::cout << "mark 5" << pos_exp_rectangle <<  std::endl;
+    
   cv::Mat positioned_experimental_image = experimental_image_roi(pos_exp_rectangle);
   calculate_motion_euclidian_matrix( positioned_experimental_image , cleaned_simulated_image );
     
@@ -715,11 +727,15 @@ bool SIMGRID_wavimg_steplength::simulate_from_dat_file(){
   if ( get_motion_euclidian_rotation_angle() > acceptable_rotation_diff ){
     std::cout << "WARNING: im2model zone axis / upward vector orientation has a large error value" << std::endl;
   }
-    
+    std::cout << "mark 6" << std::endl;
+
   calculate_error_matrix( positioned_experimental_image, euclidean_transformed_cleaned_simulated_image );
+    std::cout << "mark 7" << std::endl;
 
   cv::Mat gradX = gradientX( match_values_matrix, defocus_period );
   cv::Mat gradY = gradientY( match_values_matrix, slice_period );
+
+    std::cout << "mark 8" << std::endl;
 
   dilate(match_values_matrix,imregionalmax_match_values_matrix,cv::Mat(),cv::Point(0,0),1);
   imregionalmax_match_values_matrix = match_values_matrix - imregionalmax_match_values_matrix;
