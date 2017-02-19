@@ -1,7 +1,8 @@
 # the minimum version of CMake required
-cmake_minimum_required(VERSION 2.8)
 
-project( im2model )
+project(im2model CXX)
+
+cmake_minimum_required(VERSION 3.1)
 
 set(Boost_USE_STATIC_LIBS ON) 
 set(Boost_USE_MULTITHREADED ON)  
@@ -15,8 +16,7 @@ set(CMAKE_BINARY_DIR ${CMAKE_SOURCE_DIR}/build)
 set(EXECUTABLE_OUTPUT_PATH ${CMAKE_BINARY_DIR})
 set(LIBRARY_OUTPUT_PATH ${CMAKE_BINARY_DIR})
 
-set(CMAKE_CXX_FLAGS "-std=c++0x -Wall")
-
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wno-deprecated-register -std=c++0x -Wall")
 
 # we add the files in the include directory to be included
 # while compiling all the source code

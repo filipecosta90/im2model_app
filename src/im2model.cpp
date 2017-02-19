@@ -10,6 +10,7 @@
 #include <sstream>      // std::stringstream
 #include <string>       // std::string
 #include <iostream>     // std::cout
+#include <cstdlib>
 #include <iomanip>
 #include <algorithm>    // std::min_element, std::max_element
 
@@ -40,10 +41,24 @@
 #include "msa_prm.h"
 #include "wavimg_prm.h"
 #include "simgrid_steplength.h"
+#include "mc_driver.hpp"
+
 
 using namespace cv;
 
 // Global Variables
+
+#ifdef _WIN32
+std::string celslc_bin_string =  "../bin/drprobe_clt_bin_winx64/celslc";
+std::string msa_bin_string = "../bin/drprobe_clt_bin_winx64/msa";
+std::string wavimg_bin_string = "../bin/drprobe_clt_bin_winx64/wavimg";
+#elif defined __unix__
+////do something for unix like #include <unistd.h>
+#elif defined __APPLE__
+std::string celslc_bin_string =  "../bin/drprobe_clt_bin_osx/celslc";
+std::string msa_bin_string = "../bin/drprobe_clt_bin_osx/msa";
+std::string wavimg_bin_string = "../bin/drprobe_clt_bin_osx/wavimg";
+#endif
 
 // Experimental Image info
 cv::Mat experimental_image; 
@@ -103,7 +118,7 @@ void thresh_callback(int, void* )
   std::vector< std::vector<Point> > contours;
   std::vector< std::vector<Point> > contours_2nd_itt;
 
-    std::vector<Vec4i> hierarchy;
+  std::vector<Vec4i> hierarchy;
 
   cv::Canny( experimental_image, canny_output, thresh, thresh*2, 3 );
   cv::findContours( canny_output, contours, hierarchy, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE, Point(0, 0) );
@@ -156,7 +171,7 @@ void thresh_callback(int, void* )
   }
 
   /// Find the convex hull object for each contour
-    std::vector<std::vector<Point> > roi_contours;
+  std::vector<std::vector<Point> > roi_contours;
 
   for( size_t i = 0; i< contours.size(); i++ ){
     Scalar color = Scalar( rng.uniform(0, 255), rng.uniform(0,255), rng.uniform(0,255) );
@@ -168,7 +183,7 @@ void thresh_callback(int, void* )
 
   }
 
-    std::vector<Point> contours_merged;
+  std::vector<Point> contours_merged;
 
   for( int i = 0; i < roi_contours.size(); i++ ){
     for ( size_t j = 0; j< roi_contours[i].size(); j++  ){
@@ -176,11 +191,11 @@ void thresh_callback(int, void* )
     }
   }
 
-    std::vector<std::vector<Point>> hull( 1 );
+  std::vector<std::vector<Point>> hull( 1 );
   convexHull( Mat(contours_merged), hull[0], false );
 
   Scalar color = Scalar( rng.uniform(0, 255), rng.uniform(0,255), rng.uniform(0,255) );
-    drawContours( drawing, hull, 0, color, 3, 8, std::vector<Vec4i>(), 0, Point() );
+  drawContours( drawing, hull, 0, color, 3, 8, std::vector<Vec4i>(), 0, Point() );
   double roi_area_px = cv::contourArea(hull[0],false);
   double roi_area_nm = roi_area_px * sampling_rate_experimental_x_nm_per_pixel * sampling_rate_experimental_y_nm_per_pixel;
   std::cout << "ROI area " << roi_area_px << " px, " << roi_area_nm << " nm^2" << std::endl;
@@ -232,6 +247,8 @@ int main(int argc, char** argv )
   // Simulation info
   /////////////////////////
 
+  //std::cout << System::Environment::GetEnvironmentVariable("CELSLC_BIN_PATH");
+  //std::cout << std::getenv("CELSLC_BIN_PATH");
   // Specifies the input super-cell file containing the atomic structure data in CIF file format.
   std::string super_cell_cif_file;
   // Specifies the output slice file name prefix.
@@ -257,15 +274,15 @@ int main(int argc, char** argv )
   // based on super_cell_size_z and nz_simulated_partitions;
   float super_cell_z_nm_slice;
 
-    // wavimg defocus aberration coefficient
-    float coefficient_aberration_defocus;
-    // wavimg spherical aberration coefficient
-    float coefficient_aberration_spherical;
-                                                
-    int number_image_aberrations = 0;
-    bool cd_switch = false;
-    bool cs_switch = false;
-    
+  // wavimg defocus aberration coefficient
+  float coefficient_aberration_defocus;
+  // wavimg spherical aberration coefficient
+  float coefficient_aberration_spherical;
+
+  int number_image_aberrations = 0;
+  bool cd_switch = false;
+  bool cs_switch = false;
+
   // Switch for applying Debye-Waller factors which effectively dampen the atomic scattering potentials.
   // Use this option for conventional HR-TEM, STEM bright-field, or STEM annular bright-field image simulations only.
   bool dwf_switch=false;
@@ -331,6 +348,8 @@ int main(int argc, char** argv )
   int initial_simulated_image_height;
   int reshaped_simulated_image_width;
   int reshaped_simulated_image_height;
+
+  MC::MC_Driver driver;
 
   try{
     /** Define and parse the program options
@@ -404,16 +423,16 @@ int main(int argc, char** argv )
           << desc << std::endl;
         return 0;
       }
-        
-        if ( vm.count("cd") ){
-            cd_switch = true;
-            number_image_aberrations++;
-        }
-        
-        if ( vm.count("cs") ){
-            number_image_aberrations++;
-            cs_switch = true;
-        }
+
+      if ( vm.count("cd") ){
+        cd_switch = true;
+        number_image_aberrations++;
+      }
+
+      if ( vm.count("cs") ){
+        number_image_aberrations++;
+        cs_switch = true;
+      }
       if ( vm.count("dwf")  ){
         dwf_switch=true;
       }
@@ -463,7 +482,7 @@ int main(int argc, char** argv )
       std::cerr << desc << std::endl;
       return -1;
     }
-
+    driver.parse( super_cell_cif_file.c_str() );
     // Simulated image sampling rate
     sampling_rate_super_cell_x_nm_pixel = super_cell_size_x / nx_simulated_horizontal_samples;
     sampling_rate_super_cell_y_nm_pixel = super_cell_size_y / ny_simulated_vertical_samples;
@@ -539,14 +558,14 @@ int main(int argc, char** argv )
       celslc_parameters.set_ht_accelaration_voltage(ht_accelaration_voltage);
       celslc_parameters.set_dwf_switch(dwf_switch);
       celslc_parameters.set_abs_switch(abs_switch);
-      celslc_parameters.set_bin_path("../bin/drprobe_clt_bin_osx/celslc");
+      celslc_parameters.set_bin_path( celslc_bin_string );
       celslc_parameters.call_bin();
     }
 
     if( msa_switch == true ){
       MSA_prm::MSA_prm msa_parameters;
-       // Since the release of MSA version 0.64 you may alternatively specify the electron energy in keV in line 6
-        msa_parameters.set_electron_wavelength( ht_accelaration_voltage ); //0.00196875 );
+      // Since the release of MSA version 0.64 you may alternatively specify the electron energy in keV in line 6
+      msa_parameters.set_electron_wavelength( ht_accelaration_voltage ); //0.00196875 );
       msa_parameters.set_internal_repeat_factor_of_super_cell_along_x ( 1 );
       msa_parameters.set_internal_repeat_factor_of_super_cell_along_y ( 1 );
       std::stringstream input_prefix_stream;
@@ -562,7 +581,7 @@ int main(int argc, char** argv )
       msa_parameters.set_prm_file_name("temporary_msa_im2model.prm");
       msa_parameters.produce_prm();
       msa_parameters.set_wave_function_name ("wave.wav");
-      msa_parameters.set_bin_path("../bin/drprobe_clt_bin_osx/msa");
+      msa_parameters.set_bin_path( msa_bin_string );
       msa_parameters.set_debug_switch(debug_switch);
       msa_parameters.call_bin();
     }
@@ -624,17 +643,17 @@ int main(int argc, char** argv )
       // setters line 18
       wavimg_parameters.set_number_image_aberrations_set( number_image_aberrations );
       // setters line 19
-        // check for wavimg defocus aberration coefficient
-        if( cd_switch == true ){
-            //Defocus (a20, C1,0, C1)
-            wavimg_parameters.add_aberration_definition ( 1, coefficient_aberration_defocus, 0.0f );
-        }
-        // check for wavimg spherical aberration coefficient
-        if( cs_switch == true ){
-            //Spherical aberration (a40, C3,0, C3)
-            wavimg_parameters.add_aberration_definition ( 5, coefficient_aberration_spherical, 0.0f );
-        }
-            // setters line 19 + aberration_definition_index_number
+      // check for wavimg defocus aberration coefficient
+      if( cd_switch == true ){
+        //Defocus (a20, C1,0, C1)
+        wavimg_parameters.add_aberration_definition ( 1, coefficient_aberration_defocus, 0.0f );
+      }
+      // check for wavimg spherical aberration coefficient
+      if( cs_switch == true ){
+        //Spherical aberration (a40, C3,0, C3)
+        wavimg_parameters.add_aberration_definition ( 5, coefficient_aberration_spherical, 0.0f );
+      }
+      // setters line 19 + aberration_definition_index_number
       wavimg_parameters.set_objective_aperture_radius( 5500.0f );
       // setters line 20 + aberration_definition_index_number
       wavimg_parameters.set_center_x_of_objective_aperture( 0.0f );
@@ -645,7 +664,7 @@ int main(int argc, char** argv )
       wavimg_parameters.add_parameter_loop ( 3 , 1 , 1, slices_lower_bound, slices_upper_bound, slice_samples, "'_sl'" );
       wavimg_parameters.set_prm_file_name("temporary_wavimg_im2model.prm");
       wavimg_parameters.produce_prm();
-      wavimg_parameters.set_bin_path("../bin/drprobe_clt_bin_osx/wavimg");
+      wavimg_parameters.set_bin_path( wavimg_bin_string );
       wavimg_parameters.set_debug_switch(debug_switch);
       wavimg_parameters.call_bin();
     }

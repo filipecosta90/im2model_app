@@ -631,11 +631,36 @@ bool SIMGRID_wavimg_steplength::simulate_from_dat_file(){
       // remove the ignored edge pixels
       // we will still save the raw grayscale simulated image in order to enable image alignement (rotation)
       cv::Mat cleaned_simulated_image = raw_gray_simulated_image(ignore_edge_pixels_rectangle);
+        cv::Mat with_rectangle_simulated_image = raw_gray_simulated_image.clone();
+        rectangle ( with_rectangle_simulated_image, ignore_edge_pixels_rectangle, cvScalar(255,255,255), 1, 8, 0  );
+        
+        // get the .dat image name
+        std::stringstream output_debug_info1;
+        output_debug_info1 << "with_rectangle_sim_" << std::setw(3) << std::setfill('0') << std::to_string(thickness) << "_" << std::setw(3) << std::setfill('0') << std::to_string(defocus) << ".png";
+        std::string string_output_debug_info1 = output_debug_info1.str();
+        
+        // get the .dat image name
+        std::stringstream output_debug_info2;
+        output_debug_info2 << "no_reshape_sim_raw_" << std::setw(3) << std::setfill('0') << std::to_string(thickness) << "_" << std::setw(3) << std::setfill('0') << std::to_string(defocus) << ".png";
+        std::string string_output_debug_info2 = output_debug_info2.str();
+        
+        // get the .dat image name
+        std::stringstream output_debug_info3;
+        output_debug_info3 << "reshaped_sim_raw_" << std::setw(3) << std::setfill('0') << std::to_string(thickness) << "_" << std::setw(3) << std::setfill('0') << std::to_string(defocus) << ".png";
+        std::string string_output_debug_info3 = output_debug_info3.str();
+        
+        imwrite( string_output_debug_info1 , with_rectangle_simulated_image );
 
       // confirm if it needs reshaping
       if ( simulated_image_needs_reshape ){
+          
+          imwrite( string_output_debug_info2 , raw_gray_simulated_image );
+          
         resize(cleaned_simulated_image, cleaned_simulated_image, cv::Size(0,0), reshape_factor_from_supper_cell_to_experimental_x, reshape_factor_from_supper_cell_to_experimental_y, cv::INTER_LINEAR );
         resize(raw_gray_simulated_image, raw_gray_simulated_image, cv::Size(0,0), reshape_factor_from_supper_cell_to_experimental_x, reshape_factor_from_supper_cell_to_experimental_y, cv::INTER_LINEAR );
+          
+          imwrite( string_output_debug_info3 , raw_gray_simulated_image );
+
 
       }
 
