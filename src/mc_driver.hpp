@@ -34,7 +34,9 @@ namespace MC{
       void add_looped_ItemValue(const int loop_number, const int loop_col_number, const std::string &ItemValue);
       bool extract_unit_cell();
       bool populate_unit_cell();
-
+      bool populate_symetry_equiv_pos_as_xyz_unit_cell();
+      bool populate_atom_site_unit_cell();
+      bool create_atoms_from_site_and_symetry();
       std::ostream& print(std::ostream &stream);
     private:
 

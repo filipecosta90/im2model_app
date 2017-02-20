@@ -2,18 +2,16 @@
 */
 
 #include <vector>
-
+#include <iostream>
 #include "symbcalc.hpp"
 #include "string_additions.hpp"
-
-using namespace std;
 
 /** This function is used to evaluate a string expresion
   It understands /,+,-,*,x,y,z,and 0-9,. the calculator returns
   the numerical result as a double**/
-float symbCalc(string expresion,float x,float y,float z){
+float symbCalc(std::string expression,double x,double y,double z){
   float val=0;
-  vector<string> numbers = split(expresion,"+-/*");
+  std::vector<std::string> numbers = split(expression,"+-/*");
 
   //This will replace all x,y,z with there "value"
   for (unsigned int i=0;i<numbers.size();i++){
@@ -28,12 +26,12 @@ float symbCalc(string expresion,float x,float y,float z){
     }
   }
 
-  vector<double> nums;
+  std::vector<double> nums;
   for (unsigned int i=0;i<numbers.size();i++){
     nums.push_back(convert_to_double(numbers[i]));
   }
 
-  vector<string> opperator = split(expresion,"1234567890.xyz");
+  std::vector<std::string> opperator = split(expression,"1234567890.xyz");
 
   //To get rid of the +- before the expresion
   if (opperator.size() == numbers.size()){

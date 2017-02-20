@@ -87,14 +87,26 @@ EOL     (({CR}{LF})|{LF})
     return( token::ITEMVALUE );
 }
 
-[\'](.)*[\']([ \t]|{EOL})  {
+[\'](.)*[\']  {
   /*  Single Quoted Strings */
+
+  /* remove initial quote */
+  yytext++;
+  /* remove last quote */
+  yytext[strlen(yytext)-1]='\0';
+
   yylval->build< std::string >( yytext );
   return( token::ITEMVALUE );
 }
 
 [\"](.)*[\"]([ \t]|{EOL})  {  
   /* Double Quoted Strings */
+
+  /* remove initial quote */
+  yytext++;
+  /* remove last quote */
+  yytext[strlen(yytext)-1]='\0';
+
   yylval->build< std::string >( yytext );
   return( token::ITEMVALUE );
 }

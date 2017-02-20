@@ -2,6 +2,11 @@
 #include <fstream>
 #include <cassert>
 
+#include <algorithm>
+#include <string>
+#include <iostream>
+#include <cctype>
+
 #include "mc_driver.hpp"
 #include "unit_cell.hpp"
 #include "string_additions.hpp"
@@ -182,5 +187,99 @@ bool MC::MC_Driver::populate_unit_cell(){
     parse_error = true;
   }
   return !parse_error;
+}
+
+bool MC::MC_Driver::populate_atom_site_unit_cell(){
+  bool parse_error = false;
+  std::map<std::string,std::vector<std::string>>::iterator ItemList_itt;
+  ItemList_itt = looped_items.find("_atom_site_fract_x");
+  if (ItemList_itt != looped_items.end()){
+    std::vector<std::string> ValueList;  
+    std::vector<std::string>::iterator value_list_it; 
+    ValueList = ItemList_itt->second;
+    for(value_list_it = ValueList.begin() ; value_list_it < ValueList.end(); value_list_it++ ) {
+      std::string _atom_site_fract_x = *value_list_it;
+      const double d_item_value = convert_to_double( _atom_site_fract_x );
+      unit_cell.add_atom_site_fract_x( d_item_value );
+    }
+  }
+  else{
+    parse_error = true;
+  }
+  ItemList_itt = looped_items.find("_atom_site_fract_y");
+  if (ItemList_itt != looped_items.end()){
+    std::vector<std::string> ValueList;  
+    std::vector<std::string>::iterator value_list_it; 
+    ValueList = ItemList_itt->second;
+    for(value_list_it = ValueList.begin() ; value_list_it < ValueList.end(); value_list_it++ ) {
+      std::string _atom_site_fract_y = *value_list_it;
+      const double d_item_value = convert_to_double( _atom_site_fract_y );
+      unit_cell.add_atom_site_fract_y( d_item_value );
+    }
+  }
+  else{
+    parse_error = true;
+  }
+  ItemList_itt = looped_items.find("_atom_site_fract_z");
+  if (ItemList_itt != looped_items.end()){
+    std::vector<std::string> ValueList;  
+    std::vector<std::string>::iterator value_list_it; 
+    ValueList = ItemList_itt->second;
+    for(value_list_it = ValueList.begin() ; value_list_it < ValueList.end(); value_list_it++ ) {
+      std::string _atom_site_fract_z = *value_list_it;
+      const double d_item_value = convert_to_double( _atom_site_fract_z );
+      unit_cell.add_atom_site_fract_z( d_item_value );
+    }
+  }
+  else{
+    parse_error = true;
+  }
+  ItemList_itt = looped_items.find("_atom_site_type_symbol");
+  if (ItemList_itt != looped_items.end()){
+    std::vector<std::string> ValueList;  
+    std::vector<std::string>::iterator value_list_it; 
+    ValueList = ItemList_itt->second;
+    for(value_list_it = ValueList.begin() ; value_list_it < ValueList.end(); value_list_it++ ) {
+      std::string _atom_site_type_symbol = *value_list_it;
+      unit_cell.add_atom_site_type_symbol ( _atom_site_type_symbol );
+    }
+  }
+  else{
+    parse_error = true;
+  }
+
+  return !parse_error;
+}
+
+bool MC::MC_Driver::populate_symetry_equiv_pos_as_xyz_unit_cell(){
+  std::map<std::string,std::vector<std::string>>::iterator ItemList_itt;
+  ItemList_itt = looped_items.find("_symmetry_equiv_pos_as_xyz");
+  if (ItemList_itt != looped_items.end()){
+    std::vector<std::string> ValueList;  
+    std::vector<std::string>::iterator value_list_it; 
+    ValueList = ItemList_itt->second;
+    for(value_list_it = ValueList.begin() ; value_list_it < ValueList.end(); value_list_it++ ) {
+      std::string symetry_xyz = *value_list_it;
+      //remove white spaces
+      symetry_xyz.erase(std::remove_if(
+            symetry_xyz.begin(), 
+            symetry_xyz.end(),
+            [](char x){return std::isspace(x);}
+            ),
+          symetry_xyz.end());
+      std::vector<std::string> symetry_vec = split( symetry_xyz, ",");
+      std::cout << symetry_vec[0] << " " << symetry_vec[1] << " " << symetry_vec[2] <<  std::endl ;
+      unit_cell.add_symmetry_equiv_pos_as_x( symetry_vec[0]);
+      unit_cell.add_symmetry_equiv_pos_as_y( symetry_vec[1]);
+      unit_cell.add_symmetry_equiv_pos_as_z( symetry_vec[2]);
+    }
+  }
+  return true;
+}
+
+bool MC::MC_Driver::create_atoms_from_site_and_symetry(){
+  bool result;
+  result = unit_cell.create_atoms_from_site_and_symetry();
+  return result;
 }
 
