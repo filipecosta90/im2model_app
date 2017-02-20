@@ -8,6 +8,7 @@
 
 #include "mc_scanner.hpp"
 #include "mc_parser.tab.hh"
+#include "unit_cell.hpp"
 
 namespace MC{
 
@@ -31,6 +32,8 @@ namespace MC{
       void add_loop( const int loop_number);
       void add_looped_ItemName(const int loop_number, const int loop_col_number, const std::string &ItemName);
       void add_looped_ItemValue(const int loop_number, const int loop_col_number, const std::string &ItemValue);
+      bool extract_unit_cell();
+      bool populate_unit_cell();
 
       std::ostream& print(std::ostream &stream);
     private:
@@ -42,7 +45,8 @@ namespace MC{
       std::map<std::string,std::string> non_looped_items;
       std::map<int,std::vector<std::string>> loop_tables;
       std::map<std::string,std::vector<std::string>> looped_items;
-      
+
+      Unit_Cell unit_cell; 
       const std::string red   = "\033[1;31m";
       const std::string blue  = "\033[1;36m";
       const std::string norm  = "\033[0m";

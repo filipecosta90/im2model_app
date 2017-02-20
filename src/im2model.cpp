@@ -483,6 +483,7 @@ int main(int argc, char** argv )
       return -1;
     }
     driver.parse( super_cell_cif_file.c_str() );
+    driver.populate_unit_cell();
     // Simulated image sampling rate
     sampling_rate_super_cell_x_nm_pixel = super_cell_size_x / nx_simulated_horizontal_samples;
     sampling_rate_super_cell_y_nm_pixel = super_cell_size_y / ny_simulated_vertical_samples;

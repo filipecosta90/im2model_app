@@ -6,6 +6,7 @@ find_package(FLEX REQUIRED)
 
 file(GLOB im2model_SRC
   "*.h"
+  "*.hpp"
   "*.cpp"
   )
 

@@ -3,6 +3,9 @@
 #include <cassert>
 
 #include "mc_driver.hpp"
+#include "unit_cell.hpp"
+#include "string_additions.hpp"
+
 
 MC::MC_Driver::~MC_Driver(){
   delete(scanner);
@@ -106,5 +109,78 @@ std::ostream& MC::MC_Driver::print( std::ostream &stream )
   stream << red  << "Results: " << norm << "\n";
   stream << blue << "Characters: " << norm << "\n";
   return(stream);
+}
+
+bool MC::MC_Driver::extract_unit_cell(){
+  return true;
+}
+
+bool MC::MC_Driver::populate_unit_cell(){
+  bool parse_error=false;
+  std::map<std::string,std::string>::iterator it;
+  it = non_looped_items.find("_cell_length_a");
+  if (it != non_looped_items.end()){
+    const std::string item_value = it->second;
+    const double d_item_value = convert_to_double( item_value );
+    unit_cell.set_cell_length_a( d_item_value ); 
+  }
+  else{
+    parse_error = true;
+  }
+  it = non_looped_items.find("_cell_length_b");
+  if (it != non_looped_items.end()){
+    const std::string item_value = it->second;
+    const double d_item_value = convert_to_double( item_value );
+    unit_cell.set_cell_length_b( d_item_value ); 
+  }
+  else{
+    parse_error = true;
+  }
+  it = non_looped_items.find("_cell_length_c");
+  if (it != non_looped_items.end()){
+    const std::string item_value = it->second;
+    const double d_item_value = convert_to_double( item_value );
+    unit_cell.set_cell_length_c( d_item_value ); 
+  }
+  else{
+    parse_error = true;
+  }
+  it = non_looped_items.find("_cell_angle_alpha");
+  if (it != non_looped_items.end()){
+    const std::string item_value = it->second;
+    const double d_item_value = convert_to_double( item_value );
+    unit_cell.set_cell_angle_alpha( d_item_value ); 
+  }
+  else{
+    parse_error = true;
+  }
+  it = non_looped_items.find("_cell_angle_beta");
+  if (it != non_looped_items.end()){
+    const std::string item_value = it->second;
+    const double d_item_value = convert_to_double( item_value );
+    unit_cell.set_cell_angle_beta( d_item_value ); 
+  }
+  else{
+    parse_error = true;
+  }
+  it = non_looped_items.find("_cell_angle_gamma");
+  if (it != non_looped_items.end()){
+    const std::string item_value = it->second;
+    const double d_item_value = convert_to_double( item_value );
+    unit_cell.set_cell_angle_gamma( d_item_value ); 
+  }
+  else{
+    parse_error = true;
+  }
+  it = non_looped_items.find("_cell_volume");
+  if (it != non_looped_items.end()){
+    const std::string item_value = it->second;
+    const double d_item_value = convert_to_double( item_value );
+    unit_cell.set_cell_volume( d_item_value ); 
+  }
+  else{
+    parse_error = true;
+  }
+  return !parse_error;
 }
 
