@@ -38,6 +38,7 @@ namespace MC{
       bool populate_atom_site_unit_cell();
       bool create_atoms_from_site_and_symetry();
       std::ostream& print(std::ostream &stream);
+      Unit_Cell get_unit_cell();
     private:
 
       void parse_helper( std::istream &stream );

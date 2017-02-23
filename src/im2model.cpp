@@ -350,6 +350,9 @@ int main(int argc, char** argv )
   int reshaped_simulated_image_height;
 
   MC::MC_Driver driver;
+  Unit_Cell::Unit_Cell unit_cell;
+  cv::Point3d  zone_axis_vector_uvw;
+  cv::Point3d  upward_vector_hkl;
 
   try{
     /** Define and parse the program options
@@ -482,13 +485,20 @@ int main(int argc, char** argv )
       std::cerr << desc << std::endl;
       return -1;
     }
-    
+
     /* CIF file parser */
     driver.parse( super_cell_cif_file.c_str() );
     driver.populate_unit_cell();
     driver.populate_atom_site_unit_cell();
     driver.populate_symetry_equiv_pos_as_xyz_unit_cell();
     driver.create_atoms_from_site_and_symetry();
+
+    unit_cell = driver.get_unit_cell();
+    zone_axis_vector_uvw = cv::Point3d( perpendicular_dir_u, perpendicular_dir_v , perpendicular_dir_w );
+    upward_vector_hkl = cv::Point3d( projection_dir_h, projection_dir_k , projection_dir_l );
+    unit_cell.set_zone_axis_vector( zone_axis_vector_uvw );
+    unit_cell.set_upward_vector( upward_vector_hkl );
+    
 
     // Simulated image sampling rate
     sampling_rate_super_cell_x_nm_pixel = super_cell_size_x / nx_simulated_horizontal_samples;

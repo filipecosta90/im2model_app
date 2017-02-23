@@ -4,6 +4,13 @@ project(im2model CXX)
 
 cmake_minimum_required(VERSION 3.1)
 
+include(ExternalProject)
+
+#ExternalProject_Add(mantid
+# GIT_REPOSITORY  https://github.com/mantidproject/mantid.git 
+# INSTALL_DIR ${PROJECT_BINARY_DIR}
+# CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>)
+
 set(Boost_USE_STATIC_LIBS ON) 
 set(Boost_USE_MULTITHREADED ON)  
 set(Boost_USE_STATIC_RUNTIME OFF) 
@@ -25,4 +32,5 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 # we add the sub-directories that we want CMake to scan
 add_subdirectory(src)
 
+#add_dependencies(im2model mantid)
 

@@ -3,6 +3,15 @@
 
 #include "atom.hpp"
 
+#include <opencv2/opencv.hpp>
+#include "opencv2/highgui/highgui.hpp"
+#include "opencv2/imgproc/imgproc.hpp"
+
+#include "opencv2/opencv_modules.hpp"
+
+#include "opencv2/core/core.hpp"
+#include "opencv2/features2d/features2d.hpp"
+
 class Unit_Cell {
   private:
     double _cell_length_a;
@@ -12,6 +21,12 @@ class Unit_Cell {
     double _cell_angle_beta;
     double _cell_angle_gamma;
     double _cell_volume;
+
+    /** Zone Axis / Lattice vector **/
+    cv::Point3d zone_axis_vector_uvw;
+
+    /** reciprocal-lattice (Miller) indices  **/
+    cv::Point3d upward_vector_hkl;
 
     /* symetry */
     std::string _symmetry_space_group_name_H_M;
@@ -32,6 +47,8 @@ class Unit_Cell {
     /* end Atom site */
 
     std::vector<Atom::Atom> _atoms;
+    std::vector<cv::Point3d> _atom_positions;
+
   public:
     Unit_Cell();
     void extract_space_group();
@@ -42,6 +59,9 @@ class Unit_Cell {
     void set_cell_angle_beta( double beta );
     void set_cell_angle_gamma( double gamma );
     void set_cell_volume( double volume );
+    void set_zone_axis_vector( cv::Point3d uvw );
+    void set_upward_vector( cv::Point3d hkl );
+    
     void add_symmetry_equiv_pos_as_xyz( std::string xyz );
     void add_symmetry_equiv_pos_as_x( std::string x );
     void add_symmetry_equiv_pos_as_y( std::string y );

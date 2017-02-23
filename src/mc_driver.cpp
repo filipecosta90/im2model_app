@@ -268,7 +268,7 @@ bool MC::MC_Driver::populate_symetry_equiv_pos_as_xyz_unit_cell(){
             ),
           symetry_xyz.end());
       std::vector<std::string> symetry_vec = split( symetry_xyz, ",");
-      std::cout << symetry_vec[0] << " " << symetry_vec[1] << " " << symetry_vec[2] <<  std::endl ;
+      //std::cout << symetry_vec[0] << " " << symetry_vec[1] << " " << symetry_vec[2] <<  std::endl ;
       unit_cell.add_symmetry_equiv_pos_as_x( symetry_vec[0]);
       unit_cell.add_symmetry_equiv_pos_as_y( symetry_vec[1]);
       unit_cell.add_symmetry_equiv_pos_as_z( symetry_vec[2]);
@@ -281,5 +281,9 @@ bool MC::MC_Driver::create_atoms_from_site_and_symetry(){
   bool result;
   result = unit_cell.create_atoms_from_site_and_symetry();
   return result;
+}
+
+Unit_Cell MC::MC_Driver::get_unit_cell(){
+  return unit_cell;
 }
 
