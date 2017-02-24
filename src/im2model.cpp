@@ -498,7 +498,7 @@ int main(int argc, char** argv )
     upward_vector_hkl = cv::Point3d( projection_dir_h, projection_dir_k , projection_dir_l );
     unit_cell.set_zone_axis_vector( zone_axis_vector_uvw );
     unit_cell.set_upward_vector( upward_vector_hkl );
-    
+    unit_cell.form_matrix_from_miller_indices(); 
 
     // Simulated image sampling rate
     sampling_rate_super_cell_x_nm_pixel = super_cell_size_x / nx_simulated_horizontal_samples;

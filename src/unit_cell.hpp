@@ -49,6 +49,9 @@ class Unit_Cell {
     std::vector<Atom::Atom> _atoms;
     std::vector<cv::Point3d> _atom_positions;
 
+    /** Orientation **/
+    cv::Mat orientation_matrix;
+
   public:
     Unit_Cell();
     void extract_space_group();
@@ -61,12 +64,12 @@ class Unit_Cell {
     void set_cell_volume( double volume );
     void set_zone_axis_vector( cv::Point3d uvw );
     void set_upward_vector( cv::Point3d hkl );
-    
+
     void add_symmetry_equiv_pos_as_xyz( std::string xyz );
     void add_symmetry_equiv_pos_as_x( std::string x );
     void add_symmetry_equiv_pos_as_y( std::string y );
     void add_symmetry_equiv_pos_as_z( std::string z );
-    
+
     /* start atom site public methods */
     void add_atom_site_type_symbol( std::string type_symbol );
     void add_atom_site_fract_x( double fract_x );
@@ -74,6 +77,7 @@ class Unit_Cell {
     void add_atom_site_fract_z( double fract_z );
 
     bool create_atoms_from_site_and_symetry();
+    void form_matrix_from_miller_indices();
 };
 
 #endif

@@ -124,3 +124,38 @@ bool Unit_Cell::create_atoms_from_site_and_symetry(){
   return true;
 }
 
+void Unit_Cell::form_matrix_from_miller_indices (){
+
+  const double norm_uvw = cv::norm(zone_axis_vector_uvw);
+  const double norm_hkl = cv::norm(upward_vector_hkl);
+
+  // Miller indices [integer representation of direction cosines] 
+  // can be converted to a unit vector, n, by dividing by the 
+  // square root of the sum of the squares: {similar for [uvw]}.  
+  // This is known as normalization.
+  cv::Point3d b = zone_axis_vector_uvw / norm_uvw; 
+  cv::Point3d n = upward_vector_hkl / norm_hkl; 
+
+  cv::Mat b_matrix (b, CV_64F);
+  cv::Mat n_matrix (n, CV_64F);
+
+  cv::Mat t_up = n_matrix.cross( b_matrix); 
+  const double norm_t = cv::norm( t_up );
+  cv::Mat t_mat = t_up / norm_t; 
+  cv::Point3d t;
+  t.x = t_mat.at<double>(0,0);
+  t.y = t_mat.at<double>(1,0);
+  t.z = t_mat.at<double>(2,0);
+
+  // free aux matrix mem
+  b_matrix.release();
+  n_matrix.release();
+
+  /* insert into matrix */
+  std::vector<cv::Point3d> points;
+  points.push_back(t);
+  points.push_back(n);
+  points.push_back(b);
+  orientation_matrix = cv::Mat(points);
+  // std::cout << orientation_matrix << std::endl;
+}
