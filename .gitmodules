@@ -1,3 +1,0 @@
-[submodule "thirdparty/mantid"]
-	path = thirdparty/mantid
-	url = https://github.com/mantidproject/mantid.git
