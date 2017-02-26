@@ -37,11 +37,15 @@
 // emitted by the command line parser
 #include <exception>
 
+// Visualization
+#include <GL/glut.h>
+
 #include "celslc_prm.h"
 #include "msa_prm.h"
 #include "wavimg_prm.h"
 #include "simgrid_steplength.h"
 #include "mc_driver.hpp"
+#include "chem_database.hpp"
 
 
 using namespace cv;
@@ -78,6 +82,57 @@ int max_thresh = 255;
 RNG rng(12345);
 int max_contour_distance_px = 30;
 int max_contour_distance_thresh_px = 255;
+
+
+
+Unit_Cell unit_cell;
+
+/* test opengl */
+GLfloat light_diffuse[] = {0.0, 0.0, 0.0, 1.0};  /* Red diffuse light. */
+GLfloat light_position[] = {1.0, 1.0, 1.0, 0.0};  /* Infinite light location. */
+
+
+
+  void
+display(void)
+{
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  unit_cell.render_gl();  
+  glutSwapBuffers();
+}
+
+  void
+init(void)
+{
+  // Set background color to black and opaque
+  glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+
+  /* Setup cube vertex data. */
+  /* Enable a single OpenGL light. */
+  /* glLightfv(GL_LIGHT0, GL_DIFFUSE, light_diffuse);
+     glLightfv(GL_LIGHT0, GL_POSITION, light_position);
+     glEnable(GL_LIGHT0);
+     glEnable(GL_LIGHTING);
+     */
+
+  /* Use depth buffering for hidden surface elimination. */
+  glEnable(GL_DEPTH_TEST);
+
+  /* Setup the view of the cube. */
+  glMatrixMode(GL_PROJECTION);
+  gluPerspective( /* field of view in degree */ 40.0,
+      /* aspect ratio */ 1.0,
+      /* Z near */ 1.0, /* Z far */ 10.0);
+  glMatrixMode(GL_MODELVIEW);
+  gluLookAt(0.0, 0.0, 5.0,  /* eye is at (0,0,5) */
+      0.0, 0.0, 0.0,      /* center is at (0,0,0) */
+      0.0, 1.0, 0.);      /* up is in positive Y direction */
+
+  /* Adjust cube position to be asthetic angle. */
+  glTranslatef(0.0, 0.0, -1.0);
+  glRotatef(60, 1.0, 0.0, 0.0);
+  glRotatef(-20, 0.0, 0.0, 1.0);
+}
 
 
 /// Function Headers
@@ -350,7 +405,7 @@ int main(int argc, char** argv )
   int reshaped_simulated_image_height;
 
   MC::MC_Driver driver;
-  Unit_Cell::Unit_Cell unit_cell;
+
   cv::Point3d  zone_axis_vector_uvw;
   cv::Point3d  upward_vector_hkl;
 
@@ -499,6 +554,15 @@ int main(int argc, char** argv )
     unit_cell.set_zone_axis_vector( zone_axis_vector_uvw );
     unit_cell.set_upward_vector( upward_vector_hkl );
     unit_cell.form_matrix_from_miller_indices(); 
+
+
+    glutInit(&argc, argv);
+    glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
+    glutCreateWindow("Molecular model");
+    glutDisplayFunc(display);
+    init();
+    glutMainLoop();
+
 
     // Simulated image sampling rate
     sampling_rate_super_cell_x_nm_pixel = super_cell_size_x / nx_simulated_horizontal_samples;

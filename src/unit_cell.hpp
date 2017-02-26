@@ -1,8 +1,15 @@
 #ifndef __UNIT_CELL_H__
 #define __UNIT_CELL_H__
 
-#include "atom.hpp"
 
+
+// visualization
+#include <GL/glut.h> 
+
+#include <glm/glm.hpp>
+#include <glm/vec4.hpp>  
+
+// opencv 
 #include <opencv2/opencv.hpp>
 #include "opencv2/highgui/highgui.hpp"
 #include "opencv2/imgproc/imgproc.hpp"
@@ -11,6 +18,9 @@
 
 #include "opencv2/core/core.hpp"
 #include "opencv2/features2d/features2d.hpp"
+
+#include "atom.hpp"
+#include "chem_database.hpp"
 
 class Unit_Cell {
   private:
@@ -48,10 +58,16 @@ class Unit_Cell {
 
     std::vector<Atom::Atom> _atoms;
     std::vector<cv::Point3d> _atom_positions;
+    std::vector<glm::vec4> _atom_rgba_colors;
 
     /** Orientation **/
     cv::Mat orientation_matrix;
 
+    /** Chem Database **/
+    Chem_Database chem_database;
+
+    void renderSphere(float x, float y, float z, float radius, glm::vec4 atom_rgba_color,int subdivisions,GLUquadricObj *quadric);
+    void renderSphere_convenient(cv::Point3d point, float radius, glm::vec4 atom_rgba_color, int subdivisions);
   public:
     Unit_Cell();
     void extract_space_group();
@@ -78,6 +94,9 @@ class Unit_Cell {
 
     bool create_atoms_from_site_and_symetry();
     void form_matrix_from_miller_indices();
+
+    void set_chem_database(Chem_Database* chem_db );
+    void render_gl();
 };
 
 #endif

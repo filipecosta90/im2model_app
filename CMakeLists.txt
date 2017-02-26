@@ -6,6 +6,21 @@ cmake_minimum_required(VERSION 3.1)
 
 include(ExternalProject)
 
+include(ExternalProject)
+ExternalProject_Add(
+  glm
+  PREFIX ${CMAKE_BINARY_DIR}/glm
+  GIT_REPOSITORY https://github.com/g-truc/glm.git
+  CONFIGURE_COMMAND ""
+  BUILD_COMMAND ""
+  INSTALL_COMMAND ""
+  LOG_DOWNLOAD ON
+  )
+ExternalProject_Get_Property(glm source_dir)
+set(GlmIncludeDir ${source_dir}/glm)
+
+
+
 #ExternalProject_Add(mantid
 # GIT_REPOSITORY  https://github.com/mantidproject/mantid.git 
 # INSTALL_DIR ${PROJECT_BINARY_DIR}
@@ -16,8 +31,12 @@ set(Boost_USE_MULTITHREADED ON)
 set(Boost_USE_STATIC_RUNTIME OFF) 
 
 find_package(Boost COMPONENTS program_options REQUIRED)
+find_package(OpenGL REQUIRED)
+find_package(GLUT REQUIRED)
 
 include_directories(${BOOST_INCLUDE_DIRS})
+include_directories( ${OPENGL_INCLUDE_DIRS} ) 
+include_directories( ${GLUT_INCLUDE_DIRS} )
 
 set(CMAKE_BINARY_DIR ${CMAKE_SOURCE_DIR}/build)
 set(EXECUTABLE_OUTPUT_PATH ${CMAKE_BINARY_DIR})
