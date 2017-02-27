@@ -38,7 +38,8 @@
 #include <exception>
 
 // Visualization
-#include <GL/glut.h>
+#include "opengl.hpp"
+
 
 #include "celslc_prm.h"
 #include "msa_prm.h"
@@ -83,61 +84,281 @@ RNG rng(12345);
 int max_contour_distance_px = 30;
 int max_contour_distance_thresh_px = 255;
 
-
-
 Unit_Cell unit_cell;
 
 /* test opengl */
-GLfloat light_diffuse[] = {0.0, 0.0, 0.0, 1.0};  /* Red diffuse light. */
-GLfloat light_position[] = {1.0, 1.0, 1.0, 0.0};  /* Infinite light location. */
 
+int screen_width=800, screen_height=600;
+GLuint vbo_cube_vertices, vbo_cube_colors;
+GLuint ibo_cube_elements;
+GLuint program;
+GLint attribute_coord3d, attribute_v_color;
+GLint uniform_mvp;
 
+std::vector<GLfloat> vertices;
+std::vector<GLfloat> colors;
+std::vector<GLint> indices;
 
-  void
-display(void)
+bool init_resources()
 {
-  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-  unit_cell.render_gl();  
+    int slices = 10;
+    int stacks = 15;
+    float radius = 1.0f;
+    float		sinI[slices], cosI[slices];
+    float		sinJ[stacks], cosJ[stacks];
+    
+    // create sin/cos cache
+    for (int i = 0; i < slices; i++){
+        sinI[i]= sin(2.f * M_PI * (float)i / (float)slices);
+        cosI[i]= cos(2.f * M_PI * (float)i / (float)slices);
+    }
+    for (int j = 1; j < stacks; j++){
+        sinJ[j]= sin( M_PI * (float)j / (float)stacks);
+        cosJ[j]= cos( M_PI * (float)j / (float)stacks);
+    }
+    
+    const int floats_per_vertex = 3;
+    unsigned int i, v_size;
+  
+    // positive Z pole
+    vertices.push_back( 0.f );
+    vertices.push_back( 0.f );
+    vertices.push_back( radius );
+    colors.push_back(1.0f);
+    colors.push_back(0.0f);
+    colors.push_back(0.0f);
+    
+    // stacks
+    for (int j = 1; j < stacks; j++) { // Azimuth [0, 2PI]
+        for (int i = 0; i < slices; i++) { // Elevation [0, PI]
+            //vertex x,y,z
+            float x,y,z;
+            x = sinI[i] * sinJ[j] * radius;
+            y = cosI[i] * sinJ[j] * radius;
+            z = cosJ[j] * radius;
+            vertices.push_back( x );
+            vertices.push_back( y );
+            vertices.push_back( z );
+            colors.push_back(1.0f);
+            colors.push_back(0.0f);
+            colors.push_back(0.0f);
+            
+            //normals
+            //   vertices[vertex_padding+0] = sinI[i] * sinJ[j] * radius;
+            //   vertices[vertex_padding+1] = cosI[i] * sinJ[j] * radius;
+            //   vertices[vertex_padding+2] = cosJ[j] * radius;
+        }
+    }
+    
+    // negative Z pole
+    vertices.push_back( 0.0f );
+    vertices.push_back( 0.0f );
+    vertices.push_back( -radius );
+    colors.push_back(1.0f);
+    colors.push_back(0.0f);
+    colors.push_back(0.0f);
+    
+    /* indices of vertices for every triangle */
+    
+    // positive Z pole
+    const int points_per_triangle = 3;
+    
+    int rowA = 0;
+    int rowB = 1;
+    int index_pos=0;
+    
+    for(int i = 0; i < slices - 1; i++) {
+        indices.push_back( rowA );
+        indices.push_back( rowB + i + 1 );
+        indices.push_back( rowB + i );
+    }
+    indices.push_back( rowA );
+    indices.push_back( rowB );
+    indices.push_back( rowB + i );
+    
+    // interior stacks
+    for (int j = 1; j < stacks - 1; j++) {
+        rowA = 1 + (j - 1) * slices;
+        rowB = rowA + slices;
+        
+        for (int i = 0; i < slices - 1; i++) {
+            indices.push_back( rowA + i );
+            indices.push_back( rowA + i + 1 );
+            indices.push_back( rowB + i );
+            
+            indices.push_back( rowA + i + 1 );
+            indices.push_back( rowB + i + 1 );
+            indices.push_back( rowB + i );
+        }
+        
+        indices.push_back( rowA + j );
+        indices.push_back( rowA );
+        indices.push_back( rowB + j );
+        
+        indices.push_back( rowA + j + 1 );
+        indices.push_back( rowB + j + 1 );
+        indices.push_back( rowB + j );
+    }
+    
+    // negative Z pole
+    rowA = 1 + (stacks - 2) * slices;
+    rowB = rowA + slices;
+    
+    for (int i = 0; i < slices - 1; i++) {
+        indices.push_back( rowA + i );
+        indices.push_back( rowA + i + 1 );
+        indices.push_back( rowB );
+    }
+    indices.push_back( rowA + i );
+    indices.push_back( rowA );
+    indices.push_back( rowB );
+
+  glGenBuffers(1, &vbo_cube_vertices);
+  glBindBuffer(GL_ARRAY_BUFFER, vbo_cube_vertices);
+    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(GLfloat), vertices.data(), GL_STATIC_DRAW);
+    std::cout << "binded vertices " << std::endl;
+  glGenBuffers(1, &vbo_cube_colors);
+  glBindBuffer(GL_ARRAY_BUFFER, vbo_cube_colors);
+    glBufferData(GL_ARRAY_BUFFER, colors.size() * sizeof(GLfloat), colors.data(), GL_STATIC_DRAW);
+    std::cout << "binded colors " << std::endl;
+  glGenBuffers(1, &ibo_cube_elements);
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo_cube_elements);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(GLushort), indices.data(), GL_STATIC_DRAW);
+    std::cout << "binded triangles " << std::endl;
+    
+    
+
+  GLint link_ok = GL_FALSE;
+
+  GLuint vs, fs;
+  if ((vs = create_shader("shaders/cube.v.glsl", GL_VERTEX_SHADER))   == 0) return false;
+  if ((fs = create_shader("shaders/cube.f.glsl", GL_FRAGMENT_SHADER)) == 0) return false;
+
+  program = glCreateProgram();
+  glAttachShader(program, vs);
+  glAttachShader(program, fs);
+  glLinkProgram(program);
+  glGetProgramiv(program, GL_LINK_STATUS, &link_ok);
+  if (!link_ok) {
+    fprintf(stderr, "glLinkProgram:");
+    print_log(program);
+    return false;
+  }
+
+  const char* attribute_name;
+  attribute_name = "coord3d";
+  attribute_coord3d = glGetAttribLocation(program, attribute_name);
+  if (attribute_coord3d == -1) {
+    fprintf(stderr, "Could not bind attribute %s\n", attribute_name);
+    return false;
+  }
+  attribute_name = "v_color";
+  attribute_v_color = glGetAttribLocation(program, attribute_name);
+  if (attribute_v_color == -1) {
+    fprintf(stderr, "Could not bind attribute %s\n", attribute_name);
+    return false;
+  }
+  const char* uniform_name;
+  uniform_name = "mvp";
+  uniform_mvp = glGetUniformLocation(program, uniform_name);
+  if (uniform_mvp == -1) {
+    fprintf(stderr, "Could not bind uniform %s\n", uniform_name);
+    return false;
+  }
+  return true;
+}
+
+void onIdle() {
+  float angle = glutGet(GLUT_ELAPSED_TIME) / 1000.0 * 45;  // 45° per second
+  glm::vec3 axis_y(0, 1, 0);
+  glm::mat4 anim = glm::rotate(glm::mat4(1.0f), glm::radians(angle), axis_y);
+
+  glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(0.0, 0.0, -4.0));
+  glm::mat4 view = glm::lookAt(glm::vec3(0.0, 2.0, 0.0), glm::vec3(0.0, 0.0, -4.0), glm::vec3(0.0, 1.0, 0.0));
+  glm::mat4 projection = glm::perspective(45.0f, 1.0f*screen_width/screen_height, 0.1f, 10.0f);
+
+  glm::mat4 mvp = projection * view * model * anim;
+
+  glUseProgram(program);
+  glUniformMatrix4fv(uniform_mvp, 1, GL_FALSE, glm::value_ptr(mvp));
+  glutPostRedisplay();
+}
+
+void onDisplay()
+{
+  glClearColor(1.0, 1.0, 1.0, 1.0);
+  glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
+
+  glUseProgram(program);
+  glEnableVertexAttribArray(attribute_coord3d);
+  // Describe our vertices array to OpenGL (it can't guess its format automatically)
+  glBindBuffer(GL_ARRAY_BUFFER, vbo_cube_vertices);
+  glVertexAttribPointer(
+      attribute_coord3d, // attribute
+      3,                 // number of elements per vertex, here (x,y,z)
+      GL_FLOAT,          // the type of each element
+      GL_FALSE,          // take our values as-is
+      0,                 // no extra data between each position
+      0                  // offset of first element
+      );
+
+  glEnableVertexAttribArray(attribute_v_color);
+  glBindBuffer(GL_ARRAY_BUFFER, vbo_cube_colors);
+  glVertexAttribPointer(
+      attribute_v_color, // attribute
+      3,                 // number of elements per vertex, here (R,G,B)
+      GL_FLOAT,          // the type of each element
+      GL_FALSE,          // take our values as-is
+      0,                 // no extra data between each position
+      0                  // offset of first element
+      );
+
+  /* Push each element in buffer_vertices to the vertex shader */
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo_cube_elements);
+  int size;
+    glGetBufferParameteriv(GL_ELEMENT_ARRAY_BUFFER, GL_BUFFER_SIZE, &size);
+  glDrawElements(GL_TRIANGLES, size/sizeof(GLushort), GL_UNSIGNED_INT , 0);
+    
+   // std::cout << "buffer size " << size/sizeof(GLushort) << std::endl;
+
+  glDisableVertexAttribArray(attribute_coord3d);
+  glDisableVertexAttribArray(attribute_v_color);
   glutSwapBuffers();
 }
 
-  void
-init(void)
+void onReshape(int width, int height) {
+  screen_width = width;
+  screen_height = height;
+  glViewport(0, 0, screen_width, screen_height);
+}
+
+void free_resources()
 {
-  // Set background color to black and opaque
-  glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-
-  /* Setup cube vertex data. */
-  /* Enable a single OpenGL light. */
-  /* glLightfv(GL_LIGHT0, GL_DIFFUSE, light_diffuse);
-     glLightfv(GL_LIGHT0, GL_POSITION, light_position);
-     glEnable(GL_LIGHT0);
-     glEnable(GL_LIGHTING);
-     */
-
-  /* Use depth buffering for hidden surface elimination. */
-  glEnable(GL_DEPTH_TEST);
-
-  /* Setup the view of the cube. */
-  glMatrixMode(GL_PROJECTION);
-  gluPerspective( /* field of view in degree */ 40.0,
-      /* aspect ratio */ 1.0,
-      /* Z near */ 1.0, /* Z far */ 10.0);
-  glMatrixMode(GL_MODELVIEW);
-  gluLookAt(0.0, 0.0, 5.0,  /* eye is at (0,0,5) */
-      0.0, 0.0, 0.0,      /* center is at (0,0,0) */
-      0.0, 1.0, 0.);      /* up is in positive Y direction */
-
-  /* Adjust cube position to be asthetic angle. */
-  glTranslatef(0.0, 0.0, -1.0);
-  glRotatef(60, 1.0, 0.0, 0.0);
-  glRotatef(-20, 0.0, 0.0, 1.0);
+  glDeleteProgram(program);
+  glDeleteBuffers(1, &vbo_cube_vertices);
+  glDeleteBuffers(1, &vbo_cube_colors);
+  glDeleteBuffers(1, &ibo_cube_elements);
 }
 
 
+
+static int g_window;
+
+  static void
+handleKeyPress(unsigned char key, int x, int y)
+{
+  switch(key) {
+    default:
+      break;
+    case 27: /* escape */
+      glutDestroyWindow(g_window);
+      exit(0);
+      break;
+  }
+}
+
 /// Function Headers
 void thresh_callback(int, void* );
-
 
 void CallBackFunc(int event, int x, int y, int flags, void* userdata)
 {
@@ -554,15 +775,54 @@ int main(int argc, char** argv )
     unit_cell.set_zone_axis_vector( zone_axis_vector_uvw );
     unit_cell.set_upward_vector( upward_vector_hkl );
     unit_cell.form_matrix_from_miller_indices(); 
-
-
+    
+    /* VIS */
     glutInit(&argc, argv);
-    glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
-    glutCreateWindow("Molecular model");
-    glutDisplayFunc(display);
-    init();
-    glutMainLoop();
+    glutInitDisplayMode(GLUT_RGBA|GLUT_ALPHA|GLUT_DOUBLE|GLUT_DEPTH);
+    glutInitWindowSize(screen_width, screen_height);
+    glutCreateWindow("Particle rendered");
+    GLenum glew_status = glewInit();
+    if (glew_status != GLEW_OK) {
+      fprintf(stderr, "Error: %s\n", glewGetErrorString(glew_status));
+      return 1;
+    }
 
+    if (!GLEW_VERSION_2_0) {
+      fprintf(stderr, "Error: your graphic card does not support OpenGL 2.0\n");
+      return 1;
+    }
+    if (init_resources()) {
+        std::cout << "VERTICES" << std::endl;
+
+        for ( std::vector<GLfloat>::iterator it = vertices.begin(); it != vertices.end(); it++  ){
+            std::cout << *it << std::endl;
+        }
+        std::cout << "COLORS" << std::endl;
+
+        for ( std::vector<GLfloat>::iterator it = colors.begin(); it != colors.end(); it++  ){
+            std::cout << *it << std::endl;
+        }
+        
+        std::cout << "TRIANGLES"  << std::endl;
+        
+        for ( std::vector<GLushort>::iterator it = indices.begin(); it != indices.end(); it++  ){
+            std::cout << *it << std::endl;
+        }
+        
+        if (vertices.size() == colors.size()){
+            std::cout << "SIZE seems ok!!" << std::endl;
+        }
+        
+      glutDisplayFunc(onDisplay);
+      glutReshapeFunc(onReshape);
+      glutIdleFunc(onIdle);
+      glEnable(GL_BLEND);
+      glEnable(GL_DEPTH_TEST);
+      glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+      glutMainLoop();
+    }
+
+    free_resources();
 
     // Simulated image sampling rate
     sampling_rate_super_cell_x_nm_pixel = super_cell_size_x / nx_simulated_horizontal_samples;

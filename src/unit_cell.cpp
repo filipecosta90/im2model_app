@@ -175,8 +175,7 @@ void Unit_Cell::form_matrix_from_miller_indices (){
   // std::cout << orientation_matrix << std::endl;
 }
 
-void Unit_Cell::renderSphere(float x, float y, float z, float radius, glm::vec4 atom_rgba_color, int subdivisions,GLUquadricObj *quadric)
-{
+void Unit_Cell::renderSphere(float x, float y, float z, float radius, glm::vec4 atom_rgba_color, int subdivisions,GLUquadricObj *quadric){
   glPushMatrix();
   glTranslatef( x,y,z );
   float r,g,b,a;

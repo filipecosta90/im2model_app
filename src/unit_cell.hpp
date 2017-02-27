@@ -57,7 +57,11 @@ class Unit_Cell {
     /* end Atom site */
 
     std::vector<Atom::Atom> _atoms;
+
     std::vector<cv::Point3d> _atom_positions;
+    //vertex buffer for points
+    
+    //vertex buffer for colors
     std::vector<glm::vec4> _atom_rgba_colors;
 
     /** Orientation **/

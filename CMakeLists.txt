@@ -2,6 +2,10 @@
 
 project(im2model CXX)
 
+if(APPLE)
+  add_definitions(-DAPPLE)
+endif(APPLE)
+
 cmake_minimum_required(VERSION 3.1)
 
 include(ExternalProject)
@@ -33,10 +37,14 @@ set(Boost_USE_STATIC_RUNTIME OFF)
 find_package(Boost COMPONENTS program_options REQUIRED)
 find_package(OpenGL REQUIRED)
 find_package(GLUT REQUIRED)
+find_package(GLEW REQUIRED)
+
 
 include_directories(${BOOST_INCLUDE_DIRS})
 include_directories( ${OPENGL_INCLUDE_DIRS} ) 
 include_directories( ${GLUT_INCLUDE_DIRS} )
+include_directories( ${GLEW_INCLUDE_DIRS} )
+
 
 set(CMAKE_BINARY_DIR ${CMAKE_SOURCE_DIR}/build)
 set(EXECUTABLE_OUTPUT_PATH ${CMAKE_BINARY_DIR})
