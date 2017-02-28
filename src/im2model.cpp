@@ -86,6 +86,9 @@ int max_contour_distance_thresh_px = 255;
 
 Unit_Cell unit_cell;
 
+cv::Point3d  zone_axis_vector_uvw;
+cv::Point3d  upward_vector_hkl;
+
 /* test opengl */
 
 int screen_width=800, screen_height=600;
@@ -99,134 +102,250 @@ std::vector<GLfloat> vertices;
 std::vector<GLfloat> colors;
 std::vector<GLint> indices;
 
+float DEGS_TO_RAD = M_PI/180.0f;
+
+//------------------------
+//-- Prints a sphere as a "standard sphere" triangular mesh with the specified
+//-- number of latitude (nLatitude) and longitude (nLongitude) lines and
+//-- writes results to the specified output file (fout).
+
+void create_unit_cell_cube(cv::Point3d pt, float side ){
+  int initial_vertices_size = vertices.size() / 3;     // the needed padding
+  std::cout << "initial_vertices_size " << initial_vertices_size << std::endl;
+  // bottom vertex 1 - A
+  vertices.push_back( pt.x );
+  vertices.push_back( pt.y );
+  vertices.push_back( pt.z );
+  // bottom vertex 2 - B
+  vertices.push_back( pt.x+side );
+  vertices.push_back( pt.y );
+  vertices.push_back( pt.z );
+  // bottom vertex 3 - C
+  vertices.push_back( pt.x+side );
+  vertices.push_back( pt.y+side );
+  vertices.push_back( pt.z );
+  // bottom vertex 4 - D
+  vertices.push_back( pt.x );
+  vertices.push_back( pt.y+side );
+  vertices.push_back( pt.z );
+  // top vertex 5 - E
+  vertices.push_back( pt.x );
+  vertices.push_back( pt.y );
+  vertices.push_back( pt.z+side );
+  // top vertex 6 - F
+  vertices.push_back( pt.x+side );
+  vertices.push_back( pt.y );
+  vertices.push_back( pt.z+side );
+  // top vertex 7 - G
+  vertices.push_back( pt.x+side );
+  vertices.push_back( pt.y+side );
+  vertices.push_back( pt.z+side );
+  // top vertex 8 - H
+  vertices.push_back( pt.x );
+  vertices.push_back( pt.y+side );
+  vertices.push_back( pt.z+side );
+
+  colors.push_back(1.0f);
+  colors.push_back(0.0f);
+  colors.push_back(0.0f);
+
+  colors.push_back(1.0f);
+  colors.push_back(0.0f);
+  colors.push_back(0.0f);
+
+  colors.push_back(1.0f);
+  colors.push_back(0.0f);
+  colors.push_back(0.0f);
+
+  colors.push_back(1.0f);
+  colors.push_back(0.0f);
+  colors.push_back(0.0f);
+
+  colors.push_back(1.0f);
+  colors.push_back(0.0f);
+  colors.push_back(0.0f);
+
+  colors.push_back(1.0f);
+  colors.push_back(0.0f);
+  colors.push_back(0.0f);
+
+  colors.push_back(1.0f);
+  colors.push_back(0.0f);
+  colors.push_back(0.0f);
+
+  colors.push_back(1.0f);
+  colors.push_back(0.0f);
+  colors.push_back(0.0f);
+
+  int a,b,c,d,e,f,g,h;
+  a = initial_vertices_size;
+  b = a + 1;
+  c = b + 1;
+  d = c + 1;
+  e = d + 1;
+  f = e + 1;
+  g = f + 1;
+  h = g + 1;
+
+  //front 1
+  indices.push_back( b );
+  indices.push_back( c );
+  indices.push_back( g );
+  // front 2
+  indices.push_back( b );
+  indices.push_back( g );
+  indices.push_back( f );
+  // right 1
+  indices.push_back( g );
+  indices.push_back( h );
+  indices.push_back( d );
+  // right 2
+  indices.push_back( g );
+  indices.push_back( d );
+  indices.push_back( c );
+  // back 1
+  indices.push_back( a );
+  indices.push_back( d );
+  indices.push_back( h );
+  // back 2
+  indices.push_back( a );
+  indices.push_back( h );
+  indices.push_back( e );
+  // left 1
+  indices.push_back( a );
+  indices.push_back( b );
+  indices.push_back( f );
+  // left 2
+  indices.push_back( a );
+  indices.push_back( f );
+  indices.push_back( e );
+  // top 1
+  indices.push_back( g );
+  indices.push_back( f );
+  indices.push_back( e );
+  // top 2
+  indices.push_back( g );
+  indices.push_back( e );
+  indices.push_back( h );
+  // bottom 1
+  indices.push_back( a );
+  indices.push_back( d );
+  indices.push_back( c );
+  // bottom 2
+  indices.push_back( a );
+  indices.push_back( c );
+  indices.push_back( b );
+
+}
+
+void create_standard_sphere(cv::Point3d pt, float radius, int nLatitude, int nLongitude)
+{
+  int p, s, i, j;
+  float x, y, z, out;
+  int nPitch = nLongitude + 1;
+  int initial_vertices_size = vertices.size() / 3;    // the needed padding
+  std::cout << "initial_vertices_size " << initial_vertices_size << std::endl;
+
+  int numVertices = 0;    // the number of vertex points added.
+  float pitchInc = (180. / (float)nPitch) * DEGS_TO_RAD;
+  float rotInc   = (360. / (float)nLatitude) * DEGS_TO_RAD;
+
+  // Top vertex.
+  vertices.push_back( pt.x );
+  vertices.push_back( pt.y+radius );
+  vertices.push_back( pt.z );
+  // Bottom vertex.
+  vertices.push_back( pt.x );
+  vertices.push_back( pt.y-radius );
+  vertices.push_back( pt.z );
+
+  colors.push_back(0.0f);
+  colors.push_back(0.0f);
+  colors.push_back(1.0f);
+  colors.push_back(0.0f);
+  colors.push_back(0.0f);
+  colors.push_back(1.0f);
+
+  numVertices = numVertices+2;
+
+  int fVert = initial_vertices_size + numVertices;    // Record the first vertex index for intermediate vertices.
+  for(p=1; p<nPitch; p++)     // Generate all "intermediate vertices":
+  {
+    out = radius * sin((float)p * pitchInc);
+    if(out < 0) out = -out;    // abs() command won't work with all compilers
+    y   = radius * cos(p * pitchInc);
+    for(s=0; s<=nLatitude; s++)
+    {
+      x = out * cos(s * rotInc);
+      z = out * sin(s * rotInc);
+      vertices.push_back( x+pt.x );
+      vertices.push_back( y+pt.y );
+      vertices.push_back( z+pt.z );
+      colors.push_back(0.0f);
+      colors.push_back(0.0f);
+      colors.push_back(1.0f);
+      numVertices++;
+    }
+  }
+
+  //## PRINT SQUARE FACES BETWEEN INTERMEDIATE POINTS:
+
+  for(p=1; p<(nPitch-1); p++) // starts from lower part of sphere up
+  {
+    for(s=0; s<(nLatitude); s++) {
+      i = p*(nLatitude+1) + s;
+      /* a - d */
+      /* | \ | */
+      /* b - c */
+      const int upper_pos_lat = i - (nLatitude+1);
+      float a = upper_pos_lat+fVert;
+      float b = i+fVert;
+      float c = i+1+fVert;
+      float d = upper_pos_lat+1+fVert;
+      // 1st triangle abc
+      indices.push_back( a );
+      indices.push_back( b );
+      indices.push_back( c );
+      // 2nd triangle acd
+      indices.push_back( a );
+      indices.push_back( c );
+      indices.push_back( d );
+    }
+  }
+
+  //## PRINT TRIANGLE FACES CONNECTING TO TOP AND BOTTOM VERTEX:
+  int offLastVerts  = initial_vertices_size + numVertices - (nLatitude+1);
+  for(s=0; s<(nLatitude-1); s++)
+  {
+    //top
+    indices.push_back( initial_vertices_size   );
+    indices.push_back( (s+2)+fVert );
+    indices.push_back( (s+1)+fVert );
+    //bottom
+    indices.push_back( initial_vertices_size + 1);
+    indices.push_back( (s+1)+offLastVerts );
+    indices.push_back( (s+2)+offLastVerts );
+  }
+}
+
+
 bool init_resources()
 {
-    int slices = 10;
-    int stacks = 15;
-    float radius = 1.0f;
-    float		sinI[slices], cosI[slices];
-    float		sinJ[stacks], cosJ[stacks];
-    
-    // create sin/cos cache
-    for (int i = 0; i < slices; i++){
-        sinI[i]= sin(2.f * M_PI * (float)i / (float)slices);
-        cosI[i]= cos(2.f * M_PI * (float)i / (float)slices);
-    }
-    for (int j = 1; j < stacks; j++){
-        sinJ[j]= sin( M_PI * (float)j / (float)stacks);
-        cosJ[j]= cos( M_PI * (float)j / (float)stacks);
-    }
-    
-    const int floats_per_vertex = 3;
-    unsigned int i, v_size;
-  
-    // positive Z pole
-    vertices.push_back( 0.f );
-    vertices.push_back( 0.f );
-    vertices.push_back( radius );
-    colors.push_back(1.0f);
-    colors.push_back(0.0f);
-    colors.push_back(0.0f);
-    
-    // stacks
-    for (int j = 1; j < stacks; j++) { // Azimuth [0, 2PI]
-        for (int i = 0; i < slices; i++) { // Elevation [0, PI]
-            //vertex x,y,z
-            float x,y,z;
-            x = sinI[i] * sinJ[j] * radius;
-            y = cosI[i] * sinJ[j] * radius;
-            z = cosJ[j] * radius;
-            vertices.push_back( x );
-            vertices.push_back( y );
-            vertices.push_back( z );
-            colors.push_back(1.0f);
-            colors.push_back(0.0f);
-            colors.push_back(0.0f);
-            
-            //normals
-            //   vertices[vertex_padding+0] = sinI[i] * sinJ[j] * radius;
-            //   vertices[vertex_padding+1] = cosI[i] * sinJ[j] * radius;
-            //   vertices[vertex_padding+2] = cosJ[j] * radius;
-        }
-    }
-    
-    // negative Z pole
-    vertices.push_back( 0.0f );
-    vertices.push_back( 0.0f );
-    vertices.push_back( -radius );
-    colors.push_back(1.0f);
-    colors.push_back(0.0f);
-    colors.push_back(0.0f);
-    
-    /* indices of vertices for every triangle */
-    
-    // positive Z pole
-    const int points_per_triangle = 3;
-    
-    int rowA = 0;
-    int rowB = 1;
-    int index_pos=0;
-    
-    for(int i = 0; i < slices - 1; i++) {
-        indices.push_back( rowA );
-        indices.push_back( rowB + i + 1 );
-        indices.push_back( rowB + i );
-    }
-    indices.push_back( rowA );
-    indices.push_back( rowB );
-    indices.push_back( rowB + i );
-    
-    // interior stacks
-    for (int j = 1; j < stacks - 1; j++) {
-        rowA = 1 + (j - 1) * slices;
-        rowB = rowA + slices;
-        
-        for (int i = 0; i < slices - 1; i++) {
-            indices.push_back( rowA + i );
-            indices.push_back( rowA + i + 1 );
-            indices.push_back( rowB + i );
-            
-            indices.push_back( rowA + i + 1 );
-            indices.push_back( rowB + i + 1 );
-            indices.push_back( rowB + i );
-        }
-        
-        indices.push_back( rowA + j );
-        indices.push_back( rowA );
-        indices.push_back( rowB + j );
-        
-        indices.push_back( rowA + j + 1 );
-        indices.push_back( rowB + j + 1 );
-        indices.push_back( rowB + j );
-    }
-    
-    // negative Z pole
-    rowA = 1 + (stacks - 2) * slices;
-    rowB = rowA + slices;
-    
-    for (int i = 0; i < slices - 1; i++) {
-        indices.push_back( rowA + i );
-        indices.push_back( rowA + i + 1 );
-        indices.push_back( rowB );
-    }
-    indices.push_back( rowA + i );
-    indices.push_back( rowA );
-    indices.push_back( rowB );
 
+  create_unit_cell_cube(cv::Point3d(0,0,0), 1.0f);
+  create_standard_sphere(cv::Point3d(1,1,0), 0.25f, 20, 20);
   glGenBuffers(1, &vbo_cube_vertices);
   glBindBuffer(GL_ARRAY_BUFFER, vbo_cube_vertices);
-    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(GLfloat), vertices.data(), GL_STATIC_DRAW);
-    std::cout << "binded vertices " << std::endl;
+  glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(GLfloat), vertices.data(), GL_STATIC_DRAW);
+  std::cout << "binded vertices " << std::endl;
   glGenBuffers(1, &vbo_cube_colors);
   glBindBuffer(GL_ARRAY_BUFFER, vbo_cube_colors);
-    glBufferData(GL_ARRAY_BUFFER, colors.size() * sizeof(GLfloat), colors.data(), GL_STATIC_DRAW);
-    std::cout << "binded colors " << std::endl;
+  glBufferData(GL_ARRAY_BUFFER, colors.size() * sizeof(GLfloat), colors.data(), GL_STATIC_DRAW);
+  std::cout << "binded colors " << std::endl;
   glGenBuffers(1, &ibo_cube_elements);
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo_cube_elements);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(GLushort), indices.data(), GL_STATIC_DRAW);
-    std::cout << "binded triangles " << std::endl;
-    
-    
+  glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(GLint), indices.data(), GL_STATIC_DRAW);
+  std::cout << "binded triangles " << std::endl;
 
   GLint link_ok = GL_FALSE;
 
@@ -269,12 +388,27 @@ bool init_resources()
 }
 
 void onIdle() {
-  float angle = glutGet(GLUT_ELAPSED_TIME) / 1000.0 * 45;  // 45° per second
-  glm::vec3 axis_y(0, 1, 0);
+  float angle = glutGet(GLUT_ELAPSED_TIME) / 1000.0 * 10;  // 45° per second
+  glm::vec3 axis_y(1, 1, 0);
   glm::mat4 anim = glm::rotate(glm::mat4(1.0f), glm::radians(angle), axis_y);
 
-  glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(0.0, 0.0, -4.0));
-  glm::mat4 view = glm::lookAt(glm::vec3(0.0, 2.0, 0.0), glm::vec3(0.0, 0.0, -4.0), glm::vec3(0.0, 1.0, 0.0));
+  glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(0.0, 0.0, 0.0));
+
+  glm::vec3 eye (1,0,3); //(zone_axis_vector_uvw.x, zone_axis_vector_uvw.y, zone_axis_vector_uvw.z);
+
+  /*
+     to use a direction vector D instead of a center position,
+     you can simply use eye + D as the center position, 
+     where D can be a unit vector for example.
+     In our case D will be our zone_axis_vector_uvw
+     */
+  const double norm_uvw = cv::norm(zone_axis_vector_uvw);
+  cv::Point3d b = zone_axis_vector_uvw / norm_uvw;
+  glm::vec3 D (b.x , b.y, b.z );
+  glm::vec3 center ( 0, 0, 0 ) ;//zone_axis_vector_uvw.x, zone_axis_vector_uvw.y, zone_axis_vector_uvw.z );
+  glm::vec3 vis_up (upward_vector_hkl.x, upward_vector_hkl.y, upward_vector_hkl.z);
+
+  glm::mat4 view = glm::lookAt( eye, center, vis_up );
   glm::mat4 projection = glm::perspective(45.0f, 1.0f*screen_width/screen_height, 0.1f, 10.0f);
 
   glm::mat4 mvp = projection * view * model * anim;
@@ -301,6 +435,7 @@ void onDisplay()
       0,                 // no extra data between each position
       0                  // offset of first element
       );
+  glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
   glEnableVertexAttribArray(attribute_v_color);
   glBindBuffer(GL_ARRAY_BUFFER, vbo_cube_colors);
@@ -316,10 +451,8 @@ void onDisplay()
   /* Push each element in buffer_vertices to the vertex shader */
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo_cube_elements);
   int size;
-    glGetBufferParameteriv(GL_ELEMENT_ARRAY_BUFFER, GL_BUFFER_SIZE, &size);
-  glDrawElements(GL_TRIANGLES, size/sizeof(GLushort), GL_UNSIGNED_INT , 0);
-    
-   // std::cout << "buffer size " << size/sizeof(GLushort) << std::endl;
+  glGetBufferParameteriv(GL_ELEMENT_ARRAY_BUFFER, GL_BUFFER_SIZE, &size);
+  glDrawElements(GL_TRIANGLES, size/sizeof(GLint), GL_UNSIGNED_INT , 0);
 
   glDisableVertexAttribArray(attribute_coord3d);
   glDisableVertexAttribArray(attribute_v_color);
@@ -573,6 +706,7 @@ int main(int argc, char** argv )
   bool im2model_switch = true;
   bool debug_switch = false;
   bool roi_gui_switch = false;
+  bool vis_gui_switch = false;
   bool sim_cmp_gui_switch = false;
   bool sim_grid_switch = false;
   bool phase_comparation_switch = false;
@@ -627,8 +761,7 @@ int main(int argc, char** argv )
 
   MC::MC_Driver driver;
 
-  cv::Point3d  zone_axis_vector_uvw;
-  cv::Point3d  upward_vector_hkl;
+
 
   try{
     /** Define and parse the program options
@@ -679,6 +812,7 @@ int main(int argc, char** argv )
       ("roi_x", boost::program_options::value<int>(&roi_center_x)->required(), "region center in x axis.")
       ("roi_y", boost::program_options::value<int>(&roi_center_y)->required(), "region center in y axis.")
       ("roi_gui", "switch for enabling gui region of interest selection prior to im2model execution.")
+      ("vis_gui", "switch for enabling supercell visualization.")
       ("sim_cmp_gui", "switch for enabling gui im2model simullated and experimental comparation visualization.")
       ("sim_grid", "switch for enable simmulated image grid generation.")
 
@@ -736,6 +870,9 @@ int main(int argc, char** argv )
       if ( vm.count("roi_gui")  ){
         roi_gui_switch=true;
       }
+      if ( vm.count("vis_gui")  ){
+        vis_gui_switch=true;
+      }
       if ( vm.count("sim_cmp_gui")  ){
         sim_cmp_gui_switch=true;
       }
@@ -775,54 +912,7 @@ int main(int argc, char** argv )
     unit_cell.set_zone_axis_vector( zone_axis_vector_uvw );
     unit_cell.set_upward_vector( upward_vector_hkl );
     unit_cell.form_matrix_from_miller_indices(); 
-    
-    /* VIS */
-    glutInit(&argc, argv);
-    glutInitDisplayMode(GLUT_RGBA|GLUT_ALPHA|GLUT_DOUBLE|GLUT_DEPTH);
-    glutInitWindowSize(screen_width, screen_height);
-    glutCreateWindow("Particle rendered");
-    GLenum glew_status = glewInit();
-    if (glew_status != GLEW_OK) {
-      fprintf(stderr, "Error: %s\n", glewGetErrorString(glew_status));
-      return 1;
-    }
 
-    if (!GLEW_VERSION_2_0) {
-      fprintf(stderr, "Error: your graphic card does not support OpenGL 2.0\n");
-      return 1;
-    }
-    if (init_resources()) {
-        std::cout << "VERTICES" << std::endl;
-
-        for ( std::vector<GLfloat>::iterator it = vertices.begin(); it != vertices.end(); it++  ){
-            std::cout << *it << std::endl;
-        }
-        std::cout << "COLORS" << std::endl;
-
-        for ( std::vector<GLfloat>::iterator it = colors.begin(); it != colors.end(); it++  ){
-            std::cout << *it << std::endl;
-        }
-        
-        std::cout << "TRIANGLES"  << std::endl;
-        
-        for ( std::vector<GLushort>::iterator it = indices.begin(); it != indices.end(); it++  ){
-            std::cout << *it << std::endl;
-        }
-        
-        if (vertices.size() == colors.size()){
-            std::cout << "SIZE seems ok!!" << std::endl;
-        }
-        
-      glutDisplayFunc(onDisplay);
-      glutReshapeFunc(onReshape);
-      glutIdleFunc(onIdle);
-      glEnable(GL_BLEND);
-      glEnable(GL_DEPTH_TEST);
-      glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-      glutMainLoop();
-    }
-
-    free_resources();
 
     // Simulated image sampling rate
     sampling_rate_super_cell_x_nm_pixel = super_cell_size_x / nx_simulated_horizontal_samples;
@@ -1110,6 +1200,35 @@ int main(int argc, char** argv )
 
       wavimg_simgrid_steps.simulate_from_dat_file();
       wavimg_simgrid_steps.export_sim_grid();
+    }
+
+    if( vis_gui_switch ){
+      /* VIS */
+      glutInit(&argc, argv);
+      glutInitDisplayMode(GLUT_RGBA|GLUT_ALPHA|GLUT_DOUBLE|GLUT_DEPTH);
+      glutInitWindowSize(screen_width, screen_height);
+      glutCreateWindow("Particle rendered");
+      GLenum glew_status = glewInit();
+      if (glew_status != GLEW_OK) {
+        fprintf(stderr, "Error: %s\n", glewGetErrorString(glew_status));
+        return 1;
+      }
+
+      if (!GLEW_VERSION_2_0) {
+        fprintf(stderr, "Error: your graphic card does not support OpenGL 2.0\n");
+        return 1;
+      }
+      if (init_resources()) {
+        glutDisplayFunc(onDisplay);
+        glutReshapeFunc(onReshape);
+        glutIdleFunc(onIdle);
+        glEnable(GL_BLEND);
+        glEnable(GL_DEPTH_TEST);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        glutMainLoop();
+      }
+
+      free_resources();
     }
 
   }
