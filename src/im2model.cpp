@@ -252,12 +252,12 @@ void create_standard_sphere(cv::Point3d pt, float radius, int nLatitude, int nLo
 
   // Top vertex.
   vertices.push_back( pt.x );
-  vertices.push_back( pt.y+radius );
-  vertices.push_back( pt.z );
+  vertices.push_back( pt.y );
+  vertices.push_back( pt.z+radius );
   // Bottom vertex.
   vertices.push_back( pt.x );
-  vertices.push_back( pt.y-radius );
-  vertices.push_back( pt.z );
+  vertices.push_back( pt.y );
+  vertices.push_back( pt.z-radius );
 
   colors.push_back(0.0f);
   colors.push_back(0.0f);
@@ -273,11 +273,11 @@ void create_standard_sphere(cv::Point3d pt, float radius, int nLatitude, int nLo
   {
     out = radius * sin((float)p * pitchInc);
     if(out < 0) out = -out;    // abs() command won't work with all compilers
-    y   = radius * cos(p * pitchInc);
+    z   = radius * cos(p * pitchInc);
     for(s=0; s<=nLatitude; s++)
     {
       x = out * cos(s * rotInc);
-      z = out * sin(s * rotInc);
+      y = out * sin(s * rotInc);
       vertices.push_back( x+pt.x );
       vertices.push_back( y+pt.y );
       vertices.push_back( z+pt.z );
@@ -329,11 +329,14 @@ void create_standard_sphere(cv::Point3d pt, float radius, int nLatitude, int nLo
 }
 
 
+
+
+
 bool init_resources()
 {
 
-  create_unit_cell_cube(cv::Point3d(0,0,0), 1.0f);
-  create_standard_sphere(cv::Point3d(1,1,0), 0.25f, 20, 20);
+ // create_unit_cell_cube(cv::Point3d(0,0,0), 1.0f);
+  create_standard_sphere(cv::Point3d(0,0,0), 1.0f, 20, 20);
   glGenBuffers(1, &vbo_cube_vertices);
   glBindBuffer(GL_ARRAY_BUFFER, vbo_cube_vertices);
   glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(GLfloat), vertices.data(), GL_STATIC_DRAW);
@@ -406,12 +409,11 @@ void onIdle() {
   cv::Point3d b = zone_axis_vector_uvw / norm_uvw;
   glm::vec3 D (b.x , b.y, b.z );
   glm::vec3 center ( 0, 0, 0 ) ;//zone_axis_vector_uvw.x, zone_axis_vector_uvw.y, zone_axis_vector_uvw.z );
-  glm::vec3 vis_up (upward_vector_hkl.x, upward_vector_hkl.y, upward_vector_hkl.z);
+  glm::vec3 vis_up ( 0, 0, 1 ) ; //(upward_vector_hkl.x, upward_vector_hkl.y, upward_vector_hkl.z);
 
   glm::mat4 view = glm::lookAt( eye, center, vis_up );
   glm::mat4 projection = glm::perspective(45.0f, 1.0f*screen_width/screen_height, 0.1f, 10.0f);
-
-  glm::mat4 mvp = projection * view * model * anim;
+    glm::mat4 mvp = projection * view * model ; //* anim;
 
   glUseProgram(program);
   glUniformMatrix4fv(uniform_mvp, 1, GL_FALSE, glm::value_ptr(mvp));
