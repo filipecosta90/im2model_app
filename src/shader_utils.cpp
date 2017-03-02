@@ -211,3 +211,4 @@ GLint get_uniform(GLuint program, const char *name) {
     fprintf(stderr, "Could not bind uniform %s\n", name);
   return uniform;
 }
+

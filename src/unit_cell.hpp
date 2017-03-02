@@ -75,6 +75,7 @@ class Unit_Cell {
   public:
     Unit_Cell();
     void extract_space_group();
+    //setters
     void set_cell_length_a( double a );
     void set_cell_length_b( double b );
     void set_cell_length_c( double c );
@@ -84,6 +85,8 @@ class Unit_Cell {
     void set_cell_volume( double volume );
     void set_zone_axis_vector( cv::Point3d uvw );
     void set_upward_vector( cv::Point3d hkl );
+    //getters
+    std::vector<cv::Point3d> get_atom_positions_vec();
 
     void add_symmetry_equiv_pos_as_xyz( std::string xyz );
     void add_symmetry_equiv_pos_as_x( std::string x );

@@ -100,6 +100,10 @@ void Unit_Cell::add_atom_site_fract_z( double fract_z ){
   _atoms_site_fract_z.push_back(fract_z);
 }
 
+std::vector<cv::Point3d> Unit_Cell::get_atom_positions_vec( ){
+    return _atom_positions;
+}
+
 bool Unit_Cell::create_atoms_from_site_and_symetry(){
   int distinct = 1;
   for( int atom_site_pos = 0 ; atom_site_pos < _atoms_site_type_symbols.size(); atom_site_pos++ ) {

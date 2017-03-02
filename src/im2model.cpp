@@ -102,6 +102,48 @@ std::vector<GLfloat> vertices;
 std::vector<GLfloat> colors;
 std::vector<GLint> indices;
 
+/*
+ *  Represents a textured geometry asset
+ *   Contains everything necessary to draw arbitrary geometry with a single texture:
+ *     - shaders
+ *       - a texture
+ *         - a VBO
+ *           - a VAO
+ *             - the parameters to glDrawArrays (drawType, drawStart, drawCount)
+ *              */
+struct ModelAsset {
+  GLuint* shaders;
+  //tdogl::Program* shaders;
+  GLuint vbo;
+  GLuint vao;
+  GLenum drawType;
+  GLint drawStart;
+  GLint drawCount;
+
+  ModelAsset():
+    shaders(NULL),
+    vbo(0),
+    vao(0),
+    drawType(GL_TRIANGLES),
+    drawStart(0),
+    drawCount(0)
+  {}
+};
+
+/*
+ *  Represents an instance of an `ModelAsset`
+ *   Contains a pointer to the asset, and a model transformation matrix to be used when drawing.
+ *    */
+struct ModelInstance {
+  ModelAsset* asset;
+  glm::mat4 transform;
+
+  ModelInstance() :
+    asset(NULL),
+    transform()
+  {}
+};
+
 float DEGS_TO_RAD = M_PI/180.0f;
 
 //------------------------
@@ -238,6 +280,98 @@ void create_unit_cell_cube(cv::Point3d pt, float side ){
 
 }
 
+
+void create_standard_cylinder(cv::Point3d pt, float radius, float height, int nLatitude, int nLongitude)
+{
+  int nPitch = nLongitude + 1;
+  int initial_vertices_size = vertices.size() / 3;    // the needed padding
+
+  int numVertices = 0;    // the number of vertex points added.
+  float pitchInc = height / nLongitude; //(180. / (float)nPitch) * DEGS_TO_RAD;
+  float rotInc   = (360. / (float)nLatitude) * DEGS_TO_RAD;
+  std::cout << "initial_vertices_size " << initial_vertices_size << std::endl;
+  std::cout << "pitchInc " << pitchInc << std::endl;
+
+  // Top vertex.
+  vertices.push_back( pt.x );
+  vertices.push_back( pt.y );
+  vertices.push_back( pt.z+height );
+  // Bottom vertex.
+  vertices.push_back( pt.x );
+  vertices.push_back( pt.y );
+  vertices.push_back( pt.z );
+
+  colors.push_back(0.0f);
+  colors.push_back(0.0f);
+  colors.push_back(1.0f);
+  colors.push_back(0.0f);
+  colors.push_back(0.0f);
+  colors.push_back(1.0f);
+
+  numVertices = numVertices+2;
+
+  int fVert = initial_vertices_size + numVertices;    // Record the first vertex index for intermediate vertices.
+  for(int p=0; p<nPitch; p++)     // Generate all "intermediate vertices":
+  {
+    //float out = radius * sin((float)p * pitchInc);
+    //if(out < 0) out = -out;    // abs() command won't work with all compilers
+    const float z   = p * pitchInc;
+    for(int s=0; s<=nLatitude; s++)
+    {
+      const float x = radius * cos(s * rotInc);
+      const float y = radius * sin(s * rotInc);
+      vertices.push_back( x+pt.x );
+      vertices.push_back( y+pt.y );
+      vertices.push_back( z+pt.z );
+      colors.push_back(0.0f);
+      colors.push_back(0.0f);
+      colors.push_back(1.0f);
+      numVertices++;
+    }
+  }
+
+  //## PRINT SQUARE FACES BETWEEN INTERMEDIATE POINTS:
+
+  for(int p=1; p<(nPitch); p++) // starts from lower part of sphere up
+  {
+    for(int s=0; s<(nLatitude); s++) {
+      const int i = p*(nLatitude+1) + s;
+      /* a - d */
+      /* | \ | */
+      /* b - c */
+      const int upper_pos_lat = i - (nLatitude+1);
+      float a = upper_pos_lat+fVert;
+      float b = i+fVert;
+      float c = i+1+fVert;
+      float d = upper_pos_lat+1+fVert;
+      // 1st triangle abc
+      indices.push_back( a );
+      indices.push_back( b );
+      indices.push_back( c );
+      // 2nd triangle acd
+      indices.push_back( a );
+      indices.push_back( c );
+      indices.push_back( d );
+    }
+  }
+
+  //## PRINT TRIANGLE FACES CONNECTING TO TOP AND BOTTOM VERTEX:
+  int offLastVerts  = initial_vertices_size + numVertices - (nLatitude+1);
+  for(int s=0; s<(nLatitude-1); s++)
+  {
+
+    //top
+    indices.push_back( initial_vertices_size );
+    indices.push_back( (s+1)+offLastVerts );
+    indices.push_back( (s+2)+offLastVerts );
+    //bottom
+    indices.push_back( initial_vertices_size +1 );
+    indices.push_back( (s+2)+fVert );
+    indices.push_back( (s+1)+fVert );
+  }
+}
+
+
 void create_standard_sphere(cv::Point3d pt, float radius, int nLatitude, int nLongitude)
 {
   int p, s, i, j;
@@ -334,9 +468,9 @@ void create_standard_sphere(cv::Point3d pt, float radius, int nLatitude, int nLo
 
 bool init_resources()
 {
-
- // create_unit_cell_cube(cv::Point3d(0,0,0), 1.0f);
-  create_standard_sphere(cv::Point3d(0,0,0), 1.0f, 20, 20);
+  //create_unit_cell_cube(cv::Point3d(0,0,0), 1.0f);
+  //create_standard_cylinder( cv::Point3d(0,0,0), 0.1f, 5.0f ,10, 5);
+  create_standard_sphere(cv::Point3d(0,0,0), 1.0f, 25, 25);
   glGenBuffers(1, &vbo_cube_vertices);
   glBindBuffer(GL_ARRAY_BUFFER, vbo_cube_vertices);
   glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(GLfloat), vertices.data(), GL_STATIC_DRAW);
@@ -387,6 +521,13 @@ bool init_resources()
     fprintf(stderr, "Could not bind uniform %s\n", uniform_name);
     return false;
   }
+  uniform_name = "mvp";
+  uniform_mvp = glGetUniformLocation(program, uniform_name);
+  if (uniform_mvp == -1) {
+    fprintf(stderr, "Could not bind uniform %s\n", uniform_name);
+    return false;
+  }
+
   return true;
 }
 
@@ -413,11 +554,11 @@ void onIdle() {
 
   glm::mat4 view = glm::lookAt( eye, center, vis_up );
   glm::mat4 projection = glm::perspective(45.0f, 1.0f*screen_width/screen_height, 0.1f, 10.0f);
-    glm::mat4 mvp = projection * view * model ; //* anim;
+  glm::mat4 mvp = projection * view ; //* model * anim;
 
   glUseProgram(program);
   glUniformMatrix4fv(uniform_mvp, 1, GL_FALSE, glm::value_ptr(mvp));
-  glutPostRedisplay();
+    glutPostRedisplay();
 }
 
 void onDisplay()
@@ -454,8 +595,18 @@ void onDisplay()
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo_cube_elements);
   int size;
   glGetBufferParameteriv(GL_ELEMENT_ARRAY_BUFFER, GL_BUFFER_SIZE, &size);
-  glDrawElements(GL_TRIANGLES, size/sizeof(GLint), GL_UNSIGNED_INT , 0);
-
+  std::vector<cv::Point3d> atom_positions = unit_cell.get_atom_positions_vec();
+  std::vector<cv::Point3d>::iterator pos_itt;
+  for (pos_itt = atom_positions.begin(); pos_itt != atom_positions.end(); pos_itt++){
+    glPushMatrix();
+    cv::Point3d pos = *pos_itt;
+    /*   glm::mat4 mvp = projection * view * model * anim;
+         glUseProgram(program);
+         glUniformMatrix4fv(uniform_mvp, 1, GL_FALSE, glm::value_ptr(mvp));*/
+    glTranslatef(pos.x, pos.y, pos.z );
+    glDrawElements(GL_TRIANGLES, size/sizeof(GLint), GL_UNSIGNED_INT , 0);
+    glPopMatrix();
+  }
   glDisableVertexAttribArray(attribute_coord3d);
   glDisableVertexAttribArray(attribute_v_color);
   glutSwapBuffers();
