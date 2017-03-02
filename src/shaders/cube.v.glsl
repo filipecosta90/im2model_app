@@ -1,13 +1,18 @@
 #version 150
 
-attribute vec3 coord3d;
-attribute vec3 v_color;
+uniform mat4 camera;
+uniform mat4 model;
 
-uniform mat4 mvp;
-uniform mat4 model_transform;
+in vec3 vert;
+in vec2 vertTexCoord;
 
-varying vec3 f_color;
-void main(void) {
-  gl_Position = mvp * model_transform * vec4(coord3d, 1.0);
-  f_color = v_color;
+out vec2 fragTexCoord;
+
+void main() {
+  // Pass the tex coord straight through to the fragment shader
+  fragTexCoord = vertTexCoord;
+
+  // Apply all matrix transformations to vert
+  gl_Position = camera * model * vec4(vert, 1);
 }
+

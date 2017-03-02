@@ -1,5 +1,14 @@
-varying vec3 f_color;
+#version 150
 
-void main(void) {
-  gl_FragColor = vec4(f_color.x, f_color.y, f_color.z, 1.0);
-}
+uniform sampler2D tex;
+
+//in vec2 fragTexCoord;
+
+out vec4 finalColor;
+
+void main() {
+    //note: the texture function was called texture2D in older versions of GLSL
+        finalColor = vec4(1.0 , 1.0 , 0 , 1.0);//texture(tex, fragTexCoord);
+        }
+
+

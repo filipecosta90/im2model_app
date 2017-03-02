@@ -38,8 +38,19 @@
 #include <exception>
 
 // Visualization
+// third-party libraries
+#include <GL/glew.h>
+#include <GLFW/glfw3.h>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 #include "opengl.hpp"
 
+// standard C++ libraries
+#include <cassert>
+#include <iostream>
+#include <stdexcept>
+#include <cmath>
+#include <list>
 
 #include "celslc_prm.h"
 #include "msa_prm.h"
@@ -48,6 +59,9 @@
 #include "mc_driver.hpp"
 #include "chem_database.hpp"
 
+// vis classes
+#include "program.hpp"
+#include "camera.hpp"
 
 using namespace cv;
 
@@ -89,18 +103,6 @@ Unit_Cell unit_cell;
 cv::Point3d  zone_axis_vector_uvw;
 cv::Point3d  upward_vector_hkl;
 
-/* test opengl */
-
-int screen_width=800, screen_height=600;
-GLuint vbo_cube_vertices, vbo_cube_colors;
-GLuint ibo_cube_elements;
-GLuint program;
-GLint attribute_coord3d, attribute_v_color;
-GLint uniform_mvp;
-
-std::vector<GLfloat> vertices;
-std::vector<GLfloat> colors;
-std::vector<GLint> indices;
 
 /*
  *  Represents a textured geometry asset
@@ -112,9 +114,9 @@ std::vector<GLint> indices;
  *             - the parameters to glDrawArrays (drawType, drawStart, drawCount)
  *              */
 struct ModelAsset {
-  GLuint* shaders;
-  //tdogl::Program* shaders;
+  vis::Program* shaders;
   GLuint vbo;
+  GLuint ibo;
   GLuint vao;
   GLenum drawType;
   GLint drawStart;
@@ -123,6 +125,7 @@ struct ModelAsset {
   ModelAsset():
     shaders(NULL),
     vbo(0),
+    ibo(0),
     vao(0),
     drawType(GL_TRIANGLES),
     drawStart(0),
@@ -144,12 +147,368 @@ struct ModelInstance {
   {}
 };
 
+
+/* test opengl */
+
+int screen_width=2040, screen_height=1600;
+GLuint vbo_cube_vertices, vbo_cube_colors;
+GLuint ibo_cube_elements;
+GLuint program;
+GLint attribute_coord3d, attribute_v_color;
+GLint uniform_mvp;
+
+std::vector<GLfloat> vertices;
+std::vector<GLfloat> colors;
+std::vector<GLint> indices;
+
+// constants
+const glm::vec2 SCREEN_SIZE(1024 , 760);
+
+// globals
+GLFWwindow* gWindow = NULL;
+double gScrollY = 0.0;
+vis::Camera gCamera;
+ModelAsset gWoodenCrate;
+std::list<ModelInstance> gInstances;
+GLfloat gDegreesRotated = 0.0f;
+
 float DEGS_TO_RAD = M_PI/180.0f;
 
 //------------------------
 //-- Prints a sphere as a "standard sphere" triangular mesh with the specified
 //-- number of latitude (nLatitude) and longitude (nLongitude) lines and
 //-- writes results to the specified output file (fout).
+
+// returns a new vis::Program created from the given vertex and fragment shader filenames
+static vis::Program* LoadShaders(const char* vertFilename, const char* fragFilename) {
+    std::vector<vis::Shader> shaders;
+    shaders.push_back(vis::Shader::shaderFromFile(vertFilename, GL_VERTEX_SHADER));
+    shaders.push_back(vis::Shader::shaderFromFile(fragFilename, GL_FRAGMENT_SHADER));
+    return new vis::Program(shaders);
+}
+
+
+// initialises the gWoodenCrate global
+static void LoadWoodenCrateAsset() {
+    // set all the elements of gWoodenCrate
+    gWoodenCrate.shaders = LoadShaders("shaders/cube.v.glsl", "shaders/cube.f.glsl");
+    gWoodenCrate.drawType = GL_TRIANGLES;
+    gWoodenCrate.drawStart = 0;
+    gWoodenCrate.drawCount = 6*2*3;
+    glGenBuffers(1, &gWoodenCrate.vbo);
+    glGenVertexArrays(1, &gWoodenCrate.vao);
+    
+    // bind the VAO
+    glBindVertexArray(gWoodenCrate.vao);
+    
+    // bind the VBO
+    glBindBuffer(GL_ARRAY_BUFFER, gWoodenCrate.vbo);
+    
+    // Make a cube out of triangles (two triangles per side)
+    GLfloat vertexData[] = {
+        //  X     Y     Z       U     V
+        // bottom
+        -1.0f,-1.0f,-1.0f,   0.0f, 0.0f,
+        1.0f,-1.0f,-1.0f,   1.0f, 0.0f,
+        -1.0f,-1.0f, 1.0f,   0.0f, 1.0f,
+        1.0f,-1.0f,-1.0f,   1.0f, 0.0f,
+        1.0f,-1.0f, 1.0f,   1.0f, 1.0f,
+        -1.0f,-1.0f, 1.0f,   0.0f, 1.0f,
+        
+        // top
+        -1.0f, 1.0f,-1.0f,   0.0f, 0.0f,
+        -1.0f, 1.0f, 1.0f,   0.0f, 1.0f,
+        1.0f, 1.0f,-1.0f,   1.0f, 0.0f,
+        1.0f, 1.0f,-1.0f,   1.0f, 0.0f,
+        -1.0f, 1.0f, 1.0f,   0.0f, 1.0f,
+        1.0f, 1.0f, 1.0f,   1.0f, 1.0f,
+        
+        // front
+        -1.0f,-1.0f, 1.0f,   1.0f, 0.0f,
+        1.0f,-1.0f, 1.0f,   0.0f, 0.0f,
+        -1.0f, 1.0f, 1.0f,   1.0f, 1.0f,
+        1.0f,-1.0f, 1.0f,   0.0f, 0.0f,
+        1.0f, 1.0f, 1.0f,   0.0f, 1.0f,
+        -1.0f, 1.0f, 1.0f,   1.0f, 1.0f,
+        
+        // back
+        -1.0f,-1.0f,-1.0f,   0.0f, 0.0f,
+        -1.0f, 1.0f,-1.0f,   0.0f, 1.0f,
+        1.0f,-1.0f,-1.0f,   1.0f, 0.0f,
+        1.0f,-1.0f,-1.0f,   1.0f, 0.0f,
+        -1.0f, 1.0f,-1.0f,   0.0f, 1.0f,
+        1.0f, 1.0f,-1.0f,   1.0f, 1.0f,
+        
+        // left
+        -1.0f,-1.0f, 1.0f,   0.0f, 1.0f,
+        -1.0f, 1.0f,-1.0f,   1.0f, 0.0f,
+        -1.0f,-1.0f,-1.0f,   0.0f, 0.0f,
+        -1.0f,-1.0f, 1.0f,   0.0f, 1.0f,
+        -1.0f, 1.0f, 1.0f,   1.0f, 1.0f,
+        -1.0f, 1.0f,-1.0f,   1.0f, 0.0f,
+        
+        // right
+        1.0f,-1.0f, 1.0f,   1.0f, 1.0f,
+        1.0f,-1.0f,-1.0f,   1.0f, 0.0f,
+        1.0f, 1.0f,-1.0f,   0.0f, 0.0f,
+        1.0f,-1.0f, 1.0f,   1.0f, 1.0f,
+        1.0f, 1.0f,-1.0f,   0.0f, 0.0f,
+        1.0f, 1.0f, 1.0f,   0.0f, 1.0f
+    };
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertexData), vertexData, GL_STATIC_DRAW);
+    
+    // connect the xyz to the "vert" attribute of the vertex shader
+    glEnableVertexAttribArray(gWoodenCrate.shaders->attrib("vert"));
+    glVertexAttribPointer(gWoodenCrate.shaders->attrib("vert"), 3, GL_FLOAT, GL_FALSE, 5*sizeof(GLfloat), NULL);
+    
+    // connect the uv coords to the "vertTexCoord" attribute of the vertex shader
+    //glEnableVertexAttribArray(gWoodenCrate.shaders->attrib("vertTexCoord"));
+    //glVertexAttribPointer(gWoodenCrate.shaders->attrib("vertTexCoord"), 2, GL_FLOAT, GL_TRUE,  5*sizeof(GLfloat), (const GLvoid*)(3 * sizeof(GLfloat)));
+    
+    // unbind the VAO
+    glBindVertexArray(0);
+}
+
+
+// convenience function that returns a translation matrix
+glm::mat4 translate(GLfloat x, GLfloat y, GLfloat z) {
+    return glm::translate(glm::mat4(), glm::vec3(x,y,z));
+}
+
+
+// convenience function that returns a scaling matrix
+glm::mat4 scale(GLfloat x, GLfloat y, GLfloat z) {
+    return glm::scale(glm::mat4(), glm::vec3(x,y,z));
+}
+
+
+//create all the `instance` structs for the 3D scene, and add them to `gInstances`
+static void CreateInstances() {
+    
+    std::vector<cv::Point3d> atom_positions = unit_cell.get_atom_positions_vec();
+    std::vector<cv::Point3d>::iterator pos_itt;
+    std::cout << "going to create  " << atom_positions.size() << " instances" << std::endl;
+    for (pos_itt = atom_positions.begin(); pos_itt != atom_positions.end(); pos_itt++){
+        cv::Point3d pos = *pos_itt;
+        ModelInstance dot;
+        dot.asset = &gWoodenCrate;
+        dot.transform = translate(pos.x, pos.y, pos.z) * scale(0.15f,0.15f,0.15f);
+        gInstances.push_back(dot);
+        
+    }
+    
+    /*ModelInstance dot;
+    dot.asset = &gWoodenCrate;
+    dot.transform = glm::mat4();
+    gInstances.push_back(dot);
+
+    
+    ModelInstance hLeft;
+    hLeft.asset = &gWoodenCrate;
+    hLeft.transform = translate(-8,0,0) * scale(1,6,1);
+    gInstances.push_back(hLeft);
+    
+    ModelInstance hRight;
+    hRight.asset = &gWoodenCrate;
+    hRight.transform = translate(-4,0,0) * scale(1,6,1);
+    gInstances.push_back(hRight);
+    
+    ModelInstance hMid;
+    hMid.asset = &gWoodenCrate;
+    hMid.transform = translate(-6,0,0) * scale(2,1,0.8f);
+    gInstances.push_back(hMid);*/
+}
+
+
+//renders a single `ModelInstance`
+static void RenderInstance(const ModelInstance& inst) {
+    ModelAsset* asset = inst.asset;
+    vis::Program* shaders = asset->shaders;
+    
+    //bind the shaders
+    shaders->use();
+    
+    //set the shader uniforms
+    shaders->setUniform("camera", gCamera.matrix());
+    shaders->setUniform("model", inst.transform);
+   // shaders->setUniform("tex", 0); //set to 0 because the texture will be bound to GL_TEXTURE0
+    
+    //bind the texture
+    //glActiveTexture(GL_TEXTURE0);
+    //glBindTexture(GL_TEXTURE_2D, asset->texture->object());
+    
+    //bind VAO and draw
+    glBindVertexArray(asset->vao);
+    glDrawArrays(asset->drawType, asset->drawStart, asset->drawCount);
+    
+    //unbind everything
+    glBindVertexArray(0);
+    //glBindTexture(GL_TEXTURE_2D, 0);
+    shaders->stopUsing();
+}
+
+
+
+// draws a single frame
+static void Render() {
+    // clear everything
+    glClearColor(1, 1, 1, 1); // black
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    
+    // render all the instances
+    std::list<ModelInstance>::const_iterator it;
+    for(it = gInstances.begin(); it != gInstances.end(); ++it){
+        RenderInstance(*it);
+    }
+    // swap the display buffers (displays what was just drawn)
+    glfwSwapBuffers(gWindow);
+}
+
+
+// update the scene based on the time elapsed since last update
+static void Update(float secondsElapsed) {
+    //rotate the first instance in `gInstances`
+    const GLfloat degreesPerSecond = 180.0f;
+    gDegreesRotated += secondsElapsed * degreesPerSecond;
+    while(gDegreesRotated > 360.0f) gDegreesRotated -= 360.0f;
+    //gInstances.front().transform = glm::rotate(glm::mat4(), glm::radians(gDegreesRotated), glm::vec3(0,1,0));
+    
+    //move position of camera based on WASD keys, and XZ keys for up and down
+    const float moveSpeed = 2.0; //units per second
+    if(glfwGetKey(gWindow, 'S')){
+        gCamera.offsetPosition(secondsElapsed * moveSpeed * -gCamera.forward());
+    } else if(glfwGetKey(gWindow, 'W')){
+        gCamera.offsetPosition(secondsElapsed * moveSpeed * gCamera.forward());
+    }
+    if(glfwGetKey(gWindow, 'A')){
+        gCamera.offsetPosition(secondsElapsed * moveSpeed * -gCamera.right());
+    } else if(glfwGetKey(gWindow, 'D')){
+        gCamera.offsetPosition(secondsElapsed * moveSpeed * gCamera.right());
+    }
+    if(glfwGetKey(gWindow, 'Z')){
+        gCamera.offsetPosition(secondsElapsed * moveSpeed * -glm::vec3(0,1,0));
+    } else if(glfwGetKey(gWindow, 'X')){
+        gCamera.offsetPosition(secondsElapsed * moveSpeed * glm::vec3(0,1,0));
+    }
+    
+    //rotate camera based on mouse movement
+    const float mouseSensitivity = 0.1f;
+    double mouseX, mouseY;
+    glfwGetCursorPos(gWindow, &mouseX, &mouseY);
+    gCamera.offsetOrientation(mouseSensitivity * (float)mouseY, mouseSensitivity * (float)mouseX);
+   glfwSetCursorPos(gWindow, 1, 1); //reset the mouse, so it doesn't go out of the window
+    
+    //increase or decrease field of view based on mouse wheel
+    const float zoomSensitivity = -0.2f;
+    float fieldOfView = gCamera.fieldOfView() + zoomSensitivity * (float)gScrollY;
+    if(fieldOfView < 5.0f) fieldOfView = 5.0f;
+    if(fieldOfView > 130.0f) fieldOfView = 130.0f;
+    gCamera.setFieldOfView(fieldOfView);
+    gScrollY = 0;
+}
+
+// records how far the y axis has been scrolled
+void OnScroll(GLFWwindow* window, double deltaX, double deltaY) {
+    gScrollY += deltaY;
+}
+
+void OnError(int errorCode, const char* msg) {
+    throw std::runtime_error(msg);
+}
+
+// the program starts here
+void AppMain() {
+    // initialise GLFW
+    glfwSetErrorCallback(OnError);
+    if(!glfwInit())
+        throw std::runtime_error("glfwInit failed");
+    
+    // open a window with GLFW
+    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
+    glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
+    gWindow = glfwCreateWindow((int)SCREEN_SIZE.x, (int)SCREEN_SIZE.y, "OpenGL Tutorial", NULL, NULL);
+    if(!gWindow)
+        throw std::runtime_error("glfwCreateWindow failed. Can your hardware handle OpenGL 3.2?");
+    
+    // GLFW settings
+    glfwSetInputMode(gWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    glfwSetCursorPos(gWindow, 1, 1);
+    glfwSetScrollCallback(gWindow, OnScroll);
+    glfwMakeContextCurrent(gWindow);
+    
+    // initialise GLEW
+    glewExperimental = GL_TRUE; //stops glew crashing on OSX :-/
+    if(glewInit() != GLEW_OK)
+        throw std::runtime_error("glewInit failed");
+    
+    // GLEW throws some errors, so discard all the errors so far
+    while(glGetError() != GL_NO_ERROR) {}
+    
+    // print out some info about the graphics drivers
+    std::cout << "OpenGL version: " << glGetString(GL_VERSION) << std::endl;
+    std::cout << "GLSL version: " << glGetString(GL_SHADING_LANGUAGE_VERSION) << std::endl;
+    std::cout << "Vendor: " << glGetString(GL_VENDOR) << std::endl;
+    std::cout << "Renderer: " << glGetString(GL_RENDERER) << std::endl;
+    
+    // make sure OpenGL version 3.2 API is available
+    if(!GLEW_VERSION_3_2)
+        throw std::runtime_error("OpenGL 3.2 API is not available.");
+    
+    // OpenGL settings
+    glEnable(GL_DEPTH_TEST);
+    glDepthFunc(GL_LESS);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    
+    // initialise the gWoodenCrate asset
+    LoadWoodenCrateAsset();
+    
+    // create all the instances in the 3D scene based on the gWoodenCrate asset
+    CreateInstances();
+    
+    // setup gCamera
+  // gCamera.setPosition(glm::vec3(upward_vector_hkl.x, upward_vector_hkl.y, upward_vector_hkl.z));
+  //set eye
+    gCamera.setPosition(glm::vec3(1,0,3));
+gCamera.set_vis_up( glm::vec3(zone_axis_vector_uvw.x, zone_axis_vector_uvw.y, zone_axis_vector_uvw.z) );
+    // gCamera.lookAt(glm::vec3(zone_axis_vector_uvw.x, zone_axis_vector_uvw.y, zone_axis_vector_uvw.z));
+    
+    // );
+    //glm::vec3 vis_up ( 0, 0, 1 ) ; //();
+    
+    gCamera.setViewportAspectRatio(SCREEN_SIZE.x / SCREEN_SIZE.y);
+    
+    // run while the window is open
+    double lastTime = glfwGetTime();
+    while(!glfwWindowShouldClose(gWindow)){
+        // process pending events
+        glfwPollEvents();
+        
+        // update the scene based on the time elapsed since last update
+        double thisTime = glfwGetTime();
+        Update((float)(thisTime - lastTime));
+        lastTime = thisTime;
+        
+        // draw one frame
+        Render();
+        
+        // check for errors
+        GLenum error = glGetError();
+        if(error != GL_NO_ERROR)
+            std::cerr << "OpenGL Error " << error << std::endl;
+        
+        //exit program if escape key is pressed
+        if(glfwGetKey(gWindow, GLFW_KEY_ESCAPE))
+            glfwSetWindowShouldClose(gWindow, GL_TRUE);
+    }
+    
+    // clean up and exit
+    glfwTerminate();
+}
+
 
 void create_unit_cell_cube(cv::Point3d pt, float side ){
   int initial_vertices_size = vertices.size() / 3;     // the needed padding
@@ -371,7 +730,6 @@ void create_standard_cylinder(cv::Point3d pt, float radius, float height, int nL
   }
 }
 
-
 void create_standard_sphere(cv::Point3d pt, float radius, int nLatitude, int nLongitude)
 {
   int p, s, i, j;
@@ -561,8 +919,7 @@ void onIdle() {
     glutPostRedisplay();
 }
 
-void onDisplay()
-{
+void onDisplay(){
   glClearColor(1.0, 1.0, 1.0, 1.0);
   glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 
@@ -612,35 +969,17 @@ void onDisplay()
   glutSwapBuffers();
 }
 
-void onReshape(int width, int height) {
+void onReshape(int width, int height){
   screen_width = width;
   screen_height = height;
   glViewport(0, 0, screen_width, screen_height);
 }
 
-void free_resources()
-{
+void free_resources(){
   glDeleteProgram(program);
   glDeleteBuffers(1, &vbo_cube_vertices);
   glDeleteBuffers(1, &vbo_cube_colors);
   glDeleteBuffers(1, &ibo_cube_elements);
-}
-
-
-
-static int g_window;
-
-  static void
-handleKeyPress(unsigned char key, int x, int y)
-{
-  switch(key) {
-    default:
-      break;
-    case 27: /* escape */
-      glutDestroyWindow(g_window);
-      exit(0);
-      break;
-  }
 }
 
 /// Function Headers
@@ -1357,32 +1696,8 @@ int main(int argc, char** argv )
 
     if( vis_gui_switch ){
       /* VIS */
-      glutInit(&argc, argv);
-      glutInitDisplayMode(GLUT_RGBA|GLUT_ALPHA|GLUT_DOUBLE|GLUT_DEPTH);
-      glutInitWindowSize(screen_width, screen_height);
-      glutCreateWindow("Particle rendered");
-      GLenum glew_status = glewInit();
-      if (glew_status != GLEW_OK) {
-        fprintf(stderr, "Error: %s\n", glewGetErrorString(glew_status));
-        return 1;
-      }
-
-      if (!GLEW_VERSION_2_0) {
-        fprintf(stderr, "Error: your graphic card does not support OpenGL 2.0\n");
-        return 1;
-      }
-      if (init_resources()) {
-        glutDisplayFunc(onDisplay);
-        glutReshapeFunc(onReshape);
-        glutIdleFunc(onIdle);
-        glEnable(GL_BLEND);
-        glEnable(GL_DEPTH_TEST);
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-        glutMainLoop();
-      }
-
-      free_resources();
-    }
+        AppMain();
+            }
 
   }
   catch(std::exception& e){
