@@ -138,7 +138,7 @@ struct ModelInstance {
   ModelAsset* asset;
   glm::mat4 transform;
   glm::vec4 rgba;
-            GLenum polygon_mode; 
+  GLenum polygon_mode; 
   GLenum polygon_face;
 
 
@@ -176,7 +176,7 @@ static vis::Program* LoadShaders(const char* vertFilename, const char* fragFilen
 }
 
 // initialises the vis_atom_asset global
-static void LoadVisUnitCellAsset() {
+static void LoadVisUnitCellAsset( float side ) {
   // set all the elements of vis_atom_asset
   vis_unit_cell_asset.shaders = LoadShaders("shaders/cube.v.glsl", "shaders/cube.f.glsl");
   vis_unit_cell_asset.drawType = GL_TRIANGLES;
@@ -194,7 +194,6 @@ static void LoadVisUnitCellAsset() {
   //-- creates a sphere as a "standard sphere" triangular mesh with the specified
   //-- number of latitude (nLatitude) and longitude (nLongitude) lines
   cv::Point3d pt(0.0f,0.0f,0.0f);
-  float side = 1.0f; 
   int initial_vertices_size = vertices.size() / 3;    // the needed padding
 
   // bottom vertex 1 - A
@@ -448,23 +447,25 @@ glm::mat4 scale(GLfloat x, GLfloat y, GLfloat z) {
 
 //create all the `instance` structs for the 3D scene, and add them to `gInstances`
 static void CreateInstances() {
-  
-    ModelInstance unit_cell_asset;
-    unit_cell_asset.asset = &vis_unit_cell_asset;
-    unit_cell_asset.polygon_mode = GL_LINE;
-    gInstances.push_back( unit_cell_asset );
 
-  std::vector<cv::Point3d> atom_positions = unit_cell.get_atom_positions_vec();
+  ModelInstance unit_cell_asset;
+  unit_cell_asset.asset = &vis_unit_cell_asset;
+  unit_cell_asset.polygon_mode = GL_LINE;
+  gInstances.push_back( unit_cell_asset );
+
+  std::vector<glm::vec3> atom_positions = unit_cell.get_atom_positions_vec();
   std::vector<glm::vec4> atom_cpk_rgba_colors = unit_cell.get_atom_cpk_rgba_colors_vec();
-  std::vector<cv::Point3d>::iterator pos_itt;
+  std::vector<double> atom_empirical_radii = unit_cell.get_atom_empirical_radii_vec();
+  std::vector<glm::vec3>::iterator pos_itt;
 
   std::cout << "going to create  " << atom_positions.size() << " instances" << std::endl;
   for (int vec_pos = 0; vec_pos < atom_positions.size(); vec_pos++){
-    cv::Point3d pos = atom_positions.at(vec_pos); 
+    glm::vec3 pos = atom_positions.at(vec_pos); 
     ModelInstance atom;
     atom.asset = &vis_atom_asset;
     atom.rgba = atom_cpk_rgba_colors.at(vec_pos);
-    atom.transform = translate(pos.x, pos.y, pos.z) * scale(0.15f,0.15f,0.15f);
+    double radii = atom_empirical_radii.at(vec_pos);
+    atom.transform = translate(pos.x, pos.y, pos.z) * scale(radii, radii, radii );
     gInstances.push_back(atom);
   }
 }
@@ -473,7 +474,6 @@ static void CreateInstances() {
 static void RenderInstance(const ModelInstance& inst) {
   ModelAsset* asset = inst.asset;
   vis::Program* shaders = asset->shaders;
-  
 
   //bind the shaders
   shaders->use();
@@ -488,9 +488,9 @@ static void RenderInstance(const ModelInstance& inst) {
   glBindBuffer(GL_ARRAY_BUFFER, asset->vbo);
 
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, asset->ibo);
-  
+
   glPolygonMode( inst.polygon_face , inst.polygon_mode );
-  
+
   glDrawElements( asset->drawType , asset->numIndices, GL_UNSIGNED_INT , 0);
 
   // unbind the element render buffer 
@@ -618,9 +618,9 @@ void AppVis() {
   glEnable(GL_BLEND);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-  
+
   // initialise the vis_unit_cell asset
-  LoadVisUnitCellAsset();
+  LoadVisUnitCellAsset( unit_cell.get_cell_length_a() );
   // initialise the vis_atom_asset asset
   LoadVisAtomAsset();
 
@@ -630,7 +630,7 @@ void AppVis() {
   // setup gCamera
   // gCamera.setPosition(glm::vec3(upward_vector_hkl.x, upward_vector_hkl.y, upward_vector_hkl.z));
   // set eye
-  gCamera.setPosition(glm::vec3(0,0,3));
+  gCamera.setPosition(glm::vec3(unit_cell.get_cell_length_a()*2.0f,unit_cell.get_cell_length_b()*2.0f,unit_cell.get_cell_length_c() * 2.0f));
   gCamera.set_vis_up( glm::vec3(zone_axis_vector_uvw.x, zone_axis_vector_uvw.y, zone_axis_vector_uvw.z) );
   // gCamera.lookAt(glm::vec3(zone_axis_vector_uvw.x, zone_axis_vector_uvw.y, zone_axis_vector_uvw.z));
 
@@ -1084,7 +1084,7 @@ int main(int argc, char** argv )
     unit_cell.set_zone_axis_vector( zone_axis_vector_uvw );
     unit_cell.set_upward_vector( upward_vector_hkl );
     unit_cell.form_matrix_from_miller_indices(); 
-
+    unit_cell.orientate_atoms_from_matrix();
 
     // Simulated image sampling rate
     sampling_rate_super_cell_x_nm_pixel = super_cell_size_x / nx_simulated_horizontal_samples;

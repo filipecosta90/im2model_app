@@ -57,12 +57,13 @@ class Unit_Cell {
     /* end Atom site */
 
     std::vector<Atom::Atom> _atoms;
-    std::vector<cv::Point3d> _atom_positions;
+    std::vector<cv::Point3d> _symetry_atom_positions;
+    std::vector<glm::vec3> _atom_positions;
     std::vector<glm::vec4> _atom_cpk_rgba_colors;
-std::vector<double> _atom_radii;
-
+    std::vector<double> _atom_radii;
+    std::vector<double> _atom_empirical_radii;
     //vertex buffer for points
-    
+
     //vertex buffer for colors
     std::vector<glm::vec4> _atom_rgba_colors;
 
@@ -86,10 +87,16 @@ std::vector<double> _atom_radii;
     void set_zone_axis_vector( cv::Point3d uvw );
     void set_upward_vector( cv::Point3d hkl );
     //getters
-    std::vector<cv::Point3d> get_atom_positions_vec();
-std::vector<glm::vec4> get_atom_cpk_rgba_colors_vec();
-std::vector<double> get_atom_radii_vec();
+    std::vector<glm::vec3> get_atom_positions_vec();
+    std::vector<cv::Point3d> get_symetry_atom_positions_vec();
+    std::vector<glm::vec4> get_atom_cpk_rgba_colors_vec();
+    std::vector<double> get_atom_radii_vec();
+    std::vector<double> get_atom_empirical_radii_vec();
+    double get_cell_length_a();
+    double get_cell_length_b();
+    double get_cell_length_c();
 
+    //others
     void add_symmetry_equiv_pos_as_xyz( std::string xyz );
     void add_symmetry_equiv_pos_as_x( std::string x );
     void add_symmetry_equiv_pos_as_y( std::string y );
@@ -103,7 +110,7 @@ std::vector<double> get_atom_radii_vec();
 
     bool create_atoms_from_site_and_symetry();
     void form_matrix_from_miller_indices();
-
+    void orientate_atoms_from_matrix();
     void set_chem_database(Chem_Database* chem_db );
 };
 

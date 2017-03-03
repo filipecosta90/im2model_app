@@ -100,16 +100,35 @@ void Unit_Cell::add_atom_site_fract_z( double fract_z ){
   _atoms_site_fract_z.push_back(fract_z);
 }
 
-std::vector<cv::Point3d> Unit_Cell::get_atom_positions_vec( ){
-    return _atom_positions;
+std::vector<glm::vec3> Unit_Cell::get_atom_positions_vec( ){
+  return _atom_positions;
+}
+std::vector<cv::Point3d> Unit_Cell::get_symetry_atom_positions_vec( ){
+  return _symetry_atom_positions;
 }
 
 std::vector<glm::vec4> Unit_Cell::get_atom_cpk_rgba_colors_vec( ){
-    return _atom_cpk_rgba_colors;
+  return _atom_cpk_rgba_colors;
 }
 
 std::vector<double> Unit_Cell::get_atom_radii_vec( ){
-    return _atom_radii;
+  return _atom_radii;
+}
+
+std::vector<double> Unit_Cell::get_atom_empirical_radii_vec(){
+  return _atom_empirical_radii;
+}
+
+double Unit_Cell::get_cell_length_a(){
+  return _cell_length_a;
+}
+
+double Unit_Cell::get_cell_length_b(){
+  return _cell_length_b;
+}
+
+double Unit_Cell::get_cell_length_c(){
+  return _cell_length_c;
 }
 
 bool Unit_Cell::create_atoms_from_site_and_symetry(){
@@ -121,7 +140,7 @@ bool Unit_Cell::create_atoms_from_site_and_symetry(){
     const std::string atom_type_symbol = _atoms_site_type_symbols.at(atom_site_pos);
     std::cout << "searching for "<<  atom_type_symbol << " in chem DB of size " << chem_database.size() << std::endl;
     Atom_Info atom_info = chem_database.get_atom_info( atom_type_symbol );
-    double atom_radious = atom_info.vanDerWaalsRadius(); //empiricalRadius(); //calculatedRadius();
+    double atom_radious = atom_info.empiricalRadius(); //vanDerWaalsRadius(); //empiricalRadius(); //calculatedRadius();
     std::cout << " atom radious " << atom_radious << std::endl;
     glm::vec4 cpk_color = atom_info.cpkColor();
     std::cout << "Color CPK RGBA " << cpk_color.r << " , " << cpk_color.g << " , " << cpk_color.b << " , " << cpk_color.a  << std::endl;
@@ -133,17 +152,46 @@ bool Unit_Cell::create_atoms_from_site_and_symetry(){
       double temp_a = symbCalc( symetry_x , fract_x, fract_y, fract_z);
       double temp_b = symbCalc( symetry_y , fract_x, fract_y, fract_z);
       double temp_c = symbCalc( symetry_z , fract_x, fract_y, fract_z);
-      if ( ( temp_a >= 0.0 && temp_a < 1.0 ) && ( temp_b >= 0.0  && temp_b < 1.0 ) && ( temp_c >= 0.0 && temp_c < 1.0 ) ){
-        const cv::Point3d temporary_point = cv::Point3d(temp_a, temp_b, temp_c );
-        std::vector<cv::Point3d>::iterator it ;
-        it = std::find(_atom_positions.begin(), _atom_positions.end(), temporary_point );
-        if(it == _atom_positions.end() ){
-          std::cout << "atom # " << distinct << " ( " << atom_type_symbol << " )" << temp_a << " , " << temp_b << " , " << temp_c << std::endl;
-          _atom_positions.push_back(temporary_point);
-          //_atom_cpk_colors
-          _atom_cpk_rgba_colors.push_back(cpk_color);
-          distinct++;
-        }
+      //std::cout << temp_a << "(" << symetry_x << ")" << temp_b << "(" << symetry_y << ")" << temp_c << "(" << symetry_z << ")" << std::endl;
+      //std::cout << temp_a << " " << temp_b << " " << temp_c << std::endl;
+
+      if  ( temp_a > 1.0f ) {
+        temp_a = temp_a - 1.0f; 
+      }
+      if  ( temp_a < 0.0f ) {
+        temp_a = temp_a + 1.0f;
+      } 
+
+      if  ( temp_b > 1.0f ) {
+        temp_b = temp_b - 1.0f; 
+      }
+      if  ( temp_b < 0.0f ) {
+        temp_b = temp_b + 1.0f;
+      } 
+
+      if  ( temp_c > 1.0f ) {
+        temp_c = temp_c - 1.0f; 
+      }
+      if  ( temp_c < 0.0f ) {
+        temp_c = temp_c + 1.0f;
+      } 
+
+      const cv::Point3d temporary_point = cv::Point3d(temp_a, temp_b, temp_c );
+      std::vector<cv::Point3d>::iterator it ;
+      // check if it already exists
+      it = std::find(_symetry_atom_positions.begin(), _symetry_atom_positions.end(), temporary_point );
+      if(it == _symetry_atom_positions.end() ){
+        std::cout << "atom # " << distinct << " ( " << atom_type_symbol << " )" << temp_a << " , " << temp_b << " , " << temp_c << std::endl;
+        const double px = temp_a * _cell_length_a;
+        const double py = temp_b * _cell_length_b;
+        const double pz = temp_c * _cell_length_c;
+        const glm::vec3 atom_pos ( px, py, pz );
+        _atom_positions.push_back( atom_pos );
+        _atom_empirical_radii.push_back( atom_radious );
+        _symetry_atom_positions.push_back(temporary_point);
+        //_atom_cpk_colors
+        _atom_cpk_rgba_colors.push_back(cpk_color);
+        distinct++;
       }
     }
   }
@@ -182,10 +230,31 @@ void Unit_Cell::form_matrix_from_miller_indices (){
   points.push_back(t);
   points.push_back(n);
   points.push_back(b);
-  orientation_matrix = cv::Mat(points);
-  // std::cout << orientation_matrix << std::endl;
+  orientation_matrix = cv::Mat(points, CV_64FC1);
+
+  std::cout << "Orientation Matrix :" << std::endl;
+  std::cout << orientation_matrix << std::endl;
+}
+
+
+void Unit_Cell::orientate_atoms_from_matrix(){
+  std::vector<glm::vec3>::iterator it ;
+  // check if it already exists
+  for ( int pos = 0; pos <  _atom_positions.size(); pos++ ){
+    glm::vec3 initial_atom = _atom_positions.at(pos);
+    cv::Point3d b = cv::Point3d(initial_atom.x,initial_atom.y,initial_atom.z);
+    cv::Point3d final;
+    final.x = orientation_matrix.at<double>(0,0) * b.x + orientation_matrix.at<double>(0,1) * b.y + orientation_matrix.at<double>(0,2) * b.z; 
+    final.y = orientation_matrix.at<double>(1,0) * b.x + orientation_matrix.at<double>(1,1) * b.y + orientation_matrix.at<double>(1,2) * b.z; 
+    final.z = orientation_matrix.at<double>(2,0) * b.x + orientation_matrix.at<double>(2,1) * b.y + orientation_matrix.at<double>(2,2) * b.z; 
+    std::cout << "initial: " << b << " final: " << final << std::endl;
+    _atom_positions.at(pos) =  glm::vec3 ( final.x, final.y, final.z );
+
+  }
 }
 
 void Unit_Cell::set_chem_database( Chem_Database* chem_db ){
 
 }
+
+
