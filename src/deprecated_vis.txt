@@ -1,0 +1,312 @@
+/*
+void create_unit_cell_cube(cv::Point3d pt, float side ){
+int initial_vertices_size = vertices.size() / 3;     // the needed padding
+std::cout << "initial_vertices_size " << initial_vertices_size << std::endl;
+// bottom vertex 1 - A
+vertices.push_back( pt.x );
+vertices.push_back( pt.y );
+vertices.push_back( pt.z );
+// bottom vertex 2 - B
+vertices.push_back( pt.x+side );
+vertices.push_back( pt.y );
+vertices.push_back( pt.z );
+// bottom vertex 3 - C
+vertices.push_back( pt.x+side );
+vertices.push_back( pt.y+side );
+vertices.push_back( pt.z );
+// bottom vertex 4 - D
+vertices.push_back( pt.x );
+vertices.push_back( pt.y+side );
+vertices.push_back( pt.z );
+// top vertex 5 - E
+vertices.push_back( pt.x );
+vertices.push_back( pt.y );
+vertices.push_back( pt.z+side );
+// top vertex 6 - F
+vertices.push_back( pt.x+side );
+vertices.push_back( pt.y );
+vertices.push_back( pt.z+side );
+// top vertex 7 - G
+vertices.push_back( pt.x+side );
+vertices.push_back( pt.y+side );
+vertices.push_back( pt.z+side );
+// top vertex 8 - H
+vertices.push_back( pt.x );
+vertices.push_back( pt.y+side );
+vertices.push_back( pt.z+side );
+
+colors.push_back(1.0f);
+colors.push_back(0.0f);
+colors.push_back(0.0f);
+
+colors.push_back(1.0f);
+colors.push_back(0.0f);
+colors.push_back(0.0f);
+
+colors.push_back(1.0f);
+colors.push_back(0.0f);
+colors.push_back(0.0f);
+
+colors.push_back(1.0f);
+colors.push_back(0.0f);
+colors.push_back(0.0f);
+
+colors.push_back(1.0f);
+colors.push_back(0.0f);
+colors.push_back(0.0f);
+
+colors.push_back(1.0f);
+colors.push_back(0.0f);
+colors.push_back(0.0f);
+
+colors.push_back(1.0f);
+colors.push_back(0.0f);
+colors.push_back(0.0f);
+
+colors.push_back(1.0f);
+colors.push_back(0.0f);
+colors.push_back(0.0f);
+
+int a,b,c,d,e,f,g,h;
+a = initial_vertices_size;
+b = a + 1;
+c = b + 1;
+d = c + 1;
+e = d + 1;
+f = e + 1;
+g = f + 1;
+h = g + 1;
+
+//front 1
+indices.push_back( b );
+indices.push_back( c );
+indices.push_back( g );
+// front 2
+indices.push_back( b );
+indices.push_back( g );
+indices.push_back( f );
+// right 1
+indices.push_back( g );
+indices.push_back( h );
+indices.push_back( d );
+// right 2
+indices.push_back( g );
+indices.push_back( d );
+indices.push_back( c );
+// back 1
+indices.push_back( a );
+indices.push_back( d );
+indices.push_back( h );
+// back 2
+indices.push_back( a );
+indices.push_back( h );
+indices.push_back( e );
+// left 1
+indices.push_back( a );
+indices.push_back( b );
+indices.push_back( f );
+// left 2
+indices.push_back( a );
+indices.push_back( f );
+indices.push_back( e );
+// top 1
+indices.push_back( g );
+indices.push_back( f );
+indices.push_back( e );
+// top 2
+indices.push_back( g );
+indices.push_back( e );
+indices.push_back( h );
+// bottom 1
+indices.push_back( a );
+indices.push_back( d );
+indices.push_back( c );
+// bottom 2
+indices.push_back( a );
+indices.push_back( c );
+indices.push_back( b );
+
+}
+*/
+/*
+void create_standard_cylinder(cv::Point3d pt, float radius, float height, int nLatitude, int nLongitude)
+{
+int nPitch = nLongitude + 1;
+int initial_vertices_size = vertices.size() / 3;    // the needed padding
+
+int numVertices = 0;    // the number of vertex points added.
+float pitchInc = height / nLongitude; //(180. / (float)nPitch) * DEGS_TO_RAD;
+float rotInc   = (360. / (float)nLatitude) * DEGS_TO_RAD;
+std::cout << "initial_vertices_size " << initial_vertices_size << std::endl;
+std::cout << "pitchInc " << pitchInc << std::endl;
+
+// Top vertex.
+vertices.push_back( pt.x );
+vertices.push_back( pt.y );
+vertices.push_back( pt.z+height );
+// Bottom vertex.
+vertices.push_back( pt.x );
+vertices.push_back( pt.y );
+vertices.push_back( pt.z );
+
+colors.push_back(0.0f);
+colors.push_back(0.0f);
+colors.push_back(1.0f);
+colors.push_back(0.0f);
+colors.push_back(0.0f);
+colors.push_back(1.0f);
+
+numVertices = numVertices+2;
+
+int fVert = initial_vertices_size + numVertices;    // Record the first vertex index for intermediate vertices.
+for(int p=0; p<nPitch; p++)     // Generate all "intermediate vertices":
+{
+//float out = radius * sin((float)p * pitchInc);
+//if(out < 0) out = -out;    // abs() command won't work with all compilers
+const float z   = p * pitchInc;
+for(int s=0; s<=nLatitude; s++)
+{
+const float x = radius * cos(s * rotInc);
+const float y = radius * sin(s * rotInc);
+vertices.push_back( x+pt.x );
+vertices.push_back( y+pt.y );
+vertices.push_back( z+pt.z );
+colors.push_back(0.0f);
+colors.push_back(0.0f);
+colors.push_back(1.0f);
+numVertices++;
+}
+}
+
+//## PRINT SQUARE FACES BETWEEN INTERMEDIATE POINTS:
+
+for(int p=1; p<(nPitch); p++) // starts from lower part of sphere up
+{
+for(int s=0; s<(nLatitude); s++) {
+const int i = p*(nLatitude+1) + s;
+// a - d //
+// | \ | //
+// b - c //
+const int upper_pos_lat = i - (nLatitude+1);
+float a = upper_pos_lat+fVert;
+float b = i+fVert;
+float c = i+1+fVert;
+float d = upper_pos_lat+1+fVert;
+// 1st triangle abc
+indices.push_back( a );
+indices.push_back( b );
+indices.push_back( c );
+// 2nd triangle acd
+indices.push_back( a );
+indices.push_back( c );
+indices.push_back( d );
+}
+}
+
+//## PRINT TRIANGLE FACES CONNECTING TO TOP AND BOTTOM VERTEX:
+int offLastVerts  = initial_vertices_size + numVertices - (nLatitude+1);
+for(int s=0; s<(nLatitude-1); s++)
+{
+
+//top
+indices.push_back( initial_vertices_size );
+indices.push_back( (s+1)+offLastVerts );
+indices.push_back( (s+2)+offLastVerts );
+//bottom
+indices.push_back( initial_vertices_size +1 );
+indices.push_back( (s+2)+fVert );
+indices.push_back( (s+1)+fVert );
+}
+}
+*/
+/*
+void create_standard_sphere(cv::Point3d pt, float radius, int nLatitude, int nLongitude)
+{
+int p, s, i, j;
+float x, y, z, out;
+int nPitch = nLongitude + 1;
+int initial_vertices_size = vertices.size() / 3;    // the needed padding
+std::cout << "initial_vertices_size " << initial_vertices_size << std::endl;
+
+int numVertices = 0;    // the number of vertex points added.
+float pitchInc = (180. / (float)nPitch) * DEGS_TO_RAD;
+float rotInc   = (360. / (float)nLatitude) * DEGS_TO_RAD;
+
+// Top vertex.
+vertices.push_back( pt.x );
+vertices.push_back( pt.y );
+vertices.push_back( pt.z+radius );
+// Bottom vertex.
+vertices.push_back( pt.x );
+vertices.push_back( pt.y );
+vertices.push_back( pt.z-radius );
+
+colors.push_back(0.0f);
+colors.push_back(0.0f);
+colors.push_back(1.0f);
+colors.push_back(0.0f);
+colors.push_back(0.0f);
+colors.push_back(1.0f);
+
+numVertices = numVertices+2;
+
+int fVert = initial_vertices_size + numVertices;    // Record the first vertex index for intermediate vertices.
+for(p=1; p<nPitch; p++)     // Generate all "intermediate vertices":
+{
+out = radius * sin((float)p * pitchInc);
+if(out < 0) out = -out;    // abs() command won't work with all compilers
+z   = radius * cos(p * pitchInc);
+for(s=0; s<=nLatitude; s++)
+{
+x = out * cos(s * rotInc);
+y = out * sin(s * rotInc);
+vertices.push_back( x+pt.x );
+vertices.push_back( y+pt.y );
+vertices.push_back( z+pt.z );
+colors.push_back(0.0f);
+colors.push_back(0.0f);
+colors.push_back(1.0f);
+numVertices++;
+}
+}
+
+//## PRINT SQUARE FACES BETWEEN INTERMEDIATE POINTS:
+
+for(p=1; p<(nPitch-1); p++) // starts from lower part of sphere up
+{
+for(s=0; s<(nLatitude); s++) {
+i = p*(nLatitude+1) + s;
+// a - d //
+// | \ | //
+// b - c //
+const int upper_pos_lat = i - (nLatitude+1);
+float a = upper_pos_lat+fVert;
+float b = i+fVert;
+float c = i+1+fVert;
+float d = upper_pos_lat+1+fVert;
+// 1st triangle abc
+indices.push_back( a );
+indices.push_back( b );
+indices.push_back( c );
+// 2nd triangle acd
+indices.push_back( a );
+indices.push_back( c );
+indices.push_back( d );
+}
+}
+
+//## PRINT TRIANGLE FACES CONNECTING TO TOP AND BOTTOM VERTEX:
+int offLastVerts  = initial_vertices_size + numVertices - (nLatitude+1);
+for(s=0; s<(nLatitude-1); s++)
+{
+//top
+indices.push_back( initial_vertices_size   );
+indices.push_back( (s+2)+fVert );
+indices.push_back( (s+1)+fVert );
+//bottom
+indices.push_back( initial_vertices_size + 1);
+indices.push_back( (s+1)+offLastVerts );
+indices.push_back( (s+2)+offLastVerts );
+}
+}
+*/
