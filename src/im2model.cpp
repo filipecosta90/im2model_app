@@ -189,7 +189,7 @@ static void LoadVisAtomAsset() {
   float radius = 0.5f;
   int nLatitude = 10;
   int nLongitude = 10;
-  int p, s, i, j;
+  int p, s, i;
   float x, y, z, out;
   int nPitch = nLongitude + 1;
   int initial_vertices_size = vertices.size() / 3;    // the needed padding

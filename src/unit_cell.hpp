@@ -70,8 +70,6 @@ class Unit_Cell {
     /** Chem Database **/
     Chem_Database chem_database;
 
-    void renderSphere(float x, float y, float z, float radius, glm::vec4 atom_rgba_color,int subdivisions,GLUquadricObj *quadric);
-    void renderSphere_convenient(cv::Point3d point, float radius, glm::vec4 atom_rgba_color, int subdivisions);
   public:
     Unit_Cell();
     void extract_space_group();
@@ -103,7 +101,6 @@ class Unit_Cell {
     void form_matrix_from_miller_indices();
 
     void set_chem_database(Chem_Database* chem_db );
-    void render_gl();
 };
 
 #endif

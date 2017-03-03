@@ -40,7 +40,6 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
-#include "shader_utils.h"
 #else
 #include <GL/gl.h>
 #include <GL/glext.h>

@@ -179,38 +179,6 @@ void Unit_Cell::form_matrix_from_miller_indices (){
   // std::cout << orientation_matrix << std::endl;
 }
 
-void Unit_Cell::renderSphere(float x, float y, float z, float radius, glm::vec4 atom_rgba_color, int subdivisions,GLUquadricObj *quadric){
-  glPushMatrix();
-  glTranslatef( x,y,z );
-  float r,g,b,a;
-  r = atom_rgba_color.r;
-  g = atom_rgba_color.g;
-  b = atom_rgba_color.b;
-  a = atom_rgba_color.a;
-  glColor4f(r,g,b,a); 
-  gluSphere(quadric, radius, subdivisions,subdivisions);
-  glPopMatrix();
-}
-
-void Unit_Cell::renderSphere_convenient( cv::Point3d point, float radius, glm::vec4 atom_rgba_color, int subdivisions)
-{
-  //the same quadric can be re-used for drawing many spheres
-  GLUquadricObj *quadric=gluNewQuadric();
-  gluQuadricNormals(quadric, GLU_SMOOTH);
-  renderSphere(point.x,point.y,point.z,radius, atom_rgba_color, subdivisions,quadric);
-  gluDeleteQuadric(quadric);
-
-}
-
 void Unit_Cell::set_chem_database( Chem_Database* chem_db ){
-}
 
-void Unit_Cell::render_gl(){
-  for ( std::vector<cv::Point3d>::iterator it = _atom_positions.begin(); it != _atom_positions.end(); it++  ){
-    cv::Point3d atom_position = *it;
-    auto pos = std::distance(_atom_positions.begin(), it);
-    glm::vec4 atom_rgba_color = _atom_rgba_colors.at(pos); 
-    renderSphere_convenient( atom_position, 0.1, atom_rgba_color, 20);
-  }
 }
-

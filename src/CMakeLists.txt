@@ -1,19 +1,9 @@
-find_package( OpenCV  3.0.0 REQUIRED)
-
-find_package(PkgConfig REQUIRED)
-find_package(BISON REQUIRED)
-find_package(FLEX REQUIRED)
-pkg_search_module(GLFW REQUIRED glfw3)
-
 file(GLOB im2model_SRC
   "*.h"
   "*.hpp"
   "*.cpp"
   "*.c"
   )
-
-include_directories(${OpenCV_INCLUDE_DIRS})
-include_directories(${GLFW_INCLUDE_DIRS})
 
 BISON_TARGET(mc_parser
   mc_parser.yy
@@ -22,7 +12,6 @@ FLEX_TARGET(mc_lexer
   mc_lexer.l
   ${CMAKE_CURRENT_BINARY_DIR}/mc_lexer.yy.cc)
 ADD_FLEX_BISON_DEPENDENCY(mc_lexer mc_parser)
-
 
 add_executable( im2model ${im2model_SRC} 
   mc_driver.cpp
@@ -35,28 +24,16 @@ target_include_directories(im2model
   .
   ${CMAKE_CURRENT_BINARY_DIR})
 
-#set_property(TARGET im2model
-#PROPERTY CXX_STANDARD 14)
-
 file(COPY "shaders" DESTINATION "${CMAKE_BINARY_DIR}")
-
-
-
-#add_custom_target(copy-runtime-files ALL
-#COMMAND cmake -E copy_directory ${CMAKE_SOURCE_DIR}/shaders ${CMAKE_BINARY_DIR}/src/shaders
-# DEPENDS ${MY_TARGET})
-
-# we add the sub-directories that we want CMake to scan
-
 
 target_include_directories(im2model PRIVATE ${GlmIncludeDir})
 
 target_link_libraries( im2model 
-${OpenCV_LIBS} 
-${Boost_LIBRARIES} 
-${OPENGL_LIBRARIES} 
-${GLUT_LIBRARY}  
+  ${OpenCV_LIBS} 
+  ${Boost_LIBRARIES} 
+  ${OPENGL_LIBRARIES} 
+  ${GLUT_LIBRARY}  
   ${GLEW_LIBRARY}
-${GLFW_LIBRARIES}
-)
+  ${GLFW_LIBRARIES}
+  )
 
