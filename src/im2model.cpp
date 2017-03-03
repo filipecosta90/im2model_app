@@ -103,16 +103,16 @@ Unit_Cell unit_cell;
 cv::Point3d  zone_axis_vector_uvw;
 cv::Point3d  upward_vector_hkl;
 
-
 /*
- *  Represents a textured geometry asset
- *   Contains everything necessary to draw arbitrary geometry with a single texture:
- *     - shaders
- *       - a texture
- *         - a VBO
- *           - a VAO
- *             - the parameters to glDrawArrays (drawType, drawStart, drawCount)
- *              */
+ Represents a textured geometry asset
+ Contains everything necessary to draw arbitrary geometry with a single texture:
+ - shaders
+ - a texture
+ - a VBO
+ - a IBO 
+ - a VAO
+ - the parameters to glDrawArrays (drawType, drawStart, drawCount)
+ */
 struct ModelAsset {
   vis::Program* shaders;
   GLuint vbo;
@@ -121,6 +121,7 @@ struct ModelAsset {
   GLenum drawType;
   GLint drawStart;
   GLint drawCount;
+  GLint numIndices;
 
   ModelAsset():
     shaders(NULL),
@@ -129,14 +130,15 @@ struct ModelAsset {
     vao(0),
     drawType(GL_TRIANGLES),
     drawStart(0),
-    drawCount(0)
+    drawCount(0),
+    numIndices(0)
   {}
 };
 
 /*
- *  Represents an instance of an `ModelAsset`
- *   Contains a pointer to the asset, and a model transformation matrix to be used when drawing.
- *    */
+ Represents an instance of an `ModelAsset`
+ Contains a pointer to the asset, and a model transformation matrix to be used when drawing.
+ */
 struct ModelInstance {
   ModelAsset* asset;
   glm::mat4 transform;
@@ -147,19 +149,7 @@ struct ModelInstance {
   {}
 };
 
-
 /* test opengl */
-
-int screen_width=2040, screen_height=1600;
-GLuint vbo_cube_vertices, vbo_cube_colors;
-GLuint ibo_cube_elements;
-GLuint program;
-GLint attribute_coord3d, attribute_v_color;
-GLint uniform_mvp;
-
-std::vector<GLfloat> vertices;
-std::vector<GLfloat> colors;
-std::vector<GLint> indices;
 
 // constants
 const glm::vec2 SCREEN_SIZE(1024 , 760);
@@ -168,7 +158,7 @@ const glm::vec2 SCREEN_SIZE(1024 , 760);
 GLFWwindow* gWindow = NULL;
 double gScrollY = 0.0;
 vis::Camera gCamera;
-ModelAsset gWoodenCrate;
+ModelAsset vis_atom_asset;
 std::list<ModelInstance> gInstances;
 GLfloat gDegreesRotated = 0.0f;
 
@@ -181,335 +171,365 @@ float DEGS_TO_RAD = M_PI/180.0f;
 
 // returns a new vis::Program created from the given vertex and fragment shader filenames
 static vis::Program* LoadShaders(const char* vertFilename, const char* fragFilename) {
-    std::vector<vis::Shader> shaders;
-    shaders.push_back(vis::Shader::shaderFromFile(vertFilename, GL_VERTEX_SHADER));
-    shaders.push_back(vis::Shader::shaderFromFile(fragFilename, GL_FRAGMENT_SHADER));
-    return new vis::Program(shaders);
+  std::vector<vis::Shader> shaders;
+  shaders.push_back(vis::Shader::shaderFromFile(vertFilename, GL_VERTEX_SHADER));
+  shaders.push_back(vis::Shader::shaderFromFile(fragFilename, GL_FRAGMENT_SHADER));
+  return new vis::Program(shaders);
 }
 
+// initialises the vis_atom_asset global
+static void LoadVisAtomAsset() {
+  // set all the elements of vis_atom_asset
+  vis_atom_asset.shaders = LoadShaders("shaders/cube.v.glsl", "shaders/cube.f.glsl");
+  vis_atom_asset.drawType = GL_TRIANGLES;
+ glGenBuffers(1, &vis_atom_asset.vbo);
+  glGenVertexArrays(1, &vis_atom_asset.vao);
+  glGenBuffers(1, &vis_atom_asset.ibo);
 
-// initialises the gWoodenCrate global
-static void LoadWoodenCrateAsset() {
-    // set all the elements of gWoodenCrate
-    gWoodenCrate.shaders = LoadShaders("shaders/cube.v.glsl", "shaders/cube.f.glsl");
-    gWoodenCrate.drawType = GL_TRIANGLES;
-    gWoodenCrate.drawStart = 0;
-    gWoodenCrate.drawCount = 6*2*3;
-    glGenBuffers(1, &gWoodenCrate.vbo);
-    glGenVertexArrays(1, &gWoodenCrate.vao);
-    
-    // bind the VAO
-    glBindVertexArray(gWoodenCrate.vao);
-    
-    // bind the VBO
-    glBindBuffer(GL_ARRAY_BUFFER, gWoodenCrate.vbo);
-    
-    // Make a cube out of triangles (two triangles per side)
-    GLfloat vertexData[] = {
-        //  X     Y     Z       U     V
-        // bottom
-        -1.0f,-1.0f,-1.0f,   0.0f, 0.0f,
-        1.0f,-1.0f,-1.0f,   1.0f, 0.0f,
-        -1.0f,-1.0f, 1.0f,   0.0f, 1.0f,
-        1.0f,-1.0f,-1.0f,   1.0f, 0.0f,
-        1.0f,-1.0f, 1.0f,   1.0f, 1.0f,
-        -1.0f,-1.0f, 1.0f,   0.0f, 1.0f,
-        
-        // top
-        -1.0f, 1.0f,-1.0f,   0.0f, 0.0f,
-        -1.0f, 1.0f, 1.0f,   0.0f, 1.0f,
-        1.0f, 1.0f,-1.0f,   1.0f, 0.0f,
-        1.0f, 1.0f,-1.0f,   1.0f, 0.0f,
-        -1.0f, 1.0f, 1.0f,   0.0f, 1.0f,
-        1.0f, 1.0f, 1.0f,   1.0f, 1.0f,
-        
-        // front
-        -1.0f,-1.0f, 1.0f,   1.0f, 0.0f,
-        1.0f,-1.0f, 1.0f,   0.0f, 0.0f,
-        -1.0f, 1.0f, 1.0f,   1.0f, 1.0f,
-        1.0f,-1.0f, 1.0f,   0.0f, 0.0f,
-        1.0f, 1.0f, 1.0f,   0.0f, 1.0f,
-        -1.0f, 1.0f, 1.0f,   1.0f, 1.0f,
-        
-        // back
-        -1.0f,-1.0f,-1.0f,   0.0f, 0.0f,
-        -1.0f, 1.0f,-1.0f,   0.0f, 1.0f,
-        1.0f,-1.0f,-1.0f,   1.0f, 0.0f,
-        1.0f,-1.0f,-1.0f,   1.0f, 0.0f,
-        -1.0f, 1.0f,-1.0f,   0.0f, 1.0f,
-        1.0f, 1.0f,-1.0f,   1.0f, 1.0f,
-        
-        // left
-        -1.0f,-1.0f, 1.0f,   0.0f, 1.0f,
-        -1.0f, 1.0f,-1.0f,   1.0f, 0.0f,
-        -1.0f,-1.0f,-1.0f,   0.0f, 0.0f,
-        -1.0f,-1.0f, 1.0f,   0.0f, 1.0f,
-        -1.0f, 1.0f, 1.0f,   1.0f, 1.0f,
-        -1.0f, 1.0f,-1.0f,   1.0f, 0.0f,
-        
-        // right
-        1.0f,-1.0f, 1.0f,   1.0f, 1.0f,
-        1.0f,-1.0f,-1.0f,   1.0f, 0.0f,
-        1.0f, 1.0f,-1.0f,   0.0f, 0.0f,
-        1.0f,-1.0f, 1.0f,   1.0f, 1.0f,
-        1.0f, 1.0f,-1.0f,   0.0f, 0.0f,
-        1.0f, 1.0f, 1.0f,   0.0f, 1.0f
-    };
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertexData), vertexData, GL_STATIC_DRAW);
-    
-    // connect the xyz to the "vert" attribute of the vertex shader
-    glEnableVertexAttribArray(gWoodenCrate.shaders->attrib("vert"));
-    glVertexAttribPointer(gWoodenCrate.shaders->attrib("vert"), 3, GL_FLOAT, GL_FALSE, 5*sizeof(GLfloat), NULL);
-    
-    // connect the uv coords to the "vertTexCoord" attribute of the vertex shader
-    //glEnableVertexAttribArray(gWoodenCrate.shaders->attrib("vertTexCoord"));
-    //glVertexAttribPointer(gWoodenCrate.shaders->attrib("vertTexCoord"), 2, GL_FLOAT, GL_TRUE,  5*sizeof(GLfloat), (const GLvoid*)(3 * sizeof(GLfloat)));
-    
-    // unbind the VAO
-    glBindVertexArray(0);
+std::vector<GLfloat> vertices;
+std::vector<GLint> indices;
+ 
+  // bind the VAO
+  glBindVertexArray(vis_atom_asset.vao);
+
+  float side = 1.0f; 
+  glm::vec3 pt(0.0,0.0,0.0);
+  int initial_vertices_size = vertices.size() / 3;     // the needed padding
+  std::cout << "initial_vertices_size " << initial_vertices_size << std::endl;
+  // bottom vertex 1 - A
+  vertices.push_back( pt.x );
+  vertices.push_back( pt.y );
+  vertices.push_back( pt.z );
+  // bottom vertex 2 - B
+  vertices.push_back( pt.x+side );
+  vertices.push_back( pt.y );
+  vertices.push_back( pt.z );
+  // bottom vertex 3 - C
+  vertices.push_back( pt.x+side );
+  vertices.push_back( pt.y+side );
+  vertices.push_back( pt.z );
+  // bottom vertex 4 - D
+  vertices.push_back( pt.x );
+  vertices.push_back( pt.y+side );
+  vertices.push_back( pt.z );
+  // top vertex 5 - E
+  vertices.push_back( pt.x );
+  vertices.push_back( pt.y );
+  vertices.push_back( pt.z+side );
+  // top vertex 6 - F
+  vertices.push_back( pt.x+side );
+  vertices.push_back( pt.y );
+  vertices.push_back( pt.z+side );
+  // top vertex 7 - G
+  vertices.push_back( pt.x+side );
+  vertices.push_back( pt.y+side );
+  vertices.push_back( pt.z+side );
+  // top vertex 8 - H
+  vertices.push_back( pt.x );
+  vertices.push_back( pt.y+side );
+  vertices.push_back( pt.z+side );
+
+  int a,b,c,d,e,f,g,h;
+  a = initial_vertices_size;
+  b = a + 1;
+  c = b + 1;
+  d = c + 1;
+  e = d + 1;
+  f = e + 1;
+  g = f + 1;
+  h = g + 1;
+
+  //front 1
+  indices.push_back( b );
+  indices.push_back( c );
+  indices.push_back( g );
+  // front 2
+  indices.push_back( b );
+  indices.push_back( g );
+  indices.push_back( f );
+  // right 1
+  indices.push_back( g );
+  indices.push_back( h );
+  indices.push_back( d );
+  // right 2
+  indices.push_back( g );
+  indices.push_back( d );
+  indices.push_back( c );
+  // back 1
+  indices.push_back( a );
+  indices.push_back( d );
+  indices.push_back( h );
+  // back 2
+  indices.push_back( a );
+  indices.push_back( h );
+  indices.push_back( e );
+  // left 1
+  indices.push_back( a );
+  indices.push_back( b );
+  indices.push_back( f );
+  // left 2
+  indices.push_back( a );
+  indices.push_back( f );
+  indices.push_back( e );
+  // top 1
+  indices.push_back( g );
+  indices.push_back( f );
+  indices.push_back( e );
+  // top 2
+  indices.push_back( g );
+  indices.push_back( e );
+  indices.push_back( h );
+  // bottom 1
+  indices.push_back( a );
+  indices.push_back( d );
+  indices.push_back( c );
+  // bottom 2
+  indices.push_back( a );
+  indices.push_back( c );
+  indices.push_back( b );
+
+  vis_atom_asset.drawStart = 0;
+  vis_atom_asset.drawCount = vertices.size();
+  vis_atom_asset.numIndices = indices.size();
+
+  // bind the VBO
+  glBindBuffer(GL_ARRAY_BUFFER, vis_atom_asset.vbo);
+  glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(GLfloat), vertices.data(), GL_STATIC_DRAW);
+
+  // bind the IBO
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vis_atom_asset.ibo);
+  glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(GLint), indices.data(), GL_STATIC_DRAW);
+
+  // connect the xyz to the "vert" attribute of the vertex shader
+  glEnableVertexAttribArray(vis_atom_asset.shaders->attrib("vert"));
+  glVertexAttribPointer(vis_atom_asset.shaders->attrib("vert"), 3, GL_FLOAT, GL_FALSE, 0, NULL); //3*sizeof(GLfloat), NULL);
+
+  // connect the uv coords to the "vertTexCoord" attribute of the vertex shader
+  //glEnableVertexAttribArray(vis_atom_asset.shaders->attrib("vertTexCoord"));
+  //glVertexAttribPointer(vis_atom_asset.shaders->attrib("vertTexCoord"), 2, GL_FLOAT, GL_TRUE,  5*sizeof(GLfloat), (const GLvoid*)(3 * sizeof(GLfloat)));
+
+  // unbind buffers 
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+  glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+  // unbind the VAO
+  glBindVertexArray(0);
+
 }
 
 
 // convenience function that returns a translation matrix
 glm::mat4 translate(GLfloat x, GLfloat y, GLfloat z) {
-    return glm::translate(glm::mat4(), glm::vec3(x,y,z));
+  return glm::translate(glm::mat4(), glm::vec3(x,y,z));
 }
 
 
 // convenience function that returns a scaling matrix
 glm::mat4 scale(GLfloat x, GLfloat y, GLfloat z) {
-    return glm::scale(glm::mat4(), glm::vec3(x,y,z));
+  return glm::scale(glm::mat4(), glm::vec3(x,y,z));
 }
-
 
 //create all the `instance` structs for the 3D scene, and add them to `gInstances`
 static void CreateInstances() {
-    
-    std::vector<cv::Point3d> atom_positions = unit_cell.get_atom_positions_vec();
-    std::vector<cv::Point3d>::iterator pos_itt;
-    std::cout << "going to create  " << atom_positions.size() << " instances" << std::endl;
-    for (pos_itt = atom_positions.begin(); pos_itt != atom_positions.end(); pos_itt++){
-        cv::Point3d pos = *pos_itt;
-        ModelInstance dot;
-        dot.asset = &gWoodenCrate;
-        dot.transform = translate(pos.x, pos.y, pos.z) * scale(0.15f,0.15f,0.15f);
-        gInstances.push_back(dot);
-        
-    }
-    
-    /*ModelInstance dot;
-    dot.asset = &gWoodenCrate;
-    dot.transform = glm::mat4();
-    gInstances.push_back(dot);
-
-    
-    ModelInstance hLeft;
-    hLeft.asset = &gWoodenCrate;
-    hLeft.transform = translate(-8,0,0) * scale(1,6,1);
-    gInstances.push_back(hLeft);
-    
-    ModelInstance hRight;
-    hRight.asset = &gWoodenCrate;
-    hRight.transform = translate(-4,0,0) * scale(1,6,1);
-    gInstances.push_back(hRight);
-    
-    ModelInstance hMid;
-    hMid.asset = &gWoodenCrate;
-    hMid.transform = translate(-6,0,0) * scale(2,1,0.8f);
-    gInstances.push_back(hMid);*/
+  std::vector<cv::Point3d> atom_positions = unit_cell.get_atom_positions_vec();
+  std::vector<cv::Point3d>::iterator pos_itt;
+  std::cout << "going to create  " << atom_positions.size() << " instances" << std::endl;
+  for (pos_itt = atom_positions.begin(); pos_itt != atom_positions.end(); pos_itt++){
+    cv::Point3d pos = *pos_itt;
+    ModelInstance atom;
+    atom.asset = &vis_atom_asset;
+    atom.transform = translate(pos.x, pos.y, pos.z) * scale(0.15f,0.15f,0.15f);
+    gInstances.push_back(atom);
+  }
 }
-
 
 //renders a single `ModelInstance`
 static void RenderInstance(const ModelInstance& inst) {
-    ModelAsset* asset = inst.asset;
-    vis::Program* shaders = asset->shaders;
-    
-    //bind the shaders
-    shaders->use();
-    
-    //set the shader uniforms
-    shaders->setUniform("camera", gCamera.matrix());
-    shaders->setUniform("model", inst.transform);
-   // shaders->setUniform("tex", 0); //set to 0 because the texture will be bound to GL_TEXTURE0
-    
-    //bind the texture
-    //glActiveTexture(GL_TEXTURE0);
-    //glBindTexture(GL_TEXTURE_2D, asset->texture->object());
-    
-    //bind VAO and draw
-    glBindVertexArray(asset->vao);
-    glDrawArrays(asset->drawType, asset->drawStart, asset->drawCount);
-    
-    //unbind everything
-    glBindVertexArray(0);
-    //glBindTexture(GL_TEXTURE_2D, 0);
-    shaders->stopUsing();
+  ModelAsset* asset = inst.asset;
+  vis::Program* shaders = asset->shaders;
+
+  //bind the shaders
+  shaders->use();
+
+  //set the shader uniforms
+  shaders->setUniform("camera", gCamera.matrix());
+  shaders->setUniform("model", inst.transform);
+
+  //bind VAO and draw
+  glBindVertexArray(asset->vao);
+  glBindBuffer(GL_ARRAY_BUFFER, asset->vbo);
+
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, asset->ibo);
+  glDrawElements( asset->drawType , asset->numIndices, GL_UNSIGNED_INT , 0);
+  //glDrawArrays(asset->drawType, asset->drawStart, asset->drawCount);
+
+  // unbind the element render buffer 
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+  // unbind the vertex array buffer 
+  glBindBuffer(GL_ARRAY_BUFFER, 0);
+  //unbind everything
+  glBindVertexArray(0);
+  shaders->stopUsing();
 }
-
-
 
 // draws a single frame
 static void Render() {
-    // clear everything
-    glClearColor(1, 1, 1, 1); // black
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    
-    // render all the instances
-    std::list<ModelInstance>::const_iterator it;
-    for(it = gInstances.begin(); it != gInstances.end(); ++it){
-        RenderInstance(*it);
-    }
-    // swap the display buffers (displays what was just drawn)
-    glfwSwapBuffers(gWindow);
+  // clear everything
+  glClearColor(1, 1, 1, 1); // white bg 
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+  // render all the instances
+  std::list<ModelInstance>::const_iterator it;
+  for(it = gInstances.begin(); it != gInstances.end(); ++it){
+    RenderInstance(*it);
+  }
+  // swap the display buffers (displays what was just drawn)
+  glfwSwapBuffers(gWindow);
 }
 
 
 // update the scene based on the time elapsed since last update
 static void Update(float secondsElapsed) {
-    //rotate the first instance in `gInstances`
-    const GLfloat degreesPerSecond = 180.0f;
-    gDegreesRotated += secondsElapsed * degreesPerSecond;
-    while(gDegreesRotated > 360.0f) gDegreesRotated -= 360.0f;
-    //gInstances.front().transform = glm::rotate(glm::mat4(), glm::radians(gDegreesRotated), glm::vec3(0,1,0));
-    
-    //move position of camera based on WASD keys, and XZ keys for up and down
-    const float moveSpeed = 2.0; //units per second
-    if(glfwGetKey(gWindow, 'S')){
-        gCamera.offsetPosition(secondsElapsed * moveSpeed * -gCamera.forward());
-    } else if(glfwGetKey(gWindow, 'W')){
-        gCamera.offsetPosition(secondsElapsed * moveSpeed * gCamera.forward());
-    }
-    if(glfwGetKey(gWindow, 'A')){
-        gCamera.offsetPosition(secondsElapsed * moveSpeed * -gCamera.right());
-    } else if(glfwGetKey(gWindow, 'D')){
-        gCamera.offsetPosition(secondsElapsed * moveSpeed * gCamera.right());
-    }
-    if(glfwGetKey(gWindow, 'Z')){
-        gCamera.offsetPosition(secondsElapsed * moveSpeed * -glm::vec3(0,1,0));
-    } else if(glfwGetKey(gWindow, 'X')){
-        gCamera.offsetPosition(secondsElapsed * moveSpeed * glm::vec3(0,1,0));
-    }
-    
-    //rotate camera based on mouse movement
-    const float mouseSensitivity = 0.1f;
-    double mouseX, mouseY;
-    glfwGetCursorPos(gWindow, &mouseX, &mouseY);
-    gCamera.offsetOrientation(mouseSensitivity * (float)mouseY, mouseSensitivity * (float)mouseX);
-   glfwSetCursorPos(gWindow, 1, 1); //reset the mouse, so it doesn't go out of the window
-    
-    //increase or decrease field of view based on mouse wheel
-    const float zoomSensitivity = -0.2f;
-    float fieldOfView = gCamera.fieldOfView() + zoomSensitivity * (float)gScrollY;
-    if(fieldOfView < 5.0f) fieldOfView = 5.0f;
-    if(fieldOfView > 130.0f) fieldOfView = 130.0f;
-    gCamera.setFieldOfView(fieldOfView);
-    gScrollY = 0;
+  //rotate the first instance in `gInstances`
+  const GLfloat degreesPerSecond = 180.0f;
+  gDegreesRotated += secondsElapsed * degreesPerSecond;
+  while(gDegreesRotated > 360.0f) gDegreesRotated -= 360.0f;
+  //gInstances.front().transform = glm::rotate(glm::mat4(), glm::radians(gDegreesRotated), glm::vec3(0,1,0));
+
+  //move position of camera based on WASD keys, and XZ keys for up and down
+  const float moveSpeed = 2.0; //units per second
+  if(glfwGetKey(gWindow, 'S')){
+    gCamera.offsetPosition(secondsElapsed * moveSpeed * -gCamera.forward());
+  } else if(glfwGetKey(gWindow, 'W')){
+    gCamera.offsetPosition(secondsElapsed * moveSpeed * gCamera.forward());
+  }
+  if(glfwGetKey(gWindow, 'A')){
+    gCamera.offsetPosition(secondsElapsed * moveSpeed * -gCamera.right());
+  } else if(glfwGetKey(gWindow, 'D')){
+    gCamera.offsetPosition(secondsElapsed * moveSpeed * gCamera.right());
+  }
+  if(glfwGetKey(gWindow, 'Z')){
+    gCamera.offsetPosition(secondsElapsed * moveSpeed * -glm::vec3(0,1,0));
+  } else if(glfwGetKey(gWindow, 'X')){
+    gCamera.offsetPosition(secondsElapsed * moveSpeed * glm::vec3(0,1,0));
+  }
+
+  //rotate camera based on mouse movement
+  const float mouseSensitivity = 0.1f;
+  double mouseX, mouseY;
+  glfwGetCursorPos(gWindow, &mouseX, &mouseY);
+  gCamera.offsetOrientation(mouseSensitivity * (float)mouseY, mouseSensitivity * (float)mouseX);
+  glfwSetCursorPos(gWindow, 1, 1); //reset the mouse, so it doesn't go out of the window
+
+  //increase or decrease field of view based on mouse wheel
+  const float zoomSensitivity = -0.2f;
+  float fieldOfView = gCamera.fieldOfView() + zoomSensitivity * (float)gScrollY;
+  if(fieldOfView < 5.0f) fieldOfView = 5.0f;
+  if(fieldOfView > 130.0f) fieldOfView = 130.0f;
+  gCamera.setFieldOfView(fieldOfView);
+  gScrollY = 0;
 }
 
 // records how far the y axis has been scrolled
 void OnScroll(GLFWwindow* window, double deltaX, double deltaY) {
-    gScrollY += deltaY;
+  gScrollY += deltaY;
 }
 
 void OnError(int errorCode, const char* msg) {
-    throw std::runtime_error(msg);
+  throw std::runtime_error(msg);
 }
 
 // the program starts here
-void AppMain() {
-    // initialise GLFW
-    glfwSetErrorCallback(OnError);
-    if(!glfwInit())
-        throw std::runtime_error("glfwInit failed");
-    
-    // open a window with GLFW
-    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
-    glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
-    gWindow = glfwCreateWindow((int)SCREEN_SIZE.x, (int)SCREEN_SIZE.y, "OpenGL Tutorial", NULL, NULL);
-    if(!gWindow)
-        throw std::runtime_error("glfwCreateWindow failed. Can your hardware handle OpenGL 3.2?");
-    
-    // GLFW settings
-    glfwSetInputMode(gWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-    glfwSetCursorPos(gWindow, 1, 1);
-    glfwSetScrollCallback(gWindow, OnScroll);
-    glfwMakeContextCurrent(gWindow);
-    
-    // initialise GLEW
-    glewExperimental = GL_TRUE; //stops glew crashing on OSX :-/
-    if(glewInit() != GLEW_OK)
-        throw std::runtime_error("glewInit failed");
-    
-    // GLEW throws some errors, so discard all the errors so far
-    while(glGetError() != GL_NO_ERROR) {}
-    
-    // print out some info about the graphics drivers
-    std::cout << "OpenGL version: " << glGetString(GL_VERSION) << std::endl;
-    std::cout << "GLSL version: " << glGetString(GL_SHADING_LANGUAGE_VERSION) << std::endl;
-    std::cout << "Vendor: " << glGetString(GL_VENDOR) << std::endl;
-    std::cout << "Renderer: " << glGetString(GL_RENDERER) << std::endl;
-    
-    // make sure OpenGL version 3.2 API is available
-    if(!GLEW_VERSION_3_2)
-        throw std::runtime_error("OpenGL 3.2 API is not available.");
-    
-    // OpenGL settings
-    glEnable(GL_DEPTH_TEST);
-    glDepthFunc(GL_LESS);
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    
-    // initialise the gWoodenCrate asset
-    LoadWoodenCrateAsset();
-    
-    // create all the instances in the 3D scene based on the gWoodenCrate asset
-    CreateInstances();
-    
-    // setup gCamera
+void AppVis() {
+  // initialise GLFW
+  glfwSetErrorCallback(OnError);
+  if(!glfwInit())
+    throw std::runtime_error("glfwInit failed");
+
+  // open a window with GLFW
+  glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+  glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
+  glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
+  gWindow = glfwCreateWindow((int)SCREEN_SIZE.x, (int)SCREEN_SIZE.y, "Im2Model Vis", NULL, NULL);
+  if(!gWindow)
+    throw std::runtime_error("glfwCreateWindow failed. Can your hardware handle OpenGL 3.2?");
+
+  // GLFW settings
+  glfwSetInputMode(gWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+  glfwSetCursorPos(gWindow, 1, 1);
+  glfwSetScrollCallback(gWindow, OnScroll);
+  glfwMakeContextCurrent(gWindow);
+
+  // initialise GLEW
+  glewExperimental = GL_TRUE; //stops glew crashing on OSX :-/
+  if(glewInit() != GLEW_OK)
+    throw std::runtime_error("glewInit failed");
+
+  // GLEW throws some errors, so discard all the errors so far
+  while(glGetError() != GL_NO_ERROR) {}
+
+  // print out some info about the graphics drivers
+  std::cout << "OpenGL version: " << glGetString(GL_VERSION) << std::endl;
+  std::cout << "GLSL version: " << glGetString(GL_SHADING_LANGUAGE_VERSION) << std::endl;
+  std::cout << "Vendor: " << glGetString(GL_VENDOR) << std::endl;
+  std::cout << "Renderer: " << glGetString(GL_RENDERER) << std::endl;
+
+  // make sure OpenGL version 3.2 API is available
+  if(!GLEW_VERSION_3_2)
+    throw std::runtime_error("OpenGL 3.2 API is not available.");
+
+  // OpenGL settings
+  glEnable(GL_DEPTH_TEST);
+  glDepthFunc(GL_LESS);
+  glEnable(GL_BLEND);
+  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+  // initialise the vis_atom_asset asset
+  LoadVisAtomAsset();
+
+  // create all the instances in the 3D scene based on the vis_atom_asset asset
+  CreateInstances();
+
+  // setup gCamera
   // gCamera.setPosition(glm::vec3(upward_vector_hkl.x, upward_vector_hkl.y, upward_vector_hkl.z));
   //set eye
-    gCamera.setPosition(glm::vec3(1,0,3));
-gCamera.set_vis_up( glm::vec3(zone_axis_vector_uvw.x, zone_axis_vector_uvw.y, zone_axis_vector_uvw.z) );
-    // gCamera.lookAt(glm::vec3(zone_axis_vector_uvw.x, zone_axis_vector_uvw.y, zone_axis_vector_uvw.z));
-    
-    // );
-    //glm::vec3 vis_up ( 0, 0, 1 ) ; //();
-    
-    gCamera.setViewportAspectRatio(SCREEN_SIZE.x / SCREEN_SIZE.y);
-    
-    // run while the window is open
-    double lastTime = glfwGetTime();
-    while(!glfwWindowShouldClose(gWindow)){
-        // process pending events
-        glfwPollEvents();
-        
-        // update the scene based on the time elapsed since last update
-        double thisTime = glfwGetTime();
-        Update((float)(thisTime - lastTime));
-        lastTime = thisTime;
-        
-        // draw one frame
-        Render();
-        
-        // check for errors
-        GLenum error = glGetError();
-        if(error != GL_NO_ERROR)
-            std::cerr << "OpenGL Error " << error << std::endl;
-        
-        //exit program if escape key is pressed
-        if(glfwGetKey(gWindow, GLFW_KEY_ESCAPE))
-            glfwSetWindowShouldClose(gWindow, GL_TRUE);
-    }
-    
-    // clean up and exit
-    glfwTerminate();
+  gCamera.setPosition(glm::vec3(1,0,3));
+  gCamera.set_vis_up( glm::vec3(zone_axis_vector_uvw.x, zone_axis_vector_uvw.y, zone_axis_vector_uvw.z) );
+  // gCamera.lookAt(glm::vec3(zone_axis_vector_uvw.x, zone_axis_vector_uvw.y, zone_axis_vector_uvw.z));
+
+  gCamera.setViewportAspectRatio(SCREEN_SIZE.x / SCREEN_SIZE.y);
+
+  // run while the window is open
+  double lastTime = glfwGetTime();
+  while(!glfwWindowShouldClose(gWindow)){
+    // process pending events
+    glfwPollEvents();
+
+    // update the scene based on the time elapsed since last update
+    double thisTime = glfwGetTime();
+    Update((float)(thisTime - lastTime));
+    lastTime = thisTime;
+
+    // draw one frame
+    Render();
+
+    // check for errors
+    GLenum error = glGetError();
+    if(error != GL_NO_ERROR)
+      std::cerr << "OpenGL Error " << error << std::endl;
+
+    //exit program if escape key is pressed
+    if(glfwGetKey(gWindow, GLFW_KEY_ESCAPE))
+      glfwSetWindowShouldClose(gWindow, GL_TRUE);
+  }
+
+  // clean up and exit
+  glfwTerminate();
 }
 
-
+/*
 void create_unit_cell_cube(cv::Point3d pt, float side ){
   int initial_vertices_size = vertices.size() / 3;     // the needed padding
   std::cout << "initial_vertices_size " << initial_vertices_size << std::endl;
@@ -638,8 +658,8 @@ void create_unit_cell_cube(cv::Point3d pt, float side ){
   indices.push_back( b );
 
 }
-
-
+*/
+/*
 void create_standard_cylinder(cv::Point3d pt, float radius, float height, int nLatitude, int nLongitude)
 {
   int nPitch = nLongitude + 1;
@@ -695,9 +715,9 @@ void create_standard_cylinder(cv::Point3d pt, float radius, float height, int nL
   {
     for(int s=0; s<(nLatitude); s++) {
       const int i = p*(nLatitude+1) + s;
-      /* a - d */
-      /* | \ | */
-      /* b - c */
+      // a - d //
+      // | \ | //
+      // b - c //
       const int upper_pos_lat = i - (nLatitude+1);
       float a = upper_pos_lat+fVert;
       float b = i+fVert;
@@ -729,7 +749,8 @@ void create_standard_cylinder(cv::Point3d pt, float radius, float height, int nL
     indices.push_back( (s+1)+fVert );
   }
 }
-
+ */
+/*
 void create_standard_sphere(cv::Point3d pt, float radius, int nLatitude, int nLongitude)
 {
   int p, s, i, j;
@@ -786,9 +807,9 @@ void create_standard_sphere(cv::Point3d pt, float radius, int nLatitude, int nLo
   {
     for(s=0; s<(nLatitude); s++) {
       i = p*(nLatitude+1) + s;
-      /* a - d */
-      /* | \ | */
-      /* b - c */
+      // a - d //
+      // | \ | //
+      // b - c //
       const int upper_pos_lat = i - (nLatitude+1);
       float a = upper_pos_lat+fVert;
       float b = i+fVert;
@@ -819,168 +840,7 @@ void create_standard_sphere(cv::Point3d pt, float radius, int nLatitude, int nLo
     indices.push_back( (s+2)+offLastVerts );
   }
 }
-
-
-
-
-
-bool init_resources()
-{
-  //create_unit_cell_cube(cv::Point3d(0,0,0), 1.0f);
-  //create_standard_cylinder( cv::Point3d(0,0,0), 0.1f, 5.0f ,10, 5);
-  create_standard_sphere(cv::Point3d(0,0,0), 1.0f, 25, 25);
-  glGenBuffers(1, &vbo_cube_vertices);
-  glBindBuffer(GL_ARRAY_BUFFER, vbo_cube_vertices);
-  glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(GLfloat), vertices.data(), GL_STATIC_DRAW);
-  std::cout << "binded vertices " << std::endl;
-  glGenBuffers(1, &vbo_cube_colors);
-  glBindBuffer(GL_ARRAY_BUFFER, vbo_cube_colors);
-  glBufferData(GL_ARRAY_BUFFER, colors.size() * sizeof(GLfloat), colors.data(), GL_STATIC_DRAW);
-  std::cout << "binded colors " << std::endl;
-  glGenBuffers(1, &ibo_cube_elements);
-  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo_cube_elements);
-  glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(GLint), indices.data(), GL_STATIC_DRAW);
-  std::cout << "binded triangles " << std::endl;
-
-  GLint link_ok = GL_FALSE;
-
-  GLuint vs, fs;
-  if ((vs = create_shader("shaders/cube.v.glsl", GL_VERTEX_SHADER))   == 0) return false;
-  if ((fs = create_shader("shaders/cube.f.glsl", GL_FRAGMENT_SHADER)) == 0) return false;
-
-  program = glCreateProgram();
-  glAttachShader(program, vs);
-  glAttachShader(program, fs);
-  glLinkProgram(program);
-  glGetProgramiv(program, GL_LINK_STATUS, &link_ok);
-  if (!link_ok) {
-    fprintf(stderr, "glLinkProgram:");
-    print_log(program);
-    return false;
-  }
-
-  const char* attribute_name;
-  attribute_name = "coord3d";
-  attribute_coord3d = glGetAttribLocation(program, attribute_name);
-  if (attribute_coord3d == -1) {
-    fprintf(stderr, "Could not bind attribute %s\n", attribute_name);
-    return false;
-  }
-  attribute_name = "v_color";
-  attribute_v_color = glGetAttribLocation(program, attribute_name);
-  if (attribute_v_color == -1) {
-    fprintf(stderr, "Could not bind attribute %s\n", attribute_name);
-    return false;
-  }
-  const char* uniform_name;
-  uniform_name = "mvp";
-  uniform_mvp = glGetUniformLocation(program, uniform_name);
-  if (uniform_mvp == -1) {
-    fprintf(stderr, "Could not bind uniform %s\n", uniform_name);
-    return false;
-  }
-  uniform_name = "mvp";
-  uniform_mvp = glGetUniformLocation(program, uniform_name);
-  if (uniform_mvp == -1) {
-    fprintf(stderr, "Could not bind uniform %s\n", uniform_name);
-    return false;
-  }
-
-  return true;
-}
-
-void onIdle() {
-  float angle = glutGet(GLUT_ELAPSED_TIME) / 1000.0 * 10;  // 45° per second
-  glm::vec3 axis_y(1, 1, 0);
-  glm::mat4 anim = glm::rotate(glm::mat4(1.0f), glm::radians(angle), axis_y);
-
-  glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(0.0, 0.0, 0.0));
-
-  glm::vec3 eye (1,0,3); //(zone_axis_vector_uvw.x, zone_axis_vector_uvw.y, zone_axis_vector_uvw.z);
-
-  /*
-     to use a direction vector D instead of a center position,
-     you can simply use eye + D as the center position, 
-     where D can be a unit vector for example.
-     In our case D will be our zone_axis_vector_uvw
-     */
-  const double norm_uvw = cv::norm(zone_axis_vector_uvw);
-  cv::Point3d b = zone_axis_vector_uvw / norm_uvw;
-  glm::vec3 D (b.x , b.y, b.z );
-  glm::vec3 center ( 0, 0, 0 ) ;//zone_axis_vector_uvw.x, zone_axis_vector_uvw.y, zone_axis_vector_uvw.z );
-  glm::vec3 vis_up ( 0, 0, 1 ) ; //(upward_vector_hkl.x, upward_vector_hkl.y, upward_vector_hkl.z);
-
-  glm::mat4 view = glm::lookAt( eye, center, vis_up );
-  glm::mat4 projection = glm::perspective(45.0f, 1.0f*screen_width/screen_height, 0.1f, 10.0f);
-  glm::mat4 mvp = projection * view ; //* model * anim;
-
-  glUseProgram(program);
-  glUniformMatrix4fv(uniform_mvp, 1, GL_FALSE, glm::value_ptr(mvp));
-    glutPostRedisplay();
-}
-
-void onDisplay(){
-  glClearColor(1.0, 1.0, 1.0, 1.0);
-  glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
-
-  glUseProgram(program);
-  glEnableVertexAttribArray(attribute_coord3d);
-  // Describe our vertices array to OpenGL (it can't guess its format automatically)
-  glBindBuffer(GL_ARRAY_BUFFER, vbo_cube_vertices);
-  glVertexAttribPointer(
-      attribute_coord3d, // attribute
-      3,                 // number of elements per vertex, here (x,y,z)
-      GL_FLOAT,          // the type of each element
-      GL_FALSE,          // take our values as-is
-      0,                 // no extra data between each position
-      0                  // offset of first element
-      );
-  glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-
-  glEnableVertexAttribArray(attribute_v_color);
-  glBindBuffer(GL_ARRAY_BUFFER, vbo_cube_colors);
-  glVertexAttribPointer(
-      attribute_v_color, // attribute
-      3,                 // number of elements per vertex, here (R,G,B)
-      GL_FLOAT,          // the type of each element
-      GL_FALSE,          // take our values as-is
-      0,                 // no extra data between each position
-      0                  // offset of first element
-      );
-
-  /* Push each element in buffer_vertices to the vertex shader */
-  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo_cube_elements);
-  int size;
-  glGetBufferParameteriv(GL_ELEMENT_ARRAY_BUFFER, GL_BUFFER_SIZE, &size);
-  std::vector<cv::Point3d> atom_positions = unit_cell.get_atom_positions_vec();
-  std::vector<cv::Point3d>::iterator pos_itt;
-  for (pos_itt = atom_positions.begin(); pos_itt != atom_positions.end(); pos_itt++){
-    glPushMatrix();
-    cv::Point3d pos = *pos_itt;
-    /*   glm::mat4 mvp = projection * view * model * anim;
-         glUseProgram(program);
-         glUniformMatrix4fv(uniform_mvp, 1, GL_FALSE, glm::value_ptr(mvp));*/
-    glTranslatef(pos.x, pos.y, pos.z );
-    glDrawElements(GL_TRIANGLES, size/sizeof(GLint), GL_UNSIGNED_INT , 0);
-    glPopMatrix();
-  }
-  glDisableVertexAttribArray(attribute_coord3d);
-  glDisableVertexAttribArray(attribute_v_color);
-  glutSwapBuffers();
-}
-
-void onReshape(int width, int height){
-  screen_width = width;
-  screen_height = height;
-  glViewport(0, 0, screen_width, screen_height);
-}
-
-void free_resources(){
-  glDeleteProgram(program);
-  glDeleteBuffers(1, &vbo_cube_vertices);
-  glDeleteBuffers(1, &vbo_cube_colors);
-  glDeleteBuffers(1, &ibo_cube_elements);
-}
+*/
 
 /// Function Headers
 void thresh_callback(int, void* );
@@ -1252,8 +1112,6 @@ int main(int argc, char** argv )
   int reshaped_simulated_image_height;
 
   MC::MC_Driver driver;
-
-
 
   try{
     /** Define and parse the program options
@@ -1696,8 +1554,8 @@ int main(int argc, char** argv )
 
     if( vis_gui_switch ){
       /* VIS */
-        AppMain();
-            }
+      AppVis();
+    }
 
   }
   catch(std::exception& e){
