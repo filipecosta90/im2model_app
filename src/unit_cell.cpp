@@ -104,6 +104,14 @@ std::vector<cv::Point3d> Unit_Cell::get_atom_positions_vec( ){
     return _atom_positions;
 }
 
+std::vector<glm::vec4> Unit_Cell::get_atom_cpk_rgba_colors_vec( ){
+    return _atom_cpk_rgba_colors;
+}
+
+std::vector<double> Unit_Cell::get_atom_radii_vec( ){
+    return _atom_radii;
+}
+
 bool Unit_Cell::create_atoms_from_site_and_symetry(){
   int distinct = 1;
   for( int atom_site_pos = 0 ; atom_site_pos < _atoms_site_type_symbols.size(); atom_site_pos++ ) {
@@ -130,11 +138,10 @@ bool Unit_Cell::create_atoms_from_site_and_symetry(){
         std::vector<cv::Point3d>::iterator it ;
         it = std::find(_atom_positions.begin(), _atom_positions.end(), temporary_point );
         if(it == _atom_positions.end() ){
-
           std::cout << "atom # " << distinct << " ( " << atom_type_symbol << " )" << temp_a << " , " << temp_b << " , " << temp_c << std::endl;
           _atom_positions.push_back(temporary_point);
           //_atom_cpk_colors
-          _atom_rgba_colors.push_back(cpk_color);
+          _atom_cpk_rgba_colors.push_back(cpk_color);
           distinct++;
         }
       }

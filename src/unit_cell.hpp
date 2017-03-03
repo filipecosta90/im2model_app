@@ -57,8 +57,10 @@ class Unit_Cell {
     /* end Atom site */
 
     std::vector<Atom::Atom> _atoms;
-
     std::vector<cv::Point3d> _atom_positions;
+    std::vector<glm::vec4> _atom_cpk_rgba_colors;
+std::vector<double> _atom_radii;
+
     //vertex buffer for points
     
     //vertex buffer for colors
@@ -85,6 +87,8 @@ class Unit_Cell {
     void set_upward_vector( cv::Point3d hkl );
     //getters
     std::vector<cv::Point3d> get_atom_positions_vec();
+std::vector<glm::vec4> get_atom_cpk_rgba_colors_vec();
+std::vector<double> get_atom_radii_vec();
 
     void add_symmetry_equiv_pos_as_xyz( std::string xyz );
     void add_symmetry_equiv_pos_as_x( std::string x );

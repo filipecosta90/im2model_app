@@ -137,10 +137,12 @@ struct ModelAsset {
 struct ModelInstance {
   ModelAsset* asset;
   glm::mat4 transform;
+  glm::vec4 rgba;
 
   ModelInstance() :
     asset(NULL),
-    transform()
+    transform(),
+    rgba(1.0f,1.0f,0.0f,1.0f)
   {}
 };
 
@@ -154,6 +156,7 @@ GLFWwindow* gWindow = NULL;
 double gScrollY = 0.0;
 vis::Camera gCamera;
 ModelAsset vis_atom_asset;
+ModelAsset vis_unit_cell_asset;
 std::list<ModelInstance> gInstances;
 GLfloat gDegreesRotated = 0.0f;
 
@@ -182,9 +185,9 @@ static void LoadVisAtomAsset() {
   std::vector<GLfloat> vertices;
   std::vector<GLint> indices;
 
-    //------------------------
-    //-- creates a sphere as a "standard sphere" triangular mesh with the specified
-    //-- number of latitude (nLatitude) and longitude (nLongitude) lines
+  //------------------------
+  //-- creates a sphere as a "standard sphere" triangular mesh with the specified
+  //-- number of latitude (nLatitude) and longitude (nLongitude) lines
   cv::Point3d pt(0.0f,0.0f,0.0f);
   float radius = 0.5f;
   int nLatitude = 10;
@@ -251,7 +254,7 @@ static void LoadVisAtomAsset() {
     }
   }
 
-    //## create triangles connecting to top and bottom vertices
+  //## create triangles connecting to top and bottom vertices
   int offLastVerts  = initial_vertices_size + numVertices - (nLatitude+1);
   for(s=0; s<(nLatitude-1); s++)
   {
@@ -303,12 +306,14 @@ glm::mat4 scale(GLfloat x, GLfloat y, GLfloat z) {
 //create all the `instance` structs for the 3D scene, and add them to `gInstances`
 static void CreateInstances() {
   std::vector<cv::Point3d> atom_positions = unit_cell.get_atom_positions_vec();
+  std::vector<glm::vec4> atom_cpk_rgba_colors = unit_cell.get_atom_cpk_rgba_colors_vec();
   std::vector<cv::Point3d>::iterator pos_itt;
   std::cout << "going to create  " << atom_positions.size() << " instances" << std::endl;
-  for (pos_itt = atom_positions.begin(); pos_itt != atom_positions.end(); pos_itt++){
-    cv::Point3d pos = *pos_itt;
+  for (int vec_pos = 0; vec_pos < atom_positions.size(); vec_pos++){
+    cv::Point3d pos = atom_positions.at(vec_pos); 
     ModelInstance atom;
     atom.asset = &vis_atom_asset;
+    atom.rgba = atom_cpk_rgba_colors.at(vec_pos);
     atom.transform = translate(pos.x, pos.y, pos.z) * scale(0.15f,0.15f,0.15f);
     gInstances.push_back(atom);
   }
@@ -325,6 +330,7 @@ static void RenderInstance(const ModelInstance& inst) {
   //set the shader uniforms
   shaders->setUniform("camera", gCamera.matrix());
   shaders->setUniform("model", inst.transform);
+  shaders->setUniform("model_color", inst.rgba);
 
   //bind VAO and draw
   glBindVertexArray(asset->vao);
