@@ -138,11 +138,16 @@ struct ModelInstance {
   ModelAsset* asset;
   glm::mat4 transform;
   glm::vec4 rgba;
+            GLenum polygon_mode; 
+  GLenum polygon_face;
+
 
   ModelInstance() :
     asset(NULL),
     transform(),
-    rgba(1.0f,1.0f,0.0f,1.0f)
+    rgba(1.0f,0.0f,0.0f,1.0f),
+    polygon_mode(GL_FILL),
+    polygon_face(GL_FRONT_AND_BACK)
   {}
 };
 
@@ -168,6 +173,144 @@ static vis::Program* LoadShaders(const char* vertFilename, const char* fragFilen
   shaders.push_back(vis::Shader::shaderFromFile(vertFilename, GL_VERTEX_SHADER));
   shaders.push_back(vis::Shader::shaderFromFile(fragFilename, GL_FRAGMENT_SHADER));
   return new vis::Program(shaders);
+}
+
+// initialises the vis_atom_asset global
+static void LoadVisUnitCellAsset() {
+  // set all the elements of vis_atom_asset
+  vis_unit_cell_asset.shaders = LoadShaders("shaders/cube.v.glsl", "shaders/cube.f.glsl");
+  vis_unit_cell_asset.drawType = GL_TRIANGLES;
+  glGenBuffers(1, &vis_unit_cell_asset.vbo);
+  glGenVertexArrays(1, &vis_unit_cell_asset.vao);
+  glGenBuffers(1, &vis_unit_cell_asset.ibo);
+
+  // bind the VAO
+  glBindVertexArray(vis_unit_cell_asset.vao);
+
+  std::vector<GLfloat> vertices;
+  std::vector<GLint> indices;
+
+  //------------------------
+  //-- creates a sphere as a "standard sphere" triangular mesh with the specified
+  //-- number of latitude (nLatitude) and longitude (nLongitude) lines
+  cv::Point3d pt(0.0f,0.0f,0.0f);
+  float side = 1.0f; 
+  int initial_vertices_size = vertices.size() / 3;    // the needed padding
+
+  // bottom vertex 1 - A
+  vertices.push_back( pt.x );
+  vertices.push_back( pt.y );
+  vertices.push_back( pt.z );
+  // bottom vertex 2 - B
+  vertices.push_back( pt.x+side );
+  vertices.push_back( pt.y );
+  vertices.push_back( pt.z );
+  // bottom vertex 3 - C
+  vertices.push_back( pt.x+side );
+  vertices.push_back( pt.y+side );
+  vertices.push_back( pt.z );
+  // bottom vertex 4 - D
+  vertices.push_back( pt.x );
+  vertices.push_back( pt.y+side );
+  vertices.push_back( pt.z );
+  // top vertex 5 - E
+  vertices.push_back( pt.x );
+  vertices.push_back( pt.y );
+  vertices.push_back( pt.z+side );
+  // top vertex 6 - F
+  vertices.push_back( pt.x+side );
+  vertices.push_back( pt.y );
+  vertices.push_back( pt.z+side );
+  // top vertex 7 - G
+  vertices.push_back( pt.x+side );
+  vertices.push_back( pt.y+side );
+  vertices.push_back( pt.z+side );
+  // top vertex 8 - H
+  vertices.push_back( pt.x );
+  vertices.push_back( pt.y+side );
+  vertices.push_back( pt.z+side );
+
+  int a,b,c,d,e,f,g,h;
+  a = initial_vertices_size;
+  b = a + 1;
+  c = b + 1;
+  d = c + 1;
+  e = d + 1;
+  f = e + 1;
+  g = f + 1;
+  h = g + 1;
+
+  //front 1
+  indices.push_back( b );
+  indices.push_back( c );
+  indices.push_back( g );
+  // front 2
+  indices.push_back( b );
+  indices.push_back( g );
+  indices.push_back( f );
+  // right 1
+  indices.push_back( g );
+  indices.push_back( h );
+  indices.push_back( d );
+  // right 2
+  indices.push_back( g );
+  indices.push_back( d );
+  indices.push_back( c );
+  // back 1
+  indices.push_back( a );
+  indices.push_back( d );
+  indices.push_back( h );
+  // back 2
+  indices.push_back( a );
+  indices.push_back( h );
+  indices.push_back( e );
+  // left 1
+  indices.push_back( a );
+  indices.push_back( b );
+  indices.push_back( f );
+  // left 2
+  indices.push_back( a );
+  indices.push_back( f );
+  indices.push_back( e );
+  // top 1
+  indices.push_back( g );
+  indices.push_back( f );
+  indices.push_back( e );
+  // top 2
+  indices.push_back( g );
+  indices.push_back( e );
+  indices.push_back( h );
+  // bottom 1
+  indices.push_back( a );
+  indices.push_back( d );
+  indices.push_back( c );
+  // bottom 2
+  indices.push_back( a );
+  indices.push_back( c );
+  indices.push_back( b );
+
+  vis_unit_cell_asset.drawStart = 0;
+  vis_unit_cell_asset.drawCount = vertices.size();
+  vis_unit_cell_asset.numIndices = indices.size();
+
+  // bind the VBO
+  glBindBuffer(GL_ARRAY_BUFFER, vis_unit_cell_asset.vbo);
+  glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(GLfloat), vertices.data(), GL_STATIC_DRAW);
+
+  // bind the IBO
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vis_unit_cell_asset.ibo);
+  glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(GLint), indices.data(), GL_STATIC_DRAW);
+
+  // connect the xyz to the "vert" attribute of the vertex shader
+  glEnableVertexAttribArray(vis_unit_cell_asset.shaders->attrib("vert"));
+  glVertexAttribPointer(vis_unit_cell_asset.shaders->attrib("vert"), 3, GL_FLOAT, GL_FALSE, 0, NULL); //3*sizeof(GLfloat), NULL);
+
+  // unbind buffers 
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+  glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+  // unbind the VAO
+  glBindVertexArray(0);
 }
 
 // initialises the vis_atom_asset global
@@ -305,9 +448,16 @@ glm::mat4 scale(GLfloat x, GLfloat y, GLfloat z) {
 
 //create all the `instance` structs for the 3D scene, and add them to `gInstances`
 static void CreateInstances() {
+  
+    ModelInstance unit_cell_asset;
+    unit_cell_asset.asset = &vis_unit_cell_asset;
+    unit_cell_asset.polygon_mode = GL_LINE;
+    gInstances.push_back( unit_cell_asset );
+
   std::vector<cv::Point3d> atom_positions = unit_cell.get_atom_positions_vec();
   std::vector<glm::vec4> atom_cpk_rgba_colors = unit_cell.get_atom_cpk_rgba_colors_vec();
   std::vector<cv::Point3d>::iterator pos_itt;
+
   std::cout << "going to create  " << atom_positions.size() << " instances" << std::endl;
   for (int vec_pos = 0; vec_pos < atom_positions.size(); vec_pos++){
     cv::Point3d pos = atom_positions.at(vec_pos); 
@@ -323,6 +473,7 @@ static void CreateInstances() {
 static void RenderInstance(const ModelInstance& inst) {
   ModelAsset* asset = inst.asset;
   vis::Program* shaders = asset->shaders;
+  
 
   //bind the shaders
   shaders->use();
@@ -337,6 +488,9 @@ static void RenderInstance(const ModelInstance& inst) {
   glBindBuffer(GL_ARRAY_BUFFER, asset->vbo);
 
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, asset->ibo);
+  
+  glPolygonMode( inst.polygon_face , inst.polygon_mode );
+  
   glDrawElements( asset->drawType , asset->numIndices, GL_UNSIGNED_INT , 0);
 
   // unbind the element render buffer 
@@ -346,6 +500,7 @@ static void RenderInstance(const ModelInstance& inst) {
   //unbind everything
   glBindVertexArray(0);
   shaders->stopUsing();
+
 }
 
 // draws a single frame
@@ -356,6 +511,7 @@ static void Render() {
 
   // render all the instances
   std::list<ModelInstance>::const_iterator it;
+
   for(it = gInstances.begin(); it != gInstances.end(); ++it){
     RenderInstance(*it);
   }
@@ -462,6 +618,9 @@ void AppVis() {
   glEnable(GL_BLEND);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
+  
+  // initialise the vis_unit_cell asset
+  LoadVisUnitCellAsset();
   // initialise the vis_atom_asset asset
   LoadVisAtomAsset();
 
@@ -471,7 +630,7 @@ void AppVis() {
   // setup gCamera
   // gCamera.setPosition(glm::vec3(upward_vector_hkl.x, upward_vector_hkl.y, upward_vector_hkl.z));
   // set eye
-  gCamera.setPosition(glm::vec3(1,0,3));
+  gCamera.setPosition(glm::vec3(0,0,3));
   gCamera.set_vis_up( glm::vec3(zone_axis_vector_uvw.x, zone_axis_vector_uvw.y, zone_axis_vector_uvw.z) );
   // gCamera.lookAt(glm::vec3(zone_axis_vector_uvw.x, zone_axis_vector_uvw.y, zone_axis_vector_uvw.z));
 

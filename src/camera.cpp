@@ -8,8 +8,8 @@ using namespace vis;
 static const float MaxVerticalAngle = 85.0f; //must be less than 90 to avoid gimbal lock
 
 Camera::Camera() :
-    _eye(1,0,3),
-    _center(0,0,0),
+    _eye(0,0,3),
+    _center(0,0,1),
     _vis_up(0,0,1),
     _position(0.0f, 0.0f, 4.0f),
     _horizontalAngle(0.0f),
