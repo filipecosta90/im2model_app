@@ -84,6 +84,10 @@ int roi_x_size;
 int roi_y_size;
 int roi_center_x;
 int roi_center_y;
+Rect supercell_boundaries_rect;
+int supercell_min_width;
+int supercell_min_height;
+
 float  sampling_rate_experimental_x_nm_per_pixel;
 float  sampling_rate_experimental_y_nm_per_pixel;
 
@@ -620,7 +624,7 @@ void AppVis() {
 
 
   // initialise the vis_unit_cell asset
-  LoadVisUnitCellAsset( unit_cell.get_cell_length_a() );
+  LoadVisUnitCellAsset( unit_cell.get_cell_length_a_Nanometers() );
   // initialise the vis_atom_asset asset
   LoadVisAtomAsset();
 
@@ -630,7 +634,7 @@ void AppVis() {
   // setup gCamera
   // gCamera.setPosition(glm::vec3(upward_vector_hkl.x, upward_vector_hkl.y, upward_vector_hkl.z));
   // set eye
-  gCamera.setPosition(glm::vec3(unit_cell.get_cell_length_a()*2.0f,unit_cell.get_cell_length_b()*2.0f,unit_cell.get_cell_length_c() * 2.0f));
+  gCamera.setPosition(glm::vec3(unit_cell.get_cell_length_a_Nanometers()*2.0f,unit_cell.get_cell_length_b_Nanometers()*2.0f,unit_cell.get_cell_length_c_Nanometers() * 2.0f));
   gCamera.set_vis_up( glm::vec3(zone_axis_vector_uvw.x, zone_axis_vector_uvw.y, zone_axis_vector_uvw.z) );
   // gCamera.lookAt(glm::vec3(zone_axis_vector_uvw.x, zone_axis_vector_uvw.y, zone_axis_vector_uvw.z));
 
@@ -777,6 +781,7 @@ void thresh_callback(int, void* )
   std::vector<std::vector<Point>> hull( 1 );
   convexHull( Mat(contours_merged), hull[0], false );
 
+  supercell_boundaries_rect = boundingRect(contours_merged);
   Scalar color = Scalar( rng.uniform(0, 255), rng.uniform(0,255), rng.uniform(0,255) );
   drawContours( drawing, hull, 0, color, 3, 8, std::vector<Vec4i>(), 0, Point() );
   double roi_area_px = cv::contourArea(hull[0],false);
@@ -813,8 +818,12 @@ void thresh_callback(int, void* )
   putText(drawing, line3_experimental_roi_info , cvPoint(legend_position_x , legent_position_y_bottom_left_line_3), FONT_HERSHEY_PLAIN, 1.5, cvScalar(255,255,255), 1, CV_AA);
   putText(drawing, line4_experimental_roi_info , cvPoint(legend_position_x , legent_position_y_bottom_left_line_4), FONT_HERSHEY_PLAIN, 1.5, cvScalar(255,255,255), 1, CV_AA);
 
+  cv::rectangle(drawing, supercell_boundaries_rect, Scalar(0,0,255), 2);
+  std::cout << "Boundaries rectangle: " << supercell_boundaries_rect << std::endl; 
+  std::cout << "Boundaries rectangle size: " << supercell_boundaries_rect.size() << std::endl; 
+  supercell_min_width = supercell_boundaries_rect.width;
+  supercell_min_height = supercell_boundaries_rect.height;
   imshow( "Contours", drawing );
-
 
   // save the experimental calculated roi
   imwrite( "exp_roi_auto.png", drawing );
@@ -1369,8 +1378,17 @@ int main(int argc, char** argv )
       wavimg_simgrid_steps.set_iteration_number(1);
       wavimg_simgrid_steps.set_step_length_minimum_threshold ( 87.5 );
       wavimg_simgrid_steps.set_step_size( defocus_period, slice_period );
-
       wavimg_simgrid_steps.simulate_from_dat_file();
+
+      std::cout << "Preparing for supercell calculation" << std::endl;
+      std::cout << "Unit cell size" << " nm" << std::endl;
+      std::cout << "Super cell min width (pixels) " << supercell_min_width << std::endl;
+      std::cout << "Super cell min height (pixels) " << supercell_min_height << std::endl;
+      float x_supercell_min_size_nm = supercell_min_width * sampling_rate_super_cell_x_nm_pixel;
+      float y_supercell_min_size_nm = supercell_min_height * sampling_rate_super_cell_y_nm_pixel;
+      const int x_unitcell_expand_factor = ceil( x_supercell_min_size_nm / unit_cell.get_cell_length_a_Nanometers() );
+      const int y_unitcell_expand_factor = ceil( y_supercell_min_size_nm / unit_cell.get_cell_length_b_Nanometers() );
+      std::cout << "We need to expand the unit cell in " << x_unitcell_expand_factor << " units on X axis, and " << y_unitcell_expand_factor << " units on Y axis." << std::endl; 
       wavimg_simgrid_steps.export_sim_grid();
     }
 

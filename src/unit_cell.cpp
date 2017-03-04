@@ -119,16 +119,29 @@ std::vector<double> Unit_Cell::get_atom_empirical_radii_vec(){
   return _atom_empirical_radii;
 }
 
-double Unit_Cell::get_cell_length_a(){
+double Unit_Cell::get_cell_length_a_Angstroms(){
   return _cell_length_a;
 }
 
-double Unit_Cell::get_cell_length_b(){
+double Unit_Cell::get_cell_length_b_Angstroms(){
   return _cell_length_b;
 }
 
-double Unit_Cell::get_cell_length_c(){
+double Unit_Cell::get_cell_length_c_Angstroms(){
   return _cell_length_c;
+}
+
+
+double Unit_Cell::get_cell_length_a_Nanometers(){
+  return ( _cell_length_a / 10.0f);
+}
+
+double Unit_Cell::get_cell_length_b_Nanometers(){
+  return ( _cell_length_b / 10.0f);
+}
+
+double Unit_Cell::get_cell_length_c_Nanometers(){
+  return ( _cell_length_c / 10.0f);
 }
 
 bool Unit_Cell::create_atoms_from_site_and_symetry(){

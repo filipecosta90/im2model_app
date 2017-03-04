@@ -92,10 +92,13 @@ class Unit_Cell {
     std::vector<glm::vec4> get_atom_cpk_rgba_colors_vec();
     std::vector<double> get_atom_radii_vec();
     std::vector<double> get_atom_empirical_radii_vec();
-    double get_cell_length_a();
-    double get_cell_length_b();
-    double get_cell_length_c();
-
+   double get_cell_length_a_Angstroms();
+    double get_cell_length_b_Angstroms();
+    double get_cell_length_c_Angstroms();
+  double get_cell_length_a_Nanometers();
+    double get_cell_length_b_Nanometers();
+    double get_cell_length_c_Nanometers();
+   
     //others
     void add_symmetry_equiv_pos_as_xyz( std::string xyz );
     void add_symmetry_equiv_pos_as_x( std::string x );
