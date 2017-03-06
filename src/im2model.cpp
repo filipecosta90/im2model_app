@@ -460,18 +460,18 @@ static void CreateInstances() {
   unit_cell_asset.polygon_mode = GL_LINE;
   gInstances.push_back( unit_cell_asset );
 
-  std::vector<glm::vec3> atom_positions = unit_cell.get_atom_positions_vec();
-  std::vector<glm::vec4> atom_cpk_rgba_colors = unit_cell.get_atom_cpk_rgba_colors_vec();
-  std::vector<double> atom_empirical_radii = unit_cell.get_atom_empirical_radii_vec();
+  std::vector<glm::vec3> atom_positions = super_cell.get_atom_positions_vec();
+  std::vector<glm::vec4> atom_cpk_rgba_colors = super_cell.get_atom_cpk_rgba_colors_vec();
+  std::vector<double> atom_empirical_radii = super_cell.get_atom_empirical_radii_vec();
   std::vector<glm::vec3>::iterator pos_itt;
 
   std::cout << "going to create  " << atom_positions.size() << " instances" << std::endl;
   for (int vec_pos = 0; vec_pos < atom_positions.size(); vec_pos++){
-    glm::vec3 pos = atom_positions.at(vec_pos); 
+    const glm::vec3 pos = atom_positions.at(vec_pos);
     ModelInstance atom;
     atom.asset = &vis_atom_asset;
     atom.rgba = atom_cpk_rgba_colors.at(vec_pos);
-    double radii = atom_empirical_radii.at(vec_pos);
+    const double radii = atom_empirical_radii.at(vec_pos);
     atom.transform = translate(pos.x, pos.y, pos.z) * scale(radii, radii, radii );
     gInstances.push_back(atom);
   }
@@ -637,7 +637,7 @@ void AppVis() {
   // setup gCamera
   // gCamera.setPosition(glm::vec3(upward_vector_hkl.x, upward_vector_hkl.y, upward_vector_hkl.z));
   // set eye
-  gCamera.setPosition(glm::vec3(unit_cell.get_cell_length_a_Nanometers()*2.0f,unit_cell.get_cell_length_b_Nanometers()*2.0f,unit_cell.get_cell_length_c_Nanometers() * 2.0f));
+  gCamera.setPosition(glm::vec3(super_cell.get_super_cell_length_a_Nanometers()*2.0f,super_cell.get_super_cell_length_b_Nanometers()*2.0f,super_cell.get_super_cell_length_c_Nanometers() * 2.0f));
   gCamera.set_vis_up( glm::vec3(zone_axis_vector_uvw.x, zone_axis_vector_uvw.y, zone_axis_vector_uvw.z) );
   // gCamera.lookAt(glm::vec3(zone_axis_vector_uvw.x, zone_axis_vector_uvw.y, zone_axis_vector_uvw.z));
 

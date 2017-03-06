@@ -25,17 +25,25 @@
 
 class Super_Cell {
   private:
-    double _cell_length_a_Angstroms;
-    double _cell_length_b_Angstroms;
-    double _cell_length_c_Angstroms;
+    double _unit_cell_length_a_Angstroms;
+    double _unit_cell_length_b_Angstroms;
+    double _unit_cell_length_c_Angstroms;
+    double _unit_cell_length_a_Nanometers;
+    double _unit_cell_length_b_Nanometers;
+    double _unit_cell_length_c_Nanometers;
+    double _unit_cell_volume;
 
-    double _cell_length_a_Nanometers;
-    double _cell_length_b_Nanometers;
-    double _cell_length_c_Nanometers;
+    double _super_cell_length_a_Angstroms;
+    double _super_cell_length_b_Angstroms;
+    double _super_cell_length_c_Angstroms;
+    double _super_cell_length_a_Nanometers;
+    double _super_cell_length_b_Nanometers;
+    double _super_cell_length_c_Nanometers;
+    double _super_cell_volume;
+
     double _cell_angle_alpha;
     double _cell_angle_beta;
     double _cell_angle_gamma;
-    double _cell_volume;
 
     /** supercell exclusive **/
     int expand_factor_a;
@@ -64,6 +72,7 @@ class Super_Cell {
     Super_Cell( Unit_Cell* unit_cell, int factor_a, int factor_b, int factor_c );
 
     //setters
+
     void set_super_cell_length_a_Angstroms( double a );
     void set_super_cell_length_b_Angstroms( double b );
     void set_super_cell_length_c_Angstroms( double c );
@@ -95,7 +104,7 @@ class Super_Cell {
     std::vector<glm::vec4> get_atom_cpk_rgba_colors_vec();
     std::vector<double> get_atom_empirical_radii_vec();
 
-
+    bool update_unit_cell_parameters();
     bool create_atoms_from_unit_cell();
     void orientate_atoms_from_matrix();
 };
