@@ -52,6 +52,8 @@
 #include "wavimg_prm.h"
 #include "simgrid_steplength.h"
 #include "mc_driver.hpp"
+#include "unit_cell.hpp"
+#include "super_cell.hpp"
 #include "chem_database.hpp"
 
 // vis classes
@@ -94,10 +96,11 @@ float  sampling_rate_experimental_y_nm_per_pixel;
 int thresh = 100;
 int max_thresh = 255;
 RNG rng(12345);
-int max_contour_distance_px = 30;
+int max_contour_distance_px = 19;
 int max_contour_distance_thresh_px = 255;
 
 Unit_Cell unit_cell;
+Super_Cell super_cell;
 cv::Point3d  zone_axis_vector_uvw;
 cv::Point3d  upward_vector_hkl;
 
@@ -1380,6 +1383,7 @@ int main(int argc, char** argv )
       wavimg_simgrid_steps.set_step_size( defocus_period, slice_period );
       wavimg_simgrid_steps.simulate_from_dat_file();
 
+      thresh_callback( 1 , nullptr );
       std::cout << "Preparing for supercell calculation" << std::endl;
       std::cout << "Unit cell size" << " nm" << std::endl;
       std::cout << "Super cell min width (pixels) " << supercell_min_width << std::endl;
@@ -1389,7 +1393,8 @@ int main(int argc, char** argv )
       const int x_unitcell_expand_factor = ceil( x_supercell_min_size_nm / unit_cell.get_cell_length_a_Nanometers() );
       const int y_unitcell_expand_factor = ceil( y_supercell_min_size_nm / unit_cell.get_cell_length_b_Nanometers() );
       std::cout << "We need to expand the unit cell in " << x_unitcell_expand_factor << " units on X axis, and " << y_unitcell_expand_factor << " units on Y axis." << std::endl; 
-      wavimg_simgrid_steps.export_sim_grid();
+      super_cell = Super_Cell::Super_Cell( &unit_cell ); 
+      //wavimg_simgrid_steps.export_sim_grid();
     }
 
     if( vis_gui_switch ){
