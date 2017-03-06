@@ -370,6 +370,18 @@ float SIMGRID_wavimg_steplength::get_motion_euclidian_translation_y(){
   return motion_euclidean_warp_matrix.at<float>( 1, 2);
 }
 
+int SIMGRID_wavimg_steplength::get_simgrid_best_match_thickness_slice(){
+    return simgrid_best_match_thickness_slice;
+}
+
+double SIMGRID_wavimg_steplength::get_simgrid_best_match_thickness_nm(){
+    return simgrid_best_match_thickness_nm;
+}
+
+double SIMGRID_wavimg_steplength::get_simgrid_best_match_defocus_nm(){
+    return simgrid_best_match_defocus_nm;
+}
+
 cv::Mat SIMGRID_wavimg_steplength::calculate_simulated_motion_euclidean_transformed_matrix(  cv::Mat raw_simulated_image_roi ){
 
   if (debug_switch == true ){
@@ -425,7 +437,6 @@ cv::Mat SIMGRID_wavimg_steplength::calculate_error_matrix( cv::Mat aligned_exper
   namedWindow( "error (black: no error)", cv::WINDOW_AUTOSIZE );// Create a window for display.
   namedWindow( "Positioned Experimental", cv::WINDOW_AUTOSIZE );
   namedWindow( "Positioned Simulated", cv::WINDOW_AUTOSIZE );
-
   cv::imshow ("error (black: no error)",  error_matrix);
   cv::imshow ("Positioned Experimental",  aligned_experimental_image_roi);
   cv::imshow ("Positioned Simulated",  normalized_aligned_simulated_image_roi);
@@ -657,11 +668,10 @@ bool SIMGRID_wavimg_steplength::simulate_from_dat_file(){
           imwrite( string_output_debug_info2 , raw_gray_simulated_image );
           
         resize(cleaned_simulated_image, cleaned_simulated_image, cv::Size(0,0), reshape_factor_from_supper_cell_to_experimental_x, reshape_factor_from_supper_cell_to_experimental_y, cv::INTER_LINEAR );
+          
         resize(raw_gray_simulated_image, raw_gray_simulated_image, cv::Size(0,0), reshape_factor_from_supper_cell_to_experimental_x, reshape_factor_from_supper_cell_to_experimental_y, cv::INTER_LINEAR );
           
           imwrite( string_output_debug_info3 , raw_gray_simulated_image );
-
-
       }
 
       /// Create the result matrix
@@ -694,7 +704,7 @@ bool SIMGRID_wavimg_steplength::simulate_from_dat_file(){
       simulated_images_row.push_back(cleaned_simulated_image);
       raw_simulated_images_row.push_back(raw_gray_simulated_image);
 
-      std::cout << maxLoc << std::endl;
+      //std::cout << maxLoc << std::endl;
       experimental_images_matchloc_row.push_back(maxLoc);
 
       simulated_matches.push_back(match_factor);
@@ -714,23 +724,19 @@ bool SIMGRID_wavimg_steplength::simulate_from_dat_file(){
   int col_defocus = dist % defocus_samples;
   int row_thickness = (dist - col_defocus ) / defocus_samples;
 
-  int best_slice = round( (slice_period * row_thickness ) + slices_lower_bound);
-  int best_defocus = round( (col_defocus * defocus_period ) + defocus_lower_bound);
-
-  std::cout << "Max match % is " << *maxElement << " | " << simulated_matches.at(dist) << "\t at pos ["<< dist << "](" << col_defocus << "," << row_thickness  <<") slice " << best_slice << ", defocus " << best_defocus << std::endl;
-    std::cout << "mark 0" << simulated_images_grid.size() << std::endl;
+  simgrid_best_match_thickness_slice = (slice_period * row_thickness) + slices_lower_bound;
+  simgrid_best_match_thickness_nm = super_cell_z_nm_slice * simgrid_best_match_thickness_slice;
+  simgrid_best_match_defocus_nm = (col_defocus * defocus_period ) + defocus_lower_bound;
+    
+  std::cout << "Max match % is " << *maxElement << " | " << simulated_matches.at(dist) << "\t at pos ["<< dist << "](" << col_defocus << "," << row_thickness  <<") slice " << simgrid_best_match_thickness_slice << " ( " << simgrid_best_match_thickness_nm << " ) , defocus " << simgrid_best_match_defocus_nm << std::endl;
 
   std::vector<cv::Mat> simulated_images_row = simulated_images_grid.at(row_thickness);
-    std::cout << "mark 1" << std::endl;
 
   cv::Mat cleaned_simulated_image = simulated_images_row.at(col_defocus);
-    std::cout << "mark 2" << std::endl;
 
   std::vector<cv::Mat> raw_simulated_images_row = raw_simulated_images_grid.at(row_thickness);
-    std::cout << "mark 3" << std::endl;
 
   cv::Mat raw_simulated_image = raw_simulated_images_row.at(col_defocus);
-    std::cout << "mark 4" << std::endl;
 
   std::vector<cv::Point> experimental_images_match_location_row = experimental_images_match_location_grid.at(row_thickness);
   cv::Point position_at_experimental_image = experimental_images_match_location_row.at(col_defocus);
@@ -740,8 +746,6 @@ bool SIMGRID_wavimg_steplength::simulate_from_dat_file(){
   pos_exp_rectangle.y = position_at_experimental_image.y;
   pos_exp_rectangle.width = cleaned_simulated_image.cols;
   pos_exp_rectangle.height = cleaned_simulated_image.rows;
-
-    std::cout << "mark 5" << pos_exp_rectangle <<  std::endl;
     
   cv::Mat positioned_experimental_image = experimental_image_roi(pos_exp_rectangle);
   calculate_motion_euclidian_matrix( positioned_experimental_image , cleaned_simulated_image );
@@ -752,15 +756,11 @@ bool SIMGRID_wavimg_steplength::simulate_from_dat_file(){
   if ( get_motion_euclidian_rotation_angle() > acceptable_rotation_diff ){
     std::cout << "WARNING: im2model zone axis / upward vector orientation has a large error value" << std::endl;
   }
-    std::cout << "mark 6" << std::endl;
 
   calculate_error_matrix( positioned_experimental_image, euclidean_transformed_cleaned_simulated_image );
-    std::cout << "mark 7" << std::endl;
 
   cv::Mat gradX = gradientX( match_values_matrix, defocus_period );
   cv::Mat gradY = gradientY( match_values_matrix, slice_period );
-
-    std::cout << "mark 8" << std::endl;
 
   dilate(match_values_matrix,imregionalmax_match_values_matrix,cv::Mat(),cv::Point(0,0),1);
   imregionalmax_match_values_matrix = match_values_matrix - imregionalmax_match_values_matrix;

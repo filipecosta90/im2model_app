@@ -1392,8 +1392,11 @@ int main(int argc, char** argv )
       float y_supercell_min_size_nm = supercell_min_height * sampling_rate_super_cell_y_nm_pixel;
       const int x_unitcell_expand_factor = ceil( x_supercell_min_size_nm / unit_cell.get_cell_length_a_Nanometers() );
       const int y_unitcell_expand_factor = ceil( y_supercell_min_size_nm / unit_cell.get_cell_length_b_Nanometers() );
-      std::cout << "We need to expand the unit cell in " << x_unitcell_expand_factor << " units on X axis, and " << y_unitcell_expand_factor << " units on Y axis." << std::endl; 
-      super_cell = Super_Cell::Super_Cell( &unit_cell ); 
+      const int z_unitcell_expand_factor = ceil ( wavimg_simgrid_steps.get_simgrid_best_match_thickness_nm() / unit_cell.get_cell_length_c_Nanometers()  );
+
+      std::cout << "We need to expand the unit cell in " << x_unitcell_expand_factor << " units on X axis, " << y_unitcell_expand_factor << " units on Y axis, and " << z_unitcell_expand_factor << " units on Z axis." << std::endl;
+      super_cell = Super_Cell::Super_Cell( &unit_cell , x_unitcell_expand_factor, y_unitcell_expand_factor, z_unitcell_expand_factor );
+      super_cell.create_atoms_from_unit_cell();
       //wavimg_simgrid_steps.export_sim_grid();
     }
 

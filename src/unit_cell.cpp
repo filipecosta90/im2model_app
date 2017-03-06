@@ -103,6 +103,57 @@ void Unit_Cell::add_atom_site_fract_z( double fract_z ){
   _atoms_site_fract_z.push_back(fract_z);
 }
 
+/** getters **/
+double Unit_Cell::get_cell_length_a_Angstroms(){
+  return _cell_length_a;
+}
+
+double Unit_Cell::get_cell_length_b_Angstroms(){
+  return _cell_length_b;
+}
+
+double Unit_Cell::get_cell_length_c_Angstroms(){
+  return _cell_length_c;
+}
+
+double Unit_Cell::get_cell_length_a_Nanometers(){
+  return _cell_length_a_Nanometers;
+}
+
+double Unit_Cell::get_cell_length_b_Nanometers(){
+  return _cell_length_b_Nanometers;
+}
+
+double Unit_Cell::get_cell_length_c_Nanometers(){
+  return _cell_length_c_Nanometers;
+}
+
+double Unit_Cell::get_cell_angle_alpha(){
+  return _cell_angle_alpha;
+}
+
+double Unit_Cell::get_cell_angle_beta(){
+  return _cell_angle_beta;
+}
+
+double Unit_Cell::get_cell_angle_gamma(){
+  return _cell_angle_gamma;
+}
+
+double Unit_Cell::get_cell_volume(){
+  return _cell_volume;
+}
+
+/** Zone Axis / Lattice vector **/
+cv::Point3d Unit_Cell::get_zone_axis_vector_uvw(){
+  return zone_axis_vector_uvw;
+}
+
+/** reciprocal-lattice (Miller) indices  **/
+cv::Point3d Unit_Cell::get_upward_vector_hkl(){
+  return upward_vector_hkl;
+}
+
 std::vector<glm::vec3> Unit_Cell::get_atom_positions_vec( ){
   return _atom_positions;
 }
@@ -123,30 +174,10 @@ std::vector<double> Unit_Cell::get_atom_empirical_radii_vec(){
   return _atom_empirical_radii;
 }
 
-double Unit_Cell::get_cell_length_a_Angstroms(){
-  return _cell_length_a;
+cv::Mat Unit_Cell::get_orientation_matrix(){
+  return orientation_matrix;
 }
 
-double Unit_Cell::get_cell_length_b_Angstroms(){
-  return _cell_length_b;
-}
-
-double Unit_Cell::get_cell_length_c_Angstroms(){
-  return _cell_length_c;
-}
-
-
-double Unit_Cell::get_cell_length_a_Nanometers(){
-  return _cell_length_a_Nanometers; 
-}
-
-double Unit_Cell::get_cell_length_b_Nanometers(){
-  return _cell_length_b_Nanometers; 
-}
-
-double Unit_Cell::get_cell_length_c_Nanometers(){
-  return _cell_length_c_Nanometers; 
-}
 
 bool Unit_Cell::create_atoms_from_site_and_symetry(){
   int distinct = 1;

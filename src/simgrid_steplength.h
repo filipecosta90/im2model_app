@@ -20,6 +20,8 @@ class SIMGRID_wavimg_steplength {
     int slice_period;
     float user_estimated_thickness_nm;
     int user_estimated_thickness_slice;
+    int simgrid_best_match_thickness_slice;
+    double simgrid_best_match_thickness_nm;
 
     /***********
       defocus vars
@@ -28,8 +30,8 @@ class SIMGRID_wavimg_steplength {
     int defocus_lower_bound;
     int defocus_upper_bound;
     float defocus_period;
-    float super_cell_z_nm_slice;
     int user_estimated_defocus_nm;
+    double simgrid_best_match_defocus_nm;
 
     /***********
       roi vars
@@ -42,9 +44,10 @@ class SIMGRID_wavimg_steplength {
      ***********/
     float sampling_rate_super_cell_x_nm_pixel;
     float sampling_rate_super_cell_y_nm_pixel;
+    float super_cell_z_nm_slice;
+
     cv::Mat experimental_image_roi;
     
-
     /***********
       simulated image vars
      ***********/
@@ -66,13 +69,11 @@ class SIMGRID_wavimg_steplength {
     cv::Mat sim_grid;
     std::vector< std::vector<cv::Mat> > simulated_images_grid;
     std::vector< std::vector<cv::Mat> > raw_simulated_images_grid;
-
     std::vector< std::vector<cv::Point> > experimental_images_match_location_grid;
 
     //will contain the all the simulated images match percentage
     std::vector<double> simulated_matches;
     std::vector<cv::Point3d> slice_defocus_match_points;
-
 
     /***********
       step-length algorithm vars
@@ -227,13 +228,19 @@ class SIMGRID_wavimg_steplength {
 
     void set_step_size( cv::Point2f defocus_slice_step );
 
-    void calculate_motion_euclidian_matrix(  cv::Mat cropped_experimental_image_roi, cv::Mat simulated_image_roi );
-    
     float get_motion_euclidian_rotation_angle();
     
     float get_motion_euclidian_translation_x();
 
     float get_motion_euclidian_translation_y();
+    
+    int get_simgrid_best_match_thickness_slice();
+    
+    double get_simgrid_best_match_thickness_nm();
+    
+    double get_simgrid_best_match_defocus_nm();
+    
+    void calculate_motion_euclidian_matrix(  cv::Mat cropped_experimental_image_roi, cv::Mat simulated_image_roi );
     
     cv::Mat calculate_simulated_motion_euclidean_transformed_matrix( cv::Mat raw_simulated_image_roi );
     

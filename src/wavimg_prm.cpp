@@ -99,7 +99,6 @@ WAVIMG_prm::WAVIMG_prm()
 }
 
 WAVIMG_prm::WAVIMG_prm(const WAVIMG_prm &obj){
-  std::cout << "WAVIMG_prm Copy constructor." << std::endl;
   // line 1
   file_name_input_wave_function = obj.file_name_input_wave_function;
   // line 2

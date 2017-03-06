@@ -1,8 +1,6 @@
 #ifndef __UNIT_CELL_H__
 #define __UNIT_CELL_H__
 
-
-
 // visualization
 #include <GL/glut.h> 
 
@@ -90,17 +88,33 @@ class Unit_Cell {
     void set_zone_axis_vector( cv::Point3d uvw );
     void set_upward_vector( cv::Point3d hkl );
     //getters
+    double get_cell_length_a_Angstroms();
+    double get_cell_length_b_Angstroms();
+    double get_cell_length_c_Angstroms();
+
+    double get_cell_length_a_Nanometers();
+    double get_cell_length_b_Nanometers();
+    double get_cell_length_c_Nanometers();
+
+    double get_cell_angle_alpha();
+    double get_cell_angle_beta();
+    double get_cell_angle_gamma();
+    double get_cell_volume();
+
+    /** Zone Axis / Lattice vector **/
+    cv::Point3d get_zone_axis_vector_uvw();
+
+    /** reciprocal-lattice (Miller) indices  **/
+    cv::Point3d get_upward_vector_hkl();
+
+
     std::vector<glm::vec3> get_atom_positions_vec();
     std::vector<cv::Point3d> get_symetry_atom_positions_vec();
     std::vector<glm::vec4> get_atom_cpk_rgba_colors_vec();
     std::vector<double> get_atom_radii_vec();
     std::vector<double> get_atom_empirical_radii_vec();
-    double get_cell_length_a_Angstroms();
-    double get_cell_length_b_Angstroms();
-    double get_cell_length_c_Angstroms();
-    double get_cell_length_a_Nanometers();
-    double get_cell_length_b_Nanometers();
-    double get_cell_length_c_Nanometers();
+
+    cv::Mat get_orientation_matrix();
 
     //others
     void add_symmetry_equiv_pos_as_xyz( std::string xyz );
