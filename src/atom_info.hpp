@@ -63,7 +63,8 @@ class Atom_Info
     double calculatedRadius();
 
     //! Returns the atom's empirical radius in Angstroms
-    double empiricalRadius();
+    double empiricalRadius_Angstroms();
+    double empiricalRadius_Nanometers();
 
     //! Returns the atom's covalent radius in Angstroms
     double covalentRadius();
@@ -94,7 +95,7 @@ class Atom_Info
     double mElectronegativity;
     double mElectronAffinity;
     double mCalculatedRadius;
-    double mEmpiricalRadius;
+    double mEmpiricalRadius_Picometers;
     double mCovalentRadius;
     double mVanDerWaalsRadius;
 };

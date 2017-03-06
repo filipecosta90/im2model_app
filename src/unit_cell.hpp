@@ -27,6 +27,9 @@ class Unit_Cell {
     double _cell_length_a;
     double _cell_length_b;
     double _cell_length_c;
+    double _cell_length_a_Nanometers;
+    double _cell_length_b_Nanometers;
+    double _cell_length_c_Nanometers;
     double _cell_angle_alpha;
     double _cell_angle_beta;
     double _cell_angle_gamma;
@@ -92,13 +95,13 @@ class Unit_Cell {
     std::vector<glm::vec4> get_atom_cpk_rgba_colors_vec();
     std::vector<double> get_atom_radii_vec();
     std::vector<double> get_atom_empirical_radii_vec();
-   double get_cell_length_a_Angstroms();
+    double get_cell_length_a_Angstroms();
     double get_cell_length_b_Angstroms();
     double get_cell_length_c_Angstroms();
-  double get_cell_length_a_Nanometers();
+    double get_cell_length_a_Nanometers();
     double get_cell_length_b_Nanometers();
     double get_cell_length_c_Nanometers();
-   
+
     //others
     void add_symmetry_equiv_pos_as_xyz( std::string xyz );
     void add_symmetry_equiv_pos_as_x( std::string x );

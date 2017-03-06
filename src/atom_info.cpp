@@ -31,7 +31,7 @@ Atom_Info::Atom_Info(
   mElectronAffinity  = electron_aff;
   mValence           = valence;
   mCalculatedRadius  = calculated_r;
-  mEmpiricalRadius   = empirical_r;
+  mEmpiricalRadius_Picometers = empirical_r;
   mCovalentRadius    = covalent_r;
   mVanDerWaalsRadius = vdw_r;
   mCPKColor = cpk_color;
@@ -89,8 +89,13 @@ double Atom_Info::calculatedRadius()  {
 }
 
 //! Returns the atom's empirical radius in Angstroms
-double Atom_Info::empiricalRadius()  {
-  return mEmpiricalRadius / 100.0;
+double Atom_Info::empiricalRadius_Angstroms()  {
+  return mEmpiricalRadius_Picometers / 100.0;
+}
+
+//! Returns the atom's empirical radius in Nanometers 
+double Atom_Info::empiricalRadius_Nanometers()  {
+  return mEmpiricalRadius_Picometers / 1000.0;
 }
 
 //! Returns the atom's covalent radius in Angstroms

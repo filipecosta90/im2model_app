@@ -34,14 +34,17 @@ void Unit_Cell::extract_space_group(){
 
 void Unit_Cell::set_cell_length_a( double a ){
   _cell_length_a = a;
+  _cell_length_a_Nanometers = a / 10.0f;
 }
 
 void Unit_Cell::set_cell_length_b( double b ){
   _cell_length_b = b;
+  _cell_length_b_Nanometers = b / 10.0f;
 }
 
 void Unit_Cell::set_cell_length_c( double c ){
   _cell_length_c = c;
+  _cell_length_c_Nanometers = c / 10.0f;
 }
 
 void Unit_Cell::set_cell_angle_alpha( double alpha ){
@@ -103,6 +106,7 @@ void Unit_Cell::add_atom_site_fract_z( double fract_z ){
 std::vector<glm::vec3> Unit_Cell::get_atom_positions_vec( ){
   return _atom_positions;
 }
+
 std::vector<cv::Point3d> Unit_Cell::get_symetry_atom_positions_vec( ){
   return _symetry_atom_positions;
 }
@@ -133,15 +137,15 @@ double Unit_Cell::get_cell_length_c_Angstroms(){
 
 
 double Unit_Cell::get_cell_length_a_Nanometers(){
-  return ( _cell_length_a / 10.0f);
+  return _cell_length_a_Nanometers; 
 }
 
 double Unit_Cell::get_cell_length_b_Nanometers(){
-  return ( _cell_length_b / 10.0f);
+  return _cell_length_b_Nanometers; 
 }
 
 double Unit_Cell::get_cell_length_c_Nanometers(){
-  return ( _cell_length_c / 10.0f);
+  return _cell_length_c_Nanometers; 
 }
 
 bool Unit_Cell::create_atoms_from_site_and_symetry(){
@@ -153,7 +157,7 @@ bool Unit_Cell::create_atoms_from_site_and_symetry(){
     const std::string atom_type_symbol = _atoms_site_type_symbols.at(atom_site_pos);
     std::cout << "searching for "<<  atom_type_symbol << " in chem DB of size " << chem_database.size() << std::endl;
     Atom_Info atom_info = chem_database.get_atom_info( atom_type_symbol );
-    double atom_radious = atom_info.empiricalRadius(); //vanDerWaalsRadius(); //empiricalRadius(); //calculatedRadius();
+    double atom_radious = atom_info.empiricalRadius_Nanometers(); 
     std::cout << " atom radious " << atom_radious << std::endl;
     glm::vec4 cpk_color = atom_info.cpkColor();
     std::cout << "Color CPK RGBA " << cpk_color.r << " , " << cpk_color.g << " , " << cpk_color.b << " , " << cpk_color.a  << std::endl;
@@ -165,8 +169,6 @@ bool Unit_Cell::create_atoms_from_site_and_symetry(){
       double temp_a = symbCalc( symetry_x , fract_x, fract_y, fract_z);
       double temp_b = symbCalc( symetry_y , fract_x, fract_y, fract_z);
       double temp_c = symbCalc( symetry_z , fract_x, fract_y, fract_z);
-      //std::cout << temp_a << "(" << symetry_x << ")" << temp_b << "(" << symetry_y << ")" << temp_c << "(" << symetry_z << ")" << std::endl;
-      //std::cout << temp_a << " " << temp_b << " " << temp_c << std::endl;
 
       if  ( temp_a > 1.0f ) {
         temp_a = temp_a - 1.0f; 
@@ -195,9 +197,9 @@ bool Unit_Cell::create_atoms_from_site_and_symetry(){
       it = std::find(_symetry_atom_positions.begin(), _symetry_atom_positions.end(), temporary_point );
       if(it == _symetry_atom_positions.end() ){
         std::cout << "atom # " << distinct << " ( " << atom_type_symbol << " )" << temp_a << " , " << temp_b << " , " << temp_c << std::endl;
-        const double px = temp_a * _cell_length_a;
-        const double py = temp_b * _cell_length_b;
-        const double pz = temp_c * _cell_length_c;
+        const double px = temp_a * _cell_length_a_Nanometers; 
+        const double py = temp_b * _cell_length_b_Nanometers;
+        const double pz = temp_c * _cell_length_c_Nanometers;
         const glm::vec3 atom_pos ( px, py, pz );
         _atom_positions.push_back( atom_pos );
         _atom_empirical_radii.push_back( atom_radious );
@@ -243,26 +245,25 @@ void Unit_Cell::form_matrix_from_miller_indices (){
   points.push_back(t);
   points.push_back(n);
   points.push_back(b);
-  orientation_matrix = cv::Mat(points, CV_64FC1);
+  orientation_matrix = cv::Mat( points , true ); 
+  orientation_matrix = orientation_matrix.reshape(1);
 
   std::cout << "Orientation Matrix :" << std::endl;
   std::cout << orientation_matrix << std::endl;
+
 }
 
-
 void Unit_Cell::orientate_atoms_from_matrix(){
+  std::cout << "Orientating atoms from matrix :" << std::endl;
   std::vector<glm::vec3>::iterator it ;
-  // check if it already exists
   for ( int pos = 0; pos <  _atom_positions.size(); pos++ ){
     glm::vec3 initial_atom = _atom_positions.at(pos);
-    cv::Point3d b = cv::Point3d(initial_atom.x,initial_atom.y,initial_atom.z);
-    cv::Point3d final;
-    final.x = orientation_matrix.at<double>(0,0) * b.x + orientation_matrix.at<double>(0,1) * b.y + orientation_matrix.at<double>(0,2) * b.z; 
-    final.y = orientation_matrix.at<double>(1,0) * b.x + orientation_matrix.at<double>(1,1) * b.y + orientation_matrix.at<double>(1,2) * b.z; 
-    final.z = orientation_matrix.at<double>(2,0) * b.x + orientation_matrix.at<double>(2,1) * b.y + orientation_matrix.at<double>(2,2) * b.z; 
-    std::cout << "initial: " << b << " final: " << final << std::endl;
-    _atom_positions.at(pos) =  glm::vec3 ( final.x, final.y, final.z );
-
+    cv::Vec3d V ( initial_atom.x, initial_atom.y, initial_atom.z );
+    cv::Mat result = orientation_matrix * cv::Mat(V);
+    const glm::vec3 final (result.at<double>(0,0), result.at<double>(1,0), result.at<double>(2,0));
+    std::cout << "initial: " << V << " final: " << final.x << " " << final.y << " " <<  final.z  << std::endl;
+    result.release();
+    _atom_positions.at(pos) =  final; 
   }
 }
 
