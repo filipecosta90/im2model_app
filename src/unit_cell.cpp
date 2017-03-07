@@ -154,6 +154,10 @@ cv::Point3d Unit_Cell::get_upward_vector_hkl(){
   return upward_vector_hkl;
 }
 
+cv::Point3d Unit_Cell::get_vector_t ( ){
+  return vector_t;
+}
+
 std::vector<glm::vec3> Unit_Cell::get_atom_positions_vec( ){
   return _atom_positions;
 }
@@ -262,10 +266,9 @@ void Unit_Cell::form_matrix_from_miller_indices (){
   cv::Mat t_up = n_matrix.cross( b_matrix); 
   const double norm_t = cv::norm( t_up );
   cv::Mat t_mat = t_up / norm_t; 
-  cv::Point3d t;
-  t.x = t_mat.at<double>(0,0);
-  t.y = t_mat.at<double>(1,0);
-  t.z = t_mat.at<double>(2,0);
+  vector_t.x = t_mat.at<double>(0,0);
+  vector_t.y = t_mat.at<double>(1,0);
+  vector_t.z = t_mat.at<double>(2,0);
 
   // free aux matrix mem
   b_matrix.release();
@@ -273,7 +276,7 @@ void Unit_Cell::form_matrix_from_miller_indices (){
 
   /* insert into matrix */
   std::vector<cv::Point3d> points;
-  points.push_back(t);
+  points.push_back(vector_t);
   points.push_back(n);
   points.push_back(b);
   orientation_matrix = cv::Mat( points , true ); 

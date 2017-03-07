@@ -38,6 +38,7 @@ class Unit_Cell {
 
     /** reciprocal-lattice (Miller) indices  **/
     cv::Point3d upward_vector_hkl;
+    cv::Point3d vector_t;
 
     /* symetry */
     std::string _symmetry_space_group_name_H_M;
@@ -106,6 +107,9 @@ class Unit_Cell {
 
     /** reciprocal-lattice (Miller) indices  **/
     cv::Point3d get_upward_vector_hkl();
+
+    /** vector t **/
+    cv::Point3d get_vector_t();
 
 
     std::vector<glm::vec3> get_atom_positions_vec();

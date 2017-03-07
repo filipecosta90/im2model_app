@@ -49,7 +49,7 @@ Super_Cell::Super_Cell( Unit_Cell* cell , int factor_a, int factor_b, int factor
   expand_factor_a = factor_a;
   expand_factor_b = factor_b;
   expand_factor_c = factor_c;
-  
+
   /** unitcell **/
   unit_cell = cell;
   update_unit_cell_parameters();
@@ -196,13 +196,14 @@ bool Super_Cell::create_atoms_from_unit_cell(){
 
 void Super_Cell::orientate_atoms_from_matrix(){
   std::cout << "Orientating atoms from matrix :" << std::endl;
+  std::cout << orientation_matrix << std::endl;
   std::vector<glm::vec3>::iterator it ;
   for ( int pos = 0; pos <  _atom_positions.size(); pos++ ){
     glm::vec3 initial_atom = _atom_positions.at(pos);
     cv::Vec3d V ( initial_atom.x, initial_atom.y, initial_atom.z );
     cv::Mat result = orientation_matrix * cv::Mat(V);
     const glm::vec3 final (result.at<double>(0,0), result.at<double>(1,0), result.at<double>(2,0));
-    std::cout << "initial: " << V << " final: " << final.x << " " << final.y << " " <<  final.z  << std::endl;
+    //    std::cout << "initial: " << V << " final: " << final.x << " " << final.y << " " <<  final.z  << std::endl;
     result.release();
     _atom_positions.at(pos) =  final; 
   }

@@ -637,8 +637,24 @@ void AppVis() {
   // setup gCamera
   // gCamera.setPosition(glm::vec3(upward_vector_hkl.x, upward_vector_hkl.y, upward_vector_hkl.z));
   // set eye
-  gCamera.setPosition(glm::vec3(super_cell.get_super_cell_length_a_Nanometers()*2.0f,super_cell.get_super_cell_length_b_Nanometers()*2.0f,super_cell.get_super_cell_length_c_Nanometers() * 2.0f));
-  gCamera.set_vis_up( glm::vec3(zone_axis_vector_uvw.x, zone_axis_vector_uvw.y, zone_axis_vector_uvw.z) );
+  glm::vec3 center =  glm::vec3(0.0f,0.0f,0.0f);
+  gCamera.set_center( center );
+  glm::vec3 eye = glm::normalize( glm::vec3( zone_axis_vector_uvw.x, zone_axis_vector_uvw.y, zone_axis_vector_uvw.z ) );
+  glm::vec3 position = glm::vec3(0.0f,0.0f,0.0f) - eye;
+  position.x = position.x * super_cell.get_super_cell_length_a_Nanometers()*2.0f; 
+  position.y = position.y * super_cell.get_super_cell_length_b_Nanometers()*2.0f; 
+  position.z = position.z * super_cell.get_super_cell_length_c_Nanometers()*2.0f; 
+  // gCamera.set_eye((super_cell.get_super_cell_length_a_Nanometers()*2.0f,super_cell.get_super_cell_length_b_Nanometers()*2.0f,super_cell.get_super_cell_length_c_Nanometers() * 2.0f));
+  gCamera.setPosition(position);
+  glm::vec3 up = glm::normalize (glm::vec3(upward_vector_hkl.x, upward_vector_hkl.y, upward_vector_hkl.z));
+  gCamera.set_vis_up( up );
+ std::cout << "Visualization Parameters" << std::endl;
+ std::cout << "Center: x " << center.x << ", y " << center.y << ", z " << center.z <<  std::endl; 
+ std::cout << "Eye: x " << eye.x << ", y " << eye.y << ", z " << eye.z <<  std::endl;
+ std::cout << "Position: x " << position.x << ", y " << position.y << ", z " << position.z <<  std::endl;
+ std::cout << "Up: x " << up.x << ", y " << up.y << ", z " << up.z <<  std::endl;
+  //gCamera.set_center( glm::vec3(0.0f,0.0f,0.0f) );
+  //gCamera.set_vis_up( glm::normalize (glm::vec3(zone_axis_vector_uvw.x, zone_axis_vector_uvw.y, zone_axis_vector_uvw.z) ) );
   // gCamera.lookAt(glm::vec3(zone_axis_vector_uvw.x, zone_axis_vector_uvw.y, zone_axis_vector_uvw.z));
 
   gCamera.setViewportAspectRatio(SCREEN_SIZE.x / SCREEN_SIZE.y);
@@ -1096,7 +1112,6 @@ int main(int argc, char** argv )
     unit_cell.set_zone_axis_vector( zone_axis_vector_uvw );
     unit_cell.set_upward_vector( upward_vector_hkl );
     unit_cell.form_matrix_from_miller_indices(); 
-    unit_cell.orientate_atoms_from_matrix();
 
     // Simulated image sampling rate
     sampling_rate_super_cell_x_nm_pixel = super_cell_size_x / nx_simulated_horizontal_samples;
@@ -1397,6 +1412,7 @@ int main(int argc, char** argv )
       std::cout << "We need to expand the unit cell in " << x_unitcell_expand_factor << " units on X axis, " << y_unitcell_expand_factor << " units on Y axis, and " << z_unitcell_expand_factor << " units on Z axis." << std::endl;
       super_cell = Super_Cell::Super_Cell( &unit_cell , x_unitcell_expand_factor, y_unitcell_expand_factor, z_unitcell_expand_factor );
       super_cell.create_atoms_from_unit_cell();
+      super_cell.orientate_atoms_from_matrix();
       //wavimg_simgrid_steps.export_sim_grid();
     }
 

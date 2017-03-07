@@ -20,6 +20,8 @@ namespace vis {
         
         glm::vec3 _eye, _center, _vis_up;
        void set_vis_up(const glm::vec3& upward_vector );
+       void set_eye(const glm::vec3& eye_vector );
+       void set_center(const glm::vec3& center_vector );
         
         /**
          The position of the camera.
