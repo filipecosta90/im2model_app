@@ -634,7 +634,7 @@ void AppVis() {
   CreateInstances();
 
   // setup gCamera
-  
+
   glm::vec3 vec_n = glm::normalize( glm::vec3( zone_axis_vector_uvw.x, zone_axis_vector_uvw.y, zone_axis_vector_uvw.z ) ); 
   glm::vec3 vec_v = glm::normalize( glm::vec3( upward_vector_hkl.x, upward_vector_hkl.y, upward_vector_hkl.z ) );
   cv::Point3d cv_t = unit_cell.get_vector_t();
@@ -647,9 +647,9 @@ void AppVis() {
   position.x = super_cell.get_super_cell_length_a_Nanometers()*2.0f; 
   position.y = super_cell.get_super_cell_length_b_Nanometers()*2.0f; 
   position.z = super_cell.get_super_cell_length_c_Nanometers()*2.0f; 
-  
+
   //glm::vec3 up = glm::normalize (glm::vec3(upward_vector_hkl.x, upward_vector_hkl.y, upward_vector_hkl.z));
- 
+
   gCamera.set_center( center );
   gCamera.setPosition( position ); // position );
   gCamera.set_n( vec_n );
@@ -657,20 +657,20 @@ void AppVis() {
   gCamera.set_vis_up( vec_up );
 
   std::cout << "Visualization Parameters" << std::endl;
- std::cout << "Center: " << glm::to_string( center ) <<  std::endl;   
- std::cout << "CAM Looking in direction: " << glm::to_string( eye ) <<  std::endl; 
- std::cout << "CAM Up: " << glm::to_string( vec_up ) <<  std::endl;
- std::cout << "CAM Position: " << glm::to_string( position ) <<  std::endl;  
- std::cout << "View Matrix:" << std::endl;
+  std::cout << "Center: " << glm::to_string( center ) <<  std::endl;   
+  std::cout << "CAM Looking in direction: " << glm::to_string( eye ) <<  std::endl; 
+  std::cout << "CAM Up: " << glm::to_string( vec_up ) <<  std::endl;
+  std::cout << "CAM Position: " << glm::to_string( position ) <<  std::endl;  
+  std::cout << "View Matrix:" << std::endl;
   std::cout << glm::to_string( gCamera.view() ) << std::endl;
- 
- // gCamera.setPosition(glm::vec3(upward_vector_hkl.x, upward_vector_hkl.y, upward_vector_hkl.z));
+
+  // gCamera.setPosition(glm::vec3(upward_vector_hkl.x, upward_vector_hkl.y, upward_vector_hkl.z));
   // gCamera.set_eye((super_cell.get_super_cell_length_a_Nanometers()*2.0f,super_cell.get_super_cell_length_b_Nanometers()*2.0f,super_cell.get_super_cell_length_c_Nanometers() * 2.0f));
- //gCamera.set_center( glm::vec3(0.0f,0.0f,0.0f) );
+  //gCamera.set_center( glm::vec3(0.0f,0.0f,0.0f) );
   //gCamera.set_vis_up( glm::normalize (glm::vec3(zone_axis_vector_uvw.x, zone_axis_vector_uvw.y, zone_axis_vector_uvw.z) ) );
   // gCamera.lookAt(glm::vec3(zone_axis_vector_uvw.x, zone_axis_vector_uvw.y, zone_axis_vector_uvw.z));
-gCamera.set_window_width( SCREEN_SIZE.x );
-gCamera.set_window_height( SCREEN_SIZE.y );
+  gCamera.set_window_width( SCREEN_SIZE.x );
+  gCamera.set_window_height( SCREEN_SIZE.y );
   gCamera.setViewportAspectRatio(SCREEN_SIZE.x / SCREEN_SIZE.y);
 
   // run while the window is open
@@ -1417,14 +1417,21 @@ int main(int argc, char** argv )
       std::cout << "Unit cell size" << " nm" << std::endl;
       std::cout << "Super cell min width (pixels) " << supercell_min_width << std::endl;
       std::cout << "Super cell min height (pixels) " << supercell_min_height << std::endl;
-      float x_supercell_min_size_nm = supercell_min_width * sampling_rate_super_cell_x_nm_pixel;
-      float y_supercell_min_size_nm = supercell_min_height * sampling_rate_super_cell_y_nm_pixel;
+      const float x_supercell_min_size_nm = supercell_min_width * sampling_rate_super_cell_x_nm_pixel;
+      const float y_supercell_min_size_nm = supercell_min_height * sampling_rate_super_cell_y_nm_pixel;
+      const float z_supercell_min_size_nm = wavimg_simgrid_steps.get_simgrid_best_match_thickness_nm();
+/*
       const int x_unitcell_expand_factor = ceil( x_supercell_min_size_nm / unit_cell.get_cell_length_a_Nanometers() );
       const int y_unitcell_expand_factor = ceil( y_supercell_min_size_nm / unit_cell.get_cell_length_b_Nanometers() );
-      const int z_unitcell_expand_factor = ceil ( wavimg_simgrid_steps.get_simgrid_best_match_thickness_nm() / unit_cell.get_cell_length_c_Nanometers()  );
+      const int z_unitcell_expand_factor = ceil( z_supercell_min_size_nm / unit_cell.get_cell_length_c_Nanometers() );
 
       std::cout << "We need to expand the unit cell in " << x_unitcell_expand_factor << " units on X axis, " << y_unitcell_expand_factor << " units on Y axis, and " << z_unitcell_expand_factor << " units on Z axis." << std::endl;
-      super_cell = Super_Cell::Super_Cell( &unit_cell , x_unitcell_expand_factor, y_unitcell_expand_factor, z_unitcell_expand_factor );
+  */
+      super_cell = Super_Cell::Super_Cell( &unit_cell ); //, x_unitcell_expand_factor, y_unitcell_expand_factor, z_unitcell_expand_factor );
+      super_cell.set_experimental_min_size_nm_x( x_supercell_min_size_nm );
+      super_cell.set_experimental_min_size_nm_y( y_supercell_min_size_nm );
+      super_cell.set_experimental_min_size_nm_z( z_supercell_min_size_nm );
+      super_cell.calculate_expand_factor();
       super_cell.create_atoms_from_unit_cell();
       super_cell.orientate_atoms_from_matrix();
       //wavimg_simgrid_steps.export_sim_grid();
@@ -1443,6 +1450,4 @@ int main(int argc, char** argv )
   }
   return 0;
 }
-
-
 

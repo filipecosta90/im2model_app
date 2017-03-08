@@ -122,6 +122,32 @@ void Super_Cell::set_super_cell_expand_factor_c( int factor_c ){
   expand_factor_c = factor_c;
 }
 
+void Super_Cell::set_experimental_min_size_nm_x( double x_min_size_nm ){
+  _x_supercell_min_size_nm = x_min_size_nm;
+}
+
+void Super_Cell::set_experimental_min_size_nm_y( double y_min_size_nm ){
+  _y_supercell_min_size_nm = y_min_size_nm;
+
+}
+
+void Super_Cell::set_experimental_min_size_nm_z( double z_min_size_nm ){
+  _z_supercell_min_size_nm = z_min_size_nm;
+}
+
+void Super_Cell::calculate_expand_factor(){
+  _a = cv::Point3d( 0.0f , 0.0f , 0.0f );
+  _b = cv::Point3d( _x_supercell_min_size_nm , 0.0f , 0.0f );
+  _c = cv::Point3d( _x_supercell_min_size_nm , _y_supercell_min_size_nm , 0.0f );
+  _d = cv::Point3d( 0.0f , _y_supercell_min_size_nm , 0.0f );
+  _e = cv::Point3d( 0.0f , 0.0f , _z_supercell_min_size_nm );
+  _f = cv::Point3d( _x_supercell_min_size_nm , 0.0f , _z_supercell_min_size_nm );
+  _g = cv::Point3d( _x_supercell_min_size_nm , _y_supercell_min_size_nm , _z_supercell_min_size_nm );
+  _g = cv::Point3d( 0.0f , _y_supercell_min_size_nm , _z_supercell_min_size_nm );
+    cv::Mat _m_a = inverse_orientation_matrix * cv::Mat(_a);
+  _sim_a = cv::Point3d(_m_a.at<double>(0,0), _m_a.at<double>(1,0), _m_a.at<double>(2,0));
+}
+
 /** getters **/
 double Super_Cell::get_super_cell_length_a_Angstroms(){
   return _super_cell_length_a_Angstroms;
@@ -234,6 +260,7 @@ bool Super_Cell::update_unit_cell_parameters(){
 
   /** Orientation **/
   orientation_matrix = unit_cell->get_orientation_matrix();
+  inverse_orientation_matrix = orientation_matrix.inv(); 
   return true;
 }
 
