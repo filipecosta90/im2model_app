@@ -19,10 +19,19 @@ namespace vis {
         Camera();
         
         glm::vec3 _eye, _center, _vis_up;
+        glm::vec3 _u, _v, _n;
+        int  _window_width, _window_height; 
+
+       void set_u(const glm::vec3& u );
+       void set_v(const glm::vec3& v );
+       void set_n(const glm::vec3& n );
+
        void set_vis_up(const glm::vec3& upward_vector );
        void set_eye(const glm::vec3& eye_vector );
        void set_center(const glm::vec3& center_vector );
-        
+       
+       void set_window_width( int width );
+       void set_window_height( int height );
         /**
          The position of the camera.
          */

@@ -44,6 +44,7 @@
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtx/string_cast.hpp>
 #include "opengl.hpp"
 
 // project classes
@@ -532,8 +533,6 @@ static void Update(float secondsElapsed) {
   //rotate the first instance in `gInstances`
   const GLfloat degreesPerSecond = 180.0f;
   gDegreesRotated += secondsElapsed * degreesPerSecond;
-  while(gDegreesRotated > 360.0f) gDegreesRotated -= 360.0f;
-  //gInstances.front().transform = glm::rotate(glm::mat4(), glm::radians(gDegreesRotated), glm::vec3(0,1,0));
 
   //move position of camera based on WASD keys, and XZ keys for up and down
   const float moveSpeed = 2.0; //units per second
@@ -635,28 +634,43 @@ void AppVis() {
   CreateInstances();
 
   // setup gCamera
-  // gCamera.setPosition(glm::vec3(upward_vector_hkl.x, upward_vector_hkl.y, upward_vector_hkl.z));
-  // set eye
+  
+  glm::vec3 vec_n = glm::normalize( glm::vec3( zone_axis_vector_uvw.x, zone_axis_vector_uvw.y, zone_axis_vector_uvw.z ) ); 
+  glm::vec3 vec_v = glm::normalize( glm::vec3( upward_vector_hkl.x, upward_vector_hkl.y, upward_vector_hkl.z ) );
+  cv::Point3d cv_t = unit_cell.get_vector_t();
+  glm::vec3 vec_up = glm::normalize( glm::vec3( cv_t.x, cv_t.y, cv_t.z ) );
+
   glm::vec3 center =  glm::vec3(0.0f,0.0f,0.0f);
-  gCamera.set_center( center );
+
   glm::vec3 eye = glm::normalize( glm::vec3( zone_axis_vector_uvw.x, zone_axis_vector_uvw.y, zone_axis_vector_uvw.z ) );
-  glm::vec3 position = glm::vec3(0.0f,0.0f,0.0f) - eye;
-  position.x = position.x * super_cell.get_super_cell_length_a_Nanometers()*2.0f; 
-  position.y = position.y * super_cell.get_super_cell_length_b_Nanometers()*2.0f; 
-  position.z = position.z * super_cell.get_super_cell_length_c_Nanometers()*2.0f; 
+  glm::vec3 position = glm::vec3(0.0f,0.0f,0.0f);
+  position.x = super_cell.get_super_cell_length_a_Nanometers()*2.0f; 
+  position.y = super_cell.get_super_cell_length_b_Nanometers()*2.0f; 
+  position.z = super_cell.get_super_cell_length_c_Nanometers()*2.0f; 
+  
+  //glm::vec3 up = glm::normalize (glm::vec3(upward_vector_hkl.x, upward_vector_hkl.y, upward_vector_hkl.z));
+ 
+  gCamera.set_center( center );
+  gCamera.setPosition( position ); // position );
+  gCamera.set_n( vec_n );
+  //gCamera.lookAt( -eye );
+  gCamera.set_vis_up( vec_up );
+
+  std::cout << "Visualization Parameters" << std::endl;
+ std::cout << "Center: " << glm::to_string( center ) <<  std::endl;   
+ std::cout << "CAM Looking in direction: " << glm::to_string( eye ) <<  std::endl; 
+ std::cout << "CAM Up: " << glm::to_string( vec_up ) <<  std::endl;
+ std::cout << "CAM Position: " << glm::to_string( position ) <<  std::endl;  
+ std::cout << "View Matrix:" << std::endl;
+  std::cout << glm::to_string( gCamera.view() ) << std::endl;
+ 
+ // gCamera.setPosition(glm::vec3(upward_vector_hkl.x, upward_vector_hkl.y, upward_vector_hkl.z));
   // gCamera.set_eye((super_cell.get_super_cell_length_a_Nanometers()*2.0f,super_cell.get_super_cell_length_b_Nanometers()*2.0f,super_cell.get_super_cell_length_c_Nanometers() * 2.0f));
-  gCamera.setPosition(position);
-  glm::vec3 up = glm::normalize (glm::vec3(upward_vector_hkl.x, upward_vector_hkl.y, upward_vector_hkl.z));
-  gCamera.set_vis_up( up );
- std::cout << "Visualization Parameters" << std::endl;
- std::cout << "Center: x " << center.x << ", y " << center.y << ", z " << center.z <<  std::endl; 
- std::cout << "Eye: x " << eye.x << ", y " << eye.y << ", z " << eye.z <<  std::endl;
- std::cout << "Position: x " << position.x << ", y " << position.y << ", z " << position.z <<  std::endl;
- std::cout << "Up: x " << up.x << ", y " << up.y << ", z " << up.z <<  std::endl;
-  //gCamera.set_center( glm::vec3(0.0f,0.0f,0.0f) );
+ //gCamera.set_center( glm::vec3(0.0f,0.0f,0.0f) );
   //gCamera.set_vis_up( glm::normalize (glm::vec3(zone_axis_vector_uvw.x, zone_axis_vector_uvw.y, zone_axis_vector_uvw.z) ) );
   // gCamera.lookAt(glm::vec3(zone_axis_vector_uvw.x, zone_axis_vector_uvw.y, zone_axis_vector_uvw.z));
-
+gCamera.set_window_width( SCREEN_SIZE.x );
+gCamera.set_window_height( SCREEN_SIZE.y );
   gCamera.setViewportAspectRatio(SCREEN_SIZE.x / SCREEN_SIZE.y);
 
   // run while the window is open

@@ -1,8 +1,10 @@
 #define _USE_MATH_DEFINES
 #include <cmath>
+#include <iostream>
 #include "camera.hpp"
 #include <glm/gtc/matrix_transform.hpp>
-
+#include <glm/gtc/type_ptr.hpp>
+#include <glm/gtx/string_cast.hpp>
 using namespace vis;
 
 static const float MaxVerticalAngle = 85.0f; //must be less than 90 to avoid gimbal lock
@@ -17,7 +19,9 @@ Camera::Camera() :
   _fieldOfView(50.0f),
   _nearPlane(0.01f),
   _farPlane(100.0f),
-  _viewportAspectRatio(4.0f/3.0f)
+  _viewportAspectRatio(4.0f/3.0f),
+  _window_width(1024),
+  _window_height(720)
 {
 }
 
@@ -29,12 +33,32 @@ void Camera::set_vis_up( const glm::vec3& upward_vector ){
   _vis_up = upward_vector;
 }
 
+void Camera::set_u( const glm::vec3& u ){
+  _u = u;
+}
+
+void Camera::set_v( const glm::vec3& v ){
+  _v = v;
+}
+
+void Camera::set_n( const glm::vec3& n ){
+  _n = n;
+}
+
 void Camera::set_eye(const glm::vec3& eye_vector ){
   _eye = eye_vector; 
 }
 
 void Camera::set_center(const glm::vec3& center_vector ){
   _center = center_vector;
+}
+
+void Camera::set_window_width( int width ){
+  _window_width = width;
+}
+
+void Camera::set_window_height( int height ){
+  _window_height = height;
 }
 
 void Camera::setPosition(const glm::vec3& position) {
@@ -120,14 +144,17 @@ glm::mat4 Camera::matrix() const {
 
 glm::mat4 Camera::projection() const {
   //ortho  
+  //return glm::ortho(0.0f, (float) _window_width, 0.0f,(float) _window_height , _nearPlane, _farPlane );
   return glm::perspective(glm::radians(_fieldOfView), _viewportAspectRatio, _nearPlane, _farPlane);
 }
 
 glm::mat4 Camera::view() const {
-  //glm::mat4 view = glm::lookAt( eye, center, vis_up );
- // return glm::lookAt( _eye, _center, _vis_up );
-  return glm::lookAt( _position, _center, _vis_up );
-  //return orientation() * glm::translate(glm::mat4(), -_position);
+  //glm::mat4 view = glm::lookAt( _eye, _center, _vis_up ) * glm::translate(glm::mat4(), -_position); 
+  //  std::cout << glm::to_string( view ) << std::endl;// return glm::lookAt( _eye, _center, _vis_up );
+  glm::mat4 view = glm::lookAt( _position, _center + _n, _vis_up ); //orientation() * glm::translate(glm::mat4(), -_position);
+
+  //glm::lookAt( _eye, _center, _vis_up );
+  return view; 
 }
 
 void Camera::normalizeAngles() {
@@ -135,9 +162,9 @@ void Camera::normalizeAngles() {
   //fmodf can return negative values, but this will make them all positive
   if(_horizontalAngle < 0.0f)
     _horizontalAngle += 360.0f;
-
   if(_verticalAngle > MaxVerticalAngle)
     _verticalAngle = MaxVerticalAngle;
   else if(_verticalAngle < -MaxVerticalAngle)
     _verticalAngle = -MaxVerticalAngle;
 }
+

@@ -170,9 +170,10 @@ bool Super_Cell::create_atoms_from_unit_cell(){
   const double unit_cell_c_nm = unit_cell->get_cell_length_c_Nanometers();
   const double center_a_padding_nm = _super_cell_length_a_Nanometers / -2.0f;
   const double center_b_padding_nm = _super_cell_length_b_Nanometers / -2.0f;
+  const double center_c_padding_nm = _super_cell_length_c_Nanometers / -2.0f;
 
   for ( int c_expand_pos = 0; c_expand_pos < expand_factor_c; c_expand_pos++ ){
-    const double c_expand_nanometers = c_expand_pos * unit_cell_c_nm;
+    const double c_expand_nanometers = c_expand_pos * unit_cell_c_nm + center_c_padding_nm;
     for ( int b_expand_pos = 0; b_expand_pos < expand_factor_b; b_expand_pos++ ){
       const double b_expand_nanometers = b_expand_pos * unit_cell_b_nm + center_b_padding_nm;
       for ( int a_expand_pos = 0; a_expand_pos < expand_factor_a; a_expand_pos++ ){
