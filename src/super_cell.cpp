@@ -14,6 +14,7 @@
 #include <iomanip>
 #include <vector>
 #include <stdio.h>
+#include <algorithm>
 
 // Visualization
 #include <GL/glut.h>
@@ -136,16 +137,116 @@ void Super_Cell::set_experimental_min_size_nm_z( double z_min_size_nm ){
 }
 
 void Super_Cell::calculate_expand_factor(){
-  _a = cv::Point3d( 0.0f , 0.0f , 0.0f );
-  _b = cv::Point3d( _x_supercell_min_size_nm , 0.0f , 0.0f );
-  _c = cv::Point3d( _x_supercell_min_size_nm , _y_supercell_min_size_nm , 0.0f );
-  _d = cv::Point3d( 0.0f , _y_supercell_min_size_nm , 0.0f );
-  _e = cv::Point3d( 0.0f , 0.0f , _z_supercell_min_size_nm );
-  _f = cv::Point3d( _x_supercell_min_size_nm , 0.0f , _z_supercell_min_size_nm );
-  _g = cv::Point3d( _x_supercell_min_size_nm , _y_supercell_min_size_nm , _z_supercell_min_size_nm );
-  _g = cv::Point3d( 0.0f , _y_supercell_min_size_nm , _z_supercell_min_size_nm );
-    cv::Mat _m_a = inverse_orientation_matrix * cv::Mat(_a);
+  const double r_a = _x_supercell_min_size_nm / 2.0f;
+  const double r_b = _y_supercell_min_size_nm / 2.0f;
+  const double r_c = _z_supercell_min_size_nm / 2.0f;
+  
+  _a = cv::Point3d( -r_a, -r_b, -r_c ); 
+  _b = cv::Point3d( r_a, -r_b, -r_c ); 
+  _c = cv::Point3d( r_a, r_b, -r_c ); 
+  _d = cv::Point3d( -r_a, r_b, -r_c ); 
+  
+  _e = cv::Point3d( -r_a, -r_b, r_c ); 
+  _f = cv::Point3d( r_a, -r_b, r_c ); 
+  _g = cv::Point3d( r_a, r_b, r_c ); 
+  _h = cv::Point3d( -r_a, r_b, r_c ); 
+  
+  std::vector<double> _sim_x_component;
+  std::vector<double> _sim_y_component;
+  std::vector<double> _sim_z_component;
+
+  cv::Mat _m_a = inverse_orientation_matrix * cv::Mat(_a);
   _sim_a = cv::Point3d(_m_a.at<double>(0,0), _m_a.at<double>(1,0), _m_a.at<double>(2,0));
+  cv::Mat _m_b = inverse_orientation_matrix * cv::Mat(_b);
+  _sim_b = cv::Point3d(_m_b.at<double>(0,0), _m_b.at<double>(1,0), _m_b.at<double>(2,0));
+  cv::Mat _m_c = inverse_orientation_matrix * cv::Mat(_c);
+  _sim_c = cv::Point3d(_m_c.at<double>(0,0), _m_c.at<double>(1,0), _m_c.at<double>(2,0));
+  cv::Mat _m_d = inverse_orientation_matrix * cv::Mat(_d);
+  _sim_d = cv::Point3d(_m_d.at<double>(0,0), _m_d.at<double>(1,0), _m_d.at<double>(2,0));
+  cv::Mat _m_e = inverse_orientation_matrix * cv::Mat(_e);
+  _sim_e = cv::Point3d(_m_e.at<double>(0,0), _m_e.at<double>(1,0), _m_e.at<double>(2,0));
+  cv::Mat _m_f = inverse_orientation_matrix * cv::Mat(_f);
+  _sim_f = cv::Point3d(_m_f.at<double>(0,0), _m_f.at<double>(1,0), _m_f.at<double>(2,0));
+  cv::Mat _m_g = inverse_orientation_matrix * cv::Mat(_g);
+  _sim_g = cv::Point3d(_m_g.at<double>(0,0), _m_g.at<double>(1,0), _m_g.at<double>(2,0));
+  cv::Mat _m_h = inverse_orientation_matrix * cv::Mat(_h);
+  _sim_h = cv::Point3d(_m_h.at<double>(0,0), _m_h.at<double>(1,0), _m_h.at<double>(2,0));
+
+  _sim_x_component.push_back( _sim_a.x );
+  _sim_x_component.push_back( _sim_b.x );
+  _sim_x_component.push_back( _sim_c.x );
+  _sim_x_component.push_back( _sim_d.x );
+  _sim_x_component.push_back( _sim_e.x );
+  _sim_x_component.push_back( _sim_f.x );
+  _sim_x_component.push_back( _sim_g.x );
+  _sim_x_component.push_back( _sim_h.x );
+  
+  _sim_y_component.push_back( _sim_a.y );
+  _sim_y_component.push_back( _sim_b.y );
+  _sim_y_component.push_back( _sim_c.y );
+  _sim_y_component.push_back( _sim_d.y );
+  _sim_y_component.push_back( _sim_e.y );
+  _sim_y_component.push_back( _sim_f.y );
+  _sim_y_component.push_back( _sim_g.y );
+  _sim_y_component.push_back( _sim_h.y );
+  
+  _sim_z_component.push_back( _sim_a.z );
+  _sim_z_component.push_back( _sim_b.z );
+  _sim_z_component.push_back( _sim_c.z );
+  _sim_z_component.push_back( _sim_d.z );
+  _sim_z_component.push_back( _sim_e.z );
+  _sim_z_component.push_back( _sim_f.z );
+  _sim_z_component.push_back( _sim_g.z );
+  _sim_z_component.push_back( _sim_h.z );
+
+  double min_x, max_x, min_y, max_y, min_z, max_z;
+
+  std::vector<double>::iterator x_it = max_element(_sim_x_component.begin(), _sim_x_component.end());
+  max_x = *x_it; 
+  x_it = min_element(_sim_x_component.begin(), _sim_x_component.end());
+  min_x = *x_it; 
+
+  std::vector<double>::iterator y_it = max_element(_sim_y_component.begin(), _sim_y_component.end());
+  max_y = *y_it; 
+  y_it = min_element(_sim_y_component.begin(), _sim_y_component.end());
+  min_y = *y_it; 
+
+  std::vector<double>::iterator z_it = max_element(_sim_z_component.begin(), _sim_z_component.end());
+  max_z = *z_it; 
+  z_it = min_element(_sim_z_component.begin(), _sim_z_component.end());
+  min_z = *z_it; 
+
+  std::cout << "Inverse matrix: " << std::endl;
+  std::cout << inverse_orientation_matrix << std::endl;
+  std::cout << "a: " << _a << std::endl;
+  std::cout << "b: " << _b << std::endl;
+  std::cout << "c: " << _c << std::endl;
+  std::cout << "d: " << _d << std::endl;
+  std::cout << "e: " << _e << std::endl;
+  std::cout << "f: " << _f << std::endl;
+  std::cout << "g: " << _g << std::endl;
+  std::cout << "h: " << _h << std::endl;
+  std::cout << "############" << std::endl;
+  std::cout << " x range: [ " << -r_a << " , " << r_a << " ] :: length " << _x_supercell_min_size_nm << std::endl; 
+  std::cout << " y range: [ " << -r_b << " , " << r_b << " ] :: length " << _y_supercell_min_size_nm << std::endl; 
+  std::cout << " z range: [ " << -r_c << " , " << r_c << " ] :: length " << _z_supercell_min_size_nm << std::endl; 
+  std::cout << "############" << std::endl;
+  std::cout << "a': " << _sim_a << std::endl;
+  std::cout << "b': " << _sim_b << std::endl;
+  std::cout << "c': " << _sim_c << std::endl;
+  std::cout << "d': " << _sim_d << std::endl;
+  std::cout << "e': " << _sim_e << std::endl;
+  std::cout << "f': " << _sim_f << std::endl;
+  std::cout << "g': " << _sim_g << std::endl;
+  std::cout << "h': " << _sim_h << std::endl;
+  std::cout << "############" << std::endl;
+  double norm_new_x = max_x - min_x;
+  double norm_new_y = max_y - min_z;
+  double norm_new_z = max_z - min_z;
+  std::cout << " x' range: [ " << min_x << " , " << max_x << " ] :: length " << norm_new_x << std::endl; 
+  std::cout << " y' range: [ " << min_y << " , " << max_y << " ] :: length " << norm_new_y << std::endl; 
+  std::cout << " z' range: [ " << min_z << " , " << max_z << " ] :: length " << norm_new_z << std::endl; 
+  
 }
 
 /** getters **/
