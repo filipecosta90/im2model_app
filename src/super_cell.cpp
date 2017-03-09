@@ -140,17 +140,17 @@ void Super_Cell::calculate_expand_factor(){
   const double r_a = _x_supercell_min_size_nm / 2.0f;
   const double r_b = _y_supercell_min_size_nm / 2.0f;
   const double r_c = _z_supercell_min_size_nm / 2.0f;
-  
+
   _a = cv::Point3d( -r_a, -r_b, -r_c ); 
   _b = cv::Point3d( r_a, -r_b, -r_c ); 
   _c = cv::Point3d( r_a, r_b, -r_c ); 
   _d = cv::Point3d( -r_a, r_b, -r_c ); 
-  
+
   _e = cv::Point3d( -r_a, -r_b, r_c ); 
   _f = cv::Point3d( r_a, -r_b, r_c ); 
   _g = cv::Point3d( r_a, r_b, r_c ); 
   _h = cv::Point3d( -r_a, r_b, r_c ); 
-  
+
   std::vector<double> _sim_x_component;
   std::vector<double> _sim_y_component;
   std::vector<double> _sim_z_component;
@@ -180,7 +180,7 @@ void Super_Cell::calculate_expand_factor(){
   _sim_x_component.push_back( _sim_f.x );
   _sim_x_component.push_back( _sim_g.x );
   _sim_x_component.push_back( _sim_h.x );
-  
+
   _sim_y_component.push_back( _sim_a.y );
   _sim_y_component.push_back( _sim_b.y );
   _sim_y_component.push_back( _sim_c.y );
@@ -189,7 +189,7 @@ void Super_Cell::calculate_expand_factor(){
   _sim_y_component.push_back( _sim_f.y );
   _sim_y_component.push_back( _sim_g.y );
   _sim_y_component.push_back( _sim_h.y );
-  
+
   _sim_z_component.push_back( _sim_a.z );
   _sim_z_component.push_back( _sim_b.z );
   _sim_z_component.push_back( _sim_c.z );
@@ -246,7 +246,10 @@ void Super_Cell::calculate_expand_factor(){
   std::cout << " x' range: [ " << min_x << " , " << max_x << " ] :: length " << norm_new_x << std::endl; 
   std::cout << " y' range: [ " << min_y << " , " << max_y << " ] :: length " << norm_new_y << std::endl; 
   std::cout << " z' range: [ " << min_z << " , " << max_z << " ] :: length " << norm_new_z << std::endl; 
-  
+  expand_factor_a = ceil( norm_new_x / _unit_cell_length_a_Nanometers ); 
+  expand_factor_b = ceil( norm_new_y / _unit_cell_length_b_Nanometers ); 
+  expand_factor_c = ceil( norm_new_z / _unit_cell_length_c_Nanometers );
+  update_length_parameters();
 }
 
 /** getters **/
@@ -306,7 +309,6 @@ bool Super_Cell::create_atoms_from_unit_cell(){
       for ( int a_expand_pos = 0; a_expand_pos < expand_factor_a; a_expand_pos++ ){
         const double a_expand_nanometers = a_expand_pos * unit_cell_a_nm + center_a_padding_nm;
         const glm::vec3 abc_expand (a_expand_nanometers, b_expand_nanometers, c_expand_nanometers);
-        std::cout << "expand #"<< a_expand_pos << "a, " << b_expand_pos << "b, " << c_expand_pos<< "c:  ( " << a_expand_nanometers << " , " << b_expand_nanometers << " , " << c_expand_nanometers << " )" << std::endl;
         for ( int unit_cell_pos = 0; unit_cell_pos <  unit_cell_atom_positions.size(); unit_cell_pos++ ){
           const glm::vec3 atom = unit_cell_atom_positions.at(unit_cell_pos) + abc_expand;
           const glm::vec4 atom_cpk_rgba_colors = unit_cell_atom_cpk_rgba_colors.at(unit_cell_pos);
@@ -331,10 +333,21 @@ void Super_Cell::orientate_atoms_from_matrix(){
     cv::Vec3d V ( initial_atom.x, initial_atom.y, initial_atom.z );
     cv::Mat result = orientation_matrix * cv::Mat(V);
     const glm::vec3 final (result.at<double>(0,0), result.at<double>(1,0), result.at<double>(2,0));
-    //    std::cout << "initial: " << V << " final: " << final.x << " " << final.y << " " <<  final.z  << std::endl;
     result.release();
     _atom_positions.at(pos) =  final; 
   }
+}
+
+void Super_Cell::update_length_parameters(){
+  _super_cell_length_a_Angstroms = expand_factor_a * _unit_cell_length_a_Angstroms;
+  _super_cell_length_b_Angstroms = expand_factor_b * _unit_cell_length_b_Angstroms;
+  _super_cell_length_c_Angstroms = expand_factor_c * _unit_cell_length_c_Angstroms;
+
+  _super_cell_length_a_Nanometers = _super_cell_length_a_Angstroms * 10.0f; 
+  _super_cell_length_b_Nanometers = _super_cell_length_b_Angstroms * 10.0f; 
+  _super_cell_length_c_Nanometers = _super_cell_length_c_Angstroms * 10.0f; 
+  
+  _super_cell_volume= ( expand_factor_a * expand_factor_b * expand_factor_c ) * unit_cell->get_cell_volume();
 }
 
 /** other methods **/

@@ -884,9 +884,9 @@ int main(int argc, char** argv )
   float perpendicular_dir_u;
   float perpendicular_dir_v;
   float perpendicular_dir_w;
-  float super_cell_size_x;
-  float super_cell_size_y;
-  float super_cell_size_z;
+  double super_cell_size_x;
+  double super_cell_size_y;
+  double super_cell_size_z;
   int nx_simulated_horizontal_samples;
   int ny_simulated_vertical_samples;
   int nz_simulated_partitions;
@@ -997,9 +997,9 @@ int main(int argc, char** argv )
       ("prp_u",  boost::program_options::value<float>(&perpendicular_dir_u)->required(), "perpendicular direction u for the new y-axis of the projection [uvw].")
       ("prp_v",  boost::program_options::value<float>(&perpendicular_dir_v)->required(), "perpendicular direction v for the new y-axis of the projection [uvw].")
       ("prp_w",  boost::program_options::value<float>(&perpendicular_dir_w)->required(), "perpendicular direction w for the new y-axis of the projection [uvw].")
-      ("super_a",  boost::program_options::value<float>(&super_cell_size_x)->required(), "the size(in nanometers) of the new orthorhombic super-cell along the axis x.")
-      ("super_b",  boost::program_options::value<float>(&super_cell_size_y)->required(), "the size(in nanometers) of the new orthorhombic super-cell along the axis y.")
-      ("super_c",  boost::program_options::value<float>(&super_cell_size_z)->required(), "the size(in nanometers) of the new orthorhombic super-cell along the axis z, where z is the projection direction of the similation.")
+      ("super_a",  boost::program_options::value<double>(&super_cell_size_x)->required(), "the size(in nanometers) of the new orthorhombic super-cell along the axis x.")
+      ("super_b",  boost::program_options::value<double>(&super_cell_size_y)->required(), "the size(in nanometers) of the new orthorhombic super-cell along the axis y.")
+      ("super_c",  boost::program_options::value<double>(&super_cell_size_z)->required(), "the size(in nanometers) of the new orthorhombic super-cell along the axis z, where z is the projection direction of the similation.")
       ("nx", boost::program_options::value<int>(&nx_simulated_horizontal_samples)->required(), "number of horizontal samples for the phase grating. The same number of pixels is used to sample the wave function in multislice calculations based on the calculated phase gratings.")
       ("ny", boost::program_options::value<int>(&ny_simulated_vertical_samples)->required(), "number of vertical samples for the phase grating. The same number of pixels is used to sample the wave function in multislice calculations based on the calculated phase gratings.")
       ("nz", boost::program_options::value<int>(&nz_simulated_partitions)->required(), "simulated partitions")
@@ -1417,16 +1417,11 @@ int main(int argc, char** argv )
       std::cout << "Unit cell size" << " nm" << std::endl;
       std::cout << "Super cell min width (pixels) " << supercell_min_width << std::endl;
       std::cout << "Super cell min height (pixels) " << supercell_min_height << std::endl;
+     
       const float x_supercell_min_size_nm = supercell_min_width * sampling_rate_super_cell_x_nm_pixel;
       const float y_supercell_min_size_nm = supercell_min_height * sampling_rate_super_cell_y_nm_pixel;
       const float z_supercell_min_size_nm = wavimg_simgrid_steps.get_simgrid_best_match_thickness_nm();
-/*
-      const int x_unitcell_expand_factor = ceil( x_supercell_min_size_nm / unit_cell.get_cell_length_a_Nanometers() );
-      const int y_unitcell_expand_factor = ceil( y_supercell_min_size_nm / unit_cell.get_cell_length_b_Nanometers() );
-      const int z_unitcell_expand_factor = ceil( z_supercell_min_size_nm / unit_cell.get_cell_length_c_Nanometers() );
-
-      std::cout << "We need to expand the unit cell in " << x_unitcell_expand_factor << " units on X axis, " << y_unitcell_expand_factor << " units on Y axis, and " << z_unitcell_expand_factor << " units on Z axis." << std::endl;
-  */
+      
       super_cell = Super_Cell::Super_Cell( &unit_cell ); //, x_unitcell_expand_factor, y_unitcell_expand_factor, z_unitcell_expand_factor );
       super_cell.set_experimental_min_size_nm_x( x_supercell_min_size_nm );
       super_cell.set_experimental_min_size_nm_y( y_supercell_min_size_nm );

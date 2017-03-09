@@ -74,6 +74,7 @@ class Super_Cell {
     /** Unit Cell **/
     Unit_Cell* unit_cell;
 
+    void update_length_parameters();
   public:
     Super_Cell();
     Super_Cell( Unit_Cell* unit_cell );
