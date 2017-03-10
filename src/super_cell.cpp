@@ -136,6 +136,22 @@ void Super_Cell::set_experimental_min_size_nm_z( double z_min_size_nm ){
   _z_supercell_min_size_nm = z_min_size_nm;
 }
 
+void Super_Cell::set_experimental_image ( cv::Mat raw_image ){
+  _raw_experimental_image = raw_image;
+}
+
+void Super_Cell::set_sampling_rate_super_cell_x_nm_pixel( double sampling_rate ){
+  _sampling_rate_super_cell_x_nm_pixel = sampling_rate;
+}
+
+void Super_Cell::set_sampling_rate_super_cell_y_nm_pixel( double sampling_rate ){
+  _sampling_rate_super_cell_y_nm_pixel = sampling_rate;
+}
+
+void Super_Cell::set_simgrid_best_match_thickness_nm( double thickness ){ 
+  _simgrid_best_match_thickness_nm = thickness; 
+}
+
 void Super_Cell::calculate_expand_factor(){
   const double r_a = _x_supercell_min_size_nm / 2.0f;
   const double r_b = _y_supercell_min_size_nm / 2.0f;
@@ -308,7 +324,7 @@ bool Super_Cell::create_atoms_from_unit_cell(){
   const double center_b_padding_nm = _super_cell_length_b_Nanometers / -2.0f;
   const double center_c_padding_nm = _super_cell_length_c_Nanometers / -2.0f;
   std::cout << "UnitCell has " << unit_cell_atom_positions.size() << " atoms" << std::endl;
-  std::cout << "\t Supercell expand factors: X " << expand_factor_a << ", Y " << expand_factor_b << ", Z " << expand_factor_c << std::endl;
+  std::cout << "\tSupercell expand factors: X " << expand_factor_a << ", Y " << expand_factor_b << ", Z " << expand_factor_c << std::endl;
 
   for ( int c_expand_pos = 0; c_expand_pos < expand_factor_c; c_expand_pos++ ){
     const double c_expand_nanometers = c_expand_pos * unit_cell_c_nm + center_c_padding_nm;
@@ -384,5 +400,94 @@ bool Super_Cell::update_unit_cell_parameters(){
   orientation_matrix = unit_cell->get_orientation_matrix();
   inverse_orientation_matrix = orientation_matrix.inv(); 
   return true;
+}
+
+void Super_Cell::calculate_supercell_boundaries_from_experimental_image( cv::Point2f roi_center, int threshold, int max_contour_distance_px ){
+  cv::Mat canny_output;
+  std::vector< std::vector<cv::Point> > contours;
+  std::vector<cv::Vec4i> hierarchy;
+
+  cv::Canny( _raw_experimental_image, canny_output, threshold , threshold *2, 3 );
+  cv::findContours( canny_output, contours, hierarchy, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE, cv::Point(0, 0) );
+
+  cv::Mat1f dist(contours.size(), contours.size(), 0.f);
+  cv::Mat1i in_range(contours.size(), contours.size(), 0);
+
+  for( size_t i = 0; i< contours.size(); i++ ){
+    for( size_t j = (i+1); j< contours.size(); j++ ){
+      const double raw_distance = fabs(cv::pointPolygonTest( contours[i], contours[j][0] , true ));
+      dist[i][j]=raw_distance;
+      dist[j][i]=raw_distance;
+    }
+  }
+
+  int contours_in_range = 0;
+  for( size_t i = 0; i< contours.size(); i++ ){
+    const double raw_distance = fabs(cv::pointPolygonTest( contours[i], roi_center , true ));
+    if ( raw_distance < max_contour_distance_px ){
+      in_range[i][1]=1;
+      contours_in_range++;
+    }
+  }
+
+  std::cout << "There are " << contours_in_range << " contours in range("<< max_contour_distance_px <<"px) of the ROI" << std::endl;
+  int itt_num = 1;
+  int added_itt = 1;
+
+  while ( added_itt > 0 ){
+    added_itt = 0;
+    for( size_t i = 0; i< contours.size(); i++ ){
+      if ( in_range[i][1] == 1 ){
+        for( size_t j = 0; j < contours.size(); j++ ){
+          if ( in_range[j][1] == 0 ){
+            if ( ( dist[i][j] < max_contour_distance_px )|| (dist[j][i] < max_contour_distance_px ) ){
+              in_range[j][1]=1;
+              added_itt++;
+            }
+          }
+        }
+      }
+    }
+    std::cout << "Added  " << added_itt << " contours in iteration # "<< itt_num << std::endl;
+    itt_num++;
+  }
+
+  /// Find the convex hull object for each contour
+  std::vector<std::vector<cv::Point> > roi_contours;
+
+  for( size_t i = 0; i< contours.size(); i++ ){
+    if ( in_range[i][1] == 1 ){
+      roi_contours.push_back(contours[i]);
+    }
+  }
+
+  std::vector<cv::Point> contours_merged;
+
+  for( size_t i = 0; i < roi_contours.size(); i++ ){
+    for ( size_t j = 0; j< roi_contours[i].size(); j++  ){
+      contours_merged.push_back(roi_contours[i][j]);
+    }
+  }
+
+  std::vector<std::vector<cv::Point>> hull( 1 );
+  convexHull( cv::Mat(contours_merged), hull[0], false );
+
+  std::cout << " HULL SIZE: " << hull[0].size() << std::endl;
+  std::vector<cv::Point>::iterator contour_it; 
+
+  for ( contour_it = hull[0].begin(); contour_it != hull[0].end(); contour_it++){
+    cv::Point p1 = *contour_it;
+    std::cout << p1 << std::endl;  
+  }
+
+  cv::Rect supercell_boundaries_rect = boundingRect(contours_merged);
+  _super_cell_min_width_px = supercell_boundaries_rect.width;
+  _super_cell_min_height_px = supercell_boundaries_rect.height;
+}
+
+void Super_Cell::calculate_experimental_min_size_nm(){
+  _x_supercell_min_size_nm = _sampling_rate_super_cell_x_nm_pixel * _super_cell_min_width_px; 
+  _y_supercell_min_size_nm = _sampling_rate_super_cell_y_nm_pixel * _super_cell_min_height_px; 
+  _z_supercell_min_size_nm = _simgrid_best_match_thickness_nm;
 }
 

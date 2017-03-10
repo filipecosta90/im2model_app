@@ -87,14 +87,13 @@ int roi_x_size;
 int roi_y_size;
 int roi_center_x;
 int roi_center_y;
-Rect supercell_boundaries_rect;
 int supercell_min_width;
 int supercell_min_height;
 
 double sampling_rate_experimental_x_nm_per_pixel;
 double  sampling_rate_experimental_y_nm_per_pixel;
 
-int thresh = 100;
+int edge_detection_threshold = 100;
 int max_thresh = 255;
 RNG rng(12345);
 int max_contour_distance_px = 19;
@@ -648,12 +647,10 @@ void AppVis() {
   position.y = super_cell.get_super_cell_length_b_Nanometers()*2.0f; 
   position.z = super_cell.get_super_cell_length_c_Nanometers()*2.0f; 
 
-  //glm::vec3 up = glm::normalize (glm::vec3(upward_vector_hkl.x, upward_vector_hkl.y, upward_vector_hkl.z));
-
   gCamera.set_center( center );
   gCamera.setPosition( position ); // position );
   gCamera.set_n( vec_n );
-  //gCamera.lookAt( -eye );
+  gCamera.lookAt( -eye );
   gCamera.set_vis_up( vec_up );
 
   std::cout << "Visualization Parameters" << std::endl;
@@ -740,13 +737,11 @@ void thresh_callback(int, void* )
 
   std::vector<Vec4i> hierarchy;
 
-  cv::Canny( experimental_image, canny_output, thresh, thresh*2, 3 );
-  cv::findContours( canny_output, contours, hierarchy, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE, Point(0, 0) );
+  //// contours = get_experimental_image_contours(experimental_image, edge_detection_threshold );
 
   std::cout << "Detected " << contours.size() << " countours" << std::endl;
   Mat1f dist(contours.size(), contours.size(), 0.f);
   Mat1i in_range(contours.size(), contours.size(), 0);
-
 
   for( size_t i = 0; i< contours.size(); i++ ){
     for( size_t j = (i+1); j< contours.size(); j++ ){
@@ -791,19 +786,18 @@ void thresh_callback(int, void* )
   }
 
   /// Find the convex hull object for each contour
-  std::vector<std::vector<Point> > roi_contours;
+  std::vector<std::vector<cv::Point> > roi_contours;
 
   for( size_t i = 0; i< contours.size(); i++ ){
     Scalar color = Scalar( rng.uniform(0, 255), rng.uniform(0,255), rng.uniform(0,255) );
     if ( in_range[i][1] == 1 ){
       roi_contours.push_back(contours[i]);
-      drawContours( drawing, contours, i, color, 2, 8, hierarchy, 0, Point() );
+      drawContours( drawing, contours, i, color, 2, 8, NULL , 0, Point() );
     }
-    drawContours( raw_edge_drawing, contours, i, color, 2, 8, hierarchy, 0, Point() );
-
+    drawContours( raw_edge_drawing, contours, i, color, 2, 8, NULL , 0, Point() );
   }
 
-  std::vector<Point> contours_merged;
+  std::vector<cv::Point> contours_merged;
 
   for( size_t i = 0; i < roi_contours.size(); i++ ){
     for ( size_t j = 0; j< roi_contours[i].size(); j++  ){
@@ -811,10 +805,18 @@ void thresh_callback(int, void* )
     }
   }
 
-  std::vector<std::vector<Point>> hull( 1 );
+  std::vector<std::vector<cv::Point>> hull( 1 );
   convexHull( Mat(contours_merged), hull[0], false );
 
-  supercell_boundaries_rect = boundingRect(contours_merged);
+  std::cout << " HULL SIZE: " << hull[0].size() << std::endl;
+  std::vector<cv::Point>::iterator contour_it; 
+
+  for ( contour_it = hull[0].begin(); contour_it != hull[0].end(); contour_it++){
+    cv::Point p1 = *contour_it;
+    std::cout << p1 << std::endl;  
+  }
+
+  cv::Rect supercell_boundaries_rect = boundingRect(contours_merged);
   Scalar color = Scalar( rng.uniform(0, 255), rng.uniform(0,255), rng.uniform(0,255) );
   drawContours( drawing, hull, 0, color, 3, 8, std::vector<Vec4i>(), 0, Point() );
   double roi_area_px = cv::contourArea(hull[0],false);
@@ -831,7 +833,7 @@ void thresh_callback(int, void* )
   std::stringstream output_legend_line4;
 
   output_legend_line1 <<  "ROI area: " << roi_area_px << " sq. px, " << roi_area_nm << "sq. nm";
-  output_legend_line2 <<  "Canny thresh: " << thresh;
+  output_legend_line2 <<  "Canny thresh: " << edge_detection_threshold;
   output_legend_line3 <<  "Max distance between countours: " << max_contour_distance_px<< " px";
   output_legend_line4 <<  "# Contours selected: " << roi_contours.size() << " from "<< contours.size() << ", calculated in " << itt_num << " iterations";
 
@@ -1348,7 +1350,7 @@ int main(int argc, char** argv )
         setMouseCallback("Experimental Window", CallBackFunc, NULL);
         rectangle(experimental_working, roi_rectangle, Scalar(0,0,255), 5);
         imshow("Experimental Window", experimental_working);
-        createTrackbar( " Canny thresh:", "Experimental Window", &thresh, max_thresh, thresh_callback );
+        createTrackbar( " Canny thresh:", "Experimental Window", &edge_detection_threshold, max_thresh, thresh_callback );
         createTrackbar( "Max Countour px distance: ", "Experimental Window", &max_contour_distance_px, max_contour_distance_thresh_px, thresh_callback );
         waitKey(0);
       }
@@ -1413,21 +1415,23 @@ int main(int argc, char** argv )
       wavimg_simgrid_steps.simulate_from_dat_file();
       std::cout << "Thresh " << std::endl;
 
-      thresh_callback( 1 , nullptr );
-      std::cout << "Preparing for supercell calculation" << std::endl;
-      std::cout << "Unit cell size" << " nm" << std::endl;
-      std::cout << "Super cell min width (pixels) " << supercell_min_width << std::endl;
-      std::cout << "Super cell min height (pixels) " << supercell_min_height << std::endl;
+      //thresh_callback( 1 , nullptr );
 
-      const double x_supercell_min_size_nm = supercell_min_width * sampling_rate_super_cell_x_nm_pixel;
-      const double y_supercell_min_size_nm = supercell_min_height * sampling_rate_super_cell_y_nm_pixel;
-      const double z_supercell_min_size_nm = wavimg_simgrid_steps.get_simgrid_best_match_thickness_nm();
+      /*      std::cout << "Super cell min width (pixels) " << supercell_min_width << std::endl;
+              std::cout << "Super cell min height (pixels) " << supercell_min_height << std::endl;
 
+              const double x_supercell_min_size_nm = supercell_min_width * sampling_rate_super_cell_x_nm_pixel;
+              const double y_supercell_min_size_nm = supercell_min_height * sampling_rate_super_cell_y_nm_pixel;
+              const double z_supercell_min_size_nm = wavimg_simgrid_steps.get_simgrid_best_match_thickness_nm();
+              */
       unit_cell.create_atoms_from_site_and_symetry();
       super_cell = Super_Cell::Super_Cell( &unit_cell ); 
-      super_cell.set_experimental_min_size_nm_x( x_supercell_min_size_nm );
-      super_cell.set_experimental_min_size_nm_y( y_supercell_min_size_nm );
-      super_cell.set_experimental_min_size_nm_z( z_supercell_min_size_nm );
+      super_cell.set_experimental_image( experimental_image );
+      super_cell.calculate_supercell_boundaries_from_experimental_image( cv::Point2f(roi_center_x, roi_center_y), edge_detection_threshold , max_contour_distance_px );
+      super_cell.set_sampling_rate_super_cell_x_nm_pixel( sampling_rate_super_cell_x_nm_pixel );
+      super_cell.set_sampling_rate_super_cell_y_nm_pixel( sampling_rate_super_cell_y_nm_pixel );
+      super_cell.set_simgrid_best_match_thickness_nm( wavimg_simgrid_steps.get_simgrid_best_match_thickness_nm() );
+      super_cell.calculate_experimental_min_size_nm(); 
       super_cell.calculate_expand_factor();
       super_cell.create_atoms_from_unit_cell();
       super_cell.orientate_atoms_from_matrix();

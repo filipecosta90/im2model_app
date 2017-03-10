@@ -41,11 +41,11 @@ class Super_Cell {
     double _x_supercell_min_size_nm;
     double _y_supercell_min_size_nm;
     double _z_supercell_min_size_nm;
-    
+
     cv::Mat inverse_orientation_matrix;
     cv::Point3d _a,_b,_c,_d,_e,_f,_g,_h;
     cv::Point3d _sim_a,_sim_b,_sim_c,_sim_d,_sim_e,_sim_f,_sim_g,_sim_h;
-    
+
     int expand_factor_a;
     int expand_factor_b;
     int expand_factor_c;
@@ -65,6 +65,15 @@ class Super_Cell {
 
     /** Unit Cell **/
     Unit_Cell* unit_cell;
+
+    /** Experimental image related **/
+    cv::Mat _raw_experimental_image;
+    cv::Rect _super_cell_boundaries_rectangle;
+    int _super_cell_min_width_px;
+    int _super_cell_min_height_px;
+    double _sampling_rate_super_cell_x_nm_pixel;
+    double _sampling_rate_super_cell_y_nm_pixel;
+    double _simgrid_best_match_thickness_nm; 
 
     void update_length_parameters();
   public:
@@ -96,7 +105,10 @@ class Super_Cell {
     void set_experimental_min_size_nm_x( double x_min_size_nm );
     void set_experimental_min_size_nm_y( double y_min_size_nm );
     void set_experimental_min_size_nm_z( double z_min_size_nm );
-
+    void set_experimental_image( cv::Mat raw_image ); 
+    void set_sampling_rate_super_cell_x_nm_pixel( double sampling_rate );
+    void set_sampling_rate_super_cell_y_nm_pixel( double sampling_rate );
+    void set_simgrid_best_match_thickness_nm( double tickness ); 
     //getters
     double get_super_cell_length_a_Angstroms();
     double get_super_cell_length_b_Angstroms();
@@ -112,7 +124,10 @@ class Super_Cell {
     bool update_unit_cell_parameters();
     bool create_atoms_from_unit_cell();
     void orientate_atoms_from_matrix();
+
+   void calculate_experimental_min_size_nm(); 
     void calculate_expand_factor(); 
+    void calculate_supercell_boundaries_from_experimental_image( cv::Point2f roi_center, int threshold, int max_contour_distance_px );
 };
 
 #endif
