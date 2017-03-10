@@ -36,7 +36,6 @@ namespace MC{
       bool populate_unit_cell();
       bool populate_symetry_equiv_pos_as_xyz_unit_cell();
       bool populate_atom_site_unit_cell();
-      bool create_atoms_from_site_and_symetry();
       std::ostream& print(std::ostream &stream);
       Unit_Cell get_unit_cell();
     private:

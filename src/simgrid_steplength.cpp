@@ -371,15 +371,15 @@ float SIMGRID_wavimg_steplength::get_motion_euclidian_translation_y(){
 }
 
 int SIMGRID_wavimg_steplength::get_simgrid_best_match_thickness_slice(){
-    return simgrid_best_match_thickness_slice;
+  return simgrid_best_match_thickness_slice;
 }
 
 double SIMGRID_wavimg_steplength::get_simgrid_best_match_thickness_nm(){
-    return simgrid_best_match_thickness_nm;
+  return simgrid_best_match_thickness_nm;
 }
 
 double SIMGRID_wavimg_steplength::get_simgrid_best_match_defocus_nm(){
-    return simgrid_best_match_defocus_nm;
+  return simgrid_best_match_defocus_nm;
 }
 
 cv::Mat SIMGRID_wavimg_steplength::calculate_simulated_motion_euclidean_transformed_matrix(  cv::Mat raw_simulated_image_roi ){
@@ -393,9 +393,9 @@ cv::Mat SIMGRID_wavimg_steplength::calculate_simulated_motion_euclidean_transfor
   ignore_edge_pixels_rectangle.width = reshaped_simulated_image_width;
   ignore_edge_pixels_rectangle.height = reshaped_simulated_image_height;
 
-    if (debug_switch == true ){
-  std::cout << ignore_edge_pixels_rectangle <<  std::endl;
-    }
+  if (debug_switch == true ){
+    std::cout << ignore_edge_pixels_rectangle <<  std::endl;
+  }
 
   cv::Mat euclidean_transformed_cleaned_simulated_image = cv::Mat(reshaped_simulated_image_height, reshaped_simulated_image_width, CV_8UC1);
 
@@ -409,11 +409,11 @@ cv::Mat SIMGRID_wavimg_steplength::calculate_simulated_motion_euclidean_transfor
 }
 
 cv::Mat SIMGRID_wavimg_steplength::calculate_error_matrix( cv::Mat aligned_experimental_image_roi, cv::Mat aligned_simulated_image_roi ){
-    std::cout << aligned_experimental_image_roi.size() << "\n";
-    
-    std::cout << aligned_simulated_image_roi.size() << "\n";
+  std::cout << aligned_experimental_image_roi.size() << "\n";
 
-    assert(aligned_experimental_image_roi.size() == aligned_simulated_image_roi.size() );
+  std::cout << aligned_simulated_image_roi.size() << "\n";
+
+  assert(aligned_experimental_image_roi.size() == aligned_simulated_image_roi.size() );
   cv::Mat normalized_aligned_simulated_image_roi;
   normalized_aligned_simulated_image_roi = cv::Mat(aligned_simulated_image_roi.rows, aligned_simulated_image_roi.cols, CV_8UC1);
 
@@ -430,23 +430,23 @@ cv::Mat SIMGRID_wavimg_steplength::calculate_error_matrix( cv::Mat aligned_exper
   double max_of_error;
 
   cv::minMaxLoc(error_matrix, NULL, &max_of_error);
-    if (debug_switch == true ){
+  if (debug_switch == true ){
 
-  std::cout << " ### Max error" << max_of_error << std::endl;
-        
-  namedWindow( "error (black: no error)", cv::WINDOW_AUTOSIZE );// Create a window for display.
-  namedWindow( "Positioned Experimental", cv::WINDOW_AUTOSIZE );
-  namedWindow( "Positioned Simulated", cv::WINDOW_AUTOSIZE );
-  cv::imshow ("error (black: no error)",  error_matrix);
-  cv::imshow ("Positioned Experimental",  aligned_experimental_image_roi);
-  cv::imshow ("Positioned Simulated",  normalized_aligned_simulated_image_roi);
-        cv::waitKey(0);
-    }
+    std::cout << " ### Max error" << max_of_error << std::endl;
+
+    namedWindow( "error (black: no error)", cv::WINDOW_AUTOSIZE );// Create a window for display.
+    namedWindow( "Positioned Experimental", cv::WINDOW_AUTOSIZE );
+    namedWindow( "Positioned Simulated", cv::WINDOW_AUTOSIZE );
+    cv::imshow ("error (black: no error)",  error_matrix);
+    cv::imshow ("Positioned Experimental",  aligned_experimental_image_roi);
+    cv::imshow ("Positioned Simulated",  normalized_aligned_simulated_image_roi);
+    cv::waitKey(0);
+  }
 
   imwrite( "normalized_aligned_simulated_image_roi.png", normalized_aligned_simulated_image_roi );
   imwrite( "aligned_experimental_image_roi.png", aligned_experimental_image_roi );
   imwrite( "error_roi.png", error_matrix );
-    
+
   return error_matrix;
 }
 
@@ -642,36 +642,36 @@ bool SIMGRID_wavimg_steplength::simulate_from_dat_file(){
       // remove the ignored edge pixels
       // we will still save the raw grayscale simulated image in order to enable image alignement (rotation)
       cv::Mat cleaned_simulated_image = raw_gray_simulated_image(ignore_edge_pixels_rectangle);
-        cv::Mat with_rectangle_simulated_image = raw_gray_simulated_image.clone();
-        rectangle ( with_rectangle_simulated_image, ignore_edge_pixels_rectangle, cvScalar(255,255,255), 1, 8, 0  );
-        
-        // get the .dat image name
-        std::stringstream output_debug_info1;
-        output_debug_info1 << "with_rectangle_sim_" << std::setw(3) << std::setfill('0') << std::to_string(thickness) << "_" << std::setw(3) << std::setfill('0') << std::to_string(defocus) << ".png";
-        std::string string_output_debug_info1 = output_debug_info1.str();
-        
-        // get the .dat image name
-        std::stringstream output_debug_info2;
-        output_debug_info2 << "no_reshape_sim_raw_" << std::setw(3) << std::setfill('0') << std::to_string(thickness) << "_" << std::setw(3) << std::setfill('0') << std::to_string(defocus) << ".png";
-        std::string string_output_debug_info2 = output_debug_info2.str();
-        
-        // get the .dat image name
-        std::stringstream output_debug_info3;
-        output_debug_info3 << "reshaped_sim_raw_" << std::setw(3) << std::setfill('0') << std::to_string(thickness) << "_" << std::setw(3) << std::setfill('0') << std::to_string(defocus) << ".png";
-        std::string string_output_debug_info3 = output_debug_info3.str();
-        
-        imwrite( string_output_debug_info1 , with_rectangle_simulated_image );
+      cv::Mat with_rectangle_simulated_image = raw_gray_simulated_image.clone();
+      rectangle ( with_rectangle_simulated_image, ignore_edge_pixels_rectangle, cvScalar(255,255,255), 1, 8, 0  );
+
+      // get the .dat image name
+      std::stringstream output_debug_info1;
+      output_debug_info1 << "with_rectangle_sim_" << std::setw(3) << std::setfill('0') << std::to_string(thickness) << "_" << std::setw(3) << std::setfill('0') << std::to_string(defocus) << ".png";
+      std::string string_output_debug_info1 = output_debug_info1.str();
+
+      // get the .dat image name
+      std::stringstream output_debug_info2;
+      output_debug_info2 << "no_reshape_sim_raw_" << std::setw(3) << std::setfill('0') << std::to_string(thickness) << "_" << std::setw(3) << std::setfill('0') << std::to_string(defocus) << ".png";
+      std::string string_output_debug_info2 = output_debug_info2.str();
+
+      // get the .dat image name
+      std::stringstream output_debug_info3;
+      output_debug_info3 << "reshaped_sim_raw_" << std::setw(3) << std::setfill('0') << std::to_string(thickness) << "_" << std::setw(3) << std::setfill('0') << std::to_string(defocus) << ".png";
+      std::string string_output_debug_info3 = output_debug_info3.str();
+
+      imwrite( string_output_debug_info1 , with_rectangle_simulated_image );
 
       // confirm if it needs reshaping
       if ( simulated_image_needs_reshape ){
-          
-          imwrite( string_output_debug_info2 , raw_gray_simulated_image );
-          
+
+        imwrite( string_output_debug_info2 , raw_gray_simulated_image );
+
         resize(cleaned_simulated_image, cleaned_simulated_image, cv::Size(0,0), reshape_factor_from_supper_cell_to_experimental_x, reshape_factor_from_supper_cell_to_experimental_y, cv::INTER_LINEAR );
-          
+
         resize(raw_gray_simulated_image, raw_gray_simulated_image, cv::Size(0,0), reshape_factor_from_supper_cell_to_experimental_x, reshape_factor_from_supper_cell_to_experimental_y, cv::INTER_LINEAR );
-          
-          imwrite( string_output_debug_info3 , raw_gray_simulated_image );
+
+        imwrite( string_output_debug_info3 , raw_gray_simulated_image );
       }
 
       /// Create the result matrix
@@ -727,7 +727,7 @@ bool SIMGRID_wavimg_steplength::simulate_from_dat_file(){
   simgrid_best_match_thickness_slice = (slice_period * row_thickness) + slices_lower_bound;
   simgrid_best_match_thickness_nm = super_cell_z_nm_slice * simgrid_best_match_thickness_slice;
   simgrid_best_match_defocus_nm = (col_defocus * defocus_period ) + defocus_lower_bound;
-    
+
   std::cout << "Max match % is " << *maxElement << " | " << simulated_matches.at(dist) << "\t at pos ["<< dist << "](" << col_defocus << "," << row_thickness  <<") slice " << simgrid_best_match_thickness_slice << " ( " << simgrid_best_match_thickness_nm << " ) , defocus " << simgrid_best_match_defocus_nm << std::endl;
 
   std::vector<cv::Mat> simulated_images_row = simulated_images_grid.at(row_thickness);
@@ -746,10 +746,10 @@ bool SIMGRID_wavimg_steplength::simulate_from_dat_file(){
   pos_exp_rectangle.y = position_at_experimental_image.y;
   pos_exp_rectangle.width = cleaned_simulated_image.cols;
   pos_exp_rectangle.height = cleaned_simulated_image.rows;
-    
+
   cv::Mat positioned_experimental_image = experimental_image_roi(pos_exp_rectangle);
   calculate_motion_euclidian_matrix( positioned_experimental_image , cleaned_simulated_image );
-    
+
   cv::Mat euclidean_transformed_cleaned_simulated_image;
   euclidean_transformed_cleaned_simulated_image = calculate_simulated_motion_euclidean_transformed_matrix( raw_simulated_image );
 
@@ -779,3 +779,4 @@ bool SIMGRID_wavimg_steplength::simulate_from_dat_file(){
   runned_simulation = true;
   return EXIT_SUCCESS;
 }
+

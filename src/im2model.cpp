@@ -91,8 +91,8 @@ Rect supercell_boundaries_rect;
 int supercell_min_width;
 int supercell_min_height;
 
-float  sampling_rate_experimental_x_nm_per_pixel;
-float  sampling_rate_experimental_y_nm_per_pixel;
+double sampling_rate_experimental_x_nm_per_pixel;
+double  sampling_rate_experimental_y_nm_per_pixel;
 
 int thresh = 100;
 int max_thresh = 255;
@@ -1118,9 +1118,8 @@ int main(int argc, char** argv )
     driver.populate_unit_cell();
     driver.populate_atom_site_unit_cell();
     driver.populate_symetry_equiv_pos_as_xyz_unit_cell();
-    driver.create_atoms_from_site_and_symetry();
-
     unit_cell = driver.get_unit_cell();
+
     zone_axis_vector_uvw = cv::Point3d( perpendicular_dir_u, perpendicular_dir_v , perpendicular_dir_w );
     upward_vector_hkl = cv::Point3d( projection_dir_h, projection_dir_k , projection_dir_l );
     unit_cell.set_zone_axis_vector( zone_axis_vector_uvw );
@@ -1417,12 +1416,13 @@ int main(int argc, char** argv )
       std::cout << "Unit cell size" << " nm" << std::endl;
       std::cout << "Super cell min width (pixels) " << supercell_min_width << std::endl;
       std::cout << "Super cell min height (pixels) " << supercell_min_height << std::endl;
-     
+
       const float x_supercell_min_size_nm = supercell_min_width * sampling_rate_super_cell_x_nm_pixel;
       const float y_supercell_min_size_nm = supercell_min_height * sampling_rate_super_cell_y_nm_pixel;
       const float z_supercell_min_size_nm = wavimg_simgrid_steps.get_simgrid_best_match_thickness_nm();
-      
-      super_cell = Super_Cell::Super_Cell( &unit_cell ); //, x_unitcell_expand_factor, y_unitcell_expand_factor, z_unitcell_expand_factor );
+
+      unit_cell.create_atoms_from_site_and_symetry();
+      super_cell = Super_Cell::Super_Cell( &unit_cell ); 
       super_cell.set_experimental_min_size_nm_x( x_supercell_min_size_nm );
       super_cell.set_experimental_min_size_nm_y( y_supercell_min_size_nm );
       super_cell.set_experimental_min_size_nm_z( z_supercell_min_size_nm );

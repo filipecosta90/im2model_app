@@ -23,11 +23,6 @@ ExternalProject_Add(
 ExternalProject_Get_Property(glm source_dir)
 set(GlmIncludeDir ${source_dir}/glm)
 
-#ExternalProject_Add(mantid
-# GIT_REPOSITORY  https://github.com/mantidproject/mantid.git 
-# INSTALL_DIR ${PROJECT_BINARY_DIR}
-# CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>)
-
 set(Boost_USE_STATIC_LIBS ON) 
 set(Boost_USE_MULTITHREADED ON)  
 set(Boost_USE_STATIC_RUNTIME OFF) 
@@ -54,7 +49,7 @@ set(CMAKE_BINARY_DIR ${CMAKE_SOURCE_DIR}/build)
 set(EXECUTABLE_OUTPUT_PATH ${CMAKE_BINARY_DIR})
 set(LIBRARY_OUTPUT_PATH ${CMAKE_BINARY_DIR})
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wno-deprecated-register -std=c++0x -Wall")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wno-deprecated-register -std=c++0x -Wconversion")
 
 # we add the files in the include directory to be included
 # while compiling all the source code
