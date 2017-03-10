@@ -360,16 +360,17 @@ void Super_Cell::orientate_atoms_from_matrix(){
     result.release();
     _atom_positions.at(pos) =  final; 
   }
+  std::cout << "Finished orientating atoms from matrix :" << std::endl;
 }
 
 void Super_Cell::update_length_parameters(){
-  _super_cell_length_a_Angstroms = expand_factor_a * unit_cell->get_cell_length_a_Angstroms();
-  _super_cell_length_b_Angstroms = expand_factor_b * unit_cell->get_cell_length_b_Angstroms(); 
-  _super_cell_length_c_Angstroms = expand_factor_c * unit_cell->get_cell_length_c_Angstroms(); 
+  _super_cell_length_a_Nanometers = expand_factor_a * unit_cell->get_cell_length_a_Nanometers();
+  _super_cell_length_b_Nanometers = expand_factor_b * unit_cell->get_cell_length_b_Nanometers(); 
+  _super_cell_length_c_Nanometers = expand_factor_c * unit_cell->get_cell_length_c_Nanometers(); 
 
-  _super_cell_length_a_Nanometers = _super_cell_length_a_Angstroms * 10.0f; 
-  _super_cell_length_b_Nanometers = _super_cell_length_b_Angstroms * 10.0f; 
-  _super_cell_length_c_Nanometers = _super_cell_length_c_Angstroms * 10.0f; 
+  _super_cell_length_a_Angstroms = _super_cell_length_a_Nanometers * 10.0f; 
+  _super_cell_length_b_Angstroms = _super_cell_length_b_Nanometers * 10.0f; 
+  _super_cell_length_c_Angstroms = _super_cell_length_c_Nanometers * 10.0f; 
 
   _super_cell_volume= ( expand_factor_a * expand_factor_b * expand_factor_c ) * unit_cell->get_cell_volume();
 }
@@ -377,18 +378,9 @@ void Super_Cell::update_length_parameters(){
 /** other methods **/
 bool Super_Cell::update_unit_cell_parameters(){
 
-  _super_cell_length_a_Angstroms = expand_factor_a * unit_cell->get_cell_length_a_Angstroms();
-  _super_cell_length_b_Angstroms = expand_factor_b * unit_cell->get_cell_length_b_Angstroms();
-  _super_cell_length_c_Angstroms = expand_factor_c * unit_cell->get_cell_length_c_Angstroms();
-
-  _super_cell_length_a_Nanometers = _super_cell_length_a_Angstroms * 10.0f; 
-  _super_cell_length_b_Nanometers = _super_cell_length_b_Angstroms * 10.0f; 
-  _super_cell_length_c_Nanometers = _super_cell_length_c_Angstroms * 10.0f; 
-
   _cell_angle_alpha = unit_cell->get_cell_angle_alpha();
   _cell_angle_beta = unit_cell->get_cell_angle_beta();
   _cell_angle_gamma = unit_cell->get_cell_angle_gamma();
-  _super_cell_volume= ( expand_factor_a * expand_factor_b * expand_factor_c ) * unit_cell->get_cell_volume();
 
   /** Zone Axis / Lattice vector **/
   zone_axis_vector_uvw = unit_cell->get_zone_axis_vector_uvw();
@@ -399,6 +391,9 @@ bool Super_Cell::update_unit_cell_parameters(){
   /** Orientation **/
   orientation_matrix = unit_cell->get_orientation_matrix();
   inverse_orientation_matrix = orientation_matrix.inv(); 
+
+  /** Dimensions **/
+  update_length_parameters();
   return true;
 }
 
@@ -460,29 +455,21 @@ void Super_Cell::calculate_supercell_boundaries_from_experimental_image( cv::Poi
       roi_contours.push_back(contours[i]);
     }
   }
-
   std::vector<cv::Point> contours_merged;
-
   for( size_t i = 0; i < roi_contours.size(); i++ ){
     for ( size_t j = 0; j< roi_contours[i].size(); j++  ){
       contours_merged.push_back(roi_contours[i][j]);
     }
   }
-
-  std::vector<std::vector<cv::Point>> hull( 1 );
-  convexHull( cv::Mat(contours_merged), hull[0], false );
-
-  std::cout << " HULL SIZE: " << hull[0].size() << std::endl;
-  std::vector<cv::Point>::iterator contour_it; 
-
-  for ( contour_it = hull[0].begin(); contour_it != hull[0].end(); contour_it++){
-    cv::Point p1 = *contour_it;
-    std::cout << p1 << std::endl;  
-  }
-
-  cv::Rect supercell_boundaries_rect = boundingRect(contours_merged);
-  _super_cell_min_width_px = supercell_boundaries_rect.width;
-  _super_cell_min_height_px = supercell_boundaries_rect.height;
+  convexHull( cv::Mat(contours_merged), _experimental_image_boundary_polygon, false );
+  _experimental_image_boundary_rectangle = boundingRect(contours_merged);
+  _super_cell_min_width_px = _experimental_image_boundary_rectangle.width;
+  _super_cell_min_height_px = _experimental_image_boundary_rectangle.height;
+  _super_cell_left_padding_px = _experimental_image_boundary_rectangle.x;
+  _super_cell_top_padding_px = _experimental_image_boundary_rectangle.y;
+  calculate_experimental_min_size_nm();
+  calculate_expand_factor();
+  update_super_cell_boundary_polygon();
 }
 
 void Super_Cell::calculate_experimental_min_size_nm(){
@@ -491,3 +478,40 @@ void Super_Cell::calculate_experimental_min_size_nm(){
   _z_supercell_min_size_nm = _simgrid_best_match_thickness_nm;
 }
 
+void Super_Cell::update_super_cell_boundary_polygon(){
+  std::vector<cv::Point>::iterator experimental_bound_it;
+
+  const double center_a_padding_nm = _super_cell_length_a_Nanometers / -2.0f;
+  const double center_b_padding_nm = _super_cell_length_b_Nanometers / -2.0f;
+  std::cout << "a padding nm: " << center_a_padding_nm << std::endl;
+  std::cout << "b padding nm: " << center_b_padding_nm << std::endl;
+  for (experimental_bound_it = _experimental_image_boundary_polygon.begin(); experimental_bound_it != _experimental_image_boundary_polygon.end(); experimental_bound_it++ ){
+    cv::Point super_cell_boundary_point = *experimental_bound_it;
+    super_cell_boundary_point.x -= _super_cell_left_padding_px;
+    super_cell_boundary_point.y -= _super_cell_top_padding_px;
+    //std::cout << " experimental point after removing of padding: " << super_cell_boundary_point << std::endl;
+    const double _pos_x = _sampling_rate_super_cell_x_nm_pixel * ((double) super_cell_boundary_point.x ) + center_a_padding_nm;
+    const double _pos_y = _sampling_rate_super_cell_y_nm_pixel * ((double) super_cell_boundary_point.y ) + center_b_padding_nm;
+    //std::cout << "\t\t " << _pos_x << " , " << _pos_y << std::endl;
+    cv::Point3d _a ( _pos_x, _pos_y , 0.0f ); 
+    cv::Mat _m_a = inverse_orientation_matrix * cv::Mat(_a);
+    cv::Point2d _sim_a;
+    _sim_a = cv::Point2d(_m_a.at<double>(0,0), _m_a.at<double>(1,0)); 
+    std::cout << " experimental point after nm conversion: " << _sim_a << std::endl;
+    _super_cell_boundary_polygon.push_back(_sim_a);
+  }
+}
+
+void Super_Cell::remove_out_of_range_atoms(){
+  std::cout << "Removing atoms out of range:" << std::endl;
+  std::vector<glm::vec3>::iterator it ;
+  for ( int pos = 0; pos <  _atom_positions.size(); pos++ ){
+    glm::vec3 initial_atom = _atom_positions.at(pos);
+    cv::Vec3d V ( initial_atom.x, initial_atom.y, initial_atom.z );
+    cv::Mat result = orientation_matrix * cv::Mat(V);
+    const glm::vec3 final (result.at<double>(0,0), result.at<double>(1,0), result.at<double>(2,0));
+    result.release();
+    _atom_positions.at(pos) =  final; 
+  }
+  std::cout << "Finished orientating atoms from matrix :" << std::endl;
+}

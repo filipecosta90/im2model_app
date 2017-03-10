@@ -1411,31 +1411,22 @@ int main(int argc, char** argv )
       wavimg_simgrid_steps.set_iteration_number(1);
       wavimg_simgrid_steps.set_step_length_minimum_threshold ( 87.5f );
       wavimg_simgrid_steps.set_step_size( (int) defocus_period, (int) slice_period );
-      std::cout << "Simulating from dat " << std::endl;
       wavimg_simgrid_steps.simulate_from_dat_file();
-      std::cout << "Thresh " << std::endl;
 
-      //thresh_callback( 1 , nullptr );
+      //////////////////////////////////////////////////////
+      // UNIT CELL AND SUPER CELL GENERATION STARTS HERE  //
+      //////////////////////////////////////////////////////
 
-      /*      std::cout << "Super cell min width (pixels) " << supercell_min_width << std::endl;
-              std::cout << "Super cell min height (pixels) " << supercell_min_height << std::endl;
-
-              const double x_supercell_min_size_nm = supercell_min_width * sampling_rate_super_cell_x_nm_pixel;
-              const double y_supercell_min_size_nm = supercell_min_height * sampling_rate_super_cell_y_nm_pixel;
-              const double z_supercell_min_size_nm = wavimg_simgrid_steps.get_simgrid_best_match_thickness_nm();
-              */
       unit_cell.create_atoms_from_site_and_symetry();
       super_cell = Super_Cell::Super_Cell( &unit_cell ); 
       super_cell.set_experimental_image( experimental_image );
-      super_cell.calculate_supercell_boundaries_from_experimental_image( cv::Point2f(roi_center_x, roi_center_y), edge_detection_threshold , max_contour_distance_px );
       super_cell.set_sampling_rate_super_cell_x_nm_pixel( sampling_rate_super_cell_x_nm_pixel );
       super_cell.set_sampling_rate_super_cell_y_nm_pixel( sampling_rate_super_cell_y_nm_pixel );
       super_cell.set_simgrid_best_match_thickness_nm( wavimg_simgrid_steps.get_simgrid_best_match_thickness_nm() );
-      super_cell.calculate_experimental_min_size_nm(); 
-      super_cell.calculate_expand_factor();
-      super_cell.create_atoms_from_unit_cell();
+      
+      super_cell.calculate_supercell_boundaries_from_experimental_image( cv::Point2f(roi_center_x, roi_center_y), edge_detection_threshold , max_contour_distance_px );
+     super_cell.create_atoms_from_unit_cell();
       super_cell.orientate_atoms_from_matrix();
-      std::cout << "Supercell created" << std::endl;
       //wavimg_simgrid_steps.export_sim_grid();
     }
 

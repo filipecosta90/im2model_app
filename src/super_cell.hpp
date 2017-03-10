@@ -68,14 +68,19 @@ class Super_Cell {
 
     /** Experimental image related **/
     cv::Mat _raw_experimental_image;
-    cv::Rect _super_cell_boundaries_rectangle;
+    cv::Rect _experimental_image_boundary_rectangle; 
+    std::vector<cv::Point> _experimental_image_boundary_polygon;
+    std::vector<cv::Point2d> _super_cell_boundary_polygon;
     int _super_cell_min_width_px;
     int _super_cell_min_height_px;
+    int _super_cell_left_padding_px;
+    int _super_cell_top_padding_px;
     double _sampling_rate_super_cell_x_nm_pixel;
     double _sampling_rate_super_cell_y_nm_pixel;
     double _simgrid_best_match_thickness_nm; 
 
     void update_length_parameters();
+
   public:
     Super_Cell();
     Super_Cell( Unit_Cell* unit_cell );
@@ -125,9 +130,11 @@ class Super_Cell {
     bool create_atoms_from_unit_cell();
     void orientate_atoms_from_matrix();
 
-   void calculate_experimental_min_size_nm(); 
+    void calculate_experimental_min_size_nm(); 
     void calculate_expand_factor(); 
     void calculate_supercell_boundaries_from_experimental_image( cv::Point2f roi_center, int threshold, int max_contour_distance_px );
+    void update_super_cell_boundary_polygon();
+    void remove_out_of_range_atoms();
 };
 
 #endif
