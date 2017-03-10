@@ -1,7 +1,7 @@
 #ifndef __SIMGRID_STEPLENGTH_H__
 #define __SIMGRID_STEPLENGTH_H__
 
-#include "wavimg_prm.h"
+#include "wavimg_prm.hpp"
 
 class SIMGRID_wavimg_steplength {
   private:
@@ -18,7 +18,7 @@ class SIMGRID_wavimg_steplength {
     int slices_upper_bound;
     int number_slices_to_max_thickness;
     int slice_period;
-    float user_estimated_thickness_nm;
+    double user_estimated_thickness_nm;
     int user_estimated_thickness_slice;
     int simgrid_best_match_thickness_slice;
     double simgrid_best_match_thickness_nm;
@@ -29,7 +29,7 @@ class SIMGRID_wavimg_steplength {
     int defocus_samples;
     int defocus_lower_bound;
     int defocus_upper_bound;
-    float defocus_period;
+    double defocus_period;
     int user_estimated_defocus_nm;
     double simgrid_best_match_defocus_nm;
 
@@ -42,9 +42,9 @@ class SIMGRID_wavimg_steplength {
     /***********
       experimental image vars
      ***********/
-    float sampling_rate_super_cell_x_nm_pixel;
-    float sampling_rate_super_cell_y_nm_pixel;
-    float super_cell_z_nm_slice;
+    double sampling_rate_super_cell_x_nm_pixel;
+    double sampling_rate_super_cell_y_nm_pixel;
+    double super_cell_z_nm_slice;
 
     cv::Mat experimental_image_roi;
     
@@ -79,7 +79,7 @@ class SIMGRID_wavimg_steplength {
       step-length algorithm vars
      ***********/
     int iteration_number;
-    float step_length_minimum_threshold;
+    double step_length_minimum_threshold;
     cv::Point2f step_size;
 
     cv::Mat defocus_values_matrix;
@@ -128,7 +128,7 @@ class SIMGRID_wavimg_steplength {
     std::string thickness_matrix_file_name;
     std::string match_factor_matrix_file_name;
     
-    const float acceptable_rotation_diff = 5.0f;
+    const double acceptable_rotation_diff = 5.0f;
 
     // // // // //
     // visual info
@@ -146,17 +146,17 @@ class SIMGRID_wavimg_steplength {
 
     int imregionalmax(cv::Mat input , cv::Mat locations);
 
-    std::pair<cv::Mat,cv::Mat> gradient(cv::Mat & img, float spaceX, float spaceY);
+    std::pair<cv::Mat,cv::Mat> gradient(cv::Mat & img, double spaceX, double spaceY);
 
-    static cv::Mat gradientX(cv::Mat & mat, float spacing);
+    static cv::Mat gradientX(cv::Mat & mat, double spacing);
 
-    static cv::Mat gradientY(cv::Mat & mat, float spacing);
+    static cv::Mat gradientY(cv::Mat & mat, double spacing);
 
     SIMGRID_wavimg_steplength();
 
     void set_iteration_number ( int itt );
 
-    void set_step_length_minimum_threshold ( float minimum_threshold );
+    void set_step_length_minimum_threshold ( double minimum_threshold );
 
     void set_wavimg_var( WAVIMG_prm::WAVIMG_prm* wavimg_var );
 
@@ -182,21 +182,21 @@ class SIMGRID_wavimg_steplength {
 
     void set_defocus_period( int period );
 
-    void set_super_cell_z_nm_slice( float nm_slice );
+    void set_super_cell_z_nm_slice( double nm_slice );
 
     void set_roi_pixel_size( int pixel_size );
 
     void set_ignore_edge_pixels( int edge_pixels_number );
 
-    void set_sampling_rate_super_cell_x_nm_pixel( float nm_pixel );
+    void set_sampling_rate_super_cell_x_nm_pixel( double nm_pixel );
 
-    void set_sampling_rate_super_cell_y_nm_pixel( float nm_pixel );
+    void set_sampling_rate_super_cell_y_nm_pixel( double nm_pixel );
 
     void set_experimental_image_roi( cv::Mat exp_image_roi );
 
-    void set_reshape_factor_from_supper_cell_to_experimental_x( float reshape_factor );
+    void set_reshape_factor_from_supper_cell_to_experimental_x( double reshape_factor );
 
-    void set_reshape_factor_from_supper_cell_to_experimental_y( float reshape_factor );
+    void set_reshape_factor_from_supper_cell_to_experimental_y( double reshape_factor );
 
     void set_n_rows_simulated_image( int n_rows );
 
@@ -218,7 +218,7 @@ class SIMGRID_wavimg_steplength {
 
     void set_user_estimated_thickness_nm_switch( bool estimated_thickness_nm_switch );
 
-    void set_user_estimated_thickness_nm( float estimated_thickness_nm );
+    void set_user_estimated_thickness_nm( double estimated_thickness_nm );
 
     void set_user_estimated_thickness_slice_switch( bool estimated_thickness_slice_switch );
 
@@ -228,11 +228,11 @@ class SIMGRID_wavimg_steplength {
 
     void set_step_size( cv::Point2f defocus_slice_step );
 
-    float get_motion_euclidian_rotation_angle();
+    double get_motion_euclidian_rotation_angle();
     
-    float get_motion_euclidian_translation_x();
+    double get_motion_euclidian_translation_x();
 
-    float get_motion_euclidian_translation_y();
+    double get_motion_euclidian_translation_y();
     
     int get_simgrid_best_match_thickness_slice();
     

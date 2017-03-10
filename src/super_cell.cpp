@@ -245,7 +245,12 @@ void Super_Cell::calculate_expand_factor(){
   double norm_new_z = max_z - min_z;
   std::cout << " x' range: [ " << min_x << " , " << max_x << " ] :: length " << norm_new_x << std::endl; 
   std::cout << " y' range: [ " << min_y << " , " << max_y << " ] :: length " << norm_new_y << std::endl; 
-  std::cout << " z' range: [ " << min_z << " , " << max_z << " ] :: length " << norm_new_z << std::endl; 
+  std::cout << " z' range: [ " << min_z << " , " << max_z << " ] :: length " << norm_new_z << std::endl;
+
+  const double _unit_cell_length_a_Nanometers = unit_cell->get_cell_length_a_Nanometers();
+  const double _unit_cell_length_b_Nanometers = unit_cell->get_cell_length_b_Nanometers();
+  const double _unit_cell_length_c_Nanometers = unit_cell->get_cell_length_c_Nanometers();
+
   expand_factor_a = (int) ceil( norm_new_x / _unit_cell_length_a_Nanometers ); 
   expand_factor_b = (int) ceil( norm_new_y / _unit_cell_length_b_Nanometers ); 
   expand_factor_c = (int) ceil( norm_new_z / _unit_cell_length_c_Nanometers );
@@ -304,7 +309,7 @@ bool Super_Cell::create_atoms_from_unit_cell(){
   const double center_c_padding_nm = _super_cell_length_c_Nanometers / -2.0f;
   std::cout << "UnitCell has " << unit_cell_atom_positions.size() << " atoms" << std::endl;
   std::cout << "\t Supercell expand factors: X " << expand_factor_a << ", Y " << expand_factor_b << ", Z " << expand_factor_c << std::endl;
-    
+
   for ( int c_expand_pos = 0; c_expand_pos < expand_factor_c; c_expand_pos++ ){
     const double c_expand_nanometers = c_expand_pos * unit_cell_c_nm + center_c_padding_nm;
     for ( int b_expand_pos = 0; b_expand_pos < expand_factor_b; b_expand_pos++ ){
@@ -342,14 +347,14 @@ void Super_Cell::orientate_atoms_from_matrix(){
 }
 
 void Super_Cell::update_length_parameters(){
-  _super_cell_length_a_Angstroms = expand_factor_a * _unit_cell_length_a_Angstroms;
-  _super_cell_length_b_Angstroms = expand_factor_b * _unit_cell_length_b_Angstroms;
-  _super_cell_length_c_Angstroms = expand_factor_c * _unit_cell_length_c_Angstroms;
+  _super_cell_length_a_Angstroms = expand_factor_a * unit_cell->get_cell_length_a_Angstroms();
+  _super_cell_length_b_Angstroms = expand_factor_b * unit_cell->get_cell_length_b_Angstroms(); 
+  _super_cell_length_c_Angstroms = expand_factor_c * unit_cell->get_cell_length_c_Angstroms(); 
 
   _super_cell_length_a_Nanometers = _super_cell_length_a_Angstroms * 10.0f; 
   _super_cell_length_b_Nanometers = _super_cell_length_b_Angstroms * 10.0f; 
   _super_cell_length_c_Nanometers = _super_cell_length_c_Angstroms * 10.0f; 
-  
+
   _super_cell_volume= ( expand_factor_a * expand_factor_b * expand_factor_c ) * unit_cell->get_cell_volume();
 }
 
@@ -360,9 +365,9 @@ bool Super_Cell::update_unit_cell_parameters(){
   _super_cell_length_b_Angstroms = expand_factor_b * unit_cell->get_cell_length_b_Angstroms();
   _super_cell_length_c_Angstroms = expand_factor_c * unit_cell->get_cell_length_c_Angstroms();
 
-  _super_cell_length_a_Nanometers = expand_factor_a * unit_cell->get_cell_length_a_Nanometers();
-  _super_cell_length_b_Nanometers = expand_factor_b * unit_cell->get_cell_length_b_Nanometers();
-  _super_cell_length_c_Nanometers = expand_factor_c * unit_cell->get_cell_length_c_Nanometers();
+  _super_cell_length_a_Nanometers = _super_cell_length_a_Angstroms * 10.0f; 
+  _super_cell_length_b_Nanometers = _super_cell_length_b_Angstroms * 10.0f; 
+  _super_cell_length_c_Nanometers = _super_cell_length_c_Angstroms * 10.0f; 
 
   _cell_angle_alpha = unit_cell->get_cell_angle_alpha();
   _cell_angle_beta = unit_cell->get_cell_angle_beta();

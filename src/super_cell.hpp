@@ -25,14 +25,6 @@
 
 class Super_Cell {
   private:
-    double _unit_cell_length_a_Angstroms;
-    double _unit_cell_length_b_Angstroms;
-    double _unit_cell_length_c_Angstroms;
-    double _unit_cell_length_a_Nanometers;
-    double _unit_cell_length_b_Nanometers;
-    double _unit_cell_length_c_Nanometers;
-    double _unit_cell_volume;
-
     double _super_cell_length_a_Angstroms;
     double _super_cell_length_b_Angstroms;
     double _super_cell_length_c_Angstroms;

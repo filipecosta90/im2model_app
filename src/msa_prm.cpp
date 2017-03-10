@@ -15,7 +15,7 @@
 #include <vector>
 #include <stdio.h>
 
-#include "msa_prm.h"
+#include "msa_prm.hpp"
 
 MSA_prm::MSA_prm()
 {
@@ -58,7 +58,7 @@ MSA_prm::MSA_prm()
   debug_switch = false;
 }
 
-void MSA_prm::set_electron_wavelength( float energy ){
+void MSA_prm::set_electron_wavelength( double energy ){
   electron_wavelenth = energy;
 }
 

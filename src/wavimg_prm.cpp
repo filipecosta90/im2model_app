@@ -16,7 +16,7 @@
 #include <cmath>
 #include <limits>
 
-#include "wavimg_prm.h"
+#include "wavimg_prm.hpp"
 
 WAVIMG_prm::WAVIMG_prm()
 {
@@ -88,8 +88,8 @@ WAVIMG_prm::WAVIMG_prm()
   // line 24 + aberration_definition_index_number
   //std::vector<int> loop_variation_form;
   // line 25 + aberration_definition_index_number
-  //std::vector<float> loop_range_0;
-  //std::vector<float> loop_range_1;
+  //std::vector<double> loop_range_0;
+  //std::vector<double> loop_range_1;
   //std::vector<int> loop_range_n;
   // line 26 + aberration_definition_index_number
   //loop_string_indentifier = "";
@@ -167,8 +167,8 @@ WAVIMG_prm::WAVIMG_prm(const WAVIMG_prm &obj){
   // line 24 + aberration_definition_index_number
   //std::vector<int> loop_variation_form;
   // line 25 + aberration_definition_index_number
-  //std::vector<float> loop_range_0;
-  //std::vector<float> loop_range_1;
+  //std::vector<double> loop_range_0;
+  //std::vector<double> loop_range_1;
   //std::vector<int> loop_range_n;
   // line 26 + aberration_definition_index_number
   //loop_string_indentifier = "";
@@ -192,16 +192,16 @@ void WAVIMG_prm::set_n_rows_samples_input_wave_function_pixels( int n_rows ){
 }
 
 // setters line 3
-void WAVIMG_prm::set_physical_columns_sampling_rate_input_wave_function_nm_pixels( float columns_sampling_rate ){
+void WAVIMG_prm::set_physical_columns_sampling_rate_input_wave_function_nm_pixels( double columns_sampling_rate ){
   physical_columns_sampling_rate_input_wave_function_nm_pixels = columns_sampling_rate;
 }
 
-void WAVIMG_prm::set_physical_rows_sampling_rate_input_wave_function_nm_pixels( float rows_sampling_rate ){
+void WAVIMG_prm::set_physical_rows_sampling_rate_input_wave_function_nm_pixels( double rows_sampling_rate ){
   physical_rows_sampling_rate_input_wave_function_nm_pixels = rows_sampling_rate;
 }
 
 // setters line 4
-void WAVIMG_prm::set_primary_electron_energy( float electron_energy ){
+void WAVIMG_prm::set_primary_electron_energy( double electron_energy ){
   primary_electron_energy = electron_energy;
 }
 
@@ -229,15 +229,15 @@ void WAVIMG_prm::set_image_data_type(int data_type ){
   image_data_type = data_type;
 }
 
-void WAVIMG_prm::set_image_vacuum_mean_intensity( float mean_intensity ){
+void WAVIMG_prm::set_image_vacuum_mean_intensity( double mean_intensity ){
   image_vacuum_mean_intensity = mean_intensity;
 }
 
-void WAVIMG_prm::set_conversion_rate( float rate ){
+void WAVIMG_prm::set_conversion_rate( double rate ){
   conversion_rate = rate;
 }
 
-void WAVIMG_prm::set_readout_noise_rms_amplitude( float readout_noise ){
+void WAVIMG_prm::set_readout_noise_rms_amplitude( double readout_noise ){
   readout_noise_rms_amplitude = readout_noise;
 }
 
@@ -247,21 +247,21 @@ void WAVIMG_prm::set_switch_option_extract_particular_image_frame( int option ){
 }
 
 // setters line 10
-void WAVIMG_prm::set_image_sampling_rate_nm_pixel( float sampling_rate ){
+void WAVIMG_prm::set_image_sampling_rate_nm_pixel( double sampling_rate ){
   image_sampling_rate_nm_pixel = sampling_rate;
 }
 
 // setters line 11
-void WAVIMG_prm::set_image_frame_offset_x_pixels_input_wave_function( float offset_x ){
+void WAVIMG_prm::set_image_frame_offset_x_pixels_input_wave_function( double offset_x ){
   image_frame_offset_x_pixels_input_wave_function = offset_x;
 }
 
-void WAVIMG_prm::set_image_frame_offset_y_pixels_input_wave_function( float offset_y ){
+void WAVIMG_prm::set_image_frame_offset_y_pixels_input_wave_function( double offset_y ){
   image_frame_offset_y_pixels_input_wave_function = offset_y;
 }
 
 // setters line 12
-void WAVIMG_prm::set_image_frame_rotation( float frame_rotation ){
+void WAVIMG_prm::set_image_frame_rotation( double frame_rotation ){
   image_frame_rotation = frame_rotation;
 }
 
@@ -275,7 +275,7 @@ void WAVIMG_prm::set_partial_temporal_coherence_switch( int temporal_switch ){
   partial_temporal_coherence_switch = temporal_switch;
 }
 
-void WAVIMG_prm::set_partial_temporal_coherence_focus_spread( float focus_spread ){
+void WAVIMG_prm::set_partial_temporal_coherence_focus_spread( double focus_spread ){
   partial_temporal_coherence_focus_spread = focus_spread;
 }
 
@@ -284,7 +284,7 @@ void WAVIMG_prm::set_partial_spacial_coherence_switch( int coherence_switch ){
   partial_spacial_coherence_switch = coherence_switch;
 }
 
-void WAVIMG_prm::set_partial_spacial_coherence_semi_convergence_angle( float convergence_angle ){
+void WAVIMG_prm::set_partial_spacial_coherence_semi_convergence_angle( double convergence_angle ){
   partial_spacial_coherence_semi_convergence_angle = convergence_angle;
 }
 
@@ -293,7 +293,7 @@ void WAVIMG_prm::set_mtf_simulation_switch( int simulation_switch ){
   mtf_simulation_switch = simulation_switch;
 }
 
-void WAVIMG_prm::set_k_space_scaling( float scale ){
+void WAVIMG_prm::set_k_space_scaling( double scale ){
   k_space_scaling = scale;
 }
 
@@ -306,15 +306,15 @@ void WAVIMG_prm::set_simulation_image_spread_envelope_switch( int spread_switch 
   simulation_image_spread_envelope_switch = spread_switch;
 }
 
-void WAVIMG_prm::set_isotropic_one_rms_amplitude( float amplitude ){
+void WAVIMG_prm::set_isotropic_one_rms_amplitude( double amplitude ){
   isotropic_one_rms_amplitude = amplitude;
 }
 
-void WAVIMG_prm::set_anisotropic_second_rms_amplitude( float amplitude ){
+void WAVIMG_prm::set_anisotropic_second_rms_amplitude( double amplitude ){
   anisotropic_second_rms_amplitude = amplitude;
 }
 
-void WAVIMG_prm::set_azimuth_orientation_angle( float angle ){
+void WAVIMG_prm::set_azimuth_orientation_angle( double angle ){
   azimuth_orientation_angle = angle;
 }
 
@@ -325,24 +325,24 @@ void WAVIMG_prm::set_number_image_aberrations_set( int number_image_aberrations 
 
 // setters line 19
 
-void WAVIMG_prm::add_aberration_definition ( int index_number, float first_coefficient_value_nm, float second_coefficient_value_nm ){
+void WAVIMG_prm::add_aberration_definition ( int index_number, double first_coefficient_value_nm, double second_coefficient_value_nm ){
   aberration_definition_index_number.push_back( index_number );
   aberration_definition_1st_coefficient_value_nm.push_back( first_coefficient_value_nm );
   aberration_definition_2nd_coefficient_value_nm.push_back( second_coefficient_value_nm );
 }
 
 // setters line 19 + aberration_definition_index_number
-void WAVIMG_prm::set_objective_aperture_radius( float radius ){
+void WAVIMG_prm::set_objective_aperture_radius( double radius ){
   objective_aperture_radius = radius;
 }
 
 // setters line 20 + aberration_definition_index_number
-void WAVIMG_prm::set_center_x_of_objective_aperture( float center_x ){
+void WAVIMG_prm::set_center_x_of_objective_aperture( double center_x ){
   center_x_of_objective_aperture = center_x;
 
 }
 
-void WAVIMG_prm::set_center_y_of_objective_aperture( float center_y ){
+void WAVIMG_prm::set_center_y_of_objective_aperture( double center_y ){
   center_y_of_objective_aperture = center_y;
 }
 
@@ -352,7 +352,7 @@ void WAVIMG_prm::set_number_parameter_loops( int number_loops ){
 }
 
 // setters lines 22, 23, 24, 25, 26 + aberration_definition_index_number
-void WAVIMG_prm::add_parameter_loop ( int parameter_class , int parameter_index, int variation_form, float range_0, float range_1, float range_n, std::string string_identifier ){
+void WAVIMG_prm::add_parameter_loop ( int parameter_class , int parameter_index, int variation_form, double range_0, double range_1, double range_n, std::string string_identifier ){
   // line 22 + aberration_definition_index_number
   loop_parameter_class.push_back(parameter_class);
   // line 23 + aberration_definition_index_number
@@ -449,8 +449,8 @@ void WAVIMG_prm::produce_prm ( ) {
   outfile <<  mtf_simulation_switch << ", " << k_space_scaling << ", " <<  file_name_simulation_frequency_modulated_detector_transfer_function << " !" << std::endl;
   // line 17
   outfile <<  simulation_image_spread_envelope_switch << ", " << isotropic_one_rms_amplitude << " !" << std::endl;
-  // float anisotropic_second_rms_amplitude;
-  //float azimuth_orientation_angle;
+  // double anisotropic_second_rms_amplitude;
+  //double azimuth_orientation_angle;
   // line 18
   outfile <<  number_image_aberrations_set << " !" << std::endl;
   // line 19

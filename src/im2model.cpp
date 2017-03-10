@@ -48,10 +48,10 @@
 #include "opengl.hpp"
 
 // project classes
-#include "celslc_prm.h"
-#include "msa_prm.h"
-#include "wavimg_prm.h"
-#include "simgrid_steplength.h"
+#include "celslc_prm.hpp"
+#include "msa_prm.hpp"
+#include "wavimg_prm.hpp"
+#include "simgrid_steplength.hpp"
 #include "mc_driver.hpp"
 #include "unit_cell.hpp"
 #include "super_cell.hpp"
@@ -173,7 +173,7 @@ ModelAsset vis_unit_cell_asset;
 std::list<ModelInstance> gInstances;
 GLfloat gDegreesRotated = 0.0f;
 
-float DEGS_TO_RAD = M_PI/180.0f;
+double DEGS_TO_RAD = M_PI/180.0f;
 
 // returns a new vis::Program created from the given vertex and fragment shader filenames
 static vis::Program* LoadShaders(const char* vertFilename, const char* fragFilename) {
@@ -184,7 +184,7 @@ static vis::Program* LoadShaders(const char* vertFilename, const char* fragFilen
 }
 
 // initialises the vis_atom_asset global
-static void LoadVisUnitCellAsset( float side ) {
+static void LoadVisUnitCellAsset( double side ) {
   // set all the elements of vis_atom_asset
   vis_unit_cell_asset.shaders = LoadShaders("shaders/cube.v.glsl", "shaders/cube.f.glsl");
   vis_unit_cell_asset.drawType = GL_TRIANGLES;
@@ -467,7 +467,7 @@ static void CreateInstances() {
   std::vector<glm::vec3>::iterator pos_itt;
 
   std::cout << "going to create  " << atom_positions.size() << " instances" << std::endl;
-  for (int vec_pos = 0; vec_pos < atom_positions.size(); vec_pos++){
+  for ( size_t vec_pos = 0; vec_pos < atom_positions.size(); vec_pos++){
     const glm::vec3 pos = atom_positions.at(vec_pos);
     ModelInstance atom;
     atom.asset = &vis_atom_asset;
@@ -750,7 +750,7 @@ void thresh_callback(int, void* )
 
   for( size_t i = 0; i< contours.size(); i++ ){
     for( size_t j = (i+1); j< contours.size(); j++ ){
-      const float raw_distance = fabs(cv::pointPolygonTest( contours[i], contours[j][0] , true ));
+      const double raw_distance = fabs(cv::pointPolygonTest( contours[i], contours[j][0] , true ));
       dist[i][j]=raw_distance;
       dist[j][i]=raw_distance;
     }
@@ -761,7 +761,7 @@ void thresh_callback(int, void* )
 
   int contours_in_range = 0;
   for( size_t i = 0; i< contours.size(); i++ ){
-    const float raw_distance = fabs(cv::pointPolygonTest( contours[i], Point2f(roi_center_x,roi_center_y), true ));
+    const double raw_distance = fabs(cv::pointPolygonTest( contours[i], Point2f(roi_center_x,roi_center_y), true ));
     if ( raw_distance < max_contour_distance_px ){
       in_range[i][1]=1;
       contours_in_range++;
@@ -805,7 +805,7 @@ void thresh_callback(int, void* )
 
   std::vector<Point> contours_merged;
 
-  for( int i = 0; i < roi_contours.size(); i++ ){
+  for( size_t i = 0; i < roi_contours.size(); i++ ){
     for ( size_t j = 0; j< roi_contours[i].size(); j++  ){
       contours_merged.push_back(roi_contours[i][j]);
     }
@@ -878,31 +878,31 @@ int main(int argc, char** argv )
   std::string super_cell_cif_file;
   // Specifies the output slice file name prefix.
   std::string slc_file_name_prefix;
-  float projection_dir_h;
-  float projection_dir_k;
-  float projection_dir_l;
-  float perpendicular_dir_u;
-  float perpendicular_dir_v;
-  float perpendicular_dir_w;
+  double projection_dir_h;
+  double projection_dir_k;
+  double projection_dir_l;
+  double perpendicular_dir_u;
+  double perpendicular_dir_v;
+  double perpendicular_dir_w;
   double super_cell_size_x;
   double super_cell_size_y;
   double super_cell_size_z;
   int nx_simulated_horizontal_samples;
   int ny_simulated_vertical_samples;
   int nz_simulated_partitions;
-  float ht_accelaration_voltage;
+  double ht_accelaration_voltage;
 
   // based on super_cell_size_x and nx_simulated_horizontal_samples
-  float sampling_rate_super_cell_x_nm_pixel;
+  double sampling_rate_super_cell_x_nm_pixel;
   // based on super_cell_size_y and ny_simulated_vertical_samples
-  float sampling_rate_super_cell_y_nm_pixel;
+  double sampling_rate_super_cell_y_nm_pixel;
   // based on super_cell_size_z and nz_simulated_partitions;
-  float super_cell_z_nm_slice;
+  double super_cell_z_nm_slice;
 
   // wavimg defocus aberration coefficient
-  float coefficient_aberration_defocus;
+  double coefficient_aberration_defocus;
   // wavimg spherical aberration coefficient
-  float coefficient_aberration_spherical;
+  double coefficient_aberration_spherical;
 
   int number_image_aberrations = 0;
   bool cd_switch = false;
@@ -938,8 +938,8 @@ int main(int argc, char** argv )
   int slices_lower_bound;
   int slices_upper_bound;
   int number_slices_to_max_thickness;
-  float slice_period;
-  float user_estimated_thickness_nm;
+  double slice_period;
+  double user_estimated_thickness_nm;
   int user_estimated_thickness_slice;
 
   /////////////////////////
@@ -948,7 +948,7 @@ int main(int argc, char** argv )
   int defocus_samples;
   int defocus_lower_bound;
   int defocus_upper_bound;
-  float defocus_period;
+  double defocus_period;
   int user_estimated_defocus_nm;
 
   /////////////////////////
@@ -964,9 +964,9 @@ int main(int argc, char** argv )
   bool simulated_image_needs_reshape = false;
   double reshape_factor_from_supper_cell_to_experimental_x = 1.0f;
   double reshape_factor_from_supper_cell_to_experimental_y = 1.0f;
-  float max_scale_diff = 0.0005f;
-  float diff_super_cell_and_simulated_x;
-  float diff_super_cell_and_simulated_y;
+  double max_scale_diff = 0.0005f;
+  double diff_super_cell_and_simulated_x;
+  double diff_super_cell_and_simulated_y;
   // rectangle without the ignored edge pixels of the simulated image
   Rect ignore_edge_pixels_rectangle;
 
@@ -991,21 +991,21 @@ int main(int argc, char** argv )
 
       ("cif", boost::program_options::value<std::string>(&super_cell_cif_file)->required(), "specifies the input super-cell file containing the atomic structure data in CIF file format.")
       ("slc", boost::program_options::value<std::string>(&slc_file_name_prefix)->required(), "specifies the output slice file name prefix. Absolute or relative path names can be used. Enclose the file name string using quotation marks if the file name prefix or the disk path contains space characters. The slice file names will be suffixed by '_###.sli', where ### is a 3 digit number denoting the sequence of slices generated from the supercell.")
-      ("prj_h",  boost::program_options::value<float>(&projection_dir_h)->required(), "projection direction h of [hkl].")
-      ("prj_k",  boost::program_options::value<float>(&projection_dir_k)->required(), "projection direction k of [hkl].")
-      ("prj_l",  boost::program_options::value<float>(&projection_dir_l)->required(), "projection direction l of [hkl].")
-      ("prp_u",  boost::program_options::value<float>(&perpendicular_dir_u)->required(), "perpendicular direction u for the new y-axis of the projection [uvw].")
-      ("prp_v",  boost::program_options::value<float>(&perpendicular_dir_v)->required(), "perpendicular direction v for the new y-axis of the projection [uvw].")
-      ("prp_w",  boost::program_options::value<float>(&perpendicular_dir_w)->required(), "perpendicular direction w for the new y-axis of the projection [uvw].")
+      ("prj_h",  boost::program_options::value<double>(&projection_dir_h)->required(), "projection direction h of [hkl].")
+      ("prj_k",  boost::program_options::value<double>(&projection_dir_k)->required(), "projection direction k of [hkl].")
+      ("prj_l",  boost::program_options::value<double>(&projection_dir_l)->required(), "projection direction l of [hkl].")
+      ("prp_u",  boost::program_options::value<double>(&perpendicular_dir_u)->required(), "perpendicular direction u for the new y-axis of the projection [uvw].")
+      ("prp_v",  boost::program_options::value<double>(&perpendicular_dir_v)->required(), "perpendicular direction v for the new y-axis of the projection [uvw].")
+      ("prp_w",  boost::program_options::value<double>(&perpendicular_dir_w)->required(), "perpendicular direction w for the new y-axis of the projection [uvw].")
       ("super_a",  boost::program_options::value<double>(&super_cell_size_x)->required(), "the size(in nanometers) of the new orthorhombic super-cell along the axis x.")
       ("super_b",  boost::program_options::value<double>(&super_cell_size_y)->required(), "the size(in nanometers) of the new orthorhombic super-cell along the axis y.")
       ("super_c",  boost::program_options::value<double>(&super_cell_size_z)->required(), "the size(in nanometers) of the new orthorhombic super-cell along the axis z, where z is the projection direction of the similation.")
       ("nx", boost::program_options::value<int>(&nx_simulated_horizontal_samples)->required(), "number of horizontal samples for the phase grating. The same number of pixels is used to sample the wave function in multislice calculations based on the calculated phase gratings.")
       ("ny", boost::program_options::value<int>(&ny_simulated_vertical_samples)->required(), "number of vertical samples for the phase grating. The same number of pixels is used to sample the wave function in multislice calculations based on the calculated phase gratings.")
       ("nz", boost::program_options::value<int>(&nz_simulated_partitions)->required(), "simulated partitions")
-      ("ht", boost::program_options::value<float>(&ht_accelaration_voltage)->required(), "accelerating voltage defining the kinetic energy of the incident electron beam in kV.")
-      ("cd", boost::program_options::value<float>(&coefficient_aberration_defocus), "Defocus Aberration definition by two coefficient values given in [nm]. This is the first coefficient value. The second coefficient value is considered to be 0.")
-      ("cs", boost::program_options::value<float>(&coefficient_aberration_spherical), "Spherical Aberration definition by two coefficient values given in [nm]. This is the first coefficient value. The second coefficient value is considered to be 0.")
+      ("ht", boost::program_options::value<double>(&ht_accelaration_voltage)->required(), "accelerating voltage defining the kinetic energy of the incident electron beam in kV.")
+      ("cd", boost::program_options::value<double>(&coefficient_aberration_defocus), "Defocus Aberration definition by two coefficient values given in [nm]. This is the first coefficient value. The second coefficient value is considered to be 0.")
+      ("cs", boost::program_options::value<double>(&coefficient_aberration_spherical), "Spherical Aberration definition by two coefficient values given in [nm]. This is the first coefficient value. The second coefficient value is considered to be 0.")
       ("dwf", "switch for applying Debye-Waller factors which effectively dampen the atomic scattering potentials. Use this option for conventional HR-TEM, STEM bright-field, or STEM annular bright-field image simulations only.")
       ("abs", "switch for applying absorption potentials (imaginary part) according to Weickenmeier and Kohl [Acta Cryst. A47 (1991) p. 590-597]. This absorption calculation considers the loss of intensity in the elastic channel due to thermal diffuse scattering.")
       ("slices_load", boost::program_options::value<int>(&slices_load), "number of slice files to be loaded.")
@@ -1018,10 +1018,10 @@ int main(int argc, char** argv )
       ("defocus_upper_bound", boost::program_options::value<int>(&defocus_upper_bound)->required(), "defocus upper bound")
       ("exp_image_path,i", boost::program_options::value<std::string>(&experimental_image_path)->required(), "experimental image path")
       ("estimated_defocus_nm", boost::program_options::value<int>(&user_estimated_defocus_nm), "user prediction of estimated defocus value in nanometers for the experimental image. If an user estimation is given the search algorithm will consider the nearest best match as an interest point even if there are larger match values on other defocus values. The other larger defocus value points will also be considered points of interest for the following iterations (as usual).")
-      ("estimated_thickness_nm", boost::program_options::value<float>(&user_estimated_thickness_nm), "user prediction of estimated thickness value in nanometers for the experimental image. An aproximation to the nearest slice number is computed. If an user estimation is given the search algorithm will consider the nearest best match as an interest point even if there are larger match values on other thickness values. The other larger thickness points will also be considered points of interest for the following iterations (as usual).")
+      ("estimated_thickness_nm", boost::program_options::value<double>(&user_estimated_thickness_nm), "user prediction of estimated thickness value in nanometers for the experimental image. An aproximation to the nearest slice number is computed. If an user estimation is given the search algorithm will consider the nearest best match as an interest point even if there are larger match values on other thickness values. The other larger thickness points will also be considered points of interest for the following iterations (as usual).")
       ("estimated_thickness_slice", boost::program_options::value<int>(&user_estimated_thickness_slice), "user prediction of estimated thickness value in slice number for the experimental image. If an user estimation is given the search algorithm will consider the nearest best match as an interest point even if there are larger match values on other thickness values. The other larger thickness points will also be considered points of interest for the following iterations (as usual).")
-      ("exp_nx", boost::program_options::value<float>(&sampling_rate_experimental_x_nm_per_pixel)->required(), "number of horizontal samples for the loaded experimental image (nm/pixel).")
-      ("exp_ny", boost::program_options::value<float>(&sampling_rate_experimental_y_nm_per_pixel)->required(), "number of vertical samples for the loaded experimental image (nm/pixel).")
+      ("exp_nx", boost::program_options::value<double>(&sampling_rate_experimental_x_nm_per_pixel)->required(), "number of horizontal samples for the loaded experimental image (nm/pixel).")
+      ("exp_ny", boost::program_options::value<double>(&sampling_rate_experimental_y_nm_per_pixel)->required(), "number of vertical samples for the loaded experimental image (nm/pixel).")
       ("roi_size", boost::program_options::value<int>(&roi_pixel_size)->required(), "region of interest size in pixels.")
       ("roi_x", boost::program_options::value<int>(&roi_center_x)->required(), "region center in x axis.")
       ("roi_y", boost::program_options::value<int>(&roi_center_y)->required(), "region center in y axis.")
@@ -1150,8 +1150,8 @@ int main(int argc, char** argv )
       reshape_factor_from_supper_cell_to_experimental_x = fabs(sampling_rate_super_cell_x_nm_pixel) / fabs(sampling_rate_experimental_x_nm_per_pixel);
       reshape_factor_from_supper_cell_to_experimental_y = fabs(sampling_rate_super_cell_y_nm_pixel) / fabs(sampling_rate_experimental_y_nm_per_pixel);
 
-      reshaped_simulated_image_width = round ( reshape_factor_from_supper_cell_to_experimental_x * initial_simulated_image_width );
-      reshaped_simulated_image_height = round ( reshape_factor_from_supper_cell_to_experimental_y * initial_simulated_image_height );
+      reshaped_simulated_image_width = (int) round ( reshape_factor_from_supper_cell_to_experimental_x * initial_simulated_image_width );
+      reshaped_simulated_image_height = (int) round ( reshape_factor_from_supper_cell_to_experimental_y * initial_simulated_image_height );
 
       std::cout << "WARNING : simulated and experimental images have different sampling rates"
         << ". Reshaping simulated images by a factor of [ "
@@ -1170,12 +1170,12 @@ int main(int argc, char** argv )
 
 
     // Simulation Thickness Period (in slices)
-    slice_period =  ( ( ((float)slices_upper_bound - (float)slices_lower_bound) ) / ((float)slice_samples -1.0f ) );
+    slice_period =  ( ( ((double)slices_upper_bound - (double)slices_lower_bound) ) / ((double)slice_samples -1.0f ) );
     std::cout << "Calculated slice period of " << slice_period << std::endl;
 
     if (slices_lower_bound == 0){
       std::cout << "WARNING: Defined slice lower bound as 0. Going to define slice lower bound as: " << slice_period << std::endl;
-      slices_lower_bound = slice_period;
+      slices_lower_bound = (int) slice_period;
     }
 
     // Simulation Defocus Period (in nm)
@@ -1331,8 +1331,7 @@ int main(int argc, char** argv )
       roi_x_size = roi_pixel_size;
       roi_y_size = roi_pixel_size;
 
-      std::cout << "Experimental image width : " << experimental_image.cols
-        << "px , heigth : " << experimental_image.rows << "px "<<  std::endl;
+      std::cout << "Experimental image width : " << experimental_image.cols << "px , heigth : " << experimental_image.rows << "px "<<  std::endl;
       roi_rectangle.x = roi_center_x  - ( roi_x_size / 2 );
       roi_rectangle.y = roi_center_y - ( roi_y_size / 2) ;
       roi_rectangle.width = roi_x_size;
@@ -1358,6 +1357,7 @@ int main(int argc, char** argv )
       // STEP LENGTH SIMULATION PROCESS STARTS HERE  //
       /////////////////////////////////////////////////
 
+      std::cout << "Starting step length" << std::endl;
       SIMGRID_wavimg_steplength::SIMGRID_wavimg_steplength wavimg_simgrid_steps;
 
       wavimg_simgrid_steps.set_sampling_rate_super_cell_x_nm_pixel( sampling_rate_super_cell_x_nm_pixel );
@@ -1368,12 +1368,12 @@ int main(int argc, char** argv )
       wavimg_simgrid_steps.set_defocus_lower_bound( defocus_lower_bound );
       wavimg_simgrid_steps.set_defocus_upper_bound( defocus_upper_bound );
       wavimg_simgrid_steps.set_defocus_samples(defocus_samples);
-      wavimg_simgrid_steps.set_defocus_period( defocus_period );
+      wavimg_simgrid_steps.set_defocus_period( (int) defocus_period );
 
       // thicknes/slice setters
       wavimg_simgrid_steps.set_super_cell_z_nm_slice( super_cell_z_nm_slice );
       wavimg_simgrid_steps.set_slice_samples(slice_samples);
-      wavimg_simgrid_steps.set_slice_period( slice_period );
+      wavimg_simgrid_steps.set_slice_period( (int) slice_period );
       wavimg_simgrid_steps.set_slices_lower_bound( slices_lower_bound );
       wavimg_simgrid_steps.set_slices_upper_bound( slices_upper_bound );
 
@@ -1407,9 +1407,11 @@ int main(int argc, char** argv )
       }
 
       wavimg_simgrid_steps.set_iteration_number(1);
-      wavimg_simgrid_steps.set_step_length_minimum_threshold ( 87.5 );
-      wavimg_simgrid_steps.set_step_size( defocus_period, slice_period );
+      wavimg_simgrid_steps.set_step_length_minimum_threshold ( 87.5f );
+      wavimg_simgrid_steps.set_step_size( (int) defocus_period, (int) slice_period );
+      std::cout << "Simulating from dat " << std::endl;
       wavimg_simgrid_steps.simulate_from_dat_file();
+      std::cout << "Thresh " << std::endl;
 
       thresh_callback( 1 , nullptr );
       std::cout << "Preparing for supercell calculation" << std::endl;
@@ -1417,9 +1419,9 @@ int main(int argc, char** argv )
       std::cout << "Super cell min width (pixels) " << supercell_min_width << std::endl;
       std::cout << "Super cell min height (pixels) " << supercell_min_height << std::endl;
 
-      const float x_supercell_min_size_nm = supercell_min_width * sampling_rate_super_cell_x_nm_pixel;
-      const float y_supercell_min_size_nm = supercell_min_height * sampling_rate_super_cell_y_nm_pixel;
-      const float z_supercell_min_size_nm = wavimg_simgrid_steps.get_simgrid_best_match_thickness_nm();
+      const double x_supercell_min_size_nm = supercell_min_width * sampling_rate_super_cell_x_nm_pixel;
+      const double y_supercell_min_size_nm = supercell_min_height * sampling_rate_super_cell_y_nm_pixel;
+      const double z_supercell_min_size_nm = wavimg_simgrid_steps.get_simgrid_best_match_thickness_nm();
 
       unit_cell.create_atoms_from_site_and_symetry();
       super_cell = Super_Cell::Super_Cell( &unit_cell ); 
@@ -1429,6 +1431,7 @@ int main(int argc, char** argv )
       super_cell.calculate_expand_factor();
       super_cell.create_atoms_from_unit_cell();
       super_cell.orientate_atoms_from_matrix();
+      std::cout << "Supercell created" << std::endl;
       //wavimg_simgrid_steps.export_sim_grid();
     }
 

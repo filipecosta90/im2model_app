@@ -15,7 +15,7 @@
 #include <vector>
 #include <stdio.h>
 
-#include "celslc_prm.h"
+#include "celslc_prm.hpp"
 
 CELSLC_prm::CELSLC_prm()
 {
@@ -41,40 +41,40 @@ CELSLC_prm::CELSLC_prm()
   abs_switch = false;
 }
 
-void CELSLC_prm::set_prj_dir_h(float projection_dir_h ){
+void CELSLC_prm::set_prj_dir_h(double projection_dir_h ){
   prj_dir_h = projection_dir_h;
 }
 
 
-void CELSLC_prm::set_prj_dir_k(float projection_dir_k ){
+void CELSLC_prm::set_prj_dir_k(double projection_dir_k ){
   prj_dir_k = projection_dir_k;
 }
 
-void CELSLC_prm::set_prj_dir_l(float projection_dir_l ){
+void CELSLC_prm::set_prj_dir_l(double projection_dir_l ){
     prj_dir_l = projection_dir_l;
 }
 
-void CELSLC_prm::set_prp_dir_u(float perpendicular_dir_u){
+void CELSLC_prm::set_prp_dir_u(double perpendicular_dir_u){
   prp_dir_u = perpendicular_dir_u;
 }
 
-void CELSLC_prm::set_prp_dir_v(float perpendicular_dir_v){
+void CELSLC_prm::set_prp_dir_v(double perpendicular_dir_v){
   prp_dir_v = perpendicular_dir_v;
 }
 
-void CELSLC_prm::set_prp_dir_w(float perpendicular_dir_w){
+void CELSLC_prm::set_prp_dir_w(double perpendicular_dir_w){
   prp_dir_w = perpendicular_dir_w;
 }
 
-void CELSLC_prm::set_super_cell_size_x(float size_x){
+void CELSLC_prm::set_super_cell_size_x(double size_x){
   super_cell_size_x = size_x;
 }
 
-void CELSLC_prm::set_super_cell_size_y(float size_y){
+void CELSLC_prm::set_super_cell_size_y(double size_y){
   super_cell_size_y = size_y;
 }
 
-void CELSLC_prm::set_super_cell_size_z(float size_z){
+void CELSLC_prm::set_super_cell_size_z(double size_z){
   super_cell_size_z = size_z;
 }
 
@@ -98,7 +98,7 @@ void CELSLC_prm::set_nz_simulated_partitions( int nz ){
   nz_simulated_partitions = nz;
 }
 
-void CELSLC_prm::set_ht_accelaration_voltage( float ht ){
+void CELSLC_prm::set_ht_accelaration_voltage( double ht ){
   ht_accelaration_voltage = ht;
 }
 

@@ -3,21 +3,21 @@
 
 class CELSLC_prm {
   private:
-    float prj_dir_h;
-    float prj_dir_l;
-    float prj_dir_k;
-    float prp_dir_u;
-    float prp_dir_v;
-    float prp_dir_w;
-    float super_cell_size_x;
-    float super_cell_size_y;
-    float super_cell_size_z;
+    double prj_dir_h;
+    double prj_dir_l;
+    double prj_dir_k;
+    double prp_dir_u;
+    double prp_dir_v;
+    double prp_dir_w;
+    double super_cell_size_x;
+    double super_cell_size_y;
+    double super_cell_size_z;
     std::string super_cell_cif_file;
     std::string slc_file_name_prefix;
     int nx_simulated_horizontal_samples;
     int ny_simulated_vertical_samples;
     int nz_simulated_partitions;
-    float ht_accelaration_voltage;
+    double ht_accelaration_voltage;
 
     // runnable execv info
     std::string bin_path;
@@ -27,23 +27,23 @@ class CELSLC_prm {
   public:
     CELSLC_prm();
 
-    void set_prj_dir_h(float projection_dir_h );
+    void set_prj_dir_h(double projection_dir_h );
 
-    void set_prj_dir_l(float projection_dir_l );
+    void set_prj_dir_l(double projection_dir_l );
 
-    void set_prj_dir_k(float projection_dir_k );
+    void set_prj_dir_k(double projection_dir_k );
 
-    void set_prp_dir_u(float perpendicular_dir_u);
+    void set_prp_dir_u(double perpendicular_dir_u);
 
-    void set_prp_dir_v(float perpendicular_dir_v);
+    void set_prp_dir_v(double perpendicular_dir_v);
 
-    void set_prp_dir_w(float perpendicular_dir_w);
+    void set_prp_dir_w(double perpendicular_dir_w);
 
-    void set_super_cell_size_x(float super_cell_size_x);
+    void set_super_cell_size_x(double super_cell_size_x);
 
-    void set_super_cell_size_y(float super_cell_size_y);
+    void set_super_cell_size_y(double super_cell_size_y);
 
-    void set_super_cell_size_z(float super_cell_size_z);
+    void set_super_cell_size_z(double super_cell_size_z);
 
     void set_cif_file( std::string super_cell_cif_file );
 
@@ -55,7 +55,7 @@ class CELSLC_prm {
 
     void set_nz_simulated_partitions( int nz_simulated_partitions );
 
-    void set_ht_accelaration_voltage( float ht_accelaration_voltage );
+    void set_ht_accelaration_voltage( double ht_accelaration_voltage );
 
     void set_dwf_switch( bool dwf_switch );
 

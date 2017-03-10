@@ -4,25 +4,25 @@
 class MSA_prm {
   private:
     std::string microscope_parameter_block_name;
-    float incident_probe_convergence_half_angle;
-    float inner_radius_default_angular_detector_diffraction_plane;
-    float outer_radius_default_angular_detector_diffraction_plane;
+    double incident_probe_convergence_half_angle;
+    double inner_radius_default_angular_detector_diffraction_plane;
+    double outer_radius_default_angular_detector_diffraction_plane;
     int multiple_detector_definition_number;
     std::string multiple_detector_definition_extra_file;
-    float electron_wavelenth;
-    float effective_source_radious;
-    float effective_focus_spread;
-    float relative_focus_spread_kernel_width;
+    double electron_wavelenth;
+    double effective_source_radious;
+    double effective_focus_spread;
+    double relative_focus_spread_kernel_width;
     int number_focal_kernel_steps;
     int number_aberration_coefficients;
     std::string multislice_parameter_block_name;
-    float object_tilt_x_component;
-    float object_tilt_y_component;
-    float horizontal_scan_frame_offset_super_cell;
-    float vertical_scan_frame_offset_super_cell;
-    float horizontal_scan_frame_size;
-    float vertical_scan_frame_size;
-    float scan_line_rotation;
+    double object_tilt_x_component;
+    double object_tilt_y_component;
+    double horizontal_scan_frame_offset_super_cell;
+    double vertical_scan_frame_offset_super_cell;
+    double horizontal_scan_frame_size;
+    double vertical_scan_frame_size;
+    double scan_line_rotation;
     int number_scan_columns;
     int number_scan_rows;
     int explicit_focus_spread_convolution_switch;
@@ -46,7 +46,7 @@ class MSA_prm {
   public:
     MSA_prm();
 
-    void set_electron_wavelength( float energy );
+    void set_electron_wavelength( double energy );
 
     void set_internal_repeat_factor_of_super_cell_along_x ( int x_repeat );
 

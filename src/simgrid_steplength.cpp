@@ -40,14 +40,14 @@
 #include <opencv2/calib3d/calib3d.hpp>
 
 
-#include "simgrid_steplength.h"
+#include "simgrid_steplength.hpp"
 
 
 int SIMGRID_wavimg_steplength::imregionalmax(cv::Mat input, cv::Mat locations){
   return 1;
 }
 
-std::pair<cv::Mat,cv::Mat> SIMGRID_wavimg_steplength::gradient(cv::Mat & img, float spaceX, float spaceY) {
+std::pair<cv::Mat,cv::Mat> SIMGRID_wavimg_steplength::gradient(cv::Mat & img, double spaceX, double spaceY) {
 
   cv::Mat gradY = gradientY(img,spaceY);
   cv::Mat gradX = gradientX(img,spaceX);
@@ -58,7 +58,7 @@ std::pair<cv::Mat,cv::Mat> SIMGRID_wavimg_steplength::gradient(cv::Mat & img, fl
 /// Internal method to get numerical gradient for x components.
 /// @param[in] mat Specify input matrix.
 /// @param[in] spacing Specify input space.
-cv::Mat SIMGRID_wavimg_steplength::gradientX(cv::Mat & mat, float spacing) {
+cv::Mat SIMGRID_wavimg_steplength::gradientX(cv::Mat & mat, double spacing) {
   cv::Mat grad = cv::Mat::zeros(mat.rows,mat.cols,CV_32FC1);
   /*  last row */
   int maxCols = mat.cols;
@@ -66,16 +66,16 @@ cv::Mat SIMGRID_wavimg_steplength::gradientX(cv::Mat & mat, float spacing) {
 
   /* get gradients in each border */
   /* first row */
-  cv::Mat col = (-mat.col(0) + mat.col(1))/(float)spacing;
+  cv::Mat col = (-mat.col(0) + mat.col(1))/(double)spacing;
   col.copyTo(grad(cv::Rect(0,0,1,maxRows)));
-  col = (-mat.col(maxCols-2) + mat.col(maxCols-1))/(float)spacing;
+  col = (-mat.col(maxCols-2) + mat.col(maxCols-1))/(double)spacing;
 
   col.copyTo(grad(cv::Rect(maxCols-1,0,1,maxRows)));
 
   /* centered elements */
   cv::Mat centeredMat = mat(cv::Rect(0,0,maxCols-2,maxRows));
   cv::Mat offsetMat = mat(cv::Rect(2,0,maxCols-2,maxRows));
-  cv::Mat resultCenteredMat = (-centeredMat + offsetMat)/(((float)spacing)*2.0);
+  cv::Mat resultCenteredMat = (-centeredMat + offsetMat)/(((double)spacing)*2.0);
 
   resultCenteredMat.copyTo(grad(cv::Rect(1,0,maxCols-2, maxRows)));
   return grad;
@@ -84,7 +84,7 @@ cv::Mat SIMGRID_wavimg_steplength::gradientX(cv::Mat & mat, float spacing) {
 /// Internal method to get numerical gradient for y components.
 /// @param[in] mat Specify input matrix.
 /// @param[in] spacing Specify input space.
-cv::Mat SIMGRID_wavimg_steplength::gradientY(cv::Mat & mat, float spacing) {
+cv::Mat SIMGRID_wavimg_steplength::gradientY(cv::Mat & mat, double spacing) {
   cv::Mat grad = cv::Mat::zeros(mat.rows,mat.cols,CV_32FC1);
 
   /*  last row */
@@ -93,16 +93,16 @@ cv::Mat SIMGRID_wavimg_steplength::gradientY(cv::Mat & mat, float spacing) {
 
   /* get gradients in each border */
   /* first row */
-  cv::Mat row = (-mat.row(0) + mat.row(1))/(float)spacing;
+  cv::Mat row = (-mat.row(0) + mat.row(1))/(double)spacing;
   row.copyTo(grad(cv::Rect(0,0,maxCols,1)));
 
-  row = (-mat.row(maxRows-2) + mat.row(maxRows-1))/(float)spacing;
+  row = (-mat.row(maxRows-2) + mat.row(maxRows-1))/(double)spacing;
   row.copyTo(grad(cv::Rect(0,maxRows-1,maxCols,1)));
 
   /* centered elements */
   cv::Mat centeredMat = mat(cv::Rect(0,0,maxCols,maxRows-2));
   cv::Mat offsetMat = mat(cv::Rect(0,2,maxCols,maxRows-2));
-  cv::Mat resultCenteredMat = (-centeredMat + offsetMat)/(((float)spacing)*2.0);
+  cv::Mat resultCenteredMat = (-centeredMat + offsetMat)/(((double)spacing)*2.0);
 
   resultCenteredMat.copyTo(grad(cv::Rect(0,1,maxCols, maxRows-2)));
   return grad;
@@ -172,7 +172,7 @@ void SIMGRID_wavimg_steplength::set_iteration_number ( int itt ){
   iteration_number = itt;
 }
 
-void SIMGRID_wavimg_steplength::set_step_length_minimum_threshold ( float minimum_threshold ){
+void SIMGRID_wavimg_steplength::set_step_length_minimum_threshold ( double minimum_threshold ){
   step_length_minimum_threshold = minimum_threshold;
 }
 
@@ -224,7 +224,7 @@ void SIMGRID_wavimg_steplength::set_defocus_period( int period ){
   defocus_period = period;
 }
 
-void SIMGRID_wavimg_steplength::set_super_cell_z_nm_slice( float nm_slice ){
+void SIMGRID_wavimg_steplength::set_super_cell_z_nm_slice( double nm_slice ){
   super_cell_z_nm_slice = nm_slice;
 }
 
@@ -236,11 +236,11 @@ void SIMGRID_wavimg_steplength::set_ignore_edge_pixels( int edge_pixels_number )
   ignore_edge_pixels = edge_pixels_number;
 }
 
-void SIMGRID_wavimg_steplength::set_sampling_rate_super_cell_x_nm_pixel( float nm_pixel ){
+void SIMGRID_wavimg_steplength::set_sampling_rate_super_cell_x_nm_pixel( double nm_pixel ){
   sampling_rate_super_cell_x_nm_pixel = nm_pixel;
 }
 
-void SIMGRID_wavimg_steplength::set_sampling_rate_super_cell_y_nm_pixel( float nm_pixel ){
+void SIMGRID_wavimg_steplength::set_sampling_rate_super_cell_y_nm_pixel( double nm_pixel ){
   sampling_rate_super_cell_y_nm_pixel = nm_pixel;
 }
 
@@ -248,11 +248,11 @@ void SIMGRID_wavimg_steplength::set_experimental_image_roi( cv::Mat exp_image_ro
   experimental_image_roi = exp_image_roi;
 }
 
-void SIMGRID_wavimg_steplength::set_reshape_factor_from_supper_cell_to_experimental_x( float reshape_factor ){
+void SIMGRID_wavimg_steplength::set_reshape_factor_from_supper_cell_to_experimental_x( double reshape_factor ){
   reshape_factor_from_supper_cell_to_experimental_x = reshape_factor;
 }
 
-void SIMGRID_wavimg_steplength::set_reshape_factor_from_supper_cell_to_experimental_y( float reshape_factor ){
+void SIMGRID_wavimg_steplength::set_reshape_factor_from_supper_cell_to_experimental_y( double reshape_factor ){
   reshape_factor_from_supper_cell_to_experimental_y = reshape_factor;
 }
 
@@ -296,7 +296,7 @@ void SIMGRID_wavimg_steplength::set_user_estimated_thickness_nm_switch( bool est
   user_estimated_thickness_nm_switch = estimated_thickness_nm_switch;
 }
 
-void SIMGRID_wavimg_steplength::set_user_estimated_thickness_nm( float estimated_thickness_nm ){
+void SIMGRID_wavimg_steplength::set_user_estimated_thickness_nm( double estimated_thickness_nm ){
   user_estimated_thickness_nm = estimated_thickness_nm;
 }
 
@@ -358,16 +358,16 @@ void SIMGRID_wavimg_steplength::calculate_motion_euclidian_matrix( cv::Mat cropp
   }
 }
 
-float SIMGRID_wavimg_steplength::get_motion_euclidian_rotation_angle(){
-  return motion_euclidean_warp_matrix.at<float>( 1, 0);
+double SIMGRID_wavimg_steplength::get_motion_euclidian_rotation_angle(){
+  return motion_euclidean_warp_matrix.at<double>( 1, 0);
 }
 
-float SIMGRID_wavimg_steplength::get_motion_euclidian_translation_x(){
-  return motion_euclidean_warp_matrix.at<float>( 0, 2);
+double SIMGRID_wavimg_steplength::get_motion_euclidian_translation_x(){
+  return motion_euclidean_warp_matrix.at<double>( 0, 2);
 }
 
-float SIMGRID_wavimg_steplength::get_motion_euclidian_translation_y(){
-  return motion_euclidean_warp_matrix.at<float>( 1, 2);
+double SIMGRID_wavimg_steplength::get_motion_euclidian_translation_y(){
+  return motion_euclidean_warp_matrix.at<double>( 1, 2);
 }
 
 int SIMGRID_wavimg_steplength::get_simgrid_best_match_thickness_slice(){
@@ -472,15 +472,15 @@ bool SIMGRID_wavimg_steplength::export_sim_grid(){
     for (int thickness = 1; thickness <= slice_samples; thickness ++ ){
 
       // the slice thickness in nanometers
-      const float slice_thickness_nm = super_cell_z_nm_slice * slice_period * ( thickness  - 1 )  + ( super_cell_z_nm_slice * slices_lower_bound);
+      const double slice_thickness_nm = super_cell_z_nm_slice * slice_period * ( thickness  - 1 )  + ( super_cell_z_nm_slice * slices_lower_bound);
 
       std::vector<cv::Mat> simulated_images_row = simulated_images_grid.at(thickness-1);
 
       for (int defocus = 1; defocus <= defocus_samples; defocus ++ ){
 
-        const int at_defocus = defocus_values_matrix.at<float>(thickness-1, defocus-1);
-        const int at_slice = thickness_values_matrix.at<float>(thickness-1, defocus-1);
-        const float match_factor = match_values_matrix.at<float>( thickness-1, defocus-1);
+        const int at_defocus = defocus_values_matrix.at<double>(thickness-1, defocus-1);
+        const int at_slice = thickness_values_matrix.at<double>(thickness-1, defocus-1);
+        const double match_factor = match_values_matrix.at<double>( thickness-1, defocus-1);
 
         cv::Mat cleaned_simulated_image = simulated_images_row.at(defocus-1);
 
@@ -569,7 +569,7 @@ bool SIMGRID_wavimg_steplength::simulate_from_dat_file(){
 
   for (int thickness = 1; thickness <= slice_samples; thickness ++ ){
 
-    const float slice_thickness_nm = super_cell_z_nm_slice * slice_period * ( thickness  - 1 )  + ( super_cell_z_nm_slice * slices_lower_bound);
+    const double slice_thickness_nm = super_cell_z_nm_slice * slice_period * ( thickness  - 1 )  + ( super_cell_z_nm_slice * slices_lower_bound);
     const int at_slice = round( slice_period * ( thickness  - 1 ) + slices_lower_bound );
 
     //will contain the row of simulated images (same thickness, diferent defocus)
@@ -698,9 +698,9 @@ bool SIMGRID_wavimg_steplength::simulate_from_dat_file(){
       defocus_match = (double) at_defocus;
       slice_defocus_match_points.push_back (cv::Point3d ( slice_match, defocus_match, match_factor ));
 
-      defocus_values_matrix.at<float>(thickness-1, defocus-1) = (float)  at_defocus ;
-      thickness_values_matrix.at<float>(thickness-1, defocus-1) = (float)  at_slice ;
-      match_values_matrix.at<float>( thickness-1, defocus-1) = (float)  match_factor ;
+      defocus_values_matrix.at<double>(thickness-1, defocus-1) = (double)  at_defocus ;
+      thickness_values_matrix.at<double>(thickness-1, defocus-1) = (double)  at_slice ;
+      match_values_matrix.at<double>( thickness-1, defocus-1) = (double)  match_factor ;
       simulated_images_row.push_back(cleaned_simulated_image);
       raw_simulated_images_row.push_back(raw_gray_simulated_image);
 
