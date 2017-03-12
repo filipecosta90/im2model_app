@@ -69,7 +69,17 @@ class Super_Cell {
     /** Experimental image related **/
     cv::Mat _raw_experimental_image;
     cv::Rect _experimental_image_boundary_rectangle; 
+    cv::Rect _experimental_image_boundary_rectangle_w_margin;
     std::vector<cv::Point> _experimental_image_boundary_polygon;
+    std::vector<cv::Point> _experimental_image_boundary_polygon_w_margin;
+    
+    double _experimental_image_boundary_polygon_margin_x_Nanometers;
+    double _experimental_image_boundary_polygon_margin_y_Nanometers;
+    double _experimental_image_thickness_margin_z_Nanometers;
+    
+    int _experimental_image_boundary_polygon_margin_width_px;
+    int _experimental_image_boundary_polygon_margin_height_px;
+    
     std::vector<cv::Point2d> _super_cell_boundary_polygon;
     int _super_cell_min_width_px;
     int _super_cell_min_height_px;
@@ -107,6 +117,10 @@ class Super_Cell {
     void set_super_cell_expand_factor_b( int factor_b );
     void set_super_cell_expand_factor_c( int factor_c );
 
+    void set_experimental_image_boundary_polygon_margin_x_Nanometers( double margin );
+    void set_experimental_image_boundary_polygon_margin_y_Nanometers( double margin );
+    void set_experimental_image_thickness_margin_z_Nanometers( double margin );
+    
     void set_experimental_min_size_nm_x( double x_min_size_nm );
     void set_experimental_min_size_nm_y( double y_min_size_nm );
     void set_experimental_min_size_nm_z( double z_min_size_nm );

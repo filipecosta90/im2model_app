@@ -16,6 +16,14 @@
 #include <stdio.h>
 #include <algorithm>
 
+// Image processing
+#include <opencv2/opencv.hpp>
+#include "opencv2/highgui/highgui.hpp"
+#include "opencv2/imgproc/imgproc.hpp"
+#include "opencv2/opencv_modules.hpp" 
+#include "opencv2/core/core.hpp"
+#include "opencv2/features2d/features2d.hpp" 
+
 // Visualization
 #include <GL/glut.h>
 
@@ -27,10 +35,14 @@
 #include "chem_database.hpp"
 
 Super_Cell::Super_Cell(){
-
+  /** supercell exclusive **/
   expand_factor_a = 1;
   expand_factor_b = 1;
   expand_factor_c = 1;
+  _experimental_image_boundary_polygon_margin_x_Nanometers = 1.0f;
+  _experimental_image_boundary_polygon_margin_y_Nanometers = 1.0f;
+  _experimental_image_thickness_margin_z_Nanometers = 1.0f;
+  /** unitcell **/
   unit_cell = nullptr;
 }
 
@@ -39,7 +51,9 @@ Super_Cell::Super_Cell( Unit_Cell* cell ){
   expand_factor_a = 1;
   expand_factor_b = 1;
   expand_factor_c = 1;
-
+  _experimental_image_boundary_polygon_margin_x_Nanometers = 1.0f;
+  _experimental_image_boundary_polygon_margin_y_Nanometers = 1.0f;
+  _experimental_image_thickness_margin_z_Nanometers = 1.0f;
   /** unitcell **/
   unit_cell = cell;
   update_unit_cell_parameters();
@@ -50,7 +64,9 @@ Super_Cell::Super_Cell( Unit_Cell* cell , int factor_a, int factor_b, int factor
   expand_factor_a = factor_a;
   expand_factor_b = factor_b;
   expand_factor_c = factor_c;
-
+  _experimental_image_boundary_polygon_margin_x_Nanometers = 1.0f;
+  _experimental_image_boundary_polygon_margin_y_Nanometers = 1.0f;
+  _experimental_image_thickness_margin_z_Nanometers = 1.0f;
   /** unitcell **/
   unit_cell = cell;
   update_unit_cell_parameters();
@@ -150,6 +166,18 @@ void Super_Cell::set_sampling_rate_super_cell_y_nm_pixel( double sampling_rate )
 
 void Super_Cell::set_simgrid_best_match_thickness_nm( double thickness ){ 
   _simgrid_best_match_thickness_nm = thickness; 
+}
+
+void Super_Cell::set_experimental_image_boundary_polygon_margin_x_Nanometers( double margin ){
+  _experimental_image_boundary_polygon_margin_x_Nanometers = margin;
+}
+
+void Super_Cell::set_experimental_image_boundary_polygon_margin_y_Nanometers( double margin ){
+  _experimental_image_boundary_polygon_margin_y_Nanometers = margin;
+}
+
+void Super_Cell::set_experimental_image_thickness_margin_z_Nanometers( double margin ){
+  _experimental_image_thickness_margin_z_Nanometers = margin;   
 }
 
 void Super_Cell::calculate_expand_factor(){
@@ -461,18 +489,76 @@ void Super_Cell::calculate_supercell_boundaries_from_experimental_image( cv::Poi
       contours_merged.push_back(roi_contours[i][j]);
     }
   }
-  convexHull( cv::Mat(contours_merged), _experimental_image_boundary_polygon, false );
+
+  /** The functions find the convex hull of a 2D point set using the Sklansky’s algorithm [Sklansky82] 
+   * that has O(N logN) complexity in the current implementation. See the OpenCV sample convexhull.cpp 
+   * that demonstrates the usage of different function variants. **/
+  convexHull( cv::Mat(contours_merged), _experimental_image_boundary_polygon, false ); 
+  std::vector<std::vector<cv::Point>> hull;
+  hull.push_back(_experimental_image_boundary_polygon);
+
+
+
+
+  CvMoments moments; 
+  double M00, M01, M10;
+
+  moments = cv::moments( _experimental_image_boundary_polygon); 
+  M00 = cvGetSpatialMoment(&moments,0,0); 
+  M10 = cvGetSpatialMoment(&moments,1,0); 
+  M01 = cvGetSpatialMoment(&moments,0,1); 
+  int _experimental_image_boundary_polygon_center_x = (int)(M10/M00); 
+  int _experimental_image_boundary_polygon_center_y = (int)(M01/M00); 
+  cv::Point boundary_polygon_center( _experimental_image_boundary_polygon_center_x, _experimental_image_boundary_polygon_center_y );
+
+  cv::Mat temp;
+  cv::cvtColor( _raw_experimental_image, temp, cv::COLOR_GRAY2BGR);
+  cv::Scalar color = cv::Scalar( 1, 1, 1 );
+
+  drawContours( temp, hull, 0, color, 3, 8, std::vector<cv::Vec4i>(), 0, cv::Point() );
+  _experimental_image_boundary_polygon_margin_width_px = _experimental_image_boundary_polygon_margin_x_Nanometers / _sampling_rate_super_cell_x_nm_pixel; 
+  _experimental_image_boundary_polygon_margin_height_px = _experimental_image_boundary_polygon_margin_y_Nanometers / _sampling_rate_super_cell_y_nm_pixel;
+  std::vector<cv::Point>::iterator  _exp_itt;
+  
+  for ( _exp_itt = _experimental_image_boundary_polygon.begin(); _exp_itt != _experimental_image_boundary_polygon.end(); _exp_itt++ ){
+    const cv::Point initial_point = *_exp_itt;
+    const cv::Point direction_centroid_boundary = initial_point - boundary_polygon_center;
+    const double direction_centroid_boundary_x = direction_centroid_boundary.x / cv::norm( direction_centroid_boundary );
+    const double direction_centroid_boundary_y = direction_centroid_boundary.y / cv::norm( direction_centroid_boundary );
+    const int direction_centroid_boundary_x_px = (int) ( direction_centroid_boundary_x * _experimental_image_boundary_polygon_margin_width_px);
+    const int direction_centroid_boundary_y_px = (int) ( direction_centroid_boundary_y * _experimental_image_boundary_polygon_margin_height_px);
+    const cv::Point boundary ( direction_centroid_boundary_x_px, direction_centroid_boundary_y_px );
+    const cv::Point boundary_point = initial_point +  boundary;
+    _experimental_image_boundary_polygon_w_margin.push_back( boundary_point );
+  }
+  std::vector<std::vector<cv::Point>> hull1;
+  hull1.push_back( _experimental_image_boundary_polygon_w_margin );
+  drawContours( temp, hull1, 0, color, 3, 8, std::vector<cv::Vec4i>(), 0, cv::Point() );
+
+ cv::Mat rectangle_cropped_experimental_image;
+ cv::Mat rectangle_cropped_experimental_image_w_margin;
+  
   _experimental_image_boundary_rectangle = boundingRect(contours_merged);
-  _super_cell_min_width_px = _experimental_image_boundary_rectangle.width;
-  _super_cell_min_height_px = _experimental_image_boundary_rectangle.height;
-  _super_cell_left_padding_px = _experimental_image_boundary_rectangle.x;
-  _super_cell_top_padding_px = _experimental_image_boundary_rectangle.y;
+ _experimental_image_boundary_rectangle_w_margin = boundingRect( _experimental_image_boundary_polygon_w_margin );
+
+ rectangle_cropped_experimental_image = temp(_experimental_image_boundary_rectangle).clone();
+ rectangle_cropped_experimental_image_w_margin = temp(_experimental_image_boundary_rectangle_w_margin).clone();
+  imwrite( "experimental_image_boundary_rectangle.png", rectangle_cropped_experimental_image  );
+  imwrite( "experimental_image_boundary_rectangle_with_margins.png", temp );
+
+
+ 
   calculate_experimental_min_size_nm();
   calculate_expand_factor();
   update_super_cell_boundary_polygon();
 }
 
 void Super_Cell::calculate_experimental_min_size_nm(){
+  _super_cell_min_width_px = _experimental_image_boundary_rectangle_w_margin.width;
+  _super_cell_min_height_px = _experimental_image_boundary_rectangle_w_margin.height;
+  _super_cell_left_padding_px = _experimental_image_boundary_rectangle_w_margin.x;
+  _super_cell_top_padding_px = _experimental_image_boundary_rectangle_w_margin.y;
+ 
   _x_supercell_min_size_nm = _sampling_rate_super_cell_x_nm_pixel * _super_cell_min_width_px; 
   _y_supercell_min_size_nm = _sampling_rate_super_cell_y_nm_pixel * _super_cell_min_height_px; 
   _z_supercell_min_size_nm = _simgrid_best_match_thickness_nm;
