@@ -158,6 +158,7 @@ class Super_Cell {
     void calculate_supercell_boundaries_from_experimental_image( cv::Point2f roi_center, int threshold, int max_contour_distance_px );
     void update_super_cell_boundary_polygon();
     void remove_out_of_range_atoms();
+    void generate_super_cell_file(  std::string filename );
 };
 
 #endif

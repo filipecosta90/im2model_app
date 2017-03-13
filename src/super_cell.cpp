@@ -594,11 +594,12 @@ void Super_Cell::remove_out_of_range_atoms(){
   const int b_padding_px = _super_cell_height_px / 2;
   const double _z_bot_limit = _z_supercell_min_size_nm / -2.0f;
   const double _z_top_limit = _z_supercell_min_size_nm / 2.0f;
-
+  std::vector<unsigned int> _atom_positions_delete;
+  unsigned int loop_counter = 0;
   std::cout << "Initial number of atoms: " << _atom_positions.size() << std::endl;
   for( std::vector<glm::vec3>::iterator _atom_positions_itt = _atom_positions.begin() ; 
       _atom_positions_itt != _atom_positions.end();
-      /* empty ( see if else )*/
+      _atom_positions_itt++ , loop_counter++ 
      ){
     const int _atom_x_px = ((int)( _atom_positions_itt->x / _sampling_rate_super_cell_x_nm_pixel ) )+ a_padding_px;
     const int _atom_y_px = ((int)( _atom_positions_itt->y / _sampling_rate_super_cell_y_nm_pixel ) )+ b_padding_px;
@@ -615,12 +616,30 @@ void Super_Cell::remove_out_of_range_atoms(){
     }
 
     if( in_range < 0.0f ){
-      _atom_positions_itt = _atom_positions.erase(_atom_positions_itt);
-    }
-    else {
-      _atom_positions_itt++;
+      _atom_positions_delete.push_back( loop_counter );
     }
   }
+  /* We will delete from back to begin to preserve positions */
+  std::reverse( _atom_positions_delete.begin() ,_atom_positions_delete.end() ); 
+  for( std::vector<unsigned int>::iterator delete_itt =  _atom_positions_delete.begin();
+      delete_itt != _atom_positions_delete.end();
+      delete_itt++
+     ){
+    const unsigned int pos_delete = *delete_itt;
+    _atom_positions.erase( _atom_positions.begin() + pos_delete );
+    _atom_cpk_rgba_colors.erase( _atom_cpk_rgba_colors.begin() + pos_delete ); 
+    _atom_empirical_radii.erase( _atom_empirical_radii.begin() + pos_delete );
+  }
   std::cout << "Final number of atoms: " << _atom_positions.size() << std::endl;
+}
+
+void Super_Cell::generate_super_cell_file(  std::string _super_cell_filename ){
+  std::ofstream outfile;
+  outfile.open(_super_cell_filename);
+  //outfile << number_slices_used_describe_full_object_structure_up_to_its_maximum_thickness << "\t\t\t! Number of slices used to describe the full object structure up to its maximum thickness" << std::endl;
+  /*for ( int pos = 0 ; pos < number_slices_used_describe_full_object_structure_up_to_its_maximum_thickness ; pos++){
+    ((outfile << slice_index.at(pos) << std::endl;
+    }*/
+  outfile.close();
 }
 
