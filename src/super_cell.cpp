@@ -592,6 +592,9 @@ void Super_Cell::update_super_cell_boundary_polygon(){
 void Super_Cell::remove_out_of_range_atoms(){
   const int a_padding_px = _super_cell_width_px / 2;
   const int b_padding_px = _super_cell_height_px / 2;
+  const double _z_bot_limit = _z_supercell_min_size_nm / -2.0f;
+  const double _z_top_limit = _z_supercell_min_size_nm / 2.0f;
+
   std::cout << "Initial number of atoms: " << _atom_positions.size() << std::endl;
   for( std::vector<glm::vec3>::iterator _atom_positions_itt = _atom_positions.begin() ; 
       _atom_positions_itt != _atom_positions.end();
@@ -599,8 +602,18 @@ void Super_Cell::remove_out_of_range_atoms(){
      ){
     const int _atom_x_px = ((int)( _atom_positions_itt->x / _sampling_rate_super_cell_x_nm_pixel ) )+ a_padding_px;
     const int _atom_y_px = ((int)( _atom_positions_itt->y / _sampling_rate_super_cell_y_nm_pixel ) )+ b_padding_px;
+    const double _atom_z_nm = _atom_positions_itt->z;
     const cv::Point _atom_xy ( _atom_x_px, _atom_y_px );
-    const double in_range = cv::pointPolygonTest( _super_cell_boundary_polygon_px_w_margin , _atom_xy, false );
+    /** check for range in XY **/
+    double in_range = cv::pointPolygonTest( _super_cell_boundary_polygon_px_w_margin , _atom_xy, false );
+    /** check for range in Z **/
+    if ( _atom_z_nm > _z_top_limit ){ 
+      in_range = -1.0f; 
+    }
+    if ( _atom_z_nm < _z_bot_limit ){ 
+      in_range = -1.0f; 
+    }
+
     if( in_range < 0.0f ){
       _atom_positions_itt = _atom_positions.erase(_atom_positions_itt);
     }
