@@ -1423,10 +1423,11 @@ int main(int argc, char** argv )
       super_cell.set_sampling_rate_super_cell_x_nm_pixel( sampling_rate_super_cell_x_nm_pixel );
       super_cell.set_sampling_rate_super_cell_y_nm_pixel( sampling_rate_super_cell_y_nm_pixel );
       super_cell.set_simgrid_best_match_thickness_nm( wavimg_simgrid_steps.get_simgrid_best_match_thickness_nm() );
-      
+
       super_cell.calculate_supercell_boundaries_from_experimental_image( cv::Point2f(roi_center_x, roi_center_y), edge_detection_threshold , max_contour_distance_px );
-     super_cell.create_atoms_from_unit_cell();
+      super_cell.create_atoms_from_unit_cell();
       super_cell.orientate_atoms_from_matrix();
+      super_cell.remove_out_of_range_atoms();
       //wavimg_simgrid_steps.export_sim_grid();
     }
 

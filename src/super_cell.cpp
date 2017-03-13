@@ -26,7 +26,7 @@
 
 // Visualization
 #include <GL/glut.h>
-
+#include <glm/gtx/string_cast.hpp>
 #include "super_cell.hpp"
 #include "unit_cell.hpp"
 #include "symbcalc.hpp"
@@ -284,9 +284,9 @@ void Super_Cell::calculate_expand_factor(){
   std::cout << "g': " << _sim_g << std::endl;
   std::cout << "h': " << _sim_h << std::endl;
   std::cout << "############" << std::endl;
-  double norm_new_x = max_x - min_x;
-  double norm_new_y = max_y - min_z;
-  double norm_new_z = max_z - min_z;
+  const double norm_new_x = max_x - min_x;
+  const double norm_new_y = max_y - min_y;
+  const double norm_new_z = max_z - min_z;
   std::cout << " x' range: [ " << min_x << " , " << max_x << " ] :: length " << norm_new_x << std::endl; 
   std::cout << " y' range: [ " << min_y << " , " << max_y << " ] :: length " << norm_new_y << std::endl; 
   std::cout << " z' range: [ " << min_z << " , " << max_z << " ] :: length " << norm_new_z << std::endl;
@@ -388,7 +388,6 @@ void Super_Cell::orientate_atoms_from_matrix(){
     result.release();
     _atom_positions.at(pos) =  final; 
   }
-  std::cout << "Finished orientating atoms from matrix :" << std::endl;
 }
 
 void Super_Cell::update_length_parameters(){
@@ -399,6 +398,9 @@ void Super_Cell::update_length_parameters(){
   _super_cell_length_a_Angstroms = _super_cell_length_a_Nanometers * 10.0f; 
   _super_cell_length_b_Angstroms = _super_cell_length_b_Nanometers * 10.0f; 
   _super_cell_length_c_Angstroms = _super_cell_length_c_Nanometers * 10.0f; 
+
+  _super_cell_width_px = (int) (_super_cell_length_a_Nanometers / _sampling_rate_super_cell_x_nm_pixel);
+  _super_cell_height_px = (int) (_super_cell_length_b_Nanometers / _sampling_rate_super_cell_y_nm_pixel);
 
   _super_cell_volume= ( expand_factor_a * expand_factor_b * expand_factor_c ) * unit_cell->get_cell_volume();
 }
@@ -497,19 +499,17 @@ void Super_Cell::calculate_supercell_boundaries_from_experimental_image( cv::Poi
   std::vector<std::vector<cv::Point>> hull;
   hull.push_back(_experimental_image_boundary_polygon);
 
-
-
-
+  /** Lets find the centroid of the exp. image boundary poligon **/
   CvMoments moments; 
   double M00, M01, M10;
 
   moments = cv::moments( _experimental_image_boundary_polygon); 
-  M00 = cvGetSpatialMoment(&moments,0,0); 
-  M10 = cvGetSpatialMoment(&moments,1,0); 
-  M01 = cvGetSpatialMoment(&moments,0,1); 
-  int _experimental_image_boundary_polygon_center_x = (int)(M10/M00); 
-  int _experimental_image_boundary_polygon_center_y = (int)(M01/M00); 
-  cv::Point boundary_polygon_center( _experimental_image_boundary_polygon_center_x, _experimental_image_boundary_polygon_center_y );
+  M00 = cvGetSpatialMoment(&moments,0,0);
+  M10 = cvGetSpatialMoment(&moments,1,0);
+  M01 = cvGetSpatialMoment(&moments,0,1);
+  const int _experimental_image_boundary_polygon_center_x = (int)(M10/M00); 
+  const int _experimental_image_boundary_polygon_center_y = (int)(M01/M00); 
+  const cv::Point boundary_polygon_center( _experimental_image_boundary_polygon_center_x, _experimental_image_boundary_polygon_center_y );
 
   cv::Mat temp;
   cv::cvtColor( _raw_experimental_image, temp, cv::COLOR_GRAY2BGR);
@@ -519,7 +519,7 @@ void Super_Cell::calculate_supercell_boundaries_from_experimental_image( cv::Poi
   _experimental_image_boundary_polygon_margin_width_px = _experimental_image_boundary_polygon_margin_x_Nanometers / _sampling_rate_super_cell_x_nm_pixel; 
   _experimental_image_boundary_polygon_margin_height_px = _experimental_image_boundary_polygon_margin_y_Nanometers / _sampling_rate_super_cell_y_nm_pixel;
   std::vector<cv::Point>::iterator  _exp_itt;
-  
+
   for ( _exp_itt = _experimental_image_boundary_polygon.begin(); _exp_itt != _experimental_image_boundary_polygon.end(); _exp_itt++ ){
     const cv::Point initial_point = *_exp_itt;
     const cv::Point direction_centroid_boundary = initial_point - boundary_polygon_center;
@@ -531,73 +531,83 @@ void Super_Cell::calculate_supercell_boundaries_from_experimental_image( cv::Poi
     const cv::Point boundary_point = initial_point +  boundary;
     _experimental_image_boundary_polygon_w_margin.push_back( boundary_point );
   }
+
   std::vector<std::vector<cv::Point>> hull1;
   hull1.push_back( _experimental_image_boundary_polygon_w_margin );
   drawContours( temp, hull1, 0, color, 3, 8, std::vector<cv::Vec4i>(), 0, cv::Point() );
 
- cv::Mat rectangle_cropped_experimental_image;
- cv::Mat rectangle_cropped_experimental_image_w_margin;
-  
+  cv::Mat rectangle_cropped_experimental_image;
+  cv::Mat rectangle_cropped_experimental_image_w_margin;
+
   _experimental_image_boundary_rectangle = boundingRect(contours_merged);
- _experimental_image_boundary_rectangle_w_margin = boundingRect( _experimental_image_boundary_polygon_w_margin );
+  _experimental_image_boundary_rectangle_w_margin = boundingRect( _experimental_image_boundary_polygon_w_margin );
 
- rectangle_cropped_experimental_image = temp(_experimental_image_boundary_rectangle).clone();
- rectangle_cropped_experimental_image_w_margin = temp(_experimental_image_boundary_rectangle_w_margin).clone();
+  rectangle_cropped_experimental_image = temp(_experimental_image_boundary_rectangle).clone();
+  rectangle_cropped_experimental_image_w_margin = temp(_experimental_image_boundary_rectangle_w_margin).clone();
   imwrite( "experimental_image_boundary_rectangle.png", rectangle_cropped_experimental_image  );
-  imwrite( "experimental_image_boundary_rectangle_with_margins.png", temp );
+  imwrite( "experimental_image_boundary_rectangle_with_margins.png", rectangle_cropped_experimental_image_w_margin );
 
-
- 
   calculate_experimental_min_size_nm();
   calculate_expand_factor();
   update_super_cell_boundary_polygon();
 }
 
 void Super_Cell::calculate_experimental_min_size_nm(){
+  /* set super cell min size in Pixels */
   _super_cell_min_width_px = _experimental_image_boundary_rectangle_w_margin.width;
   _super_cell_min_height_px = _experimental_image_boundary_rectangle_w_margin.height;
   _super_cell_left_padding_px = _experimental_image_boundary_rectangle_w_margin.x;
   _super_cell_top_padding_px = _experimental_image_boundary_rectangle_w_margin.y;
- 
+  /* set super cell min size in Nanometers */
   _x_supercell_min_size_nm = _sampling_rate_super_cell_x_nm_pixel * _super_cell_min_width_px; 
   _y_supercell_min_size_nm = _sampling_rate_super_cell_y_nm_pixel * _super_cell_min_height_px; 
-  _z_supercell_min_size_nm = _simgrid_best_match_thickness_nm;
+  _z_supercell_min_size_nm = _experimental_image_thickness_margin_z_Nanometers + _simgrid_best_match_thickness_nm;
 }
 
 void Super_Cell::update_super_cell_boundary_polygon(){
-  std::vector<cv::Point>::iterator experimental_bound_it;
-
   const double center_a_padding_nm = _super_cell_length_a_Nanometers / -2.0f;
   const double center_b_padding_nm = _super_cell_length_b_Nanometers / -2.0f;
-  std::cout << "a padding nm: " << center_a_padding_nm << std::endl;
-  std::cout << "b padding nm: " << center_b_padding_nm << std::endl;
-  for (experimental_bound_it = _experimental_image_boundary_polygon.begin(); experimental_bound_it != _experimental_image_boundary_polygon.end(); experimental_bound_it++ ){
+
+  const int _width_padding_px = ( _super_cell_width_px - _super_cell_min_width_px )/ 2;
+  const int _height_padding_px = ( _super_cell_height_px - _super_cell_min_height_px )/ 2;
+
+  for ( std::vector<cv::Point>::iterator experimental_bound_it = _experimental_image_boundary_polygon_w_margin.begin(); 
+      experimental_bound_it != _experimental_image_boundary_polygon_w_margin.end(); 
+      experimental_bound_it++ ){
     cv::Point super_cell_boundary_point = *experimental_bound_it;
     super_cell_boundary_point.x -= _super_cell_left_padding_px;
     super_cell_boundary_point.y -= _super_cell_top_padding_px;
-    //std::cout << " experimental point after removing of padding: " << super_cell_boundary_point << std::endl;
+
     const double _pos_x = _sampling_rate_super_cell_x_nm_pixel * ((double) super_cell_boundary_point.x ) + center_a_padding_nm;
     const double _pos_y = _sampling_rate_super_cell_y_nm_pixel * ((double) super_cell_boundary_point.y ) + center_b_padding_nm;
-    //std::cout << "\t\t " << _pos_x << " , " << _pos_y << std::endl;
-    cv::Point3d _a ( _pos_x, _pos_y , 0.0f ); 
-    cv::Mat _m_a = inverse_orientation_matrix * cv::Mat(_a);
-    cv::Point2d _sim_a;
-    _sim_a = cv::Point2d(_m_a.at<double>(0,0), _m_a.at<double>(1,0)); 
-    std::cout << " experimental point after nm conversion: " << _sim_a << std::endl;
-    _super_cell_boundary_polygon.push_back(_sim_a);
+    const cv::Point2f _sim_a( _pos_x, _pos_y );
+    _super_cell_boundary_polygon_Nanometers_w_margin.push_back( _sim_a );
+
+    super_cell_boundary_point.x += _width_padding_px;
+    super_cell_boundary_point.y += _height_padding_px;
+    _super_cell_boundary_polygon_px_w_margin.push_back( super_cell_boundary_point );
   }
 }
 
 void Super_Cell::remove_out_of_range_atoms(){
-  std::cout << "Removing atoms out of range:" << std::endl;
-  std::vector<glm::vec3>::iterator it ;
-  for ( int pos = 0; pos <  _atom_positions.size(); pos++ ){
-    glm::vec3 initial_atom = _atom_positions.at(pos);
-    cv::Vec3d V ( initial_atom.x, initial_atom.y, initial_atom.z );
-    cv::Mat result = orientation_matrix * cv::Mat(V);
-    const glm::vec3 final (result.at<double>(0,0), result.at<double>(1,0), result.at<double>(2,0));
-    result.release();
-    _atom_positions.at(pos) =  final; 
+  const int a_padding_px = _super_cell_width_px / 2;
+  const int b_padding_px = _super_cell_height_px / 2;
+  std::cout << "Initial number of atoms: " << _atom_positions.size() << std::endl;
+  for( std::vector<glm::vec3>::iterator _atom_positions_itt = _atom_positions.begin() ; 
+      _atom_positions_itt != _atom_positions.end();
+      /* empty ( see if else )*/
+     ){
+    const int _atom_x_px = ((int)( _atom_positions_itt->x / _sampling_rate_super_cell_x_nm_pixel ) )+ a_padding_px;
+    const int _atom_y_px = ((int)( _atom_positions_itt->y / _sampling_rate_super_cell_y_nm_pixel ) )+ b_padding_px;
+    const cv::Point _atom_xy ( _atom_x_px, _atom_y_px );
+    const double in_range = cv::pointPolygonTest( _super_cell_boundary_polygon_px_w_margin , _atom_xy, false );
+    if( in_range < 0.0f ){
+      _atom_positions_itt = _atom_positions.erase(_atom_positions_itt);
+    }
+    else {
+      _atom_positions_itt++;
+    }
   }
-  std::cout << "Finished orientating atoms from matrix :" << std::endl;
+  std::cout << "Final number of atoms: " << _atom_positions.size() << std::endl;
 }
+

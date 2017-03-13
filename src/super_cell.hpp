@@ -1,8 +1,6 @@
 #ifndef __SUPER_CELL_H__
 #define __SUPER_CELL_H__
 
-
-
 // visualization
 #include <GL/glut.h> 
 
@@ -72,19 +70,30 @@ class Super_Cell {
     cv::Rect _experimental_image_boundary_rectangle_w_margin;
     std::vector<cv::Point> _experimental_image_boundary_polygon;
     std::vector<cv::Point> _experimental_image_boundary_polygon_w_margin;
-    
+
     double _experimental_image_boundary_polygon_margin_x_Nanometers;
     double _experimental_image_boundary_polygon_margin_y_Nanometers;
     double _experimental_image_thickness_margin_z_Nanometers;
-    
+
     int _experimental_image_boundary_polygon_margin_width_px;
     int _experimental_image_boundary_polygon_margin_height_px;
-    
-    std::vector<cv::Point2d> _super_cell_boundary_polygon;
+
+    std::vector<cv::Point2d> _super_cell_boundary_polygon_Nanometers_w_margin;
+    std::vector<cv::Point> _super_cell_boundary_polygon_px_w_margin;
     int _super_cell_min_width_px;
     int _super_cell_min_height_px;
     int _super_cell_left_padding_px;
     int _super_cell_top_padding_px;
+    /*_super_cell_width_px  and _super_cell_min_width_px may differ since 
+     * _super_cell_min_width_px reffers to the minimum acceptable width based on
+     * the ZA and UV directions. _super_cell_width_px reffers to the width in pixels
+     * based on the expand factor.
+     *
+     * _super_cell_width_px is ALWAYS >= _super_cell_min_width_px
+     * (same for _super_cell_height_px and _super_cell_min_height_px )
+     * */
+    int _super_cell_width_px;
+    int _super_cell_height_px;
     double _sampling_rate_super_cell_x_nm_pixel;
     double _sampling_rate_super_cell_y_nm_pixel;
     double _simgrid_best_match_thickness_nm; 
@@ -120,7 +129,7 @@ class Super_Cell {
     void set_experimental_image_boundary_polygon_margin_x_Nanometers( double margin );
     void set_experimental_image_boundary_polygon_margin_y_Nanometers( double margin );
     void set_experimental_image_thickness_margin_z_Nanometers( double margin );
-    
+
     void set_experimental_min_size_nm_x( double x_min_size_nm );
     void set_experimental_min_size_nm_y( double y_min_size_nm );
     void set_experimental_min_size_nm_z( double z_min_size_nm );
