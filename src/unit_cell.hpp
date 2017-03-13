@@ -56,6 +56,8 @@ class Unit_Cell {
     std::vector<double> _atoms_site_fract_x;
     std::vector<double> _atoms_site_fract_y;
     std::vector<double> _atoms_site_fract_z;
+    std::vector<double> _atoms_site_occupancy;
+    std::vector<double> _atoms_debye_waller_factor;
     /* end Atom site */
 
     std::vector<Atom::Atom> _atoms;
@@ -111,8 +113,10 @@ class Unit_Cell {
     /** vector t **/
     cv::Point3d get_vector_t();
 
-
+    std::vector<std::string> get_atoms_site_type_symbols_vec();
     std::vector<glm::vec3> get_atom_positions_vec();
+    std::vector<double> get_atom_site_occupancy_vec();
+    std::vector<double> get_atom_debye_waller_factor_vec();
     std::vector<cv::Point3d> get_symetry_atom_positions_vec();
     std::vector<glm::vec4> get_atom_cpk_rgba_colors_vec();
     std::vector<double> get_atom_radii_vec();
@@ -131,6 +135,7 @@ class Unit_Cell {
     void add_atom_site_fract_x( double fract_x );
     void add_atom_site_fract_y( double fract_y );
     void add_atom_site_fract_z( double fract_z );
+    void add_atom_site_occupancy( double occupancy );
 
     bool create_atoms_from_site_and_symetry();
     void form_matrix_from_miller_indices();

@@ -54,9 +54,14 @@ class Super_Cell {
     /** reciprocal-lattice (Miller) indices  **/
     cv::Point3d upward_vector_hkl;
 
+    std::vector<std::string> _super_cell_atom_symbol_string;
     std::vector<glm::vec3> _atom_positions;
+    std::vector<double> _super_cell_atom_site_occupancy;
+    std::vector<double> _super_cell_atom_debye_waller_factor;
     std::vector<glm::vec4> _atom_cpk_rgba_colors;
     std::vector<double> _atom_empirical_radii;
+
+    std::vector<cv::Point3d> _super_cell_atom_fractional_cell_coordinates;
 
     /** Orientation **/
     cv::Mat orientation_matrix;

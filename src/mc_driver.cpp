@@ -247,6 +247,22 @@ bool MC::MC_Driver::populate_atom_site_unit_cell(){
   else{
     parse_error = true;
   }
+  ItemList_itt = looped_items.find("_atom_site_occupancy");
+  if (ItemList_itt != looped_items.end()){
+    std::vector<std::string> ValueList;  
+    std::vector<std::string>::iterator value_list_it; 
+    ValueList = ItemList_itt->second;
+    for(value_list_it = ValueList.begin() ; value_list_it < ValueList.end(); value_list_it++ ) {
+      std::string _atom_site_occupancy = *value_list_it;
+      const double d_item_value = convert_to_double( _atom_site_occupancy );
+      unit_cell.add_atom_site_occupancy( d_item_value );
+    }
+  }
+  else{
+    parse_error = true;
+  }
+
+
 
   return !parse_error;
 }
