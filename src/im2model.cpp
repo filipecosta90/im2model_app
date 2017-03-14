@@ -1416,7 +1416,6 @@ int main(int argc, char** argv )
       //////////////////////////////////////////////////////
       // UNIT CELL AND SUPER CELL GENERATION STARTS HERE  //
       //////////////////////////////////////////////////////
-
       unit_cell.create_atoms_from_site_and_symetry();
       super_cell = Super_Cell::Super_Cell( &unit_cell ); 
       super_cell.set_experimental_image( experimental_image );
@@ -1428,6 +1427,7 @@ int main(int argc, char** argv )
       super_cell.create_atoms_from_unit_cell();
       super_cell.orientate_atoms_from_matrix();
       super_cell.remove_out_of_range_atoms();
+      super_cell.generate_super_cell_file( "test_im2model.cel" );
       //wavimg_simgrid_steps.export_sim_grid();
     }
 

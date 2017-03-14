@@ -182,12 +182,12 @@ std::vector<double> Unit_Cell::get_atom_empirical_radii_vec(){
   return _atom_empirical_radii;
 }
 
-std::vector<std::string>  Unit_Cell::get_atoms_site_type_symbols_vec(){ 
-  return _atoms_site_type_symbols;
+std::vector<std::string>  Unit_Cell::get_atom_type_symbols_vec(){ 
+  return _atom_type_symbols;
 }
 
-std::vector<double> Unit_Cell::get_atom_site_occupancy_vec(){
-  return _atoms_site_occupancy;
+std::vector<double> Unit_Cell::get_atom_occupancy_vec(){
+  return _atom_occupancies;
 }
 
 std::vector<double> Unit_Cell::get_atom_debye_waller_factor_vec(){
@@ -200,17 +200,22 @@ cv::Mat Unit_Cell::get_orientation_matrix(){
 
 
 bool Unit_Cell::create_atoms_from_site_and_symetry(){
-  int distinct = 1;
+  int distinct = 0;
   for( int atom_site_pos = 0 ; atom_site_pos < _atoms_site_type_symbols.size(); atom_site_pos++ ) {
+    distinct++;
     const double fract_x = _atoms_site_fract_x.at(atom_site_pos); 
     const double fract_y = _atoms_site_fract_y.at(atom_site_pos); 
     const double fract_z = _atoms_site_fract_z.at(atom_site_pos); 
-    const std::string atom_type_symbol = _atoms_site_type_symbols.at(atom_site_pos);
-    std::cout << "searching for "<<  atom_type_symbol << " in chem DB of size " << chem_database.size() << std::endl;
-    Atom_Info atom_info = chem_database.get_atom_info( atom_type_symbol );
+    const std::string atom_site_type_symbol = _atoms_site_type_symbols.at(atom_site_pos);
+    const double atom_occupancy = _atoms_site_occupancy.at(atom_site_pos);
+    const double atom_debye_waller_factor = 1.0f;
+    std::cout << "searching for "<<  atom_site_type_symbol << " in chem DB of size " << chem_database.size() << std::endl;
+    Atom_Info atom_info = chem_database.get_atom_info( atom_site_type_symbol );
     double atom_radious = atom_info.empiricalRadius_Nanometers(); 
-    
-    std::cout << " atom radious " << atom_radious << std::endl;
+    std::string atom_type_symbol = atom_info.symbol(); 
+    std::cout << "Atom symbol " << atom_type_symbol << std::endl;
+    std::cout << "Atom occupancy " << atom_occupancy << std::endl;
+    std::cout << "Atom radious " << atom_radious << std::endl;
     glm::vec4 cpk_color = atom_info.cpkColor();
     std::cout << "Color CPK RGBA " << cpk_color.r << " , " << cpk_color.g << " , " << cpk_color.b << " , " << cpk_color.a  << std::endl;
 
@@ -253,7 +258,10 @@ bool Unit_Cell::create_atoms_from_site_and_symetry(){
         const double py = temp_b * _cell_length_b_Nanometers;
         const double pz = temp_c * _cell_length_c_Nanometers;
         const glm::vec3 atom_pos ( px, py, pz );
+        _atom_type_symbols.push_back( atom_type_symbol );
         _atom_positions.push_back( atom_pos );
+        _atom_occupancies.push_back( atom_occupancy );
+        _atoms_debye_waller_factor.push_back( atom_debye_waller_factor );
         _atom_empirical_radii.push_back( atom_radious );
         _symetry_atom_positions.push_back(temporary_point);
         //_atom_cpk_colors

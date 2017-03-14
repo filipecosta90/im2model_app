@@ -57,14 +57,17 @@ class Unit_Cell {
     std::vector<double> _atoms_site_fract_y;
     std::vector<double> _atoms_site_fract_z;
     std::vector<double> _atoms_site_occupancy;
-    std::vector<double> _atoms_debye_waller_factor;
+
     /* end Atom site */
 
     std::vector<Atom::Atom> _atoms;
     std::vector<cv::Point3d> _symetry_atom_positions;
+    std::vector<std::string> _atom_type_symbols;
     std::vector<glm::vec3> _atom_positions;
-    std::vector<glm::vec4> _atom_cpk_rgba_colors;
+    std::vector<double> _atom_occupancies;
+    std::vector<double> _atoms_debye_waller_factor;
     std::vector<double> _atom_radii;
+    std::vector<glm::vec4> _atom_cpk_rgba_colors;
     std::vector<double> _atom_empirical_radii;
     //vertex buffer for points
 
@@ -113,9 +116,9 @@ class Unit_Cell {
     /** vector t **/
     cv::Point3d get_vector_t();
 
-    std::vector<std::string> get_atoms_site_type_symbols_vec();
+    std::vector<std::string> get_atom_type_symbols_vec();
     std::vector<glm::vec3> get_atom_positions_vec();
-    std::vector<double> get_atom_site_occupancy_vec();
+    std::vector<double> get_atom_occupancy_vec();
     std::vector<double> get_atom_debye_waller_factor_vec();
     std::vector<cv::Point3d> get_symetry_atom_positions_vec();
     std::vector<glm::vec4> get_atom_cpk_rgba_colors_vec();

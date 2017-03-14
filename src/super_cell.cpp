@@ -341,12 +341,15 @@ std::vector<double> Super_Cell::get_atom_empirical_radii_vec(){
 
 /** other methods **/
 bool Super_Cell::create_atoms_from_unit_cell(){
-  std::vector<std::string> unit_cell_atom_symbol_string = unit_cell->get_atoms_site_type_symbols_vec(); 
+  std::vector<std::string> unit_cell_atom_symbol_string = unit_cell->get_atom_type_symbols_vec(); 
   std::vector<glm::vec3> unit_cell_atom_positions = unit_cell->get_atom_positions_vec();
-  std::vector<double> unit_cell_atom_site_occupancy = unit_cell->get_atom_site_occupancy_vec();
+  std::vector<double> unit_cell_atom_site_occupancy = unit_cell->get_atom_occupancy_vec();
   std::vector<double> unit_cell_atom_debye_waller_factor = unit_cell->get_atom_debye_waller_factor_vec();
   std::vector<glm::vec4> unit_cell_atom_cpk_rgba_colors = unit_cell->get_atom_cpk_rgba_colors_vec();
   std::vector<double> unit_cell_atom_empirical_radii = unit_cell->get_atom_empirical_radii_vec();
+  std::cout << "size: " << unit_cell_atom_symbol_string.size() <<  " " << unit_cell_atom_positions.size() << 
+    " " << unit_cell_atom_site_occupancy.size() << " " << unit_cell_atom_debye_waller_factor.size() << " " << 
+    unit_cell_atom_cpk_rgba_colors.size() << " " << unit_cell_atom_empirical_radii.size() << std::endl;
   std::vector<glm::vec3>::iterator it;
   const double unit_cell_a_nm = unit_cell->get_cell_length_a_Nanometers();
   const double unit_cell_b_nm = unit_cell->get_cell_length_b_Nanometers();
@@ -361,7 +364,7 @@ bool Super_Cell::create_atoms_from_unit_cell(){
   const double fractional_factor_a_Nanometers = (1 / _super_cell_length_a_Nanometers);
   const double fractional_factor_b_Nanometers = (1 / _super_cell_length_b_Nanometers);
   const double fractional_factor_c_Nanometers = (1 / _super_cell_length_c_Nanometers);
-  
+
   std::cout << "UnitCell has " << unit_cell_atom_positions.size() << " atoms" << std::endl;
   std::cout << "\tSupercell expand factors: X " << expand_factor_a << ", Y " << expand_factor_b << ", Z " << expand_factor_c << std::endl;
 
@@ -375,25 +378,21 @@ bool Super_Cell::create_atoms_from_unit_cell(){
         for ( int unit_cell_pos = 0; unit_cell_pos <  unit_cell_atom_positions.size(); unit_cell_pos++ ){
           /* CEL */
           std::string atom_symbol = unit_cell_atom_symbol_string.at(unit_cell_pos);
-          _super_cell_atom_symbol_string.push_back( atom_symbol );
-          
-          std::cout << " symbol: " << atom_symbol << std::endl;
           const glm::vec3 atom_pos = unit_cell_atom_positions.at(unit_cell_pos) + abc_expand;
           const double atom_site_occupancy = unit_cell_atom_site_occupancy.at(unit_cell_pos);
-          _super_cell_atom_site_occupancy.push_back( atom_site_occupancy );
-          
-          std::cout << " occupancy: " << atom_site_occupancy << std::endl;
-          const double atom_debye_waller_factor = 1.0f; // unit_cell_atom_debye_waller_factor.at(unit_cell_pos);
+          const double atom_debye_waller_factor = unit_cell_atom_debye_waller_factor.at(unit_cell_pos);
           cv::Point3d atom_fractional ( atom_pos.x + center_a_unpadding_nm, atom_pos.y + center_b_unpadding_nm, atom_pos.z + center_c_unpadding_nm );
           atom_fractional.x *= fractional_factor_a_Nanometers;
           atom_fractional.y *= fractional_factor_b_Nanometers;
           atom_fractional.z *= fractional_factor_c_Nanometers;
-          _super_cell_atom_fractional_cell_coordinates.push_back( atom_fractional );
-          _super_cell_atom_debye_waller_factor.push_back( atom_debye_waller_factor );
-          std::cout << " fractional: " << atom_fractional << std::endl;
           /* VIS */
           const glm::vec4 atom_cpk_rgba_colors = unit_cell_atom_cpk_rgba_colors.at(unit_cell_pos);
           const double atom_empirical_radii = unit_cell_atom_empirical_radii.at(unit_cell_pos);
+          /** Vectors **/       
+          _super_cell_atom_symbol_string.push_back( atom_symbol );
+          _super_cell_atom_site_occupancy.push_back( atom_site_occupancy );
+          _super_cell_atom_fractional_cell_coordinates.push_back( atom_fractional );
+          _super_cell_atom_debye_waller_factor.push_back( atom_debye_waller_factor );
           _atom_positions.push_back(atom_pos);
           _atom_cpk_rgba_colors.push_back(atom_cpk_rgba_colors);
           _atom_empirical_radii.push_back(atom_empirical_radii);
@@ -655,9 +654,16 @@ void Super_Cell::remove_out_of_range_atoms(){
       delete_itt++
      ){
     const unsigned int pos_delete = *delete_itt;
+    _super_cell_atom_symbol_string.erase( _super_cell_atom_symbol_string.begin() + pos_delete );
+    _super_cell_atom_site_occupancy.erase( _super_cell_atom_site_occupancy.begin() + pos_delete );
+    _super_cell_atom_fractional_cell_coordinates.erase( _super_cell_atom_fractional_cell_coordinates.begin() + pos_delete );
+    _super_cell_atom_debye_waller_factor.erase( _super_cell_atom_debye_waller_factor.begin() + pos_delete );
     _atom_positions.erase( _atom_positions.begin() + pos_delete );
     _atom_cpk_rgba_colors.erase( _atom_cpk_rgba_colors.begin() + pos_delete ); 
     _atom_empirical_radii.erase( _atom_empirical_radii.begin() + pos_delete );
+
+
+
   }
   std::cout << "Final number of atoms: " << _atom_positions.size() << std::endl;
 }
@@ -668,10 +674,22 @@ void Super_Cell::generate_super_cell_file(  std::string _super_cell_filename ){
   outfile << "Cel file generated by Im2Model" << std::endl; 
   outfile << "0 " 
     <<  _super_cell_length_a_Nanometers << " " << _super_cell_length_b_Nanometers << " " << _super_cell_length_c_Nanometers
-    <<  _cell_angle_alpha << " " << _cell_angle_beta << " " << _cell_angle_gamma <<  std::endl; 
-  /*for ( int pos = 0 ; pos < number_slices_used_describe_full_object_structure_up_to_its_maximum_thickness ; pos++){
-    outfile << "" << std::endl; 
-    }*/
+    <<  " "  << _cell_angle_alpha << " " << _cell_angle_beta << " " << _cell_angle_gamma <<  std::endl; 
+  unsigned int loop_counter = 0;
+  for( std::vector<cv::Point3d>::iterator _atom_fractional_itt = _super_cell_atom_fractional_cell_coordinates.begin() ; 
+      _atom_fractional_itt != _super_cell_atom_fractional_cell_coordinates.end();
+      _atom_fractional_itt++ , loop_counter++ 
+     ){
+    const std::string atom_symbol = _super_cell_atom_symbol_string.at( loop_counter );
+    const double atom_occupancy = _super_cell_atom_site_occupancy.at( loop_counter );
+    const double atom_debye_waller_factor = _super_cell_atom_debye_waller_factor.at( loop_counter );
+    const cv::Point3d fractional = *_atom_fractional_itt;
+
+    outfile << atom_symbol 
+      << " " << fractional.x << " " << fractional.y << " " << fractional.z 
+      << " " << atom_occupancy << " " << atom_debye_waller_factor 
+      << " " << 0.0f << " " << 0.0f << " " << 0.0f << std::endl; 
+  }
   outfile << "*" << std::endl; 
   outfile.close();
 }

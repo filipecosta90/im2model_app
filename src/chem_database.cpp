@@ -155,7 +155,7 @@ Atom_Info Chem_Database::get_atom_info( std::string type_symbol ){
       i--;
     }
   }
-  std::cout << "element type symbol " << type_symbol << " , alnum " << type_symbol_alnum << std::endl;
+// std::cout << "element type symbol " << type_symbol << " , alnum " << type_symbol_alnum << std::endl;
   std::map<std::string,Atom_Info::Atom_Info>::iterator Atom_itt; 
   Atom_itt = elements_database.find( type_symbol_alnum );
   if ( Atom_itt == elements_database.end()){
