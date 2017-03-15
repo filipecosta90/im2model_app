@@ -282,8 +282,8 @@ void Unit_Cell::form_matrix_from_miller_indices (){
   // can be converted to a unit vector, n, by dividing by the 
   // square root of the sum of the squares: {similar for [uvw]}.  
   // This is known as normalization.
-  cv::Point3d b = zone_axis_vector_uvw / norm_uvw; 
-  cv::Point3d n = upward_vector_hkl / norm_hkl; 
+  cv::Point3d b = upward_vector_hkl / norm_hkl; 
+  cv::Point3d n = zone_axis_vector_uvw / norm_uvw;
 
   cv::Mat b_matrix (b, CV_64F);
   cv::Mat n_matrix (n, CV_64F);
@@ -307,6 +307,12 @@ void Unit_Cell::form_matrix_from_miller_indices (){
   orientation_matrix = cv::Mat( points , true ); 
   orientation_matrix = orientation_matrix.reshape(1);
 
+  /**
+   * R is normalized: the squares of the elements in any row or column sum to 1.
+   * R is orthogonal: the dot product of any pair of rows or any pair of columns is 0.
+   * The rows of R represent the coordinates in the original space of unit vectors along the coordinate axes of the rotated space. 
+   * The columns of R represent the coordinates in the rotated space of unit vectors along the axes of the original space.
+   * **/
   std::cout << "Orientation Matrix :" << std::endl;
   std::cout << orientation_matrix << std::endl;
 

@@ -616,33 +616,65 @@ void Super_Cell::update_super_cell_boundary_polygon(){
     _super_cell_boundary_polygon_px_w_margin.push_back( super_cell_boundary_point );
   }
 }
-
-void Super_Cell::remove_out_of_range_atoms(){
-  const int a_padding_px = _super_cell_width_px / 2;
-  const int b_padding_px = _super_cell_height_px / 2;
+/* this method has to be invoced before */
+void Super_Cell::remove_z_out_of_range_atoms(){
   const double _z_bot_limit = _z_supercell_min_size_nm / -2.0f;
   const double _z_top_limit = _z_supercell_min_size_nm / 2.0f;
   std::vector<unsigned int> _atom_positions_delete;
   unsigned int loop_counter = 0;
-  std::cout << "Initial number of atoms: " << _atom_positions.size() << std::endl;
+  std::cout << "Initial number of atoms prior to Z remotion: " << _atom_positions.size() << std::endl;
+  for( std::vector<glm::vec3>::iterator _atom_positions_itt = _atom_positions.begin() ; 
+      _atom_positions_itt != _atom_positions.end();
+      _atom_positions_itt++ , loop_counter++ 
+     ){
+    const double _atom_z_nm = _atom_positions_itt->z;
+    /** check for range in Z **/
+    bool in_range = true;
+
+    if ( _atom_z_nm > _z_top_limit ){ 
+      in_range = false; 
+    }
+    if ( _atom_z_nm < _z_bot_limit ){ 
+      in_range = false; 
+    }
+
+    if( !in_range ){
+      _atom_positions_delete.push_back( loop_counter );
+    }
+  }
+  /* We will delete from back to begin to preserve positions */
+  std::reverse( _atom_positions_delete.begin() ,_atom_positions_delete.end() ); 
+  for( std::vector<unsigned int>::iterator delete_itt =  _atom_positions_delete.begin();
+      delete_itt != _atom_positions_delete.end();
+      delete_itt++
+     ){
+    const unsigned int pos_delete = *delete_itt;
+    _super_cell_atom_symbol_string.erase( _super_cell_atom_symbol_string.begin() + pos_delete );
+    _super_cell_atom_site_occupancy.erase( _super_cell_atom_site_occupancy.begin() + pos_delete );
+    _super_cell_atom_fractional_cell_coordinates.erase( _super_cell_atom_fractional_cell_coordinates.begin() + pos_delete );
+    _super_cell_atom_debye_waller_factor.erase( _super_cell_atom_debye_waller_factor.begin() + pos_delete );
+    _atom_positions.erase( _atom_positions.begin() + pos_delete );
+    _atom_cpk_rgba_colors.erase( _atom_cpk_rgba_colors.begin() + pos_delete ); 
+    _atom_empirical_radii.erase( _atom_empirical_radii.begin() + pos_delete );
+  }
+  std::cout << "Final number of atoms after Z remotion: " << _atom_positions.size() << std::endl;
+}
+
+void Super_Cell::remove_xy_out_of_range_atoms(){
+  const int a_padding_px = _super_cell_width_px / 2;
+  const int b_padding_px = _super_cell_height_px / 2;
+  std::vector<unsigned int> _atom_positions_delete;
+  unsigned int loop_counter = 0;
+  std::cout << "Initial number of atoms prior to XY remotion: " << _atom_positions.size() << std::endl;
   for( std::vector<glm::vec3>::iterator _atom_positions_itt = _atom_positions.begin() ; 
       _atom_positions_itt != _atom_positions.end();
       _atom_positions_itt++ , loop_counter++ 
      ){
     const int _atom_x_px = ((int)( _atom_positions_itt->x / _sampling_rate_super_cell_x_nm_pixel ) )+ a_padding_px;
     const int _atom_y_px = ((int)( _atom_positions_itt->y / _sampling_rate_super_cell_y_nm_pixel ) )+ b_padding_px;
-    const double _atom_z_nm = _atom_positions_itt->z;
     const cv::Point _atom_xy ( _atom_x_px, _atom_y_px );
     /** check for range in XY **/
     double in_range = cv::pointPolygonTest( _super_cell_boundary_polygon_px_w_margin , _atom_xy, false );
-    /** check for range in Z **/
-    if ( _atom_z_nm > _z_top_limit ){ 
-      in_range = -1.0f; 
-    }
-    if ( _atom_z_nm < _z_bot_limit ){ 
-      in_range = -1.0f; 
-    }
-
     if( in_range < 0.0f ){
       _atom_positions_delete.push_back( loop_counter );
     }
@@ -661,11 +693,8 @@ void Super_Cell::remove_out_of_range_atoms(){
     _atom_positions.erase( _atom_positions.begin() + pos_delete );
     _atom_cpk_rgba_colors.erase( _atom_cpk_rgba_colors.begin() + pos_delete ); 
     _atom_empirical_radii.erase( _atom_empirical_radii.begin() + pos_delete );
-
-
-
   }
-  std::cout << "Final number of atoms: " << _atom_positions.size() << std::endl;
+  std::cout << "Final number of atoms after XY remotion: " << _atom_positions.size() << std::endl;
 }
 
 void Super_Cell::generate_super_cell_file(  std::string _super_cell_filename ){
