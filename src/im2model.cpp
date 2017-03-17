@@ -1425,18 +1425,16 @@ int main(int argc, char** argv )
 
       super_cell.calculate_supercell_boundaries_from_experimental_image( cv::Point2f(roi_center_x, roi_center_y), edge_detection_threshold , max_contour_distance_px );
       super_cell.create_atoms_from_unit_cell();
-      super_cell.remove_z_out_of_range_atoms();
+      //super_cell.remove_z_out_of_range_atoms();
       super_cell.orientate_atoms_from_matrix();
-      super_cell.remove_xy_out_of_range_atoms();
+      //super_cell.remove_xy_out_of_range_atoms();
       super_cell.generate_super_cell_file( "test_im2model.cel" );
       //wavimg_simgrid_steps.export_sim_grid();
     }
-
     if( vis_gui_switch ){
       /* VIS */
-      AppVis();
+      //      AppVis();
     }
-
   }
   catch(std::exception& e){
     std::cerr << "Unhandled Exception reached the top of main: "

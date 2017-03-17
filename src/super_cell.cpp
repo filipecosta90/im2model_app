@@ -34,6 +34,9 @@
 #include "atom_info.hpp"
 #include "chem_database.hpp"
 
+// Parallel construction
+//#include <omp.h>
+
 Super_Cell::Super_Cell(){
   /** supercell exclusive **/
   expand_factor_a = 1;
@@ -368,14 +371,14 @@ bool Super_Cell::create_atoms_from_unit_cell(){
   std::cout << "UnitCell has " << unit_cell_atom_positions.size() << " atoms" << std::endl;
   std::cout << "\tSupercell expand factors: X " << expand_factor_a << ", Y " << expand_factor_b << ", Z " << expand_factor_c << std::endl;
 
-  for ( int c_expand_pos = 0; c_expand_pos < expand_factor_c; c_expand_pos++ ){
+  for ( size_t c_expand_pos = 0; c_expand_pos < expand_factor_c; c_expand_pos++ ){
     const double c_expand_nanometers = c_expand_pos * unit_cell_c_nm + center_c_padding_nm;
-    for ( int b_expand_pos = 0; b_expand_pos < expand_factor_b; b_expand_pos++ ){
+    for ( size_t  b_expand_pos = 0; b_expand_pos < expand_factor_b; b_expand_pos++ ){
       const double b_expand_nanometers = b_expand_pos * unit_cell_b_nm + center_b_padding_nm;
-      for ( int a_expand_pos = 0; a_expand_pos < expand_factor_a; a_expand_pos++ ){
+      for ( size_t a_expand_pos = 0; a_expand_pos < expand_factor_a; a_expand_pos++ ){
         const double a_expand_nanometers = a_expand_pos * unit_cell_a_nm + center_a_padding_nm;
         const glm::vec3 abc_expand (a_expand_nanometers, b_expand_nanometers, c_expand_nanometers);
-        for ( int unit_cell_pos = 0; unit_cell_pos <  unit_cell_atom_positions.size(); unit_cell_pos++ ){
+        for ( size_t unit_cell_pos = 0; unit_cell_pos <  unit_cell_atom_positions.size(); unit_cell_pos++ ){
           /* CEL */
           std::string atom_symbol = unit_cell_atom_symbol_string.at(unit_cell_pos);
           const glm::vec3 atom_pos = unit_cell_atom_positions.at(unit_cell_pos) + abc_expand;
@@ -407,15 +410,18 @@ bool Super_Cell::create_atoms_from_unit_cell(){
 void Super_Cell::orientate_atoms_from_matrix(){
   std::cout << "Orientating atoms from matrix :" << std::endl;
   std::cout << orientation_matrix << std::endl;
-  std::vector<glm::vec3>::iterator it ;
-  for ( int pos = 0; pos <  _atom_positions.size(); pos++ ){
-    glm::vec3 initial_atom = _atom_positions.at(pos);
+  for (
+      std::vector<glm::vec3>::iterator it = _atom_positions.begin() ;
+      it != _atom_positions.end();
+      it++
+      ){
+    glm::vec3 initial_atom = *it; 
     cv::Vec3d V ( initial_atom.x, initial_atom.y, initial_atom.z );
     cv::Mat result = orientation_matrix * cv::Mat(V);
-    const glm::vec3 final (result.at<double>(0,0), result.at<double>(1,0), result.at<double>(2,0));
-    result.release();
-    _atom_positions.at(pos) =  final; 
+    glm::vec3 final (result.at<double>(0,0), result.at<double>(1,0), result.at<double>(2,0));
+    *it = final;
   }
+  std::cout << "Finished orientating atoms from matrix :" << std::endl;
 }
 
 void Super_Cell::update_length_parameters(){
@@ -455,7 +461,9 @@ bool Super_Cell::update_unit_cell_parameters(){
   return true;
 }
 
-void Super_Cell::calculate_supercell_boundaries_from_experimental_image( cv::Point2f roi_center, int threshold, int max_contour_distance_px ){
+void Super_Cell::calculate_supercell_boundaries_from_experimental_image( 
+    cv::Point2f roi_center, int threshold, int max_contour_distance_px 
+    ){
   cv::Mat canny_output;
   std::vector< std::vector<cv::Point> > contours;
   std::vector<cv::Vec4i> hierarchy;
@@ -468,6 +476,7 @@ void Super_Cell::calculate_supercell_boundaries_from_experimental_image( cv::Poi
 
   for( size_t i = 0; i< contours.size(); i++ ){
     for( size_t j = (i+1); j< contours.size(); j++ ){
+      
       const double raw_distance = fabs(cv::pointPolygonTest( contours[i], contours[j][0] , true ));
       dist[i][j]=raw_distance;
       dist[j][i]=raw_distance;
@@ -548,7 +557,11 @@ void Super_Cell::calculate_supercell_boundaries_from_experimental_image( cv::Poi
   _experimental_image_boundary_polygon_margin_height_px = _experimental_image_boundary_polygon_margin_y_Nanometers / _sampling_rate_super_cell_y_nm_pixel;
   std::vector<cv::Point>::iterator  _exp_itt;
 
-  for ( _exp_itt = _experimental_image_boundary_polygon.begin(); _exp_itt != _experimental_image_boundary_polygon.end(); _exp_itt++ ){
+  for ( 
+      _exp_itt = _experimental_image_boundary_polygon.begin(); 
+      _exp_itt != _experimental_image_boundary_polygon.end();
+      _exp_itt++ 
+      ){
     const cv::Point initial_point = *_exp_itt;
     const cv::Point direction_centroid_boundary = initial_point - boundary_polygon_center;
     const double direction_centroid_boundary_x = direction_centroid_boundary.x / cv::norm( direction_centroid_boundary );
@@ -599,9 +612,11 @@ void Super_Cell::update_super_cell_boundary_polygon(){
   const int _width_padding_px = ( _super_cell_width_px - _super_cell_min_width_px )/ 2;
   const int _height_padding_px = ( _super_cell_height_px - _super_cell_min_height_px )/ 2;
 
-  for ( std::vector<cv::Point>::iterator experimental_bound_it = _experimental_image_boundary_polygon_w_margin.begin(); 
+  for ( 
+      std::vector<cv::Point>::iterator experimental_bound_it = _experimental_image_boundary_polygon_w_margin.begin(); 
       experimental_bound_it != _experimental_image_boundary_polygon_w_margin.end(); 
-      experimental_bound_it++ ){
+      experimental_bound_it++ 
+      ){
     cv::Point super_cell_boundary_point = *experimental_bound_it;
     super_cell_boundary_point.x -= _super_cell_left_padding_px;
     super_cell_boundary_point.y -= _super_cell_top_padding_px;

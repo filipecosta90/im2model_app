@@ -1,6 +1,11 @@
 # the minimum version of CMake required
 
-project(im2model CXX)
+# THIS HAS TO COME BEFORE THE PROJECT LINE
+set(CMAKE_C_COMPILER "gcc")
+set(CMAKE_CXX_COMPILER "g++")
+# THIS HAS TO COME BEFORE THE PROJECT LINE
+
+project(im2model LANGUAGES CXX)
 
 if(APPLE)
   add_definitions(-DAPPLE)
@@ -35,6 +40,8 @@ find_package(GLEW REQUIRED)
 find_package(OpenCV  3.0.0 REQUIRED)
 find_package(BISON REQUIRED)
 find_package(FLEX REQUIRED)
+find_package(OpenMP)
+
 pkg_search_module(GLFW REQUIRED glfw3)
 
 
@@ -48,6 +55,11 @@ include_directories(${GLFW_INCLUDE_DIRS})
 set(CMAKE_BINARY_DIR ${CMAKE_SOURCE_DIR}/build)
 set(EXECUTABLE_OUTPUT_PATH ${CMAKE_BINARY_DIR})
 set(LIBRARY_OUTPUT_PATH ${CMAKE_BINARY_DIR})
+
+if (OPENMP_FOUND)
+  set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
+  set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+endif()
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -Wall -Wno-deprecated-register -std=c++0x -Wconversion")
 
