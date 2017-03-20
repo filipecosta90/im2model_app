@@ -25,6 +25,7 @@
 #include "chem_database.hpp"
 
 Unit_Cell::Unit_Cell(){
+  orientation_matrix.create(3,3, CV_64FC1);
   chem_database = Chem_Database();
 }
 
@@ -162,7 +163,7 @@ cv::Point3d Unit_Cell::get_vector_t ( ){
   return vector_t;
 }
 
-std::vector<glm::vec3> Unit_Cell::get_atom_positions_vec( ){
+std::vector<cv::Point3d> Unit_Cell::get_atom_positions_vec( ){
   return _atom_positions;
 }
 
@@ -257,7 +258,7 @@ bool Unit_Cell::create_atoms_from_site_and_symetry(){
         const double px = temp_a * _cell_length_a_Nanometers; 
         const double py = temp_b * _cell_length_b_Nanometers;
         const double pz = temp_c * _cell_length_c_Nanometers;
-        const glm::vec3 atom_pos ( px, py, pz );
+        cv::Point3d atom_pos ( px, py, pz );
         _atom_type_symbols.push_back( atom_type_symbol );
         _atom_positions.push_back( atom_pos );
         _atom_occupancies.push_back( atom_occupancy );
@@ -288,7 +289,7 @@ void Unit_Cell::form_matrix_from_miller_indices (){
   cv::Mat b_matrix (b, CV_64F);
   cv::Mat n_matrix (n, CV_64F);
 
-  cv::Mat t_up = n_matrix.cross( b_matrix); 
+  cv::Mat t_up = n_matrix.cross( b_matrix ); 
   const double norm_t = cv::norm( t_up );
   cv::Mat t_mat = t_up / norm_t; 
   vector_t.x = t_mat.at<double>(0,0);
@@ -317,7 +318,8 @@ void Unit_Cell::form_matrix_from_miller_indices (){
   std::cout << orientation_matrix << std::endl;
 
 }
-
+/* deprecated
+ *
 void Unit_Cell::orientate_atoms_from_matrix(){
   std::cout << "Orientating atoms from matrix :" << std::endl;
   std::vector<glm::vec3>::iterator it ;
@@ -335,5 +337,7 @@ void Unit_Cell::orientate_atoms_from_matrix(){
 void Unit_Cell::set_chem_database( Chem_Database* chem_db ){
 
 }
+
+*/
 
 

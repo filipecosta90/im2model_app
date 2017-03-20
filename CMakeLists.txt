@@ -4,8 +4,9 @@
 set(CMAKE_C_COMPILER "gcc")
 set(CMAKE_CXX_COMPILER "g++")
 # THIS HAS TO COME BEFORE THE PROJECT LINE
+ set(CMAKE_CXX_STANDARD 11)
 
-project(im2model LANGUAGES CXX)
+ project(im2model LANGUAGES CXX)
 
 if(APPLE)
   add_definitions(-DAPPLE)

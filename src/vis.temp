@@ -1,0 +1,768 @@
+
+
+/*
+ Represents a textured geometry asset
+ Contains everything necessary to draw arbitrary geometry with a single texture:
+ - shaders
+ - a texture
+ - a VBO
+ - a IBO
+ - a VAO
+ - the parameters to glDrawArrays (drawType, drawStart, drawCount)
+ */
+
+struct ModelAsset {
+    vis::Program* shaders;
+    GLuint vbo;
+    GLuint ibo;
+    GLuint vao;
+    GLenum drawType;
+    GLint drawStart;
+    GLint drawCount;
+    GLint numIndices;
+    
+    ModelAsset():
+    shaders(NULL),
+    vbo(0),
+    ibo(0),
+    vao(0),
+    drawType(GL_TRIANGLES),
+    drawStart(0),
+    drawCount(0),
+    numIndices(0)
+    {}
+};
+
+/*
+ Represents an instance of an `ModelAsset`
+ Contains a pointer to the asset, and a model transformation matrix to be used when drawing.
+ */
+struct ModelInstance {
+    ModelAsset* asset;
+    glm::mat4 transform;
+    glm::vec4 rgba;
+    GLenum polygon_mode;
+    GLenum polygon_face;
+    
+    
+    ModelInstance() :
+    asset(NULL),
+    transform(),
+    rgba(1.0f,0.0f,0.0f,1.0f),
+    polygon_mode(GL_FILL),
+    polygon_face(GL_FRONT_AND_BACK)
+    {}
+};
+
+
+
+/* test opengl */
+
+// constants
+const glm::vec2 SCREEN_SIZE(1024 , 760);
+
+// globals
+GLFWwindow* gWindow = NULL;
+double gScrollY = 0.0;
+vis::Camera gCamera;
+ModelAsset vis_atom_asset;
+ModelAsset vis_unit_cell_asset;
+std::list<ModelInstance> gInstances;
+GLfloat gDegreesRotated = 0.0f;
+
+double DEGS_TO_RAD = M_PI/180.0f;
+
+// returns a new vis::Program created from the given vertex and fragment shader filenames
+static vis::Program* LoadShaders(const char* vertFilename, const char* fragFilename) {
+    std::vector<vis::Shader> shaders;
+    shaders.push_back(vis::Shader::shaderFromFile(vertFilename, GL_VERTEX_SHADER));
+    shaders.push_back(vis::Shader::shaderFromFile(fragFilename, GL_FRAGMENT_SHADER));
+    return new vis::Program(shaders);
+}
+
+// initialises the vis_atom_asset global
+static void LoadVisUnitCellAsset( double side ) {
+    // set all the elements of vis_atom_asset
+    vis_unit_cell_asset.shaders = LoadShaders("shaders/cube.v.glsl", "shaders/cube.f.glsl");
+    vis_unit_cell_asset.drawType = GL_TRIANGLES;
+    glGenBuffers(1, &vis_unit_cell_asset.vbo);
+    glGenVertexArrays(1, &vis_unit_cell_asset.vao);
+    glGenBuffers(1, &vis_unit_cell_asset.ibo);
+    
+    // bind the VAO
+    glBindVertexArray(vis_unit_cell_asset.vao);
+    
+    std::vector<GLfloat> vertices;
+    std::vector<GLint> indices;
+    
+    //------------------------
+    //-- creates a sphere as a "standard sphere" triangular mesh with the specified
+    //-- number of latitude (nLatitude) and longitude (nLongitude) lines
+    cv::Point3d pt(0.0f,0.0f,0.0f);
+    int initial_vertices_size = vertices.size() / 3;    // the needed padding
+    
+    // bottom vertex 1 - A
+    vertices.push_back( pt.x );
+    vertices.push_back( pt.y );
+    vertices.push_back( pt.z );
+    // bottom vertex 2 - B
+    vertices.push_back( pt.x+side );
+    vertices.push_back( pt.y );
+    vertices.push_back( pt.z );
+    // bottom vertex 3 - C
+    vertices.push_back( pt.x+side );
+    vertices.push_back( pt.y+side );
+    vertices.push_back( pt.z );
+    // bottom vertex 4 - D
+    vertices.push_back( pt.x );
+    vertices.push_back( pt.y+side );
+    vertices.push_back( pt.z );
+    // top vertex 5 - E
+    vertices.push_back( pt.x );
+    vertices.push_back( pt.y );
+    vertices.push_back( pt.z+side );
+    // top vertex 6 - F
+    vertices.push_back( pt.x+side );
+    vertices.push_back( pt.y );
+    vertices.push_back( pt.z+side );
+    // top vertex 7 - G
+    vertices.push_back( pt.x+side );
+    vertices.push_back( pt.y+side );
+    vertices.push_back( pt.z+side );
+    // top vertex 8 - H
+    vertices.push_back( pt.x );
+    vertices.push_back( pt.y+side );
+    vertices.push_back( pt.z+side );
+    
+    int a,b,c,d,e,f,g,h;
+    a = initial_vertices_size;
+    b = a + 1;
+    c = b + 1;
+    d = c + 1;
+    e = d + 1;
+    f = e + 1;
+    g = f + 1;
+    h = g + 1;
+    
+    //front 1
+    indices.push_back( b );
+    indices.push_back( c );
+    indices.push_back( g );
+    // front 2
+    indices.push_back( b );
+    indices.push_back( g );
+    indices.push_back( f );
+    // right 1
+    indices.push_back( g );
+    indices.push_back( h );
+    indices.push_back( d );
+    // right 2
+    indices.push_back( g );
+    indices.push_back( d );
+    indices.push_back( c );
+    // back 1
+    indices.push_back( a );
+    indices.push_back( d );
+    indices.push_back( h );
+    // back 2
+    indices.push_back( a );
+    indices.push_back( h );
+    indices.push_back( e );
+    // left 1
+    indices.push_back( a );
+    indices.push_back( b );
+    indices.push_back( f );
+    // left 2
+    indices.push_back( a );
+    indices.push_back( f );
+    indices.push_back( e );
+    // top 1
+    indices.push_back( g );
+    indices.push_back( f );
+    indices.push_back( e );
+    // top 2
+    indices.push_back( g );
+    indices.push_back( e );
+    indices.push_back( h );
+    // bottom 1
+    indices.push_back( a );
+    indices.push_back( d );
+    indices.push_back( c );
+    // bottom 2
+    indices.push_back( a );
+    indices.push_back( c );
+    indices.push_back( b );
+    
+    vis_unit_cell_asset.drawStart = 0;
+    vis_unit_cell_asset.drawCount = vertices.size();
+    vis_unit_cell_asset.numIndices = indices.size();
+    
+    // bind the VBO
+    glBindBuffer(GL_ARRAY_BUFFER, vis_unit_cell_asset.vbo);
+    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(GLfloat), vertices.data(), GL_STATIC_DRAW);
+    
+    // bind the IBO
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vis_unit_cell_asset.ibo);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(GLint), indices.data(), GL_STATIC_DRAW);
+    
+    // connect the xyz to the "vert" attribute of the vertex shader
+    glEnableVertexAttribArray(vis_unit_cell_asset.shaders->attrib("vert"));
+    glVertexAttribPointer(vis_unit_cell_asset.shaders->attrib("vert"), 3, GL_FLOAT, GL_FALSE, 0, NULL); //3*sizeof(GLfloat), NULL);
+    
+    // unbind buffers
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    
+    // unbind the VAO
+    glBindVertexArray(0);
+}
+
+// initialises the vis_atom_asset global
+static void LoadVisAtomAsset() {
+    // set all the elements of vis_atom_asset
+    vis_atom_asset.shaders = LoadShaders("shaders/cube.v.glsl", "shaders/cube.f.glsl");
+    vis_atom_asset.drawType = GL_TRIANGLES;
+    glGenBuffers(1, &vis_atom_asset.vbo);
+    glGenVertexArrays(1, &vis_atom_asset.vao);
+    glGenBuffers(1, &vis_atom_asset.ibo);
+    
+    // bind the VAO
+    glBindVertexArray(vis_atom_asset.vao);
+    
+    std::vector<GLfloat> vertices;
+    std::vector<GLint> indices;
+    
+    //------------------------
+    //-- creates a sphere as a "standard sphere" triangular mesh with the specified
+    //-- number of latitude (nLatitude) and longitude (nLongitude) lines
+    cv::Point3d pt(0.0f,0.0f,0.0f);
+    float radius = 0.5f;
+    int nLatitude = 10;
+    int nLongitude = 10;
+    int p, s, i;
+    float x, y, z, out;
+    int nPitch = nLongitude + 1;
+    int initial_vertices_size = vertices.size() / 3;    // the needed padding
+    std::cout << "initial_vertices_size " << initial_vertices_size << std::endl;
+    
+    int numVertices = 0;    // the number of vertex points added.
+    float pitchInc = (180. / (float)nPitch) * DEGS_TO_RAD;
+    float rotInc   = (360. / (float)nLatitude) * DEGS_TO_RAD;
+    
+    // Top vertex.
+    vertices.push_back( pt.x );
+    vertices.push_back( pt.y );
+    vertices.push_back( pt.z+radius );
+    // Bottom vertex.
+    vertices.push_back( pt.x );
+    vertices.push_back( pt.y );
+    vertices.push_back( pt.z-radius );
+    
+    numVertices = numVertices+2;
+    
+    int fVert = initial_vertices_size + numVertices;    // Record the first vertex index for intermediate vertices.
+    for(p=1; p<nPitch; p++)     // Generate all "intermediate vertices":
+    {
+        out = radius * sin((float)p * pitchInc);
+        if(out < 0) out = -out;    // abs() command won't work with all compilers
+        z   = radius * cos(p * pitchInc);
+        for(s=0; s<=nLatitude; s++)
+        {
+            x = out * cos(s * rotInc);
+            y = out * sin(s * rotInc);
+            vertices.push_back( x+pt.x );
+            vertices.push_back( y+pt.y );
+            vertices.push_back( z+pt.z );
+            numVertices++;
+        }
+    }
+    
+    //## create triangles between intermediate points
+    for(p=1; p<(nPitch-1); p++) // starts from lower part of sphere up
+    {
+        for(s=0; s<(nLatitude); s++) {
+            i = p*(nLatitude+1) + s;
+            // a - d //
+            // | \ | //
+            // b - c //
+            const int upper_pos_lat = i - (nLatitude+1);
+            float a = upper_pos_lat+fVert;
+            float b = i+fVert;
+            float c = i+1+fVert;
+            float d = upper_pos_lat+1+fVert;
+            // 1st triangle abc
+            indices.push_back( a );
+            indices.push_back( b );
+            indices.push_back( c );
+            // 2nd triangle acd
+            indices.push_back( a );
+            indices.push_back( c );
+            indices.push_back( d );
+        }
+    }
+    
+    //## create triangles connecting to top and bottom vertices
+    int offLastVerts  = initial_vertices_size + numVertices - (nLatitude+1);
+    for(s=0; s<(nLatitude-1); s++)
+    {
+        //top
+        indices.push_back( initial_vertices_size   );
+        indices.push_back( (s+2)+fVert );
+        indices.push_back( (s+1)+fVert );
+        //bottom
+        indices.push_back( initial_vertices_size + 1);
+        indices.push_back( (s+1)+offLastVerts );
+        indices.push_back( (s+2)+offLastVerts );
+    }
+    
+    vis_atom_asset.drawStart = 0;
+    vis_atom_asset.drawCount = vertices.size();
+    vis_atom_asset.numIndices = indices.size();
+    
+    // bind the VBO
+    glBindBuffer(GL_ARRAY_BUFFER, vis_atom_asset.vbo);
+    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(GLfloat), vertices.data(), GL_STATIC_DRAW);
+    
+    // bind the IBO
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vis_atom_asset.ibo);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(GLint), indices.data(), GL_STATIC_DRAW);
+    
+    // connect the xyz to the "vert" attribute of the vertex shader
+    glEnableVertexAttribArray(vis_atom_asset.shaders->attrib("vert"));
+    glVertexAttribPointer(vis_atom_asset.shaders->attrib("vert"), 3, GL_FLOAT, GL_FALSE, 0, NULL); //3*sizeof(GLfloat), NULL);
+    
+    // unbind buffers
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    
+    // unbind the VAO
+    glBindVertexArray(0);
+    
+}
+
+// convenience function that returns a translation matrix
+glm::mat4 translate(GLfloat x, GLfloat y, GLfloat z) {
+    return glm::translate(glm::mat4(), glm::vec3(x,y,z));
+}
+
+// convenience function that returns a scaling matrix
+glm::mat4 scale(GLfloat x, GLfloat y, GLfloat z) {
+    return glm::scale(glm::mat4(), glm::vec3(x,y,z));
+}
+
+//create all the `instance` structs for the 3D scene, and add them to `gInstances`
+static void CreateInstances() {
+    
+    ModelInstance unit_cell_asset;
+    unit_cell_asset.asset = &vis_unit_cell_asset;
+    unit_cell_asset.polygon_mode = GL_LINE;
+    gInstances.push_back( unit_cell_asset );
+    
+    std::vector<cv::Point3d> atom_positions = super_cell.get_atom_positions_vec();
+    std::vector<glm::vec4> atom_cpk_rgba_colors = super_cell.get_atom_cpk_rgba_colors_vec();
+    std::vector<double> atom_empirical_radii = super_cell.get_atom_empirical_radii_vec();
+    std::vector<glm::vec3>::iterator pos_itt;
+    
+    std::cout << "going to create  " << atom_positions.size() << " instances" << std::endl;
+    for ( size_t vec_pos = 0; vec_pos < atom_positions.size(); vec_pos++){
+        const glm::vec3 pos = atom_positions.at(vec_pos);
+        ModelInstance atom;
+        atom.asset = &vis_atom_asset;
+        atom.rgba = atom_cpk_rgba_colors.at(vec_pos);
+        const double radii = atom_empirical_radii.at(vec_pos);
+        atom.transform = translate(pos.x, pos.y, pos.z) * scale(radii, radii, radii );
+        gInstances.push_back(atom);
+    }
+}
+
+//renders a single `ModelInstance`
+static void RenderInstance(const ModelInstance& inst) {
+    ModelAsset* asset = inst.asset;
+    vis::Program* shaders = asset->shaders;
+    
+    //bind the shaders
+    shaders->use();
+    
+    //set the shader uniforms
+    shaders->setUniform("camera", gCamera.matrix());
+    shaders->setUniform("model", inst.transform);
+    shaders->setUniform("model_color", inst.rgba);
+    
+    //bind VAO and draw
+    glBindVertexArray(asset->vao);
+    glBindBuffer(GL_ARRAY_BUFFER, asset->vbo);
+    
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, asset->ibo);
+    
+    glPolygonMode( inst.polygon_face , inst.polygon_mode );
+    
+    glDrawElements( asset->drawType , asset->numIndices, GL_UNSIGNED_INT , 0);
+    
+    // unbind the element render buffer
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+    // unbind the vertex array buffer
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    //unbind everything
+    glBindVertexArray(0);
+    shaders->stopUsing();
+    
+}
+
+// draws a single frame
+static void Render() {
+    // clear everything
+    glClearColor(1, 1, 1, 1); // white bg
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    
+    // render all the instances
+    std::list<ModelInstance>::const_iterator it;
+    
+    for(it = gInstances.begin(); it != gInstances.end(); ++it){
+        RenderInstance(*it);
+    }
+    // swap the display buffers (displays what was just drawn)
+    glfwSwapBuffers(gWindow);
+}
+
+
+// update the scene based on the time elapsed since last update
+static void Update(float secondsElapsed) {
+    //rotate the first instance in `gInstances`
+    const GLfloat degreesPerSecond = 180.0f;
+    gDegreesRotated += secondsElapsed * degreesPerSecond;
+    
+    //move position of camera based on WASD keys, and XZ keys for up and down
+    const float moveSpeed = 2.0; //units per second
+    if(glfwGetKey(gWindow, 'S')){
+        gCamera.offsetPosition(secondsElapsed * moveSpeed * -gCamera.forward());
+    } else if(glfwGetKey(gWindow, 'W')){
+        gCamera.offsetPosition(secondsElapsed * moveSpeed * gCamera.forward());
+    }
+    if(glfwGetKey(gWindow, 'A')){
+        gCamera.offsetPosition(secondsElapsed * moveSpeed * -gCamera.right());
+    } else if(glfwGetKey(gWindow, 'D')){
+        gCamera.offsetPosition(secondsElapsed * moveSpeed * gCamera.right());
+    }
+    if(glfwGetKey(gWindow, 'Z')){
+        gCamera.offsetPosition(secondsElapsed * moveSpeed * -glm::vec3(0,1,0));
+    } else if(glfwGetKey(gWindow, 'X')){
+        gCamera.offsetPosition(secondsElapsed * moveSpeed * glm::vec3(0,1,0));
+    }
+    
+    //rotate camera based on mouse movement
+    const float mouseSensitivity = 0.1f;
+    double mouseX, mouseY;
+    glfwGetCursorPos(gWindow, &mouseX, &mouseY);
+    gCamera.offsetOrientation(mouseSensitivity * (float)mouseY, mouseSensitivity * (float)mouseX);
+    glfwSetCursorPos(gWindow, 1, 1); //reset the mouse, so it doesn't go out of the window
+    
+    //increase or decrease field of view based on mouse wheel
+    const float zoomSensitivity = -0.2f;
+    float fieldOfView = gCamera.fieldOfView() + zoomSensitivity * (float)gScrollY;
+    if(fieldOfView < 5.0f) fieldOfView = 5.0f;
+    if(fieldOfView > 130.0f) fieldOfView = 130.0f;
+    gCamera.setFieldOfView(fieldOfView);
+    gScrollY = 0;
+}
+
+// records how far the y axis has been scrolled
+void OnScroll(GLFWwindow* window, double deltaX, double deltaY) {
+    gScrollY += deltaY;
+}
+
+void OnError(int errorCode, const char* msg) {
+    throw std::runtime_error(msg);
+}
+
+// the program starts here
+void AppVis() {
+    // initialise GLFW
+    glfwSetErrorCallback(OnError);
+    if(!glfwInit())
+        throw std::runtime_error("glfwInit failed");
+    
+    // open a window with GLFW
+    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
+    glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
+    gWindow = glfwCreateWindow((int)SCREEN_SIZE.x, (int)SCREEN_SIZE.y, "Im2Model Vis", NULL, NULL);
+    if(!gWindow)
+        throw std::runtime_error("glfwCreateWindow failed. Can your hardware handle OpenGL 3.2?");
+    
+    // GLFW settings
+    glfwSetInputMode(gWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    glfwSetCursorPos(gWindow, 1, 1);
+    glfwSetScrollCallback(gWindow, OnScroll);
+    glfwMakeContextCurrent(gWindow);
+    
+    // initialise GLEW
+    glewExperimental = GL_TRUE; //stops glew crashing on OSX :-/
+    if(glewInit() != GLEW_OK)
+        throw std::runtime_error("glewInit failed");
+    
+    // GLEW throws some errors, so discard all the errors so far
+    while(glGetError() != GL_NO_ERROR) {}
+    
+    // print out some info about the graphics drivers
+    std::cout << "OpenGL version: " << glGetString(GL_VERSION) << std::endl;
+    std::cout << "GLSL version: " << glGetString(GL_SHADING_LANGUAGE_VERSION) << std::endl;
+    std::cout << "Vendor: " << glGetString(GL_VENDOR) << std::endl;
+    std::cout << "Renderer: " << glGetString(GL_RENDERER) << std::endl;
+    
+    // make sure OpenGL version 3.2 API is available
+    if(!GLEW_VERSION_3_2)
+        throw std::runtime_error("OpenGL 3.2 API is not available.");
+    
+    // OpenGL settings
+    glEnable(GL_DEPTH_TEST);
+    glDepthFunc(GL_LESS);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    
+    
+    // initialise the vis_unit_cell asset
+    LoadVisUnitCellAsset( unit_cell.get_cell_length_a_Nanometers() );
+    // initialise the vis_atom_asset asset
+    LoadVisAtomAsset();
+    
+    // create all the instances in the 3D scene based on the vis_atom_asset asset
+    CreateInstances();
+    
+    // setup gCamera
+    
+    glm::vec3 vec_n = glm::normalize( glm::vec3( zone_axis_vector_uvw.x, zone_axis_vector_uvw.y, zone_axis_vector_uvw.z ) );
+    glm::vec3 vec_v = glm::normalize( glm::vec3( upward_vector_hkl.x, upward_vector_hkl.y, upward_vector_hkl.z ) );
+    cv::Point3d cv_t = unit_cell.get_vector_t();
+    glm::vec3 vec_up = glm::normalize( glm::vec3( cv_t.x, cv_t.y, cv_t.z ) );
+    
+    glm::vec3 center =  glm::vec3(0.0f,0.0f,0.0f);
+    
+    glm::vec3 eye = glm::normalize( glm::vec3( zone_axis_vector_uvw.x, zone_axis_vector_uvw.y, zone_axis_vector_uvw.z ) );
+    glm::vec3 position = glm::vec3(0.0f,0.0f,0.0f);
+    position.x = super_cell.get_super_cell_length_a_Nanometers()*2.0f;
+    position.y = super_cell.get_super_cell_length_b_Nanometers()*2.0f;
+    position.z = super_cell.get_super_cell_length_c_Nanometers()*2.0f;
+    
+    gCamera.set_center( center );
+    gCamera.setPosition( position ); // position );
+    gCamera.set_n( vec_n );
+    gCamera.lookAt( -eye );
+    gCamera.set_vis_up( vec_up );
+    
+    std::cout << "Visualization Parameters" << std::endl;
+    std::cout << "Center: " << glm::to_string( center ) <<  std::endl;
+    std::cout << "CAM Looking in direction: " << glm::to_string( eye ) <<  std::endl;
+    std::cout << "CAM Up: " << glm::to_string( vec_up ) <<  std::endl;
+    std::cout << "CAM Position: " << glm::to_string( position ) <<  std::endl;
+    std::cout << "View Matrix:" << std::endl;
+    std::cout << glm::to_string( gCamera.view() ) << std::endl;
+    
+    // gCamera.setPosition(glm::vec3(upward_vector_hkl.x, upward_vector_hkl.y, upward_vector_hkl.z));
+    // gCamera.set_eye((super_cell.get_super_cell_length_a_Nanometers()*2.0f,super_cell.get_super_cell_length_b_Nanometers()*2.0f,super_cell.get_super_cell_length_c_Nanometers() * 2.0f));
+    //gCamera.set_center( glm::vec3(0.0f,0.0f,0.0f) );
+    //gCamera.set_vis_up( glm::normalize (glm::vec3(zone_axis_vector_uvw.x, zone_axis_vector_uvw.y, zone_axis_vector_uvw.z) ) );
+    // gCamera.lookAt(glm::vec3(zone_axis_vector_uvw.x, zone_axis_vector_uvw.y, zone_axis_vector_uvw.z));
+    gCamera.set_window_width( SCREEN_SIZE.x );
+    gCamera.set_window_height( SCREEN_SIZE.y );
+    gCamera.setViewportAspectRatio(SCREEN_SIZE.x / SCREEN_SIZE.y);
+    
+    // run while the window is open
+    double lastTime = glfwGetTime();
+    while(!glfwWindowShouldClose(gWindow)){
+        // process pending events
+        glfwPollEvents();
+        
+        // update the scene based on the time elapsed since last update
+        double thisTime = glfwGetTime();
+        Update((float)(thisTime - lastTime));
+        lastTime = thisTime;
+        
+        // draw one frame
+        Render();
+        
+        // check for errors
+        GLenum error = glGetError();
+        if(error != GL_NO_ERROR)
+            std::cerr << "OpenGL Error " << error << std::endl;
+        
+        //exit program if escape key is pressed
+        if(glfwGetKey(gWindow, GLFW_KEY_ESCAPE))
+            glfwSetWindowShouldClose(gWindow, GL_TRUE);
+    }
+    
+    // clean up and exit
+    glfwTerminate();
+}
+
+/// Function Headers
+void thresh_callback(int, void* );
+
+void CallBackFunc(int event, int x, int y, int flags, void* userdata)
+{
+    if  ( event == EVENT_LBUTTONDOWN )
+    {
+        std::cout << "New ROI center - position (" << x << ", " << y << ")" << std::endl;
+        roi_rectangle.x = x - ( roi_x_size / 2 );
+        roi_rectangle.y = y - ( roi_y_size / 2) ;
+        roi_rectangle.width = roi_x_size;
+        roi_rectangle.height = roi_y_size;
+        experimental_working = experimental_image.clone();
+        // copy the roi
+        cv::Mat roi = experimental_image(roi_rectangle);
+        experimental_image_roi.create( roi_x_size, roi_y_size , CV_8UC1 );
+        roi.copyTo(experimental_image_roi);
+        //draw the roi
+        rectangle(experimental_working, roi_rectangle, Scalar(0,0,255), 5);
+        imshow("Experimental Window", experimental_working);
+    }
+    else if  ( event == EVENT_LBUTTONUP )
+    {
+        //  std::cout << "Left button released" << std::endl;
+    }
+    else if ( event == EVENT_MOUSEMOVE )
+    {
+        //  std::cout << "Mouse move over the window - position (" << x << ", " << y << ")" << std::endl;
+    }
+}
+
+void thresh_callback(int, void* )
+{
+    cv::Mat experimental_working_canny, canny_output;
+    std::vector< std::vector<Point> > contours;
+    std::vector< std::vector<Point> > contours_2nd_itt;
+    
+    std::vector<Vec4i> hierarchy;
+    
+    //// contours = get_experimental_image_contours(experimental_image, edge_detection_threshold );
+    
+    std::cout << "Detected " << contours.size() << " countours" << std::endl;
+    Mat1f dist(contours.size(), contours.size(), 0.f);
+    Mat1i in_range(contours.size(), contours.size(), 0);
+    
+    for( size_t i = 0; i< contours.size(); i++ ){
+        for( size_t j = (i+1); j< contours.size(); j++ ){
+            const double raw_distance = fabs(cv::pointPolygonTest( contours[i], contours[j][0] , true ));
+            dist[i][j]=raw_distance;
+            dist[j][i]=raw_distance;
+        }
+    }
+    
+    cv::Mat raw_edge_drawing = Mat::zeros( canny_output.size(), CV_8UC3 );
+    cv::Mat drawing = Mat::zeros( canny_output.size(), CV_8UC3 );
+    
+    int contours_in_range = 0;
+    for( size_t i = 0; i< contours.size(); i++ ){
+        const double raw_distance = fabs(cv::pointPolygonTest( contours[i], Point2f(roi_center_x,roi_center_y), true ));
+        if ( raw_distance < max_contour_distance_px ){
+            in_range[i][1]=1;
+            contours_in_range++;
+        }
+    }
+    
+    std::cout << "There are " << contours_in_range << " contours in range("<< max_contour_distance_px <<"px) of the ROI" << std::endl;
+    int itt_num = 1;
+    int added_itt = 1;
+    
+    while ( added_itt > 0 ){
+        added_itt = 0;
+        for( size_t i = 0; i< contours.size(); i++ ){
+            if ( in_range[i][1] == 1 ){
+                for( size_t j = 0; j < contours.size(); j++ ){
+                    if ( in_range[j][1] == 0 ){
+                        if ( ( dist[i][j] < max_contour_distance_px )|| (dist[j][i] < max_contour_distance_px ) ){
+                            in_range[j][1]=1;
+                            added_itt++;
+                        }
+                    }
+                }
+            }
+        }
+        std::cout << "Added  " << added_itt << " contours in iteration # "<< itt_num << std::endl;
+        itt_num++;
+    }
+    
+    /// Find the convex hull object for each contour
+    std::vector<std::vector<cv::Point> > roi_contours;
+    
+    for( size_t i = 0; i< contours.size(); i++ ){
+        Scalar color = Scalar( rng.uniform(0, 255), rng.uniform(0,255), rng.uniform(0,255) );
+        if ( in_range[i][1] == 1 ){
+            roi_contours.push_back(contours[i]);
+            drawContours( drawing, contours, i, color, 2, 8, NULL , 0, Point() );
+        }
+        drawContours( raw_edge_drawing, contours, i, color, 2, 8, NULL , 0, Point() );
+    }
+    
+    std::vector<cv::Point> contours_merged;
+    
+    for( size_t i = 0; i < roi_contours.size(); i++ ){
+        for ( size_t j = 0; j< roi_contours[i].size(); j++  ){
+            contours_merged.push_back(roi_contours[i][j]);
+        }
+    }
+    
+    std::vector<std::vector<cv::Point>> hull( 1 );
+    convexHull( Mat(contours_merged), hull[0], false );
+    
+    std::cout << " HULL SIZE: " << hull[0].size() << std::endl;
+    std::vector<cv::Point>::iterator contour_it;
+    
+    for ( contour_it = hull[0].begin(); contour_it != hull[0].end(); contour_it++){
+        cv::Point p1 = *contour_it;
+        std::cout << p1 << std::endl;
+    }
+    
+    cv::Rect supercell_boundaries_rect = boundingRect(contours_merged);
+    Scalar color = Scalar( rng.uniform(0, 255), rng.uniform(0,255), rng.uniform(0,255) );
+    drawContours( drawing, hull, 0, color, 3, 8, std::vector<Vec4i>(), 0, Point() );
+    double roi_area_px = cv::contourArea(hull[0],false);
+    double roi_area_nm = roi_area_px * sampling_rate_experimental_x_nm_per_pixel * sampling_rate_experimental_y_nm_per_pixel;
+    std::cout << "ROI area " << roi_area_px << " px, " << roi_area_nm << " nm^2" << std::endl;
+    
+    namedWindow( "Contours", WINDOW_AUTOSIZE );
+    
+    // line 1
+    
+    std::stringstream output_legend_line1;
+    std::stringstream output_legend_line2;
+    std::stringstream output_legend_line3;
+    std::stringstream output_legend_line4;
+    
+    output_legend_line1 <<  "ROI area: " << roi_area_px << " sq. px, " << roi_area_nm << "sq. nm";
+    output_legend_line2 <<  "Canny thresh: " << edge_detection_threshold;
+    output_legend_line3 <<  "Max distance between countours: " << max_contour_distance_px<< " px";
+    output_legend_line4 <<  "# Contours selected: " << roi_contours.size() << " from "<< contours.size() << ", calculated in " << itt_num << " iterations";
+    
+    std::string line1_experimental_roi_info = output_legend_line1.str();
+    std::string line2_experimental_roi_info = output_legend_line2.str();
+    std::string line3_experimental_roi_info = output_legend_line3.str();
+    std::string line4_experimental_roi_info = output_legend_line4.str();
+    
+    int legend_position_x = 10;
+    int legent_position_y_bottom_left_line_1 = 25;
+    int legent_position_y_bottom_left_line_2 = 50;
+    int legent_position_y_bottom_left_line_3 = 75;
+    int legent_position_y_bottom_left_line_4 = 100;
+    
+    putText(drawing, line1_experimental_roi_info , cvPoint(legend_position_x , legent_position_y_bottom_left_line_1), FONT_HERSHEY_PLAIN, 1.5, cvScalar(255,255,255), 1, CV_AA);
+    putText(drawing, line2_experimental_roi_info , cvPoint(legend_position_x , legent_position_y_bottom_left_line_2), FONT_HERSHEY_PLAIN, 1.5, cvScalar(255,255,255), 1, CV_AA);
+    putText(drawing, line3_experimental_roi_info , cvPoint(legend_position_x , legent_position_y_bottom_left_line_3), FONT_HERSHEY_PLAIN, 1.5, cvScalar(255,255,255), 1, CV_AA);
+    putText(drawing, line4_experimental_roi_info , cvPoint(legend_position_x , legent_position_y_bottom_left_line_4), FONT_HERSHEY_PLAIN, 1.5, cvScalar(255,255,255), 1, CV_AA);
+    
+    cv::rectangle(drawing, supercell_boundaries_rect, Scalar(0,0,255), 2);
+    std::cout << "Boundaries rectangle: " << supercell_boundaries_rect << std::endl; 
+    std::cout << "Boundaries rectangle size: " << supercell_boundaries_rect.size() << std::endl; 
+    supercell_min_width = supercell_boundaries_rect.width;
+    supercell_min_height = supercell_boundaries_rect.height;
+    imshow( "Contours", drawing );
+    
+    // save the experimental calculated roi
+    imwrite( "exp_roi_auto.png", drawing );
+    imwrite( "exp_roi_raw_edge_detected.png", raw_edge_drawing );
+    imwrite( "exp_raw.png", experimental_image );
+    
+}
+
+

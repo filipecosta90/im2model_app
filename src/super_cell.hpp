@@ -55,13 +55,17 @@ class Super_Cell {
     cv::Point3d upward_vector_hkl;
 
     std::vector<std::string> _super_cell_atom_symbol_string;
-    std::vector<glm::vec3> _atom_positions;
+    std::vector<cv::Point3d> _atom_positions;
     std::vector<double> _super_cell_atom_site_occupancy;
     std::vector<double> _super_cell_atom_debye_waller_factor;
     std::vector<glm::vec4> _atom_cpk_rgba_colors;
     std::vector<double> _atom_empirical_radii;
 
+    /** .cel **/
     std::vector<cv::Point3d> _super_cell_atom_fractional_cell_coordinates;
+    double _fractional_norm_a_atom_pos;
+    double _fractional_norm_b_atom_pos;
+    double _fractional_norm_c_atom_pos;
 
     /** Orientation **/
     cv::Mat orientation_matrix;
@@ -150,14 +154,16 @@ class Super_Cell {
     double get_super_cell_length_b_Nanometers();
     double get_super_cell_length_c_Nanometers();
 
-    std::vector<glm::vec3> get_atom_positions_vec();
+    std::vector<cv::Point3d> get_atom_positions_vec();
     std::vector<glm::vec4> get_atom_cpk_rgba_colors_vec();
     std::vector<double> get_atom_empirical_radii_vec();
 
     bool update_unit_cell_parameters();
+    void create_fractional_positions_atoms();
     bool create_atoms_from_unit_cell();
     void orientate_atoms_from_matrix();
 
+    void set_experimental_min_size_nm_from_unit_cell();
     void calculate_experimental_min_size_nm(); 
     void calculate_expand_factor(); 
     void calculate_supercell_boundaries_from_experimental_image( cv::Point2f roi_center, int threshold, int max_contour_distance_px );

@@ -63,7 +63,7 @@ class Unit_Cell {
     std::vector<Atom::Atom> _atoms;
     std::vector<cv::Point3d> _symetry_atom_positions;
     std::vector<std::string> _atom_type_symbols;
-    std::vector<glm::vec3> _atom_positions;
+    std::vector<cv::Point3d> _atom_positions;
     std::vector<double> _atom_occupancies;
     std::vector<double> _atoms_debye_waller_factor;
     std::vector<double> _atom_radii;
@@ -117,7 +117,7 @@ class Unit_Cell {
     cv::Point3d get_vector_t();
 
     std::vector<std::string> get_atom_type_symbols_vec();
-    std::vector<glm::vec3> get_atom_positions_vec();
+    std::vector<cv::Point3d> get_atom_positions_vec();
     std::vector<double> get_atom_occupancy_vec();
     std::vector<double> get_atom_debye_waller_factor_vec();
     std::vector<cv::Point3d> get_symetry_atom_positions_vec();
@@ -142,8 +142,8 @@ class Unit_Cell {
 
     bool create_atoms_from_site_and_symetry();
     void form_matrix_from_miller_indices();
-    void orientate_atoms_from_matrix();
-    void set_chem_database(Chem_Database* chem_db );
+//    void orientate_atoms_from_matrix();
+ //   void set_chem_database(Chem_Database* chem_db );
 };
 
 #endif
