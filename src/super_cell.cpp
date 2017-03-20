@@ -33,6 +33,7 @@
 #include "chem_database.hpp"
 #include "atom_info.hpp"
 #include "chem_database.hpp"
+#include "edge.hpp"
 
 // Parallel construction
 //#include <omp.h>
@@ -718,7 +719,6 @@ void Super_Cell::remove_z_out_of_range_atoms(){
     const unsigned int pos_delete = *delete_itt;
     _super_cell_atom_symbol_string.erase( _super_cell_atom_symbol_string.begin() + pos_delete );
     _super_cell_atom_site_occupancy.erase( _super_cell_atom_site_occupancy.begin() + pos_delete );
-    _super_cell_atom_fractional_cell_coordinates.erase( _super_cell_atom_fractional_cell_coordinates.begin() + pos_delete );
     _super_cell_atom_debye_waller_factor.erase( _super_cell_atom_debye_waller_factor.begin() + pos_delete );
     _atom_positions.erase( _atom_positions.begin() + pos_delete );
     _atom_cpk_rgba_colors.erase( _atom_cpk_rgba_colors.begin() + pos_delete ); 
@@ -728,8 +728,6 @@ void Super_Cell::remove_z_out_of_range_atoms(){
 }
 
 void Super_Cell::remove_xy_out_of_range_atoms(){
-  const int a_padding_px = _super_cell_width_px / 2;
-  const int b_padding_px = _super_cell_height_px / 2;
   std::vector<unsigned int> _atom_positions_delete;
   unsigned int loop_counter = 0;
   std::cout << "Initial number of atoms prior to XY remotion: " << _atom_positions.size() << std::endl;
@@ -738,15 +736,14 @@ void Super_Cell::remove_xy_out_of_range_atoms(){
       _atom_positions_itt != _atom_positions.end();
       _atom_positions_itt++ , loop_counter++ 
      ){
-    const int _atom_x_px = ((int)( _atom_positions_itt->x / _sampling_rate_super_cell_x_nm_pixel ) )+ a_padding_px;
-    const int _atom_y_px = ((int)( _atom_positions_itt->y / _sampling_rate_super_cell_y_nm_pixel ) )+ b_padding_px;
-    const cv::Point _atom_xy ( _atom_x_px, _atom_y_px );
     /** check for range in XY **/
-    double in_range = cv::pointPolygonTest( _super_cell_boundary_polygon_px_w_margin , _atom_xy, false );
-    if( in_range < 0.0f ){
+    bool in_range = inpolygon( *_atom_positions_itt, _super_cell_boundary_polygon_Nanometers_w_margin );
+    //std::cout << "RANGE: " << in_range << " point: " << *_atom_positions_itt << std::endl;
+    if(  !in_range ){
       _atom_positions_delete.push_back( loop_counter );
     }
   }
+  std::cout << "going to delete " << _atom_positions_delete.size() << " XY out of range atoms " << std::endl;
   /* We will delete from back to begin to preserve positions */
   std::reverse( _atom_positions_delete.begin() ,_atom_positions_delete.end() ); 
   for( std::vector<unsigned int>::iterator delete_itt =  _atom_positions_delete.begin();
@@ -756,7 +753,6 @@ void Super_Cell::remove_xy_out_of_range_atoms(){
     const unsigned int pos_delete = *delete_itt;
     _super_cell_atom_symbol_string.erase( _super_cell_atom_symbol_string.begin() + pos_delete );
     _super_cell_atom_site_occupancy.erase( _super_cell_atom_site_occupancy.begin() + pos_delete );
-    _super_cell_atom_fractional_cell_coordinates.erase( _super_cell_atom_fractional_cell_coordinates.begin() + pos_delete );
     _super_cell_atom_debye_waller_factor.erase( _super_cell_atom_debye_waller_factor.begin() + pos_delete );
     _atom_positions.erase( _atom_positions.begin() + pos_delete );
     _atom_cpk_rgba_colors.erase( _atom_cpk_rgba_colors.begin() + pos_delete ); 
