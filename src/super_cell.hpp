@@ -63,6 +63,9 @@ class Super_Cell {
 
     /** .cel **/
     std::vector<cv::Point3d> _super_cell_atom_fractional_cell_coordinates;
+    double _min_a_atom_pos, _max_a_atom_pos;
+    double _min_b_atom_pos, _max_b_atom_pos;
+    double _min_c_atom_pos, _max_c_atom_pos;
     double _fractional_norm_a_atom_pos;
     double _fractional_norm_b_atom_pos;
     double _fractional_norm_c_atom_pos;

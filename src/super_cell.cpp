@@ -359,21 +359,21 @@ void Super_Cell::create_fractional_positions_atoms(){
     atom_positions_z.at(i) = _atom_pos.z; 
   } 
   std::vector<double>::iterator atom_xyz_it = max_element( atom_positions_x.begin(), atom_positions_x.end());
-  const double max_a_atom_pos = *atom_xyz_it;
+  _max_a_atom_pos = *atom_xyz_it;
   atom_xyz_it = min_element( atom_positions_x.begin(), atom_positions_x.end());
-  const double min_a_atom_pos = *atom_xyz_it;
+  _min_a_atom_pos = *atom_xyz_it;
   atom_xyz_it = max_element( atom_positions_y.begin(), atom_positions_y.end());
-  const double max_b_atom_pos = *atom_xyz_it;
+  _max_b_atom_pos = *atom_xyz_it;
   atom_xyz_it = min_element( atom_positions_y.begin(), atom_positions_y.end());
-  const double min_b_atom_pos = *atom_xyz_it;
+  _min_b_atom_pos = *atom_xyz_it;
   atom_xyz_it = max_element( atom_positions_z.begin(), atom_positions_z.end());
-  const double max_c_atom_pos = *atom_xyz_it;
+  _max_c_atom_pos = *atom_xyz_it;
   atom_xyz_it = min_element( atom_positions_z.begin(), atom_positions_z.end());
-  const double min_c_atom_pos = *atom_xyz_it;
+  _min_c_atom_pos = *atom_xyz_it;
 
-  _fractional_norm_a_atom_pos = fabs(max_a_atom_pos - min_a_atom_pos);
-  _fractional_norm_b_atom_pos = fabs(max_b_atom_pos - min_b_atom_pos);
-  _fractional_norm_c_atom_pos = fabs(max_c_atom_pos - min_c_atom_pos);
+  _fractional_norm_a_atom_pos = fabs(_max_a_atom_pos - _min_a_atom_pos);
+  _fractional_norm_b_atom_pos = fabs(_max_b_atom_pos - _min_b_atom_pos);
+  _fractional_norm_c_atom_pos = fabs(_max_c_atom_pos - _min_c_atom_pos);
 
   std::cout << "\tAtoms max position Nanometers: A " << _fractional_norm_a_atom_pos 
     << ", B " << _fractional_norm_b_atom_pos 
@@ -389,12 +389,10 @@ void Super_Cell::create_fractional_positions_atoms(){
       it++
       ){
     const cv::Point3d atom_pos = *it; 
-    const double _fractional_x = (atom_pos.x - min_a_atom_pos) * fractional_factor_a_Nanometers;
-    const double _fractional_y = (atom_pos.y - min_b_atom_pos) * fractional_factor_b_Nanometers;
-    const double _fractional_z = (atom_pos.z - min_c_atom_pos) * fractional_factor_c_Nanometers;
+    const double _fractional_x = (atom_pos.x - _min_a_atom_pos) * fractional_factor_a_Nanometers;
+    const double _fractional_y = (atom_pos.y - _min_b_atom_pos) * fractional_factor_b_Nanometers;
+    const double _fractional_z = (atom_pos.z - _min_c_atom_pos) * fractional_factor_c_Nanometers;
     const cv::Point3d atom_fractional ( _fractional_x, _fractional_y, _fractional_z ); 
-    std::cout << atom_fractional << std::endl;
-
     _super_cell_atom_fractional_cell_coordinates.push_back( atom_fractional );
   }
   std::cout << "Finished Creating atoms fractional positions:" << _super_cell_atom_fractional_cell_coordinates.size() <<  std::endl;
