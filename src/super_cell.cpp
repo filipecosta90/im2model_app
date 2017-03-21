@@ -59,19 +59,6 @@ Super_Cell::Super_Cell( Unit_Cell* cell ){
   update_unit_cell_parameters();
 }
 
-Super_Cell::Super_Cell( Unit_Cell* cell , int factor_a, int factor_b, int factor_c ){
-  /** default and sentinel values **/
-  set_sentinel_values();
-  set_default_values();
-  /** non default supercell exclusive **/
-  expand_factor_a = factor_a;
-  expand_factor_b = factor_b;
-  expand_factor_c = factor_c;
-  /** non default unitcell **/
-  unit_cell = cell;
-  update_unit_cell_parameters();
-}
-
 void Super_Cell::set_default_values(){ 
   /** supercell exclusive **/
   expand_factor_a = 1;
@@ -174,8 +161,13 @@ void Super_Cell::set_experimental_min_size_nm_z( double z_min_size_nm ){
   _z_supercell_min_size_nm = z_min_size_nm;
 }
 
-void Super_Cell::set_experimental_image ( cv::Mat raw_image ){
+void Super_Cell::set_experimental_image ( cv::Mat raw_image, double sampling_rate_exp_image_x_nm_pixel, double sampling_rate_exp_image_y_nm_pixel ){
+  assert( !raw_image.empty() );
+  assert( sampling_rate_exp_image_x_nm_pixel > 0.0f );
+  assert ( sampling_rate_exp_image_y_nm_pixel > 0.0f );
   _raw_experimental_image = raw_image;
+  _sampling_rate_super_cell_x_nm_pixel = sampling_rate_exp_image_x_nm_pixel;
+  _sampling_rate_super_cell_y_nm_pixel = sampling_rate_exp_image_y_nm_pixel;
 }
 
 void Super_Cell::set_sampling_rate_super_cell_x_nm_pixel( double sampling_rate ){
@@ -327,7 +319,6 @@ void Super_Cell::calculate_expand_factor(){
   expand_factor_b = (int) ceil( norm_new_y / _unit_cell_length_b_Nanometers ); 
   expand_factor_c = (int) ceil( norm_new_z / _unit_cell_length_c_Nanometers );
   std::cout << "\t Supercell expand factors: X " << expand_factor_a << ", Y " << expand_factor_b << ", Z " << expand_factor_c << std::endl;
-  update_length_parameters();
 }
 
 /** getters **/
@@ -503,10 +494,8 @@ void Super_Cell::orientate_atoms_from_matrix(){
   }
 }
 
-void Super_Cell::update_length_parameters(){
+void Super_Cell::update_super_cell_length_parameters(){
   assert( unit_cell != NULL );
-  assert( _sampling_rate_super_cell_x_nm_pixel > 0.0f );
-  assert( _sampling_rate_super_cell_y_nm_pixel > 0.0f );
   assert( expand_factor_a > 0.0f );
   assert( expand_factor_b > 0.0f );
   assert( expand_factor_c > 0.0f );
@@ -519,10 +508,17 @@ void Super_Cell::update_length_parameters(){
   _super_cell_length_b_Angstroms = _super_cell_length_b_Nanometers * 10.0f; 
   _super_cell_length_c_Angstroms = _super_cell_length_c_Nanometers * 10.0f; 
 
+  _super_cell_volume= ( expand_factor_a * expand_factor_b * expand_factor_c ) * unit_cell->get_cell_volume();
+}
+
+void Super_Cell::update_experimental_image_size_parameters(){
+  assert( _super_cell_length_a_Nanometers > 0.0f );
+  assert( _super_cell_length_b_Nanometers > 0.0f );
+  assert( _sampling_rate_super_cell_x_nm_pixel > 0.0f );
+  assert( _sampling_rate_super_cell_y_nm_pixel > 0.0f );
+
   _super_cell_width_px = (int) (_super_cell_length_a_Nanometers / _sampling_rate_super_cell_x_nm_pixel);
   _super_cell_height_px = (int) (_super_cell_length_b_Nanometers / _sampling_rate_super_cell_y_nm_pixel);
-
-  _super_cell_volume= ( expand_factor_a * expand_factor_b * expand_factor_c ) * unit_cell->get_cell_volume();
 }
 
 /** other methods **/
@@ -542,8 +538,6 @@ bool Super_Cell::update_unit_cell_parameters(){
   orientation_matrix = unit_cell->get_orientation_matrix();
   inverse_orientation_matrix = orientation_matrix.inv(); 
 
-  /** Dimensions **/
-  update_length_parameters();
   return true;
 }
 
@@ -679,6 +673,8 @@ void Super_Cell::calculate_supercell_boundaries_from_experimental_image(
 
   calculate_experimental_min_size_nm();
   calculate_expand_factor();
+  update_super_cell_length_parameters(); 
+  update_experimental_image_size_parameters();
   update_super_cell_boundary_polygon();
 }
 
@@ -698,7 +694,7 @@ void Super_Cell::calculate_experimental_min_size_nm(){
   assert( _sampling_rate_super_cell_x_nm_pixel > 0.0f );
   assert( _experimental_image_thickness_margin_z_Nanometers >= 0.0f );
   assert( _simgrid_best_match_thickness_nm > 0.0f );
-  
+
   /* method */
   /* set super cell min size in Pixels */
   _super_cell_min_width_px = _experimental_image_boundary_rectangle_w_margin.width;
@@ -834,10 +830,10 @@ void Super_Cell::generate_super_cell_file(  std::string _super_cell_filename ){
   assert( ! _super_cell_atom_symbol_string.empty() );
   assert( ! _super_cell_atom_site_occupancy.empty() );
   assert( ! _super_cell_atom_debye_waller_factor.empty() );
-  assert( ( _super_cell_atom_fractional_cell_coordinates.size() == 
-        _super_cell_atom_symbol_string.size() ==
-        _super_cell_atom_site_occupancy.size() ==
-        _super_cell_atom_debye_waller_factor.size() ) );
+  assert( ( _super_cell_atom_fractional_cell_coordinates.size() == _super_cell_atom_symbol_string.size()       ) ); 
+  assert( ( _super_cell_atom_fractional_cell_coordinates.size() == _super_cell_atom_symbol_string.size()       ) ); 
+  assert( ( _super_cell_atom_fractional_cell_coordinates.size() == _super_cell_atom_site_occupancy.size()      ) ); 
+  assert( ( _super_cell_atom_fractional_cell_coordinates.size() == _super_cell_atom_debye_waller_factor.size() ) );
   /* method */
   std::ofstream outfile;
   outfile.open(_super_cell_filename);
@@ -854,7 +850,6 @@ void Super_Cell::generate_super_cell_file(  std::string _super_cell_filename ){
     const double atom_occupancy = _super_cell_atom_site_occupancy.at( loop_counter );
     const double atom_debye_waller_factor = _super_cell_atom_debye_waller_factor.at( loop_counter );
     const cv::Point3d fractional = *_atom_fractional_itt;
-
     outfile << atom_symbol 
       << " " << fractional.x << " " << fractional.y << " " << fractional.z 
       << " " << atom_occupancy << " " << atom_debye_waller_factor 

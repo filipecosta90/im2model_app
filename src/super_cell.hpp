@@ -112,12 +112,11 @@ class Super_Cell {
     
     void set_default_values();
     void set_sentinel_values();
-    void update_length_parameters();
-
+    void update_super_cell_length_parameters();
+    void update_experimental_image_size_parameters();
   public:
     Super_Cell();
     Super_Cell( Unit_Cell* unit_cell );
-    Super_Cell( Unit_Cell* unit_cell, int factor_a, int factor_b, int factor_c );
 
     //setters
 
@@ -147,7 +146,7 @@ class Super_Cell {
     void set_experimental_min_size_nm_x( double x_min_size_nm );
     void set_experimental_min_size_nm_y( double y_min_size_nm );
     void set_experimental_min_size_nm_z( double z_min_size_nm );
-    void set_experimental_image( cv::Mat raw_image ); 
+    void set_experimental_image( cv::Mat raw_image , double sampling_rate_exp_image_x_nm_pixel, double sampling_rate_exp_image_y_nm_pixel ); 
     void set_sampling_rate_super_cell_x_nm_pixel( double sampling_rate );
     void set_sampling_rate_super_cell_y_nm_pixel( double sampling_rate );
     void set_simgrid_best_match_thickness_nm( double tickness ); 

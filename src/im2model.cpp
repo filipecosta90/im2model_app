@@ -657,18 +657,17 @@ int main(int argc, char** argv )
       // UNIT CELL AND SUPER CELL GENERATION STARTS HERE  //
       //////////////////////////////////////////////////////
       unit_cell.create_atoms_from_site_and_symetry();
-      super_cell = Super_Cell::Super_Cell( &unit_cell ); 
-      super_cell.set_experimental_image( experimental_image );
-      super_cell.set_sampling_rate_super_cell_x_nm_pixel( sampling_rate_super_cell_x_nm_pixel );
-      super_cell.set_sampling_rate_super_cell_y_nm_pixel( sampling_rate_super_cell_y_nm_pixel );
+      super_cell = Super_Cell::Super_Cell( &unit_cell );
+      /** SUPER CELL setters **/
+      super_cell.set_experimental_image( experimental_image , sampling_rate_experimental_x_nm_per_pixel, sampling_rate_experimental_y_nm_per_pixel );
       super_cell.set_simgrid_best_match_thickness_nm( wavimg_simgrid_steps.get_simgrid_best_match_thickness_nm() );
-
+      /** SUPER CELL calculations **/
       super_cell.calculate_supercell_boundaries_from_experimental_image( cv::Point2f(roi_center_x, roi_center_y), edge_detection_threshold , max_contour_distance_px );
-      //super_cell.set_experimental_min_size_nm_from_unit_cell();
       super_cell.create_atoms_from_unit_cell();
       super_cell.orientate_atoms_from_matrix();
       super_cell.remove_z_out_of_range_atoms();
       super_cell.remove_xy_out_of_range_atoms();
+      /** SUPER CELL exporting **/
       super_cell.create_fractional_positions_atoms();
       super_cell.generate_super_cell_file( "test_im2model.cel" );
       std::cout << " finished writing cel file" << std::endl;
