@@ -283,8 +283,8 @@ void Unit_Cell::form_matrix_from_miller_indices (){
   // can be converted to a unit vector, n, by dividing by the 
   // square root of the sum of the squares: {similar for [uvw]}.  
   // This is known as normalization.
-  cv::Point3d b = upward_vector_hkl / norm_hkl; 
-  cv::Point3d n = zone_axis_vector_uvw / norm_uvw;
+  cv::Point3d n = upward_vector_hkl / norm_hkl; 
+  cv::Point3d b = zone_axis_vector_uvw / norm_uvw;
 
   cv::Mat b_matrix (b, CV_64F);
   cv::Mat n_matrix (n, CV_64F);
@@ -302,9 +302,9 @@ void Unit_Cell::form_matrix_from_miller_indices (){
 
   /* insert into matrix */
   std::vector<cv::Point3d> points;
+  points.push_back(b);
   points.push_back(vector_t);
   points.push_back(n);
-  points.push_back(b);
   orientation_matrix = cv::Mat( points , true ); 
   orientation_matrix = orientation_matrix.reshape(1);
 

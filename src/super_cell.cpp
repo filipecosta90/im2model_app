@@ -596,6 +596,7 @@ void Super_Cell::calculate_supercell_boundaries_from_experimental_image(
   cv::cvtColor( _raw_experimental_image, temp, cv::COLOR_GRAY2BGR);
   cv::Scalar color = cv::Scalar( 1, 1, 1 );
 
+
   drawContours( temp, hull, 0, color, 3, 8, std::vector<cv::Vec4i>(), 0, cv::Point() );
   _experimental_image_boundary_polygon_margin_width_px = _experimental_image_boundary_polygon_margin_x_Nanometers / _sampling_rate_super_cell_x_nm_pixel; 
   _experimental_image_boundary_polygon_margin_height_px = _experimental_image_boundary_polygon_margin_y_Nanometers / _sampling_rate_super_cell_y_nm_pixel;
@@ -672,17 +673,14 @@ void Super_Cell::update_super_cell_boundary_polygon(){
     super_cell_boundary_point.x -= _super_cell_left_padding_px;
     super_cell_boundary_point.y -= _super_cell_top_padding_px;
 
-    const double _pos_x = _sampling_rate_super_cell_x_nm_pixel * ((double) super_cell_boundary_point.x ) + center_a_padding_nm;
-    const double _pos_y = _sampling_rate_super_cell_y_nm_pixel * ((double) super_cell_boundary_point.y ) + center_b_padding_nm;
-    const cv::Point2f _sim_a( _pos_x, _pos_y );
+    // this is not a bug ( see slides 161 and further )
+    const double _pos_x_uvw = ( _sampling_rate_super_cell_y_nm_pixel * ((double) super_cell_boundary_point.y ) + center_b_padding_nm );
+    const double _pos_y_t = ( _sampling_rate_super_cell_x_nm_pixel * ((double) super_cell_boundary_point.x ) + center_a_padding_nm );
+    const cv::Point2f _sim_a( _pos_x_uvw, _pos_y_t );
     _super_cell_boundary_polygon_Nanometers_w_margin.push_back( _sim_a );
-
-    super_cell_boundary_point.x += _width_padding_px;
-    super_cell_boundary_point.y += _height_padding_px;
-    _super_cell_boundary_polygon_px_w_margin.push_back( super_cell_boundary_point );
   }
 }
-/* this method has to be invoced before */
+
 void Super_Cell::remove_z_out_of_range_atoms(){
   const double _z_bot_limit = _z_supercell_min_size_nm / -2.0f;
   const double _z_top_limit = _z_supercell_min_size_nm / 2.0f;
@@ -708,6 +706,7 @@ void Super_Cell::remove_z_out_of_range_atoms(){
       _atom_positions_delete.push_back( loop_counter );
     }
   }
+
   /* We will delete from back to begin to preserve positions */
   std::reverse( _atom_positions_delete.begin() ,_atom_positions_delete.end() ); 
   for( std::vector<unsigned int>::iterator delete_itt =  _atom_positions_delete.begin();
