@@ -39,41 +39,60 @@
 //#include <omp.h>
 
 Super_Cell::Super_Cell(){
-  /** supercell exclusive **/
-  expand_factor_a = 1;
-  expand_factor_b = 1;
-  expand_factor_c = 1;
-  _experimental_image_boundary_polygon_margin_x_Nanometers = 1.0f;
-  _experimental_image_boundary_polygon_margin_y_Nanometers = 1.0f;
-  _experimental_image_thickness_margin_z_Nanometers = 1.0f;
-  /** unitcell **/
-  unit_cell = nullptr;
+  /** default and sentinel values **/
+  set_sentinel_values();
+  set_default_values();
+  /** non default supercell exclusive **/
+  // empty  
+  /** non default unitcell **/
+  // empty
 }
 
 Super_Cell::Super_Cell( Unit_Cell* cell ){
-  /** supercell exclusive **/
-  expand_factor_a = 1;
-  expand_factor_b = 1;
-  expand_factor_c = 1;
-  _experimental_image_boundary_polygon_margin_x_Nanometers = 1.0f;
-  _experimental_image_boundary_polygon_margin_y_Nanometers = 1.0f;
-  _experimental_image_thickness_margin_z_Nanometers = 1.0f;
-  /** unitcell **/
+  /** default and sentinel values **/
+  set_sentinel_values();
+  set_default_values();
+  /** non default supercell exclusive **/
+  // empty  
+  /** non default unitcell **/
   unit_cell = cell;
   update_unit_cell_parameters();
 }
 
 Super_Cell::Super_Cell( Unit_Cell* cell , int factor_a, int factor_b, int factor_c ){
-  /** supercell exclusive **/
+  /** default and sentinel values **/
+  set_sentinel_values();
+  set_default_values();
+  /** non default supercell exclusive **/
   expand_factor_a = factor_a;
   expand_factor_b = factor_b;
   expand_factor_c = factor_c;
+  /** non default unitcell **/
+  unit_cell = cell;
+  update_unit_cell_parameters();
+}
+
+void Super_Cell::set_default_values(){ 
+  /** supercell exclusive **/
+  expand_factor_a = 1;
+  expand_factor_b = 1;
+  expand_factor_c = 1;
   _experimental_image_boundary_polygon_margin_x_Nanometers = 1.0f;
   _experimental_image_boundary_polygon_margin_y_Nanometers = 1.0f;
   _experimental_image_thickness_margin_z_Nanometers = 1.0f;
   /** unitcell **/
-  unit_cell = cell;
-  update_unit_cell_parameters();
+  unit_cell = NULL;
+}
+
+void Super_Cell::set_sentinel_values(){
+  _super_cell_length_a_Angstroms = _super_cell_length_b_Angstroms = _super_cell_length_c_Angstroms = -1.0f;
+  _super_cell_length_a_Nanometers = _super_cell_length_b_Nanometers = _super_cell_length_c_Nanometers = -1.0f;
+  _super_cell_volume = 1.0f;
+  _cell_angle_alpha = _cell_angle_beta = _cell_angle_gamma = std::numeric_limits<double>::min();
+  /** supercell exclusive **/
+  _x_supercell_min_size_nm = _y_supercell_min_size_nm =_z_supercell_min_size_nm = -1.0f;
+  expand_factor_a = expand_factor_b = expand_factor_c = -1;
+  _sampling_rate_super_cell_x_nm_pixel = _sampling_rate_super_cell_y_nm_pixel = -1.0f;
 }
 
 void Super_Cell::set_super_cell_length_a_Angstroms( double a ){
@@ -184,6 +203,12 @@ void Super_Cell::set_experimental_image_thickness_margin_z_Nanometers( double ma
 }
 
 void Super_Cell::calculate_expand_factor(){
+  assert (_x_supercell_min_size_nm > 0.0f );
+  assert (_y_supercell_min_size_nm > 0.0f );
+  assert (_z_supercell_min_size_nm > 0.0f );
+  assert ( !inverse_orientation_matrix.empty() );
+  assert ( unit_cell != NULL );
+
   const double r_a = _x_supercell_min_size_nm / 2.0f;
   const double r_b = _y_supercell_min_size_nm / 2.0f;
   const double r_c = _z_supercell_min_size_nm / 2.0f;
@@ -343,6 +368,7 @@ std::vector<double> Super_Cell::get_atom_empirical_radii_vec(){
 }
 
 void Super_Cell::create_fractional_positions_atoms(){
+  assert( ! _atom_positions.empty() );
   std::cout << "Creating atoms fractional positions:" << std::endl;
   std :: vector <double> atom_positions_x ( _atom_positions.size() ); 
   std :: vector <double> atom_positions_y ( _atom_positions.size() ); 
@@ -401,6 +427,14 @@ void Super_Cell::create_fractional_positions_atoms(){
 
 /** other methods **/
 bool Super_Cell::create_atoms_from_unit_cell(){
+  assert( unit_cell != NULL );
+  assert( _super_cell_length_a_Nanometers > 0.0f ); 
+  assert( _super_cell_length_b_Nanometers > 0.0f ); 
+  assert( _super_cell_length_c_Nanometers > 0.0f ); 
+  assert( expand_factor_a > 0.0f );
+  assert( expand_factor_b > 0.0f );
+  assert( expand_factor_c > 0.0f );
+
   std::vector<std::string> unit_cell_atom_symbol_string = unit_cell->get_atom_type_symbols_vec(); 
   std::vector<cv::Point3d> unit_cell_atom_positions = unit_cell->get_atom_positions_vec();
   std::vector<double> unit_cell_atom_site_occupancy = unit_cell->get_atom_occupancy_vec();
@@ -454,6 +488,7 @@ bool Super_Cell::create_atoms_from_unit_cell(){
 }
 
 void Super_Cell::orientate_atoms_from_matrix(){
+  assert ( !orientation_matrix.empty() );
   std::cout << "Orientating atoms from matrix :" << std::endl;
   std::cout << orientation_matrix << std::endl;
   for (
@@ -466,10 +501,16 @@ void Super_Cell::orientate_atoms_from_matrix(){
     cv::Point3d final (result.at<double>(0,0), result.at<double>(1,0), result.at<double>(2,0));
     *it = final;
   }
-  std::cout << "Finished orientating atoms from matrix :" << std::endl;
 }
 
 void Super_Cell::update_length_parameters(){
+  assert( unit_cell != NULL );
+  assert( _sampling_rate_super_cell_x_nm_pixel > 0.0f );
+  assert( _sampling_rate_super_cell_y_nm_pixel > 0.0f );
+  assert( expand_factor_a > 0.0f );
+  assert( expand_factor_b > 0.0f );
+  assert( expand_factor_c > 0.0f );
+
   _super_cell_length_a_Nanometers = expand_factor_a * unit_cell->get_cell_length_a_Nanometers();
   _super_cell_length_b_Nanometers = expand_factor_b * unit_cell->get_cell_length_b_Nanometers(); 
   _super_cell_length_c_Nanometers = expand_factor_c * unit_cell->get_cell_length_c_Nanometers(); 
@@ -478,14 +519,15 @@ void Super_Cell::update_length_parameters(){
   _super_cell_length_b_Angstroms = _super_cell_length_b_Nanometers * 10.0f; 
   _super_cell_length_c_Angstroms = _super_cell_length_c_Nanometers * 10.0f; 
 
-  //_super_cell_width_px = (int) (_super_cell_length_a_Nanometers / _sampling_rate_super_cell_x_nm_pixel);
-  //_super_cell_height_px = (int) (_super_cell_length_b_Nanometers / _sampling_rate_super_cell_y_nm_pixel);
+  _super_cell_width_px = (int) (_super_cell_length_a_Nanometers / _sampling_rate_super_cell_x_nm_pixel);
+  _super_cell_height_px = (int) (_super_cell_length_b_Nanometers / _sampling_rate_super_cell_y_nm_pixel);
 
   _super_cell_volume= ( expand_factor_a * expand_factor_b * expand_factor_c ) * unit_cell->get_cell_volume();
 }
 
 /** other methods **/
 bool Super_Cell::update_unit_cell_parameters(){
+  assert( unit_cell != NULL );
   _cell_angle_alpha = unit_cell->get_cell_angle_alpha();
   _cell_angle_beta = unit_cell->get_cell_angle_beta();
   _cell_angle_gamma = unit_cell->get_cell_angle_gamma();
@@ -508,6 +550,8 @@ bool Super_Cell::update_unit_cell_parameters(){
 void Super_Cell::calculate_supercell_boundaries_from_experimental_image( 
     cv::Point2f roi_center, int threshold, int max_contour_distance_px 
     ){
+  assert( !_raw_experimental_image.empty() );
+
   cv::Mat canny_output;
   std::vector< std::vector<cv::Point> > contours;
   std::vector<cv::Vec4i> hierarchy;
@@ -639,6 +683,7 @@ void Super_Cell::calculate_supercell_boundaries_from_experimental_image(
 }
 
 void Super_Cell::set_experimental_min_size_nm_from_unit_cell(){
+  assert( unit_cell != NULL );
   /* set super cell min size in Nanometers */
   _x_supercell_min_size_nm = unit_cell->get_cell_length_a_Nanometers();
   _y_supercell_min_size_nm = unit_cell->get_cell_length_b_Nanometers();
@@ -647,18 +692,34 @@ void Super_Cell::set_experimental_min_size_nm_from_unit_cell(){
 }
 
 void Super_Cell::calculate_experimental_min_size_nm(){
+  /* general assertions */
+  assert( ( _experimental_image_boundary_rectangle_w_margin.width > 0 ) && ( _experimental_image_boundary_rectangle_w_margin.height > 0 ) );
+  assert( _sampling_rate_super_cell_y_nm_pixel > 0.0f );
+  assert( _sampling_rate_super_cell_x_nm_pixel > 0.0f );
+  assert( _experimental_image_thickness_margin_z_Nanometers >= 0.0f );
+  assert( _simgrid_best_match_thickness_nm > 0.0f );
+  
+  /* method */
   /* set super cell min size in Pixels */
   _super_cell_min_width_px = _experimental_image_boundary_rectangle_w_margin.width;
   _super_cell_min_height_px = _experimental_image_boundary_rectangle_w_margin.height;
   _super_cell_left_padding_px = _experimental_image_boundary_rectangle_w_margin.x;
   _super_cell_top_padding_px = _experimental_image_boundary_rectangle_w_margin.y;
   /* set super cell min size in Nanometers */
-  _x_supercell_min_size_nm = _sampling_rate_super_cell_x_nm_pixel * _super_cell_min_width_px; 
-  _y_supercell_min_size_nm = _sampling_rate_super_cell_y_nm_pixel * _super_cell_min_height_px; 
+  _x_supercell_min_size_nm = _sampling_rate_super_cell_y_nm_pixel * _super_cell_min_height_px; 
+  _y_supercell_min_size_nm = _sampling_rate_super_cell_x_nm_pixel * _super_cell_min_width_px; 
   _z_supercell_min_size_nm = _experimental_image_thickness_margin_z_Nanometers + _simgrid_best_match_thickness_nm;
 }
 
 void Super_Cell::update_super_cell_boundary_polygon(){
+  assert( _super_cell_width_px > 0 );
+  assert( _super_cell_height_px > 0 );
+  assert( _super_cell_width_px >= _super_cell_min_width_px );
+  assert( _super_cell_height_px >= _super_cell_min_height_px );
+  assert( _super_cell_left_padding_px >= 0 );
+  assert( _super_cell_top_padding_px >= 0 );
+  assert( ! _experimental_image_boundary_polygon_w_margin.empty() );
+
   const double center_a_padding_nm = _x_supercell_min_size_nm / -2.0f;
   const double center_b_padding_nm = _y_supercell_min_size_nm / -2.0f;
   const int _width_padding_px = ( _super_cell_width_px - _super_cell_min_width_px )/ 2;
@@ -674,14 +735,15 @@ void Super_Cell::update_super_cell_boundary_polygon(){
     super_cell_boundary_point.y -= _super_cell_top_padding_px;
 
     // this is not a bug ( see slides 161 and further )
-    const double _pos_x_uvw = ( _sampling_rate_super_cell_y_nm_pixel * ((double) super_cell_boundary_point.y ) + center_b_padding_nm );
-    const double _pos_y_t = ( _sampling_rate_super_cell_x_nm_pixel * ((double) super_cell_boundary_point.x ) + center_a_padding_nm );
+    const double _pos_x_uvw = ( _sampling_rate_super_cell_y_nm_pixel * ((double) super_cell_boundary_point.y ) + center_a_padding_nm );
+    const double _pos_y_t = ( _sampling_rate_super_cell_x_nm_pixel * ((double) super_cell_boundary_point.x ) + center_b_padding_nm );
     const cv::Point2f _sim_a( _pos_x_uvw, _pos_y_t );
     _super_cell_boundary_polygon_Nanometers_w_margin.push_back( _sim_a );
   }
 }
 
 void Super_Cell::remove_z_out_of_range_atoms(){
+  assert( _z_supercell_min_size_nm >= 0.0f );
   const double _z_bot_limit = _z_supercell_min_size_nm / -2.0f;
   const double _z_top_limit = _z_supercell_min_size_nm / 2.0f;
   std::vector<unsigned int> _atom_positions_delete;
@@ -725,6 +787,9 @@ void Super_Cell::remove_z_out_of_range_atoms(){
 }
 
 void Super_Cell::remove_xy_out_of_range_atoms(){
+  /* general assertions */
+  assert( ! _super_cell_boundary_polygon_Nanometers_w_margin.empty() );
+  /* method */
   std::vector<unsigned int> _atom_positions_delete;
   unsigned int loop_counter = 0;
   std::cout << "Initial number of atoms prior to XY remotion: " << _atom_positions.size() << std::endl;
@@ -735,7 +800,6 @@ void Super_Cell::remove_xy_out_of_range_atoms(){
      ){
     /** check for range in XY **/
     bool in_range = inpolygon( *_atom_positions_itt, _super_cell_boundary_polygon_Nanometers_w_margin );
-    //std::cout << "RANGE: " << in_range << " point: " << *_atom_positions_itt << std::endl;
     if(  !in_range ){
       _atom_positions_delete.push_back( loop_counter );
     }
@@ -759,6 +823,22 @@ void Super_Cell::remove_xy_out_of_range_atoms(){
 }
 
 void Super_Cell::generate_super_cell_file(  std::string _super_cell_filename ){
+  /* general assertions */
+  assert( _fractional_norm_a_atom_pos > 0.0f );
+  assert( _fractional_norm_b_atom_pos > 0.0f );
+  assert( _fractional_norm_c_atom_pos > 0.0f );
+  assert( ( _cell_angle_alpha > std::numeric_limits<double>::min()) );
+  assert( ( _cell_angle_beta > std::numeric_limits<double>::min()) );
+  assert( ( _cell_angle_gamma > std::numeric_limits<double>::min()) );
+  assert( ! _super_cell_atom_fractional_cell_coordinates.empty() );
+  assert( ! _super_cell_atom_symbol_string.empty() );
+  assert( ! _super_cell_atom_site_occupancy.empty() );
+  assert( ! _super_cell_atom_debye_waller_factor.empty() );
+  assert( ( _super_cell_atom_fractional_cell_coordinates.size() == 
+        _super_cell_atom_symbol_string.size() ==
+        _super_cell_atom_site_occupancy.size() ==
+        _super_cell_atom_debye_waller_factor.size() ) );
+  /* method */
   std::ofstream outfile;
   outfile.open(_super_cell_filename);
   outfile << "Cel file generated by Im2Model" << std::endl; 

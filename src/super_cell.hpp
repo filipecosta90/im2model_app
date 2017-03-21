@@ -109,7 +109,9 @@ class Super_Cell {
     double _sampling_rate_super_cell_x_nm_pixel;
     double _sampling_rate_super_cell_y_nm_pixel;
     double _simgrid_best_match_thickness_nm; 
-
+    
+    void set_default_values();
+    void set_sentinel_values();
     void update_length_parameters();
 
   public:

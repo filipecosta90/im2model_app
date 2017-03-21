@@ -369,7 +369,7 @@ int main(int argc, char** argv )
     sampling_rate_super_cell_y_nm_pixel = super_cell_size_y / ny_simulated_vertical_samples;
     super_cell_z_nm_slice = super_cell_size_z / nz_simulated_partitions;
     diff_super_cell_and_simulated_x = fabs(sampling_rate_super_cell_x_nm_pixel - sampling_rate_experimental_x_nm_per_pixel);
-    diff_super_cell_and_simulated_y = fabs(sampling_rate_super_cell_y_nm_pixel - sampling_rate_experimental_x_nm_per_pixel);
+    diff_super_cell_and_simulated_y = fabs(sampling_rate_super_cell_y_nm_pixel - sampling_rate_experimental_y_nm_per_pixel);
 
     // Check if the numbers are really close -- needed
     // when comparing numbers near zero.
@@ -602,8 +602,8 @@ int main(int argc, char** argv )
       std::cout << "Starting step length" << std::endl;
       SIMGRID_wavimg_steplength::SIMGRID_wavimg_steplength wavimg_simgrid_steps;
 
-      wavimg_simgrid_steps.set_sampling_rate_super_cell_x_nm_pixel( sampling_rate_super_cell_x_nm_pixel );
-      wavimg_simgrid_steps.set_sampling_rate_super_cell_y_nm_pixel( sampling_rate_super_cell_y_nm_pixel );
+      wavimg_simgrid_steps.set_sampling_rate_super_cell_x_nm_pixel( sampling_rate_experimental_x_nm_per_pixel );
+      wavimg_simgrid_steps.set_sampling_rate_super_cell_y_nm_pixel( sampling_rate_experimental_y_nm_per_pixel );
       wavimg_simgrid_steps.set_experimental_image_roi( experimental_image_roi );
 
       // defocus setters
