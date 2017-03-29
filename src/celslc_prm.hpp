@@ -79,6 +79,8 @@ class CELSLC_prm {
 
     void set_bin_path( std::string path );
 
+    int get_nz_simulated_partitions(); 
+    
     void produce_prm( );
 
     bool call_bin();

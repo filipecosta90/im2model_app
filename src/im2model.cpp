@@ -391,6 +391,7 @@ int main(int argc, char** argv )
       ny_simulated_vertical_samples = (int) ( super_cell_size_y / sampling_rate_experimental_y_nm_per_pixel );
       sampling_rate_super_cell_x_nm_pixel = sampling_rate_experimental_x_nm_per_pixel; 
       sampling_rate_super_cell_y_nm_pixel = sampling_rate_experimental_y_nm_per_pixel; 
+    std::cout << "automatic nx and ny. -nx " << nx_simulated_horizontal_samples << " -ny " << ny_simulated_vertical_samples << std::endl;
     }
 
     if( nz_switch ){
@@ -462,6 +463,8 @@ int main(int argc, char** argv )
       celslc_parameters.set_abs_switch(abs_switch);
       celslc_parameters.set_bin_path( celslc_bin_string );
       celslc_parameters.call_bin();
+      nz_simulated_partitions = celslc_parameters.get_nz_simulated_partitions();
+      assert( nz_simulated_partitions >= 1 );
     }
 
     if( msa_switch == true ){

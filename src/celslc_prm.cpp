@@ -160,6 +160,10 @@ void CELSLC_prm::set_bin_path( std::string path ){
   bin_path = path;
 }
 
+int CELSLC_prm::get_nz_simulated_partitions( ){
+  return nz_simulated_partitions; 
+}
+
 bool CELSLC_prm::call_bin(){
   int pid;
 
@@ -258,7 +262,22 @@ bool CELSLC_prm::call_bin(){
     int status;
     wait(&status);
     if( auto_equidistant_slices_switch || auto_non_equidistant_slices_switch ){
-      std::cout << "going to parse " <<  slc_file_name_prefix << ".prj first line " << std::endl;    
+      std::stringstream input_prm_stream;
+      input_prm_stream << slc_file_name_prefix << ".prm"; 
+
+      std::ifstream infile;
+      infile.open ( input_prm_stream.str() , std::ifstream::in);
+      if (infile.is_open()) {
+        std::string line;
+        std::getline(infile, line);
+        std::istringstream iss(line);
+        int nslices;
+        iss >> nz_simulated_partitions; 
+        infile.close();
+      }
+      else{
+        std::cout << "Warning: unable to open file \"" << input_prm_stream.str() << "\"" << std::endl;
+      }
     }  
     return EXIT_SUCCESS;
   }

@@ -314,29 +314,29 @@ void Unit_Cell::form_matrix_from_miller_indices (){
    * The rows of R represent the coordinates in the original space of unit vectors along the coordinate axes of the rotated space. 
    * The columns of R represent the coordinates in the rotated space of unit vectors along the axes of the original space.
    * **/
-  std::cout << "Orientation Matrix :" << std::endl;
-  std::cout << orientation_matrix << std::endl;
+  //  std::cout << "Orientation Matrix :" << std::endl;
+  //  std::cout << orientation_matrix << std::endl;
 
 }
 /* deprecated
  *
-void Unit_Cell::orientate_atoms_from_matrix(){
-  std::cout << "Orientating atoms from matrix :" << std::endl;
-  std::vector<glm::vec3>::iterator it ;
-  for ( int pos = 0; pos <  _atom_positions.size(); pos++ ){
-    glm::vec3 initial_atom = _atom_positions.at(pos);
-    cv::Vec3d V ( initial_atom.x, initial_atom.y, initial_atom.z );
-    cv::Mat result = orientation_matrix * cv::Mat(V);
-    const glm::vec3 final (result.at<double>(0,0), result.at<double>(1,0), result.at<double>(2,0));
-    std::cout << "initial: " << V << " final: " << final.x << " " << final.y << " " <<  final.z  << std::endl;
-    result.release();
-    _atom_positions.at(pos) =  final; 
-  }
-}
+ void Unit_Cell::orientate_atoms_from_matrix(){
+ std::cout << "Orientating atoms from matrix :" << std::endl;
+ std::vector<glm::vec3>::iterator it ;
+ for ( int pos = 0; pos <  _atom_positions.size(); pos++ ){
+ glm::vec3 initial_atom = _atom_positions.at(pos);
+ cv::Vec3d V ( initial_atom.x, initial_atom.y, initial_atom.z );
+ cv::Mat result = orientation_matrix * cv::Mat(V);
+ const glm::vec3 final (result.at<double>(0,0), result.at<double>(1,0), result.at<double>(2,0));
+ std::cout << "initial: " << V << " final: " << final.x << " " << final.y << " " <<  final.z  << std::endl;
+ result.release();
+ _atom_positions.at(pos) =  final; 
+ }
+ }
 
-void Unit_Cell::set_chem_database( Chem_Database* chem_db ){
+ void Unit_Cell::set_chem_database( Chem_Database* chem_db ){
 
-}
+ }
 
 */
 
