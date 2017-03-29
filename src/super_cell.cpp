@@ -69,7 +69,10 @@ void Super_Cell::set_default_values(){
   _experimental_image_thickness_margin_z_Nanometers = 1.0f;
   /** unitcell **/
   unit_cell = NULL;
+  /** cel **/
+  _cel_margin_nm = 0.0f;
 }
+
 
 void Super_Cell::set_sentinel_values(){
   _super_cell_length_a_Angstroms = _super_cell_length_b_Angstroms = _super_cell_length_c_Angstroms = -1.0f;
@@ -80,6 +83,10 @@ void Super_Cell::set_sentinel_values(){
   _x_supercell_min_size_nm = _y_supercell_min_size_nm =_z_supercell_min_size_nm = -1.0f;
   expand_factor_a = expand_factor_b = expand_factor_c = -1;
   _sampling_rate_super_cell_x_nm_pixel = _sampling_rate_super_cell_y_nm_pixel = -1.0f;
+}
+
+void Super_Cell::set_super_cell_margin_nm( double margin ){
+_cel_margin_nm = margin;
 }
 
 void Super_Cell::set_super_cell_length_a_Angstroms( double a ){
@@ -375,14 +382,15 @@ void Super_Cell::create_fractional_positions_atoms(){
     atom_positions_y.at(i) = _atom_pos.y; 
     atom_positions_z.at(i) = _atom_pos.z; 
   } 
+  const double _super_cell_ab_margin = _cel_margin_nm / 2.0f;
   std::vector<double>::iterator atom_xyz_it = max_element( atom_positions_x.begin(), atom_positions_x.end());
-  _max_a_atom_pos = *atom_xyz_it;
+  _max_a_atom_pos = *atom_xyz_it + _super_cell_ab_margin;
   atom_xyz_it = min_element( atom_positions_x.begin(), atom_positions_x.end());
-  _min_a_atom_pos = *atom_xyz_it;
+  _min_a_atom_pos = *atom_xyz_it - _super_cell_ab_margin;
   atom_xyz_it = max_element( atom_positions_y.begin(), atom_positions_y.end());
-  _max_b_atom_pos = *atom_xyz_it;
+  _max_b_atom_pos = *atom_xyz_it + _super_cell_ab_margin;
   atom_xyz_it = min_element( atom_positions_y.begin(), atom_positions_y.end());
-  _min_b_atom_pos = *atom_xyz_it;
+  _min_b_atom_pos = *atom_xyz_it - _super_cell_ab_margin;
   atom_xyz_it = max_element( atom_positions_z.begin(), atom_positions_z.end());
   _max_c_atom_pos = *atom_xyz_it;
   atom_xyz_it = min_element( atom_positions_z.begin(), atom_positions_z.end());

@@ -69,6 +69,7 @@ class Super_Cell {
     double _fractional_norm_a_atom_pos;
     double _fractional_norm_b_atom_pos;
     double _fractional_norm_c_atom_pos;
+    double _cel_margin_nm;
 
     /** Orientation **/
     cv::Mat orientation_matrix;
@@ -109,7 +110,7 @@ class Super_Cell {
     double _sampling_rate_super_cell_x_nm_pixel;
     double _sampling_rate_super_cell_y_nm_pixel;
     double _simgrid_best_match_thickness_nm; 
-    
+
     void set_default_values();
     void set_sentinel_values();
     void update_super_cell_length_parameters();
@@ -150,6 +151,8 @@ class Super_Cell {
     void set_sampling_rate_super_cell_x_nm_pixel( double sampling_rate );
     void set_sampling_rate_super_cell_y_nm_pixel( double sampling_rate );
     void set_simgrid_best_match_thickness_nm( double tickness ); 
+    void set_super_cell_margin_nm( double margin );
+
     //getters
     double get_super_cell_length_a_Angstroms();
     double get_super_cell_length_b_Angstroms();

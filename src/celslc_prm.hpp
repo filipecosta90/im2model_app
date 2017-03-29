@@ -13,6 +13,7 @@ class CELSLC_prm {
     double super_cell_size_y;
     double super_cell_size_z;
     std::string super_cell_cif_file;
+    std::string super_cell_cel_file;
     std::string slc_file_name_prefix;
     int nx_simulated_horizontal_samples;
     int ny_simulated_vertical_samples;
@@ -23,7 +24,9 @@ class CELSLC_prm {
     std::string bin_path;
     bool dwf_switch;
     bool abs_switch;
-
+    
+    bool cif_format_switch;
+    bool cel_format_switch;
   public:
     CELSLC_prm();
 
@@ -46,6 +49,8 @@ class CELSLC_prm {
     void set_super_cell_size_z(double super_cell_size_z);
 
     void set_cif_file( std::string super_cell_cif_file );
+    
+    void set_cel_file( std::string super_cell_cel_file );
 
     void set_slc_filename_prefix ( std::string slc_file_name_prefix);
 

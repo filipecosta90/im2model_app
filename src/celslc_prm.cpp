@@ -21,7 +21,7 @@ CELSLC_prm::CELSLC_prm()
 {
   prj_dir_h = 0.0f;
   prj_dir_k = 0.0f;
-    prj_dir_l = 0.0f;
+  prj_dir_l = 0.0f;
   prp_dir_u = 0.0f;
   prp_dir_v = 0.0f;
   prp_dir_w = 0.0f;
@@ -29,6 +29,7 @@ CELSLC_prm::CELSLC_prm()
   super_cell_size_y = 0.0f;
   super_cell_size_z = 0.0f;
   super_cell_cif_file = "";
+  super_cell_cel_file = "";
   slc_file_name_prefix = "";
   nx_simulated_horizontal_samples = 0;
   ny_simulated_vertical_samples = 0;
@@ -39,19 +40,20 @@ CELSLC_prm::CELSLC_prm()
   bin_path = "";
   dwf_switch = false;
   abs_switch = false;
+  cel_format_switch = false;
+  cif_format_switch = false;
 }
 
 void CELSLC_prm::set_prj_dir_h(double projection_dir_h ){
   prj_dir_h = projection_dir_h;
 }
 
-
 void CELSLC_prm::set_prj_dir_k(double projection_dir_k ){
   prj_dir_k = projection_dir_k;
 }
 
 void CELSLC_prm::set_prj_dir_l(double projection_dir_l ){
-    prj_dir_l = projection_dir_l;
+  prj_dir_l = projection_dir_l;
 }
 
 void CELSLC_prm::set_prp_dir_u(double perpendicular_dir_u){
@@ -80,7 +82,14 @@ void CELSLC_prm::set_super_cell_size_z(double size_z){
 
 void CELSLC_prm::set_cif_file( std::string cif_file ){
   super_cell_cif_file = cif_file;
+  cif_format_switch = true;
 }
+
+void CELSLC_prm::set_cel_file( std::string cel_file ){
+  super_cell_cel_file = cel_file;
+  cel_format_switch = true;
+}
+
 
 void CELSLC_prm::set_slc_filename_prefix ( std::string slc_file ){
   slc_file_name_prefix = slc_file;
@@ -128,8 +137,17 @@ bool CELSLC_prm::call_bin(){
   const char* input_prj_c_string = input_prj_string.c_str();
 
   celslc_vector.push_back( (char*) input_prj_c_string );
+  if( cif_format_switch  ){
   celslc_vector.push_back((char*) "-cif");
   celslc_vector.push_back((char*) super_cell_cif_file.c_str());
+  }
+  else{ 
+    if( cif_format_switch  ){
+  celslc_vector.push_back((char*) "-cel");
+  celslc_vector.push_back((char*) super_cell_cel_file.c_str());
+  }
+  }
+
   celslc_vector.push_back((char*) "-slc");
   celslc_vector.push_back((char*) slc_file_name_prefix.c_str());
 
