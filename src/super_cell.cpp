@@ -702,8 +702,8 @@ void Super_Cell::calculate_experimental_min_size_nm(){
   _super_cell_left_padding_px = _experimental_image_boundary_rectangle_w_margin.x;
   _super_cell_top_padding_px = _experimental_image_boundary_rectangle_w_margin.y;
   /* set super cell min size in Nanometers */
-  _x_supercell_min_size_nm = _sampling_rate_super_cell_y_nm_pixel * _super_cell_min_height_px; 
-  _y_supercell_min_size_nm = _sampling_rate_super_cell_x_nm_pixel * _super_cell_min_width_px; 
+  _x_supercell_min_size_nm = _sampling_rate_super_cell_x_nm_pixel * _super_cell_min_height_px; 
+  _y_supercell_min_size_nm = _sampling_rate_super_cell_y_nm_pixel * _super_cell_min_width_px; 
   _z_supercell_min_size_nm = _experimental_image_thickness_margin_z_Nanometers + _simgrid_best_match_thickness_nm;
 }
 
@@ -717,7 +717,7 @@ void Super_Cell::update_super_cell_boundary_polygon(){
   assert( ! _experimental_image_boundary_polygon_w_margin.empty() );
 
   const double center_a_padding_nm = _x_supercell_min_size_nm / -2.0f;
-  const double center_b_padding_nm = _y_supercell_min_size_nm / -2.0f;
+  const double center_b_padding_nm = _y_supercell_min_size_nm / 2.0f;
   const int _width_padding_px = ( _super_cell_width_px - _super_cell_min_width_px )/ 2;
   const int _height_padding_px = ( _super_cell_height_px - _super_cell_min_height_px )/ 2;
 
@@ -727,13 +727,15 @@ void Super_Cell::update_super_cell_boundary_polygon(){
       experimental_bound_it++ 
       ){
     cv::Point super_cell_boundary_point = *experimental_bound_it;
-    super_cell_boundary_point.x -= _super_cell_left_padding_px;
-    super_cell_boundary_point.y -= _super_cell_top_padding_px;
+    super_cell_boundary_point.x -= _super_cell_top_padding_px;
+    super_cell_boundary_point.y -= _super_cell_left_padding_px;
 
     // this is not a bug ( see slides 161 and further )
-    const double _pos_x_uvw = ( _sampling_rate_super_cell_y_nm_pixel * ((double) super_cell_boundary_point.y ) + center_a_padding_nm );
-    const double _pos_y_t = ( _sampling_rate_super_cell_x_nm_pixel * ((double) super_cell_boundary_point.x ) + center_b_padding_nm );
-    const cv::Point2f _sim_a( _pos_x_uvw, _pos_y_t );
+
+    const double _pos_x_t = ( _sampling_rate_super_cell_x_nm_pixel * ((double) super_cell_boundary_point.x ) + center_a_padding_nm );
+    const double _pos_y_uvw = ( -1.0f * ( _sampling_rate_super_cell_y_nm_pixel * ((double) super_cell_boundary_point.y ))) + center_b_padding_nm;
+      const cv::Point2f _sim_a( _pos_x_t, _pos_y_uvw );
+    std::cout << super_cell_boundary_point.y << " , " << super_cell_boundary_point.x << " point " << _sim_a << std::endl;
     _super_cell_boundary_polygon_Nanometers_w_margin.push_back( _sim_a );
   }
 }

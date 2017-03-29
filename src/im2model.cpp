@@ -213,6 +213,11 @@ int main(int argc, char** argv )
   int reshaped_simulated_image_width;
   int reshaped_simulated_image_height;
 
+  /////////////////////////
+  // Dr Probe CEL file parameters 
+  /////////////////////////
+  double cel_margin_nm; 
+
   MC::MC_Driver driver;
 
   try{
@@ -226,7 +231,6 @@ int main(int argc, char** argv )
       ("no_wavimg", "switch for skipping wavimg execution.")
       ("no_im2model", "switch for skipping im2model execution.")
       ("debug,g", "switch for enabling debug info for celslc, msa, and wavimg execution.")
-
       ("cif", boost::program_options::value<std::string>(&super_cell_cif_file)->required(), "specifies the input super-cell file containing the atomic structure data in CIF file format.")
       ("slc", boost::program_options::value<std::string>(&slc_file_name_prefix)->required(), "specifies the output slice file name prefix. Absolute or relative path names can be used. Enclose the file name string using quotation marks if the file name prefix or the disk path contains space characters. The slice file names will be suffixed by '_###.sli', where ### is a 3 digit number denoting the sequence of slices generated from the supercell.")
       ("prj_h",  boost::program_options::value<double>(&projection_dir_h)->required(), "projection direction h of [hkl].")
@@ -267,8 +271,8 @@ int main(int argc, char** argv )
       ("vis_gui", "switch for enabling supercell visualization.")
       ("sim_cmp_gui", "switch for enabling gui im2model simullated and experimental comparation visualization.")
       ("sim_grid", "switch for enable simmulated image grid generation.")
-
       ("ignore_edge_pixels", boost::program_options::value<int>(&ignore_edge_pixels)->default_value(0), "number of pixels to ignore from the outter limit of the simulated image.")
+      ("cel_margin_nm", boost::program_options::value<double>(&cel_margin_nm)->default_value(0.0f), "supercell margin in nanometers for the cel file creation.")
       ;
 
     boost::program_options::variables_map vm;

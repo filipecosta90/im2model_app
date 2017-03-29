@@ -283,28 +283,28 @@ void Unit_Cell::form_matrix_from_miller_indices (){
   // can be converted to a unit vector, n, by dividing by the 
   // square root of the sum of the squares: {similar for [uvw]}.  
   // This is known as normalization.
-  cv::Point3d n = upward_vector_hkl / norm_hkl; 
-  cv::Point3d b = zone_axis_vector_uvw / norm_uvw;
+  cv::Point3d vector_y_axis_projected = zone_axis_vector_uvw / norm_uvw;
+  cv::Point3d vector_z_axis_projected = upward_vector_hkl / norm_hkl; 
 
-  cv::Mat b_matrix (b, CV_64F);
-  cv::Mat n_matrix (n, CV_64F);
+  // projected x-axis: y cross z
+  // projected y-axis: (uvw)
+  // projected z-axis: (hkl)
+  cv::Mat z_axis_projected_mat ( vector_z_axis_projected , CV_64F);
+  cv::Mat y_axis_projected_mat ( vector_y_axis_projected , CV_64F);
 
-  cv::Mat t_up = n_matrix.cross( b_matrix ); 
-  const double norm_t = cv::norm( t_up );
-  cv::Mat t_mat = t_up / norm_t; 
-  vector_t.x = t_mat.at<double>(0,0);
-  vector_t.y = t_mat.at<double>(1,0);
-  vector_t.z = t_mat.at<double>(2,0);
-
-  // free aux matrix mem
-  b_matrix.release();
-  n_matrix.release();
+  cv::Mat x_axis_projected_mat = y_axis_projected_mat.cross( z_axis_projected_mat ); 
+  const double norm_x = cv::norm( x_axis_projected_mat );
+  cv::Mat mat_x_axis_projected = x_axis_projected_mat / norm_x; 
+  cv::Point3d vector_x_axis_projected; 
+  vector_x_axis_projected.x = mat_x_axis_projected.at<double>(0,0);
+  vector_x_axis_projected.y = mat_x_axis_projected.at<double>(1,0);
+  vector_x_axis_projected.z = mat_x_axis_projected.at<double>(2,0);
 
   /* insert into matrix */
   std::vector<cv::Point3d> points;
-  points.push_back(b);
-  points.push_back(vector_t);
-  points.push_back(n);
+  points.push_back(vector_x_axis_projected);
+  points.push_back(vector_y_axis_projected);
+  points.push_back(vector_z_axis_projected);
   orientation_matrix = cv::Mat( points , true ); 
   orientation_matrix = orientation_matrix.reshape(1);
 
