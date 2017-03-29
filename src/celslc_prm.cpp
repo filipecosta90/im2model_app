@@ -42,42 +42,78 @@ CELSLC_prm::CELSLC_prm()
   abs_switch = false;
   cel_format_switch = false;
   cif_format_switch = false;
+  projection_dir_hkl_switch = false;
+  projected_dir_uvw_switch = false;
+  super_cell_size_switch = false;
+  auto_equidistant_slices_switch = false;
+  // default value nz:
+  auto_non_equidistant_slices_switch = true;
+}
+
+void CELSLC_prm::set_prj_dir_hkl(double projection_dir_h, double projection_dir_k, double projection_dir_l ){
+  prj_dir_h = projection_dir_h;
+  prj_dir_k = projection_dir_k;
+  prj_dir_l = projection_dir_l;
+  projection_dir_hkl_switch = true;
+}
+
+void CELSLC_prm::set_prp_dir_uvw(double perpendicular_dir_u , double perpendicular_dir_v , double perpendicular_dir_w ){
+  prp_dir_u = perpendicular_dir_u; 
+  prp_dir_v = perpendicular_dir_v;
+  prp_dir_w = perpendicular_dir_w;
+  projected_dir_uvw_switch = true;
+}
+
+void CELSLC_prm::set_super_cell_size_xyz( double size_x, double size_y, double size_z ){
+  super_cell_size_x = size_x;
+  super_cell_size_y = size_y;
+  super_cell_size_z = size_z;
+  super_cell_size_switch = true;
 }
 
 void CELSLC_prm::set_prj_dir_h(double projection_dir_h ){
   prj_dir_h = projection_dir_h;
+  projection_dir_hkl_switch = true;
 }
 
 void CELSLC_prm::set_prj_dir_k(double projection_dir_k ){
   prj_dir_k = projection_dir_k;
+  projection_dir_hkl_switch = true;
 }
 
 void CELSLC_prm::set_prj_dir_l(double projection_dir_l ){
   prj_dir_l = projection_dir_l;
+  projection_dir_hkl_switch = true;
 }
 
 void CELSLC_prm::set_prp_dir_u(double perpendicular_dir_u){
   prp_dir_u = perpendicular_dir_u;
+  projected_dir_uvw_switch = true;
 }
 
 void CELSLC_prm::set_prp_dir_v(double perpendicular_dir_v){
   prp_dir_v = perpendicular_dir_v;
+  projected_dir_uvw_switch = true;
 }
 
 void CELSLC_prm::set_prp_dir_w(double perpendicular_dir_w){
   prp_dir_w = perpendicular_dir_w;
+  projected_dir_uvw_switch = true;
 }
 
 void CELSLC_prm::set_super_cell_size_x(double size_x){
   super_cell_size_x = size_x;
+  super_cell_size_switch = true;
 }
 
 void CELSLC_prm::set_super_cell_size_y(double size_y){
   super_cell_size_y = size_y;
+  super_cell_size_switch = true;
 }
 
 void CELSLC_prm::set_super_cell_size_z(double size_z){
   super_cell_size_z = size_z;
+  super_cell_size_switch = true;
 }
 
 void CELSLC_prm::set_cif_file( std::string cif_file ){
@@ -89,7 +125,6 @@ void CELSLC_prm::set_cel_file( std::string cel_file ){
   super_cell_cel_file = cel_file;
   cel_format_switch = true;
 }
-
 
 void CELSLC_prm::set_slc_filename_prefix ( std::string slc_file ){
   slc_file_name_prefix = slc_file;
@@ -105,6 +140,8 @@ void CELSLC_prm::set_ny_simulated_vertical_samples( int ny ){
 
 void CELSLC_prm::set_nz_simulated_partitions( int nz ){
   nz_simulated_partitions = nz;
+  auto_equidistant_slices_switch = false;
+  auto_non_equidistant_slices_switch = false;
 }
 
 void CELSLC_prm::set_ht_accelaration_voltage( double ht ){
@@ -128,26 +165,27 @@ bool CELSLC_prm::call_bin(){
 
   std::vector<char*> celslc_vector;
   celslc_vector.push_back((char*) bin_path.c_str() );
-  celslc_vector.push_back((char*) "-prj");
 
-  //input prj string
-  std::stringstream input_prj_stream;
-  input_prj_stream << prj_dir_h  << "," << prj_dir_k << "," << prj_dir_l  << "," << prp_dir_u << "," <<   prp_dir_v << "," << prp_dir_w << "," << super_cell_size_x << "," << super_cell_size_y << "," << super_cell_size_z;
-  std::string input_prj_string = input_prj_stream.str();
-  const char* input_prj_c_string = input_prj_string.c_str();
+  if( projection_dir_hkl_switch && projected_dir_uvw_switch && super_cell_size_switch ){
+    celslc_vector.push_back((char*) "-prj");
+    //input prj string
+    std::stringstream input_prj_stream;
+    input_prj_stream << prj_dir_h  << "," << prj_dir_k << "," << prj_dir_l  << "," << prp_dir_u << "," <<   prp_dir_v << "," << prp_dir_w << "," << super_cell_size_x << "," << super_cell_size_y << "," << super_cell_size_z;
+    std::string input_prj_string = input_prj_stream.str();
+    const char* input_prj_c_string = input_prj_string.c_str();
+    celslc_vector.push_back( (char*) input_prj_c_string );
+  }
 
-  celslc_vector.push_back( (char*) input_prj_c_string );
   if( cif_format_switch  ){
-  celslc_vector.push_back((char*) "-cif");
-  celslc_vector.push_back((char*) super_cell_cif_file.c_str());
+    celslc_vector.push_back((char*) "-cif");
+    celslc_vector.push_back((char*) super_cell_cif_file.c_str());
   }
   else{ 
     if( cif_format_switch  ){
-  celslc_vector.push_back((char*) "-cel");
-  celslc_vector.push_back((char*) super_cell_cel_file.c_str());
+      celslc_vector.push_back((char*) "-cel");
+      celslc_vector.push_back((char*) super_cell_cel_file.c_str());
+    }
   }
-  }
-
   celslc_vector.push_back((char*) "-slc");
   celslc_vector.push_back((char*) slc_file_name_prefix.c_str());
 
@@ -166,14 +204,28 @@ bool CELSLC_prm::call_bin(){
   std::string input_ny_string = input_ny_stream.str();
   const char* input_ny_c_string = input_ny_string.c_str();
   celslc_vector.push_back( (char*) input_ny_c_string );
-
-  celslc_vector.push_back((char*) "-nz");
-  // input nz string
-  std::stringstream input_nz_stream;
-  input_nz_stream << nz_simulated_partitions;
-  std::string input_nz_string = input_nz_stream.str();
-  const char* input_nz_c_string = input_nz_string.c_str();
-  celslc_vector.push_back( (char*) input_nz_c_string );
+  /**  
+   * Equidistant slicing of the super-cell along the c-axis. 
+   * Specify an explicit number of slices, 
+   * or use -nz 0 to let CELSLC determine the number of equidistant slices automatically. 
+   * Omitting the -nz option will lead to an automatic non-equidistant slicing. 
+   * **/
+  if( !auto_non_equidistant_slices_switch ){
+    celslc_vector.push_back((char*) "-nz");
+    // input nz string
+    std::stringstream input_nz_stream;
+    if( auto_equidistant_slices_switch ){
+      //let CELSLC determine the number of equidistant slices automatically
+      input_nz_stream << "0"; 
+    }
+    else{
+      //Specify an explicit number of slices
+      input_nz_stream << nz_simulated_partitions;
+    }
+    std::string input_nz_string = input_nz_stream.str();
+    const char* input_nz_c_string = input_nz_string.c_str();
+    celslc_vector.push_back( (char*) input_nz_c_string );
+  }
 
   celslc_vector.push_back((char*) "-ht");
   // input ht
@@ -205,6 +257,9 @@ bool CELSLC_prm::call_bin(){
   else {
     int status;
     wait(&status);
+    if( auto_equidistant_slices_switch || auto_non_equidistant_slices_switch ){
+      std::cout << "going to parse " <<  slc_file_name_prefix << ".prj first line " << std::endl;    
+    }  
     return EXIT_SUCCESS;
   }
   //if you get here something went wrong

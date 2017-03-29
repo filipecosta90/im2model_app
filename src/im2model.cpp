@@ -128,6 +128,8 @@ int main(int argc, char** argv )
   int nx_simulated_horizontal_samples;
   int ny_simulated_vertical_samples;
   int nz_simulated_partitions;
+  bool nx_ny_switch = false;
+  bool nz_switch = false;
   double ht_accelaration_voltage;
 
   // based on super_cell_size_x and nx_simulated_horizontal_samples
@@ -242,9 +244,9 @@ int main(int argc, char** argv )
       ("super_a",  boost::program_options::value<double>(&super_cell_size_x)->required(), "the size(in nanometers) of the new orthorhombic super-cell along the axis x.")
       ("super_b",  boost::program_options::value<double>(&super_cell_size_y)->required(), "the size(in nanometers) of the new orthorhombic super-cell along the axis y.")
       ("super_c",  boost::program_options::value<double>(&super_cell_size_z)->required(), "the size(in nanometers) of the new orthorhombic super-cell along the axis z, where z is the projection direction of the similation.")
-      ("nx", boost::program_options::value<int>(&nx_simulated_horizontal_samples)->required(), "number of horizontal samples for the phase grating. The same number of pixels is used to sample the wave function in multislice calculations based on the calculated phase gratings.")
-      ("ny", boost::program_options::value<int>(&ny_simulated_vertical_samples)->required(), "number of vertical samples for the phase grating. The same number of pixels is used to sample the wave function in multislice calculations based on the calculated phase gratings.")
-      ("nz", boost::program_options::value<int>(&nz_simulated_partitions)->required(), "simulated partitions")
+      ("nx", boost::program_options::value<int>(&nx_simulated_horizontal_samples), "number of horizontal samples for the phase grating. The same number of pixels is used to sample the wave function in multislice calculations based on the calculated phase gratings.")
+      ("ny", boost::program_options::value<int>(&ny_simulated_vertical_samples), "number of vertical samples for the phase grating. The same number of pixels is used to sample the wave function in multislice calculations based on the calculated phase gratings.")
+      ("nz", boost::program_options::value<int>(&nz_simulated_partitions), "simulated partitions")
       ("ht", boost::program_options::value<double>(&ht_accelaration_voltage)->required(), "accelerating voltage defining the kinetic energy of the incident electron beam in kV.")
       ("cd", boost::program_options::value<double>(&coefficient_aberration_defocus), "Defocus Aberration definition by two coefficient values given in [nm]. This is the first coefficient value. The second coefficient value is considered to be 0.")
       ("cs", boost::program_options::value<double>(&coefficient_aberration_spherical), "Spherical Aberration definition by two coefficient values given in [nm]. This is the first coefficient value. The second coefficient value is considered to be 0.")
@@ -296,6 +298,17 @@ int main(int argc, char** argv )
       if ( vm.count("cd") ){
         cd_switch = true;
         number_image_aberrations++;
+      }
+      if ( vm.count("nz")){
+        nz_switch = true;
+      }
+      if ( vm.count("ny") ){
+        assert( vm.count("nx") );
+        nx_ny_switch = true;
+      }
+      if ( vm.count("nx") ){
+        assert( vm.count("ny") );
+        nx_ny_switch = true;
       }
 
       if ( vm.count("cs") ){
@@ -369,9 +382,20 @@ int main(int argc, char** argv )
     unit_cell.form_matrix_from_miller_indices(); 
 
     // Simulated image sampling rate
-    sampling_rate_super_cell_x_nm_pixel = super_cell_size_x / nx_simulated_horizontal_samples;
-    sampling_rate_super_cell_y_nm_pixel = super_cell_size_y / ny_simulated_vertical_samples;
-    super_cell_z_nm_slice = super_cell_size_z / nz_simulated_partitions;
+    if ( nx_ny_switch ){
+      sampling_rate_super_cell_x_nm_pixel = super_cell_size_x / nx_simulated_horizontal_samples;
+      sampling_rate_super_cell_y_nm_pixel = super_cell_size_y / ny_simulated_vertical_samples;
+    }
+    else{
+      nx_simulated_horizontal_samples = (int) ( super_cell_size_x / sampling_rate_experimental_x_nm_per_pixel );
+      ny_simulated_vertical_samples = (int) ( super_cell_size_y / sampling_rate_experimental_y_nm_per_pixel );
+      sampling_rate_super_cell_x_nm_pixel = sampling_rate_experimental_x_nm_per_pixel; 
+      sampling_rate_super_cell_y_nm_pixel = sampling_rate_experimental_y_nm_per_pixel; 
+    }
+
+    if( nz_switch ){
+      super_cell_z_nm_slice = super_cell_size_z / nz_simulated_partitions;
+    }
     diff_super_cell_and_simulated_x = fabs(sampling_rate_super_cell_x_nm_pixel - sampling_rate_experimental_x_nm_per_pixel);
     diff_super_cell_and_simulated_y = fabs(sampling_rate_super_cell_y_nm_pixel - sampling_rate_experimental_y_nm_per_pixel);
 
@@ -408,9 +432,6 @@ int main(int argc, char** argv )
     ignore_edge_pixels_rectangle.width = initial_simulated_image_width;
     ignore_edge_pixels_rectangle.height = initial_simulated_image_height;
 
-    std::cout << "Defined nz: " << nz_simulated_partitions << " supercell size y " << super_cell_size_y << " sampling_rate_super_cell_y_nm_pixel: " << sampling_rate_super_cell_y_nm_pixel << std::endl;
-
-
     // Simulation Thickness Period (in slices)
     slice_period =  ( ( ((double)slices_upper_bound - (double)slices_lower_bound) ) / ((double)slice_samples -1.0f ) );
     std::cout << "Calculated slice period of " << slice_period << std::endl;
@@ -426,20 +447,16 @@ int main(int argc, char** argv )
 
     if (celslc_switch == true ){
       CELSLC_prm::CELSLC_prm celslc_parameters;
-      celslc_parameters.set_prj_dir_h(projection_dir_h);
-      celslc_parameters.set_prj_dir_k(projection_dir_k);
-      celslc_parameters.set_prj_dir_l(projection_dir_l);
-      celslc_parameters.set_prp_dir_u(perpendicular_dir_u);
-      celslc_parameters.set_prp_dir_v(perpendicular_dir_v);
-      celslc_parameters.set_prp_dir_w(perpendicular_dir_w);
-      celslc_parameters.set_super_cell_size_x(super_cell_size_x);
-      celslc_parameters.set_super_cell_size_y(super_cell_size_y);
-      celslc_parameters.set_super_cell_size_z(super_cell_size_z);
+      celslc_parameters.set_prj_dir_hkl( projection_dir_h, projection_dir_k, projection_dir_l );
+      celslc_parameters.set_prp_dir_uvw( perpendicular_dir_u, perpendicular_dir_v, perpendicular_dir_w );
+      celslc_parameters.set_super_cell_size_xyz( super_cell_size_x, super_cell_size_y, super_cell_size_z );
       celslc_parameters.set_cif_file(super_cell_cif_file.c_str());
       celslc_parameters.set_slc_filename_prefix (slc_file_name_prefix.c_str());
       celslc_parameters.set_nx_simulated_horizontal_samples(nx_simulated_horizontal_samples);
       celslc_parameters.set_ny_simulated_vertical_samples(ny_simulated_vertical_samples);
-      celslc_parameters.set_nz_simulated_partitions(nz_simulated_partitions);
+      if( nz_switch ){
+        celslc_parameters.set_nz_simulated_partitions(nz_simulated_partitions);
+      }
       celslc_parameters.set_ht_accelaration_voltage(ht_accelaration_voltage);
       celslc_parameters.set_dwf_switch(dwf_switch);
       celslc_parameters.set_abs_switch(abs_switch);
@@ -676,7 +693,7 @@ int main(int argc, char** argv )
       super_cell.create_fractional_positions_atoms();
       super_cell.generate_super_cell_file( "test_im2model.cel" );
       std::cout << " finished writing cel file" << std::endl;
-      
+
       //wavimg_simgrid_steps.export_sim_grid();
     }
     if( vis_gui_switch ){

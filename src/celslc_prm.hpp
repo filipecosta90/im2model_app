@@ -27,8 +27,19 @@ class CELSLC_prm {
     
     bool cif_format_switch;
     bool cel_format_switch;
+    bool projection_dir_hkl_switch;
+    bool projected_dir_uvw_switch;
+    bool super_cell_size_switch;
+    bool auto_equidistant_slices_switch;
+    bool auto_non_equidistant_slices_switch;
+ 
   public:
     CELSLC_prm();
+    void set_prj_dir_hkl( double projection_dir_h, double projection_dir_k, double projection_dir_l );
+    
+    void set_prp_dir_uvw( double perpendicular_dir_u , double perpendicular_dir_v , double perpendicular_dir_w );
+    
+    void set_super_cell_size_xyz( double size_x, double size_y, double size_z );
 
     void set_prj_dir_h(double projection_dir_h );
 

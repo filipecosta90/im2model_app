@@ -70,6 +70,8 @@ class Super_Cell {
     double _fractional_norm_b_atom_pos;
     double _fractional_norm_c_atom_pos;
     double _cel_margin_nm;
+    int _cel_nx_px;
+    int _cel_ny_px;
 
     /** Orientation **/
     cv::Mat orientation_matrix;

@@ -83,10 +83,11 @@ void Super_Cell::set_sentinel_values(){
   _x_supercell_min_size_nm = _y_supercell_min_size_nm =_z_supercell_min_size_nm = -1.0f;
   expand_factor_a = expand_factor_b = expand_factor_c = -1;
   _sampling_rate_super_cell_x_nm_pixel = _sampling_rate_super_cell_y_nm_pixel = -1.0f;
+  _cel_ny_px = _cel_nx_px = -1;
 }
 
 void Super_Cell::set_super_cell_margin_nm( double margin ){
-_cel_margin_nm = margin;
+  _cel_margin_nm = margin;
 }
 
 void Super_Cell::set_super_cell_length_a_Angstroms( double a ){
@@ -421,7 +422,9 @@ void Super_Cell::create_fractional_positions_atoms(){
     _super_cell_atom_fractional_cell_coordinates.push_back( atom_fractional );
   }
   std::cout << "Finished Creating atoms fractional positions:" << _super_cell_atom_fractional_cell_coordinates.size() <<  std::endl;
-
+  _cel_nx_px = (int) (_fractional_norm_a_atom_pos / _sampling_rate_super_cell_x_nm_pixel);
+  _cel_ny_px = (int) (_fractional_norm_b_atom_pos / _sampling_rate_super_cell_y_nm_pixel);
+  std::cout << "\tnew CELSLC -nx " << _cel_nx_px <<  " -ny " << _cel_ny_px << std::endl;
 }
 
 /** other methods **/
@@ -482,6 +485,7 @@ bool Super_Cell::create_atoms_from_unit_cell(){
       }
     }
   }
+
   std::cout << "SuperCell has " << _atom_positions.size() << " atoms" << std::endl;
   return true;
 }
@@ -525,8 +529,8 @@ void Super_Cell::update_experimental_image_size_parameters(){
   assert( _sampling_rate_super_cell_x_nm_pixel > 0.0f );
   assert( _sampling_rate_super_cell_y_nm_pixel > 0.0f );
 
-  _super_cell_width_px = (int) (_super_cell_length_a_Nanometers / _sampling_rate_super_cell_x_nm_pixel);
-  _super_cell_height_px = (int) (_super_cell_length_b_Nanometers / _sampling_rate_super_cell_y_nm_pixel);
+  _super_cell_width_px = (int) ( _super_cell_length_a_Nanometers / _sampling_rate_super_cell_x_nm_pixel );
+  _super_cell_height_px = (int) ( _super_cell_length_b_Nanometers / _sampling_rate_super_cell_y_nm_pixel );
 }
 
 /** other methods **/
@@ -742,7 +746,7 @@ void Super_Cell::update_super_cell_boundary_polygon(){
 
     const double _pos_x_t = ( _sampling_rate_super_cell_x_nm_pixel * ((double) super_cell_boundary_point.x ) + center_a_padding_nm );
     const double _pos_y_uvw = ( -1.0f * ( _sampling_rate_super_cell_y_nm_pixel * ((double) super_cell_boundary_point.y ))) + center_b_padding_nm;
-      const cv::Point2f _sim_a( _pos_x_t, _pos_y_uvw );
+    const cv::Point2f _sim_a( _pos_x_t, _pos_y_uvw );
     std::cout << super_cell_boundary_point.y << " , " << super_cell_boundary_point.x << " point " << _sim_a << std::endl;
     _super_cell_boundary_polygon_Nanometers_w_margin.push_back( _sim_a );
   }
