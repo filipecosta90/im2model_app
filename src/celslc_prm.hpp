@@ -9,9 +9,9 @@ class CELSLC_prm {
     double prp_dir_u;
     double prp_dir_v;
     double prp_dir_w;
-    double super_cell_size_x;
-    double super_cell_size_y;
-    double super_cell_size_z;
+    double super_cell_size_a;
+    double super_cell_size_b;
+    double super_cell_size_c;
     std::string super_cell_cif_file;
     std::string super_cell_cel_file;
     std::string slc_file_name_prefix;
@@ -39,7 +39,7 @@ class CELSLC_prm {
     
     void set_prp_dir_uvw( double perpendicular_dir_u , double perpendicular_dir_v , double perpendicular_dir_w );
     
-    void set_super_cell_size_xyz( double size_x, double size_y, double size_z );
+    void set_super_cell_size_abc( double size_a, double size_b, double size_c );
 
     void set_prj_dir_h(double projection_dir_h );
 
@@ -53,11 +53,11 @@ class CELSLC_prm {
 
     void set_prp_dir_w(double perpendicular_dir_w);
 
-    void set_super_cell_size_x(double super_cell_size_x);
+    void set_super_cell_size_a(double super_cell_size_a);
 
-    void set_super_cell_size_y(double super_cell_size_y);
+    void set_super_cell_size_b(double super_cell_size_b);
 
-    void set_super_cell_size_z(double super_cell_size_z);
+    void set_super_cell_size_c(double super_cell_size_c);
 
     void set_cif_file( std::string super_cell_cif_file );
     

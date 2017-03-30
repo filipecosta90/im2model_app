@@ -124,9 +124,9 @@ int main(int argc, char** argv )
   double perpendicular_dir_v;
   double perpendicular_dir_w;
   std::string prj_uvw;
-  double super_cell_size_x;
-  double super_cell_size_y;
-  double super_cell_size_z;
+  double super_cell_size_a;
+  double super_cell_size_b;
+  double super_cell_size_c;
   std::string super_abc;
   bool hkl_switch = false;
   bool uvw_switch = false;
@@ -139,11 +139,11 @@ int main(int argc, char** argv )
   bool nz_switch = false;
   double ht_accelaration_voltage;
 
-  // based on super_cell_size_x and nx_simulated_horizontal_samples
+  // based on super_cell_size_a and nx_simulated_horizontal_samples
   double sampling_rate_super_cell_x_nm_pixel;
-  // based on super_cell_size_y and ny_simulated_vertical_samples
+  // based on super_cell_size_b and ny_simulated_vertical_samples
   double sampling_rate_super_cell_y_nm_pixel;
-  // based on super_cell_size_z and nz_simulated_partitions;
+  // based on super_cell_size_c and nz_simulated_partitions;
   double super_cell_z_nm_slice;
 
   // wavimg defocus aberration coefficient
@@ -250,9 +250,9 @@ int main(int argc, char** argv )
       ("prp_v",  boost::program_options::value<double>(&perpendicular_dir_v), "perpendicular direction v for the new y-axis of the projection [uvw].")
       ("prp_w",  boost::program_options::value<double>(&perpendicular_dir_w), "perpendicular direction w for the new y-axis of the projection [uvw].")
       ("prj_uvw",  boost::program_options::value<std::string>(&prj_uvw), "projected y axis direction [uvw].")
-      ("super_a",  boost::program_options::value<double>(&super_cell_size_x), "the size(in nanometers) of the new orthorhombic super-cell along the axis x.")
-      ("super_b",  boost::program_options::value<double>(&super_cell_size_y), "the size(in nanometers) of the new orthorhombic super-cell along the axis y.")
-      ("super_c",  boost::program_options::value<double>(&super_cell_size_z), "the size(in nanometers) of the new orthorhombic super-cell along the axis z, where z is the projection direction of the similation.")
+      ("super_a",  boost::program_options::value<double>(&super_cell_size_a), "the size(in nanometers) of the new orthorhombic super-cell along the axis x.")
+      ("super_b",  boost::program_options::value<double>(&super_cell_size_b), "the size(in nanometers) of the new orthorhombic super-cell along the axis y.")
+      ("super_c",  boost::program_options::value<double>(&super_cell_size_c), "the size(in nanometers) of the new orthorhombic super-cell along the axis z, where z is the projection direction of the similation.")
       ("super_abc",  boost::program_options::value<std::string>(&super_abc), "the size(in nanometers) of the new orthorhombic super-cell along the axis xyz.")
       ("nx", boost::program_options::value<int>(&nx_simulated_horizontal_samples), "number of horizontal samples for the phase grating. The same number of pixels is used to sample the wave function in multislice calculations based on the calculated phase gratings.")
       ("ny", boost::program_options::value<int>(&ny_simulated_vertical_samples), "number of vertical samples for the phase grating. The same number of pixels is used to sample the wave function in multislice calculations based on the calculated phase gratings.")
@@ -288,109 +288,151 @@ int main(int argc, char** argv )
       ;
 
     boost::program_options::variables_map vm;
-    try
-    {
+    try{
       boost::program_options::store(boost::program_options::parse_command_line(argc, argv, desc),vm); // can throw
-
-      /** --help option
-      */
-      if ( vm.count("help")  )
-      {
-        std::cout << "\n\n********************************************************************************\n\n" <<
-          "im2model -- Atomic models for TEM image simulation and matching\n"
-          <<
-          "Command Line Parameters:" << std::endl
-          << desc << std::endl;
-        return 0;
-      }
-      if ( vm.count("cd") ){
-        cd_switch = true;
-        number_image_aberrations++;
-      }
-      if ( vm.count("prj_h") && vm.count("prj_k") && vm.count("prj_l") ){
-        hkl_switch = true;
-      }
-      if ( vm.count("prj_hkl") ){
-        std::cout << "HKL " << prj_hkl << super_cell_cif_file << std::endl;
-        typedef boost::tokenizer<boost::char_separator<char>> tokenizer;
-        boost::char_separator<char> sep{","};
-        tokenizer tok{prj_hkl, sep};
-        for (const auto &t : tok)
-          std::cout << t << std::endl;
-        hkl_switch = true;
-      }
-      if ( vm.count("prj_u") && vm.count("prj_v") && vm.count("prj_w") ){
-        uvw_switch = true;
-      }
-      if ( vm.count("nz")){
-        nz_switch = true;
-      }
-      if ( vm.count("ny") ){
-        assert( vm.count("nx") );
-        nx_ny_switch = true;
-      }
-      if ( vm.count("nx") ){
-        assert( vm.count("ny") );
-        nx_ny_switch = true;
-      }
-
-      if ( vm.count("cs") ){
-        number_image_aberrations++;
-        cs_switch = true;
-      }
-      if ( vm.count("dwf")  ){
-        dwf_switch=true;
-      }
-      if ( vm.count("abs")  ){
-        abs_switch=true;
-      }
-      if ( vm.count("no_celslc")  ){
-        celslc_switch=false;
-      }
-      if ( vm.count("no_msa")  ){
-        msa_switch=false;
-      }
-      if ( vm.count("no_wavimg")  ){
-        wavimg_switch=false;
-      }
-      if ( vm.count("no_im2model")  ){
-        im2model_switch=false;
-      }
-      if ( vm.count("debug")  ){
-        debug_switch=true;
-      }
-      if ( vm.count("roi_gui")  ){
-        roi_gui_switch=true;
-      }
-      if ( vm.count("vis_gui")  ){
-        vis_gui_switch=true;
-      }
-      if ( vm.count("sim_cmp_gui")  ){
-        sim_cmp_gui_switch=true;
-      }
-      if ( vm.count("sim_grid")  ){
-        sim_grid_switch=true;
-      }
-      if ( vm.count("estimated_defocus_nm")  ){
-        user_estimated_defocus_nm_switch=true;
-      }
-      if ( vm.count("estimated_thickness_nm")  ){
-        user_estimated_thickness_nm_switch=true;
-      }
-      if ( vm.count("estimated_thickness_slice")  ){
-        user_estimated_thickness_slice_switch=true;
-      }
-
-      boost::program_options::notify(vm); // throws on error, so do after help in case
-      // there are any problems
     }
-    catch(boost::program_options::error& e)
-    {
+    catch(boost::program_options::error& e){
       std::cerr << "ERROR: " << e.what() << std::endl << std::endl;
       std::cerr << desc << std::endl;
       return -1;
     }
 
+    boost::program_options::notify(vm); 
+
+    if ( vm.count("help")  )
+    {
+      std::cout << "\n\n********************************************************************************\n\n" <<
+        "im2model -- Atomic models for TEM image simulation and matching\n"
+        <<
+        "Command Line Parameters:" << std::endl
+        << desc << std::endl;
+      return 0;
+    }
+
+
+    if ( vm.count("cd") ){
+      cd_switch = true;
+      number_image_aberrations++;
+    }
+    if ( vm.count("prj_h") && vm.count("prj_k") && vm.count("prj_l") ){
+      hkl_switch = true;
+    }
+    if ( vm.count("prj_hkl") ){
+      typedef boost::tokenizer<boost::char_separator<char>> tokenizer;
+      boost::char_separator<char> sep{","};
+      tokenizer tok{prj_hkl, sep};
+      tokenizer::iterator itt_h,itt_k,itt_l; 
+      itt_h = tok.begin();
+      itt_k = tok.begin();
+      itt_l = tok.begin();
+      std::advance(itt_k,1);
+      std::advance(itt_l,2);
+      projection_dir_h = boost::lexical_cast<double> (*itt_h);
+      projection_dir_k = boost::lexical_cast<double> (*itt_k);
+      projection_dir_l = boost::lexical_cast<double> (*itt_l);
+      hkl_switch = true;
+    }
+    if ( vm.count("prj_u") && vm.count("prj_v") && vm.count("prj_w") ){
+      uvw_switch = true;
+    }
+
+    if ( vm.count("prj_uvw") ){
+      typedef boost::tokenizer<boost::char_separator<char>> tokenizer;
+      boost::char_separator<char> sep{","};
+      tokenizer tok{prj_uvw, sep};
+      tokenizer::iterator itt_u,itt_v,itt_w; 
+      itt_u = tok.begin();
+      itt_v = tok.begin();
+      itt_w = tok.begin();
+      std::advance(itt_v,1);
+      std::advance(itt_w,2);
+      perpendicular_dir_u = boost::lexical_cast<double> (*itt_u);
+      perpendicular_dir_v = boost::lexical_cast<double> (*itt_v);
+      perpendicular_dir_w = boost::lexical_cast<double> (*itt_w);
+      uvw_switch = true;
+    }
+     if ( vm.count("super_a") && vm.count("super_b") && vm.count("super_c") ){
+       abc_switch = true;
+    }
+    
+    if ( vm.count("super_abc") ){
+      typedef boost::tokenizer<boost::char_separator<char>> tokenizer;
+      boost::char_separator<char> sep{","};
+      tokenizer tok{super_abc, sep};
+      tokenizer::iterator itt_a,itt_b,itt_c; 
+      itt_a = tok.begin();
+      itt_b = tok.begin();
+      itt_c = tok.begin();
+      std::advance(itt_v,1);
+      std::advance(itt_w,2);
+     super_cell_size_c = boost::lexical_cast<double> (*itt_a);
+    super_cell_size_b = boost::lexical_cast<double> (*itt_b);
+  super_cell_size_c = boost::lexical_cast<double> (*itt_c);
+      abc_switch = true;
+    }
+    
+    if ( vm.count("nz")){
+      nz_switch = true;
+    }
+    if ( vm.count("ny") ){
+      assert( vm.count("nx") );
+      nx_ny_switch = true;
+    }
+    if ( vm.count("nx") ){
+      assert( vm.count("ny") );
+      nx_ny_switch = true;
+    }
+
+    if ( vm.count("cs") ){
+      number_image_aberrations++;
+      cs_switch = true;
+    }
+    if ( vm.count("dwf")  ){
+      dwf_switch=true;
+    }
+    if ( vm.count("abs")  ){
+      abs_switch=true;
+    }
+    if ( vm.count("no_celslc")  ){
+      celslc_switch=false;
+    }
+    if ( vm.count("no_msa")  ){
+      msa_switch=false;
+    }
+    if ( vm.count("no_wavimg")  ){
+      wavimg_switch=false;
+    }
+    if ( vm.count("no_im2model")  ){
+      im2model_switch=false;
+    }
+    if ( vm.count("debug")  ){
+      debug_switch=true;
+    }
+    if ( vm.count("roi_gui")  ){
+      roi_gui_switch=true;
+    }
+    if ( vm.count("vis_gui")  ){
+      vis_gui_switch=true;
+    }
+    if ( vm.count("sim_cmp_gui")  ){
+      sim_cmp_gui_switch=true;
+    }
+    if ( vm.count("sim_grid")  ){
+      sim_grid_switch=true;
+    }
+    if ( vm.count("estimated_defocus_nm")  ){
+      user_estimated_defocus_nm_switch=true;
+    }
+    if ( vm.count("estimated_thickness_nm")  ){
+      user_estimated_thickness_nm_switch=true;
+    }
+    if ( vm.count("estimated_thickness_slice")  ){
+      user_estimated_thickness_slice_switch=true;
+    }
+
+
+    // there are any problems
+    std::cout << "PRJ " << prj_hkl << std::endl;
     /* CIF file parser */
     driver.parse( super_cell_cif_file.c_str() );
     driver.populate_unit_cell();
@@ -407,19 +449,19 @@ int main(int argc, char** argv )
 
     // Simulated image sampling rate
     if ( nx_ny_switch ){
-      sampling_rate_super_cell_x_nm_pixel = super_cell_size_x / nx_simulated_horizontal_samples;
-      sampling_rate_super_cell_y_nm_pixel = super_cell_size_y / ny_simulated_vertical_samples;
+      sampling_rate_super_cell_x_nm_pixel = super_cell_size_a / nx_simulated_horizontal_samples;
+      sampling_rate_super_cell_y_nm_pixel = super_cell_size_b / ny_simulated_vertical_samples;
     }
     else{
-      nx_simulated_horizontal_samples = (int) ( super_cell_size_x / sampling_rate_experimental_x_nm_per_pixel );
-      ny_simulated_vertical_samples = (int) ( super_cell_size_y / sampling_rate_experimental_y_nm_per_pixel );
+      nx_simulated_horizontal_samples = (int) ( super_cell_size_a / sampling_rate_experimental_x_nm_per_pixel );
+      ny_simulated_vertical_samples = (int) ( super_cell_size_b / sampling_rate_experimental_y_nm_per_pixel );
       sampling_rate_super_cell_x_nm_pixel = sampling_rate_experimental_x_nm_per_pixel; 
       sampling_rate_super_cell_y_nm_pixel = sampling_rate_experimental_y_nm_per_pixel; 
       std::cout << "automatic nx and ny. -nx " << nx_simulated_horizontal_samples << " -ny " << ny_simulated_vertical_samples << std::endl;
     }
 
     if( nz_switch ){
-      super_cell_z_nm_slice = super_cell_size_z / nz_simulated_partitions;
+      super_cell_z_nm_slice = super_cell_size_c / nz_simulated_partitions;
     }
     diff_super_cell_and_simulated_x = fabs(sampling_rate_super_cell_x_nm_pixel - sampling_rate_experimental_x_nm_per_pixel);
     diff_super_cell_and_simulated_y = fabs(sampling_rate_super_cell_y_nm_pixel - sampling_rate_experimental_y_nm_per_pixel);
@@ -472,26 +514,10 @@ int main(int argc, char** argv )
 
     if (celslc_switch == true ){
       CELSLC_prm::CELSLC_prm celslc_parameters;
-      celslc_parameters.set_prj_dir_h( projection_dir_h );
-      celslc_parameters.set_prj_dir_k( projection_dir_k );
-      celslc_parameters.set_prj_dir_l( projection_dir_l );
-
-
-      celslc_parameters.set_prp_dir_u( perpendicular_dir_u );
-      celslc_parameters.set_prp_dir_v( perpendicular_dir_v );
-      celslc_parameters.set_prp_dir_w( perpendicular_dir_w );
-
-      celslc_parameters.set_super_cell_size_x( super_cell_size_x );
-      celslc_parameters.set_super_cell_size_y( super_cell_size_y );
-      celslc_parameters.set_super_cell_size_z( super_cell_size_z );
-
-      /*   
-       *
-       *    , projection_dir_k, projection_dir_l );
-       *    celslc_parameters.set_prj_dir_hkl( projection_dir_h, projection_dir_k, projection_dir_l );
+      
+    celslc_parameters.set_prj_dir_hkl( projection_dir_h, projection_dir_k, projection_dir_l );
        celslc_parameters.set_prp_dir_uvw( perpendicular_dir_u, perpendicular_dir_v, perpendicular_dir_w );
-       celslc_parameters.set_super_cell_size_xyz( super_cell_size_x, super_cell_size_y, super_cell_size_z );
-       */
+       celslc_parameters.set_super_cell_size_ayz( super_cell_size_a, super_cell_size_b, super_cell_size_c );
       celslc_parameters.set_cif_file(super_cell_cif_file.c_str());
       celslc_parameters.set_slc_filename_prefix (slc_file_name_prefix.c_str());
       celslc_parameters.set_nx_simulated_horizontal_samples(nx_simulated_horizontal_samples);

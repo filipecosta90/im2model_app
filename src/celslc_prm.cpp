@@ -25,9 +25,9 @@ CELSLC_prm::CELSLC_prm()
   prp_dir_u = 0.0f;
   prp_dir_v = 0.0f;
   prp_dir_w = 0.0f;
-  super_cell_size_x = 0.0f;
-  super_cell_size_y = 0.0f;
-  super_cell_size_z = 0.0f;
+  super_cell_size_a = 0.0f;
+  super_cell_size_b = 0.0f;
+  super_cell_size_c = 0.0f;
   super_cell_cif_file = "";
   super_cell_cel_file = "";
   slc_file_name_prefix = "";
@@ -64,10 +64,10 @@ void CELSLC_prm::set_prp_dir_uvw(double perpendicular_dir_u , double perpendicul
   projected_dir_uvw_switch = true;
 }
 
-void CELSLC_prm::set_super_cell_size_xyz( double size_x, double size_y, double size_z ){
-  super_cell_size_x = size_x;
-  super_cell_size_y = size_y;
-  super_cell_size_z = size_z;
+void CELSLC_prm::set_super_cell_size_abc( double size_a, double size_b, double size_c ){
+  super_cell_size_a = size_a;
+  super_cell_size_b = size_b;
+  super_cell_size_c = size_c;
   super_cell_size_switch = true;
 }
 
@@ -101,18 +101,18 @@ void CELSLC_prm::set_prp_dir_w(double perpendicular_dir_w){
   projected_dir_uvw_switch = true;
 }
 
-void CELSLC_prm::set_super_cell_size_x(double size_x){
-  super_cell_size_x = size_x;
+void CELSLC_prm::set_super_cell_size_a( double size_a ){
+  super_cell_size_a = size_a;
   super_cell_size_switch = true;
 }
 
-void CELSLC_prm::set_super_cell_size_y(double size_y){
-  super_cell_size_y = size_y;
+void CELSLC_prm::set_super_cell_size_b( double size_b ){
+  super_cell_size_b = size_b;
   super_cell_size_switch = true;
 }
 
-void CELSLC_prm::set_super_cell_size_z(double size_z){
-  super_cell_size_z = size_z;
+void CELSLC_prm::set_super_cell_size_c( double size_c ){
+  super_cell_size_c = size_c;
   super_cell_size_switch = true;
 }
 
@@ -192,7 +192,7 @@ bool CELSLC_prm::call_bin(){
     input_prj_stream 
       << (float) prj_dir_h  << "," << (float) prj_dir_k << "," << (float) prj_dir_l  << "," 
       << (float) prp_dir_u << "," <<   (float) prp_dir_v << "," << (float) prp_dir_w << "," 
-      << (float) super_cell_size_x << "," << (float) super_cell_size_y << "," << (float) super_cell_size_z;
+      << (float) super_cell_size_a << "," << (float) super_cell_size_b << "," << (float) super_cell_size_c;
     std::string input_prj_string = input_prj_stream.str();
     std::cout <<  "prj: " << input_prj_string.c_str() << "| " << input_prj_string << std::endl;
     celslc_vector.push_back( (char*) input_prj_string.c_str() );
