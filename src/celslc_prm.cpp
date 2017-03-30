@@ -140,8 +140,11 @@ void CELSLC_prm::set_ny_simulated_vertical_samples( int ny ){
 
 void CELSLC_prm::set_nz_simulated_partitions( int nz ){
   nz_simulated_partitions = nz;
-  auto_equidistant_slices_switch = false;
+  auto_equidistant_slices_switch = false; 
   auto_non_equidistant_slices_switch = false;
+  if( nz == 0 ){
+    auto_equidistant_slices_switch = true; 
+  }
 }
 
 void CELSLC_prm::set_ht_accelaration_voltage( double ht ){
@@ -168,17 +171,8 @@ bool CELSLC_prm::call_bin(){
   int pid;
 
   std::vector<char*> celslc_vector;
-  celslc_vector.push_back((char*) bin_path.c_str() );
 
-  if( projection_dir_hkl_switch && projected_dir_uvw_switch && super_cell_size_switch ){
-    celslc_vector.push_back((char*) "-prj");
-    //input prj string
-    std::stringstream input_prj_stream;
-    input_prj_stream << prj_dir_h  << "," << prj_dir_k << "," << prj_dir_l  << "," << prp_dir_u << "," <<   prp_dir_v << "," << prp_dir_w << "," << super_cell_size_x << "," << super_cell_size_y << "," << super_cell_size_z;
-    std::string input_prj_string = input_prj_stream.str();
-    const char* input_prj_c_string = input_prj_string.c_str();
-    celslc_vector.push_back( (char*) input_prj_c_string );
-  }
+  celslc_vector.push_back((char*) bin_path.c_str() );
 
   if( cif_format_switch  ){
     celslc_vector.push_back((char*) "-cif");
@@ -190,6 +184,20 @@ bool CELSLC_prm::call_bin(){
       celslc_vector.push_back((char*) super_cell_cel_file.c_str());
     }
   }
+
+  if( projection_dir_hkl_switch && projected_dir_uvw_switch && super_cell_size_switch ){
+    celslc_vector.push_back((char*) "-prj");
+    //input prj string
+    std::stringstream input_prj_stream;
+    input_prj_stream 
+      << (float) prj_dir_h  << "," << (float) prj_dir_k << "," << (float) prj_dir_l  << "," 
+      << (float) prp_dir_u << "," <<   (float) prp_dir_v << "," << (float) prp_dir_w << "," 
+      << (float) super_cell_size_x << "," << (float) super_cell_size_y << "," << (float) super_cell_size_z;
+    std::string input_prj_string = input_prj_stream.str();
+    std::cout <<  "prj: " << input_prj_string.c_str() << "| " << input_prj_string << std::endl;
+    celslc_vector.push_back( (char*) input_prj_string.c_str() );
+  }
+
   celslc_vector.push_back((char*) "-slc");
   celslc_vector.push_back((char*) slc_file_name_prefix.c_str());
 
@@ -247,6 +255,12 @@ bool CELSLC_prm::call_bin(){
   }
   celslc_vector.push_back(0); //end of arguments sentinel is NULL
 
+  std::cout << "size::" <<  celslc_vector.size();
+  std::vector<char*>::iterator  itt; 
+  for( itt = celslc_vector.begin(); itt != celslc_vector.end(); itt++ ){
+    char* param = *itt;
+    //std::cout << (char*) (*itt); 
+  } 
   if ((pid = vfork()) == -1) // system functions also set a variable called "errno"
   {
     perror("ERROR in vfork() of CELSLC call_bin"); // this function automatically checks "errno"
@@ -285,3 +299,4 @@ bool CELSLC_prm::call_bin(){
   return EXIT_FAILURE;
 
 }
+

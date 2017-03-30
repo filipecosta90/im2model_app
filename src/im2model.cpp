@@ -119,12 +119,19 @@ int main(int argc, char** argv )
   double projection_dir_h;
   double projection_dir_k;
   double projection_dir_l;
+  std::string prj_hkl;
   double perpendicular_dir_u;
   double perpendicular_dir_v;
   double perpendicular_dir_w;
+  std::string prj_uvw;
   double super_cell_size_x;
   double super_cell_size_y;
   double super_cell_size_z;
+  std::string super_abc;
+  bool hkl_switch = false;
+  bool uvw_switch = false;
+  bool abc_switch = false;
+
   int nx_simulated_horizontal_samples;
   int ny_simulated_vertical_samples;
   int nz_simulated_partitions;
@@ -235,15 +242,18 @@ int main(int argc, char** argv )
       ("debug,g", "switch for enabling debug info for celslc, msa, and wavimg execution.")
       ("cif", boost::program_options::value<std::string>(&super_cell_cif_file)->required(), "specifies the input super-cell file containing the atomic structure data in CIF file format.")
       ("slc", boost::program_options::value<std::string>(&slc_file_name_prefix)->required(), "specifies the output slice file name prefix. Absolute or relative path names can be used. Enclose the file name string using quotation marks if the file name prefix or the disk path contains space characters. The slice file names will be suffixed by '_###.sli', where ### is a 3 digit number denoting the sequence of slices generated from the supercell.")
-      ("prj_h",  boost::program_options::value<double>(&projection_dir_h)->required(), "projection direction h of [hkl].")
-      ("prj_k",  boost::program_options::value<double>(&projection_dir_k)->required(), "projection direction k of [hkl].")
-      ("prj_l",  boost::program_options::value<double>(&projection_dir_l)->required(), "projection direction l of [hkl].")
-      ("prp_u",  boost::program_options::value<double>(&perpendicular_dir_u)->required(), "perpendicular direction u for the new y-axis of the projection [uvw].")
-      ("prp_v",  boost::program_options::value<double>(&perpendicular_dir_v)->required(), "perpendicular direction v for the new y-axis of the projection [uvw].")
-      ("prp_w",  boost::program_options::value<double>(&perpendicular_dir_w)->required(), "perpendicular direction w for the new y-axis of the projection [uvw].")
-      ("super_a",  boost::program_options::value<double>(&super_cell_size_x)->required(), "the size(in nanometers) of the new orthorhombic super-cell along the axis x.")
-      ("super_b",  boost::program_options::value<double>(&super_cell_size_y)->required(), "the size(in nanometers) of the new orthorhombic super-cell along the axis y.")
-      ("super_c",  boost::program_options::value<double>(&super_cell_size_z)->required(), "the size(in nanometers) of the new orthorhombic super-cell along the axis z, where z is the projection direction of the similation.")
+      ("prj_h",  boost::program_options::value<double>(&projection_dir_h), "projection direction h of [hkl].")
+      ("prj_k",  boost::program_options::value<double>(&projection_dir_k), "projection direction k of [hkl].")
+      ("prj_l",  boost::program_options::value<double>(&projection_dir_l), "projection direction l of [hkl].")
+      ("prj_hkl",  boost::program_options::value<std::string>(&prj_hkl), "projection direction [hkl].")
+      ("prp_u",  boost::program_options::value<double>(&perpendicular_dir_u), "perpendicular direction u for the new y-axis of the projection [uvw].")
+      ("prp_v",  boost::program_options::value<double>(&perpendicular_dir_v), "perpendicular direction v for the new y-axis of the projection [uvw].")
+      ("prp_w",  boost::program_options::value<double>(&perpendicular_dir_w), "perpendicular direction w for the new y-axis of the projection [uvw].")
+      ("prj_uvw",  boost::program_options::value<std::string>(&prj_uvw), "projected y axis direction [uvw].")
+      ("super_a",  boost::program_options::value<double>(&super_cell_size_x), "the size(in nanometers) of the new orthorhombic super-cell along the axis x.")
+      ("super_b",  boost::program_options::value<double>(&super_cell_size_y), "the size(in nanometers) of the new orthorhombic super-cell along the axis y.")
+      ("super_c",  boost::program_options::value<double>(&super_cell_size_z), "the size(in nanometers) of the new orthorhombic super-cell along the axis z, where z is the projection direction of the similation.")
+      ("super_abc",  boost::program_options::value<std::string>(&super_abc), "the size(in nanometers) of the new orthorhombic super-cell along the axis xyz.")
       ("nx", boost::program_options::value<int>(&nx_simulated_horizontal_samples), "number of horizontal samples for the phase grating. The same number of pixels is used to sample the wave function in multislice calculations based on the calculated phase gratings.")
       ("ny", boost::program_options::value<int>(&ny_simulated_vertical_samples), "number of vertical samples for the phase grating. The same number of pixels is used to sample the wave function in multislice calculations based on the calculated phase gratings.")
       ("nz", boost::program_options::value<int>(&nz_simulated_partitions), "simulated partitions")
@@ -289,15 +299,28 @@ int main(int argc, char** argv )
         std::cout << "\n\n********************************************************************************\n\n" <<
           "im2model -- Atomic models for TEM image simulation and matching\n"
           <<
-
           "Command Line Parameters:" << std::endl
           << desc << std::endl;
         return 0;
       }
-
       if ( vm.count("cd") ){
         cd_switch = true;
         number_image_aberrations++;
+      }
+      if ( vm.count("prj_h") && vm.count("prj_k") && vm.count("prj_l") ){
+        hkl_switch = true;
+      }
+      if ( vm.count("prj_hkl") ){
+        std::cout << "HKL " << prj_hkl << super_cell_cif_file << std::endl;
+        typedef boost::tokenizer<boost::char_separator<char>> tokenizer;
+        boost::char_separator<char> sep{","};
+        tokenizer tok{prj_hkl, sep};
+        for (const auto &t : tok)
+          std::cout << t << std::endl;
+        hkl_switch = true;
+      }
+      if ( vm.count("prj_u") && vm.count("prj_v") && vm.count("prj_w") ){
+        uvw_switch = true;
       }
       if ( vm.count("nz")){
         nz_switch = true;
@@ -381,6 +404,7 @@ int main(int argc, char** argv )
     unit_cell.set_upward_vector( upward_vector_hkl );
     unit_cell.form_matrix_from_miller_indices(); 
 
+
     // Simulated image sampling rate
     if ( nx_ny_switch ){
       sampling_rate_super_cell_x_nm_pixel = super_cell_size_x / nx_simulated_horizontal_samples;
@@ -391,7 +415,7 @@ int main(int argc, char** argv )
       ny_simulated_vertical_samples = (int) ( super_cell_size_y / sampling_rate_experimental_y_nm_per_pixel );
       sampling_rate_super_cell_x_nm_pixel = sampling_rate_experimental_x_nm_per_pixel; 
       sampling_rate_super_cell_y_nm_pixel = sampling_rate_experimental_y_nm_per_pixel; 
-    std::cout << "automatic nx and ny. -nx " << nx_simulated_horizontal_samples << " -ny " << ny_simulated_vertical_samples << std::endl;
+      std::cout << "automatic nx and ny. -nx " << nx_simulated_horizontal_samples << " -ny " << ny_simulated_vertical_samples << std::endl;
     }
 
     if( nz_switch ){
@@ -448,9 +472,26 @@ int main(int argc, char** argv )
 
     if (celslc_switch == true ){
       CELSLC_prm::CELSLC_prm celslc_parameters;
-      celslc_parameters.set_prj_dir_hkl( projection_dir_h, projection_dir_k, projection_dir_l );
-      celslc_parameters.set_prp_dir_uvw( perpendicular_dir_u, perpendicular_dir_v, perpendicular_dir_w );
-      celslc_parameters.set_super_cell_size_xyz( super_cell_size_x, super_cell_size_y, super_cell_size_z );
+      celslc_parameters.set_prj_dir_h( projection_dir_h );
+      celslc_parameters.set_prj_dir_k( projection_dir_k );
+      celslc_parameters.set_prj_dir_l( projection_dir_l );
+
+
+      celslc_parameters.set_prp_dir_u( perpendicular_dir_u );
+      celslc_parameters.set_prp_dir_v( perpendicular_dir_v );
+      celslc_parameters.set_prp_dir_w( perpendicular_dir_w );
+
+      celslc_parameters.set_super_cell_size_x( super_cell_size_x );
+      celslc_parameters.set_super_cell_size_y( super_cell_size_y );
+      celslc_parameters.set_super_cell_size_z( super_cell_size_z );
+
+      /*   
+       *
+       *    , projection_dir_k, projection_dir_l );
+       *    celslc_parameters.set_prj_dir_hkl( projection_dir_h, projection_dir_k, projection_dir_l );
+       celslc_parameters.set_prp_dir_uvw( perpendicular_dir_u, perpendicular_dir_v, perpendicular_dir_w );
+       celslc_parameters.set_super_cell_size_xyz( super_cell_size_x, super_cell_size_y, super_cell_size_z );
+       */
       celslc_parameters.set_cif_file(super_cell_cif_file.c_str());
       celslc_parameters.set_slc_filename_prefix (slc_file_name_prefix.c_str());
       celslc_parameters.set_nx_simulated_horizontal_samples(nx_simulated_horizontal_samples);

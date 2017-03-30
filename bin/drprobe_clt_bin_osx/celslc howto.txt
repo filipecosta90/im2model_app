@@ -1,6 +1,6 @@
-HOWTO use the CELSLC program, Version 0.53b
+HOWTO use the CELSLC program, Version 0.55b
 
-(Juri Barthel, 2016-09-14)
+(Juri Barthel, 2017-03-08)
 
 
 1) Requireemts
@@ -41,7 +41,8 @@ Usage of CELSLC in command line:
   > [-nv <number>  = number of FL variants per slice (1 ... 2048)]
   > [-nz <number>  = number of equidistant slices (0 ... 2048)]
   > [-pot         -> export potentials to files *.pot]
-  > [-prj <h,k,l,u,v,w,a,b,c> = super-cell re-orientation]
+  > [-pps         -> output projected potentials to slice files]
+  > [-prj <u,v,w,u,v,w,a,b,c> = super-cell re-orientation]
   > [-rev         -> slicing in reversed sequence]
   > [-ssc <number> = single slice calculation]
   > [-tla <x,y,z>  = additional shift of atoms]
@@ -179,7 +180,15 @@ Detailed explanations:
   
   By applying the option -pot projected electron scattering 
   potentials are saved for each slice of the supercell.
+  Potentials are stored without the relativistic correction.
   
+  
+  -pps         -> output projected potentials to slice files
+  
+  This switch can be used to output projected potentials instead of
+  phase gratings to the slice files.
+  Potentials are stored without the relativistic correction.
+    
   
   -ssc <number> = single slice calculation
   
@@ -197,11 +206,12 @@ Detailed explanations:
   use it in a new orthorhombic super-cell of given size. The
   orientation is given by the first 6 numbers, defining the new
   projection direction and a perpendicular direction for the new
-  y-axis of the projection. The size of the new super-cell is
-  given by the last 3 numbers defining the extension in nanometers
-  along each of the 3 new axes x, y, and z, where z is along the
-  new  projection direction. The origin point of the structure is
-  not changed.
+  y-axis of the projection. All orientation vectors [uvw] are 
+  specified in coordinates of the real-space input lattice. The
+  size of the new super-cell is given by the last 3 numbers
+  defining the extension in nanometers along each of the 3 new
+  axes x, y, and z, where z is along the new projection direction.
+  The origin point of the structure is not changed.
   Take care to supply sizes and orientations producing a periodic
   super-cell. Aperiodic super-cells may produce serious image
   artifacts at the super-cell borders. In particular sligthly wrong
@@ -532,6 +542,13 @@ cubic srtio3 110, original unit cell repeated 4x along x and 6x along y
 
 6) Changelog:
 
+- 170306: JB: Version 0.55b
+              Added option -pps which is a switch to output the projected potentials
+              in the slice files instead of the (default) phase grating output.
+              The potentials are before relativistic correction.
+- 161215: JB: Version 0.54b
+              Corrected the documentation of the orientation input. All orientations
+              must be given in real-space lattice coordinates.
 - 160914: JB: Version 0.53b
               Omitting -nz when using 3D potential input forces identical sampling
               of the projected potential slices along z and is no longer causing

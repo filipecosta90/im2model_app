@@ -7,15 +7,15 @@ Mac OSX binaries: Dr. L. Houben, FZ-Juelich, Germany
 
 COMPILE INFO
 
-compiled on Mac OS X 10.10.5 using ifort (IFORT) 16.0.0 20150803, Xcode Version 7.0 (7A220)
+compiled on Mac OS X 10.??.? using ifort (IFORT) v??, Xcode Version ?
 
 VERSION INFO
 
 Program [celslc] 
-Version: 0.53b (20160914) 64-bit
+Version: 0.55b (20170308) 64-bit
 
 Program [msa]
-Version: 0.72b (20160923) 64-bit 
+Version: 0.73b (20170329) 64-bit 
 
 Program [wavimg]
-Version: 0.63b (20160914) 64-bit
+Version: 0.64b (20160927) 64-bit
