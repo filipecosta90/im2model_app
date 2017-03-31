@@ -17,6 +17,16 @@
 
 #include "celslc_prm.hpp"
 
+// opencv 
+#include <opencv2/opencv.hpp>
+#include "opencv2/highgui/highgui.hpp"
+#include "opencv2/imgproc/imgproc.hpp"
+
+#include "opencv2/opencv_modules.hpp"
+
+#include "opencv2/core/core.hpp"
+#include "opencv2/features2d/features2d.hpp"
+
 CELSLC_prm::CELSLC_prm()
 {
   prj_dir_h = 0.0f;
@@ -48,6 +58,7 @@ CELSLC_prm::CELSLC_prm()
   // default value nz:
   auto_equidistant_slices_switch = true; 
   auto_non_equidistant_slices_switch = false;
+  runned_bin = false;
 }
 
 void CELSLC_prm::set_prj_dir_hkl(double projection_dir_h, double projection_dir_k, double projection_dir_l ){
@@ -62,6 +73,32 @@ void CELSLC_prm::set_prp_dir_uvw(double perpendicular_dir_u , double perpendicul
   prp_dir_v = perpendicular_dir_v;
   prp_dir_w = perpendicular_dir_w;
   projected_dir_uvw_switch = true;
+}
+
+void CELSLC_prm::calc_prp_dir_uvw(){
+  assert(projection_dir_hkl_switch);
+  cv::Point3d vector_z_axis_projected (prj_dir_h, prj_dir_k, prj_dir_l); 
+  cv::Mat z_axis_projected_mat ( vector_z_axis_projected , CV_64F);
+  cv::Point3d vector_aux(prj_dir_h+1,prj_dir_k+1,prj_dir_l+1);
+  cv::Mat aux_mat ( vector_aux , CV_64F);
+  cv::Mat y_axis_projected_mat = z_axis_projected_mat.cross( aux_mat );
+  prp_dir_u = y_axis_projected_mat.at<double>(0,0);
+  prp_dir_v = y_axis_projected_mat.at<double>(1,0);
+  prp_dir_w = y_axis_projected_mat.at<double>(2,0);
+  projected_dir_uvw_switch = true;
+}
+
+void CELSLC_prm::calc_prj_dir_hkl(){
+  assert(projected_dir_uvw_switch);
+  cv::Point3d vector_y_axis_projected (prp_dir_u, prp_dir_v, prp_dir_w); 
+  cv::Mat y_axis_projected_mat ( vector_y_axis_projected , CV_64F);
+  cv::Point3d vector_aux(prp_dir_u+1,prp_dir_v+1,prp_dir_w+1);
+  cv::Mat aux_mat ( vector_aux , CV_64F);
+  cv::Mat z_axis_projected_mat = y_axis_projected_mat.cross( aux_mat );
+  prj_dir_h = z_axis_projected_mat.at<double>(0,0);
+  prj_dir_k = z_axis_projected_mat.at<double>(1,0);
+  prj_dir_l = z_axis_projected_mat.at<double>(2,0);
+  projection_dir_hkl_switch = true;
 }
 
 void CELSLC_prm::set_super_cell_size_abc( double size_a, double size_b, double size_c ){
@@ -164,7 +201,92 @@ void CELSLC_prm::set_bin_path( std::string path ){
 }
 
 int CELSLC_prm::get_nz_simulated_partitions( ){
+  if ( runned_bin != true ){
+    update_nz_simulated_partitions_from_prm();
+  }
   return nz_simulated_partitions; 
+}
+
+int CELSLC_prm::get_slice_number_from_nm_floor( double goal_thickness_nm ){
+  assert( nz_simulated_partitions >= 1 );
+  assert( slice_params_nm_slice_vec.size() == nz_simulated_partitions );
+  double accumulated_thickness = 0.0f;
+  int slice_pos = 1;
+  for ( 
+      std::vector<double>::iterator slice_itt = slice_params_nm_slice_vec.begin();
+      slice_itt != slice_params_nm_slice_vec.end() && goal_thickness_nm > accumulated_thickness;
+      slice_itt ++, slice_pos++
+      ){
+    accumulated_thickness +=  *slice_itt;
+  } 
+  return slice_pos;
+}
+
+int CELSLC_prm::get_slice_number_from_nm_ceil( double goal_thickness_nm ){
+  assert( nz_simulated_partitions >= 1 );
+  assert( slice_params_nm_slice_vec.size() == nz_simulated_partitions );
+  double accumulated_thickness = 0.0f;
+  int slice_pos = 1;
+  for ( 
+      std::vector<double>::iterator slice_itt = slice_params_nm_slice_vec.begin();
+      slice_itt != slice_params_nm_slice_vec.end() && accumulated_thickness < goal_thickness_nm;
+      slice_itt ++, slice_pos++
+      ){
+    accumulated_thickness +=  *slice_itt;
+  } 
+  return slice_pos;
+}
+
+bool CELSLC_prm::update_nz_simulated_partitions_from_prm(){
+  assert( slc_file_name_prefix != "" );
+  bool result = false;  
+  if( auto_equidistant_slices_switch || auto_non_equidistant_slices_switch ){
+    std::stringstream input_prm_stream;
+    input_prm_stream << slc_file_name_prefix << ".prm"; 
+
+    std::ifstream infile;
+    infile.open ( input_prm_stream.str() , std::ifstream::in);
+    if (infile.is_open()) {
+      std::string line;
+      std::getline(infile, line);
+      std::istringstream iss(line);
+      int nslices;
+      iss >> nz_simulated_partitions; 
+      for (int slice_id = 1; slice_id <= nz_simulated_partitions ; slice_id ++ ){
+        //ignore line with '[Slice Parameters]'
+        std::getline(infile, line); 
+        //ignore line with slice### 
+        std::getline(infile, line); 
+        //ignore line with slicepath 
+        std::getline(infile, line); 
+        //ignore line with nx
+        std::getline(infile, line); 
+        //ignore line with ny
+        std::getline(infile, line); 
+        //ignore line with nz
+        std::getline(infile, line); 
+        //ignore line with nm/per/px x
+        std::getline(infile, line); 
+        //ignore line with nm/per/px y
+        std::getline(infile, line); 
+        //get nz dimension of the slice
+        std::getline(infile, line);
+        std::istringstream iss(line);
+        double slice_thickness_nm;
+        iss >> slice_thickness_nm;
+        //        std::cout << slice_id  <<" " << slice_thickness_nm << std::endl;
+
+        slice_params_nm_slice.insert( std::pair<int,double> (slice_id, slice_thickness_nm));
+        slice_params_nm_slice_vec.push_back(slice_thickness_nm);
+      }
+      infile.close();
+      result = true;
+    }
+    else{
+      std::cout << "Warning: unable to open file \"" << input_prm_stream.str() << "\"" << std::endl;
+    }
+  }
+  return result;
 }
 
 bool CELSLC_prm::call_bin(){
@@ -272,23 +394,9 @@ bool CELSLC_prm::call_bin(){
     int status;
     wait(&status);
     if( auto_equidistant_slices_switch || auto_non_equidistant_slices_switch ){
-      std::stringstream input_prm_stream;
-      input_prm_stream << slc_file_name_prefix << ".prm"; 
-
-      std::ifstream infile;
-      infile.open ( input_prm_stream.str() , std::ifstream::in);
-      if (infile.is_open()) {
-        std::string line;
-        std::getline(infile, line);
-        std::istringstream iss(line);
-        int nslices;
-        iss >> nz_simulated_partitions; 
-        infile.close();
-      }
-      else{
-        std::cout << "Warning: unable to open file \"" << input_prm_stream.str() << "\"" << std::endl;
-      }
-    }  
+      update_nz_simulated_partitions_from_prm();
+    }
+    runned_bin = true;
     return EXIT_SUCCESS;
   }
   //if you get here something went wrong

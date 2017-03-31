@@ -184,6 +184,8 @@ int main(int argc, char** argv )
   int slice_samples;
   int slices_lower_bound;
   int slices_upper_bound;
+  double nm_lower_bound;
+  double nm_upper_bound;
   int number_slices_to_max_thickness;
   double slice_period;
   double user_estimated_thickness_nm;
@@ -264,8 +266,10 @@ int main(int argc, char** argv )
       ("abs", "switch for applying absorption potentials (imaginary part) according to Weickenmeier and Kohl [Acta Cryst. A47 (1991) p. 590-597]. This absorption calculation considers the loss of intensity in the elastic channel due to thermal diffuse scattering.")
       ("slices_load", boost::program_options::value<int>(&slices_load), "number of slice files to be loaded.")
       ("slices_samples", boost::program_options::value<int>(&slice_samples)->required(), "slices samples")
-      ("slices_lower_bound", boost::program_options::value<int>(&slices_lower_bound)->required(), "slices lower bound")
-      ("slices_upper_bound", boost::program_options::value<int>(&slices_upper_bound)->required(), "slices Upper Bound")
+      ("slices_lower_bound", boost::program_options::value<int>(&slices_lower_bound), "slices lower bound")
+      ("nm_lower_bound", boost::program_options::value<double>(&nm_lower_bound), "nm lower bound. the nearest slice will be calculated and used as parameter.")
+      ("nm_upper_bound", boost::program_options::value<double>(&nm_upper_bound), "nm upper bound. the nearest slice will be calculated and used as parameter.")
+      ("slices_upper_bound", boost::program_options::value<int>(&slices_upper_bound), "slices Upper Bound")
       ("slices_max", boost::program_options::value<int>(&number_slices_to_max_thickness), "number of slices used to describe the full object structure up to its maximum thickness.")
       ("defocus_samples", boost::program_options::value<int>(&defocus_samples)->required(), "defocus samples")
       ("defocus_lower_bound", boost::program_options::value<int>(&defocus_lower_bound)->required(), "defocus lower bound")
@@ -444,7 +448,6 @@ int main(int argc, char** argv )
     unit_cell.set_upward_vector( upward_vector_hkl );
     unit_cell.form_matrix_from_miller_indices(); 
 
-
     // Simulated image sampling rate
     if ( nx_ny_switch ){
       sampling_rate_super_cell_x_nm_pixel = super_cell_size_a / nx_simulated_horizontal_samples;
@@ -468,7 +471,6 @@ int main(int argc, char** argv )
     // when comparing numbers near zero.
 
     std::cout << "sampling rate simulated [ " << sampling_rate_super_cell_x_nm_pixel << " , " << sampling_rate_super_cell_y_nm_pixel << " ]" << std::endl;
-
     std::cout << "sampling rate experimental [ " << sampling_rate_experimental_x_nm_per_pixel << " , " << sampling_rate_experimental_y_nm_per_pixel << " ]" << std::endl;
 
     initial_simulated_image_width = nx_simulated_horizontal_samples - ( 2 * ignore_edge_pixels );
@@ -480,7 +482,6 @@ int main(int argc, char** argv )
       simulated_image_needs_reshape = true;
       reshape_factor_from_supper_cell_to_experimental_x = fabs(sampling_rate_super_cell_x_nm_pixel) / fabs(sampling_rate_experimental_x_nm_per_pixel);
       reshape_factor_from_supper_cell_to_experimental_y = fabs(sampling_rate_super_cell_y_nm_pixel) / fabs(sampling_rate_experimental_y_nm_per_pixel);
-
       reshaped_simulated_image_width = (int) round ( reshape_factor_from_supper_cell_to_experimental_x * initial_simulated_image_width );
       reshaped_simulated_image_height = (int) round ( reshape_factor_from_supper_cell_to_experimental_y * initial_simulated_image_height );
 
@@ -497,7 +498,47 @@ int main(int argc, char** argv )
     ignore_edge_pixels_rectangle.width = initial_simulated_image_width;
     ignore_edge_pixels_rectangle.height = initial_simulated_image_height;
 
+    // Simulation Defocus Period (in nm)
+    defocus_period = ( defocus_upper_bound - defocus_lower_bound) / ( defocus_samples - 1 );
+    std::cout << "defocus period " <<  defocus_period << std::endl;
 
+
+    CELSLC_prm::CELSLC_prm celslc_parameters;
+
+    celslc_parameters.set_prp_dir_uvw( perpendicular_dir_u, perpendicular_dir_v, perpendicular_dir_w );
+    celslc_parameters.set_prj_dir_hkl( projection_dir_h, projection_dir_k, projection_dir_l );
+    celslc_parameters.set_super_cell_size_abc( super_cell_size_a, super_cell_size_b, super_cell_size_c );
+    celslc_parameters.set_cif_file(super_cell_cif_file.c_str());
+    celslc_parameters.set_slc_filename_prefix (slc_file_name_prefix.c_str());
+    celslc_parameters.set_nx_simulated_horizontal_samples(nx_simulated_horizontal_samples);
+    celslc_parameters.set_ny_simulated_vertical_samples(ny_simulated_vertical_samples);
+    if( nz_switch ){
+      celslc_parameters.set_nz_simulated_partitions(nz_simulated_partitions);
+    }
+    celslc_parameters.set_ht_accelaration_voltage(ht_accelaration_voltage);
+    celslc_parameters.set_dwf_switch(dwf_switch);
+    celslc_parameters.set_abs_switch(abs_switch);
+
+    if (celslc_switch == true ){
+      celslc_parameters.set_bin_path( celslc_bin_string );
+      celslc_parameters.call_bin();
+    }
+    nz_simulated_partitions = celslc_parameters.get_nz_simulated_partitions();
+
+    assert( nz_simulated_partitions >= 1 );
+
+    number_slices_to_max_thickness = nz_simulated_partitions;
+    slices_load = nz_simulated_partitions;
+
+    if ( vm.count("nm_upper_bound")  ){
+      slices_upper_bound = celslc_parameters.get_slice_number_from_nm_floor( nm_upper_bound );
+      std::cout << "Calculated slice # " << slices_upper_bound << " as the upper bound for the maximum thickness of: " << nm_upper_bound << " nm" << std::endl;
+    }
+
+    if ( vm.count("nm_lower_bound")  ){
+      slices_lower_bound = celslc_parameters.get_slice_number_from_nm_ceil( nm_lower_bound );
+      std::cout << "Calculated slice # " << slices_lower_bound << " as the lower bound for the minimum thickness of: " << nm_lower_bound << " nm" << std::endl;
+    }
 
     // Simulation Thickness Period (in slices)
     slice_period =  ( ( ((double)slices_upper_bound - (double)slices_lower_bound) ) / ((double)slice_samples -1.0f ) );
@@ -508,136 +549,109 @@ int main(int argc, char** argv )
       slices_lower_bound = (int) slice_period;
     }
 
-    // Simulation Defocus Period (in nm)
-    defocus_period = ( defocus_upper_bound - defocus_lower_bound) / ( defocus_samples - 1 );
-    std::cout << "defocus period " <<  defocus_period << std::endl;
-
-    if (celslc_switch == true ){
-      CELSLC_prm::CELSLC_prm celslc_parameters;
-
-      celslc_parameters.set_prj_dir_hkl( projection_dir_h, projection_dir_k, projection_dir_l );
-      celslc_parameters.set_prp_dir_uvw( perpendicular_dir_u, perpendicular_dir_v, perpendicular_dir_w );
-      celslc_parameters.set_super_cell_size_abc( super_cell_size_a, super_cell_size_b, super_cell_size_c );
-      celslc_parameters.set_cif_file(super_cell_cif_file.c_str());
-      celslc_parameters.set_slc_filename_prefix (slc_file_name_prefix.c_str());
-      celslc_parameters.set_nx_simulated_horizontal_samples(nx_simulated_horizontal_samples);
-      celslc_parameters.set_ny_simulated_vertical_samples(ny_simulated_vertical_samples);
-      if( nz_switch ){
-        celslc_parameters.set_nz_simulated_partitions(nz_simulated_partitions);
-      }
-      celslc_parameters.set_ht_accelaration_voltage(ht_accelaration_voltage);
-      celslc_parameters.set_dwf_switch(dwf_switch);
-      celslc_parameters.set_abs_switch(abs_switch);
-      celslc_parameters.set_bin_path( celslc_bin_string );
-      celslc_parameters.call_bin();
-      nz_simulated_partitions = celslc_parameters.get_nz_simulated_partitions();
-      assert( nz_simulated_partitions >= 1 );
-    }
-      assert( nz_simulated_partitions >= 1 );
-    number_slices_to_max_thickness = nz_simulated_partitions;
-    slices_load = nz_simulated_partitions;
-
+    MSA_prm::MSA_prm msa_parameters;
+    // Since the release of MSA version 0.64 you may alternatively specify the electron energy in keV in line 6
+    msa_parameters.set_electron_wavelength( ht_accelaration_voltage ); 
+    msa_parameters.set_internal_repeat_factor_of_super_cell_along_x ( 1 );
+    msa_parameters.set_internal_repeat_factor_of_super_cell_along_y ( 1 );
+    std::stringstream input_prefix_stream;
+    input_prefix_stream << "'" << slc_file_name_prefix << "'";
+    std::string input_prefix_string = input_prefix_stream.str();
+    msa_parameters.set_slice_filename_prefix ( input_prefix_string );
+    msa_parameters.set_number_slices_to_load ( slices_load );
+    msa_parameters.set_number_frozen_lattice_variants_considered_per_slice( 1 );
+    msa_parameters.set_minimum_number_frozen_phonon_configurations_used_generate_wave_functions ( 1 );
+    msa_parameters.set_period_readout_or_detection_in_units_of_slices ( 1 ); // bug
+    msa_parameters.set_number_slices_used_describe_full_object_structure_up_to_its_maximum_thickness ( number_slices_to_max_thickness );
+    msa_parameters.set_linear_slices_for_full_object_structure();
+    msa_parameters.set_prm_file_name("temporary_msa_im2model.prm");
+    msa_parameters.set_wave_function_name ("wave.wav");
+    msa_parameters.produce_prm();
     if( msa_switch == true ){
-      MSA_prm::MSA_prm msa_parameters;
-      // Since the release of MSA version 0.64 you may alternatively specify the electron energy in keV in line 6
-      msa_parameters.set_electron_wavelength( ht_accelaration_voltage ); 
-      msa_parameters.set_internal_repeat_factor_of_super_cell_along_x ( 1 );
-      msa_parameters.set_internal_repeat_factor_of_super_cell_along_y ( 1 );
-      std::stringstream input_prefix_stream;
-      input_prefix_stream << "'" << slc_file_name_prefix << "'";
-      std::string input_prefix_string = input_prefix_stream.str();
-      msa_parameters.set_slice_filename_prefix ( input_prefix_string );
-      msa_parameters.set_number_slices_to_load ( slices_load );
-      msa_parameters.set_number_frozen_lattice_variants_considered_per_slice( 1 );
-      msa_parameters.set_minimum_number_frozen_phonon_configurations_used_generate_wave_functions ( 1 );
-      msa_parameters.set_period_readout_or_detection_in_units_of_slices ( 1 ); // bug
-      msa_parameters.set_number_slices_used_describe_full_object_structure_up_to_its_maximum_thickness ( number_slices_to_max_thickness );
-      msa_parameters.set_linear_slices_for_full_object_structure();
-      msa_parameters.set_prm_file_name("temporary_msa_im2model.prm");
-      msa_parameters.produce_prm();
-      msa_parameters.set_wave_function_name ("wave.wav");
       msa_parameters.set_bin_path( msa_bin_string );
       msa_parameters.set_debug_switch(debug_switch);
       msa_parameters.call_bin();
     }
 
-    if(wavimg_switch == true ){
-      WAVIMG_prm::WAVIMG_prm wavimg_parameters;
 
-      std::string wave_function_name =  "'wave_sl.wav'";
-      std::string wavimg_prm_name = "temporary_wavimg_im2model.prm";
-      std::string file_name_output_image_wave_function = "'image.dat'";
-      // setters line 1
-      wavimg_parameters.set_file_name_input_wave_function( wave_function_name );
-      // setters line 2
-      wavimg_parameters.set_n_columns_samples_input_wave_function_pixels( ny_simulated_vertical_samples );
-      wavimg_parameters.set_n_rows_samples_input_wave_function_pixels( nx_simulated_horizontal_samples );
-      // setters line 3
-      wavimg_parameters.set_physical_columns_sampling_rate_input_wave_function_nm_pixels( sampling_rate_super_cell_x_nm_pixel );
-      wavimg_parameters.set_physical_rows_sampling_rate_input_wave_function_nm_pixels( sampling_rate_super_cell_y_nm_pixel );
-      // setters line 4
-      wavimg_parameters.set_primary_electron_energy( ht_accelaration_voltage );
-      // setters line 5
-      wavimg_parameters.set_type_of_output( 0 );
-      // setters line 6
-      wavimg_parameters.set_file_name_output_image_wave_function( file_name_output_image_wave_function );
-      // setters line 7
-      wavimg_parameters.set_n_columns_samples_output_image( ny_simulated_vertical_samples );
-      wavimg_parameters.set_n_rows_samples_output_image( nx_simulated_horizontal_samples );
-      // setters line 8
-      wavimg_parameters.set_image_data_type( 0 );
-      wavimg_parameters.set_image_vacuum_mean_intensity( 3000.0f );
-      wavimg_parameters.set_conversion_rate( 1.0f );
-      wavimg_parameters.set_readout_noise_rms_amplitude( 0.0f ); // colocar a zero
-      // setters line 9
-      wavimg_parameters.set_switch_option_extract_particular_image_frame( 1 );
-      // setters line 10
-      wavimg_parameters.set_image_sampling_rate_nm_pixel( sampling_rate_super_cell_x_nm_pixel );
-      // setters line 11
-      wavimg_parameters.set_image_frame_offset_x_pixels_input_wave_function( 0.0f );
-      wavimg_parameters.set_image_frame_offset_y_pixels_input_wave_function( 0.0f );
-      // setters line 12
-      wavimg_parameters.set_image_frame_rotation( 0.0f );
-      // setters line 13
-      wavimg_parameters.set_switch_coherence_model( 1 ); // colocar a zero
-      // setters line 14
-      wavimg_parameters.set_partial_temporal_coherence_switch( 1 );
-      wavimg_parameters.set_partial_temporal_coherence_focus_spread( 4.0f );
-      // setters line 15
-      wavimg_parameters.set_partial_spacial_coherence_switch( 1 ); // colocar a zero
-      wavimg_parameters.set_partial_spacial_coherence_semi_convergence_angle( 0.2f );
-      // setters line 16
-      wavimg_parameters.set_mtf_simulation_switch( 1 ); // alterar aqui para 0
-      wavimg_parameters.set_k_space_scaling( 1.0f );
-      wavimg_parameters.set_file_name_simulation_frequency_modulated_detector_transfer_function( "'../simulation/mtf/MTF-US2k-300.mtf'" );
-      // setters line 17
-      wavimg_parameters.set_simulation_image_spread_envelope_switch( 0 );
-      wavimg_parameters.set_isotropic_one_rms_amplitude( 0.03 ); // colocar a zero
-      //  wavimg_parameters.set_anisotropic_second_rms_amplitude( 0.0f );
-      // wavimg_parameters.set_azimuth_orientation_angle( 0.0f );
-      // setters line 18
-      wavimg_parameters.set_number_image_aberrations_set( number_image_aberrations );
-      // setters line 19
-      // check for wavimg defocus aberration coefficient
-      if( cd_switch == true ){
-        //Defocus (a20, C1,0, C1)
-        wavimg_parameters.add_aberration_definition ( 1, coefficient_aberration_defocus, 0.0f );
-      }
-      // check for wavimg spherical aberration coefficient
-      if( cs_switch == true ){
-        //Spherical aberration (a40, C3,0, C3)
-        wavimg_parameters.add_aberration_definition ( 5, coefficient_aberration_spherical, 0.0f );
-      }
-      // setters line 19 + aberration_definition_index_number
-      wavimg_parameters.set_objective_aperture_radius( 5500.0f );
-      // setters line 20 + aberration_definition_index_number
-      wavimg_parameters.set_center_x_of_objective_aperture( 0.0f );
-      wavimg_parameters.set_center_y_of_objective_aperture( 0.0f );
-      // setters line 21 + aberration_definition_index_number
-      wavimg_parameters.set_number_parameter_loops( 2 );
-      wavimg_parameters.add_parameter_loop ( 1 , 1 , 1, defocus_lower_bound, defocus_upper_bound, defocus_samples, "'foc'" );
-      wavimg_parameters.add_parameter_loop ( 3 , 1 , 1, slices_lower_bound, slices_upper_bound, slice_samples, "'_sl'" );
-      wavimg_parameters.set_prm_file_name("temporary_wavimg_im2model.prm");
+    WAVIMG_prm::WAVIMG_prm wavimg_parameters;
+
+    std::string wave_function_name =  "'wave_sl.wav'";
+    std::string wavimg_prm_name = "temporary_wavimg_im2model.prm";
+    std::string file_name_output_image_wave_function = "'image.dat'";
+    // setters line 1
+    wavimg_parameters.set_file_name_input_wave_function( wave_function_name );
+    // setters line 2
+    wavimg_parameters.set_n_columns_samples_input_wave_function_pixels( ny_simulated_vertical_samples );
+    wavimg_parameters.set_n_rows_samples_input_wave_function_pixels( nx_simulated_horizontal_samples );
+    // setters line 3
+    wavimg_parameters.set_physical_columns_sampling_rate_input_wave_function_nm_pixels( sampling_rate_super_cell_x_nm_pixel );
+    wavimg_parameters.set_physical_rows_sampling_rate_input_wave_function_nm_pixels( sampling_rate_super_cell_y_nm_pixel );
+    // setters line 4
+    wavimg_parameters.set_primary_electron_energy( ht_accelaration_voltage );
+    // setters line 5
+    wavimg_parameters.set_type_of_output( 0 );
+    // setters line 6
+    wavimg_parameters.set_file_name_output_image_wave_function( file_name_output_image_wave_function );
+    // setters line 7
+    wavimg_parameters.set_n_columns_samples_output_image( ny_simulated_vertical_samples );
+    wavimg_parameters.set_n_rows_samples_output_image( nx_simulated_horizontal_samples );
+    // setters line 8
+    wavimg_parameters.set_image_data_type( 0 );
+    wavimg_parameters.set_image_vacuum_mean_intensity( 3000.0f );
+    wavimg_parameters.set_conversion_rate( 1.0f );
+    wavimg_parameters.set_readout_noise_rms_amplitude( 0.0f ); // colocar a zero
+    // setters line 9
+    wavimg_parameters.set_switch_option_extract_particular_image_frame( 1 );
+    // setters line 10
+    wavimg_parameters.set_image_sampling_rate_nm_pixel( sampling_rate_super_cell_x_nm_pixel );
+    // setters line 11
+    wavimg_parameters.set_image_frame_offset_x_pixels_input_wave_function( 0.0f );
+    wavimg_parameters.set_image_frame_offset_y_pixels_input_wave_function( 0.0f );
+    // setters line 12
+    wavimg_parameters.set_image_frame_rotation( 0.0f );
+    // setters line 13
+    wavimg_parameters.set_switch_coherence_model( 1 ); // colocar a zero
+    // setters line 14
+    wavimg_parameters.set_partial_temporal_coherence_switch( 1 );
+    wavimg_parameters.set_partial_temporal_coherence_focus_spread( 4.0f );
+    // setters line 15
+    wavimg_parameters.set_partial_spacial_coherence_switch( 1 ); // colocar a zero
+    wavimg_parameters.set_partial_spacial_coherence_semi_convergence_angle( 0.2f );
+    // setters line 16
+    wavimg_parameters.set_mtf_simulation_switch( 1 ); // alterar aqui para 0
+    wavimg_parameters.set_k_space_scaling( 1.0f );
+    wavimg_parameters.set_file_name_simulation_frequency_modulated_detector_transfer_function( "'../simulation/mtf/MTF-US2k-300.mtf'" );
+    // setters line 17
+    wavimg_parameters.set_simulation_image_spread_envelope_switch( 0 );
+    wavimg_parameters.set_isotropic_one_rms_amplitude( 0.03 ); // colocar a zero
+    //  wavimg_parameters.set_anisotropic_second_rms_amplitude( 0.0f );
+    // wavimg_parameters.set_azimuth_orientation_angle( 0.0f );
+    // setters line 18
+    wavimg_parameters.set_number_image_aberrations_set( number_image_aberrations );
+    // setters line 19
+    // check for wavimg defocus aberration coefficient
+    if( cd_switch == true ){
+      //Defocus (a20, C1,0, C1)
+      wavimg_parameters.add_aberration_definition ( 1, coefficient_aberration_defocus, 0.0f );
+    }
+    // check for wavimg spherical aberration coefficient
+    if( cs_switch == true ){
+      //Spherical aberration (a40, C3,0, C3)
+      wavimg_parameters.add_aberration_definition ( 5, coefficient_aberration_spherical, 0.0f );
+    }
+    // setters line 19 + aberration_definition_index_number
+    wavimg_parameters.set_objective_aperture_radius( 5500.0f );
+    // setters line 20 + aberration_definition_index_number
+    wavimg_parameters.set_center_x_of_objective_aperture( 0.0f );
+    wavimg_parameters.set_center_y_of_objective_aperture( 0.0f );
+    // setters line 21 + aberration_definition_index_number
+    wavimg_parameters.set_number_parameter_loops( 2 );
+    wavimg_parameters.add_parameter_loop ( 1 , 1 , 1, defocus_lower_bound, defocus_upper_bound, defocus_samples, "'foc'" );
+    wavimg_parameters.add_parameter_loop ( 3 , 1 , 1, slices_lower_bound, slices_upper_bound, slice_samples, "'_sl'" );
+    wavimg_parameters.set_prm_file_name("temporary_wavimg_im2model.prm");
+
+    if(wavimg_switch == true ){
       wavimg_parameters.produce_prm();
       wavimg_parameters.set_bin_path( wavimg_bin_string );
       wavimg_parameters.set_debug_switch(debug_switch);
