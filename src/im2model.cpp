@@ -351,10 +351,10 @@ int main(int argc, char** argv )
       perpendicular_dir_w = boost::lexical_cast<double> (*itt_w);
       uvw_switch = true;
     }
-     if ( vm.count("super_a") && vm.count("super_b") && vm.count("super_c") ){
-       abc_switch = true;
+    if ( vm.count("super_a") && vm.count("super_b") && vm.count("super_c") ){
+      abc_switch = true;
     }
-    
+
     if ( vm.count("super_abc") ){
       typedef boost::tokenizer<boost::char_separator<char>> tokenizer;
       boost::char_separator<char> sep{","};
@@ -363,14 +363,14 @@ int main(int argc, char** argv )
       itt_a = tok.begin();
       itt_b = tok.begin();
       itt_c = tok.begin();
-      std::advance(itt_v,1);
-      std::advance(itt_w,2);
-     super_cell_size_c = boost::lexical_cast<double> (*itt_a);
-    super_cell_size_b = boost::lexical_cast<double> (*itt_b);
-  super_cell_size_c = boost::lexical_cast<double> (*itt_c);
+      std::advance(itt_b,1);
+      std::advance(itt_c,2);
+      super_cell_size_a = boost::lexical_cast<double> (*itt_a);
+      super_cell_size_b = boost::lexical_cast<double> (*itt_b);
+      super_cell_size_c = boost::lexical_cast<double> (*itt_c);
       abc_switch = true;
     }
-    
+
     if ( vm.count("nz")){
       nz_switch = true;
     }
@@ -430,9 +430,7 @@ int main(int argc, char** argv )
       user_estimated_thickness_slice_switch=true;
     }
 
-
     // there are any problems
-    std::cout << "PRJ " << prj_hkl << std::endl;
     /* CIF file parser */
     driver.parse( super_cell_cif_file.c_str() );
     driver.populate_unit_cell();
@@ -499,6 +497,8 @@ int main(int argc, char** argv )
     ignore_edge_pixels_rectangle.width = initial_simulated_image_width;
     ignore_edge_pixels_rectangle.height = initial_simulated_image_height;
 
+
+
     // Simulation Thickness Period (in slices)
     slice_period =  ( ( ((double)slices_upper_bound - (double)slices_lower_bound) ) / ((double)slice_samples -1.0f ) );
     std::cout << "Calculated slice period of " << slice_period << std::endl;
@@ -514,10 +514,10 @@ int main(int argc, char** argv )
 
     if (celslc_switch == true ){
       CELSLC_prm::CELSLC_prm celslc_parameters;
-      
-    celslc_parameters.set_prj_dir_hkl( projection_dir_h, projection_dir_k, projection_dir_l );
-       celslc_parameters.set_prp_dir_uvw( perpendicular_dir_u, perpendicular_dir_v, perpendicular_dir_w );
-       celslc_parameters.set_super_cell_size_ayz( super_cell_size_a, super_cell_size_b, super_cell_size_c );
+
+      celslc_parameters.set_prj_dir_hkl( projection_dir_h, projection_dir_k, projection_dir_l );
+      celslc_parameters.set_prp_dir_uvw( perpendicular_dir_u, perpendicular_dir_v, perpendicular_dir_w );
+      celslc_parameters.set_super_cell_size_abc( super_cell_size_a, super_cell_size_b, super_cell_size_c );
       celslc_parameters.set_cif_file(super_cell_cif_file.c_str());
       celslc_parameters.set_slc_filename_prefix (slc_file_name_prefix.c_str());
       celslc_parameters.set_nx_simulated_horizontal_samples(nx_simulated_horizontal_samples);
@@ -533,11 +533,14 @@ int main(int argc, char** argv )
       nz_simulated_partitions = celslc_parameters.get_nz_simulated_partitions();
       assert( nz_simulated_partitions >= 1 );
     }
+      assert( nz_simulated_partitions >= 1 );
+    number_slices_to_max_thickness = nz_simulated_partitions;
+    slices_load = nz_simulated_partitions;
 
     if( msa_switch == true ){
       MSA_prm::MSA_prm msa_parameters;
       // Since the release of MSA version 0.64 you may alternatively specify the electron energy in keV in line 6
-      msa_parameters.set_electron_wavelength( ht_accelaration_voltage ); //0.00196875 );
+      msa_parameters.set_electron_wavelength( ht_accelaration_voltage ); 
       msa_parameters.set_internal_repeat_factor_of_super_cell_along_x ( 1 );
       msa_parameters.set_internal_repeat_factor_of_super_cell_along_y ( 1 );
       std::stringstream input_prefix_stream;

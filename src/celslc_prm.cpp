@@ -45,9 +45,9 @@ CELSLC_prm::CELSLC_prm()
   projection_dir_hkl_switch = false;
   projected_dir_uvw_switch = false;
   super_cell_size_switch = false;
-  auto_equidistant_slices_switch = false;
   // default value nz:
-  auto_non_equidistant_slices_switch = true;
+  auto_equidistant_slices_switch = true; 
+  auto_non_equidistant_slices_switch = false;
 }
 
 void CELSLC_prm::set_prj_dir_hkl(double projection_dir_h, double projection_dir_k, double projection_dir_l ){
@@ -178,25 +178,13 @@ bool CELSLC_prm::call_bin(){
     celslc_vector.push_back((char*) "-cif");
     celslc_vector.push_back((char*) super_cell_cif_file.c_str());
   }
-  else{ 
-    if( cif_format_switch  ){
+  else{
+    if( cel_format_switch  ){
       celslc_vector.push_back((char*) "-cel");
       celslc_vector.push_back((char*) super_cell_cel_file.c_str());
     }
   }
 
-  if( projection_dir_hkl_switch && projected_dir_uvw_switch && super_cell_size_switch ){
-    celslc_vector.push_back((char*) "-prj");
-    //input prj string
-    std::stringstream input_prj_stream;
-    input_prj_stream 
-      << (float) prj_dir_h  << "," << (float) prj_dir_k << "," << (float) prj_dir_l  << "," 
-      << (float) prp_dir_u << "," <<   (float) prp_dir_v << "," << (float) prp_dir_w << "," 
-      << (float) super_cell_size_a << "," << (float) super_cell_size_b << "," << (float) super_cell_size_c;
-    std::string input_prj_string = input_prj_stream.str();
-    std::cout <<  "prj: " << input_prj_string.c_str() << "| " << input_prj_string << std::endl;
-    celslc_vector.push_back( (char*) input_prj_string.c_str() );
-  }
 
   celslc_vector.push_back((char*) "-slc");
   celslc_vector.push_back((char*) slc_file_name_prefix.c_str());
@@ -216,6 +204,28 @@ bool CELSLC_prm::call_bin(){
   std::string input_ny_string = input_ny_stream.str();
   const char* input_ny_c_string = input_ny_string.c_str();
   celslc_vector.push_back( (char*) input_ny_c_string );
+
+  celslc_vector.push_back((char*) "-ht");
+  // input ht
+  std::stringstream input_ht_stream;
+  input_ht_stream << ht_accelaration_voltage;
+  std::string input_ht_string = input_ht_stream.str();
+  const char* input_ht_c_string = input_ht_string.c_str();
+  celslc_vector.push_back( (char*) input_ht_c_string );
+
+
+  if( projection_dir_hkl_switch && projected_dir_uvw_switch && super_cell_size_switch ){
+    celslc_vector.push_back((char*) "-prj");
+    std::stringstream input_prj_stream;
+    input_prj_stream 
+      << (float) prj_dir_h  << "," << (float) prj_dir_k << "," << (float) prj_dir_l << ","  
+      <<  prp_dir_u << "," << prp_dir_v << "," << prp_dir_w << "," 
+      << (float) super_cell_size_a << "," << (float) super_cell_size_b << "," << (float) super_cell_size_c;
+    const std::string input_prj_string = input_prj_stream.str();
+    std::cout << "-prj |"<< input_prj_string << "|" << std::endl;
+    celslc_vector.push_back( (char*) input_prj_string.c_str() );
+  }
+
   /**  
    * Equidistant slicing of the super-cell along the c-axis. 
    * Specify an explicit number of slices, 
@@ -239,14 +249,6 @@ bool CELSLC_prm::call_bin(){
     celslc_vector.push_back( (char*) input_nz_c_string );
   }
 
-  celslc_vector.push_back((char*) "-ht");
-  // input ht
-  std::stringstream input_ht_stream;
-  input_ht_stream << ht_accelaration_voltage;
-  std::string input_ht_string = input_ht_stream.str();
-  const char* input_ht_c_string = input_ht_string.c_str();
-  celslc_vector.push_back( (char*) input_ht_c_string );
-
   if ( dwf_switch ){
     celslc_vector.push_back((char*) "-dwf");
   }
@@ -255,12 +257,6 @@ bool CELSLC_prm::call_bin(){
   }
   celslc_vector.push_back(0); //end of arguments sentinel is NULL
 
-  std::cout << "size::" <<  celslc_vector.size();
-  std::vector<char*>::iterator  itt; 
-  for( itt = celslc_vector.begin(); itt != celslc_vector.end(); itt++ ){
-    char* param = *itt;
-    //std::cout << (char*) (*itt); 
-  } 
   if ((pid = vfork()) == -1) // system functions also set a variable called "errno"
   {
     perror("ERROR in vfork() of CELSLC call_bin"); // this function automatically checks "errno"
