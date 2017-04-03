@@ -224,12 +224,8 @@ void SIMGRID_wavimg_steplength::set_defocus_period( int period ){
   defocus_period = period;
 }
 
-void SIMGRID_wavimg_steplength::set_celslc_nm_slice_vec( std::vector<double> slice_params_nm_slice_vec ){
-  celslc_nm_slice_vec = slice_params_nm_slice_vec;
-}
-
-void SIMGRID_wavimg_steplength::set_super_cell_z_nm_slice( double nm_slice ){
-  super_cell_z_nm_slice = nm_slice;
+void SIMGRID_wavimg_steplength::set_celslc_accum_nm_slice_vec( std::vector<double> slice_params_nm_slice_vec ){
+  celslc_accum_nm_slice_vec = slice_params_nm_slice_vec;
 }
 
 void SIMGRID_wavimg_steplength::set_roi_pixel_size( int pixel_size ){
@@ -455,6 +451,10 @@ cv::Mat SIMGRID_wavimg_steplength::calculate_error_matrix( cv::Mat aligned_exper
 }
 
 bool SIMGRID_wavimg_steplength::export_sim_grid(){
+  assert ( slice_samples >= 1 );
+  assert ( defocus_samples >= 1 );
+  assert ( slices_lower_bound >= 1 );
+  assert ( celslc_accum_nm_slice_vec.size() == number_slices_to_max_thickness );
   if( runned_simulation ){
 
     sim_grid_width  = ( reshaped_simulated_image_width * defocus_samples );
@@ -463,7 +463,6 @@ bool SIMGRID_wavimg_steplength::export_sim_grid(){
     sim_grid = cv::Mat::zeros(sim_grid_height, sim_grid_width, CV_8UC1);
 
     std::cout << "Simulated grid size: " << sim_grid.cols << " x " << sim_grid.rows << std::endl;
-    std::cout << "Thickness step (nm): " << slice_period * super_cell_z_nm_slice << std::endl;
     std::cout << "Defocus step (nm): " << defocus_period << std::endl;
 
     match_factor_file.open (match_factor_file_name.c_str() , std::ofstream::out );
@@ -476,7 +475,7 @@ bool SIMGRID_wavimg_steplength::export_sim_grid(){
     for (int thickness = 1; thickness <= slice_samples; thickness ++ ){
 
       // the slice thickness in nanometers
-      const double slice_thickness_nm = super_cell_z_nm_slice * slice_period * ( thickness  - 1 )  + ( super_cell_z_nm_slice * slices_lower_bound);
+
 
       std::vector<cv::Mat> simulated_images_row = simulated_images_grid.at(thickness-1);
 
@@ -484,6 +483,7 @@ bool SIMGRID_wavimg_steplength::export_sim_grid(){
 
         const int at_defocus = defocus_values_matrix.at<double>(thickness-1, defocus-1);
         const int at_slice = thickness_values_matrix.at<double>(thickness-1, defocus-1);
+        const double slice_thickness_nm = celslc_accum_nm_slice_vec.at(at_slice-1);
         const double match_factor = match_values_matrix.at<double>( thickness-1, defocus-1);
 
         cv::Mat cleaned_simulated_image = simulated_images_row.at(defocus-1);
@@ -557,7 +557,10 @@ bool SIMGRID_wavimg_steplength::export_sim_grid(){
 }
 
 bool SIMGRID_wavimg_steplength::simulate_from_dat_file(){
-assert ( celslc_nm_slice_vec.size() == number_slices_to_max_thickness );
+  assert ( slice_samples >= 1 );
+  assert ( defocus_samples >= 1 );
+  assert ( slices_lower_bound >= 1 );
+  assert ( celslc_accum_nm_slice_vec.size() == number_slices_to_max_thickness );
   // we will iterate through every thickness and defocus. for every thickess we calculate the defocus images and after that, we change the thickness
 
   // X
@@ -570,12 +573,10 @@ assert ( celslc_nm_slice_vec.size() == number_slices_to_max_thickness );
   // will contain regional matches
   imregionalmax_match_values_matrix = cv::Mat( slice_samples, defocus_samples , CV_32FC1);
 
-
   for (int thickness = 1; thickness <= slice_samples; thickness ++ ){
-
-    const double slice_thickness_nm = super_cell_z_nm_slice * slice_period * ( thickness  - 1 )  + ( super_cell_z_nm_slice * slices_lower_bound);
     const int at_slice = round( slice_period * ( thickness  - 1 ) + slices_lower_bound );
-
+    const double slice_thickness_nm = celslc_accum_nm_slice_vec.at(at_slice-1);
+    
     //will contain the row of simulated images (same thickness, diferent defocus)
     std::vector<cv::Mat> simulated_images_row;
     std::vector<cv::Mat> raw_simulated_images_row;
@@ -729,7 +730,7 @@ assert ( celslc_nm_slice_vec.size() == number_slices_to_max_thickness );
   int row_thickness = (dist - col_defocus ) / defocus_samples;
 
   simgrid_best_match_thickness_slice = (slice_period * row_thickness) + slices_lower_bound;
-  simgrid_best_match_thickness_nm = super_cell_z_nm_slice * simgrid_best_match_thickness_slice;
+  simgrid_best_match_thickness_nm = celslc_accum_nm_slice_vec.at(simgrid_best_match_thickness_slice-1);
   simgrid_best_match_defocus_nm = (col_defocus * defocus_period ) + defocus_lower_bound;
 
   std::cout << "Max match % is " << *maxElement << " | " << simulated_matches.at(dist) << "\t at pos ["<< dist << "](" << col_defocus << "," << row_thickness  <<") slice " << simgrid_best_match_thickness_slice << " ( " << simgrid_best_match_thickness_nm << " ) , defocus " << simgrid_best_match_defocus_nm << std::endl;

@@ -187,10 +187,10 @@ int main(int argc, char** argv )
   double nm_lower_bound;
   double nm_upper_bound;
   int number_slices_to_max_thickness;
-  double slice_period;
+  int slice_period;
   double user_estimated_thickness_nm;
   int user_estimated_thickness_slice;
-  std::vector<double> celslc_nm_slice_vec;
+  std::vector<double> celslc_accum_nm_slice_vec;
 
   /////////////////////////
   // Simulated Defocus info
@@ -198,7 +198,7 @@ int main(int argc, char** argv )
   int defocus_samples;
   int defocus_lower_bound;
   int defocus_upper_bound;
-  double defocus_period;
+  int defocus_period;
   int user_estimated_defocus_nm;
 
   /////////////////////////
@@ -528,7 +528,7 @@ int main(int argc, char** argv )
 
     assert( nz_simulated_partitions >= 1 );
 
-    celslc_nm_slice_vec = celslc_parameters.get_slice_params_nm_slice_vec();
+    celslc_accum_nm_slice_vec = celslc_parameters.get_slice_params_accum_nm_slice_vec();
 
     number_slices_to_max_thickness = nz_simulated_partitions;
     slices_load = nz_simulated_partitions;
@@ -758,17 +758,18 @@ int main(int argc, char** argv )
       // defocus setters
       wavimg_simgrid_steps.set_defocus_lower_bound( defocus_lower_bound );
       wavimg_simgrid_steps.set_defocus_upper_bound( defocus_upper_bound );
-      wavimg_simgrid_steps.set_defocus_samples(defocus_samples);
-      wavimg_simgrid_steps.set_defocus_period( (int) defocus_period );
+      wavimg_simgrid_steps.set_defocus_samples( defocus_samples );
+      wavimg_simgrid_steps.set_defocus_period( defocus_period );
 
-      // thicknes/slice setters
+      // thickness/slice setters
 
-      wavimg_simgrid_steps.set_celslc_nm_slice_vec( celslc_nm_slice_vec ); 
+      wavimg_simgrid_steps.set_celslc_accum_nm_slice_vec( celslc_accum_nm_slice_vec ); 
       wavimg_simgrid_steps.set_slice_samples(slice_samples);
-      wavimg_simgrid_steps.set_slice_period( (int) slice_period );
+      wavimg_simgrid_steps.set_slice_period( slice_period );
+      wavimg_simgrid_steps.set_number_slices_to_max_thickness( number_slices_to_max_thickness );
       wavimg_simgrid_steps.set_slices_lower_bound( slices_lower_bound );
       wavimg_simgrid_steps.set_slices_upper_bound( slices_upper_bound );
-
+      
       wavimg_simgrid_steps.set_n_rows_simulated_image(nx_simulated_horizontal_samples);
       wavimg_simgrid_steps.set_n_cols_simulated_image(ny_simulated_vertical_samples);
 

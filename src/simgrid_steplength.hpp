@@ -22,7 +22,7 @@ class SIMGRID_wavimg_steplength {
     int user_estimated_thickness_slice;
     int simgrid_best_match_thickness_slice;
     double simgrid_best_match_thickness_nm;
-    std::vector<double> celslc_nm_slice_vec;
+    std::vector<double> celslc_accum_nm_slice_vec;
 
     /***********
       defocus vars
@@ -185,7 +185,7 @@ class SIMGRID_wavimg_steplength {
 
     void set_super_cell_z_nm_slice( double nm_slice );
 
-void  set_celslc_nm_slice_vec( std::vector<double> slice_params_nm_slice_vec ); 
+void  set_celslc_accum_nm_slice_vec( std::vector<double> slice_params_accum_nm_slice_vec ); 
 
     void set_roi_pixel_size( int pixel_size );
 

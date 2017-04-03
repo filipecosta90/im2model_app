@@ -237,6 +237,10 @@ int CELSLC_prm::get_slice_number_from_nm_ceil( double goal_thickness_nm ){
   return slice_pos;
 }
 
+std::vector<double> CELSLC_prm::get_slice_params_accum_nm_slice_vec(){
+return slice_params_accum_nm_slice_vec;
+}
+
 std::vector<double> CELSLC_prm::get_slice_params_nm_slice_vec(){
 return slice_params_nm_slice_vec;
 }
@@ -256,7 +260,8 @@ bool CELSLC_prm::update_nz_simulated_partitions_from_prm(){
       std::getline(infile, line);
       std::istringstream iss(line);
       int nslices;
-      iss >> nz_simulated_partitions; 
+      iss >> nz_simulated_partitions;
+      double accumulated_thickness = 0.0f;
       for (int slice_id = 1; slice_id <= nz_simulated_partitions ; slice_id ++ ){
         //ignore line with '[Slice Parameters]'
         std::getline(infile, line); 
@@ -279,9 +284,9 @@ bool CELSLC_prm::update_nz_simulated_partitions_from_prm(){
         std::istringstream iss(line);
         double slice_thickness_nm;
         iss >> slice_thickness_nm;
-        //        std::cout << slice_id  <<" " << slice_thickness_nm << std::endl;
-
         slice_params_nm_slice.insert( std::pair<int,double> (slice_id, slice_thickness_nm));
+        accumulated_thickness += slice_thickness_nm;
+        slice_params_accum_nm_slice_vec.push_back( accumulated_thickness );
         slice_params_nm_slice_vec.push_back(slice_thickness_nm);
       }
       infile.close();

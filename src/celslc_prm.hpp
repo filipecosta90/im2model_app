@@ -19,6 +19,7 @@ class CELSLC_prm {
     std::string slc_file_name_prefix;
     // [Slice Parameters]
     std::vector<double> slice_params_nm_slice_vec;
+    std::vector<double> slice_params_accum_nm_slice_vec;
     std::map<int,double> slice_params_nm_slice;
     int nx_simulated_horizontal_samples;
     int ny_simulated_vertical_samples;
@@ -96,6 +97,8 @@ class CELSLC_prm {
     int get_slice_number_from_nm_ceil( double goal_thickness_nm );
     
     std::vector<double> get_slice_params_nm_slice_vec();
+    
+    std::vector<double> get_slice_params_accum_nm_slice_vec();
     
     bool update_nz_simulated_partitions_from_prm();
 
