@@ -190,6 +190,7 @@ int main(int argc, char** argv )
   double slice_period;
   double user_estimated_thickness_nm;
   int user_estimated_thickness_slice;
+  std::vector<double> celslc_nm_slice_vec;
 
   /////////////////////////
   // Simulated Defocus info
@@ -527,6 +528,8 @@ int main(int argc, char** argv )
 
     assert( nz_simulated_partitions >= 1 );
 
+    celslc_nm_slice_vec = celslc_parameters.get_slice_params_nm_slice_vec();
+
     number_slices_to_max_thickness = nz_simulated_partitions;
     slices_load = nz_simulated_partitions;
 
@@ -540,14 +543,48 @@ int main(int argc, char** argv )
       std::cout << "Calculated slice # " << slices_lower_bound << " as the lower bound for the minimum thickness of: " << nm_lower_bound << " nm" << std::endl;
     }
 
-    // Simulation Thickness Period (in slices)
-    slice_period =  ( ( ((double)slices_upper_bound - (double)slices_lower_bound) ) / ((double)slice_samples -1.0f ) );
-    std::cout << "Calculated slice period of " << slice_period << std::endl;
-
     if (slices_lower_bound == 0){
       std::cout << "WARNING: Defined slice lower bound as 0. Going to define slice lower bound as: " << slice_period << std::endl;
       slices_lower_bound = (int) slice_period;
     }
+
+    // Simulation Thickness Period (in slices)
+    int slice_interval = slices_upper_bound - slices_lower_bound;
+    std::div_t divresult;
+    divresult = div (slice_interval, (slice_samples -1) );
+    slice_period = divresult.quot;
+    assert(slice_period >= 1);
+    std::cout << "Calculated slice period of " << slice_period << std::endl;
+    const int remainder_slices = divresult.rem;
+    const int slices_to_period = (slice_samples -1) - remainder_slices;
+    if ( remainder_slices > 0 ){
+      std::cout << "WARNING: an adjustment needs to be made in the slices lower or upper bound." << std::endl;
+      const int increase_top_range = slices_lower_bound + (slice_samples * slice_period );
+      const int decrease_top_range = slices_lower_bound + ((slice_samples-1) * slice_period );
+      const int decrease_bot_range = slices_lower_bound-slices_to_period + (slice_samples * slice_period );
+
+      if ( increase_top_range <= number_slices_to_max_thickness ){
+        std::cout << "Increasing top range to slice #" << increase_top_range << std::endl;
+        std::cout << "Going to use one more sample than the requested " << slice_samples << " samples. Using " << (slice_samples+1) << " samples." << std::endl;
+        slices_upper_bound = increase_top_range;
+        slice_samples++;
+      }
+      else{
+        if( decrease_bot_range >= 1 ){
+          std::cout << "Decreasing bot range to slice #" << decrease_bot_range << std::endl;
+          slices_lower_bound -= slices_to_period;
+          slice_samples++;
+        }
+        else{
+          std::cout << "Decreasing top range to slice #" << decrease_top_range << std::endl;
+          slices_upper_bound = decrease_top_range;
+        }
+      }
+    }
+
+
+    std::cout << "MSA: Number slices to load " << slices_load << std::endl;
+    std::cout << "MSA: Number slices to max thickness " << slices_load << std::endl;
 
     MSA_prm::MSA_prm msa_parameters;
     // Since the release of MSA version 0.64 you may alternatively specify the electron energy in keV in line 6
@@ -647,6 +684,10 @@ int main(int argc, char** argv )
     wavimg_parameters.set_center_y_of_objective_aperture( 0.0f );
     // setters line 21 + aberration_definition_index_number
     wavimg_parameters.set_number_parameter_loops( 2 );
+
+    std::cout << "WAVIMG: parameter loop DEFOCUS: lower bound " << defocus_lower_bound << ", upper bound " << defocus_upper_bound << ", defocus samples " << defocus_samples << std::endl;
+    std::cout << "WAVIMG: parameter loop SLICES: lower bound " << slices_lower_bound << ", upper bound " << slices_upper_bound << ", slice samples " << slice_samples << std::endl;
+
     wavimg_parameters.add_parameter_loop ( 1 , 1 , 1, defocus_lower_bound, defocus_upper_bound, defocus_samples, "'foc'" );
     wavimg_parameters.add_parameter_loop ( 3 , 1 , 1, slices_lower_bound, slices_upper_bound, slice_samples, "'_sl'" );
     wavimg_parameters.set_prm_file_name("temporary_wavimg_im2model.prm");
@@ -721,7 +762,8 @@ int main(int argc, char** argv )
       wavimg_simgrid_steps.set_defocus_period( (int) defocus_period );
 
       // thicknes/slice setters
-      wavimg_simgrid_steps.set_super_cell_z_nm_slice( super_cell_z_nm_slice );
+
+      wavimg_simgrid_steps.set_celslc_nm_slice_vec( celslc_nm_slice_vec ); 
       wavimg_simgrid_steps.set_slice_samples(slice_samples);
       wavimg_simgrid_steps.set_slice_period( (int) slice_period );
       wavimg_simgrid_steps.set_slices_lower_bound( slices_lower_bound );

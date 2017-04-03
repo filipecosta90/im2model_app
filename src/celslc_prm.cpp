@@ -237,6 +237,11 @@ int CELSLC_prm::get_slice_number_from_nm_ceil( double goal_thickness_nm ){
   return slice_pos;
 }
 
+std::vector<double> CELSLC_prm::get_slice_params_nm_slice_vec(){
+return slice_params_nm_slice_vec;
+}
+
+
 bool CELSLC_prm::update_nz_simulated_partitions_from_prm(){
   assert( slc_file_name_prefix != "" );
   bool result = false;  

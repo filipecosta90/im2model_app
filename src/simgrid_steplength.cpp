@@ -224,6 +224,10 @@ void SIMGRID_wavimg_steplength::set_defocus_period( int period ){
   defocus_period = period;
 }
 
+void SIMGRID_wavimg_steplength::set_celslc_nm_slice_vec( std::vector<double> slice_params_nm_slice_vec ){
+  celslc_nm_slice_vec = slice_params_nm_slice_vec;
+}
+
 void SIMGRID_wavimg_steplength::set_super_cell_z_nm_slice( double nm_slice ){
   super_cell_z_nm_slice = nm_slice;
 }
@@ -553,7 +557,7 @@ bool SIMGRID_wavimg_steplength::export_sim_grid(){
 }
 
 bool SIMGRID_wavimg_steplength::simulate_from_dat_file(){
-
+assert ( celslc_nm_slice_vec.size() == number_slices_to_max_thickness );
   // we will iterate through every thickness and defocus. for every thickess we calculate the defocus images and after that, we change the thickness
 
   // X

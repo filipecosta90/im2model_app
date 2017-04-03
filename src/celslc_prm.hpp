@@ -94,7 +94,9 @@ class CELSLC_prm {
     int get_slice_number_from_nm_floor( double goal_thickness_nm );
 
     int get_slice_number_from_nm_ceil( double goal_thickness_nm );
-
+    
+    std::vector<double> get_slice_params_nm_slice_vec();
+    
     bool update_nz_simulated_partitions_from_prm();
 
     void produce_prm( );
