@@ -167,6 +167,9 @@ class Super_Cell {
     std::vector<glm::vec4> get_atom_cpk_rgba_colors_vec();
     std::vector<double> get_atom_empirical_radii_vec();
 
+    int get_super_cell_nx_px();
+    int get_super_cell_ny_px();
+
     bool update_unit_cell_parameters();
     void create_fractional_positions_atoms();
     bool create_atoms_from_unit_cell();

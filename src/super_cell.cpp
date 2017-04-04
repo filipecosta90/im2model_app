@@ -366,6 +366,14 @@ std::vector<double> Super_Cell::get_atom_empirical_radii_vec(){
   return _atom_empirical_radii;
 }
 
+int Super_Cell::get_super_cell_nx_px(){
+  return _cel_nx_px;
+}
+
+int Super_Cell::get_super_cell_ny_px(){
+  return _cel_ny_px;
+}
+
 void Super_Cell::create_fractional_positions_atoms(){
   assert( ! _atom_positions.empty() );
   std::cout << "Creating atoms fractional positions:" << std::endl;
@@ -424,7 +432,6 @@ void Super_Cell::create_fractional_positions_atoms(){
   std::cout << "Finished Creating atoms fractional positions:" << _super_cell_atom_fractional_cell_coordinates.size() <<  std::endl;
   _cel_nx_px = (int) (_fractional_norm_a_atom_pos / _sampling_rate_super_cell_x_nm_pixel);
   _cel_ny_px = (int) (_fractional_norm_b_atom_pos / _sampling_rate_super_cell_y_nm_pixel);
-  std::cout << "\tnew CELSLC -nx " << _cel_nx_px <<  " -ny " << _cel_ny_px << std::endl;
 }
 
 /** other methods **/

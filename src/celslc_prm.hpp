@@ -40,7 +40,15 @@ class CELSLC_prm {
     bool auto_equidistant_slices_switch;
     bool auto_non_equidistant_slices_switch;
 
-   void cleanup_thread(); 
+    bool single_slice_calculation_prepare_bin_runned_switch;
+    bool single_slice_calculation_nz_switch;
+    bool single_slice_calculation_enabled_switch;
+    bool single_slice_calculation_runned_switch;
+    
+    void cleanup_thread(); 
+    bool prepare_bin_ssc();
+    bool prepare_nz_simulated_partitions_from_ssc_prm();
+   
   public:
     CELSLC_prm();
     void set_prj_dir_hkl( double projection_dir_h, double projection_dir_k, double projection_dir_l );
@@ -48,7 +56,7 @@ class CELSLC_prm {
     void set_prp_dir_uvw( double perpendicular_dir_u , double perpendicular_dir_v , double perpendicular_dir_w );
 
     void calc_prj_dir_hkl();
-    
+
     void calc_prp_dir_uvw();
 
     void set_super_cell_size_abc( double size_a, double size_b, double size_c );
@@ -96,18 +104,20 @@ class CELSLC_prm {
     int get_slice_number_from_nm_floor( double goal_thickness_nm );
 
     int get_slice_number_from_nm_ceil( double goal_thickness_nm );
-    
+
     std::vector<double> get_slice_params_nm_slice_vec();
-    
+
     std::vector<double> get_slice_params_accum_nm_slice_vec();
-    
+
     bool update_nz_simulated_partitions_from_prm();
 
     void produce_prm( );
 
-    bool call_bin();
-    
     bool cleanup_bin();
+    
+    bool call_bin();
+
+    bool call_bin_ssc();
 };
 
 #endif

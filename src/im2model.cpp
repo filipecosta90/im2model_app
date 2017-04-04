@@ -521,10 +521,10 @@ int main(int argc, char** argv )
     celslc_parameters.set_ht_accelaration_voltage(ht_accelaration_voltage);
     celslc_parameters.set_dwf_switch(dwf_switch);
     celslc_parameters.set_abs_switch(abs_switch);
-
+    celslc_parameters.set_bin_path( celslc_bin_string );
     if (celslc_switch == true ){
-      celslc_parameters.set_bin_path( celslc_bin_string );
-      celslc_parameters.call_bin();
+      celslc_parameters.call_bin_ssc();
+      //celslc_parameters.call_bin();
     }
     nz_simulated_partitions = celslc_parameters.get_nz_simulated_partitions();
 
@@ -584,7 +584,6 @@ int main(int argc, char** argv )
       }
     }
 
-
     std::cout << "MSA: Number slices to load " << slices_load << std::endl;
     std::cout << "MSA: Number slices to max thickness " << slices_load << std::endl;
 
@@ -612,10 +611,10 @@ int main(int argc, char** argv )
       msa_parameters.call_bin();
     }
 
-      if (cleanup_switch == true ){
-        std::cout << " cleaning up celslc temporary files. { *.sli }" << std::endl;
-        celslc_parameters.cleanup_bin();
-      }
+    if (cleanup_switch == true ){
+      std::cout << " cleaning up celslc temporary files. { *.sli }" << std::endl;
+      //      celslc_parameters.cleanup_bin();
+    }
 
     WAVIMG_prm::WAVIMG_prm wavimg_parameters;
 
@@ -704,12 +703,12 @@ int main(int argc, char** argv )
       wavimg_parameters.set_debug_switch(debug_switch);
       wavimg_parameters.call_bin();
     }
-      
+
     if (cleanup_switch == true ){
-        std::cout << " cleaning up msa temporary files. { *.wav }" << std::endl;
-        msa_parameters.cleanup_bin();
-      }
-    
+      std::cout << " cleaning up msa temporary files. { *.wav }" << std::endl;
+      msa_parameters.cleanup_bin();
+    }
+
     if (im2model_switch == true ){
 
       // Read the experimental image from file
@@ -839,7 +838,32 @@ int main(int argc, char** argv )
       super_cell.create_fractional_positions_atoms();
       super_cell.generate_super_cell_file( "test_im2model.cel" );
 
-         //wavimg_simgrid_steps.export_sim_grid();
+      int _super_cell_nx = super_cell.get_super_cell_nx_px();
+      int _super_cell_ny = super_cell.get_super_cell_ny_px();
+
+      /*
+       *
+       * MILESTONE 3
+       *
+       * */
+
+      CELSLC_prm::CELSLC_prm celslc_cel;
+      celslc_cel.set_cel_file( "test_im2model.cel" );
+      celslc_cel.set_slc_filename_prefix ( "cel_slc" );
+      celslc_cel.set_nx_simulated_horizontal_samples( _super_cell_nx ); //nx_simulated_horizontal_samples);
+      celslc_cel.set_ny_simulated_vertical_samples( _super_cell_ny ); // ny_simulated_vertical_samples);
+      celslc_cel.set_ht_accelaration_voltage(ht_accelaration_voltage);
+      celslc_cel.set_dwf_switch(dwf_switch);
+      celslc_cel.set_abs_switch(abs_switch);
+      std::cout << "preparing for single slice parallel calculation";
+      celslc_cel.set_bin_path( celslc_bin_string );
+      celslc_cel.call_bin_ssc();
+
+      //number_slices_to_max_thickness = nz_simulated_partitions;
+      //slices_load = nz_simulated_partitions;
+
+
+      //wavimg_simgrid_steps.export_sim_grid();
     }
     if( vis_gui_switch ){
       /* VIS */

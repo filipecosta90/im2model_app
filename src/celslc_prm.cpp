@@ -64,6 +64,10 @@ CELSLC_prm::CELSLC_prm()
   auto_equidistant_slices_switch = true; 
   auto_non_equidistant_slices_switch = false;
   runned_bin = false;
+  single_slice_calculation_prepare_bin_runned_switch = false;
+  single_slice_calculation_nz_switch = false;
+  single_slice_calculation_enabled_switch = true;
+  single_slice_calculation_runned_switch = true;
 }
 
 void CELSLC_prm::set_prj_dir_hkl(double projection_dir_h, double projection_dir_k, double projection_dir_l ){
@@ -250,7 +254,6 @@ std::vector<double> CELSLC_prm::get_slice_params_nm_slice_vec(){
   return slice_params_nm_slice_vec;
 }
 
-
 bool CELSLC_prm::update_nz_simulated_partitions_from_prm(){
   assert( slc_file_name_prefix != "" );
   bool result = false;  
@@ -343,7 +346,6 @@ bool CELSLC_prm::call_bin(){
       celslc_vector.push_back((char*) super_cell_cel_file.c_str());
     }
   }
-
 
   celslc_vector.push_back((char*) "-slc");
   celslc_vector.push_back((char*) slc_file_name_prefix.c_str());
@@ -438,6 +440,259 @@ bool CELSLC_prm::call_bin(){
   }
   //if you get here something went wrong
   return EXIT_FAILURE;
-
 }
+
+bool CELSLC_prm::prepare_nz_simulated_partitions_from_ssc_prm(){
+  bool result = false;  
+  std::stringstream input_prm_stream;
+  input_prm_stream << slc_file_name_prefix << "_ssc_prepare.prm"; 
+  std::ifstream infile;
+  infile.open ( input_prm_stream.str() , std::ifstream::in);
+  if (infile.is_open()) {
+    std::string line;
+    std::getline(infile, line);
+    std::istringstream iss(line);
+    int nslices;
+    iss >> nz_simulated_partitions;
+    double accumulated_thickness = 0.0f;
+    for (int slice_id = 1; slice_id <= nz_simulated_partitions ; slice_id ++ ){
+      //ignore line with '[Slice Parameters]'
+      std::getline(infile, line); 
+      //ignore line with slice### 
+      std::getline(infile, line); 
+      //ignore line with slicepath 
+      std::getline(infile, line); 
+      //ignore line with nx
+      std::getline(infile, line); 
+      //ignore line with ny
+      std::getline(infile, line); 
+      //ignore line with nz
+      std::getline(infile, line); 
+      //ignore line with nm/per/px x
+      std::getline(infile, line); 
+      //ignore line with nm/per/px y
+      std::getline(infile, line); 
+      //get nz dimension of the slice
+      std::getline(infile, line);
+      std::istringstream iss(line);
+      double slice_thickness_nm;
+      iss >> slice_thickness_nm;
+      slice_params_nm_slice.insert( std::pair<int,double> (slice_id, slice_thickness_nm));
+      accumulated_thickness += slice_thickness_nm;
+      slice_params_accum_nm_slice_vec.push_back( accumulated_thickness );
+      slice_params_nm_slice_vec.push_back(slice_thickness_nm);
+    }
+    infile.close();
+    result = true;
+  }
+  else{
+    std::cout << "Warning: unable to open file for SSC preparation \"" << input_prm_stream.str() << "\"" << std::endl;
+  }
+  return result;
+}
+
+bool CELSLC_prm::prepare_bin_ssc(){
+
+  int pid;
+  std::vector<char*> celslc_vector;
+
+  celslc_vector.push_back((char*) bin_path.c_str() );
+
+  if( cif_format_switch  ){
+    celslc_vector.push_back((char*) "-cif");
+    celslc_vector.push_back((char*) super_cell_cif_file.c_str());
+  }
+  else{
+    if( cel_format_switch  ){
+      celslc_vector.push_back((char*) "-cel");
+      celslc_vector.push_back((char*) super_cell_cel_file.c_str());
+    }
+  }
+
+  std::string slc_file_name_prefix_dummy = slc_file_name_prefix + "_ssc_prepare";
+  celslc_vector.push_back((char*) "-slc");
+  celslc_vector.push_back((char*) slc_file_name_prefix_dummy.c_str());
+
+  celslc_vector.push_back((char*) "-nx");
+  // input nx string
+  celslc_vector.push_back( (char*) "32" );
+
+  celslc_vector.push_back((char*) "-ny");
+  // input ny string
+  celslc_vector.push_back( (char*) "32" );
+
+  celslc_vector.push_back((char*) "-ht");
+  // input ht
+  std::stringstream input_ht_stream;
+  input_ht_stream << ht_accelaration_voltage;
+  std::string input_ht_string = input_ht_stream.str();
+  const char* input_ht_c_string = input_ht_string.c_str();
+  celslc_vector.push_back( (char*) input_ht_c_string );
+
+
+  if( projection_dir_hkl_switch && projected_dir_uvw_switch && super_cell_size_switch ){
+    celslc_vector.push_back((char*) "-prj");
+    std::stringstream input_prj_stream;
+    input_prj_stream 
+      << (float) prj_dir_h  << "," << (float) prj_dir_k << "," << (float) prj_dir_l << ","  
+      <<  prp_dir_u << "," << prp_dir_v << "," << prp_dir_w << "," 
+      << (float) super_cell_size_a << "," << (float) super_cell_size_b << "," << (float) super_cell_size_c;
+    const std::string input_prj_string = input_prj_stream.str();
+    std::cout << "-prj |"<< input_prj_string << "|" << std::endl;
+    celslc_vector.push_back( (char*) input_prj_string.c_str() );
+  }
+
+  /**  
+   * Equidistant slicing of the super-cell along the c-axis. 
+   * Specify an explicit number of slices, 
+   * or use -nz 0 to let CELSLC determine the number of equidistant slices automatically. 
+   * Omitting the -nz option will lead to an automatic non-equidistant slicing. 
+   * **/
+  celslc_vector.push_back((char*) "-nz");
+  // input nz string
+  std::stringstream input_nz_stream;
+  //let CELSLC determine the number of equidistant slices automatically
+  input_nz_stream << "0"; 
+  std::string input_nz_string = input_nz_stream.str();
+  const char* input_nz_c_string = input_nz_string.c_str();
+  celslc_vector.push_back( (char*) input_nz_c_string );
+
+  if ( dwf_switch ){
+    celslc_vector.push_back((char*) "-dwf");
+  }
+  if ( abs_switch ){
+    celslc_vector.push_back((char*) "-abs");
+  }
+  celslc_vector.push_back(0); //end of arguments sentinel is NULL
+
+  if ((pid = vfork()) == -1) // system functions also set a variable called "errno"
+  {
+    perror("ERROR in vfork() of CELSLC prepare_bin_ssc"); // this function automatically checks "errno"
+    // and prints the error plus what you give it
+    return EXIT_FAILURE;
+  }
+  // ---- by when you get here there will be two processes
+  if (pid == 0) // child process
+  {
+    execv(celslc_vector[0], &celslc_vector.front());
+  }
+  else {
+    int status;
+    wait(&status);
+    prepare_nz_simulated_partitions_from_ssc_prm();
+    single_slice_calculation_prepare_bin_runned_switch = true;
+    std::cout << "ssc NZ max processes " << nz_simulated_partitions << std::endl;
+    return EXIT_SUCCESS;
+  }
+  //if you get here something went wrong
+  return EXIT_FAILURE;
+}
+
+bool CELSLC_prm::call_bin_ssc(){
+  prepare_bin_ssc();
+
+  pid_t* pID = new pid_t[nz_simulated_partitions];
+
+  for ( int slice_id = 1; slice_id <= nz_simulated_partitions; slice_id++ ){
+
+    std::vector<char*> celslc_vector;
+
+    celslc_vector.push_back((char*) bin_path.c_str() );
+
+    if( cif_format_switch  ){
+      celslc_vector.push_back((char*) "-cif");
+      celslc_vector.push_back((char*) super_cell_cif_file.c_str());
+    }
+    else{
+      if( cel_format_switch  ){
+        celslc_vector.push_back((char*) "-cel");
+        celslc_vector.push_back((char*) super_cell_cel_file.c_str());
+      }
+    }
+
+    celslc_vector.push_back((char*) "-slc");
+    celslc_vector.push_back((char*) slc_file_name_prefix.c_str());
+
+    celslc_vector.push_back((char*) "-nx");
+    // input nx string
+    std::stringstream input_nx_stream;
+    input_nx_stream << nx_simulated_horizontal_samples;
+    std::string input_nx_string = input_nx_stream.str();
+    const char* input_nx_c_string = input_nx_string.c_str();
+    celslc_vector.push_back( (char*) input_nx_c_string );
+
+    celslc_vector.push_back((char*) "-ny");
+    // input ny string
+    std::stringstream input_ny_stream;
+    input_ny_stream << ny_simulated_vertical_samples;
+    std::string input_ny_string = input_ny_stream.str();
+    const char* input_ny_c_string = input_ny_string.c_str();
+    celslc_vector.push_back( (char*) input_ny_c_string );
+
+    celslc_vector.push_back((char*) "-ht");
+    // input ht
+    std::stringstream input_ht_stream;
+    input_ht_stream << ht_accelaration_voltage;
+    std::string input_ht_string = input_ht_stream.str();
+    const char* input_ht_c_string = input_ht_string.c_str();
+    celslc_vector.push_back( (char*) input_ht_c_string );
+
+    if ( dwf_switch ){
+      celslc_vector.push_back((char*) "-dwf");
+    }
+    if ( abs_switch ){
+      celslc_vector.push_back((char*) "-abs");
+    }
+
+    if( projection_dir_hkl_switch && projected_dir_uvw_switch && super_cell_size_switch ){
+      celslc_vector.push_back((char*) "-prj");
+      std::stringstream input_prj_stream;
+      input_prj_stream 
+        << (float) prj_dir_h  << "," << (float) prj_dir_k << "," << (float) prj_dir_l << ","  
+        <<  prp_dir_u << "," << prp_dir_v << "," << prp_dir_w << "," 
+        << (float) super_cell_size_a << "," << (float) super_cell_size_b << "," << (float) super_cell_size_c;
+      const std::string input_prj_string = input_prj_stream.str();
+      std::cout << "-prj |"<< input_prj_string << "|" << std::endl;
+      celslc_vector.push_back( (char*) input_prj_string.c_str() );
+    }
+
+    celslc_vector.push_back((char*) "-ssc");
+    // input ssc
+    std::stringstream input_ssc_stream;
+    input_ssc_stream << slice_id; 
+    std::string input_ssc_string = input_ssc_stream.str();
+    const char* input_ssc_c_string = input_ssc_string.c_str();
+    celslc_vector.push_back( (char*) input_ssc_c_string );
+
+    celslc_vector.push_back(0); //end of arguments sentinel is NULL
+
+    pID[slice_id-1]=fork();
+    if (pID[slice_id-1] == -1) // system functions also set a variable called "errno"
+    {
+      perror("ERROR in vfork() of CELSLC call_bin"); // this function automatically checks "errno"
+      // and prints the error plus what you give it
+      return EXIT_FAILURE;
+    }
+    if (pID[slice_id-1] == 0) // child process
+    {
+      std::cout << "Process for slice" << slice_id << std::endl;
+      execv(celslc_vector[0], &celslc_vector.front());
+    }
+    else{
+
+    } 
+
+  }
+  for (int i = 0; i < nz_simulated_partitions; ++i) {
+    int status;
+    while (-1 == waitpid(pID[i], &status, 0));
+    if (!WIFEXITED(status) || WEXITSTATUS(status) != 0) {
+      std::cerr << "Process " << i << " (pid " << pID[i] << ") failed" << std::endl;
+      exit(1);
+    }
+  }
+
+  return EXIT_SUCCESS;
+}
+
 
