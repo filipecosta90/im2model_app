@@ -18,6 +18,12 @@
 
 #include "wavimg_prm.hpp"
 
+// Include the headers relevant to the boost::filesystem
+#include <boost/filesystem.hpp>
+#include <boost/thread.hpp>
+
+static const std::string DAT_EXTENSION = ".dat";
+
 WAVIMG_prm::WAVIMG_prm()
 {
   // line 1
@@ -96,6 +102,7 @@ WAVIMG_prm::WAVIMG_prm()
   prm_filename = "";
   bin_path = "";
   debug_switch = false;
+  runned_bin = false;
 }
 
 WAVIMG_prm::WAVIMG_prm(const WAVIMG_prm &obj){
@@ -367,6 +374,28 @@ void WAVIMG_prm::add_parameter_loop ( int parameter_class , int parameter_index,
   loop_string_indentifier.push_back(string_identifier);
 }
 
+void WAVIMG_prm::cleanup_thread(){
+  boost::filesystem::path p (".");
+  boost::filesystem::directory_iterator end_itr;
+  // cycle through the directory
+  for ( boost::filesystem::directory_iterator itr(p); itr != end_itr; ++itr)
+  {
+    // If it's not a directory, list it. If you want to list directories too, just remove this check.
+    if (is_regular_file(itr->path())) {
+      // assign current file name to current_file and echo it out to the console.
+      if( itr->path().extension() == DAT_EXTENSION ){
+        bool remove_result = boost::filesystem::remove( itr->path().filename() );
+      }
+    }
+  }
+}
+
+bool WAVIMG_prm::cleanup_bin(){
+  boost::thread t( &WAVIMG_prm::cleanup_thread , this ); 
+  runned_bin = false; 
+  return EXIT_SUCCESS;
+}
+
 bool WAVIMG_prm::call_bin(){
   int pid;
 
@@ -379,7 +408,7 @@ bool WAVIMG_prm::call_bin(){
   }
   wavimg_vector.push_back(0); //end of arguments sentinel is NULL
 
-  if ((pid = vfork()) == -1) // system functions also set a variable called "errno"
+  if ((pid = fork()) == -1) // system functions also set a variable called "errno"
   {
     perror("ERROR in vfork() of WAVIMG call_bin"); // this function automatically checks "errno"
     // and prints the error plus what you give it
@@ -478,3 +507,4 @@ void WAVIMG_prm::produce_prm ( ) {
   }
   outfile.close();
 }
+

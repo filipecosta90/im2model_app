@@ -77,6 +77,8 @@ std::string msa_bin_string = "../bin/drprobe_clt_bin_osx/msa";
 std::string wavimg_bin_string = "../bin/drprobe_clt_bin_osx/wavimg";
 #endif
 
+
+
 // Experimental Image info
 cv::Mat experimental_image; 
 cv::Mat experimental_image_roi;
@@ -176,6 +178,7 @@ int main(int argc, char** argv )
   bool user_estimated_defocus_nm_switch = false;
   bool user_estimated_thickness_nm_switch = false;
   bool user_estimated_thickness_slice_switch = false;
+  bool cleanup_switch = true; 
 
   /////////////////////////
   // Simulated Thickness info
@@ -505,7 +508,6 @@ int main(int argc, char** argv )
 
 
     CELSLC_prm::CELSLC_prm celslc_parameters;
-
     celslc_parameters.set_prp_dir_uvw( perpendicular_dir_u, perpendicular_dir_v, perpendicular_dir_w );
     celslc_parameters.set_prj_dir_hkl( projection_dir_h, projection_dir_k, projection_dir_l );
     celslc_parameters.set_super_cell_size_abc( super_cell_size_a, super_cell_size_b, super_cell_size_c );
@@ -610,6 +612,10 @@ int main(int argc, char** argv )
       msa_parameters.call_bin();
     }
 
+      if (cleanup_switch == true ){
+        std::cout << " cleaning up celslc temporary files. { *.sli }" << std::endl;
+        celslc_parameters.cleanup_bin();
+      }
 
     WAVIMG_prm::WAVIMG_prm wavimg_parameters;
 
@@ -698,7 +704,12 @@ int main(int argc, char** argv )
       wavimg_parameters.set_debug_switch(debug_switch);
       wavimg_parameters.call_bin();
     }
-
+      
+    if (cleanup_switch == true ){
+        std::cout << " cleaning up msa temporary files. { *.wav }" << std::endl;
+        msa_parameters.cleanup_bin();
+      }
+    
     if (im2model_switch == true ){
 
       // Read the experimental image from file
@@ -769,7 +780,7 @@ int main(int argc, char** argv )
       wavimg_simgrid_steps.set_number_slices_to_max_thickness( number_slices_to_max_thickness );
       wavimg_simgrid_steps.set_slices_lower_bound( slices_lower_bound );
       wavimg_simgrid_steps.set_slices_upper_bound( slices_upper_bound );
-      
+
       wavimg_simgrid_steps.set_n_rows_simulated_image(nx_simulated_horizontal_samples);
       wavimg_simgrid_steps.set_n_cols_simulated_image(ny_simulated_vertical_samples);
 
@@ -801,8 +812,13 @@ int main(int argc, char** argv )
 
       wavimg_simgrid_steps.set_iteration_number(1);
       wavimg_simgrid_steps.set_step_length_minimum_threshold ( 87.5f );
-      wavimg_simgrid_steps.set_step_size( (int) defocus_period, (int) slice_period );
+      wavimg_simgrid_steps.set_step_size( defocus_period, slice_period );
       wavimg_simgrid_steps.simulate_from_dat_file();
+
+      if (cleanup_switch == true ){
+        std::cout << " cleaning up wavimg temporary files. { *.dat }" << std::endl;
+        wavimg_parameters.cleanup_bin();
+      }
 
       //////////////////////////////////////////////////////
       // UNIT CELL AND SUPER CELL GENERATION STARTS HERE  //
@@ -822,9 +838,8 @@ int main(int argc, char** argv )
       /** SUPER CELL exporting **/
       super_cell.create_fractional_positions_atoms();
       super_cell.generate_super_cell_file( "test_im2model.cel" );
-      std::cout << " finished writing cel file" << std::endl;
 
-      //wavimg_simgrid_steps.export_sim_grid();
+         //wavimg_simgrid_steps.export_sim_grid();
     }
     if( vis_gui_switch ){
       /* VIS */

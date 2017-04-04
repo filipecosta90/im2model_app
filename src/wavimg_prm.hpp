@@ -80,7 +80,9 @@ class WAVIMG_prm {
     std::string prm_filename;
     std::string bin_path;
     bool debug_switch;
+    bool runned_bin; 
 
+    void cleanup_thread();
   public:
     WAVIMG_prm();
     WAVIMG_prm(const WAVIMG_prm &obj);
@@ -154,6 +156,8 @@ class WAVIMG_prm {
     void set_debug_switch(bool deb_switch);
 
     void produce_prm( );
+
+    bool cleanup_bin();
 
     bool call_bin();
 

@@ -34,7 +34,7 @@ set(Boost_USE_MULTITHREADED ON)
 set(Boost_USE_STATIC_RUNTIME OFF) 
 
 find_package(PkgConfig REQUIRED)
-find_package(Boost COMPONENTS program_options REQUIRED)
+find_package(Boost COMPONENTS program_options filesystem thread REQUIRED)
 find_package(OpenGL REQUIRED)
 find_package(GLUT REQUIRED)
 find_package(GLEW REQUIRED)

@@ -1,4 +1,3 @@
-
 #include <cctype>
 #include <fstream>
 #include <cassert>
@@ -26,6 +25,12 @@
 
 #include "opencv2/core/core.hpp"
 #include "opencv2/features2d/features2d.hpp"
+
+// Include the headers relevant to the boost::filesystem
+#include <boost/filesystem.hpp>
+#include <boost/thread.hpp>
+
+static const std::string SLI_EXTENSION = ".sli";
 
 CELSLC_prm::CELSLC_prm()
 {
@@ -238,11 +243,11 @@ int CELSLC_prm::get_slice_number_from_nm_ceil( double goal_thickness_nm ){
 }
 
 std::vector<double> CELSLC_prm::get_slice_params_accum_nm_slice_vec(){
-return slice_params_accum_nm_slice_vec;
+  return slice_params_accum_nm_slice_vec;
 }
 
 std::vector<double> CELSLC_prm::get_slice_params_nm_slice_vec(){
-return slice_params_nm_slice_vec;
+  return slice_params_nm_slice_vec;
 }
 
 
@@ -297,6 +302,28 @@ bool CELSLC_prm::update_nz_simulated_partitions_from_prm(){
     }
   }
   return result;
+}
+
+void CELSLC_prm::cleanup_thread(){
+  boost::filesystem::path p (".");
+  boost::filesystem::directory_iterator end_itr;
+  // cycle through the directory
+  for ( boost::filesystem::directory_iterator itr(p); itr != end_itr; ++itr)
+  {
+    // If it's not a directory, list it. If you want to list directories too, just remove this check.
+    if (is_regular_file(itr->path())) {
+      // assign current file name to current_file and echo it out to the console.
+      if( itr->path().extension() == SLI_EXTENSION ){
+        bool remove_result = boost::filesystem::remove( itr->path().filename() );
+      }
+    }
+  }
+}
+
+bool CELSLC_prm::cleanup_bin(){
+  boost::thread t( &CELSLC_prm::cleanup_thread , this ); 
+  runned_bin = false; 
+  return EXIT_SUCCESS;
 }
 
 bool CELSLC_prm::call_bin(){

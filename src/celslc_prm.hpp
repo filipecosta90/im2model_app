@@ -40,6 +40,7 @@ class CELSLC_prm {
     bool auto_equidistant_slices_switch;
     bool auto_non_equidistant_slices_switch;
 
+   void cleanup_thread(); 
   public:
     CELSLC_prm();
     void set_prj_dir_hkl( double projection_dir_h, double projection_dir_k, double projection_dir_l );
@@ -105,7 +106,8 @@ class CELSLC_prm {
     void produce_prm( );
 
     bool call_bin();
-
+    
+    bool cleanup_bin();
 };
 
 #endif

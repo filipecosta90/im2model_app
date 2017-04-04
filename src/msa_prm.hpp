@@ -42,7 +42,9 @@ class MSA_prm {
     std::string wave_function_name;
     std::string bin_path;
     bool debug_switch;
+    bool runned_bin;
 
+    void cleanup_thread();
   public:
     MSA_prm();
 
@@ -74,7 +76,9 @@ class MSA_prm {
 
     void set_debug_switch(bool deb_switch);
 
-    void produce_prm( );
+    void produce_prm();
+
+    bool cleanup_bin();
 
     bool call_bin();
 

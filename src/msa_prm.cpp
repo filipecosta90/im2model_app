@@ -1,4 +1,3 @@
-
 #include <cctype>
 #include <fstream>
 #include <cassert>
@@ -16,6 +15,12 @@
 #include <stdio.h>
 
 #include "msa_prm.hpp"
+
+// Include the headers relevant to the boost::filesystem
+#include <boost/filesystem.hpp>  
+#include <boost/thread.hpp>  
+
+static const std::string WAV_EXTENSION = ".wav";
 
 MSA_prm::MSA_prm()
 {
@@ -56,6 +61,7 @@ MSA_prm::MSA_prm()
   wave_function_name = "";
   bin_path = "";
   debug_switch = false;
+  runned_bin = false;
 }
 
 void MSA_prm::set_electron_wavelength( double energy ){
@@ -100,6 +106,28 @@ void MSA_prm::set_linear_slices_for_full_object_structure () {
   }
 }
 
+void MSA_prm::cleanup_thread(){
+  boost::filesystem::path p (".");
+  boost::filesystem::directory_iterator end_itr;
+  // cycle through the directory
+  for ( boost::filesystem::directory_iterator itr(p); itr != end_itr; ++itr)
+  {
+    // If it's not a directory, list it. If you want to list directories too, just remove this check.
+    if (is_regular_file(itr->path())) {
+      // assign current file name to current_file and echo it out to the console.
+      if( itr->path().extension() == WAV_EXTENSION ){
+        bool remove_result = boost::filesystem::remove( itr->path().filename() );
+      }
+    }
+  }
+}
+
+bool MSA_prm::cleanup_bin(){
+  boost::thread t( &MSA_prm::cleanup_thread , this ); 
+  runned_bin = false; 
+  return EXIT_SUCCESS;
+}
+
 bool MSA_prm::call_bin(){
   int pid;
 
@@ -116,7 +144,7 @@ bool MSA_prm::call_bin(){
 
   msa_vector.push_back(0); //end of arguments sentinel is NULL
 
-  if ((pid = vfork()) == -1) // system functions also set a variable called "errno"
+  if ((pid = fork()) == -1) // system functions also set a variable called "errno"
   {
     perror("ERROR in vfork() of MSA call_bin"); // this function automatically checks "errno"
     // and prints the error plus what you give it
