@@ -211,7 +211,7 @@ void CELSLC_prm::set_bin_path( std::string path ){
 }
 
 int CELSLC_prm::get_nz_simulated_partitions( ){
-  if ( runned_bin != true || ssc_runned_bin ){
+  if ( runned_bin != true || ssc_runned_bin != true ){
     update_nz_simulated_partitions_from_prm();
   }
   return nz_simulated_partitions; 
