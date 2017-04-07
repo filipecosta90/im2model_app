@@ -433,15 +433,15 @@ cv::Mat SIMGRID_wavimg_steplength::calculate_error_matrix( cv::Mat aligned_exper
   if (debug_switch == true ){
 
     std::cout << " ### Max error" << max_of_error << std::endl;
-
-    namedWindow( "error (black: no error)", cv::WINDOW_AUTOSIZE );// Create a window for display.
-    namedWindow( "Positioned Experimental", cv::WINDOW_AUTOSIZE );
-    namedWindow( "Positioned Simulated", cv::WINDOW_AUTOSIZE );
-    cv::imshow ("error (black: no error)",  error_matrix);
-    cv::imshow ("Positioned Experimental",  aligned_experimental_image_roi);
-    cv::imshow ("Positioned Simulated",  normalized_aligned_simulated_image_roi);
-    cv::waitKey(0);
-  }
+    /*
+       namedWindow( "error (black: no error)", cv::WINDOW_AUTOSIZE );// Create a window for display.
+       namedWindow( "Positioned Experimental", cv::WINDOW_AUTOSIZE );
+       namedWindow( "Positioned Simulated", cv::WINDOW_AUTOSIZE );
+    //cv::imshow ("error (black: no error)",  error_matrix);
+    //cv::imshow ("Positioned Experimental",  aligned_experimental_image_roi);
+    //cv::imshow ("Positioned Simulated",  normalized_aligned_simulated_image_roi);
+    //cv::waitKey(0);
+    */ }
 
   imwrite( "normalized_aligned_simulated_image_roi.png", normalized_aligned_simulated_image_roi );
   imwrite( "aligned_experimental_image_roi.png", aligned_experimental_image_roi );
@@ -556,6 +556,75 @@ bool SIMGRID_wavimg_steplength::export_sim_grid(){
   }
 }
 
+void SIMGRID_wavimg_steplength::produce_png_from_dat_file(){
+  assert ( slice_samples >= 1 );
+  assert ( defocus_samples >= 1 );
+  assert ( slices_lower_bound >= 1 );
+  assert ( celslc_accum_nm_slice_vec.size() == number_slices_to_max_thickness );
+
+  for (int thickness = 1; thickness <= slice_samples; thickness ++ ){
+    const int at_slice = round( slice_period * ( thickness  - 1 ) + slices_lower_bound );
+    const double slice_thickness_nm = celslc_accum_nm_slice_vec.at(at_slice-1);
+
+    // for the same thickness iterate through every defocus
+    for (int defocus = 1; defocus <= defocus_samples; defocus ++ ){
+      const int at_defocus = round( ((defocus-1) * defocus_period )+ defocus_lower_bound );
+
+      // get the .dat image name
+      std::stringstream output_dat_name_stream;
+      output_dat_name_stream << "image_" << std::setw(3) << std::setfill('0') << std::to_string(thickness) << "_" << std::setw(3) << std::setfill('0') << std::to_string(defocus) << ".dat";
+      std::string file_name_output_dat = output_dat_name_stream.str();
+      std::cout << "Opening " << file_name_output_dat << " to retrieve thickness " << slice_thickness_nm << " nm (sl "<< at_slice << "), defocus " << at_defocus << std::endl;
+
+      int fd;
+      fd = open ( file_name_output_dat.c_str() , O_RDONLY );
+      if ( fd == -1 ){
+        perror("ERROR: in open() of *.dat image file");
+      }
+
+      off_t fsize;
+      fsize = lseek(fd, 0, SEEK_END);
+      float* p;
+
+      p = (float*) mmap (0, fsize, PROT_READ, MAP_SHARED, fd, 0);
+
+      if (p == MAP_FAILED) {
+        perror ("ERROR: in mmap() of *.dat image file");
+      }
+
+      if (close (fd) == -1) {
+        perror ("ERROR: in close() of *.dat image file");
+      }
+
+      cv::Mat raw_simulated_image ( n_rows_simulated_image , n_cols_simulated_image , CV_32FC1);
+      double min, max;
+
+      int pos = 0;
+      for (int row = 0; row < n_rows_simulated_image; row++) {
+        for (int col = 0; col < n_cols_simulated_image; col++) {
+          const int inverse_col = n_rows_simulated_image - ( col + 1 );
+          raw_simulated_image.at<float>(row, inverse_col) = (float)  p[pos] ;
+          pos++;
+        }
+      }
+
+      cv::minMaxLoc(raw_simulated_image, &min, &max);
+
+      // Create a new matrix to hold the gray image
+      cv::Mat raw_gray_simulated_image;
+      raw_simulated_image.convertTo(raw_gray_simulated_image, CV_8UC1 , 255.0f/(max - min), -min * 255.0f/(max - min));
+
+      // get the .dat image name
+      std::stringstream output_debug_info2;
+      output_debug_info2 << "raw_simulated" << std::setw(3) << std::setfill('0') << std::to_string(thickness) << "_" << std::setw(3) << std::setfill('0') << std::to_string(defocus) << ".png";
+      std::string string_output_debug_info2 = output_debug_info2.str();
+      imwrite( string_output_debug_info2 , raw_gray_simulated_image );
+
+    }
+  }
+
+}
+
 bool SIMGRID_wavimg_steplength::simulate_from_dat_file(){
   assert ( slice_samples >= 1 );
   assert ( defocus_samples >= 1 );
@@ -576,7 +645,7 @@ bool SIMGRID_wavimg_steplength::simulate_from_dat_file(){
   for (int thickness = 1; thickness <= slice_samples; thickness ++ ){
     const int at_slice = round( slice_period * ( thickness  - 1 ) + slices_lower_bound );
     const double slice_thickness_nm = celslc_accum_nm_slice_vec.at(at_slice-1);
-    
+
     //will contain the row of simulated images (same thickness, diferent defocus)
     std::vector<cv::Mat> simulated_images_row;
     std::vector<cv::Mat> raw_simulated_images_row;

@@ -782,16 +782,7 @@ void Super_Cell::remove_z_out_of_range_atoms(){
      ){
     const double _atom_z_nm = _atom_positions_itt->z;
     /** check for range in Z **/
-    bool in_range = true;
-
-    if ( _atom_z_nm > _z_top_limit ){ 
-      in_range = false; 
-    }
-    if ( _atom_z_nm < _z_bot_limit ){ 
-      in_range = false; 
-    }
-
-    if( !in_range ){
+    if ( ( _atom_z_nm > _z_top_limit ) || ( _atom_z_nm < _z_bot_limit ) ){ 
       _atom_positions_delete.push_back( loop_counter );
     }
   }
@@ -826,7 +817,7 @@ void Super_Cell::remove_xy_out_of_range_atoms(){
       _atom_positions_itt++ , loop_counter++ 
      ){
     /** check for range in XY **/
-    bool in_range = inpolygon( *_atom_positions_itt, _super_cell_boundary_polygon_Nanometers_w_margin );
+    const bool in_range = inpolygon( *_atom_positions_itt, _super_cell_boundary_polygon_Nanometers_w_margin );
     if(  !in_range ){
       _atom_positions_delete.push_back( loop_counter );
     }

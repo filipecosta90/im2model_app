@@ -251,6 +251,9 @@ void  set_celslc_accum_nm_slice_vec( std::vector<double> slice_params_accum_nm_s
 
     bool export_sim_grid();
 
+    void produce_png_from_dat_file();
+
+
     bool simulate_from_dat_file();
 };
 
