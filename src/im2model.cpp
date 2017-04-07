@@ -106,8 +106,7 @@ Super_Cell super_cell;
 cv::Point3d  zone_axis_vector_uvw;
 cv::Point3d  upward_vector_hkl;
 
-int main(int argc, char** argv )
-{
+int main(int argc, char** argv ){
   /////////////////////////
   // Simulation info
   /////////////////////////
@@ -178,7 +177,7 @@ int main(int argc, char** argv )
   bool user_estimated_defocus_nm_switch = false;
   bool user_estimated_thickness_nm_switch = false;
   bool user_estimated_thickness_slice_switch = false;
-  bool cleanup_switch = true; 
+  bool cleanup_switch = false; 
 
   /////////////////////////
   // Simulated Thickness info
@@ -235,6 +234,18 @@ int main(int argc, char** argv )
 
   MC::MC_Driver driver;
 
+  /////////////////////////
+  // Super Cell parameters 
+  /////////////////////////
+  int super_cell_nz_simulated_partitions;
+  int super_cell_number_slices_to_max_thickness;
+  int super_cell_slices_load;
+  int super_cell_slices_upper_bound;
+  int super_cell_slices_lower_bound;
+  int super_cell_slice_period;
+  std::vector<double> super_cell_celslc_accum_nm_slice_vec;
+
+
   try{
     /** Define and parse the program options
     */
@@ -245,6 +256,7 @@ int main(int argc, char** argv )
       ("no_msa", "switch for skipping msa execution.")
       ("no_wavimg", "switch for skipping wavimg execution.")
       ("no_im2model", "switch for skipping im2model execution.")
+      ("clean","switch for enabling temporary files cleaning after execution.")
       ("debug,g", "switch for enabling debug info for celslc, msa, and wavimg execution.")
       ("cif", boost::program_options::value<std::string>(&super_cell_cif_file)->required(), "specifies the input super-cell file containing the atomic structure data in CIF file format.")
       ("slc", boost::program_options::value<std::string>(&slc_file_name_prefix)->required(), "specifies the output slice file name prefix. Absolute or relative path names can be used. Enclose the file name string using quotation marks if the file name prefix or the disk path contains space characters. The slice file names will be suffixed by '_###.sli', where ### is a 3 digit number denoting the sequence of slices generated from the supercell.")
@@ -395,6 +407,10 @@ int main(int argc, char** argv )
       number_image_aberrations++;
       cs_switch = true;
     }
+    if ( vm.count("clean") ){
+      cleanup_switch = true;
+    }
+
     if ( vm.count("dwf")  ){
       dwf_switch=true;
     }
@@ -523,8 +539,8 @@ int main(int argc, char** argv )
     celslc_parameters.set_abs_switch(abs_switch);
     celslc_parameters.set_bin_path( celslc_bin_string );
     if (celslc_switch == true ){
-      celslc_parameters.call_bin_ssc();
-      //celslc_parameters.call_bin();
+      //celslc_parameters.call_bin_ssc();
+      celslc_parameters.call_bin();
     }
     nz_simulated_partitions = celslc_parameters.get_nz_simulated_partitions();
 
@@ -739,21 +755,6 @@ int main(int argc, char** argv )
       experimental_image_roi.create( roi_x_size, roi_y_size , CV_8UC1 );
       roi.copyTo(experimental_image_roi);
 
-      /*
-       * deprecated 
-       *
-       if ( roi_gui_switch == true ){
-      //Create a window
-      namedWindow("Experimental Window", WINDOW_AUTOSIZE );
-      setMouseCallback("Experimental Window", CallBackFunc, NULL);
-      rectangle(experimental_working, roi_rectangle, Scalar(0,0,255), 5);
-      imshow("Experimental Window", experimental_working);
-      createTrackbar( " Canny thresh:", "Experimental Window", &edge_detection_threshold, max_thresh, thresh_callback );
-      createTrackbar( "Max Countour px distance: ", "Experimental Window", &max_contour_distance_px, max_contour_distance_thresh_px, thresh_callback );
-      waitKey(0);
-      }
-      */
-
       /////////////////////////////////////////////////
       // STEP LENGTH SIMULATION PROCESS STARTS HERE  //
       /////////////////////////////////////////////////
@@ -850,20 +851,71 @@ int main(int argc, char** argv )
       CELSLC_prm::CELSLC_prm celslc_cel;
       celslc_cel.set_cel_file( "test_im2model.cel" );
       celslc_cel.set_slc_filename_prefix ( "cel_slc" );
-      celslc_cel.set_nx_simulated_horizontal_samples( _super_cell_nx ); //nx_simulated_horizontal_samples);
-      celslc_cel.set_ny_simulated_vertical_samples( _super_cell_ny ); // ny_simulated_vertical_samples);
+      celslc_cel.set_nx_simulated_horizontal_samples( _super_cell_nx ); 
+      celslc_cel.set_ny_simulated_vertical_samples( _super_cell_ny ); 
       celslc_cel.set_ht_accelaration_voltage(ht_accelaration_voltage);
       celslc_cel.set_dwf_switch(dwf_switch);
       celslc_cel.set_abs_switch(abs_switch);
       std::cout << "preparing for single slice parallel calculation";
       celslc_cel.set_bin_path( celslc_bin_string );
-      celslc_cel.call_bin_ssc();
+      celslc_cel.call_bin_ssc( );
 
-      //number_slices_to_max_thickness = nz_simulated_partitions;
-      //slices_load = nz_simulated_partitions;
+      super_cell_nz_simulated_partitions = celslc_cel.get_nz_simulated_partitions();
 
+      assert( super_cell_nz_simulated_partitions >= 1 );
 
-      //wavimg_simgrid_steps.export_sim_grid();
+      super_cell_celslc_accum_nm_slice_vec = celslc_cel.get_slice_params_accum_nm_slice_vec();
+
+      super_cell_number_slices_to_max_thickness = super_cell_nz_simulated_partitions;
+      super_cell_slices_load = super_cell_nz_simulated_partitions;
+
+      if ( vm.count("nm_upper_bound")  ){
+        super_cell_slices_upper_bound = celslc_cel.get_slice_number_from_nm_floor( nm_upper_bound );
+        std::cout << "Calculated slice # " << super_cell_slices_upper_bound << " as the upper bound for the maximum thickness of: " << nm_upper_bound << " nm" << std::endl;
+      }
+
+      if ( vm.count("nm_lower_bound")  ){
+        super_cell_slices_lower_bound = celslc_cel.get_slice_number_from_nm_ceil( nm_lower_bound );
+        std::cout << "Calculated slice # " << super_cell_slices_lower_bound << " as the lower bound for the minimum thickness of: " << nm_lower_bound << " nm" << std::endl;
+      }
+
+      // Simulation Thickness Period (in slices)
+      int super_cell_slice_interval = super_cell_slices_upper_bound - super_cell_slices_lower_bound;
+      std::div_t divresult;
+      divresult = div (slice_interval, (slice_samples -1) );
+      super_cell_slice_period = divresult.quot;
+      assert(super_cell_slice_period >= 1);
+      std::cout << "Calculated slice period of " << super_cell_slice_period << std::endl;
+      const int remainder_slices = divresult.rem;
+      const int slices_to_period = (slice_samples -1) - remainder_slices;
+      if ( remainder_slices > 0 ){
+        std::cout << "WARNING: an adjustment needs to be made in the slices lower or upper bound." << std::endl;
+        const int increase_top_range = super_cell_slices_lower_bound + (slice_samples * super_cell_slice_period );
+        const int decrease_top_range = super_cell_slices_lower_bound + ((slice_samples-1) * super_cell_slice_period );
+        const int decrease_bot_range = super_cell_slices_lower_bound-slices_to_period + (slice_samples * super_cell_slice_period );
+
+        if ( increase_top_range <= super_cell_number_slices_to_max_thickness ){
+          std::cout << "Increasing top range to slice #" << increase_top_range << std::endl;
+          std::cout << "Going to use one more sample than the requested " << slice_samples << " samples. Using " << (slice_samples+1) << " samples." << std::endl;
+          super_cell_slices_upper_bound = increase_top_range;
+          slice_samples++;
+        }
+        else{
+          if( decrease_bot_range >= 1 ){
+            std::cout << "Decreasing bot range to slice #" << decrease_bot_range << std::endl;
+            super_cell_slices_lower_bound -= slices_to_period;
+            slice_samples++;
+          }
+          else{
+            std::cout << "Decreasing top range to slice #" << decrease_top_range << std::endl;
+            super_cell_slices_upper_bound = decrease_top_range;
+          }
+        }
+      }
+
+      std::cout << "MSA: Number slices to load " << slices_load << std::endl;
+      std::cout << "MSA: Number slices to max thickness " << slices_load << std::endl;
+        //wavimg_simgrid_steps.export_sim_grid();
     }
     if( vis_gui_switch ){
       /* VIS */

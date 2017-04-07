@@ -28,6 +28,7 @@ class CELSLC_prm {
 
     // runnable execv info
     bool runned_bin;
+    bool ssc_runned_bin;
     std::string bin_path;
     bool dwf_switch;
     bool abs_switch;
@@ -43,8 +44,7 @@ class CELSLC_prm {
     bool single_slice_calculation_prepare_bin_runned_switch;
     bool single_slice_calculation_nz_switch;
     bool single_slice_calculation_enabled_switch;
-    bool single_slice_calculation_runned_switch;
-    
+
     void cleanup_thread(); 
     bool prepare_bin_ssc();
     bool prepare_nz_simulated_partitions_from_ssc_prm();

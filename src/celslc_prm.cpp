@@ -64,10 +64,11 @@ CELSLC_prm::CELSLC_prm()
   auto_equidistant_slices_switch = true; 
   auto_non_equidistant_slices_switch = false;
   runned_bin = false;
+  ssc_runned_bin = false;
   single_slice_calculation_prepare_bin_runned_switch = false;
   single_slice_calculation_nz_switch = false;
   single_slice_calculation_enabled_switch = true;
-  single_slice_calculation_runned_switch = true;
+
 }
 
 void CELSLC_prm::set_prj_dir_hkl(double projection_dir_h, double projection_dir_k, double projection_dir_l ){
@@ -210,7 +211,7 @@ void CELSLC_prm::set_bin_path( std::string path ){
 }
 
 int CELSLC_prm::get_nz_simulated_partitions( ){
-  if ( runned_bin != true ){
+  if ( runned_bin != true || ssc_runned_bin ){
     update_nz_simulated_partitions_from_prm();
   }
   return nz_simulated_partitions; 
@@ -218,6 +219,7 @@ int CELSLC_prm::get_nz_simulated_partitions( ){
 
 int CELSLC_prm::get_slice_number_from_nm_floor( double goal_thickness_nm ){
   assert( nz_simulated_partitions >= 1 );
+  std::cout << "vec size: " <<  slice_params_nm_slice_vec.size() << " nz " << nz_simulated_partitions << std::endl;
   assert( slice_params_nm_slice_vec.size() == nz_simulated_partitions );
   double accumulated_thickness = 0.0f;
   int slice_pos = 1;
@@ -445,7 +447,7 @@ bool CELSLC_prm::call_bin(){
 bool CELSLC_prm::prepare_nz_simulated_partitions_from_ssc_prm(){
   bool result = false;  
   std::stringstream input_prm_stream;
-  input_prm_stream << slc_file_name_prefix << "_ssc_prepare.prm"; 
+  input_prm_stream << slc_file_name_prefix << ".prm"; 
   std::ifstream infile;
   infile.open ( input_prm_stream.str() , std::ifstream::in);
   if (infile.is_open()) {
@@ -454,6 +456,7 @@ bool CELSLC_prm::prepare_nz_simulated_partitions_from_ssc_prm(){
     std::istringstream iss(line);
     int nslices;
     iss >> nz_simulated_partitions;
+    std::cout << "The file \"" << input_prm_stream.str() << "\" indicated : " <<  nz_simulated_partitions << " slices" << std::endl; 
     double accumulated_thickness = 0.0f;
     for (int slice_id = 1; slice_id <= nz_simulated_partitions ; slice_id ++ ){
       //ignore line with '[Slice Parameters]'
@@ -509,7 +512,7 @@ bool CELSLC_prm::prepare_bin_ssc(){
     }
   }
 
-  std::string slc_file_name_prefix_dummy = slc_file_name_prefix + "_ssc_prepare";
+  std::string slc_file_name_prefix_dummy = slc_file_name_prefix ; //+ "_ssc_prepare";
   celslc_vector.push_back((char*) "-slc");
   celslc_vector.push_back((char*) slc_file_name_prefix_dummy.c_str());
 
@@ -629,6 +632,18 @@ bool CELSLC_prm::call_bin_ssc(){
     const char* input_ny_c_string = input_ny_string.c_str();
     celslc_vector.push_back( (char*) input_ny_c_string );
 
+    /**  
+     * Equidistant slicing of the super-cell along the c-axis. 
+     * Specify an explicit number of slices, 
+     * **/
+    celslc_vector.push_back((char*) "-nz");
+    // input nz string
+    std::stringstream input_nz_stream;
+    input_nz_stream << nz_simulated_partitions; 
+    std::string input_nz_string = input_nz_stream.str();
+    const char* input_nz_c_string = input_nz_string.c_str();
+    celslc_vector.push_back( (char*) input_nz_c_string );
+
     celslc_vector.push_back((char*) "-ht");
     // input ht
     std::stringstream input_ht_stream;
@@ -675,7 +690,15 @@ bool CELSLC_prm::call_bin_ssc(){
     }
     if (pID[slice_id-1] == 0) // child process
     {
-      std::cout << "Process for slice" << slice_id << std::endl;
+      std::cout << "Process for slice #" << slice_id << std::endl;
+      std::stringstream celslc_stream;
+      celslc_stream << "log_" << slc_file_name_prefix << "_" << slice_id << ".log"; 
+      std::cout << "Saving log of slice #"<< slice_id << " in file: " << celslc_stream.str() << std::endl ;
+      int fd = open( celslc_stream.str().c_str() , O_RDWR | O_CREAT, S_IRUSR | S_IWUSR );
+      dup2(fd, 1);   // make stdout go to file
+      dup2(fd, 2);   // make stderr go to file - you may choose to not do this
+      close(fd);     // fd no longer needed - the dup'ed handles are sufficient
+
       execv(celslc_vector[0], &celslc_vector.front());
     }
     else{
@@ -690,8 +713,9 @@ bool CELSLC_prm::call_bin_ssc(){
       std::cerr << "Process " << i << " (pid " << pID[i] << ") failed" << std::endl;
       exit(1);
     }
+    std::cout << "Process with ID " << pID[i] << " ended" << std::endl;
   }
-
+  ssc_runned_bin = true; 
   return EXIT_SUCCESS;
 }
 
