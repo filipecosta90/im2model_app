@@ -54,8 +54,9 @@ class Super_Cell {
     /** reciprocal-lattice (Miller) indices  **/
     cv::Point3d upward_vector_hkl;
 
-    std::vector<std::string> _super_cell_atom_symbol_string;
     std::vector<cv::Point3d> _atom_positions;
+    std::vector<int> _super_cell_to_unit_cell_pos;
+    std::vector<std::string> _super_cell_atom_symbol_string;
     std::vector<double> _super_cell_atom_site_occupancy;
     std::vector<double> _super_cell_atom_debye_waller_factor;
     std::vector<glm::vec4> _atom_cpk_rgba_colors;
@@ -163,6 +164,10 @@ class Super_Cell {
     double get_super_cell_length_b_Nanometers();
     double get_super_cell_length_c_Nanometers();
 
+    double get_fractional_norm_a_atom_pos_Nanometers();
+    double get_fractional_norm_b_atom_pos_Nanometers();
+    double get_fractional_norm_c_atom_pos_Nanometers();
+    
     std::vector<cv::Point3d> get_atom_positions_vec();
     std::vector<glm::vec4> get_atom_cpk_rgba_colors_vec();
     std::vector<double> get_atom_empirical_radii_vec();

@@ -628,7 +628,7 @@ int main(int argc, char** argv ){
     }
 
     if (cleanup_switch == true ){
-      std::cout << " cleaning up celslc temporary files. { *.sli }" << std::endl;
+      std::cout << " cleaning up celslc temporary files. { " << slc_file_name_prefix << "_***.sli && '"<<slc_file_name_prefix<<"'.prm }" << std::endl;
       celslc_parameters.cleanup_bin();
     }
 
@@ -842,8 +842,8 @@ int main(int argc, char** argv ){
       super_cell.create_fractional_positions_atoms();
       super_cell.generate_super_cell_file( "test_im2model.cel" );
 
-      int _super_cell_nx = super_cell.get_super_cell_nx_px() / 5;
-      int _super_cell_ny = super_cell.get_super_cell_ny_px() / 5;
+      int _super_cell_nx = super_cell.get_super_cell_nx_px();
+      int _super_cell_ny = super_cell.get_super_cell_ny_px();
 
       /*
        *
@@ -861,10 +861,9 @@ int main(int argc, char** argv ){
       celslc_cel.set_ht_accelaration_voltage(ht_accelaration_voltage);
       celslc_cel.set_dwf_switch(dwf_switch);
       celslc_cel.set_abs_switch(abs_switch);
-/*      celslc_cel.set_prp_dir_uvw( 0 , 1 , 0 );
-      celslc_cel.set_prj_dir_hkl( 0, 0 , 1 );
-      celslc_cel.set_super_cell_size_abc( super_cell.get_super_cell_length_a_Nanometers(), super_cell.get_super_cell_length_b_Nanometers() , super_cell.get_super_cell_length_c_Nanometers() );
-*/
+      celslc_cel.set_prp_dir_uvw( 0.0f, 1.0f, 0.0f );
+      celslc_cel.set_prj_dir_hkl( 0.0f, 0.0f, 1.0f );
+      celslc_cel.set_super_cell_size_abc( super_cell.get_fractional_norm_a_atom_pos_Nanometers(), super_cell.get_fractional_norm_b_atom_pos_Nanometers(), super_cell.get_fractional_norm_c_atom_pos_Nanometers() );
       std::cout << "preparing for single slice parallel calculation";
       celslc_cel.set_bin_path( celslc_bin_string );
       celslc_cel.call_bin( );

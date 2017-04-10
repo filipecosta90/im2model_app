@@ -364,6 +364,17 @@ double Super_Cell::get_super_cell_length_c_Nanometers(){
   return _super_cell_length_c_Nanometers;
 }
 
+double Super_Cell::get_fractional_norm_a_atom_pos_Nanometers(){
+  return _fractional_norm_a_atom_pos;
+}
+double Super_Cell::get_fractional_norm_b_atom_pos_Nanometers(){
+  return _fractional_norm_b_atom_pos;
+}
+
+double Super_Cell::get_fractional_norm_c_atom_pos_Nanometers(){
+  return _fractional_norm_b_atom_pos;
+}
+
 std::vector<cv::Point3d> Super_Cell::get_atom_positions_vec( ){
   return _atom_positions;
 }
@@ -454,13 +465,7 @@ bool Super_Cell::create_atoms_from_unit_cell(){
   assert( expand_factor_b > 0.0f );
   assert( expand_factor_c > 0.0f );
 
-  std::vector<std::string> unit_cell_atom_symbol_string = unit_cell->get_atom_type_symbols_vec(); 
   std::vector<cv::Point3d> unit_cell_atom_positions = unit_cell->get_atom_positions_vec();
-  std::vector<double> unit_cell_atom_site_occupancy = unit_cell->get_atom_occupancy_vec();
-  std::vector<double> unit_cell_atom_debye_waller_factor = unit_cell->get_atom_debye_waller_factor_vec();
-  std::vector<glm::vec4> unit_cell_atom_cpk_rgba_colors = unit_cell->get_atom_cpk_rgba_colors_vec();
-  std::vector<double> unit_cell_atom_empirical_radii = unit_cell->get_atom_empirical_radii_vec();
-
   const double unit_cell_a_nm = unit_cell->get_cell_length_a_Nanometers();
   const double unit_cell_b_nm = unit_cell->get_cell_length_b_Nanometers();
   const double unit_cell_c_nm = unit_cell->get_cell_length_c_Nanometers();
@@ -483,21 +488,9 @@ bool Super_Cell::create_atoms_from_unit_cell(){
         const double a_expand_nanometers = a_expand_pos * unit_cell_a_nm + center_a_padding_nm;
         const cv::Point3d abc_expand (a_expand_nanometers, b_expand_nanometers, c_expand_nanometers);
         for ( size_t unit_cell_pos = 0; unit_cell_pos <  unit_cell_atom_positions.size(); unit_cell_pos++ ){
-          /* CEL */
-          std::string atom_symbol = unit_cell_atom_symbol_string.at(unit_cell_pos);
+          _super_cell_to_unit_cell_pos.push_back(unit_cell_pos);
           const cv::Point3d atom_pos = unit_cell_atom_positions.at(unit_cell_pos) + abc_expand;
-          const double atom_site_occupancy = unit_cell_atom_site_occupancy.at(unit_cell_pos);
-          const double atom_debye_waller_factor = unit_cell_atom_debye_waller_factor.at(unit_cell_pos);
-          /* VIS */
-          const glm::vec4 atom_cpk_rgba_colors = unit_cell_atom_cpk_rgba_colors.at(unit_cell_pos);
-          const double atom_empirical_radii = unit_cell_atom_empirical_radii.at(unit_cell_pos);
-          /** Vectors **/       
-          _super_cell_atom_symbol_string.push_back( atom_symbol );
-          _super_cell_atom_site_occupancy.push_back( atom_site_occupancy );
-          _super_cell_atom_debye_waller_factor.push_back( atom_debye_waller_factor );
           _atom_positions.push_back(atom_pos);
-          _atom_cpk_rgba_colors.push_back(atom_cpk_rgba_colors);
-          _atom_empirical_radii.push_back(atom_empirical_radii);
         }
       }
     }
@@ -794,12 +787,8 @@ void Super_Cell::remove_z_out_of_range_atoms(){
       delete_itt++
      ){
     const unsigned int pos_delete = *delete_itt;
-    _super_cell_atom_symbol_string.erase( _super_cell_atom_symbol_string.begin() + pos_delete );
-    _super_cell_atom_site_occupancy.erase( _super_cell_atom_site_occupancy.begin() + pos_delete );
-    _super_cell_atom_debye_waller_factor.erase( _super_cell_atom_debye_waller_factor.begin() + pos_delete );
     _atom_positions.erase( _atom_positions.begin() + pos_delete );
-    _atom_cpk_rgba_colors.erase( _atom_cpk_rgba_colors.begin() + pos_delete ); 
-    _atom_empirical_radii.erase( _atom_empirical_radii.begin() + pos_delete );
+    _super_cell_to_unit_cell_pos.erase( _super_cell_to_unit_cell_pos.begin() + pos_delete );
   }
   std::cout << "Final number of atoms after Z remotion: " << _atom_positions.size() << std::endl;
 }
@@ -830,12 +819,8 @@ void Super_Cell::remove_xy_out_of_range_atoms(){
       delete_itt++
      ){
     const unsigned int pos_delete = *delete_itt;
-    _super_cell_atom_symbol_string.erase( _super_cell_atom_symbol_string.begin() + pos_delete );
-    _super_cell_atom_site_occupancy.erase( _super_cell_atom_site_occupancy.begin() + pos_delete );
-    _super_cell_atom_debye_waller_factor.erase( _super_cell_atom_debye_waller_factor.begin() + pos_delete );
     _atom_positions.erase( _atom_positions.begin() + pos_delete );
-    _atom_cpk_rgba_colors.erase( _atom_cpk_rgba_colors.begin() + pos_delete ); 
-    _atom_empirical_radii.erase( _atom_empirical_radii.begin() + pos_delete );
+    _super_cell_to_unit_cell_pos.erase( _super_cell_to_unit_cell_pos.begin() + pos_delete );
   }
   std::cout << "Final number of atoms after XY remotion: " << _atom_positions.size() << std::endl;
 }
@@ -849,14 +834,12 @@ void Super_Cell::generate_super_cell_file(  std::string _super_cell_filename ){
   assert( ( _cell_angle_beta > std::numeric_limits<double>::min()) );
   assert( ( _cell_angle_gamma > std::numeric_limits<double>::min()) );
   assert( ! _super_cell_atom_fractional_cell_coordinates.empty() );
-  assert( ! _super_cell_atom_symbol_string.empty() );
-  assert( ! _super_cell_atom_site_occupancy.empty() );
-  assert( ! _super_cell_atom_debye_waller_factor.empty() );
-  assert( ( _super_cell_atom_fractional_cell_coordinates.size() == _super_cell_atom_symbol_string.size()       ) ); 
-  assert( ( _super_cell_atom_fractional_cell_coordinates.size() == _super_cell_atom_symbol_string.size()       ) ); 
-  assert( ( _super_cell_atom_fractional_cell_coordinates.size() == _super_cell_atom_site_occupancy.size()      ) ); 
-  assert( ( _super_cell_atom_fractional_cell_coordinates.size() == _super_cell_atom_debye_waller_factor.size() ) );
   /* method */
+
+  std::vector<std::string> unit_cell_atom_symbol_string = unit_cell->get_atom_type_symbols_vec(); 
+  std::vector<double> unit_cell_atom_site_occupancy = unit_cell->get_atom_occupancy_vec();
+  std::vector<double> unit_cell_atom_debye_waller_factor = unit_cell->get_atom_debye_waller_factor_vec();
+
   std::ofstream outfile;
   outfile.open(_super_cell_filename);
   outfile << "Cel file generated by Im2Model" << std::endl; 
@@ -868,13 +851,15 @@ void Super_Cell::generate_super_cell_file(  std::string _super_cell_filename ){
       _atom_fractional_itt != _super_cell_atom_fractional_cell_coordinates.end();
       _atom_fractional_itt++ , loop_counter++ 
      ){
-    const std::string atom_symbol = _super_cell_atom_symbol_string.at( loop_counter );
-    const double atom_occupancy = _super_cell_atom_site_occupancy.at( loop_counter );
-    const double atom_debye_waller_factor = _super_cell_atom_debye_waller_factor.at( loop_counter );
+    const int unit_cell_pos = _super_cell_to_unit_cell_pos.at(loop_counter);
     const cv::Point3d fractional = *_atom_fractional_itt;
+    std::string atom_symbol = unit_cell_atom_symbol_string.at(unit_cell_pos);
+    const double atom_site_occupancy = unit_cell_atom_site_occupancy.at(unit_cell_pos);
+    const double atom_debye_waller_factor = unit_cell_atom_debye_waller_factor.at(unit_cell_pos);
+    /** print **/
     outfile << atom_symbol 
       << " " << fractional.x << " " << fractional.y << " " << fractional.z 
-      << " " << atom_occupancy << " " << atom_debye_waller_factor 
+      << " " << atom_site_occupancy << " " << atom_debye_waller_factor 
       << " " << 0.0f << " " << 0.0f << " " << 0.0f << std::endl; 
   }
   outfile << "*" << std::endl; 
