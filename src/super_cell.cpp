@@ -372,7 +372,7 @@ double Super_Cell::get_fractional_norm_b_atom_pos_Nanometers(){
 }
 
 double Super_Cell::get_fractional_norm_c_atom_pos_Nanometers(){
-  return _fractional_norm_b_atom_pos;
+  return _fractional_norm_c_atom_pos;
 }
 
 std::vector<cv::Point3d> Super_Cell::get_atom_positions_vec( ){

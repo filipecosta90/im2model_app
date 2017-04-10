@@ -539,8 +539,8 @@ int main(int argc, char** argv ){
     celslc_parameters.set_abs_switch(abs_switch);
     celslc_parameters.set_bin_path( celslc_bin_string );
     if (celslc_switch == true ){
-      //celslc_parameters.call_bin_ssc();
-      celslc_parameters.call_bin();
+      celslc_parameters.call_bin_ssc();
+      //celslc_parameters.call_bin();
     }
     nz_simulated_partitions = celslc_parameters.get_nz_simulated_partitions();
 
@@ -842,8 +842,8 @@ int main(int argc, char** argv ){
       super_cell.create_fractional_positions_atoms();
       super_cell.generate_super_cell_file( "test_im2model.cel" );
 
-      int _super_cell_nx = super_cell.get_super_cell_nx_px();
-      int _super_cell_ny = super_cell.get_super_cell_ny_px();
+      int _super_cell_nx = super_cell.get_super_cell_nx_px() / 2;
+      int _super_cell_ny = super_cell.get_super_cell_ny_px() / 2;
 
       /*
        *
