@@ -842,8 +842,8 @@ int main(int argc, char** argv ){
       super_cell.create_fractional_positions_atoms();
       super_cell.generate_super_cell_file( "test_im2model.cel" );
 
-      int _super_cell_nx = super_cell.get_super_cell_nx_px() / 2;
-      int _super_cell_ny = super_cell.get_super_cell_ny_px() / 2;
+      int _super_cell_nx = super_cell.get_super_cell_nx_px();
+      int _super_cell_ny = super_cell.get_super_cell_ny_px();
 
       /*
        *
@@ -866,7 +866,7 @@ int main(int argc, char** argv ){
       celslc_cel.set_super_cell_size_abc( super_cell.get_fractional_norm_a_atom_pos_Nanometers(), super_cell.get_fractional_norm_b_atom_pos_Nanometers(), super_cell.get_fractional_norm_c_atom_pos_Nanometers() );
       std::cout << "preparing for single slice parallel calculation";
       celslc_cel.set_bin_path( celslc_bin_string );
-      celslc_cel.call_bin( );
+      celslc_cel.call_bin_ssc( );
 
       super_cell_nz_simulated_partitions = celslc_cel.get_nz_simulated_partitions();
 
@@ -1051,7 +1051,6 @@ int main(int argc, char** argv ){
       simgrid_cel.set_defocus_period( defocus_period );
 
       // thickness/slice setters
-
       simgrid_cel.set_celslc_accum_nm_slice_vec( super_cell_celslc_accum_nm_slice_vec ); 
       simgrid_cel.set_slice_samples( slice_samples );
       simgrid_cel.set_slice_period( super_cell_slice_period );
