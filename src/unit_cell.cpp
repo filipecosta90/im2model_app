@@ -209,7 +209,7 @@ bool Unit_Cell::create_atoms_from_site_and_symetry(){
     const double fract_z = _atoms_site_fract_z.at(atom_site_pos); 
     const std::string atom_site_type_symbol = _atoms_site_type_symbols.at(atom_site_pos);
     const double atom_occupancy = _atoms_site_occupancy.at(atom_site_pos);
-    const double atom_debye_waller_factor = 1.0f;
+    const double atom_debye_waller_factor = 0.01f;
     std::cout << "searching for "<<  atom_site_type_symbol << " in chem DB of size " << chem_database.size() << std::endl;
     Atom_Info atom_info = chem_database.get_atom_info( atom_site_type_symbol );
     double atom_radious = atom_info.empiricalRadius_Nanometers(); 

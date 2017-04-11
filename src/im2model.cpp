@@ -539,8 +539,8 @@ int main(int argc, char** argv ){
     celslc_parameters.set_abs_switch(abs_switch);
     celslc_parameters.set_bin_path( celslc_bin_string );
     if (celslc_switch == true ){
-      celslc_parameters.call_bin_ssc();
-      //celslc_parameters.call_bin();
+      //celslc_parameters.call_bin_ssc();
+      celslc_parameters.call_bin();
     }
     nz_simulated_partitions = celslc_parameters.get_nz_simulated_partitions();
 
@@ -842,8 +842,8 @@ int main(int argc, char** argv ){
       super_cell.create_fractional_positions_atoms();
       super_cell.generate_super_cell_file( "test_im2model.cel" );
 
-      int _super_cell_nx = super_cell.get_super_cell_nx_px();
-      int _super_cell_ny = super_cell.get_super_cell_ny_px();
+      int _super_cell_nx = super_cell.get_super_cell_nx_px() / 4;
+      int _super_cell_ny = super_cell.get_super_cell_ny_px() / 4;
 
       /*
        *
@@ -861,12 +861,12 @@ int main(int argc, char** argv ){
       celslc_cel.set_ht_accelaration_voltage(ht_accelaration_voltage);
       celslc_cel.set_dwf_switch(dwf_switch);
       celslc_cel.set_abs_switch(abs_switch);
-      celslc_cel.set_prp_dir_uvw( 0.0f, 1.0f, 0.0f );
-      celslc_cel.set_prj_dir_hkl( 0.0f, 0.0f, 1.0f );
-      celslc_cel.set_super_cell_size_abc( super_cell.get_fractional_norm_a_atom_pos_Nanometers(), super_cell.get_fractional_norm_b_atom_pos_Nanometers(), super_cell.get_fractional_norm_c_atom_pos_Nanometers() );
+      //celslc_cel.set_prp_dir_uvw( 0.0f, 1.0f, 0.0f );
+      //celslc_cel.set_prj_dir_hkl( 0.0f, 0.0f, 1.0f );
+      //celslc_cel.set_super_cell_size_abc( super_cell.get_fractional_norm_a_atom_pos_Nanometers(), super_cell.get_fractional_norm_b_atom_pos_Nanometers(), super_cell.get_fractional_norm_c_atom_pos_Nanometers() );
       std::cout << "preparing for single slice parallel calculation";
       celslc_cel.set_bin_path( celslc_bin_string );
-      celslc_cel.call_bin_ssc( );
+      celslc_cel.call_bin( );
 
       super_cell_nz_simulated_partitions = celslc_cel.get_nz_simulated_partitions();
 
