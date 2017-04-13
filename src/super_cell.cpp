@@ -749,8 +749,9 @@ void Super_Cell::update_super_cell_boundary_polygon(){
       experimental_bound_it++ 
       ){
     cv::Point super_cell_boundary_point = *experimental_bound_it;
-    super_cell_boundary_point.x -= _super_cell_top_padding_px;
-    super_cell_boundary_point.y -= _super_cell_left_padding_px;
+    // the old bug discussed on slide 183 was due to the following 2 lines
+    super_cell_boundary_point.x -= _super_cell_left_padding_px;
+    super_cell_boundary_point.y -= _super_cell_top_padding_px;
 
     // this is not a bug ( see slides 161 and further )
 
