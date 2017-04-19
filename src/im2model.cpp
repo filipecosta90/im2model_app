@@ -165,6 +165,7 @@ int main(int argc, char** argv ){
   bool abs_switch=false;
 
   bool celslc_switch = true;
+  bool celslc_cel_switch = true;
   bool msa_switch = true;
   bool wavimg_switch = true;
   bool im2model_switch = true;
@@ -253,6 +254,7 @@ int main(int argc, char** argv ){
     desc.add_options()
       ("help,h", "Print help message")
       ("no_celslc", "switch for skipping celslc execution.")
+      ("no_celslc_cel", "switch for skipping celslc execution on supercell.")
       ("no_msa", "switch for skipping msa execution.")
       ("no_wavimg", "switch for skipping wavimg execution.")
       ("no_im2model", "switch for skipping im2model execution.")
@@ -428,6 +430,9 @@ int main(int argc, char** argv ){
     }
     if ( vm.count("no_im2model")  ){
       im2model_switch=false;
+    }
+     if ( vm.count("no_celslc_cel")  ){
+      celslc_cel_switch=false;
     }
     if ( vm.count("debug")  ){
       debug_switch=true;
@@ -842,8 +847,8 @@ int main(int argc, char** argv ){
       super_cell.create_fractional_positions_atoms();
       super_cell.generate_super_cell_file( "test_im2model.cel" );
 
-      int _super_cell_nx = super_cell.get_super_cell_nx_px() / 4;
-      int _super_cell_ny = super_cell.get_super_cell_ny_px() / 4;
+      int _super_cell_nx = super_cell.get_super_cell_nx_px();
+      int _super_cell_ny = super_cell.get_super_cell_ny_px();
 
       /*
        *
@@ -861,12 +866,12 @@ int main(int argc, char** argv ){
       celslc_cel.set_ht_accelaration_voltage(ht_accelaration_voltage);
       celslc_cel.set_dwf_switch(dwf_switch);
       celslc_cel.set_abs_switch(abs_switch);
-      //celslc_cel.set_prp_dir_uvw( 0.0f, 1.0f, 0.0f );
-      //celslc_cel.set_prj_dir_hkl( 0.0f, 0.0f, 1.0f );
-      //celslc_cel.set_super_cell_size_abc( super_cell.get_fractional_norm_a_atom_pos_Nanometers(), super_cell.get_fractional_norm_b_atom_pos_Nanometers(), super_cell.get_fractional_norm_c_atom_pos_Nanometers() );
       std::cout << "preparing for single slice parallel calculation";
       celslc_cel.set_bin_path( celslc_bin_string );
+
+    if(celslc_cel_switch == true ){
       celslc_cel.call_bin( );
+    }
 
       super_cell_nz_simulated_partitions = celslc_cel.get_nz_simulated_partitions();
 
@@ -925,8 +930,8 @@ int main(int argc, char** argv ){
       else{
         super_cell_slice_period = 1;
         slice_samples = super_cell_slice_interval +1;
-
       }
+      
       std::cout << "MSA: Number slices to load " << super_cell_slices_load << std::endl;
       std::cout << "MSA: Number slices to max thickness " << super_cell_number_slices_to_max_thickness << std::endl;
 

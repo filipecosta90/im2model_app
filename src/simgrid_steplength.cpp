@@ -565,17 +565,17 @@ void SIMGRID_wavimg_steplength::produce_png_from_dat_file(){
   for (int thickness = 1; thickness <= slice_samples; thickness ++ ){
     const int at_slice = round( slice_period * ( thickness  - 1 ) + slices_lower_bound );
     const double slice_thickness_nm = celslc_accum_nm_slice_vec.at(at_slice-1);
+      std::cout << "slice thickness" << slice_thickness_nm << std::endl;
 
     // for the same thickness iterate through every defocus
     for (int defocus = 1; defocus <= defocus_samples; defocus ++ ){
       const int at_defocus = round( ((defocus-1) * defocus_period )+ defocus_lower_bound );
-
+      std::cout << "at defocus" << at_defocus << std::endl;
       // get the .dat image name
       std::stringstream output_dat_name_stream;
       output_dat_name_stream << "image_" << std::setw(3) << std::setfill('0') << std::to_string(thickness) << "_" << std::setw(3) << std::setfill('0') << std::to_string(defocus) << ".dat";
       std::string file_name_output_dat = output_dat_name_stream.str();
       std::cout << "Opening " << file_name_output_dat << " to retrieve thickness " << slice_thickness_nm << " nm (sl "<< at_slice << "), defocus " << at_defocus << std::endl;
-
       int fd;
       fd = open ( file_name_output_dat.c_str() , O_RDONLY );
       if ( fd == -1 ){
@@ -585,7 +585,7 @@ void SIMGRID_wavimg_steplength::produce_png_from_dat_file(){
       off_t fsize;
       fsize = lseek(fd, 0, SEEK_END);
       float* p;
-
+      std::cout << "size of file: " << fsize << std::endl;
       p = (float*) mmap (0, fsize, PROT_READ, MAP_SHARED, fd, 0);
 
       if (p == MAP_FAILED) {
@@ -595,7 +595,7 @@ void SIMGRID_wavimg_steplength::produce_png_from_dat_file(){
       if (close (fd) == -1) {
         perror ("ERROR: in close() of *.dat image file");
       }
-
+      std::cout << "going to create a new Mat" << std::endl;
       cv::Mat raw_simulated_image ( n_rows_simulated_image , n_cols_simulated_image , CV_32FC1);
       double min, max;
 
@@ -607,7 +607,7 @@ void SIMGRID_wavimg_steplength::produce_png_from_dat_file(){
           pos++;
         }
       }
-
+      std::cout << "Finished reading file " << std::endl; 
       cv::minMaxLoc(raw_simulated_image, &min, &max);
 
       // Create a new matrix to hold the gray image
@@ -619,10 +619,10 @@ void SIMGRID_wavimg_steplength::produce_png_from_dat_file(){
       output_debug_info2 << "raw_simulated" << std::setw(3) << std::setfill('0') << std::to_string(thickness) << "_" << std::setw(3) << std::setfill('0') << std::to_string(defocus) << ".png";
       std::string string_output_debug_info2 = output_debug_info2.str();
       imwrite( string_output_debug_info2 , raw_gray_simulated_image );
-
+      std::cout << "Cycle end" << std::endl; 
     }
   }
-
+      std::cout << "Finished writing png files from *.dat " << std::endl; 
 }
 
 bool SIMGRID_wavimg_steplength::simulate_from_dat_file(){
