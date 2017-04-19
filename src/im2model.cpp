@@ -915,8 +915,8 @@ int main(int argc, char** argv ){
       // setters line 1
       wavimg_cel.set_file_name_input_wave_function( wave_function_name_stream.str() );
       // setters line 2
-      wavimg_cel.set_n_columns_samples_input_wave_function_pixels( _super_cell_ny );
-      wavimg_cel.set_n_rows_samples_input_wave_function_pixels( _super_cell_nx );
+      wavimg_cel.set_n_columns_samples_input_wave_function_pixels( _super_cell_nx );
+      wavimg_cel.set_n_rows_samples_input_wave_function_pixels( _super_cell_ny );
       // setters line 3
       wavimg_cel.set_physical_columns_sampling_rate_input_wave_function_nm_pixels( sampling_rate_super_cell_x_nm_pixel );
       wavimg_cel.set_physical_rows_sampling_rate_input_wave_function_nm_pixels( sampling_rate_super_cell_y_nm_pixel );
