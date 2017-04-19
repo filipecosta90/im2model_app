@@ -431,7 +431,7 @@ int main(int argc, char** argv ){
     if ( vm.count("no_im2model")  ){
       im2model_switch=false;
     }
-     if ( vm.count("no_celslc_cel")  ){
+    if ( vm.count("no_celslc_cel")  ){
       celslc_cel_switch=false;
     }
     if ( vm.count("debug")  ){
@@ -657,8 +657,8 @@ int main(int argc, char** argv ){
     // setters line 6
     wavimg_parameters.set_file_name_output_image_wave_function( file_name_output_image_wave_function );
     // setters line 7
-    wavimg_parameters.set_n_columns_samples_output_image( ny_simulated_vertical_samples );
-    wavimg_parameters.set_n_rows_samples_output_image( nx_simulated_horizontal_samples );
+    wavimg_parameters.set_n_columns_samples_output_image( nx_simulated_horizontal_samples );
+    wavimg_parameters.set_n_rows_samples_output_image( ny_simulated_vertical_samples );
     // setters line 8
     wavimg_parameters.set_image_data_type( 0 );
     wavimg_parameters.set_image_vacuum_mean_intensity( 3000.0f );
@@ -858,6 +858,13 @@ int main(int argc, char** argv ){
 
       CELSLC_prm::CELSLC_prm celslc_cel;
       std::string super_cell_slc_filename_prefix = "cel_slc";
+      celslc_cel.set_prp_dir_uvw( 0.0f, 1.0f, 0.0f );
+      celslc_cel.set_prj_dir_hkl( 0.0f, 0.0f, 1.0f );
+      celslc_cel.set_super_cell_size_abc( 
+          super_cell.get_fractional_norm_a_atom_pos_Nanometers(),
+          super_cell.get_fractional_norm_b_atom_pos_Nanometers(),
+          super_cell.get_fractional_norm_c_atom_pos_Nanometers() 
+          );
 
       celslc_cel.set_cel_file( "test_im2model.cel" );
       celslc_cel.set_slc_filename_prefix ( super_cell_slc_filename_prefix );
@@ -869,71 +876,12 @@ int main(int argc, char** argv ){
       std::cout << "preparing for single slice parallel calculation";
       celslc_cel.set_bin_path( celslc_bin_string );
 
-    if(celslc_cel_switch == true ){
-      celslc_cel.call_bin( );
-    }
+      if(celslc_cel_switch == true ){
+        celslc_cel.call_bin_ssc( );
+      }
 
       super_cell_nz_simulated_partitions = celslc_cel.get_nz_simulated_partitions();
-
       assert( super_cell_nz_simulated_partitions >= 1 );
-
-      super_cell_celslc_accum_nm_slice_vec = celslc_cel.get_slice_params_accum_nm_slice_vec();
-
-      super_cell_number_slices_to_max_thickness = super_cell_nz_simulated_partitions;
-      super_cell_slices_load = super_cell_nz_simulated_partitions;
-
-      super_cell_slices_upper_bound = super_cell_nz_simulated_partitions; 
-      std::cout << "Calculated SuperCell slice upper bound # " << super_cell_slices_upper_bound << std::endl;
-
-      if ( vm.count("nm_lower_bound")  ){
-        super_cell_slices_lower_bound = celslc_cel.get_slice_number_from_nm_ceil( nm_lower_bound );
-        std::cout << "Calculated slice # " << super_cell_slices_lower_bound << " as the lower bound for the minimum thickness of: " << nm_lower_bound << " nm" << std::endl;
-      }
-      else{
-        super_cell_slices_lower_bound = 1; 
-      }
-      // Simulation Thickness Period (in slices)
-      int super_cell_slice_interval = super_cell_slices_upper_bound - super_cell_slices_lower_bound;
-      std::div_t divresult;
-      divresult = div (super_cell_slice_interval, (slice_samples -1) );
-      super_cell_slice_period = divresult.quot;
-      if (super_cell_slice_period >= 1){
-        assert(super_cell_slice_period >= 1);
-        std::cout << "Calculated slice period of " << super_cell_slice_period << std::endl;
-        const int remainder_slices = divresult.rem;
-        const int slices_to_period = (slice_samples -1) - remainder_slices;
-        if ( remainder_slices > 0 ){
-          std::cout << "WARNING: an adjustment needs to be made in the slices lower or upper bound." << std::endl;
-          const int increase_top_range = super_cell_slices_lower_bound + (slice_samples * super_cell_slice_period );
-          const int decrease_top_range = super_cell_slices_lower_bound + ((slice_samples-1) * super_cell_slice_period );
-          const int decrease_bot_range = super_cell_slices_lower_bound-slices_to_period + (slice_samples * super_cell_slice_period );
-
-          if ( increase_top_range <= super_cell_number_slices_to_max_thickness ){
-            std::cout << "Increasing top range to slice #" << increase_top_range << std::endl;
-            std::cout << "Going to use one more sample than the requested " << slice_samples << " samples. Using " << (slice_samples+1) << " samples." << std::endl;
-            super_cell_slices_upper_bound = increase_top_range;
-            slice_samples++;
-          }
-          else{
-            if( decrease_bot_range >= 1 ){
-              std::cout << "Decreasing bot range to slice #" << decrease_bot_range << std::endl;
-              super_cell_slices_lower_bound -= slices_to_period;
-              slice_samples++;
-            }
-            else{
-              std::cout << "Decreasing top range to slice #" << decrease_top_range << std::endl;
-              super_cell_slices_upper_bound = decrease_top_range;
-            }
-          }
-        }
-      }
-      else{
-        super_cell_slice_period = 1;
-        slice_samples = super_cell_slice_interval +1;
-      }
-      
-      std::cout << "MSA: Number slices to load " << super_cell_slices_load << std::endl;
-      std::cout << "MSA: Number slices to max thickness " << super_cell_number_slices_to_max_thickness << std::endl;
 
       MSA_prm::MSA_prm msa_cel;
       msa_cel.set_electron_wavelength( ht_accelaration_voltage ); 
@@ -943,11 +891,11 @@ int main(int argc, char** argv ){
       input_prefix_stream << "'" << super_cell_slc_filename_prefix << "'";
       std::string input_prefix_string = input_prefix_stream.str();
       msa_cel.set_slice_filename_prefix ( input_prefix_string );
-      msa_cel.set_number_slices_to_load ( super_cell_slices_load );
+      msa_cel.set_number_slices_to_load ( super_cell_nz_simulated_partitions );
       msa_cel.set_number_frozen_lattice_variants_considered_per_slice( 1 );
       msa_cel.set_minimum_number_frozen_phonon_configurations_used_generate_wave_functions ( 1 );
       msa_cel.set_period_readout_or_detection_in_units_of_slices ( 1 ); // bug
-      msa_cel.set_number_slices_used_describe_full_object_structure_up_to_its_maximum_thickness ( super_cell_number_slices_to_max_thickness );
+      msa_cel.set_number_slices_used_describe_full_object_structure_up_to_its_maximum_thickness ( super_cell_nz_simulated_partitions );
       msa_cel.set_linear_slices_for_full_object_structure();
       msa_cel.set_prm_file_name("temporary_msa_im2model.prm");
       msa_cel.set_wave_function_name ("wave.wav");
@@ -959,11 +907,13 @@ int main(int argc, char** argv ){
 
       WAVIMG_prm::WAVIMG_prm wavimg_cel;
 
-      std::string wave_function_name =  "'wave_sl.wav'";
+      std::stringstream wave_function_name_stream;
+      wave_function_name_stream << "'wave_sl" << std::setw(3) << std::setfill('0') << std::to_string( super_cell_nz_simulated_partitions ) << ".wav'";
+
       std::string wavimg_prm_name = "temporary_wavimg_im2model.prm";
       std::string file_name_output_image_wave_function = "'image.dat'";
       // setters line 1
-      wavimg_cel.set_file_name_input_wave_function( wave_function_name );
+      wavimg_cel.set_file_name_input_wave_function( wave_function_name_stream.str() );
       // setters line 2
       wavimg_cel.set_n_columns_samples_input_wave_function_pixels( _super_cell_ny );
       wavimg_cel.set_n_rows_samples_input_wave_function_pixels( _super_cell_nx );
@@ -977,8 +927,8 @@ int main(int argc, char** argv ){
       // setters line 6
       wavimg_cel.set_file_name_output_image_wave_function( file_name_output_image_wave_function );
       // setters line 7
-      wavimg_cel.set_n_columns_samples_output_image( _super_cell_ny );
-      wavimg_cel.set_n_rows_samples_output_image( _super_cell_nx );
+      wavimg_cel.set_n_columns_samples_output_image( _super_cell_nx );
+      wavimg_cel.set_n_rows_samples_output_image( _super_cell_ny );
       // setters line 8
       wavimg_cel.set_image_data_type( 0 );
       wavimg_cel.set_image_vacuum_mean_intensity( 3000.0f );
@@ -1029,42 +979,12 @@ int main(int argc, char** argv ){
       wavimg_cel.set_center_x_of_objective_aperture( 0.0f );
       wavimg_cel.set_center_y_of_objective_aperture( 0.0f );
       // setters line 21 + aberration_definition_index_number
-      wavimg_cel.set_number_parameter_loops( 2 );
-
-      std::cout << "WAVIMG: parameter loop DEFOCUS: lower bound " << defocus_lower_bound << ", upper bound " << defocus_upper_bound << ", defocus samples " << defocus_samples << std::endl;
-      std::cout << "WAVIMG: parameter loop SLICES: lower bound " << super_cell_slices_lower_bound << ", upper bound " << super_cell_slices_upper_bound << ", slice samples " << slice_samples << std::endl;
-
-      wavimg_cel.add_parameter_loop ( 1 , 1 , 1, defocus_lower_bound, defocus_upper_bound, defocus_samples, "'foc'" );
-      wavimg_cel.add_parameter_loop ( 3 , 1 , 1, super_cell_slices_lower_bound, super_cell_slices_upper_bound, slice_samples, "'_sl'" );
       wavimg_cel.set_prm_file_name("temporary_wavimg_im2model.prm");
       wavimg_cel.produce_prm();
       wavimg_cel.set_bin_path( wavimg_bin_string );
       wavimg_cel.set_debug_switch( true );
       wavimg_cel.call_bin();
-
       std::cout << "Starting step length for SUPERCELL" << std::endl;
-      SIMGRID_wavimg_steplength::SIMGRID_wavimg_steplength simgrid_cel;
-
-      simgrid_cel.set_sampling_rate_super_cell_x_nm_pixel( sampling_rate_experimental_x_nm_per_pixel );
-      simgrid_cel.set_sampling_rate_super_cell_y_nm_pixel( sampling_rate_experimental_y_nm_per_pixel );
-      simgrid_cel.set_experimental_image_roi( experimental_image );
-
-      // defocus setters
-      simgrid_cel.set_defocus_lower_bound( defocus_lower_bound );
-      simgrid_cel.set_defocus_upper_bound( defocus_upper_bound );
-      simgrid_cel.set_defocus_samples( defocus_samples );
-      simgrid_cel.set_defocus_period( defocus_period );
-
-      // thickness/slice setters
-      simgrid_cel.set_celslc_accum_nm_slice_vec( super_cell_celslc_accum_nm_slice_vec ); 
-      simgrid_cel.set_slice_samples( slice_samples );
-      simgrid_cel.set_slice_period( super_cell_slice_period );
-      simgrid_cel.set_number_slices_to_max_thickness( super_cell_number_slices_to_max_thickness );
-      simgrid_cel.set_slices_lower_bound( super_cell_slices_lower_bound );
-      simgrid_cel.set_slices_upper_bound( super_cell_slices_upper_bound );
-      simgrid_cel.set_n_rows_simulated_image( _super_cell_nx );
-      simgrid_cel.set_n_cols_simulated_image( _super_cell_ny );
-      simgrid_cel.produce_png_from_dat_file();
     }
     if( vis_gui_switch ){
       /* VIS */
