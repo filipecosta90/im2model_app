@@ -985,6 +985,7 @@ int main(int argc, char** argv ){
       wavimg_cel.set_debug_switch( true );
       wavimg_cel.call_bin();
       std::cout << "Starting step length for SUPERCELL" << std::endl;
+      super_cell.read_simulated_super_cell_from_dat_file("image.dat");
     }
     if( vis_gui_switch ){
       /* VIS */

@@ -80,6 +80,9 @@ class Super_Cell {
     /** Unit Cell **/
     Unit_Cell* unit_cell;
 
+    /** **/
+    cv::Mat raw_gray_simulated_image_super_cell;
+
     /** Experimental image related **/
     cv::Mat _raw_experimental_image;
     cv::Rect _experimental_image_boundary_rectangle; 
@@ -167,7 +170,7 @@ class Super_Cell {
     double get_fractional_norm_a_atom_pos_Nanometers();
     double get_fractional_norm_b_atom_pos_Nanometers();
     double get_fractional_norm_c_atom_pos_Nanometers();
-    
+
     std::vector<cv::Point3d> get_atom_positions_vec();
     std::vector<glm::vec4> get_atom_cpk_rgba_colors_vec();
     std::vector<double> get_atom_empirical_radii_vec();
@@ -188,6 +191,7 @@ class Super_Cell {
     void remove_z_out_of_range_atoms();
     void remove_xy_out_of_range_atoms();
     void generate_super_cell_file(  std::string filename );
+    void read_simulated_super_cell_from_dat_file( std::string file_name_input_dat );
 };
 
 #endif
