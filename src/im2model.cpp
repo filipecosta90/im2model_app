@@ -167,7 +167,9 @@ int main(int argc, char** argv ){
   bool celslc_switch = true;
   bool celslc_cel_switch = true;
   bool msa_switch = true;
+  bool msa_cel_switch = true;
   bool wavimg_switch = true;
+  bool wavimg_cel_switch = true;
   bool im2model_switch = true;
   bool debug_switch = false;
   bool roi_gui_switch = false;
@@ -254,9 +256,11 @@ int main(int argc, char** argv ){
     desc.add_options()
       ("help,h", "Print help message")
       ("no_celslc", "switch for skipping celslc execution.")
-      ("no_celslc_cel", "switch for skipping celslc execution on supercell.")
+      ("no_celslc_cel", "switch for skipping celslc execution on super-cell.")
       ("no_msa", "switch for skipping msa execution.")
+      ("no_msa_cel", "switch for skipping msa execution on super-cell.")
       ("no_wavimg", "switch for skipping wavimg execution.")
+      ("no_wavimg_cel", "switch for skipping wavimg execution on super-cell.")
       ("no_im2model", "switch for skipping im2model execution.")
       ("clean","switch for enabling temporary files cleaning after execution.")
       ("debug,g", "switch for enabling debug info for celslc, msa, and wavimg execution.")
@@ -434,6 +438,13 @@ int main(int argc, char** argv ){
     if ( vm.count("no_celslc_cel")  ){
       celslc_cel_switch=false;
     }
+    if ( vm.count("no_msa_cel")  ){
+      msa_cel_switch=false;
+    }
+    if ( vm.count("no_wavimg_cel")  ){
+      wavimg_cel_switch=false;
+    }
+
     if ( vm.count("debug")  ){
       debug_switch=true;
     }
@@ -833,6 +844,7 @@ int main(int argc, char** argv ){
       /** SUPER CELL setters **/
 
       const double best_match_thickness_nm = wavimg_simgrid_steps.get_simgrid_best_match_thickness_nm();
+      const double best_match_defocus_nm = wavimg_simgrid_steps.get_simgrid_best_match_defocus_nm();
 
       super_cell.set_experimental_image( experimental_image , sampling_rate_experimental_x_nm_per_pixel, sampling_rate_experimental_y_nm_per_pixel );
       super_cell.set_simgrid_best_match_thickness_nm( best_match_thickness_nm );
@@ -858,14 +870,15 @@ int main(int argc, char** argv ){
 
       CELSLC_prm::CELSLC_prm celslc_cel;
       std::string super_cell_slc_filename_prefix = "cel_slc";
-      celslc_cel.set_prp_dir_uvw( 0.0f, 1.0f, 0.0f );
-      celslc_cel.set_prj_dir_hkl( 0.0f, 0.0f, 1.0f );
-      celslc_cel.set_super_cell_size_abc( 
-          super_cell.get_fractional_norm_a_atom_pos_Nanometers(),
-          super_cell.get_fractional_norm_b_atom_pos_Nanometers(),
-          super_cell.get_fractional_norm_c_atom_pos_Nanometers() 
-          );
-
+      /*
+         celslc_cel.set_prp_dir_uvw( 0.0f, 1.0f, 0.0f );
+         celslc_cel.set_prj_dir_hkl( 0.0f, 0.0f, 1.0f );
+         celslc_cel.set_super_cell_size_abc( 
+         super_cell.get_fractional_norm_a_atom_pos_Nanometers(),
+         super_cell.get_fractional_norm_b_atom_pos_Nanometers(),
+         super_cell.get_fractional_norm_c_atom_pos_Nanometers() 
+         );
+         */
       celslc_cel.set_cel_file( "test_im2model.cel" );
       celslc_cel.set_slc_filename_prefix ( super_cell_slc_filename_prefix );
       celslc_cel.set_nx_simulated_horizontal_samples( _super_cell_nx ); 
@@ -898,17 +911,19 @@ int main(int argc, char** argv ){
       msa_cel.set_number_slices_used_describe_full_object_structure_up_to_its_maximum_thickness ( super_cell_nz_simulated_partitions );
       msa_cel.set_linear_slices_for_full_object_structure();
       msa_cel.set_prm_file_name("temporary_msa_im2model.prm");
-      msa_cel.set_wave_function_name ("wave.wav");
+      msa_cel.set_wave_function_name ("wave_cel.wav");
       msa_cel.produce_prm();
 
       msa_cel.set_bin_path( msa_bin_string );
       msa_cel.set_debug_switch( true );
-      msa_cel.call_bin();
+      if(msa_cel_switch == true ){
+        msa_cel.call_bin( );
+      }
 
       WAVIMG_prm::WAVIMG_prm wavimg_cel;
 
       std::stringstream wave_function_name_stream;
-      wave_function_name_stream << "'wave_sl" << std::setw(3) << std::setfill('0') << std::to_string( super_cell_nz_simulated_partitions ) << ".wav'";
+      wave_function_name_stream << "'wave_cel_sl" << std::setw(3) << std::setfill('0') << std::to_string( super_cell_nz_simulated_partitions ) << ".wav'";
 
       std::string wavimg_prm_name = "temporary_wavimg_im2model.prm";
       std::string file_name_output_image_wave_function = "'image.dat'";
@@ -980,12 +995,27 @@ int main(int argc, char** argv ){
       wavimg_cel.set_center_y_of_objective_aperture( 0.0f );
       // setters line 21 + aberration_definition_index_number
       wavimg_cel.set_prm_file_name("temporary_wavimg_im2model.prm");
+      wavimg_cel.set_number_parameter_loops( 1 );
+      double super_cell_defocus_lower_bound = best_match_defocus_nm - 2;
+      double super_cell_defocus_upper_bound = best_match_defocus_nm + 2;
+      int super_cell_defocus_samples = 5;
+      int super_cell_defocus_period = 1;
+      wavimg_cel.add_parameter_loop ( 1 , 1 , 1, super_cell_defocus_lower_bound, super_cell_defocus_upper_bound, super_cell_defocus_samples, "'foc'" );
       wavimg_cel.produce_prm();
       wavimg_cel.set_bin_path( wavimg_bin_string );
       wavimg_cel.set_debug_switch( true );
-      wavimg_cel.call_bin();
-      std::cout << "Starting step length for SUPERCELL" << std::endl;
-      super_cell.read_simulated_super_cell_from_dat_file("image.dat");
+
+      if(wavimg_cel_switch == true ){
+        wavimg_cel.call_bin();
+      }
+
+      super_cell.set_file_name_input_dat( "image" );
+      super_cell.set_super_cell_simulated_defocus_lower_bound( super_cell_defocus_lower_bound );
+      super_cell.set_super_cell_simulated_defocus_upper_bound( super_cell_defocus_upper_bound );
+      super_cell.set_super_cell_simulated_defocus_samples( super_cell_defocus_samples );
+      super_cell.set_super_cell_simulated_defocus_period( super_cell_defocus_period );
+      //super_cell.read_simulated_super_cell_from_dat_file("image_001.dat");
+      super_cell.read_simulated_super_cells_from_dat_files();
     }
     if( vis_gui_switch ){
       /* VIS */

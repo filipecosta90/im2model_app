@@ -80,15 +80,24 @@ class Super_Cell {
     /** Unit Cell **/
     Unit_Cell* unit_cell;
 
-    /** **/
-    cv::Mat raw_gray_simulated_image_super_cell;
+    /** Simulated Crystal image related **/
+    double super_cell_simulated_defocus_lower_bound;
+    double super_cell_simulated_defocus_upper_bound;
+    int super_cell_simulated_defocus_samples;
+    double super_cell_simulated_defocus_period;
+    std::vector<cv::Mat> raw_gray_simulated_images_super_cell;
+    std::string file_name_input_dat;
 
     /** Experimental image related **/
     cv::Mat _raw_experimental_image;
+    cv::Mat _rectangle_cropped_experimental_image_w_margin;
     cv::Rect _experimental_image_boundary_rectangle; 
     cv::Rect _experimental_image_boundary_rectangle_w_margin;
     std::vector<cv::Point> _experimental_image_boundary_polygon;
     std::vector<cv::Point> _experimental_image_boundary_polygon_w_margin;
+    // vars for minMaxLoc to normalize simulated crystal images
+    double experimental_image_minVal;
+    double experimental_image_maxVal;
 
     double _experimental_image_boundary_polygon_margin_x_Nanometers;
     double _experimental_image_boundary_polygon_margin_y_Nanometers;
@@ -159,6 +168,13 @@ class Super_Cell {
     void set_simgrid_best_match_thickness_nm( double tickness ); 
     void set_super_cell_margin_nm( double margin );
 
+    void set_file_name_input_dat( std::string file_name_input_dat );
+    void set_super_cell_simulated_defocus_lower_bound( double super_cell_simulated_defocus_lower_bound );
+    void set_super_cell_simulated_defocus_upper_bound( double super_cell_simulated_defocus_upper_bound );
+    void set_super_cell_simulated_defocus_samples( int super_cell_simulated_defocus_samples );
+    void set_super_cell_simulated_defocus_period( double super_cell_simulated_defocus_period );
+
+
     //getters
     double get_super_cell_length_a_Angstroms();
     double get_super_cell_length_b_Angstroms();
@@ -179,6 +195,7 @@ class Super_Cell {
     int get_super_cell_ny_px();
 
     bool update_unit_cell_parameters();
+    void update_super_cell_length_parameters_from_fractional_norms();
     void create_fractional_positions_atoms();
     bool create_atoms_from_unit_cell();
     void orientate_atoms_from_matrix();
@@ -192,6 +209,7 @@ class Super_Cell {
     void remove_xy_out_of_range_atoms();
     void generate_super_cell_file(  std::string filename );
     void read_simulated_super_cell_from_dat_file( std::string file_name_input_dat );
+    void read_simulated_super_cells_from_dat_files( );
 };
 
 #endif
