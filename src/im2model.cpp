@@ -95,7 +95,7 @@ int supercell_min_height;
 double sampling_rate_experimental_x_nm_per_pixel;
 double  sampling_rate_experimental_y_nm_per_pixel;
 
-int edge_detection_threshold = 100;
+int edge_detection_threshold = 85;
 int max_thresh = 255;
 RNG rng(12345);
 int max_contour_distance_px = 19;
@@ -870,15 +870,6 @@ int main(int argc, char** argv ){
 
       CELSLC_prm::CELSLC_prm celslc_cel;
       std::string super_cell_slc_filename_prefix = "cel_slc";
-      /*
-         celslc_cel.set_prp_dir_uvw( 0.0f, 1.0f, 0.0f );
-         celslc_cel.set_prj_dir_hkl( 0.0f, 0.0f, 1.0f );
-         celslc_cel.set_super_cell_size_abc( 
-         super_cell.get_fractional_norm_a_atom_pos_Nanometers(),
-         super_cell.get_fractional_norm_b_atom_pos_Nanometers(),
-         super_cell.get_fractional_norm_c_atom_pos_Nanometers() 
-         );
-         */
       celslc_cel.set_cel_file( "test_im2model.cel" );
       celslc_cel.set_slc_filename_prefix ( super_cell_slc_filename_prefix );
       celslc_cel.set_nx_simulated_horizontal_samples( _super_cell_nx ); 
@@ -907,7 +898,8 @@ int main(int argc, char** argv ){
       msa_cel.set_number_slices_to_load ( super_cell_nz_simulated_partitions );
       msa_cel.set_number_frozen_lattice_variants_considered_per_slice( 1 );
       msa_cel.set_minimum_number_frozen_phonon_configurations_used_generate_wave_functions ( 1 );
-      msa_cel.set_period_readout_or_detection_in_units_of_slices ( 1 ); // bug
+      // only use the last *.wav file
+      msa_cel.set_period_readout_or_detection_in_units_of_slices ( 0 ); // bug
       msa_cel.set_number_slices_used_describe_full_object_structure_up_to_its_maximum_thickness ( super_cell_nz_simulated_partitions );
       msa_cel.set_linear_slices_for_full_object_structure();
       msa_cel.set_prm_file_name("temporary_msa_im2model.prm");

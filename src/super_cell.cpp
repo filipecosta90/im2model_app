@@ -301,36 +301,39 @@ void Super_Cell::calculate_expand_factor(){
   z_it = min_element(_sim_z_component.begin(), _sim_z_component.end());
   min_z = *z_it; 
 
-  std::cout << "Inverse matrix: " << std::endl;
-  std::cout << inverse_orientation_matrix << std::endl;
-  std::cout << "a = " << _a << " ;" << std::endl;
-  std::cout << "b = " << _b << " ;" << std::endl;
-  std::cout << "c = " << _c << " ;" << std::endl;
-  std::cout << "d = " << _d << " ;" << std::endl;
-  std::cout << "e = " << _e << " ;" << std::endl;
-  std::cout << "f = " << _f << " ;" << std::endl;
-  std::cout << "g = " << _g << " ;" << std::endl;
-  std::cout << "h = " << _h <<  " ;" << std::endl;
-  std::cout << "############" << std::endl;
-  std::cout << " x range: [ " << -r_a << " , " << r_a << " ] :: length " << _x_supercell_min_size_nm << std::endl; 
-  std::cout << " y range: [ " << -r_b << " , " << r_b << " ] :: length " << _y_supercell_min_size_nm << std::endl; 
-  std::cout << " z range: [ " << -r_c << " , " << r_c << " ] :: length " << _z_supercell_min_size_nm << std::endl; 
-  std::cout << "############" << std::endl;
-  std::cout << "a_orto = " << _sim_a << " ;" << std::endl;
-  std::cout << "b_orto = " << _sim_b << " ;" << std::endl;
-  std::cout << "c_orto = " << _sim_c << " ;" << std::endl;
-  std::cout << "d_orto = " << _sim_d << " ;" << std::endl;
-  std::cout << "e_orto = " << _sim_e << " ;" << std::endl;
-  std::cout << "f_orto = " << _sim_f << " ;" << std::endl;
-  std::cout << "g_orto = " << _sim_g << " ;" << std::endl;
-  std::cout << "h_orto = " << _sim_h << " ;" << std::endl;
-  std::cout << "############" << std::endl;
+  /*
+     std::cout << "Inverse matrix: " << std::endl;
+     std::cout << inverse_orientation_matrix << std::endl;
+     std::cout << "a = " << _a << " ;" << std::endl;
+     std::cout << "b = " << _b << " ;" << std::endl;
+     std::cout << "c = " << _c << " ;" << std::endl;
+     std::cout << "d = " << _d << " ;" << std::endl;
+     std::cout << "e = " << _e << " ;" << std::endl;
+     std::cout << "f = " << _f << " ;" << std::endl;
+     std::cout << "g = " << _g << " ;" << std::endl;
+     std::cout << "h = " << _h <<  " ;" << std::endl;
+     std::cout << "############" << std::endl;
+     std::cout << " x range: [ " << -r_a << " , " << r_a << " ] :: length " << _x_supercell_min_size_nm << std::endl; 
+     std::cout << " y range: [ " << -r_b << " , " << r_b << " ] :: length " << _y_supercell_min_size_nm << std::endl; 
+     std::cout << " z range: [ " << -r_c << " , " << r_c << " ] :: length " << _z_supercell_min_size_nm << std::endl; 
+     std::cout << "############" << std::endl;
+     std::cout << "a_orto = " << _sim_a << " ;" << std::endl;
+     std::cout << "b_orto = " << _sim_b << " ;" << std::endl;
+     std::cout << "c_orto = " << _sim_c << " ;" << std::endl;
+     std::cout << "d_orto = " << _sim_d << " ;" << std::endl;
+     std::cout << "e_orto = " << _sim_e << " ;" << std::endl;
+     std::cout << "f_orto = " << _sim_f << " ;" << std::endl;
+     std::cout << "g_orto = " << _sim_g << " ;" << std::endl;
+     std::cout << "h_orto = " << _sim_h << " ;" << std::endl;
+     std::cout << "############" << std::endl;
+
+     std::cout << " x' range: [ " << min_x << " , " << max_x << " ] :: length " << norm_new_x << std::endl; 
+     std::cout << " y' range: [ " << min_y << " , " << max_y << " ] :: length " << norm_new_y << std::endl; 
+     std::cout << " z' range: [ " << min_z << " , " << max_z << " ] :: length " << norm_new_z << std::endl;
+     */
   const double norm_new_x = max_x - min_x;
   const double norm_new_y = max_y - min_y;
   const double norm_new_z = max_z - min_z;
-  std::cout << " x' range: [ " << min_x << " , " << max_x << " ] :: length " << norm_new_x << std::endl; 
-  std::cout << " y' range: [ " << min_y << " , " << max_y << " ] :: length " << norm_new_y << std::endl; 
-  std::cout << " z' range: [ " << min_z << " , " << max_z << " ] :: length " << norm_new_z << std::endl;
 
   const double _unit_cell_length_a_Nanometers = unit_cell->get_cell_length_a_Nanometers();
   const double _unit_cell_length_b_Nanometers = unit_cell->get_cell_length_b_Nanometers();
@@ -339,7 +342,7 @@ void Super_Cell::calculate_expand_factor(){
   expand_factor_a = (int) ceil( norm_new_x / _unit_cell_length_a_Nanometers ); 
   expand_factor_b = (int) ceil( norm_new_y / _unit_cell_length_b_Nanometers ); 
   expand_factor_c = (int) ceil( norm_new_z / _unit_cell_length_c_Nanometers );
-  std::cout << "\t Supercell expand factors: X " << expand_factor_a << ", Y " << expand_factor_b << ", Z " << expand_factor_c << std::endl;
+  // std::cout << "\t Supercell expand factors: X " << expand_factor_a << ", Y " << expand_factor_b << ", Z " << expand_factor_c << std::endl;
 }
 
 /** getters **/
@@ -591,10 +594,17 @@ void Super_Cell::calculate_supercell_boundaries_from_experimental_image(
   assert( !_raw_experimental_image.empty() );
 
   cv::Mat canny_output;
+  cv::Mat canny_output_no_blur;
   std::vector< std::vector<cv::Point> > contours;
   std::vector<cv::Vec4i> hierarchy;
 
-  cv::Canny( _raw_experimental_image, canny_output, threshold , threshold *2, 3 );
+  cv::Mat blur;
+  cv::GaussianBlur(_raw_experimental_image ,blur,cv::Size(3,3), 0);
+  imwrite( "experimental_image_blur.png", blur);
+  cv::Canny( blur, canny_output, threshold , threshold *2, 3 );
+  cv::Canny( _raw_experimental_image, canny_output_no_blur, threshold , threshold *2, 3 );
+  imwrite( "experimental_image_canny.png", canny_output );
+  imwrite( "experimental_image_canny_no_blur.png", canny_output_no_blur );
   cv::findContours( canny_output, contours, hierarchy, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE, cv::Point(0, 0) );
 
   cv::Mat1f dist(contours.size(), contours.size(), 0.f);
@@ -648,6 +658,8 @@ void Super_Cell::calculate_supercell_boundaries_from_experimental_image(
       roi_contours.push_back(contours[i]);
     }
   }
+  std::cout << "There are " << roi_contours.size() << "contours in ROI." << std::endl;
+
   std::vector<cv::Point> contours_merged;
   for( size_t i = 0; i < roi_contours.size(); i++ ){
     for ( size_t j = 0; j< roi_contours[i].size(); j++  ){
@@ -677,7 +689,6 @@ void Super_Cell::calculate_supercell_boundaries_from_experimental_image(
   cv::Mat temp;
   cv::cvtColor( _raw_experimental_image, temp, cv::COLOR_GRAY2BGR);
   cv::Scalar color = cv::Scalar( 1, 1, 1 );
-
 
   drawContours( temp, hull, 0, color, 3, 8, std::vector<cv::Vec4i>(), 0, cv::Point() );
   _experimental_image_boundary_polygon_margin_width_px = _experimental_image_boundary_polygon_margin_x_Nanometers / _sampling_rate_super_cell_x_nm_pixel; 
@@ -713,6 +724,10 @@ void Super_Cell::calculate_supercell_boundaries_from_experimental_image(
   _rectangle_cropped_experimental_image_w_margin = temp(_experimental_image_boundary_rectangle_w_margin).clone();
   imwrite( "experimental_image_boundary_rectangle.png", rectangle_cropped_experimental_image  );
   imwrite( "experimental_image_boundary_rectangle_with_margins.png", _rectangle_cropped_experimental_image_w_margin );
+
+  // drawContours( temp, roi_contours, 0, color, 3, 8, cv::noArray(), 1, cv::Point() );
+
+  //imwrite( "experimental_image_boundary_rectangle_with_margins_columns.png", temp );
 
   calculate_experimental_min_size_nm();
   calculate_expand_factor();
