@@ -207,6 +207,15 @@ int main(int argc, char** argv ){
   int user_estimated_defocus_nm;
 
   /////////////////////////
+  // Super-Cell Simulated Defocus info
+  /////////////////////////
+  int super_cell_defocus_samples;
+  double super_cell_defocus_interval;
+  double super_cell_defocus_period;
+  double super_cell_defocus_lower_bound;
+  double super_cell_defocus_upper_bound;
+
+  /////////////////////////
   // Experimental Image info
   /////////////////////////
   int roi_pixel_size;
@@ -311,6 +320,8 @@ int main(int argc, char** argv ){
       ("sim_grid", "switch for enable simmulated image grid generation.")
       ("ignore_edge_pixels", boost::program_options::value<int>(&ignore_edge_pixels)->default_value(0), "number of pixels to ignore from the outter limit of the simulated image.")
       ("cel_margin_nm", boost::program_options::value<double>(&cel_margin_nm)->default_value(0.0f), "supercell margin in nanometers for the cel file creation.")
+      ("cel_defocus_samples", boost::program_options::value<int>(&super_cell_defocus_samples)->default_value(5), "number of defocus samples for the super-cell.")
+      ("cel_defocus_interval", boost::program_options::value<double>(&super_cell_defocus_interval)->default_value(10), "defocus search interval for the super-cell. The center of the interval will be the calculated best-match on the T-Focus map.")
       ;
 
     boost::program_options::variables_map vm;
@@ -912,6 +923,13 @@ int main(int argc, char** argv ){
         msa_cel.call_bin( );
       }
 
+      /* Calculate the defocus period of the super-cell */
+      std::div_t divresult = div (super_cell_defocus_interval, (super_cell_defocus_samples -1) );
+      super_cell_defocus_period = divresult.quot;
+
+      super_cell_defocus_lower_bound = best_match_defocus_nm - (super_cell_defocus_interval / 2.0f);
+      super_cell_defocus_upper_bound = best_match_defocus_nm + (super_cell_defocus_interval / 2.0f);
+
       WAVIMG_prm::WAVIMG_prm wavimg_cel;
 
       std::stringstream wave_function_name_stream;
@@ -987,11 +1005,7 @@ int main(int argc, char** argv ){
       wavimg_cel.set_center_y_of_objective_aperture( 0.0f );
       // setters line 21 + aberration_definition_index_number
       wavimg_cel.set_prm_file_name("temporary_wavimg_im2model.prm");
-      wavimg_cel.set_number_parameter_loops( 1 );
-      double super_cell_defocus_lower_bound = best_match_defocus_nm - 2;
-      double super_cell_defocus_upper_bound = best_match_defocus_nm + 2;
-      int super_cell_defocus_samples = 5;
-      int super_cell_defocus_period = 1;
+      wavimg_cel.set_number_parameter_loops( 1 ); 
       wavimg_cel.add_parameter_loop ( 1 , 1 , 1, super_cell_defocus_lower_bound, super_cell_defocus_upper_bound, super_cell_defocus_samples, "'foc'" );
       wavimg_cel.produce_prm();
       wavimg_cel.set_bin_path( wavimg_bin_string );
