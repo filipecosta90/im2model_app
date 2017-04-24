@@ -916,7 +916,6 @@ int main(int argc, char** argv ){
       msa_cel.set_prm_file_name("temporary_msa_im2model.prm");
       msa_cel.set_wave_function_name ("wave_cel.wav");
       msa_cel.produce_prm();
-
       msa_cel.set_bin_path( msa_bin_string );
       msa_cel.set_debug_switch( true );
       if(msa_cel_switch == true ){
@@ -924,9 +923,7 @@ int main(int argc, char** argv ){
       }
 
       /* Calculate the defocus period of the super-cell */
-      std::div_t divresult = div (super_cell_defocus_interval, (super_cell_defocus_samples -1) );
-      super_cell_defocus_period = divresult.quot;
-
+      super_cell_defocus_period = super_cell_defocus_interval / ((double) (super_cell_defocus_samples -1)); 
       super_cell_defocus_lower_bound = best_match_defocus_nm - (super_cell_defocus_interval / 2.0f);
       super_cell_defocus_upper_bound = best_match_defocus_nm + (super_cell_defocus_interval / 2.0f);
 
@@ -1014,14 +1011,14 @@ int main(int argc, char** argv ){
       if(wavimg_cel_switch == true ){
         wavimg_cel.call_bin();
       }
-
       super_cell.set_file_name_input_dat( "image" );
       super_cell.set_super_cell_simulated_defocus_lower_bound( super_cell_defocus_lower_bound );
       super_cell.set_super_cell_simulated_defocus_upper_bound( super_cell_defocus_upper_bound );
       super_cell.set_super_cell_simulated_defocus_samples( super_cell_defocus_samples );
       super_cell.set_super_cell_simulated_defocus_period( super_cell_defocus_period );
-      //super_cell.read_simulated_super_cell_from_dat_file("image_001.dat");
       super_cell.read_simulated_super_cells_from_dat_files();
+      super_cell.match_experimental_simulated_super_cells();
+
     }
     if( vis_gui_switch ){
       /* VIS */

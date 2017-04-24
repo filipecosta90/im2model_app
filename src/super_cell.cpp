@@ -17,12 +17,19 @@
 #include <algorithm>
 
 // Image processing
+
 #include <opencv2/opencv.hpp>
-#include "opencv2/highgui/highgui.hpp"
-#include "opencv2/imgproc/imgproc.hpp"
-#include "opencv2/opencv_modules.hpp" 
-#include "opencv2/core/core.hpp"
-#include "opencv2/features2d/features2d.hpp" 
+#include <opencv2/imgproc.hpp>
+#include <opencv2/video.hpp>
+#include <opencv2/highgui/highgui.hpp>
+#include <opencv2/imgproc/imgproc.hpp>
+#include <opencv2/video/video.hpp>
+#include <opencv2/core/core.hpp>
+#include <opencv/cv.hpp>
+#include <opencv2/opencv_modules.hpp>
+#include <opencv2/core/core.hpp>
+#include <opencv2/features2d/features2d.hpp>
+#include <opencv2/calib3d/calib3d.hpp>
 
 // Visualization
 #include <GL/glut.h>
@@ -81,6 +88,24 @@ void Super_Cell::set_default_values(){
   unit_cell = NULL;
   /** cel **/
   _cel_margin_nm = 0.0f;
+  _super_cell_ab_margin = 0.0f;
+  _cel_margin_a_px = 0;
+  _cel_margin_b_px = 0;
+
+  /***********
+    image alignement vars
+   ***********/
+
+  // Initialize the matrix to identity
+  motion_euclidean_warp_matrix = cv::Mat::eye(2, 3, CV_32F);
+
+  // Specify the number of iterations.
+  motion_euclidean_number_of_iterations = 5000;
+
+  // Specify the threshold of the increment
+  // in the correlation coefficient between two iterations
+  motion_euclidean_termination_eps = 1e-5;
+  motion_euclidean_warp_mode = cv::MOTION_EUCLIDEAN;
 }
 
 
@@ -97,7 +122,12 @@ void Super_Cell::set_sentinel_values(){
 }
 
 void Super_Cell::set_super_cell_margin_nm( double margin ){
+  assert( _sampling_rate_super_cell_x_nm_pixel > 0.0f );
+  assert( _sampling_rate_super_cell_y_nm_pixel > 0.0f );
   _cel_margin_nm = margin;
+  _super_cell_ab_margin = _cel_margin_nm / 2.0f;
+  _cel_margin_a_px = (int) (_cel_margin_nm / _sampling_rate_super_cell_x_nm_pixel);
+  _cel_margin_b_px = (int) (_cel_margin_nm / _sampling_rate_super_cell_y_nm_pixel);
 }
 
 void Super_Cell::set_super_cell_length_a_Angstroms( double a ){
@@ -182,7 +212,7 @@ void Super_Cell::set_experimental_min_size_nm_z( double z_min_size_nm ){
 void Super_Cell::set_experimental_image ( cv::Mat raw_image, double sampling_rate_exp_image_x_nm_pixel, double sampling_rate_exp_image_y_nm_pixel ){
   assert( !raw_image.empty() );
   assert( sampling_rate_exp_image_x_nm_pixel > 0.0f );
-  assert ( sampling_rate_exp_image_y_nm_pixel > 0.0f );
+  assert( sampling_rate_exp_image_y_nm_pixel > 0.0f );
   _raw_experimental_image = raw_image;
   _sampling_rate_super_cell_x_nm_pixel = sampling_rate_exp_image_x_nm_pixel;
   _sampling_rate_super_cell_y_nm_pixel = sampling_rate_exp_image_y_nm_pixel;
@@ -215,134 +245,24 @@ void Super_Cell::set_experimental_image_thickness_margin_z_Nanometers( double ma
   _experimental_image_thickness_margin_z_Nanometers = margin;   
 }
 
-void Super_Cell::calculate_expand_factor(){
-  assert (_x_supercell_min_size_nm > 0.0f );
-  assert (_y_supercell_min_size_nm > 0.0f );
-  assert (_z_supercell_min_size_nm > 0.0f );
-  assert ( !inverse_orientation_matrix.empty() );
-  assert ( unit_cell != NULL );
+void Super_Cell::set_file_name_input_dat( std::string file_name ){
+  file_name_input_dat = file_name;
+}
 
-  const double r_a = _x_supercell_min_size_nm / 2.0f;
-  const double r_b = _y_supercell_min_size_nm / 2.0f;
-  const double r_c = _z_supercell_min_size_nm / 2.0f;
+void Super_Cell::set_super_cell_simulated_defocus_lower_bound( double defocus_lower_bound ){
+  super_cell_simulated_defocus_lower_bound = defocus_lower_bound;
+}
 
-  _a = cv::Point3d( -r_a, -r_b, -r_c ); 
-  _b = cv::Point3d( r_a, -r_b, -r_c ); 
-  _c = cv::Point3d( r_a, r_b, -r_c ); 
-  _d = cv::Point3d( -r_a, r_b, -r_c ); 
+void Super_Cell::set_super_cell_simulated_defocus_upper_bound( double defocus_upper_bound ){
+  super_cell_simulated_defocus_upper_bound = defocus_upper_bound;
+}
 
-  _e = cv::Point3d( -r_a, -r_b, r_c ); 
-  _f = cv::Point3d( r_a, -r_b, r_c ); 
-  _g = cv::Point3d( r_a, r_b, r_c ); 
-  _h = cv::Point3d( -r_a, r_b, r_c ); 
+void Super_Cell::set_super_cell_simulated_defocus_samples( int simulated_defocus_samples ){
+  super_cell_simulated_defocus_samples = simulated_defocus_samples;
+}
 
-  std::vector<double> _sim_x_component;
-  std::vector<double> _sim_y_component;
-  std::vector<double> _sim_z_component;
-
-  cv::Mat _m_a = inverse_orientation_matrix * cv::Mat(_a );
-  _sim_a = cv::Point3d(_m_a.at<double>(0,0), _m_a.at<double>(1,0), _m_a.at<double>(2,0));
-  cv::Mat _m_b = inverse_orientation_matrix * cv::Mat(_b);
-  _sim_b = cv::Point3d(_m_b.at<double>(0,0), _m_b.at<double>(1,0), _m_b.at<double>(2,0));
-  cv::Mat _m_c = inverse_orientation_matrix * cv::Mat(_c);
-  _sim_c = cv::Point3d(_m_c.at<double>(0,0), _m_c.at<double>(1,0), _m_c.at<double>(2,0));
-  cv::Mat _m_d = inverse_orientation_matrix * cv::Mat(_d);
-  _sim_d = cv::Point3d(_m_d.at<double>(0,0), _m_d.at<double>(1,0), _m_d.at<double>(2,0));
-  cv::Mat _m_e = inverse_orientation_matrix * cv::Mat(_e);
-  _sim_e = cv::Point3d(_m_e.at<double>(0,0), _m_e.at<double>(1,0), _m_e.at<double>(2,0));
-  cv::Mat _m_f = inverse_orientation_matrix * cv::Mat(_f);
-  _sim_f = cv::Point3d(_m_f.at<double>(0,0), _m_f.at<double>(1,0), _m_f.at<double>(2,0));
-  cv::Mat _m_g = inverse_orientation_matrix * cv::Mat(_g);
-  _sim_g = cv::Point3d(_m_g.at<double>(0,0), _m_g.at<double>(1,0), _m_g.at<double>(2,0));
-  cv::Mat _m_h = inverse_orientation_matrix * cv::Mat(_h);
-  _sim_h = cv::Point3d(_m_h.at<double>(0,0), _m_h.at<double>(1,0), _m_h.at<double>(2,0));
-
-  _sim_x_component.push_back( _sim_a.x );
-  _sim_x_component.push_back( _sim_b.x );
-  _sim_x_component.push_back( _sim_c.x );
-  _sim_x_component.push_back( _sim_d.x );
-  _sim_x_component.push_back( _sim_e.x );
-  _sim_x_component.push_back( _sim_f.x );
-  _sim_x_component.push_back( _sim_g.x );
-  _sim_x_component.push_back( _sim_h.x );
-
-  _sim_y_component.push_back( _sim_a.y );
-  _sim_y_component.push_back( _sim_b.y );
-  _sim_y_component.push_back( _sim_c.y );
-  _sim_y_component.push_back( _sim_d.y );
-  _sim_y_component.push_back( _sim_e.y );
-  _sim_y_component.push_back( _sim_f.y );
-  _sim_y_component.push_back( _sim_g.y );
-  _sim_y_component.push_back( _sim_h.y );
-
-  _sim_z_component.push_back( _sim_a.z );
-  _sim_z_component.push_back( _sim_b.z );
-  _sim_z_component.push_back( _sim_c.z );
-  _sim_z_component.push_back( _sim_d.z );
-  _sim_z_component.push_back( _sim_e.z );
-  _sim_z_component.push_back( _sim_f.z );
-  _sim_z_component.push_back( _sim_g.z );
-  _sim_z_component.push_back( _sim_h.z );
-
-  double min_x, max_x, min_y, max_y, min_z, max_z;
-
-  std::vector<double>::iterator x_it = max_element(_sim_x_component.begin(), _sim_x_component.end());
-  max_x = *x_it; 
-  x_it = min_element(_sim_x_component.begin(), _sim_x_component.end());
-  min_x = *x_it; 
-
-  std::vector<double>::iterator y_it = max_element(_sim_y_component.begin(), _sim_y_component.end());
-  max_y = *y_it; 
-  y_it = min_element(_sim_y_component.begin(), _sim_y_component.end());
-  min_y = *y_it; 
-
-  std::vector<double>::iterator z_it = max_element(_sim_z_component.begin(), _sim_z_component.end());
-  max_z = *z_it; 
-  z_it = min_element(_sim_z_component.begin(), _sim_z_component.end());
-  min_z = *z_it; 
-
-  /*
-     std::cout << "Inverse matrix: " << std::endl;
-     std::cout << inverse_orientation_matrix << std::endl;
-     std::cout << "a = " << _a << " ;" << std::endl;
-     std::cout << "b = " << _b << " ;" << std::endl;
-     std::cout << "c = " << _c << " ;" << std::endl;
-     std::cout << "d = " << _d << " ;" << std::endl;
-     std::cout << "e = " << _e << " ;" << std::endl;
-     std::cout << "f = " << _f << " ;" << std::endl;
-     std::cout << "g = " << _g << " ;" << std::endl;
-     std::cout << "h = " << _h <<  " ;" << std::endl;
-     std::cout << "############" << std::endl;
-     std::cout << " x range: [ " << -r_a << " , " << r_a << " ] :: length " << _x_supercell_min_size_nm << std::endl; 
-     std::cout << " y range: [ " << -r_b << " , " << r_b << " ] :: length " << _y_supercell_min_size_nm << std::endl; 
-     std::cout << " z range: [ " << -r_c << " , " << r_c << " ] :: length " << _z_supercell_min_size_nm << std::endl; 
-     std::cout << "############" << std::endl;
-     std::cout << "a_orto = " << _sim_a << " ;" << std::endl;
-     std::cout << "b_orto = " << _sim_b << " ;" << std::endl;
-     std::cout << "c_orto = " << _sim_c << " ;" << std::endl;
-     std::cout << "d_orto = " << _sim_d << " ;" << std::endl;
-     std::cout << "e_orto = " << _sim_e << " ;" << std::endl;
-     std::cout << "f_orto = " << _sim_f << " ;" << std::endl;
-     std::cout << "g_orto = " << _sim_g << " ;" << std::endl;
-     std::cout << "h_orto = " << _sim_h << " ;" << std::endl;
-     std::cout << "############" << std::endl;
-
-     std::cout << " x' range: [ " << min_x << " , " << max_x << " ] :: length " << norm_new_x << std::endl; 
-     std::cout << " y' range: [ " << min_y << " , " << max_y << " ] :: length " << norm_new_y << std::endl; 
-     std::cout << " z' range: [ " << min_z << " , " << max_z << " ] :: length " << norm_new_z << std::endl;
-     */
-  const double norm_new_x = max_x - min_x;
-  const double norm_new_y = max_y - min_y;
-  const double norm_new_z = max_z - min_z;
-
-  const double _unit_cell_length_a_Nanometers = unit_cell->get_cell_length_a_Nanometers();
-  const double _unit_cell_length_b_Nanometers = unit_cell->get_cell_length_b_Nanometers();
-  const double _unit_cell_length_c_Nanometers = unit_cell->get_cell_length_c_Nanometers();
-
-  expand_factor_a = (int) ceil( norm_new_x / _unit_cell_length_a_Nanometers ); 
-  expand_factor_b = (int) ceil( norm_new_y / _unit_cell_length_b_Nanometers ); 
-  expand_factor_c = (int) ceil( norm_new_z / _unit_cell_length_c_Nanometers );
-  // std::cout << "\t Supercell expand factors: X " << expand_factor_a << ", Y " << expand_factor_b << ", Z " << expand_factor_c << std::endl;
+void Super_Cell::set_super_cell_simulated_defocus_period( double simulated_defocus_period ){
+  super_cell_simulated_defocus_period = simulated_defocus_period;
 }
 
 /** getters **/
@@ -401,12 +321,116 @@ int Super_Cell::get_super_cell_ny_px(){
   return _cel_ny_px;
 }
 
+void Super_Cell::calculate_expand_factor(){
+  /* general assertions */
+  assert ( _x_supercell_min_size_nm > 0.0f );
+  assert ( _y_supercell_min_size_nm > 0.0f );
+  assert ( _z_supercell_min_size_nm > 0.0f );
+  assert ( !inverse_orientation_matrix.empty() );
+  assert ( unit_cell != NULL );
+
+  /* method */
+  const double r_a = _x_supercell_min_size_nm / 2.0f;
+  const double r_b = _y_supercell_min_size_nm / 2.0f;
+  const double r_c = _z_supercell_min_size_nm / 2.0f;
+
+  _a = cv::Point3d( -r_a, -r_b, -r_c );
+  _b = cv::Point3d( r_a, -r_b, -r_c );
+  _c = cv::Point3d( r_a, r_b, -r_c );
+  _d = cv::Point3d( -r_a, r_b, -r_c );
+
+  _e = cv::Point3d( -r_a, -r_b, r_c );
+  _f = cv::Point3d( r_a, -r_b, r_c );
+  _g = cv::Point3d( r_a, r_b, r_c );
+  _h = cv::Point3d( -r_a, r_b, r_c );
+
+  std::vector<double> _sim_x_component;
+  std::vector<double> _sim_y_component;
+  std::vector<double> _sim_z_component;
+
+  cv::Mat _m_a = inverse_orientation_matrix * cv::Mat(_a );
+  _sim_a = cv::Point3d(_m_a.at<double>(0,0), _m_a.at<double>(1,0), _m_a.at<double>(2,0));
+  cv::Mat _m_b = inverse_orientation_matrix * cv::Mat(_b);
+  _sim_b = cv::Point3d(_m_b.at<double>(0,0), _m_b.at<double>(1,0), _m_b.at<double>(2,0));
+  cv::Mat _m_c = inverse_orientation_matrix * cv::Mat(_c);
+  _sim_c = cv::Point3d(_m_c.at<double>(0,0), _m_c.at<double>(1,0), _m_c.at<double>(2,0));
+  cv::Mat _m_d = inverse_orientation_matrix * cv::Mat(_d);
+  _sim_d = cv::Point3d(_m_d.at<double>(0,0), _m_d.at<double>(1,0), _m_d.at<double>(2,0));
+  cv::Mat _m_e = inverse_orientation_matrix * cv::Mat(_e);
+  _sim_e = cv::Point3d(_m_e.at<double>(0,0), _m_e.at<double>(1,0), _m_e.at<double>(2,0));
+  cv::Mat _m_f = inverse_orientation_matrix * cv::Mat(_f);
+  _sim_f = cv::Point3d(_m_f.at<double>(0,0), _m_f.at<double>(1,0), _m_f.at<double>(2,0));
+  cv::Mat _m_g = inverse_orientation_matrix * cv::Mat(_g);
+  _sim_g = cv::Point3d(_m_g.at<double>(0,0), _m_g.at<double>(1,0), _m_g.at<double>(2,0));
+  cv::Mat _m_h = inverse_orientation_matrix * cv::Mat(_h);
+  _sim_h = cv::Point3d(_m_h.at<double>(0,0), _m_h.at<double>(1,0), _m_h.at<double>(2,0));
+
+  _sim_x_component.push_back( _sim_a.x );
+  _sim_x_component.push_back( _sim_b.x );
+  _sim_x_component.push_back( _sim_c.x );
+  _sim_x_component.push_back( _sim_d.x );
+  _sim_x_component.push_back( _sim_e.x );
+  _sim_x_component.push_back( _sim_f.x );
+  _sim_x_component.push_back( _sim_g.x );
+  _sim_x_component.push_back( _sim_h.x );
+
+  _sim_y_component.push_back( _sim_a.y );
+  _sim_y_component.push_back( _sim_b.y );
+  _sim_y_component.push_back( _sim_c.y );
+  _sim_y_component.push_back( _sim_d.y );
+  _sim_y_component.push_back( _sim_e.y );
+  _sim_y_component.push_back( _sim_f.y );
+  _sim_y_component.push_back( _sim_g.y );
+  _sim_y_component.push_back( _sim_h.y );
+
+  _sim_z_component.push_back( _sim_a.z );
+  _sim_z_component.push_back( _sim_b.z );
+  _sim_z_component.push_back( _sim_c.z );
+  _sim_z_component.push_back( _sim_d.z );
+  _sim_z_component.push_back( _sim_e.z );
+  _sim_z_component.push_back( _sim_f.z );
+  _sim_z_component.push_back( _sim_g.z );
+  _sim_z_component.push_back( _sim_h.z );
+
+  double min_x, max_x, min_y, max_y, min_z, max_z;
+
+  std::vector<double>::iterator x_it = max_element(_sim_x_component.begin(), _sim_x_component.end());
+  max_x = *x_it;
+  x_it = min_element(_sim_x_component.begin(), _sim_x_component.end());
+  min_x = *x_it;
+
+  std::vector<double>::iterator y_it = max_element(_sim_y_component.begin(), _sim_y_component.end());
+  max_y = *y_it;
+  y_it = min_element(_sim_y_component.begin(), _sim_y_component.end());
+  min_y = *y_it;
+
+  std::vector<double>::iterator z_it = max_element(_sim_z_component.begin(), _sim_z_component.end());
+  max_z = *z_it;
+  z_it = min_element(_sim_z_component.begin(), _sim_z_component.end());
+  min_z = *z_it;
+
+  const double norm_new_x = max_x - min_x;
+  const double norm_new_y = max_y - min_y;
+  const double norm_new_z = max_z - min_z;
+
+  const double _unit_cell_length_a_Nanometers = unit_cell->get_cell_length_a_Nanometers();
+  const double _unit_cell_length_b_Nanometers = unit_cell->get_cell_length_b_Nanometers();
+  const double _unit_cell_length_c_Nanometers = unit_cell->get_cell_length_c_Nanometers();
+
+  expand_factor_a = (int) ceil( norm_new_x / _unit_cell_length_a_Nanometers );
+  expand_factor_b = (int) ceil( norm_new_y / _unit_cell_length_b_Nanometers ); 
+  expand_factor_c = (int) ceil( norm_new_z / _unit_cell_length_c_Nanometers );
+}
+
 void Super_Cell::create_fractional_positions_atoms(){
+  /* general assertions */
   assert( ! _atom_positions.empty() );
-  std::cout << "Creating atoms fractional positions:" << std::endl;
-  std :: vector <double> atom_positions_x ( _atom_positions.size() ); 
+
+  /* method */
+  std :: vector <double> atom_positions_x ( _atom_positions.size() );
   std :: vector <double> atom_positions_y ( _atom_positions.size() ); 
-  std :: vector <double> atom_positions_z ( _atom_positions.size() ); 
+  std :: vector <double> atom_positions_z ( _atom_positions.size() );
+
   unsigned int i = 0;
   for (
       std::vector<cv::Point3d>::iterator it = _atom_positions.begin() ;
@@ -418,7 +442,6 @@ void Super_Cell::create_fractional_positions_atoms(){
     atom_positions_y.at(i) = _atom_pos.y; 
     atom_positions_z.at(i) = _atom_pos.z; 
   } 
-  const double _super_cell_ab_margin = _cel_margin_nm / 2.0f;
   std::vector<double>::iterator atom_xyz_it = max_element( atom_positions_x.begin(), atom_positions_x.end());
   _max_a_atom_pos = *atom_xyz_it + _super_cell_ab_margin;
   atom_xyz_it = min_element( atom_positions_x.begin(), atom_positions_x.end());
@@ -436,10 +459,6 @@ void Super_Cell::create_fractional_positions_atoms(){
   _fractional_norm_b_atom_pos = fabs(_max_b_atom_pos - _min_b_atom_pos);
   _fractional_norm_c_atom_pos = fabs(_max_c_atom_pos - _min_c_atom_pos);
 
-  std::cout << "\tAtoms max position Nanometers: A " << _fractional_norm_a_atom_pos 
-    << ", B " << _fractional_norm_b_atom_pos 
-    << ", C " << _fractional_norm_c_atom_pos << std::endl;
-
   const double fractional_factor_a_Nanometers = (1 / _fractional_norm_a_atom_pos );
   const double fractional_factor_b_Nanometers = (1 / _fractional_norm_b_atom_pos );
   const double fractional_factor_c_Nanometers = (1 / _fractional_norm_c_atom_pos );
@@ -456,7 +475,7 @@ void Super_Cell::create_fractional_positions_atoms(){
     const cv::Point3d atom_fractional ( _fractional_x, _fractional_y, _fractional_z ); 
     _super_cell_atom_fractional_cell_coordinates.push_back( atom_fractional );
   }
-  std::cout << "Finished Creating atoms fractional positions:" << _super_cell_atom_fractional_cell_coordinates.size() <<  std::endl;
+
   _cel_nx_px = (int) (_fractional_norm_a_atom_pos / _sampling_rate_super_cell_x_nm_pixel);
   _cel_ny_px = (int) (_fractional_norm_b_atom_pos / _sampling_rate_super_cell_y_nm_pixel);
   /* update length parameters of the super-cell*/
@@ -465,6 +484,7 @@ void Super_Cell::create_fractional_positions_atoms(){
 
 /** other methods **/
 bool Super_Cell::create_atoms_from_unit_cell(){
+  /* general assertions */
   assert( unit_cell != NULL );
   assert( _super_cell_length_a_Nanometers > 0.0f ); 
   assert( _super_cell_length_b_Nanometers > 0.0f ); 
@@ -473,6 +493,7 @@ bool Super_Cell::create_atoms_from_unit_cell(){
   assert( expand_factor_b > 0.0f );
   assert( expand_factor_c > 0.0f );
 
+  /* method */
   std::vector<cv::Point3d> unit_cell_atom_positions = unit_cell->get_atom_positions_vec();
   const double unit_cell_a_nm = unit_cell->get_cell_length_a_Nanometers();
   const double unit_cell_b_nm = unit_cell->get_cell_length_b_Nanometers();
@@ -483,10 +504,6 @@ bool Super_Cell::create_atoms_from_unit_cell(){
   const double center_b_unpadding_nm = _super_cell_length_b_Nanometers / 2.0f;
   const double center_c_padding_nm = _super_cell_length_c_Nanometers / -2.0f;
   const double center_c_unpadding_nm = _super_cell_length_c_Nanometers / 2.0f;
-
-  std::cout << "UnitCell has " << unit_cell_atom_positions.size() << " atoms" << std::endl;
-  std::cout << "\tSupercell expand factors: X " << expand_factor_a << ", Y " << expand_factor_b << ", Z " << expand_factor_c << std::endl;
-  std::cout << "\tSupercell length Nanometers: A " << _super_cell_length_a_Nanometers << ", B " << _super_cell_length_b_Nanometers << ", C " << _super_cell_length_c_Nanometers << std::endl;
 
   for ( size_t c_expand_pos = 0; c_expand_pos < expand_factor_c; c_expand_pos++ ){
     const double c_expand_nanometers = c_expand_pos * unit_cell_c_nm + center_c_padding_nm;
@@ -504,14 +521,14 @@ bool Super_Cell::create_atoms_from_unit_cell(){
     }
   }
 
-  std::cout << "SuperCell has " << _atom_positions.size() << " atoms" << std::endl;
   return true;
 }
 
 void Super_Cell::orientate_atoms_from_matrix(){
+  /* general assertions */
   assert ( !orientation_matrix.empty() );
-  std::cout << "Orientating atoms from matrix :" << std::endl;
-  std::cout << orientation_matrix << std::endl;
+
+  /* method */
   for (
       std::vector<cv::Point3d>::iterator it = _atom_positions.begin() ;
       it != _atom_positions.end();
@@ -525,11 +542,13 @@ void Super_Cell::orientate_atoms_from_matrix(){
 }
 
 void Super_Cell::update_super_cell_length_parameters_from_fractional_norms(){
+  /* general assertions */
   assert( unit_cell != NULL );
   assert( _fractional_norm_a_atom_pos > 0.0f );
   assert( _fractional_norm_b_atom_pos > 0.0f );
   assert( _fractional_norm_c_atom_pos > 0.0f );
 
+  /* method */
   _super_cell_length_a_Nanometers = _fractional_norm_a_atom_pos;
   _super_cell_length_b_Nanometers = _fractional_norm_b_atom_pos;
   _super_cell_length_c_Nanometers = _fractional_norm_c_atom_pos;
@@ -542,11 +561,13 @@ void Super_Cell::update_super_cell_length_parameters_from_fractional_norms(){
 
 
 void Super_Cell::update_super_cell_length_parameters(){
+  /* general assertions */
   assert( unit_cell != NULL );
   assert( expand_factor_a > 0.0f );
   assert( expand_factor_b > 0.0f );
   assert( expand_factor_c > 0.0f );
 
+  /* method */
   _super_cell_length_a_Nanometers = expand_factor_a * unit_cell->get_cell_length_a_Nanometers();
   _super_cell_length_b_Nanometers = expand_factor_b * unit_cell->get_cell_length_b_Nanometers(); 
   _super_cell_length_c_Nanometers = expand_factor_c * unit_cell->get_cell_length_c_Nanometers(); 
@@ -559,18 +580,22 @@ void Super_Cell::update_super_cell_length_parameters(){
 }
 
 void Super_Cell::update_experimental_image_size_parameters(){
+  /* general assertions */
   assert( _super_cell_length_a_Nanometers > 0.0f );
   assert( _super_cell_length_b_Nanometers > 0.0f );
   assert( _sampling_rate_super_cell_x_nm_pixel > 0.0f );
   assert( _sampling_rate_super_cell_y_nm_pixel > 0.0f );
 
+  /* method */
   _super_cell_width_px = (int) ( _super_cell_length_a_Nanometers / _sampling_rate_super_cell_x_nm_pixel );
   _super_cell_height_px = (int) ( _super_cell_length_b_Nanometers / _sampling_rate_super_cell_y_nm_pixel );
 }
 
-/** other methods **/
 bool Super_Cell::update_unit_cell_parameters(){
+  /* general assertions */
   assert( unit_cell != NULL );
+
+  /* method */
   _cell_angle_alpha = unit_cell->get_cell_angle_alpha();
   _cell_angle_beta = unit_cell->get_cell_angle_beta();
   _cell_angle_gamma = unit_cell->get_cell_angle_gamma();
@@ -591,8 +616,10 @@ bool Super_Cell::update_unit_cell_parameters(){
 void Super_Cell::calculate_supercell_boundaries_from_experimental_image( 
     cv::Point2f roi_center, int threshold, int max_contour_distance_px 
     ){
+  /* general assertions */
   assert( !_raw_experimental_image.empty() );
 
+  /* method */
   cv::Mat canny_output;
   cv::Mat canny_output_no_blur;
   std::vector< std::vector<cv::Point> > contours;
@@ -672,13 +699,13 @@ void Super_Cell::calculate_supercell_boundaries_from_experimental_image(
    * that demonstrates the usage of different function variants. **/
   convexHull( cv::Mat(contours_merged), _experimental_image_boundary_polygon, false ); 
   std::vector<std::vector<cv::Point>> hull;
-  hull.push_back(_experimental_image_boundary_polygon);
+  hull.push_back( _experimental_image_boundary_polygon );
 
   /** Lets find the centroid of the exp. image boundary poligon **/
   CvMoments moments; 
   double M00, M01, M10;
 
-  moments = cv::moments( _experimental_image_boundary_polygon); 
+  moments = cv::moments( _experimental_image_boundary_polygon );
   M00 = cvGetSpatialMoment(&moments,0,0);
   M10 = cvGetSpatialMoment(&moments,1,0);
   M01 = cvGetSpatialMoment(&moments,0,1);
@@ -693,6 +720,7 @@ void Super_Cell::calculate_supercell_boundaries_from_experimental_image(
   drawContours( temp, hull, 0, color, 3, 8, std::vector<cv::Vec4i>(), 0, cv::Point() );
   _experimental_image_boundary_polygon_margin_width_px = _experimental_image_boundary_polygon_margin_x_Nanometers / _sampling_rate_super_cell_x_nm_pixel; 
   _experimental_image_boundary_polygon_margin_height_px = _experimental_image_boundary_polygon_margin_y_Nanometers / _sampling_rate_super_cell_y_nm_pixel;
+
   std::vector<cv::Point>::iterator  _exp_itt;
 
   for ( 
@@ -725,9 +753,8 @@ void Super_Cell::calculate_supercell_boundaries_from_experimental_image(
   imwrite( "experimental_image_boundary_rectangle.png", rectangle_cropped_experimental_image  );
   imwrite( "experimental_image_boundary_rectangle_with_margins.png", _rectangle_cropped_experimental_image_w_margin );
 
-  // drawContours( temp, roi_contours, 0, color, 3, 8, cv::noArray(), 1, cv::Point() );
-
-  //imwrite( "experimental_image_boundary_rectangle_with_margins_columns.png", temp );
+  _experimental_image_roi = _raw_experimental_image( _experimental_image_boundary_rectangle ).clone();
+  _experimental_image_roi_w_margin = _raw_experimental_image( _experimental_image_boundary_rectangle_w_margin ).clone();
 
   calculate_experimental_min_size_nm();
   calculate_expand_factor();
@@ -737,7 +764,10 @@ void Super_Cell::calculate_supercell_boundaries_from_experimental_image(
 }
 
 void Super_Cell::set_experimental_min_size_nm_from_unit_cell(){
+  /* general assertions */
   assert( unit_cell != NULL );
+
+  /* method */
   /* set super cell min size in Nanometers */
   _x_supercell_min_size_nm = unit_cell->get_cell_length_a_Nanometers();
   _y_supercell_min_size_nm = unit_cell->get_cell_length_b_Nanometers();
@@ -752,7 +782,6 @@ void Super_Cell::calculate_experimental_min_size_nm(){
   assert( _sampling_rate_super_cell_x_nm_pixel > 0.0f );
   assert( _experimental_image_thickness_margin_z_Nanometers >= 0.0f );
   assert( _simgrid_best_match_thickness_nm > 0.0f );
-
   assert ( _experimental_image_boundary_rectangle_w_margin.width ==  _rectangle_cropped_experimental_image_w_margin.cols );
   assert ( _experimental_image_boundary_rectangle_w_margin.height ==  _rectangle_cropped_experimental_image_w_margin.rows );
 
@@ -760,8 +789,10 @@ void Super_Cell::calculate_experimental_min_size_nm(){
   /* set super cell min size in Pixels */
   _super_cell_min_width_px = _experimental_image_boundary_rectangle_w_margin.width;
   _super_cell_min_height_px = _experimental_image_boundary_rectangle_w_margin.height;
-  _super_cell_left_padding_px = _experimental_image_boundary_rectangle_w_margin.x;
-  _super_cell_top_padding_px = _experimental_image_boundary_rectangle_w_margin.y;
+  _super_cell_left_padding_px = _experimental_image_boundary_rectangle.x;
+  _super_cell_top_padding_px = _experimental_image_boundary_rectangle.y;
+  _super_cell_left_padding_w_margin_px = _experimental_image_boundary_rectangle_w_margin.x;
+  _super_cell_top_padding_w_margin_px = _experimental_image_boundary_rectangle_w_margin.y;
   /* set super cell min size in Nanometers */
   _x_supercell_min_size_nm = _sampling_rate_super_cell_x_nm_pixel * _super_cell_min_height_px; 
   _y_supercell_min_size_nm = _sampling_rate_super_cell_y_nm_pixel * _super_cell_min_width_px; 
@@ -769,41 +800,79 @@ void Super_Cell::calculate_experimental_min_size_nm(){
 }
 
 void Super_Cell::update_super_cell_boundary_polygon(){
+  /* general assertions */
   assert( _super_cell_width_px > 0 );
   assert( _super_cell_height_px > 0 );
   assert( _super_cell_width_px >= _super_cell_min_width_px );
   assert( _super_cell_height_px >= _super_cell_min_height_px );
+  assert( _super_cell_left_padding_w_margin_px >= 0 );
+  assert( _super_cell_top_padding_w_margin_px >= 0 );
   assert( _super_cell_left_padding_px >= 0 );
   assert( _super_cell_top_padding_px >= 0 );
+  assert( ! _experimental_image_boundary_polygon.empty() );
   assert( ! _experimental_image_boundary_polygon_w_margin.empty() );
 
+  /* method */
   const double center_a_padding_nm = _x_supercell_min_size_nm / -2.0f;
   const double center_b_padding_nm = _y_supercell_min_size_nm / 2.0f;
   const int _width_padding_px = ( _super_cell_width_px - _super_cell_min_width_px )/ 2;
   const int _height_padding_px = ( _super_cell_height_px - _super_cell_min_height_px )/ 2;
 
-  for ( 
+  for (
+      std::vector<cv::Point>::iterator experimental_bound_it = _experimental_image_boundary_polygon.begin();
+      experimental_bound_it != _experimental_image_boundary_polygon.end();
+      experimental_bound_it++
+      ){
+    cv::Point super_cell_boundary_point = *experimental_bound_it;
+    super_cell_boundary_point.x -= _super_cell_left_padding_px;
+    super_cell_boundary_point.y -= _super_cell_top_padding_px;
+    _experimental_image_roi_boundary_polygon.push_back( super_cell_boundary_point );
+  }
+
+  for (
       std::vector<cv::Point>::iterator experimental_bound_it = _experimental_image_boundary_polygon_w_margin.begin(); 
       experimental_bound_it != _experimental_image_boundary_polygon_w_margin.end(); 
       experimental_bound_it++ 
       ){
     cv::Point super_cell_boundary_point = *experimental_bound_it;
-    // the old bug discussed on slide 183 was due to the following 2 lines
-    super_cell_boundary_point.x -= _super_cell_left_padding_px;
-    super_cell_boundary_point.y -= _super_cell_top_padding_px;
+    super_cell_boundary_point.x -= _super_cell_left_padding_w_margin_px;
+    super_cell_boundary_point.y -= _super_cell_top_padding_w_margin_px;
+
+    _experimental_image_roi_boundary_polygon_w_margin.push_back( super_cell_boundary_point );
 
     // this is not a bug ( see slides 161 and further )
-
     const double _pos_x_t = ( _sampling_rate_super_cell_x_nm_pixel * ((double) super_cell_boundary_point.x ) + center_a_padding_nm );
     const double _pos_y_uvw = ( -1.0f * ( _sampling_rate_super_cell_y_nm_pixel * ((double) super_cell_boundary_point.y ))) + center_b_padding_nm;
     const cv::Point2f _sim_a( _pos_x_t, _pos_y_uvw );
-    std::cout << super_cell_boundary_point.y << " , " << super_cell_boundary_point.x << " point " << _sim_a << std::endl;
     _super_cell_boundary_polygon_Nanometers_w_margin.push_back( _sim_a );
   }
+  create_experimental_image_roi_mask_from_boundary_polygon();
 }
 
+void Super_Cell::create_experimental_image_roi_mask_from_boundary_polygon(){
+  _experimental_image_roi_mask = cv::Mat::zeros(_experimental_image_roi.size(),CV_8UC1);
+  _experimental_image_roi_mask_w_margin = cv::Mat::zeros(_experimental_image_roi_w_margin.size(),CV_8UC1);
+
+  std::vector<std::vector<cv::Point>> hull1;
+  std::vector<std::vector<cv::Point>> hull2;
+
+  hull1.push_back( _experimental_image_roi_boundary_polygon );
+  hull2.push_back( _experimental_image_roi_boundary_polygon_w_margin );
+
+  fillPoly(_experimental_image_roi_mask, hull1, cv::Scalar(255, 255, 255), 8, 0);
+  fillPoly(_experimental_image_roi_mask_w_margin, hull2, cv::Scalar(255, 255, 255), 8, 0);
+
+  imwrite( "experimental_image_roi_mask.png", _experimental_image_roi_mask );
+  imwrite( "experimental_image_roi_w_margin_mask.png", _experimental_image_roi_mask_w_margin );
+
+}
+
+
 void Super_Cell::remove_z_out_of_range_atoms(){
+  /* general assertions */
   assert( _z_supercell_min_size_nm >= 0.0f );
+
+  /* method */
   const double _z_bot_limit = _z_supercell_min_size_nm / -2.0f;
   const double _z_top_limit = _z_supercell_min_size_nm / 2.0f;
   std::vector<unsigned int> _atom_positions_delete;
@@ -836,6 +905,7 @@ void Super_Cell::remove_z_out_of_range_atoms(){
 void Super_Cell::remove_xy_out_of_range_atoms(){
   /* general assertions */
   assert( ! _super_cell_boundary_polygon_Nanometers_w_margin.empty() );
+
   /* method */
   std::vector<unsigned int> _atom_positions_delete;
   unsigned int loop_counter = 0;
@@ -874,8 +944,8 @@ void Super_Cell::generate_super_cell_file(  std::string _super_cell_filename ){
   assert( ( _cell_angle_beta > std::numeric_limits<double>::min()) );
   assert( ( _cell_angle_gamma > std::numeric_limits<double>::min()) );
   assert( ! _super_cell_atom_fractional_cell_coordinates.empty() );
-  /* method */
 
+  /* method */
   std::vector<std::string> unit_cell_atom_symbol_string = unit_cell->get_atom_type_symbols_vec(); 
   std::vector<double> unit_cell_atom_site_occupancy = unit_cell->get_atom_occupancy_vec();
   std::vector<double> unit_cell_atom_debye_waller_factor = unit_cell->get_atom_debye_waller_factor_vec();
@@ -907,7 +977,6 @@ void Super_Cell::generate_super_cell_file(  std::string _super_cell_filename ){
 }
 
 void Super_Cell::read_simulated_super_cell_from_dat_file( std::string file_name_input_dat ){
-
   int fd;
   fd = open ( file_name_input_dat.c_str() , O_RDONLY );
   if ( fd == -1 ){
@@ -956,30 +1025,10 @@ void Super_Cell::read_simulated_super_cell_from_dat_file( std::string file_name_
   imwrite( string_output_debug_info2 , raw_gray_simulated_image_super_cell );
 }
 
-void Super_Cell::set_file_name_input_dat( std::string file_name_input_dat ){
-
-}
-
-void Super_Cell::set_super_cell_simulated_defocus_lower_bound( double defocus_lower_bound ){
-  super_cell_simulated_defocus_lower_bound = defocus_lower_bound;
-}
-
-void Super_Cell::set_super_cell_simulated_defocus_upper_bound( double defocus_upper_bound ){
-  super_cell_simulated_defocus_upper_bound = defocus_upper_bound;
-}
-
-void Super_Cell::set_super_cell_simulated_defocus_samples( int simulated_defocus_samples ){
-  super_cell_simulated_defocus_samples = simulated_defocus_samples;
-}
-
-void Super_Cell::set_super_cell_simulated_defocus_period( double simulated_defocus_period ){
-  super_cell_simulated_defocus_period = simulated_defocus_period;
-}
-
 void Super_Cell::read_simulated_super_cells_from_dat_files( ){
 
   for (int defocus = 1; defocus <= super_cell_simulated_defocus_samples; defocus ++ ){
-    const int at_defocus = round( ((defocus-1) * super_cell_simulated_defocus_period )+ super_cell_simulated_defocus_lower_bound );
+    const double at_defocus = ((double)(defocus-1) * super_cell_simulated_defocus_period )+ super_cell_simulated_defocus_lower_bound;
     // get the .dat image name
     std::stringstream input_dat_name_stream;
 
@@ -1032,8 +1081,9 @@ void Super_Cell::read_simulated_super_cells_from_dat_files( ){
     cv::normalize(raw_gray_simulated_image_super_cell, raw_gray_simulated_image_super_cell, experimental_image_minVal, experimental_image_maxVal, cv::NORM_MINMAX);
     std::cout << "experimental image size: " << _rectangle_cropped_experimental_image_w_margin.size() << std::endl;
     std::cout << "simulated image size: " << raw_gray_simulated_image_super_cell.size() << std::endl;
-    //assert( (_rectangle_cropped_experimental_image_w_margin.size()) >= (raw_gray_simulated_image_super_cell.size()) );
-    raw_gray_simulated_images_super_cell.push_back( raw_gray_simulated_image_super_cell );
+
+    //assert( (raw_gray_simulated_image_super_cell.size()) >= (_rectangle_cropped_experimental_image_w_margin.size()) ); 
+    simulated_defocus_map_raw_images.push_back( raw_gray_simulated_image_super_cell );
 
     // get the .dat image name
     std::stringstream output_debug_info2;
@@ -1042,5 +1092,111 @@ void Super_Cell::read_simulated_super_cells_from_dat_files( ){
     imwrite( string_output_debug_info2 , raw_gray_simulated_image_super_cell );
 
   }
+  assert( simulated_defocus_map_raw_images.size() == super_cell_simulated_defocus_samples );
 }
+
+void Super_Cell::match_experimental_simulated_super_cells(){
+  assert( simulated_defocus_map_raw_images.size() == super_cell_simulated_defocus_samples );
+  for (
+      int defocus_map_pos = 0;
+      defocus_map_pos < simulated_defocus_map_raw_images.size();
+      defocus_map_pos++ ){
+
+    const double at_defocus = ((double)(defocus_map_pos) * super_cell_simulated_defocus_period )+ super_cell_simulated_defocus_lower_bound;
+
+    cv::Mat simulated_defocus_image = simulated_defocus_map_raw_images.at( defocus_map_pos );
+
+    /// Create the result matrix
+    cv::Mat result;
+
+    int result_cols =  simulated_defocus_image.cols - _experimental_image_roi_w_margin.cols + 1;
+    int result_rows = simulated_defocus_image.rows  - _experimental_image_roi_w_margin.rows + 1;
+
+    result.create( result_rows, result_cols, CV_8UC1 );
+
+    // vars for minMaxLoc
+    double minVal; double maxVal; cv::Point minLoc; cv::Point maxLoc;
+    cv::Point matchLoc;
+
+    // we can't use CV_TM_CCOEFF_NORMED due to mask not being implemented
+    cv::Mat _experimental_image_roi_w_mask;
+
+    cv::bitwise_and( _experimental_image_roi_w_margin, _experimental_image_roi_mask_w_margin , _experimental_image_roi_w_mask);
+    imwrite( "experimental_image_roi_with_mask.png", _experimental_image_roi_w_mask );
+    cv::matchTemplate( simulated_defocus_image , _experimental_image_roi_w_margin, result, CV_TM_CCORR_NORMED , _experimental_image_roi_mask_w_margin);
+
+    cv::minMaxLoc( result, &minVal, &maxVal, &minLoc, &maxLoc, cv::Mat() );
+
+    const double match_value = maxVal * 100.0;
+    simulated_defocus_map_values.push_back( at_defocus );
+    simulated_defocus_map_matches.push_back( match_value );
+    simulated_defocus_map_match_positions.push_back( maxLoc );
+    std::cout << "defocus: " << at_defocus << " nm, match value: " << match_value << std::endl;
+    std::cout << "position " << maxLoc << std::endl;
+  }
+
+  std::vector<double>::iterator maxElement;
+  maxElement = std::max_element(simulated_defocus_map_matches.begin(), simulated_defocus_map_matches.end());
+  int dist = distance(simulated_defocus_map_matches.begin(), maxElement);
+  std::cout << "Max Defocus-map element is at position: " << dist << " , defocus: " 
+    << simulated_defocus_map_values.at( dist )
+    << " , match: " << simulated_defocus_map_matches.at( dist )
+    << std::endl;
+
+  _experimental_pos_best_match_rectangle.x = simulated_defocus_map_match_positions.at(dist).x;
+  _experimental_pos_best_match_rectangle.y = simulated_defocus_map_match_positions.at(dist).y;
+
+  _experimental_pos_best_match_rectangle.width = _experimental_image_roi_w_margin.cols;
+  _experimental_pos_best_match_rectangle.height = _experimental_image_roi_w_margin.rows;
+  std::cout << "experimental data: " << _experimental_pos_best_match_rectangle << std::endl;
+  _best_match_simulated_image_raw = simulated_defocus_map_raw_images.at(dist);
+  std::cout << "simulated data: " << _best_match_simulated_image_raw.size() << std::endl;
+  _best_match_simulated_image_positioned = simulated_defocus_map_raw_images.at(dist)(_experimental_pos_best_match_rectangle);
+
+  std::cout << "calculated best _best_match_simulated_image_positioned: " << std::endl;
+  imwrite("_best_match_simulated_image_positioned.png", _best_match_simulated_image_positioned) ;
+
+  // the function findTransformECC() implements an area-based alignment
+  // that builds on intensity similarities. In essence, the function
+  //updates the initial transformation that roughly aligns the images.
+
+  motion_euclidean_warp_matrix.at<float>( 0, 2 ) = simulated_defocus_map_match_positions.at(dist).x;
+  motion_euclidean_warp_matrix.at<float>( 1, 2 ) = simulated_defocus_map_match_positions.at(dist).y;
+
+  std::cout << "WARP matrix" <<std::endl <<  motion_euclidean_warp_matrix << std::endl;
+  // Define termination criteria
+  cv::TermCriteria motion_euclidean_criteria ( cv::TermCriteria::COUNT + cv::TermCriteria::EPS, motion_euclidean_number_of_iterations, motion_euclidean_termination_eps );
+
+  // Run the ECC algorithm. The results are stored in warp_matrix.
+  try{
+    double cc =  cv::findTransformECC(
+        _best_match_simulated_image_raw,
+        _experimental_image_roi_w_margin,
+        motion_euclidean_warp_matrix,
+        motion_euclidean_warp_mode,
+        motion_euclidean_criteria
+        );
+
+    std::cout << "correlation coeficient" << cc << std::endl;
+  }
+  catch(cv::Exception e){
+    if (e.code == cv::Error::StsNoConv)
+    {
+      std::cerr << "findTransformECC did not converge";
+    }
+  }
+  std::cout << "WARP matrix" <<std::endl <<  motion_euclidean_warp_matrix << std::endl;
+
+
+  _experimental_pos_best_match_rectangle.x = (int) motion_euclidean_warp_matrix.at<float>( 0, 2 );
+  _experimental_pos_best_match_rectangle.y = (int) motion_euclidean_warp_matrix.at<float>( 1, 2 );
+
+  _best_match_simulated_image_positioned = simulated_defocus_map_raw_images.at(dist)(_experimental_pos_best_match_rectangle);
+  imwrite("_best_match_simulated_image_positioned_after_euclidean.png", _best_match_simulated_image_positioned) ;
+}
+
+
+
+
+
 

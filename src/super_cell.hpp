@@ -71,6 +71,10 @@ class Super_Cell {
     double _fractional_norm_b_atom_pos;
     double _fractional_norm_c_atom_pos;
     double _cel_margin_nm;
+    double _super_cell_ab_margin;
+    int _cel_margin_a_px;
+    int _cel_margin_b_px;
+
     int _cel_nx_px;
     int _cel_ny_px;
 
@@ -85,16 +89,26 @@ class Super_Cell {
     double super_cell_simulated_defocus_upper_bound;
     int super_cell_simulated_defocus_samples;
     double super_cell_simulated_defocus_period;
-    std::vector<cv::Mat> raw_gray_simulated_images_super_cell;
+
     std::string file_name_input_dat;
 
     /** Experimental image related **/
     cv::Mat _raw_experimental_image;
+    cv::Mat _experimental_image_roi;
+    cv::Mat _experimental_image_roi_w_margin;
+    cv::Mat _experimental_image_roi_mask;
+    cv::Mat _experimental_image_roi_mask_w_margin;
+    // _rectangle_cropped_experimental_image_w_margin is used for visualization ( the algorithms should use _experimental_image_roi_w_margin )
     cv::Mat _rectangle_cropped_experimental_image_w_margin;
     cv::Rect _experimental_image_boundary_rectangle; 
     cv::Rect _experimental_image_boundary_rectangle_w_margin;
+    // the next 2 vectors are position-related to the whole experimental image
     std::vector<cv::Point> _experimental_image_boundary_polygon;
     std::vector<cv::Point> _experimental_image_boundary_polygon_w_margin;
+    // the next 2 vectors are position-related to the ROI of the experimental image
+    std::vector<cv::Point> _experimental_image_roi_boundary_polygon;
+    std::vector<cv::Point> _experimental_image_roi_boundary_polygon_w_margin;
+
     // vars for minMaxLoc to normalize simulated crystal images
     double experimental_image_minVal;
     double experimental_image_maxVal;
@@ -110,15 +124,20 @@ class Super_Cell {
     std::vector<cv::Point> _super_cell_boundary_polygon_px_w_margin;
     int _super_cell_min_width_px;
     int _super_cell_min_height_px;
+    int _super_cell_left_padding_w_margin_px;
+    int _super_cell_top_padding_w_margin_px;
     int _super_cell_left_padding_px;
     int _super_cell_top_padding_px;
-    /*_super_cell_width_px  and _super_cell_min_width_px may differ since 
+
+    /*
+     * _super_cell_width_px  and _super_cell_min_width_px may differ since 
      * _super_cell_min_width_px reffers to the minimum acceptable width based on
      * the ZA and UV directions. _super_cell_width_px reffers to the width in pixels
      * based on the expand factor.
      *
      * _super_cell_width_px is ALWAYS >= _super_cell_min_width_px
      * (same for _super_cell_height_px and _super_cell_min_height_px )
+     * 
      * */
     int _super_cell_width_px;
     int _super_cell_height_px;
@@ -126,6 +145,35 @@ class Super_Cell {
     double _sampling_rate_super_cell_y_nm_pixel;
     double _simgrid_best_match_thickness_nm; 
 
+    /** Defocus Map simulation related **/
+    std::vector<cv::Mat> simulated_defocus_map_raw_images;
+    std::vector<cv::Point> simulated_defocus_map_match_positions;
+    std::vector<double> simulated_defocus_map_matches;
+    std::vector<double> simulated_defocus_map_values;
+
+    cv::Mat _best_match_simulated_image_raw;
+    cv::Mat _best_match_simulated_image_positioned;
+    cv::Rect _experimental_pos_best_match_rectangle;
+
+    /***********
+      image alignement vars
+     ***********/
+
+    // Set a 2x3 or 3x3 warp matrix depending on the motion model.
+    // in our case we use a 2x3 (euclidean)
+    cv::Mat motion_euclidean_warp_matrix;
+
+    // Specify the number of iterations.
+    int motion_euclidean_number_of_iterations;
+
+    // Specify the threshold of the increment
+    // in the correlation coefficient between two iterations
+    double motion_euclidean_termination_eps;
+
+    // Define the motion model
+    int motion_euclidean_warp_mode; 
+
+    /** Private Class methods **/
     void set_default_values();
     void set_sentinel_values();
     void update_super_cell_length_parameters();
@@ -174,7 +222,6 @@ class Super_Cell {
     void set_super_cell_simulated_defocus_samples( int super_cell_simulated_defocus_samples );
     void set_super_cell_simulated_defocus_period( double super_cell_simulated_defocus_period );
 
-
     //getters
     double get_super_cell_length_a_Angstroms();
     double get_super_cell_length_b_Angstroms();
@@ -210,6 +257,8 @@ class Super_Cell {
     void generate_super_cell_file(  std::string filename );
     void read_simulated_super_cell_from_dat_file( std::string file_name_input_dat );
     void read_simulated_super_cells_from_dat_files( );
+    void match_experimental_simulated_super_cells( );
+    void create_experimental_image_roi_mask_from_boundary_polygon();
 };
 
 #endif

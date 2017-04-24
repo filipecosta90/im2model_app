@@ -359,15 +359,15 @@ void SIMGRID_wavimg_steplength::calculate_motion_euclidian_matrix( cv::Mat cropp
 }
 
 double SIMGRID_wavimg_steplength::get_motion_euclidian_rotation_angle(){
-  return motion_euclidean_warp_matrix.at<double>( 1, 0);
+  return motion_euclidean_warp_matrix.at<float>( 1, 0);
 }
 
 double SIMGRID_wavimg_steplength::get_motion_euclidian_translation_x(){
-  return motion_euclidean_warp_matrix.at<double>( 0, 2);
+  return motion_euclidean_warp_matrix.at<float>( 0, 2);
 }
 
 double SIMGRID_wavimg_steplength::get_motion_euclidian_translation_y(){
-  return motion_euclidean_warp_matrix.at<double>( 1, 2);
+  return motion_euclidean_warp_matrix.at<float>( 1, 2);
 }
 
 int SIMGRID_wavimg_steplength::get_simgrid_best_match_thickness_slice(){
@@ -565,7 +565,7 @@ void SIMGRID_wavimg_steplength::produce_png_from_dat_file(){
   for (int thickness = 1; thickness <= slice_samples; thickness ++ ){
     const int at_slice = round( slice_period * ( thickness  - 1 ) + slices_lower_bound );
     const double slice_thickness_nm = celslc_accum_nm_slice_vec.at(at_slice-1);
-      std::cout << "slice thickness" << slice_thickness_nm << std::endl;
+    std::cout << "slice thickness" << slice_thickness_nm << std::endl;
 
     // for the same thickness iterate through every defocus
     for (int defocus = 1; defocus <= defocus_samples; defocus ++ ){
@@ -622,7 +622,7 @@ void SIMGRID_wavimg_steplength::produce_png_from_dat_file(){
       std::cout << "Cycle end" << std::endl; 
     }
   }
-      std::cout << "Finished writing png files from *.dat " << std::endl; 
+  std::cout << "Finished writing png files from *.dat " << std::endl; 
 }
 
 bool SIMGRID_wavimg_steplength::simulate_from_dat_file(){

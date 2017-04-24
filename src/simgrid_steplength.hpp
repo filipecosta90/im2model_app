@@ -48,7 +48,7 @@ class SIMGRID_wavimg_steplength {
     double super_cell_z_nm_slice;
 
     cv::Mat experimental_image_roi;
-    
+
     /***********
       simulated image vars
      ***********/
@@ -87,27 +87,27 @@ class SIMGRID_wavimg_steplength {
     cv::Mat thickness_values_matrix;
     cv::Mat match_values_matrix;
     cv::Mat imregionalmax_match_values_matrix;
-   
+
     WAVIMG_prm* wavimg_parameters;
 
     /***********
-     image alignement vars
+      image alignement vars
      ***********/
-    
+
     // Set a 2x3 or 3x3 warp matrix depending on the motion model.
     // in our case we use a 2x3 (euclidean)
     cv::Mat motion_euclidean_warp_matrix;
-    
+
     // Specify the number of iterations.
     int motion_euclidean_number_of_iterations;
-    
+
     // Specify the threshold of the increment
     // in the correlation coefficient between two iterations
     double motion_euclidean_termination_eps;
-    
+
     // Define the motion model
-  const int motion_euclidean_warp_mode = cv::MOTION_EUCLIDEAN;
-    
+    const int motion_euclidean_warp_mode = cv::MOTION_EUCLIDEAN;
+
     // // // // //
     // debug info
     // // // // //
@@ -128,7 +128,7 @@ class SIMGRID_wavimg_steplength {
     std::string defocus_matrix_file_name;
     std::string thickness_matrix_file_name;
     std::string match_factor_matrix_file_name;
-    
+
     const double acceptable_rotation_diff = 5.0f;
 
     // // // // //
@@ -185,7 +185,7 @@ class SIMGRID_wavimg_steplength {
 
     void set_super_cell_z_nm_slice( double nm_slice );
 
-void  set_celslc_accum_nm_slice_vec( std::vector<double> slice_params_accum_nm_slice_vec ); 
+    void  set_celslc_accum_nm_slice_vec( std::vector<double> slice_params_accum_nm_slice_vec ); 
 
     void set_roi_pixel_size( int pixel_size );
 
@@ -232,21 +232,21 @@ void  set_celslc_accum_nm_slice_vec( std::vector<double> slice_params_accum_nm_s
     void set_step_size( cv::Point2f defocus_slice_step );
 
     double get_motion_euclidian_rotation_angle();
-    
+
     double get_motion_euclidian_translation_x();
 
     double get_motion_euclidian_translation_y();
-    
+
     int get_simgrid_best_match_thickness_slice();
-    
+
     double get_simgrid_best_match_thickness_nm();
-    
+
     double get_simgrid_best_match_defocus_nm();
-    
+
     void calculate_motion_euclidian_matrix(  cv::Mat cropped_experimental_image_roi, cv::Mat simulated_image_roi );
-    
+
     cv::Mat calculate_simulated_motion_euclidean_transformed_matrix( cv::Mat raw_simulated_image_roi );
-    
+
     cv::Mat calculate_error_matrix( cv::Mat aligned_experimental_image_roi, cv::Mat aligned_simulated_image_roi );
 
     bool export_sim_grid();
