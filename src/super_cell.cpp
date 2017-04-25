@@ -126,8 +126,8 @@ void Super_Cell::set_super_cell_margin_nm( double margin ){
   assert( _sampling_rate_super_cell_y_nm_pixel > 0.0f );
   _cel_margin_nm = margin;
   _super_cell_ab_margin = _cel_margin_nm * 0.5f;
-  _cel_margin_a_px = (int) ( (_cel_margin_nm * 0.5f ) / _sampling_rate_super_cell_x_nm_pixel);
-  _cel_margin_b_px = (int) ( (_cel_margin_nm * 0.5f ) / _sampling_rate_super_cell_y_nm_pixel);
+  _cel_margin_a_px = ( (int) (_cel_margin_nm / _sampling_rate_super_cell_x_nm_pixel)) / 2;
+  _cel_margin_b_px = ( (int) (_cel_margin_nm / _sampling_rate_super_cell_y_nm_pixel)) / 2;
 }
 
 void Super_Cell::set_super_cell_length_a_Angstroms( double a ){
@@ -1089,7 +1089,7 @@ void Super_Cell::read_simulated_super_cells_from_dat_files( ){
     std::cout << "Super-Cell simulated image min and max pixels values: min: " << min << " max: "<< max << "vs EXPERIMENTAL image min and max pixels values: min: " << experimental_image_minVal << " max: "<< experimental_image_maxVal << std::endl;
 
     cv::normalize(raw_gray_simulated_image_super_cell, raw_gray_simulated_image_super_cell, experimental_image_minVal, experimental_image_maxVal, cv::NORM_MINMAX);
-    std::cout << "experimental image size: " << _rectangle_cropped_experimental_image_w_margin.size() << std::endl;
+    //std::cout << "experimental image size: " << _rectangle_cropped_experimental_image.size() << std::endl;
     std::cout << "simulated image size: " << raw_gray_simulated_image_super_cell.size() << std::endl;
 
     final_gray_simulated_image_super_cell = raw_gray_simulated_image_super_cell ( _ignore_cel_margin_rectangle );
@@ -1112,9 +1112,9 @@ void Super_Cell::read_simulated_super_cells_from_dat_files( ){
 void Super_Cell::match_experimental_simulated_super_cells(){
   assert( simulated_defocus_map_raw_images.size() == super_cell_simulated_defocus_samples );
 
-  const int result_cols =  _cel_wout_margin_nx_px - _experimental_image_roi_w_margin.cols + 1;
-  const int result_rows = _cel_wout_margin_ny_px - _experimental_image_roi_w_margin.rows + 1;
-
+  const int result_cols =  _cel_wout_margin_nx_px - _experimental_image_roi.cols + 1;
+  const int result_rows = _cel_wout_margin_ny_px - _experimental_image_roi.rows + 1;
+  std::cout << " match matrices size: cols " << result_cols << " rows " << result_rows << std::endl;
   for (
       int defocus_map_pos = 0;
       defocus_map_pos < simulated_defocus_map_raw_images.size();
@@ -1123,8 +1123,8 @@ void Super_Cell::match_experimental_simulated_super_cells(){
 
     cv::Mat simulated_defocus_image = simulated_defocus_map_raw_images.at( defocus_map_pos );
 
-    assert( simulated_defocus_image.cols >= _cel_wout_margin_nx_px );
-    assert( simulated_defocus_image.rows >= _cel_wout_margin_ny_px );
+    //assert( simulated_defocus_image.cols >= _cel_wout_margin_nx_px );
+    //assert( simulated_defocus_image.rows >= _cel_wout_margin_ny_px );
 
     /// Create the result matrix
     cv::Mat result;
@@ -1137,9 +1137,9 @@ void Super_Cell::match_experimental_simulated_super_cells(){
     // we can't use CV_TM_CCOEFF_NORMED due to mask not being implemented
     cv::Mat _experimental_image_roi_w_mask;
 
-    cv::bitwise_and( _experimental_image_roi_w_margin, _experimental_image_roi_mask_w_margin , _experimental_image_roi_w_mask);
+    cv::bitwise_and( _experimental_image_roi, _experimental_image_roi_mask , _experimental_image_roi_w_mask);
     imwrite( "experimental_image_roi_with_mask.png", _experimental_image_roi_w_mask );
-    cv::matchTemplate( simulated_defocus_image , _experimental_image_roi_w_margin, result, CV_TM_CCORR_NORMED , _experimental_image_roi_mask_w_margin);
+    cv::matchTemplate( simulated_defocus_image , _experimental_image_roi, result, CV_TM_CCORR_NORMED , _experimental_image_roi_mask);
 
     cv::minMaxLoc( result, &minVal, &maxVal, &minLoc, &maxLoc, cv::Mat() );
 
@@ -1161,9 +1161,9 @@ void Super_Cell::match_experimental_simulated_super_cells(){
 
   _experimental_pos_best_match_rectangle.x = simulated_defocus_map_match_positions.at(dist).x;
   _experimental_pos_best_match_rectangle.y = simulated_defocus_map_match_positions.at(dist).y;
-
-  _experimental_pos_best_match_rectangle.width = _experimental_image_roi_w_margin.cols;
-  _experimental_pos_best_match_rectangle.height = _experimental_image_roi_w_margin.rows;
+  _experimental_pos_best_match_rectangle.width = _experimental_image_roi.cols;
+  _experimental_pos_best_match_rectangle.height = _experimental_image_roi.rows;
+  
   std::cout << "experimental data: " << _experimental_pos_best_match_rectangle << std::endl;
   _best_match_simulated_image_raw = simulated_defocus_map_raw_images.at(dist);
   std::cout << "simulated data: " << _best_match_simulated_image_raw.size() << std::endl;
@@ -1187,7 +1187,7 @@ void Super_Cell::match_experimental_simulated_super_cells(){
   try{
     double cc =  cv::findTransformECC(
         _best_match_simulated_image_raw,
-        _experimental_image_roi_w_margin,
+        _experimental_image_roi,
         motion_euclidean_warp_matrix,
         motion_euclidean_warp_mode,
         motion_euclidean_criteria
@@ -1203,11 +1203,19 @@ void Super_Cell::match_experimental_simulated_super_cells(){
   }
   std::cout << "WARP matrix" <<std::endl <<  motion_euclidean_warp_matrix << std::endl;
 
+    
+    motion_euclidean_warp_matrix.at<float>( 0, 2 ) -= simulated_defocus_map_match_positions.at(dist).x;
+    motion_euclidean_warp_matrix.at<float>( 1, 2 ) -= simulated_defocus_map_match_positions.at(dist).y;
+    
+    cv::Mat raw_transformed_simulated_image = cv::Mat( _cel_wout_margin_ny_px, _cel_wout_margin_nx_px, CV_8UC1);
+    
+    warpAffine(_best_match_simulated_image_raw, raw_transformed_simulated_image, motion_euclidean_warp_matrix, _best_match_simulated_image_raw.size(), cv::INTER_LINEAR );
 
-  _experimental_pos_best_match_rectangle.x = (int) motion_euclidean_warp_matrix.at<float>( 0, 2 );
-  _experimental_pos_best_match_rectangle.y = (int) motion_euclidean_warp_matrix.at<float>( 1, 2 );
+    
+  //_experimental_pos_best_match_rectangle.x = (int) motion_euclidean_warp_matrix.at<float>( 0, 2 );
+  //_experimental_pos_best_match_rectangle.y = (int) motion_euclidean_warp_matrix.at<float>( 1, 2 );
 
-  _best_match_simulated_image_positioned = simulated_defocus_map_raw_images.at(dist)(_experimental_pos_best_match_rectangle);
+  _best_match_simulated_image_positioned = raw_transformed_simulated_image(_experimental_pos_best_match_rectangle);
   imwrite("_best_match_simulated_image_positioned_after_euclidean.png", _best_match_simulated_image_positioned) ;
 }
 
