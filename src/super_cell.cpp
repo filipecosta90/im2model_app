@@ -125,9 +125,9 @@ void Super_Cell::set_super_cell_margin_nm( double margin ){
   assert( _sampling_rate_super_cell_x_nm_pixel > 0.0f );
   assert( _sampling_rate_super_cell_y_nm_pixel > 0.0f );
   _cel_margin_nm = margin;
-  _super_cell_ab_margin = _cel_margin_nm / 2.0f;
-  _cel_margin_a_px = (int) (_cel_margin_nm / _sampling_rate_super_cell_x_nm_pixel);
-  _cel_margin_b_px = (int) (_cel_margin_nm / _sampling_rate_super_cell_y_nm_pixel);
+  _super_cell_ab_margin = _cel_margin_nm * 0.5f;
+  _cel_margin_a_px = (int) ( (_cel_margin_nm * 0.5f ) / _sampling_rate_super_cell_x_nm_pixel);
+  _cel_margin_b_px = (int) ( (_cel_margin_nm * 0.5f ) / _sampling_rate_super_cell_y_nm_pixel);
 }
 
 void Super_Cell::set_super_cell_length_a_Angstroms( double a ){
@@ -476,8 +476,16 @@ void Super_Cell::create_fractional_positions_atoms(){
     _super_cell_atom_fractional_cell_coordinates.push_back( atom_fractional );
   }
 
+  /* vars used in super-cell simulated images dimensioning */
   _cel_nx_px = (int) (_fractional_norm_a_atom_pos / _sampling_rate_super_cell_x_nm_pixel);
   _cel_ny_px = (int) (_fractional_norm_b_atom_pos / _sampling_rate_super_cell_y_nm_pixel);
+  _cel_wout_margin_nx_px = _cel_nx_px - ( 2 * _cel_margin_a_px );
+  _cel_wout_margin_ny_px = _cel_ny_px - ( 2 * _cel_margin_b_px );
+  _ignore_cel_margin_rectangle.x = _cel_margin_a_px;
+  _ignore_cel_margin_rectangle.y = _cel_margin_b_px;
+  _ignore_cel_margin_rectangle.width = _cel_wout_margin_nx_px; 
+  _ignore_cel_margin_rectangle.height = _cel_wout_margin_ny_px; 
+
   /* update length parameters of the super-cell*/
   update_super_cell_length_parameters_from_fractional_norms();
 }
@@ -1027,6 +1035,7 @@ void Super_Cell::read_simulated_super_cell_from_dat_file( std::string file_name_
 
 void Super_Cell::read_simulated_super_cells_from_dat_files( ){
 
+
   for (int defocus = 1; defocus <= super_cell_simulated_defocus_samples; defocus ++ ){
     const double at_defocus = ((double)(defocus-1) * super_cell_simulated_defocus_period )+ super_cell_simulated_defocus_lower_bound;
     // get the .dat image name
@@ -1058,6 +1067,7 @@ void Super_Cell::read_simulated_super_cells_from_dat_files( ){
     std::cout << "going to create a new Mat" << std::endl;
     cv::Mat raw_simulated_image ( _cel_ny_px, _cel_nx_px , CV_32FC1);
     cv::Mat raw_gray_simulated_image_super_cell ( _cel_ny_px, _cel_nx_px , CV_8UC1);
+    cv::Mat final_gray_simulated_image_super_cell ( _cel_wout_margin_ny_px, _cel_wout_margin_nx_px , CV_8UC1);
 
     int pos = 0;
 
@@ -1082,36 +1092,42 @@ void Super_Cell::read_simulated_super_cells_from_dat_files( ){
     std::cout << "experimental image size: " << _rectangle_cropped_experimental_image_w_margin.size() << std::endl;
     std::cout << "simulated image size: " << raw_gray_simulated_image_super_cell.size() << std::endl;
 
+    final_gray_simulated_image_super_cell = raw_gray_simulated_image_super_cell ( _ignore_cel_margin_rectangle );
     //assert( (raw_gray_simulated_image_super_cell.size()) >= (_rectangle_cropped_experimental_image_w_margin.size()) ); 
-    simulated_defocus_map_raw_images.push_back( raw_gray_simulated_image_super_cell );
+    simulated_defocus_map_raw_images.push_back( final_gray_simulated_image_super_cell );
 
     // get the .dat image name
+    std::stringstream output_debug_info1;
     std::stringstream output_debug_info2;
-    output_debug_info2 << "raw_super_cell_image" << std::setw(3) << std::setfill('0') << std::to_string(defocus) << ".png";
+    output_debug_info1 << "raw_super_cell_image" << std::setw(3) << std::setfill('0') << std::to_string(defocus) << ".png";
+    output_debug_info2 << "final_super_cell_image" << std::setw(3) << std::setfill('0') << std::to_string(defocus) << ".png";
+    std::string string_output_debug_info1 = output_debug_info1.str();
     std::string string_output_debug_info2 = output_debug_info2.str();
-    imwrite( string_output_debug_info2 , raw_gray_simulated_image_super_cell );
-
+    imwrite( string_output_debug_info1 , raw_gray_simulated_image_super_cell );
+    imwrite( string_output_debug_info2 , final_gray_simulated_image_super_cell );
   }
   assert( simulated_defocus_map_raw_images.size() == super_cell_simulated_defocus_samples );
 }
 
 void Super_Cell::match_experimental_simulated_super_cells(){
   assert( simulated_defocus_map_raw_images.size() == super_cell_simulated_defocus_samples );
+
+  const int result_cols =  _cel_wout_margin_nx_px - _experimental_image_roi_w_margin.cols + 1;
+  const int result_rows = _cel_wout_margin_ny_px - _experimental_image_roi_w_margin.rows + 1;
+
   for (
       int defocus_map_pos = 0;
       defocus_map_pos < simulated_defocus_map_raw_images.size();
       defocus_map_pos++ ){
-
     const double at_defocus = ((double)(defocus_map_pos) * super_cell_simulated_defocus_period )+ super_cell_simulated_defocus_lower_bound;
 
     cv::Mat simulated_defocus_image = simulated_defocus_map_raw_images.at( defocus_map_pos );
 
+    assert( simulated_defocus_image.cols >= _cel_wout_margin_nx_px );
+    assert( simulated_defocus_image.rows >= _cel_wout_margin_ny_px );
+
     /// Create the result matrix
     cv::Mat result;
-
-    int result_cols =  simulated_defocus_image.cols - _experimental_image_roi_w_margin.cols + 1;
-    int result_rows = simulated_defocus_image.rows  - _experimental_image_roi_w_margin.rows + 1;
-
     result.create( result_rows, result_cols, CV_8UC1 );
 
     // vars for minMaxLoc

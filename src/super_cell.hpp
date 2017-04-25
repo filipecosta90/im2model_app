@@ -70,6 +70,7 @@ class Super_Cell {
     double _fractional_norm_a_atom_pos;
     double _fractional_norm_b_atom_pos;
     double _fractional_norm_c_atom_pos;
+
     double _cel_margin_nm;
     double _super_cell_ab_margin;
     int _cel_margin_a_px;
@@ -77,6 +78,12 @@ class Super_Cell {
 
     int _cel_nx_px;
     int _cel_ny_px;
+
+    // used in the simulated super-cell. this is calculated based on _cel_nXY_px - 2 * _cel_margin_AB_px
+    int _cel_wout_margin_nx_px;
+    int _cel_wout_margin_ny_px;
+
+    cv::Rect _ignore_cel_margin_rectangle;
 
     /** Orientation **/
     cv::Mat orientation_matrix;
