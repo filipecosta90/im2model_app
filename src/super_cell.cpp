@@ -882,12 +882,9 @@ void Super_Cell::calculate_atomic_columns_position_w_boundary_polygon(){
   _experimental_image_roi.copyTo( _experimental_image_roi_bounded_mask , _experimental_image_roi_mask );
   imwrite( "_experimental_image_roi_bounded_mask.png" , _experimental_image_roi_bounded_mask );
 
-
   double min, max;
   cv::minMaxLoc(_experimental_image_roi_bounded_mask, &min, &max);
   cv::normalize (_experimental_image_roi_bounded_mask, _experimental_image_roi_bounded_mask, min, max, cv::NORM_MINMAX);
-
-
 
   // Create a kernel that we will use for accuting/sharpening our image
   cv::Mat kernel = (cv::Mat_<float>(3,3) <<
@@ -917,8 +914,6 @@ void Super_Cell::calculate_atomic_columns_position_w_boundary_polygon(){
   // Create binary image from source image
   cv::Mat _experimental_image_bw;
 
-
-
   //use Otsu algorithm to choose the optimal threshold value
   cv::threshold( _experimental_image_result , _experimental_image_bw, 40, 255, CV_THRESH_BINARY | CV_THRESH_OTSU);
   imwrite("experimental_binary_image_threshold.png", _experimental_image_bw);
@@ -941,20 +936,10 @@ void Super_Cell::calculate_atomic_columns_position_w_boundary_polygon(){
   cv::normalize(dist, dist_image, 0, 255, cv::NORM_MINMAX);
   imwrite("experimental_distance_transform_image_after_threshold.png", dist_image);
 
-  // Dilate a bit the dist image
-  //cv::Mat kernel1 = cv::Mat::ones(3, 3, CV_8UC1);
-  //cv::dilate(dist, dist, kernel1);
-  cv::normalize(dist, dist_image, 0, 255, cv::NORM_MINMAX);
-  imwrite("experimental_distance_transform_image_after_dilate.png", dist_image);
-
-
-
   // Create the CV_8U version of the distance image
   // It is needed for findContours()
   cv::Mat dist_8u;
   dist_image.convertTo(dist_8u, CV_8UC1);
-
-  imwrite("experimental_distance_transform_image_after_dilate_8uc1.png", dist_8u );
 
   // Setup SimpleBlobDetector parameters.
   cv::SimpleBlobDetector::Params params;
@@ -983,91 +968,43 @@ void Super_Cell::calculate_atomic_columns_position_w_boundary_polygon(){
   params.minInertiaRatio = 0.3;
 
   // Storage for blobs
-  std::vector<cv::KeyPoint> keypoints;
+  std::vector<cv::KeyPoint> _experimental_image_keypoints;
 
   // If you are using OpenCV 2
 #if CV_MAJOR_VERSION < 3
   // Set up detector with params
   cv::SimpleBlobDetector detector(params);
   // Detect blobs
-  detector.detect( dist_8u, keypoints);
+  detector.detect( dist_8u, _experimental_image_keypoints );
 #else
-
   // Set up detector with params
   cv::Ptr<cv::SimpleBlobDetector> detector = cv::SimpleBlobDetector::create(params);
   // Detect blobs
-  detector->detect( dist_8u, keypoints);
+  detector->detect( dist_8u, _experimental_image_keypoints );
 #endif
-
   // Draw detected blobs as red circles.
   // DrawMatchesFlags::DRAW_RICH_KEYPOINTS flag ensures
   // the size of the circle corresponds to the size of blob
-
   cv::Mat im_with_keypoints;
-  cv::drawKeypoints( dist_8u, keypoints, im_with_keypoints, cv::Scalar(0,0,255), cv::DrawMatchesFlags::DRAW_RICH_KEYPOINTS );
+  cv::Mat black_with_keypoints;
+  cv::Mat _experimental_keypoints = cv::Mat::zeros(_experimental_image_roi.size(),CV_8UC1);
+  cv::drawKeypoints( dist_8u, _experimental_image_keypoints, im_with_keypoints, cv::Scalar(0,0,255), cv::DrawMatchesFlags::DRAW_RICH_KEYPOINTS );
+  cv::drawKeypoints( _experimental_keypoints, _experimental_image_keypoints, black_with_keypoints, cv::Scalar(0,0,255), cv::DrawMatchesFlags::DRAW_RICH_KEYPOINTS );
 
   // Show blobs
   imwrite("experimental_keypoints.png", im_with_keypoints );
+  imwrite("experimental_keypoints_black.png", black_with_keypoints );
+  for( std::vector<cv::KeyPoint>::iterator _keypoint = _experimental_image_keypoints.begin(); _keypoint != _experimental_image_keypoints.end() ; _keypoint++ ){
+    cv::Point2f p = _keypoint->pt;
+    const double _keypoint_diameter = _keypoint->size;
+    const double _keypoint_radius_px = _keypoint_diameter * 0.5f; 
+    const double _keypoint_radius_nm = _keypoint_diameter * 0.5f * _sampling_rate_super_cell_x_nm_pixel; 
+    const double _keypoint_area_px = ( pow ( _keypoint_radius_px , _keypoint_radius_px ) )  * M_PI;
+    const double _keypoint_area_nm = _keypoint_area_px * _sampling_rate_super_cell_x_nm_pixel;
+    std::cout << _keypoint_radius_nm << std::endl;
 
-  dist.convertTo(dist_8u, CV_8U);
-  // Find total markers
-  std::vector<std::vector<cv::Point>> contours;
-  std::vector<cv::Vec4i> hierarchy;
-
-
-  cv::findContours(dist_8u, contours, hierarchy, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
-  // Create the marker image for the watershed algorithm
-  cv::Mat markers = cv::Mat::zeros(dist.size(), CV_32SC1);
-
-  // Draw the foreground markers
-  for (size_t i = 0; i < contours.size(); i++){
-    drawContours(markers, contours, static_cast<int>(i), cv::Scalar::all(static_cast<int>(i)+1), -1, 8, hierarchy, INT_MAX);
+    //std::cout << p <<  " radius: " << _keypoint_radius << " area: " << _keypoint_area << std::endl;
   }
-
-  imwrite("experimental_markers.png", markers);
-
-  cv::Mat _experimental_image_result_bgr ;
-
-  cv::cvtColor( _experimental_image_roi_bounded_mask, _experimental_image_result_bgr, CV_GRAY2BGR);
-
-  std::cout << "watershed src: " << _experimental_image_result_bgr.type() << std::endl;
-  std::cout << "watershed dst: " << markers.type() << std::endl;
-
-  watershed( _experimental_image_result_bgr , markers);
-
-  cv::Mat mark = cv::Mat::zeros(markers.size(), CV_8UC1);
-  markers.convertTo(mark, CV_8UC1);
-  bitwise_not(mark, mark);
-
-  //bitwise_not(mark, mark);
-  imwrite("experimental_markers_v2.png", mark); // uncomment this if you want to see how the mark
-  // image looks like at that point
-  // Generate random colors
-  std::vector<cv::Vec3b> colors;
-  for (size_t i = 0; i < contours.size(); i++)
-  {
-    int b = cv::theRNG().uniform(0, 255);
-    int g = cv::theRNG().uniform(0, 255);
-    int r = cv::theRNG().uniform(0, 255);
-    colors.push_back( cv::Vec3b((uchar)b, (uchar)g, (uchar)r));
-  }
-
-  // Create the result image
-  cv::Mat dst = cv::Mat::zeros(markers.size(), CV_8UC3);
-  // Fill labeled objects with random colors
-  for (int i = 0; i < markers.rows; i++){
-    for (int j = 0; j < markers.cols; j++){
-      int index = markers.at<int>(i,j);
-      if (index > 0 && index <= static_cast<int>(contours.size()))
-        dst.at<cv::Vec3b>(i,j) = colors[index-1];
-      else
-        dst.at<cv::Vec3b>(i,j) = cv::Vec3b(0,0,0);
-    }
-  }
-  // Visualize the final image
-  imwrite("experimental_final_result.png", dst);
-
-
 }
 
 void Super_Cell::remove_z_out_of_range_atoms(){
