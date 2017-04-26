@@ -1,20 +1,45 @@
 # the minimum version of CMake required
+cmake_minimum_required(VERSION 3.6.2)
 
 # THIS HAS TO COME BEFORE THE PROJECT LINE
 set(CMAKE_C_COMPILER "gcc")
 set(CMAKE_CXX_COMPILER "g++")
 # THIS HAS TO COME BEFORE THE PROJECT LINE
- set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 11)
 
- project(im2model LANGUAGES CXX)
+project(im2model LANGUAGES CXX)
 
 if(APPLE)
+  message(STATUS "Adding Apple definition")
   add_definitions(-DAPPLE)
 endif(APPLE)
 
-cmake_minimum_required(VERSION 3.1)
+if (WIN32)
+  macro(get_WIN32_WINNT version)
+    if (CMAKE_SYSTEM_VERSION)
+      set(ver ${CMAKE_SYSTEM_VERSION})
+      string(REGEX MATCH "^([0-9]+).([0-9])" ver ${ver})
+      string(REGEX MATCH "^([0-9]+)" verMajor ${ver})
+      # Check for Windows 10, b/c we'll need to convert to hex 'A'.
+      if ("${verMajor}" MATCHES "10")
+        set(verMajor "A")
+        string(REGEX REPLACE "^([0-9]+)" ${verMajor} ver ${ver})
+      endif ("${verMajor}" MATCHES "10")
+      # Remove all remaining '.' characters.
+      string(REPLACE "." "" ver ${ver})
+      # Prepend each digit with a zero.
+      string(REGEX REPLACE "([0-9A-Z])" "0\\1" ver ${ver})
+      set(${version} "0x${ver}")
+    endif(CMAKE_SYSTEM_VERSION)
+  endmacro(get_WIN32_WINNT)
 
-include(ExternalProject)
+  get_WIN32_WINNT(ver)
+  message(STATUS "Adding Windows definition")
+  add_definitions(-D_WIN32_WINNT=${ver})
+  ## visual studio
+  message(STATUS "Setting MSVC flags")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /EHc /std:c++latest")
+endif(WIN32)
 
 include(ExternalProject)
 ExternalProject_Add(
@@ -46,12 +71,12 @@ find_package(OpenMP)
 pkg_search_module(GLFW REQUIRED glfw3)
 
 
-include_directories(${BOOST_INCLUDE_DIRS})
+include_directories( ${BOOST_INCLUDE_DIRS} )
 include_directories( ${OPENGL_INCLUDE_DIRS} ) 
 include_directories( ${GLUT_INCLUDE_DIRS} )
 include_directories( ${GLEW_INCLUDE_DIRS} )
-include_directories(${OpenCV_INCLUDE_DIRS})
-include_directories(${GLFW_INCLUDE_DIRS})
+include_directories( ${OpenCV_INCLUDE_DIRS} )
+include_directories( ${GLFW_INCLUDE_DIRS} )
 
 set(CMAKE_BINARY_DIR ${CMAKE_SOURCE_DIR}/build)
 set(EXECUTABLE_OUTPUT_PATH ${CMAKE_BINARY_DIR})
