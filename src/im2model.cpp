@@ -862,6 +862,7 @@ int main(int argc, char** argv ){
       super_cell.set_super_cell_margin_nm( cel_margin_nm );
       /** SUPER CELL calculations **/
       super_cell.calculate_supercell_boundaries_from_experimental_image( cv::Point2f(roi_center_x, roi_center_y), edge_detection_threshold , max_contour_distance_px );
+      super_cell.calculate_atomic_columns_position_w_boundary_polygon();
       super_cell.create_atoms_from_unit_cell();
       super_cell.orientate_atoms_from_matrix();
       super_cell.remove_z_out_of_range_atoms();

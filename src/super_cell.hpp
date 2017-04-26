@@ -266,6 +266,7 @@ class Super_Cell {
     void read_simulated_super_cells_from_dat_files( );
     void match_experimental_simulated_super_cells( );
     void create_experimental_image_roi_mask_from_boundary_polygon();
+  void calculate_atomic_columns_position_w_boundary_polygon();
 };
 
 #endif

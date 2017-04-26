@@ -872,9 +872,203 @@ void Super_Cell::create_experimental_image_roi_mask_from_boundary_polygon(){
 
   imwrite( "experimental_image_roi_mask.png", _experimental_image_roi_mask );
   imwrite( "experimental_image_roi_w_margin_mask.png", _experimental_image_roi_mask_w_margin );
-
 }
 
+void Super_Cell::calculate_atomic_columns_position_w_boundary_polygon(){
+  assert( ! _experimental_image_roi.empty() );
+  assert( ! _experimental_image_roi_mask.empty() );
+
+  cv::Mat _experimental_image_roi_bounded_mask = cv::Mat::zeros(_experimental_image_roi.size(),CV_8UC1);
+  _experimental_image_roi.copyTo( _experimental_image_roi_bounded_mask , _experimental_image_roi_mask );
+  imwrite( "_experimental_image_roi_bounded_mask.png" , _experimental_image_roi_bounded_mask );
+
+
+  double min, max;
+  cv::minMaxLoc(_experimental_image_roi_bounded_mask, &min, &max);
+  cv::normalize (_experimental_image_roi_bounded_mask, _experimental_image_roi_bounded_mask, min, max, cv::NORM_MINMAX);
+
+
+
+  // Create a kernel that we will use for accuting/sharpening our image
+  cv::Mat kernel = (cv::Mat_<float>(3,3) <<
+      1,  1, 1,
+      1, -8, 1,
+      1,  1, 1);
+  // an approximation of second derivative, a quite strong kernel
+  // do the laplacian filtering as it is
+  // well, we need to convert everything in something more deeper then CV_8U
+  // because the kernel has some negative values,
+  // and we can expect in general to have a Laplacian image with negative values
+  // BUT a 8bits unsigned int (the one we are working with) can contain values from 0 to 255
+  // so the possible negative number will be truncated
+
+  cv::Mat _experimental_image_laplacian;
+  cv::Mat _experimental_image_sharp;
+  filter2D( _experimental_image_roi_bounded_mask, _experimental_image_laplacian, CV_32F, kernel);
+  _experimental_image_roi_bounded_mask.convertTo(_experimental_image_sharp, CV_32F);
+  cv::Mat _experimental_image_result = _experimental_image_sharp - _experimental_image_laplacian;
+
+  // convert back to 8bits gray scale
+  _experimental_image_result.convertTo( _experimental_image_result, CV_8UC3 );
+  _experimental_image_laplacian.convertTo( _experimental_image_laplacian, CV_8UC3 );
+
+  imwrite( "experimental_img_result.png", _experimental_image_result );
+
+  // Create binary image from source image
+  cv::Mat _experimental_image_bw;
+
+
+
+  //use Otsu algorithm to choose the optimal threshold value
+  cv::threshold( _experimental_image_result , _experimental_image_bw, 40, 255, CV_THRESH_BINARY | CV_THRESH_OTSU);
+  imwrite("experimental_binary_image_threshold.png", _experimental_image_bw);
+
+  // Perform the distance transform algorithm
+  cv::Mat dist;
+  cv::Mat dist_image;
+  cv::distanceTransform(_experimental_image_bw, dist, CV_DIST_L2, 3);
+
+  // Normalize the distance image for range = {0.0, 1.0}
+  // so we can visualize and threshold it
+  cv::normalize(dist, dist, 0, 1., cv::NORM_MINMAX);
+  cv::normalize(dist, dist_image, 0, 255, cv::NORM_MINMAX);
+
+  imwrite("experimental_distance_transform_image.png", dist_image);
+
+  // Threshold to obtain the peaks
+  // This will be the markers for the foreground objects
+  cv::threshold(dist, dist, .2, 1., CV_THRESH_BINARY );
+  cv::normalize(dist, dist_image, 0, 255, cv::NORM_MINMAX);
+  imwrite("experimental_distance_transform_image_after_threshold.png", dist_image);
+
+  // Dilate a bit the dist image
+  //cv::Mat kernel1 = cv::Mat::ones(3, 3, CV_8UC1);
+  //cv::dilate(dist, dist, kernel1);
+  cv::normalize(dist, dist_image, 0, 255, cv::NORM_MINMAX);
+  imwrite("experimental_distance_transform_image_after_dilate.png", dist_image);
+
+
+
+  // Create the CV_8U version of the distance image
+  // It is needed for findContours()
+  cv::Mat dist_8u;
+  dist_image.convertTo(dist_8u, CV_8UC1);
+
+  imwrite("experimental_distance_transform_image_after_dilate_8uc1.png", dist_8u );
+
+  // Setup SimpleBlobDetector parameters.
+  cv::SimpleBlobDetector::Params params;
+
+  // Change thresholds
+  params.minThreshold = 0;
+  params.maxThreshold = 256;
+
+  params.filterByColor = true;
+  params.blobColor = 255;
+
+  // Filter by Area.
+  params.filterByArea = false;
+  params.minArea = 2;
+
+  // Filter by Circularity
+  params.filterByCircularity = false;
+  params.minCircularity = 0.3;
+
+  // Filter by Convexity
+  params.filterByConvexity = false;
+  params.minConvexity = 0.3;
+
+  // Filter by Inertia
+  params.filterByInertia = false;
+  params.minInertiaRatio = 0.3;
+
+  // Storage for blobs
+  std::vector<cv::KeyPoint> keypoints;
+
+  // If you are using OpenCV 2
+#if CV_MAJOR_VERSION < 3
+  // Set up detector with params
+  cv::SimpleBlobDetector detector(params);
+  // Detect blobs
+  detector.detect( dist_8u, keypoints);
+#else
+
+  // Set up detector with params
+  cv::Ptr<cv::SimpleBlobDetector> detector = cv::SimpleBlobDetector::create(params);
+  // Detect blobs
+  detector->detect( dist_8u, keypoints);
+#endif
+
+  // Draw detected blobs as red circles.
+  // DrawMatchesFlags::DRAW_RICH_KEYPOINTS flag ensures
+  // the size of the circle corresponds to the size of blob
+
+  cv::Mat im_with_keypoints;
+  cv::drawKeypoints( dist_8u, keypoints, im_with_keypoints, cv::Scalar(0,0,255), cv::DrawMatchesFlags::DRAW_RICH_KEYPOINTS );
+
+  // Show blobs
+  imwrite("experimental_keypoints.png", im_with_keypoints );
+
+  dist.convertTo(dist_8u, CV_8U);
+  // Find total markers
+  std::vector<std::vector<cv::Point>> contours;
+  std::vector<cv::Vec4i> hierarchy;
+
+
+  cv::findContours(dist_8u, contours, hierarchy, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
+  // Create the marker image for the watershed algorithm
+  cv::Mat markers = cv::Mat::zeros(dist.size(), CV_32SC1);
+
+  // Draw the foreground markers
+  for (size_t i = 0; i < contours.size(); i++){
+    drawContours(markers, contours, static_cast<int>(i), cv::Scalar::all(static_cast<int>(i)+1), -1, 8, hierarchy, INT_MAX);
+  }
+
+  imwrite("experimental_markers.png", markers);
+
+  cv::Mat _experimental_image_result_bgr ;
+
+  cv::cvtColor( _experimental_image_roi_bounded_mask, _experimental_image_result_bgr, CV_GRAY2BGR);
+
+  std::cout << "watershed src: " << _experimental_image_result_bgr.type() << std::endl;
+  std::cout << "watershed dst: " << markers.type() << std::endl;
+
+  watershed( _experimental_image_result_bgr , markers);
+
+  cv::Mat mark = cv::Mat::zeros(markers.size(), CV_8UC1);
+  markers.convertTo(mark, CV_8UC1);
+  bitwise_not(mark, mark);
+
+  //bitwise_not(mark, mark);
+  imwrite("experimental_markers_v2.png", mark); // uncomment this if you want to see how the mark
+  // image looks like at that point
+  // Generate random colors
+  std::vector<cv::Vec3b> colors;
+  for (size_t i = 0; i < contours.size(); i++)
+  {
+    int b = cv::theRNG().uniform(0, 255);
+    int g = cv::theRNG().uniform(0, 255);
+    int r = cv::theRNG().uniform(0, 255);
+    colors.push_back( cv::Vec3b((uchar)b, (uchar)g, (uchar)r));
+  }
+
+  // Create the result image
+  cv::Mat dst = cv::Mat::zeros(markers.size(), CV_8UC3);
+  // Fill labeled objects with random colors
+  for (int i = 0; i < markers.rows; i++){
+    for (int j = 0; j < markers.cols; j++){
+      int index = markers.at<int>(i,j);
+      if (index > 0 && index <= static_cast<int>(contours.size()))
+        dst.at<cv::Vec3b>(i,j) = colors[index-1];
+      else
+        dst.at<cv::Vec3b>(i,j) = cv::Vec3b(0,0,0);
+    }
+  }
+  // Visualize the final image
+  imwrite("experimental_final_result.png", dst);
+
+
+}
 
 void Super_Cell::remove_z_out_of_range_atoms(){
   /* general assertions */
@@ -1163,7 +1357,7 @@ void Super_Cell::match_experimental_simulated_super_cells(){
   _experimental_pos_best_match_rectangle.y = simulated_defocus_map_match_positions.at(dist).y;
   _experimental_pos_best_match_rectangle.width = _experimental_image_roi.cols;
   _experimental_pos_best_match_rectangle.height = _experimental_image_roi.rows;
-  
+
   std::cout << "experimental data: " << _experimental_pos_best_match_rectangle << std::endl;
   _best_match_simulated_image_raw = simulated_defocus_map_raw_images.at(dist);
   std::cout << "simulated data: " << _best_match_simulated_image_raw.size() << std::endl;
@@ -1203,15 +1397,15 @@ void Super_Cell::match_experimental_simulated_super_cells(){
   }
   std::cout << "WARP matrix" <<std::endl <<  motion_euclidean_warp_matrix << std::endl;
 
-    
-    motion_euclidean_warp_matrix.at<float>( 0, 2 ) -= simulated_defocus_map_match_positions.at(dist).x;
-    motion_euclidean_warp_matrix.at<float>( 1, 2 ) -= simulated_defocus_map_match_positions.at(dist).y;
-    
-    cv::Mat raw_transformed_simulated_image = cv::Mat( _cel_wout_margin_ny_px, _cel_wout_margin_nx_px, CV_8UC1);
-    
-    warpAffine(_best_match_simulated_image_raw, raw_transformed_simulated_image, motion_euclidean_warp_matrix, _best_match_simulated_image_raw.size(), cv::INTER_LINEAR );
 
-    
+  motion_euclidean_warp_matrix.at<float>( 0, 2 ) -= simulated_defocus_map_match_positions.at(dist).x;
+  motion_euclidean_warp_matrix.at<float>( 1, 2 ) -= simulated_defocus_map_match_positions.at(dist).y;
+
+  cv::Mat raw_transformed_simulated_image = cv::Mat( _cel_wout_margin_ny_px, _cel_wout_margin_nx_px, CV_8UC1);
+
+  warpAffine(_best_match_simulated_image_raw, raw_transformed_simulated_image, motion_euclidean_warp_matrix, _best_match_simulated_image_raw.size(), cv::INTER_LINEAR );
+
+
   //_experimental_pos_best_match_rectangle.x = (int) motion_euclidean_warp_matrix.at<float>( 0, 2 );
   //_experimental_pos_best_match_rectangle.y = (int) motion_euclidean_warp_matrix.at<float>( 1, 2 );
 
