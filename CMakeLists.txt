@@ -58,7 +58,6 @@ set(Boost_USE_STATIC_LIBS ON)
 set(Boost_USE_MULTITHREADED ON)  
 set(Boost_USE_STATIC_RUNTIME OFF) 
 
-find_package(PkgConfig REQUIRED)
 find_package(Boost COMPONENTS program_options filesystem thread REQUIRED)
 find_package(OpenGL REQUIRED)
 find_package(GLUT REQUIRED)
@@ -66,7 +65,8 @@ find_package(GLEW REQUIRED)
 find_package(OpenCV  3.0.0 REQUIRED)
 find_package(BISON REQUIRED)
 find_package(FLEX REQUIRED)
-find_package(OpenMP)
+find_package(PkgConfig REQUIRED)
+#find_package(OpenMP)
 
 pkg_search_module(GLFW REQUIRED glfw3)
 
@@ -82,10 +82,10 @@ set(CMAKE_BINARY_DIR ${CMAKE_SOURCE_DIR}/build)
 set(EXECUTABLE_OUTPUT_PATH ${CMAKE_BINARY_DIR})
 set(LIBRARY_OUTPUT_PATH ${CMAKE_BINARY_DIR})
 
-if (OPENMP_FOUND)
-  set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
-  set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
-endif()
+#if (OPENMP_FOUND)
+#  set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
+#  set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+#endif()
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -Wall -Wno-deprecated-register -std=c++0x -Wconversion")
 
