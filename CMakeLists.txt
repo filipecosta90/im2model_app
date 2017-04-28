@@ -1,12 +1,7 @@
 # the minimum version of CMake required
-cmake_minimum_required(VERSION 3.6.2)
+cmake_minimum_required(VERSION 3.8)
 
-# THIS HAS TO COME BEFORE THE PROJECT LINE
-set(CMAKE_C_COMPILER "gcc")
-set(CMAKE_CXX_COMPILER "g++")
-# THIS HAS TO COME BEFORE THE PROJECT LINE
 set(CMAKE_CXX_STANDARD 11)
-
 project(im2model LANGUAGES CXX)
 
 if(APPLE)
@@ -39,6 +34,9 @@ if (WIN32)
   ## visual studio
   message(STATUS "Setting MSVC flags")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /EHc /std:c++latest")
+else()
+  message(status "Setting GCC flags")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fexceptions -g -Wall")
 endif(WIN32)
 
 include(ExternalProject)
@@ -54,12 +52,27 @@ ExternalProject_Add(
 ExternalProject_Get_Property(glm source_dir)
 set(GlmIncludeDir ${source_dir}/glm)
 
-set(Boost_USE_STATIC_LIBS ON) 
-set(Boost_USE_MULTITHREADED ON)  
-set(Boost_USE_STATIC_RUNTIME OFF) 
+find_package(OpenCV  3.2.0 REQUIRED)
 
-find_package(OpenCV  3.0.0 REQUIRED)
-find_package(Boost COMPONENTS program_options filesystem thread REQUIRED)
+if (WIN32)
+  message(STATUS "Setting Boost flags for Windows")
+SET (Boost_FIND_REQUIRED TRUE)
+SET (Boost_FIND_QUIETLY TRUE)
+SET (Boost_DEBUG TRUE)
+set (Boost_USE_MULTITHREADED TRUE)
+set(Boost_USE_STATIC_LIBS        OFF)
+set(Boost_USE_STATIC_RUNTIME     OFF)
+set(BOOST_ALL_DYN_LINK           TRUE)   # force dynamic linking for all libraries
+set(Boost_COMPILER "-vc141")
+else()
+  message(STATUS "Setting Boost flags for Unix")
+  set(Boost_USE_STATIC_LIBS        ON)
+  set (Boost_USE_MULTITHREADED TRUE)
+  set(Boost_USE_STATIC_RUNTIME     OFF)
+endif(WIN32)
+
+find_package(Boost 1.64.0 COMPONENTS program_options filesystem thread REQUIRED)
+
 find_package(OpenGL REQUIRED)
 find_package(GLUT REQUIRED)
 find_package(GLEW REQUIRED)
@@ -69,7 +82,6 @@ find_package(PkgConfig REQUIRED)
 #find_package(OpenMP)
 
 pkg_search_module(GLFW REQUIRED glfw3)
-
 
 include_directories( ${BOOST_INCLUDE_DIRS} )
 include_directories( ${OPENGL_INCLUDE_DIRS} ) 
