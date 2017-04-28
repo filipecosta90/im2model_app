@@ -26,7 +26,7 @@ add_executable( im2model
   ${BISON_mc_parser_OUTPUTS}
   )
 
-  # Properties->C/C++->General->Additional Include Directories
+# Properties->C/C++->General->Additional Include Directories
 target_include_directories( im2model PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR} )
 
 # Properties->Linker->Input->Additional Dependencies
@@ -35,15 +35,15 @@ target_link_libraries( im2model
   ${Boost_LIBRARIES} 
   )
 
-  # Creates a folder "executables" and adds target 
+# Creates a folder "executables" and adds target 
 # project (app.vcproj) under it
 set_property(TARGET im2model PROPERTY FOLDER "executables")
 
 # Properties->General->Output Directory
 set_target_properties(im2model PROPERTIES
-                      RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin)
+  RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin)
 
 # Adds logic to INSTALL.vcproj to copy app.exe to destination directory
 install (TARGETS im2model
-RUNTIME DESTINATION ${PROJECT_SOURCE_DIR}/_install)
+  RUNTIME DESTINATION ${PROJECT_SOURCE_DIR}/_install)
 
