@@ -28,6 +28,8 @@ add_executable( im2model
 
 # Properties->C/C++->General->Additional Include Directories
 include_directories( ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR} )
+include_directories( ${BOOST_INCLUDE_DIRS} )
+include_directories( ${OpenCV_INCLUDE_DIRS} )
 
 # Properties->Linker->Input->Additional Dependencies
 target_link_libraries( im2model
