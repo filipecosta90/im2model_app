@@ -1,12 +1,6 @@
 #ifndef __UNIT_CELL_H__
 #define __UNIT_CELL_H__
 
-// visualization
-#include <GL/glut.h> 
-
-#include <glm/glm.hpp>
-#include <glm/vec4.hpp>  
-
 // opencv 
 #include <opencv2/opencv.hpp>
 #include "opencv2/highgui/highgui.hpp"
@@ -67,12 +61,12 @@ class Unit_Cell {
     std::vector<double> _atom_occupancies;
     std::vector<double> _atoms_debye_waller_factor;
     std::vector<double> _atom_radii;
-    std::vector<glm::vec4> _atom_cpk_rgba_colors;
+    std::vector<cv::Vec4d> _atom_cpk_rgba_colors;
     std::vector<double> _atom_empirical_radii;
     //vertex buffer for points
 
     //vertex buffer for colors
-    std::vector<glm::vec4> _atom_rgba_colors;
+    std::vector<cv::Vec4d> _atom_rgba_colors;
 
     /** Orientation **/
     cv::Mat orientation_matrix;
@@ -121,7 +115,7 @@ class Unit_Cell {
     std::vector<double> get_atom_occupancy_vec();
     std::vector<double> get_atom_debye_waller_factor_vec();
     std::vector<cv::Point3d> get_symetry_atom_positions_vec();
-    std::vector<glm::vec4> get_atom_cpk_rgba_colors_vec();
+    std::vector<cv::Vec4d> get_atom_cpk_rgba_colors_vec();
     std::vector<double> get_atom_radii_vec();
     std::vector<double> get_atom_empirical_radii_vec();
 

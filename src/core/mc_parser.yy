@@ -31,7 +31,7 @@
    #include <fstream>
    
    /* include for all driver functions */
-   #include "core/mc_driver.hpp"
+   #include "mc_driver.hpp"
 
 #undef yylex
 #define yylex scanner.yylex

@@ -1,8 +1,7 @@
 
-#include <glm/glm.hpp>
-#include <glm/vec4.hpp>
 #include "atom_info.hpp"
 
+#include <opencv2/opencv.hpp> 
 //! Constructor.
 Atom_Info::Atom_Info(
     std::string type_name,
@@ -109,23 +108,23 @@ double Atom_Info::vanDerWaalsRadius()  {
 }
 
 //! Returns the atom's CPK color
-glm::vec4 Atom_Info::cpkColor() {
+cv::Vec4d Atom_Info::cpkColor() {
   float r,g,b,a;
   r = ((mCPKColor >> 16) & 0xFF) / 255.0f;
   g = ((mCPKColor >> 8)  & 0xFF) / 255.0f;
   b =  (mCPKColor        & 0xFF) / 255.0f;
   a = 1.0f;
-  glm::vec4 Color(r,g,b,a);
+  cv::Vec4d Color(r,g,b,a);
   return Color;
 }
 
 //! Returns the atom's RasMol color
-glm::vec4 Atom_Info::rasmolColor() {
+cv::Vec4d Atom_Info::rasmolColor() {
   float r,g,b,a;
   r = ((mRasMolColor >> 16) & 0xFF) / 255.0f;
   g = ((mRasMolColor >> 8)  & 0xFF) / 255.0f;
   b =  (mRasMolColor        & 0xFF) / 255.0f;
   a = 1.0f;
-  glm::vec4 Color(r,g,b,a);
+  cv::Vec4d Color(r,g,b,a);
   return Color;
 }

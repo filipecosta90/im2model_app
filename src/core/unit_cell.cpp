@@ -168,7 +168,7 @@ std::vector<cv::Point3d> Unit_Cell::get_symetry_atom_positions_vec( ){
   return _symetry_atom_positions;
 }
 
-std::vector<glm::vec4> Unit_Cell::get_atom_cpk_rgba_colors_vec( ){
+std::vector<cv::Vec4d> Unit_Cell::get_atom_cpk_rgba_colors_vec( ){
   return _atom_cpk_rgba_colors;
 }
 
@@ -214,8 +214,8 @@ bool Unit_Cell::create_atoms_from_site_and_symetry(){
     std::cout << "Atom symbol " << atom_type_symbol << std::endl;
     std::cout << "Atom occupancy " << atom_occupancy << std::endl;
     std::cout << "Atom radious " << atom_radious << std::endl;
-    glm::vec4 cpk_color = atom_info.cpkColor();
-    std::cout << "Color CPK RGBA " << cpk_color.r << " , " << cpk_color.g << " , " << cpk_color.b << " , " << cpk_color.a  << std::endl;
+    cv::Vec4d cpk_color = atom_info.cpkColor();
+//std::cout << "Color CPK RGBA " << cpk_color.r << " , " << cpk_color.g << " , " << cpk_color.b << " , " << cpk_color.a  << std::endl;
 
     for( int value_list_pos = 0; value_list_pos < _symmetry_equiv_pos_as_x.size(); value_list_pos++ ) {
       std::string symetry_x = _symmetry_equiv_pos_as_x.at(value_list_pos); 

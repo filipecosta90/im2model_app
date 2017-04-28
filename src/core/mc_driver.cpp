@@ -7,9 +7,10 @@
 #include <iostream>
 #include <cctype>
 
-#include "mc_driver.hpp"
+
 #include "unit_cell.hpp"
 #include "string_additions.hpp"
+#include "mc_driver.hpp"
 
 MC::MC_Driver::~MC_Driver(){
   delete(scanner);

@@ -39,14 +39,14 @@
 #include <boost/token_functions.hpp>
 
 // project classes
-#include "core/celslc_prm.hpp"
-#include "core/msa_prm.hpp"
-#include "core/wavimg_prm.hpp"
-#include "core/simgrid_steplength.hpp"
+#include "celslc_prm.hpp"
+#include "msa_prm.hpp"
+#include "wavimg_prm.hpp"
+#include "simgrid_steplength.hpp"
 #include "mc_driver.hpp"
-#include "core/unit_cell.hpp"
-#include "core/super_cell.hpp"
-#include "core/chem_database.hpp"
+#include "unit_cell.hpp"
+#include "super_cell.hpp"
+#include "chem_database.hpp"
 
 // vis classes
 //#include "program.hpp"

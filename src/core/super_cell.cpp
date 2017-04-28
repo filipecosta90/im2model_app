@@ -301,7 +301,7 @@ std::vector<cv::Point3d> Super_Cell::get_atom_positions_vec( ){
   return _atom_positions;
 }
 
-std::vector<cv::vec4d> Super_Cell::get_atom_cpk_rgba_colors_vec( ){
+std::vector<cv::Vec4d> Super_Cell::get_atom_cpk_rgba_colors_vec( ){
   return _atom_cpk_rgba_colors;
 }
 

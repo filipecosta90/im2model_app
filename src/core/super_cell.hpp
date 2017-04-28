@@ -53,7 +53,7 @@ class Super_Cell {
     std::vector<std::string> _super_cell_atom_symbol_string;
     std::vector<double> _super_cell_atom_site_occupancy;
     std::vector<double> _super_cell_atom_debye_waller_factor;
-    std::vector<cv::vec4d> _atom_cpk_rgba_colors;
+    std::vector<cv::Vec4d> _atom_cpk_rgba_colors;
     std::vector<double> _atom_empirical_radii;
 
     /** .cel **/
@@ -236,7 +236,7 @@ class Super_Cell {
     double get_fractional_norm_c_atom_pos_Nanometers();
 
     std::vector<cv::Point3d> get_atom_positions_vec();
-    std::vector<cv::vec4d> get_atom_cpk_rgba_colors_vec();
+    std::vector<cv::Vec4d> get_atom_cpk_rgba_colors_vec();
     std::vector<double> get_atom_empirical_radii_vec();
 
     int get_super_cell_nx_px();
