@@ -11,7 +11,6 @@
 #include "unit_cell.hpp"
 #include "string_additions.hpp"
 
-
 MC::MC_Driver::~MC_Driver(){
   delete(scanner);
   scanner = nullptr;

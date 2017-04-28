@@ -38,28 +38,19 @@
 #include <boost/tokenizer.hpp>
 #include <boost/token_functions.hpp>
 
-// Visualization
-// third-party libraries
-#include <GL/glew.h>
-#include <GLFW/glfw3.h>
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtx/string_cast.hpp>
-#include "opengl.hpp"
-
 // project classes
-#include "celslc_prm.hpp"
-#include "msa_prm.hpp"
-#include "wavimg_prm.hpp"
-#include "simgrid_steplength.hpp"
+#include "core/celslc_prm.hpp"
+#include "core/msa_prm.hpp"
+#include "core/wavimg_prm.hpp"
+#include "core/simgrid_steplength.hpp"
 #include "mc_driver.hpp"
-#include "unit_cell.hpp"
-#include "super_cell.hpp"
-#include "chem_database.hpp"
+#include "core/unit_cell.hpp"
+#include "core/super_cell.hpp"
+#include "core/chem_database.hpp"
 
 // vis classes
-#include "program.hpp"
-#include "camera.hpp"
+//#include "program.hpp"
+//#include "camera.hpp"
 
 using namespace cv;
 

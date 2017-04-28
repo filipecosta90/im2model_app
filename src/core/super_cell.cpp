@@ -27,13 +27,9 @@
 #include <opencv2/core/core.hpp>
 #include <opencv/cv.hpp>
 #include <opencv2/opencv_modules.hpp>
-#include <opencv2/core/core.hpp>
 #include <opencv2/features2d/features2d.hpp>
 #include <opencv2/calib3d/calib3d.hpp>
 
-// Visualization
-#include <GL/glut.h>
-#include <glm/gtx/string_cast.hpp>
 #include "super_cell.hpp"
 #include "unit_cell.hpp"
 #include "symbcalc.hpp"
@@ -305,7 +301,7 @@ std::vector<cv::Point3d> Super_Cell::get_atom_positions_vec( ){
   return _atom_positions;
 }
 
-std::vector<glm::vec4> Super_Cell::get_atom_cpk_rgba_colors_vec( ){
+std::vector<cv::vec4d> Super_Cell::get_atom_cpk_rgba_colors_vec( ){
   return _atom_cpk_rgba_colors;
 }
 

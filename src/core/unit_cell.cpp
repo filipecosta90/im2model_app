@@ -15,9 +15,6 @@
 #include <vector>
 #include <stdio.h>
 
-// Visualization
-#include <GL/glut.h>
-
 #include "unit_cell.hpp"
 #include "symbcalc.hpp"
 #include "chem_database.hpp"

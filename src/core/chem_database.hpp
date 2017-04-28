@@ -35,7 +35,6 @@
 #include <map>
 #include <string>
 
-#include <glm/glm.hpp>
 #include "atom_info.hpp"
 
 class Chem_Database{

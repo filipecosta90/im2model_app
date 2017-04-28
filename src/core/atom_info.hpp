@@ -1,8 +1,7 @@
 #ifndef __ATOM_INFO_H__ 
 #define __ATOM_INFO_H__ 
 
-#include <glm/glm.hpp>
-#include <glm/vec4.hpp>
+#include "opencv2/core/core.hpp"
 #include <string>
 
 //! Encapsulates information regarding an atom type.
@@ -73,10 +72,10 @@ class Atom_Info
     double vanDerWaalsRadius();
 
     //! Returns the atom's CPK color
-    glm::vec4 cpkColor();
+    cv::Vec4d cpkColor();
 
     //! Returns the atom's RasMol color
-    glm::vec4 rasmolColor();
+    cv::Vec4d rasmolColor();
 
   private:
 
