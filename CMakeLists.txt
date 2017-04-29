@@ -29,8 +29,6 @@ find_package(OpenCV  3.0.0 REQUIRED)
 
 if (WIN32)
   message(STATUS "Setting Boost flags for Windows")
-  SET (Boost_FIND_REQUIRED TRUE)
-  SET (Boost_FIND_QUIETLY TRUE)
   SET (Boost_DEBUG TRUE)
   set (Boost_USE_MULTITHREADED TRUE)
   set(Boost_USE_STATIC_LIBS        OFF)

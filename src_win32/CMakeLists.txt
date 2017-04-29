@@ -1,6 +1,11 @@
 # Properties->C/C++->General->Additional Include Directories
-include_directories( ${BOOST_INCLUDE_DIRS} )
 include_directories( ${OpenCV_INCLUDE_DIRS} )
+
+  message(STATUS " Includes - ${Boost_INCLUDE_DIRS}")
+  message(STATUS " Library  - ${Boost_LIBRARY_DIRS}")
+include_directories( ${Boost_INCLUDE_DIRS} )
+
+link_directories(${Boost_LIBRARY_DIRS})
 
 # Set Properties->General->Configuration Type to Application(.exe)
 # Creates app.exe with the listed sources (main.cxx)
