@@ -1,5 +1,6 @@
 # the minimum version of CMake required
 cmake_minimum_required(VERSION 3.6.2)
+set (CMAKE_CXX_STANDARD 14)
 
 project( MSC_IM2MODEL )
 
@@ -46,5 +47,10 @@ find_package(BISON REQUIRED)
 find_package(FLEX REQUIRED)
 
 # we add the sub-directories that we want CMake to scan
-add_subdirectory(src)
+if (WIN32)
+ add_subdirectory(src_win32)
+else()
+ add_subdirectory(src)
+endif(WIN32)
+
 

@@ -8,7 +8,7 @@
 #include <cassert>
 #include <fcntl.h>
 #include <sys/types.h>
-#include <unistd.h>
+
 #include <sys/stat.h>
 #include <sys/mman.h>
 #include <cstdio>
@@ -57,15 +57,16 @@ using namespace cv;
 // Global Variables
 
 #ifdef _WIN32
-std::string celslc_bin_string =  "../bin/drprobe_clt_bin_winx64/celslc";
+std::string celslc_bin_string =  "../simulation/bin/drprobe_clt_bin_winx64/celslc";
 std::string msa_bin_string = "../bin/drprobe_clt_bin_winx64/msa";
 std::string wavimg_bin_string = "../bin/drprobe_clt_bin_winx64/wavimg";
 #elif defined __unix__
 ////do something for unix like #include <unistd.h>
+#include <unistd.h>
 #elif defined __APPLE__
-std::string celslc_bin_string =  "../bin/drprobe_clt_bin_osx/celslc";
-std::string msa_bin_string = "../bin/drprobe_clt_bin_osx/msa";
-std::string wavimg_bin_string = "../bin/drprobe_clt_bin_osx/wavimg";
+std::string celslc_bin_string =  "../simulation/bin/drprobe_clt_bin_osx/celslc";
+std::string msa_bin_string = "../simulation/bin/drprobe_clt_bin_osx/msa";
+std::string wavimg_bin_string = "../simulation/bin/drprobe_clt_bin_osx/wavimg";
 #endif
 
 
