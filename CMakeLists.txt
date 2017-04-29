@@ -46,10 +46,6 @@ find_package(Boost 1.64.0 COMPONENTS program_options filesystem thread REQUIRED)
 find_package(BISON REQUIRED)
 find_package(FLEX REQUIRED)
 
-set(CMAKE_BINARY_DIR ${CMAKE_SOURCE_DIR}/build)
-
-#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -Wall -Wno-deprecated-register -std=c++0x -Wconversion")
-
 # we add the sub-directories that we want CMake to scan
 add_subdirectory(src)
 
