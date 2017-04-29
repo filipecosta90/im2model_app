@@ -5,7 +5,7 @@ include_directories( ${OpenCV_INCLUDE_DIRS} )
 # Set Properties->General->Configuration Type to Application(.exe)
 # Creates app.exe with the listed sources (main.cxx)
 # Adds sources to the Solution Explorer
-add_executable( app mai.cxx )
+add_executable( app main.cxx )
 
 # Properties->Linker->Input->Additional Dependencies
 target_link_libraries( app ${OpenCV_LIBS} ${Boost_LIBRARIES} )

@@ -1,6 +1,6 @@
 # the minimum version of CMake required
 cmake_minimum_required(VERSION 3.6.2)
-set (CMAKE_CXX_STANDARD 14)
+set (CMAKE_CXX_STANDARD 11)
 
 project( MSC_IM2MODEL )
 
@@ -23,6 +23,8 @@ else()
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fexceptions -g -Wall")
 endif(WIN32)
 
+set(OpenCV_STATIC OFF)
+set(BUILD_SHARED_LIBS ON)
 find_package(OpenCV  3.0.0 REQUIRED)
 
 if (WIN32)
@@ -31,9 +33,9 @@ if (WIN32)
   SET (Boost_FIND_QUIETLY TRUE)
   SET (Boost_DEBUG TRUE)
   set (Boost_USE_MULTITHREADED TRUE)
-  set(Boost_USE_STATIC_LIBS        TRUE)
+  set(Boost_USE_STATIC_LIBS        OFF)
   set(Boost_USE_STATIC_RUNTIME     OFF)
-  set(BOOST_ALL_DYN_LINK           FALSE)   # force dynamic linking for all libraries
+  set(BOOST_ALL_DYN_LINK           TRUE)   # force dynamic linking for all libraries
   set(Boost_COMPILER "-vc141")
 else()
   message(STATUS "Setting Boost flags for Unix")
