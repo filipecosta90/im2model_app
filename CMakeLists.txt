@@ -1,6 +1,6 @@
 # the minimum version of CMake required
 cmake_minimum_required(VERSION 3.6.2)
-set (CMAKE_CXX_STANDARD 11)
+set (CMAKE_CXX_STANDARD 17)
 
 project( MSC_IM2MODEL )
 
@@ -17,7 +17,7 @@ endif(APPLE)
 if (WIN32)
   ## visual studio
   message(STATUS "Setting MSVC flags")
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /EHc /std:c++latest")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /EHc /std:c++14")
 else()
   message(status "Setting GCC flags")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fexceptions -g -Wall")
