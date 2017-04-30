@@ -46,9 +46,15 @@ find_package(Boost 1.64.0 COMPONENTS program_options filesystem thread REQUIRED)
 find_package(BISON REQUIRED)
 find_package(FLEX REQUIRED)
 
+# unistd.h in windows
+#if (WIN32)
+#FIND_PACKAGE(GNUWIN32 REQUIRED)
+#endif(WIN32)
+
 # we add the sub-directories that we want CMake to scan
 if (WIN32)
- add_subdirectory(src_win32)
+#add_subdirectory(src)
+add_subdirectory(src_win32)
 else()
  add_subdirectory(src)
 endif(WIN32)

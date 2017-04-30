@@ -7,6 +7,13 @@ include_directories( ${Boost_INCLUDE_DIRS} )
 
 link_directories(${Boost_LIBRARY_DIRS})
 
+MESSAGE( STATUS "CMAKE_INCLUDE_PATH: " ${CMAKE_INCLUDE_PATH} )
+MESSAGE( STATUS "CMAKE_LIBRARY_PATH: " ${CMAKE_LIBRARY_PATH} )
+
+## this should include unistd.h
+include_directories( ${CMAKE_INCLUDE_PATH} )
+link_directories( ${CMAKE_LIBRARY_PATH} )
+
 # Set Properties->General->Configuration Type to Application(.exe)
 # Creates app.exe with the listed sources (main.cxx)
 # Adds sources to the Solution Explorer

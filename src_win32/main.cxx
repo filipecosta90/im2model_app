@@ -30,6 +30,7 @@
 #include <boost/tokenizer.hpp>
 #include <boost/token_functions.hpp>
 
+#include "unistd.h"
 
 int main (int argc, char *argv[])
 {
