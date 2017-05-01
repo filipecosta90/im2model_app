@@ -1,6 +1,8 @@
 
 #include <opencv2/core/hal/interface.h>                   // for CV_8UC1
 #include <opencv2/imgcodecs/imgcodecs_c.h>                // for ::CV_LOAD_I...
+#include <boost/process.hpp>
+
 #include <boost/tokenizer.hpp>
 #include <boost/program_options.hpp>               // for error
 #include <cassert>                                        // for assert
@@ -533,7 +535,7 @@ int main(int argc, char** argv ){
     celslc_parameters.set_bin_path( celslc_bin_string );
     if (celslc_switch == true ){
       //celslc_parameters.call_bin_ssc();
-      celslc_parameters.call_bin();
+      celslc_parameters.call_boost_bin();
     }
     nz_simulated_partitions = celslc_parameters.get_nz_simulated_partitions();
 

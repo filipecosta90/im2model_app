@@ -21,7 +21,6 @@ if (WIN32)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /EHc /std:c++14")
 else()
   message(status "Setting GCC flags")
-  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -stdlib=libc++ -lc++abi")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fexceptions -g -Wall")
 endif(WIN32)
 
@@ -44,7 +43,7 @@ else()
   set(Boost_USE_STATIC_RUNTIME     OFF)
 endif(WIN32)
 
-find_package(Boost 1.64.0 COMPONENTS program_options filesystem thread REQUIRED)
+find_package(Boost 1.64.0 COMPONENTS system program_options filesystem thread REQUIRED)
 
 #SET ( BISON_EXECUTABLE C:\ProgramData\chocolatey\lib\winflexbison3\tools\win_bison.exe )
 find_package(BISON REQUIRED)

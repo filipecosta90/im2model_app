@@ -1,6 +1,7 @@
 #include "celslc_prm.hpp"
 #include <opencv2/core/hal/interface.h>        // for CV_64F
 #include <stdlib.h>                            // for EXIT_FAILURE, EXIT_SUC...
+#include <boost/process.hpp>
 #include <sys/_types/_s_ifmt.h>                // for S_IRUSR, S_IWUSR
 #include <sys/fcntl.h>                         // for open, O_CREAT, O_RDWR
 #include <sys/wait.h>                          // for waitpid, WEXITSTATUS
@@ -322,6 +323,60 @@ bool CELSLC_prm::cleanup_bin(){
   boost::thread t( &CELSLC_prm::cleanup_thread , this ); 
   runned_bin = false; 
   return EXIT_SUCCESS;
+}
+
+bool CELSLC_prm::call_boost_bin(){
+  std::stringstream args_stream;
+  args_stream << bin_path;
+
+  if( cif_format_switch  ){
+    args_stream << " -cif " << super_cell_cif_file;
+  }
+  else{
+    if( cel_format_switch  ){
+      args_stream << " -cel " << super_cell_cel_file;
+    }
+  }
+  args_stream << " -slc " << slc_file_name_prefix;
+  // input nx string
+  args_stream << " -nx " << nx_simulated_horizontal_samples;
+  // input ny string
+  args_stream << " -ny " << ny_simulated_vertical_samples;
+  // input ht
+  args_stream << " -ht " << ht_accelaration_voltage;
+
+  if( projection_dir_hkl_switch && projected_dir_uvw_switch && super_cell_size_switch ){
+    args_stream << " -prj " << (float) prj_dir_h  << "," << (float) prj_dir_k << "," << (float) prj_dir_l << ","  
+      <<  prp_dir_u << "," << prp_dir_v << "," << prp_dir_w << "," 
+      << (float) super_cell_size_a << "," << (float) super_cell_size_b << "," << (float) super_cell_size_c;
+  }
+
+  /**  
+   * Equidistant slicing of the super-cell along the c-axis. 
+   * Specify an explicit number of slices, 
+   * or use -nz 0 to let CELSLC determine the number of equidistant slices automatically. 
+   * Omitting the -nz option will lead to an automatic non-equidistant slicing. 
+   * **/
+  if( !auto_non_equidistant_slices_switch ){
+    args_stream << " -nz ";
+    // input nz string
+    if( auto_equidistant_slices_switch ){
+      //let CELSLC determine the number of equidistant slices automatically
+      args_stream << "0"; 
+    }
+    else{
+      //Specify an explicit number of slices
+      args_stream << nz_simulated_partitions;
+    }
+  }
+
+  if ( dwf_switch ){
+    args_stream << " -dwf";
+  }
+  if ( abs_switch ){
+    args_stream << " -abs";
+  }
+  boost::process::system( args_stream.str() ); 
 }
 
 bool CELSLC_prm::call_bin(){

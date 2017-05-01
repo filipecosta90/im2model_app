@@ -119,7 +119,7 @@ class CELSLC_prm {
     bool cleanup_bin();
     
     bool call_bin();
-
+    bool call_boost_bin();
     bool call_bin_ssc();
 };
 
