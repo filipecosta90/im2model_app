@@ -1,12 +1,9 @@
 #include <cctype>
 #include <fstream>
 #include <cassert>
-
 #include <algorithm>
 #include <string>
 #include <iostream>
-#include <cctype>
-
 
 #include "unit_cell.hpp"
 #include "string_additions.hpp"

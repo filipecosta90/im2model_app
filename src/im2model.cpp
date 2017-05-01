@@ -5,12 +5,10 @@
 #include <list>
 #include <cctype>
 #include <fstream>
-#include <cassert>
 #include <fcntl.h>
 #include <sys/types.h>
 
 #include <sys/stat.h>
-#include <sys/mman.h>
 #include <cstdio>
 #include <sstream>      // std::stringstream
 #include <string>       // std::string

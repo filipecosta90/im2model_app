@@ -35,7 +35,6 @@
 #include "symbcalc.hpp"
 #include "chem_database.hpp"
 #include "atom_info.hpp"
-#include "chem_database.hpp"
 #include "edge.hpp"
 
 // Parallel construction

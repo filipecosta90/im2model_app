@@ -19,7 +19,6 @@
 #include "symbcalc.hpp"
 #include "chem_database.hpp"
 #include "atom_info.hpp"
-#include "chem_database.hpp"
 
 Unit_Cell::Unit_Cell(){
   orientation_matrix.create(3,3, CV_64FC1);
