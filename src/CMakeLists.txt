@@ -31,7 +31,10 @@ add_executable( app ${im2model_core_src} mc_driver.cpp ${FLEX_mc_lexer_OUTPUTS} 
 # Properties->Linker->Input->Additional Dependencies
 target_link_libraries( app ${OpenCV_LIBS} ${Boost_LIBRARIES} )
 
-set_target_properties( app PROPERTIES  CXX_INCLUDE_WHAT_YOU_USE /Users/filipeoliveira/Downloads/include-what-you-use/bin/include-what-you-use )
+if(APPLE)
+  message(STATUS "Adding include-what-you-use ")
+  set_target_properties( app PROPERTIES  CXX_INCLUDE_WHAT_YOU_USE /Users/filipeoliveira/Downloads/include-what-you-use/bin/include-what-you-use )
+endif(APPLE)
 
 # Creates a folder "executables" and adds target 
 # project (app.vcproj) under it
@@ -42,11 +45,4 @@ set_target_properties( app PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_
 
 # Adds logic to INSTALL.vcproj to copy app.exe to destination directory
 install (TARGETS app RUNTIME DESTINATION ${PROJECT_SOURCE_DIR}/_install)
-
-
-
-
-
-
-
 
