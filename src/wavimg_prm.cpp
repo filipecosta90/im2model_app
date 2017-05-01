@@ -1,12 +1,11 @@
 #include "wavimg_prm.hpp"
-#include <stdio.h>                             // for perror
-#include <stdlib.h>                            // for EXIT_FAILURE, EXIT_SUC...
-#include <sys/wait.h>                          // for wait
-#include <unistd.h>                            // for execv, fork
-#include <boost/filesystem/operations.hpp>     // for directory_iterator
-#include <boost/filesystem/path.hpp>           // for path, operator==
-#include <boost/iterator/iterator_facade.hpp>  // for iterator_facade_base
-#include <boost/thread.hpp>      // for thread
+
+#include <boost/process.hpp>
+#include <boost/filesystem/operations.hpp>                // for directory_iterator
+#include <boost/filesystem/path.hpp>                      // for path, operator==, oper...
+#include <boost/iterator/iterator_facade.hpp>             // for iterator_facade_base
+#include <boost/thread.hpp>                               // for thread
+
 #include <fstream>                             // for basic_ostream, operator<<
 #include <vector>                              // for allocator, vector
 
@@ -385,35 +384,15 @@ bool WAVIMG_prm::cleanup_bin(){
 }
 
 bool WAVIMG_prm::call_bin(){
-  int pid;
-
-  std::vector<char*> wavimg_vector;
-  wavimg_vector.push_back((char*) bin_path.c_str() );
-  wavimg_vector.push_back((char*) "-prm");
-  wavimg_vector.push_back((char*) prm_filename.c_str() );
+  std::stringstream args_stream;
+  args_stream << bin_path;
+  // input -prm
+  args_stream << " -prm " << prm_filename;
+  // input debug switch
   if ( debug_switch ){
-    wavimg_vector.push_back((char*) "/dbg");
+    args_stream << " /dbg";
   }
-  wavimg_vector.push_back(0); //end of arguments sentinel is NULL
-
-  if ((pid = fork()) == -1) // system functions also set a variable called "errno"
-  {
-    perror("ERROR in vfork() of WAVIMG call_bin"); // this function automatically checks "errno"
-    // and prints the error plus what you give it
-    return EXIT_FAILURE;
-  }
-  // ---- by when you get here there will be two processes
-  if (pid == 0) // child process
-  {
-    execv(wavimg_vector[0], &wavimg_vector.front());
-  }
-  else {
-    int status;
-    wait(&status);
-    return EXIT_SUCCESS;
-  }
-  //if you get here something went wrong
-  return EXIT_FAILURE;
+  boost::process::system( args_stream.str() );
 }
 
 void WAVIMG_prm::set_prm_file_name( std::string filename ){

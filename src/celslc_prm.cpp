@@ -495,7 +495,7 @@ bool CELSLC_prm::call_bin_ssc(){
   args_stream << " -nx " << nx_simulated_horizontal_samples;
   // input ny string
   args_stream << " -ny " << ny_simulated_vertical_samples;
-  
+
   args_stream << " -nz " << nz_simulated_partitions;
   // input ht
   args_stream << " -ht " << ht_accelaration_voltage;
@@ -522,9 +522,11 @@ bool CELSLC_prm::call_bin_ssc(){
     std::stringstream celslc_stream;
     celslc_stream << "log_" << slc_file_name_prefix << "_" << slice_id << ".log"; 
     std::cout << "Saving log of slice #"<< slice_id << " in file: " << celslc_stream.str() << std::endl ;
-    boost::process::spawn( ssc_stream.str(), ssc_group ); 
+    boost::process::child slice_child( ssc_stream.str()); //, ssc_group ); 
+    std::cout << " adding child " << slice_id << " to group" << std::endl;
+    ssc_group.add( slice_child );
+    //boost::process::spawn( ssc_stream.str(), ssc_group ); 
   }
-  
   ssc_group.wait();
   ssc_runned_bin = true; 
   return true; 

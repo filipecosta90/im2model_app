@@ -159,7 +159,7 @@ class WAVIMG_prm {
 
     void set_debug_switch(bool deb_switch);
 
-    void produce_prm( );
+    void produce_prm();
 
     bool cleanup_bin();
 
