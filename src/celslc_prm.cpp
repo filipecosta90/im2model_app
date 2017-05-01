@@ -385,6 +385,7 @@ bool CELSLC_prm::call_boost_bin(){
     update_nz_simulated_partitions_from_prm();
   }
   runned_bin = true;
+  return true;
 }
 
 bool CELSLC_prm::prepare_nz_simulated_partitions_from_ssc_prm(){
@@ -480,6 +481,7 @@ bool CELSLC_prm::prepare_bin_ssc(){
   prepare_nz_simulated_partitions_from_ssc_prm();
   single_slice_calculation_prepare_bin_runned_switch = true;
   std::cout << "ssc NZ max processes " << nz_simulated_partitions << std::endl;
+  return true;
 }
 
 bool CELSLC_prm::call_bin_ssc(){

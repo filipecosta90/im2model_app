@@ -1,12 +1,7 @@
 #include "simgrid_steplength.hpp"
-#include <opencv2/core/hal/interface.h>  // for CV_32FC1, CV_8UC1, CV_32F
-#include <opencv2/core/types_c.h>        // for CvScalar, cvScalar, CvPoint
-#include <opencv2/imgproc/imgproc_c.h>   // for CV_AA
-#include <opencv2/imgproc/types_c.h>     // for ::CV_TM_CCOEFF_NORMED
-#include <stdlib.h>                      // for EXIT_SUCCESS, EXIT_FAILURE
-#include <sys/fcntl.h>                   // for open, O_RDONLY
-#include <sys/mman.h>                    // for mmap, MAP_FAILED, MAP_SHARED
-#include <unistd.h>                      // for close, lseek, off_t
+
+#include <string>                        // for allocator, char_traits, to_s...
+#include <vector>                        // for vector, vector<>::iterator
 #include <algorithm>                     // for max_element
 #include <cassert>                       // for assert
 #include <cmath>                         // for round
@@ -15,14 +10,20 @@
 #include <iostream>                      // for operator<<, basic_ostream
 #include <iterator>                      // for distance
 #include <limits>                        // for numeric_limits
+
+#include <opencv2/core/hal/interface.h>  // for CV_32FC1, CV_8UC1, CV_32F
+#include <opencv2/core/types_c.h>        // for CvScalar, cvScalar, CvPoint
+#include <opencv2/imgproc/imgproc_c.h>   // for CV_AA
+#include <opencv2/imgproc/types_c.h>     // for ::CV_TM_CCOEFF_NORMED
 #include <opencv2/core.hpp>              // for minMaxLoc, Exception, Hershe...
 #include <opencv2/core/base.hpp>         // for Code::StsNoConv, NormTypes::...
 #include <opencv2/core/cvstd.inl.hpp>    // for operator<<, String::String
 #include <opencv2/highgui.hpp>           // for imshow, namedWindow, waitKey
 #include <opencv2/imgcodecs.hpp>         // for imwrite
 #include <opencv2/imgproc.hpp>           // for putText, resize, Interpolati...
-#include <string>                        // for allocator, char_traits, to_s...
-#include <vector>                        // for vector, vector<>::iterator
+
+#include <boost/iostreams/device/mapped_file.hpp> // for mmap
+#include <boost/iostreams/stream.hpp>             // for stream
 
 int SIMGRID_wavimg_steplength::imregionalmax(cv::Mat input, cv::Mat locations){
   return 1;
@@ -557,7 +558,14 @@ void SIMGRID_wavimg_steplength::produce_png_from_dat_file(){
       output_dat_name_stream << "image_" << std::setw(3) << std::setfill('0') << std::to_string(thickness) << "_" << std::setw(3) << std::setfill('0') << std::to_string(defocus) << ".dat";
       std::string file_name_output_dat = output_dat_name_stream.str();
       std::cout << "Opening " << file_name_output_dat << " to retrieve thickness " << slice_thickness_nm << " nm (sl "<< at_slice << "), defocus " << at_defocus << std::endl;
-      int fd;
+      boost::iostreams::mapped_file_source mmap( output_dat_name_stream.str() );
+      float* p;
+      std::cout << "size of file: " << mmap.size() << std::endl;
+      p = (float*)mmap.data();
+      //boost::iostreams::stream<mapped_file_source> input_stream(mmap, std::ios::binary);
+
+      /*int fd;
+
       fd = open ( file_name_output_dat.c_str() , O_RDONLY );
       if ( fd == -1 ){
         perror("ERROR: in open() of *.dat image file");
@@ -565,8 +573,8 @@ void SIMGRID_wavimg_steplength::produce_png_from_dat_file(){
 
       off_t fsize;
       fsize = lseek(fd, 0, SEEK_END);
-      float* p;
-      std::cout << "size of file: " << fsize << std::endl;
+
+
       p = (float*) mmap (0, fsize, PROT_READ, MAP_SHARED, fd, 0);
 
       if (p == MAP_FAILED) {
@@ -577,6 +585,7 @@ void SIMGRID_wavimg_steplength::produce_png_from_dat_file(){
         perror ("ERROR: in close() of *.dat image file");
       }
       std::cout << "going to create a new Mat" << std::endl;
+      */
       cv::Mat raw_simulated_image ( n_rows_simulated_image , n_cols_simulated_image , CV_32FC1);
       double min, max;
 
@@ -648,27 +657,11 @@ bool SIMGRID_wavimg_steplength::simulate_from_dat_file(){
         std::cout << "Opening " << file_name_output_dat << " to retrieve thickness " << slice_thickness_nm << " nm (sl "<< at_slice << "), defocus " << at_defocus << std::endl;
       }
       // Load image
-
-      int fd;
-      fd = open ( file_name_output_dat.c_str() , O_RDONLY );
-      if ( fd == -1 ){
-        perror("ERROR: in open() of *.dat image file");
-      }
-
-      off_t fsize;
-      fsize = lseek(fd, 0, SEEK_END);
+      boost::iostreams::mapped_file_source mmap( output_dat_name_stream.str() );
       float* p;
-
-      p = (float*) mmap (0, fsize, PROT_READ, MAP_SHARED, fd, 0);
-
-      if (p == MAP_FAILED) {
-        perror ("ERROR: in mmap() of *.dat image file");
-      }
-
-      if (close (fd) == -1) {
-        perror ("ERROR: in close() of *.dat image file");
-      }
-
+      std::cout << "size of file: " << mmap.size() << std::endl;
+      p = (float*)mmap.data();
+      
       cv::Mat raw_simulated_image ( n_rows_simulated_image , n_cols_simulated_image , CV_32FC1);
       double min, max;
 

@@ -393,6 +393,7 @@ bool WAVIMG_prm::call_bin(){
     args_stream << " /dbg";
   }
   boost::process::system( args_stream.str() );
+  return true;
 }
 
 void WAVIMG_prm::set_prm_file_name( std::string filename ){

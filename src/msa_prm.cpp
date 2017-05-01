@@ -131,6 +131,7 @@ bool MSA_prm::call_bin(){
     args_stream << " /debug ";
   }
   boost::process::system( args_stream.str() );
+  return true;
 }
 
 void MSA_prm::set_prm_file_name( std::string filename ){

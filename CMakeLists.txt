@@ -43,7 +43,7 @@ else()
   set(Boost_USE_STATIC_RUNTIME     OFF)
 endif(WIN32)
 
-find_package(Boost 1.64.0 COMPONENTS system program_options filesystem thread REQUIRED)
+find_package(Boost 1.64.0 COMPONENTS system program_options filesystem thread iostreams REQUIRED)
 
 #SET ( BISON_EXECUTABLE C:\ProgramData\chocolatey\lib\winflexbison3\tools\win_bison.exe )
 find_package(BISON REQUIRED)
@@ -57,8 +57,8 @@ find_package(FLEX REQUIRED)
 
 # we add the sub-directories that we want CMake to scan
 if (WIN32)
-#add_subdirectory(src)
-add_subdirectory(src_win32)
+add_subdirectory(src)
+#add_subdirectory(src_win32)
 else()
  add_subdirectory(src)
 endif(WIN32)
