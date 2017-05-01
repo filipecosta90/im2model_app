@@ -10,6 +10,11 @@
 #include "atom.hpp"                  // for Atom
 #include "chem_database.hpp"         // for Chem_Database
 
+class Atom;  // forward declaration so that compiler knows that 
+             // Atom is a class when it gets to parsing Unit_Cell
+
+class Chem_Database; //forward declaration 
+
 class Unit_Cell {
   private:
     double _cell_length_a;

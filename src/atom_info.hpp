@@ -100,5 +100,4 @@ class Atom_Info
     double mVanDerWaalsRadius;
 };
 
-
 #endif

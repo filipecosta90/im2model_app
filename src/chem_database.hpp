@@ -36,6 +36,8 @@
 #include <map>            // for map
 #include "atom_info.hpp"  // for Atom_Info
 
+class Atom_Info; // forward declaration
+
 class Chem_Database{
   private:
     std::map<std::string,Atom_Info::Atom_Info> elements_database;

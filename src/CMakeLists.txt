@@ -33,7 +33,7 @@ target_link_libraries( app ${OpenCV_LIBS} ${Boost_LIBRARIES} )
 
 if(APPLE)
   message(STATUS "Adding include-what-you-use ")
-  #  set_target_properties( app PROPERTIES  CXX_INCLUDE_WHAT_YOU_USE /Users/filipeoliveira/Downloads/include-what-you-use/bin/include-what-you-use )
+      set_target_properties( app PROPERTIES  CXX_INCLUDE_WHAT_YOU_USE /Users/filipeoliveira/Downloads/include-what-you-use/bin/include-what-you-use )
 endif(APPLE)
 
 # Creates a folder "executables" and adds target 
