@@ -7,8 +7,15 @@
 #include <string>                              // for allocator, char_traits
 #include <utility>                             // for pair
 #include <vector>                              // for vector, vector<>::iter...
+#include <system_error>
 
-#include <boost/process.hpp>
+#include <boost/process/error.hpp>
+#include <boost/process/io.hpp>
+#include <boost/process/args.hpp>
+#include <boost/process/child.hpp>
+#include <boost/process/group.hpp>
+#include <boost/process/system.hpp>
+
 #include <boost/filesystem/operations.hpp>     // for directory_iterator
 #include <boost/filesystem/path.hpp>           // for path, operator==, oper...
 #include <boost/iterator/iterator_facade.hpp>  // for iterator_facade_base
@@ -515,6 +522,7 @@ bool CELSLC_prm::call_bin_ssc(){
   }
   // input ssc
   for ( int slice_id = 1; slice_id <= nz_simulated_partitions; slice_id++ ){
+        std::error_code ecode;
     std::stringstream ssc_stream;
     ssc_stream << args_stream.str() << " -ssc " << slice_id;
     std::cout << "Process for slice #" << slice_id << std::endl;
@@ -522,11 +530,14 @@ bool CELSLC_prm::call_bin_ssc(){
     std::stringstream celslc_stream;
     celslc_stream << "log_" << slc_file_name_prefix << "_" << slice_id << ".log"; 
     std::cout << "Saving log of slice #"<< slice_id << " in file: " << celslc_stream.str() << std::endl ;
-    boost::process::child slice_child( ssc_stream.str()); //, ssc_group ); 
-    std::cout << " adding child " << slice_id << " to group" << std::endl;
-    ssc_group.add( slice_child );
+    boost::process::child slice_child( ssc_stream.str(), ssc_group , ecode ); //, ssc_group ); 
+    assert( !ecode );
+    std::cout << " adding child " << slice_id << "["<< slice_child.id() <<"]" << " to group. joinable?? " << slice_child.joinable() << std::endl;
+    assert( slice_child.in_group( ecode ) );
+    //ssc_group.add( slice_child );
     //boost::process::spawn( ssc_stream.str(), ssc_group ); 
   }
+  std::cout << " waiting for all child processes do end" << std::endl;
   ssc_group.wait();
   ssc_runned_bin = true; 
   return true; 
