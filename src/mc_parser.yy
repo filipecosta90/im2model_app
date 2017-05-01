@@ -30,8 +30,8 @@
    #include <cstdlib>
    #include <fstream>
    
-   /* include for all driver functions */
-   #include "mc_driver.hpp"
+/* include for all driver functions */
+#include "mc_driver.hpp"
 
 #undef yylex
 #define yylex scanner.yylex

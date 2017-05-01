@@ -43,7 +43,10 @@ else()
 endif(WIN32)
 
 find_package(Boost 1.64.0 COMPONENTS program_options filesystem thread REQUIRED)
+
+SET ( BISON_EXECUTABLE C:\ProgramData\chocolatey\lib\winflexbison3\tools\win_bison.exe )
 find_package(BISON REQUIRED)
+SET ( FLEX_EXECUTABLE C:\ProgramData\chocolatey\lib\winflexbison3\tools\win_flex.exe )
 find_package(FLEX REQUIRED)
 
 # unistd.h in windows
