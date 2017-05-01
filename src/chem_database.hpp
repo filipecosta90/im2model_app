@@ -40,7 +40,7 @@ class Atom_Info; // forward declaration
 
 class Chem_Database{
   private:
-    std::map<std::string,Atom_Info::Atom_Info> elements_database;
+    std::map<std::string,Atom_Info::Atom_Info*> elements_database;
   public:
     Chem_Database();
     Atom_Info get_atom_info( std::string type_symbol );

@@ -2,6 +2,7 @@
 #include "atom_info.hpp"
 
 //! Constructor.
+
 Atom_Info::Atom_Info(
     std::string type_name,
     std::string type_symbol,
