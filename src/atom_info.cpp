@@ -1,7 +1,6 @@
 
 #include "atom_info.hpp"
 
-#include <opencv2/opencv.hpp> 
 //! Constructor.
 Atom_Info::Atom_Info(
     std::string type_name,

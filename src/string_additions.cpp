@@ -3,6 +3,9 @@
 #include <cstdlib>
 
 #include "string_additions.hpp"
+#include <cstdlib>   // for exit
+#include <iostream>  // for string, basic_ostream, operator<<, ostringstream
+#include <string>    // for allocator, basic_string, operator!=
 
 using namespace std;
 

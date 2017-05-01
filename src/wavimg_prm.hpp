@@ -1,6 +1,10 @@
 #ifndef __WAVIMG_PRM_H__
 #define __WAVIMG_PRM_H__
 
+#include <iosfwd>  // for string
+#include <string>  // for string
+#include <vector>  // for vector
+
 class WAVIMG_prm {
   private:
     // line 1

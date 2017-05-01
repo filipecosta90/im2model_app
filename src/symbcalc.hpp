@@ -1,7 +1,7 @@
 #ifndef __SYMBCALC_H__
 #define __SYMBCALC_H__
 
-#include <string>
+#include <iosfwd>  // for string
 
 /** This function is used to evaluate a string expresion
  * It understands /,+,-,*,x,y,z,and 0-9 the calculator returns

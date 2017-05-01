@@ -1,7 +1,10 @@
 #ifndef __CELSLC_PRM_H__
 #define __CELSLC_PRM_H__
 
-#include <map>
+#include <iosfwd>  // for string
+#include <string>                              // for char_traits, basic_string
+#include <map>     // for map
+#include <vector>  // for vector
 
 class CELSLC_prm {
   private:

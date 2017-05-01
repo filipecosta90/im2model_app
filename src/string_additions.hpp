@@ -1,9 +1,8 @@
 #ifndef __STRING_ADDITIONS_H__
 #define __STRING_ADDITIONS_H__
 
-#include <string>
-#include <vector>
-
+#include <iosfwd>  // for string
+#include <vector>  // for vector
 
 /** Compares string with a vector of strings. Returns
  *  the index if it finds a match, otherwise -1 **/

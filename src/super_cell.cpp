@@ -1,44 +1,32 @@
-
-#include <cctype>
-#include <fstream>
-#include <cassert>
-#include <fcntl.h>
-#include <sys/types.h>
-#include <unistd.h>
-#include <sys/stat.h>
-#include <sys/mman.h>
-#include <cstdio>
-#include <sstream>      // std::stringstream
-#include <string>       // std::string
-#include <iostream>     // std::cout
-#include <iomanip>
-#include <vector>
-#include <stdio.h>
-#include <algorithm>
-
-// Image processing
-
-#include <opencv2/opencv.hpp>
-#include <opencv2/imgproc.hpp>
-#include <opencv2/video.hpp>
-#include <opencv2/highgui/highgui.hpp>
-#include <opencv2/imgproc/imgproc.hpp>
-#include <opencv2/video/video.hpp>
-#include <opencv2/core/core.hpp>
-#include <opencv/cv.hpp>
-#include <opencv2/opencv_modules.hpp>
-#include <opencv2/features2d/features2d.hpp>
-#include <opencv2/calib3d/calib3d.hpp>
-
 #include "super_cell.hpp"
-#include "unit_cell.hpp"
-#include "symbcalc.hpp"
-#include "chem_database.hpp"
-#include "atom_info.hpp"
-#include "edge.hpp"
-
-// Parallel construction
-//#include <omp.h>
+#include <math.h>                        // for fabs, ceil, pow, M_PI
+#include <opencv2/core/hal/interface.h>  // for CV_8UC1, CV_32F, CV_32FC1
+#include <opencv2/imgproc/imgproc_c.h>   // for cvGetSpatialMoment
+#include <opencv2/imgproc/types_c.h>     // for ::CV_THRESH_BINARY, CvMoments
+#include <sys/fcntl.h>                   // for open, O_RDONLY
+#include <sys/mman.h>                    // for mmap, MAP_FAILED, MAP_SHARED
+#include <unistd.h>                      // for close, lseek, off_t
+#include <algorithm>                     // for max_element, min_element
+#include <cassert>                       // for assert
+#include <cstdio>                        // for perror, size_t, NULL, SEEK_END
+#include <iomanip>                       // for operator<<, setfill, setw
+#include <iostream>                      // for operator<<, basic_ostream
+#include <iterator>                      // for distance
+#include <limits>                        // for numeric_limits
+#include <opencv2/core.hpp>              // for minMaxLoc, normalize, Exception
+#include <opencv2/core/base.hpp>         // for NormTypes::NORM_MINMAX, Code...
+#include <opencv2/core/cvstd.hpp>        // for Ptr
+#include <opencv2/core/cvstd.inl.hpp>    // for operator<<, String::String
+#include <opencv2/core/ptr.inl.hpp>      // for Ptr::operator->, Ptr::Ptr<T>
+#include <opencv2/core/version.hpp>      // for CV_MAJOR_VERSION
+#include <opencv2/features2d.hpp>        // for SimpleBlobDetector::Params
+#include <opencv2/imgcodecs.hpp>         // for imwrite
+#include <opencv2/imgproc.hpp>           // for Canny, boundingRect, drawCon...
+#include <opencv2/video/tracking.hpp>    // for findTransformECC, ::MOTION_E...
+#include <string>                        // for allocator, char_traits, to_s...
+#include <vector>                        // for vector, vector<>::iterator
+#include "edge.hpp"                      // for inpolygon
+#include "unit_cell.hpp"                 // for Unit_Cell
 
   template<typename Cont, typename It>
 auto ToggleIndices(Cont &cont, It beg, It end) -> decltype(std::end(cont))
@@ -502,11 +490,8 @@ bool Super_Cell::create_atoms_from_unit_cell(){
   const double unit_cell_b_nm = unit_cell->get_cell_length_b_Nanometers();
   const double unit_cell_c_nm = unit_cell->get_cell_length_c_Nanometers();
   const double center_a_padding_nm = _super_cell_length_a_Nanometers / -2.0f;
-  const double center_a_unpadding_nm = _super_cell_length_a_Nanometers / 2.0f;
   const double center_b_padding_nm = _super_cell_length_b_Nanometers / -2.0f;
-  const double center_b_unpadding_nm = _super_cell_length_b_Nanometers / 2.0f;
   const double center_c_padding_nm = _super_cell_length_c_Nanometers / -2.0f;
-  const double center_c_unpadding_nm = _super_cell_length_c_Nanometers / 2.0f;
 
   for ( size_t c_expand_pos = 0; c_expand_pos < expand_factor_c; c_expand_pos++ ){
     const double c_expand_nanometers = c_expand_pos * unit_cell_c_nm + center_c_padding_nm;
@@ -818,8 +803,6 @@ void Super_Cell::update_super_cell_boundary_polygon(){
   /* method */
   const double center_a_padding_nm = _x_supercell_min_size_nm / -2.0f;
   const double center_b_padding_nm = _y_supercell_min_size_nm / 2.0f;
-  const int _width_padding_px = ( _super_cell_width_px - _super_cell_min_width_px )/ 2;
-  const int _height_padding_px = ( _super_cell_height_px - _super_cell_min_height_px )/ 2;
 
   for (
       std::vector<cv::Point>::iterator experimental_bound_it = _experimental_image_boundary_polygon.begin();
@@ -994,10 +977,10 @@ void Super_Cell::calculate_atomic_columns_position_w_boundary_polygon(){
     const double _keypoint_diameter = _keypoint->size;
     const double _keypoint_radius_px = _keypoint_diameter * 0.5f; 
     const double _keypoint_radius_nm = _keypoint_diameter * 0.5f * _sampling_rate_super_cell_x_nm_pixel; 
-    const double _keypoint_area_px = ( pow ( _keypoint_radius_px , _keypoint_radius_px ) )  * M_PI;
-    const double _keypoint_area_nm = _keypoint_area_px * _sampling_rate_super_cell_x_nm_pixel;
-    std::cout << _keypoint_radius_nm << std::endl;
-
+    /*const double _keypoint_area_px = ( pow ( _keypoint_radius_px , _keypoint_radius_px ) )  * M_PI;
+      const double _keypoint_area_nm = _keypoint_area_px * _sampling_rate_super_cell_x_nm_pixel;
+      std::cout << _keypoint_radius_nm << std::endl;
+      */
     //std::cout << p <<  " radius: " << _keypoint_radius << " area: " << _keypoint_area << std::endl;
   }
 }

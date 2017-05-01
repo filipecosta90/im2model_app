@@ -1,6 +1,10 @@
 #ifndef __MSA_PRM_H__
 #define __MSA_PRM_H__
 
+#include <iosfwd>  // for string
+#include <string>  // for string
+#include <vector>  // for vector
+
 class MSA_prm {
   private:
     std::string microscope_parameter_block_name;

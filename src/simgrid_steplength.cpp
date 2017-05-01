@@ -1,35 +1,28 @@
-#include <cctype>
-#include <fstream>
-#include <cassert>
-#include <fcntl.h>
-#include <sys/types.h>
-#include <unistd.h>
-#include <sys/stat.h>
-#include <sys/mman.h>
-#include <cstdio>
-#include <sstream>      // std::stringstream
-#include <string>       // std::string
-#include <iostream>     // std::cout
-#include <iomanip>
-#include <vector>
-#include <stdio.h>
-#include <cmath>
-#include <limits>
-
-#include <opencv2/opencv.hpp>
-#include <opencv2/imgproc.hpp>
-#include <opencv2/video.hpp>
-#include <opencv2/highgui/highgui.hpp>
-#include <opencv2/imgproc/imgproc.hpp>
-#include <opencv2/video/video.hpp>
-#include <opencv2/core/core.hpp>
-#include <opencv/cv.hpp>
-#include <opencv2/opencv_modules.hpp>
-#include <opencv2/features2d/features2d.hpp>
-#include <opencv2/calib3d/calib3d.hpp>
-
 #include "simgrid_steplength.hpp"
-
+#include <opencv2/core/hal/interface.h>  // for CV_32FC1, CV_8UC1, CV_32F
+#include <opencv2/core/types_c.h>        // for CvScalar, cvScalar, CvPoint
+#include <opencv2/imgproc/imgproc_c.h>   // for CV_AA
+#include <opencv2/imgproc/types_c.h>     // for ::CV_TM_CCOEFF_NORMED
+#include <stdlib.h>                      // for EXIT_SUCCESS, EXIT_FAILURE
+#include <sys/fcntl.h>                   // for open, O_RDONLY
+#include <sys/mman.h>                    // for mmap, MAP_FAILED, MAP_SHARED
+#include <unistd.h>                      // for close, lseek, off_t
+#include <algorithm>                     // for max_element
+#include <cassert>                       // for assert
+#include <cmath>                         // for round
+#include <cstdio>                        // for perror, NULL, SEEK_END
+#include <iomanip>                       // for operator<<, setw, setfill
+#include <iostream>                      // for operator<<, basic_ostream
+#include <iterator>                      // for distance
+#include <limits>                        // for numeric_limits
+#include <opencv2/core.hpp>              // for minMaxLoc, Exception, Hershe...
+#include <opencv2/core/base.hpp>         // for Code::StsNoConv, NormTypes::...
+#include <opencv2/core/cvstd.inl.hpp>    // for operator<<, String::String
+#include <opencv2/highgui.hpp>           // for imshow, namedWindow, waitKey
+#include <opencv2/imgcodecs.hpp>         // for imwrite
+#include <opencv2/imgproc.hpp>           // for putText, resize, Interpolati...
+#include <string>                        // for allocator, char_traits, to_s...
+#include <vector>                        // for vector, vector<>::iterator
 
 int SIMGRID_wavimg_steplength::imregionalmax(cv::Mat input, cv::Mat locations){
   return 1;

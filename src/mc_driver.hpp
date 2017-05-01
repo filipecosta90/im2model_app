@@ -1,14 +1,11 @@
 #ifndef __MCDRIVER_HPP__
 #define __MCDRIVER_HPP__ 1
 
-#include <string>
-#include <cstddef>
-#include <istream>
-#include <map>
+#include <istream>        // for string, istream, ostream
 
 #include "mc_scanner.hpp"
 #include "mc_parser.tab.hh"
-#include "unit_cell.hpp"
+#include "unit_cell.hpp"  // for Unit_Cell
 
 namespace MC{
 

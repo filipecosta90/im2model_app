@@ -1,34 +1,24 @@
-#include <cctype>
-#include <fstream>
-#include <cassert>
-#include <fcntl.h>
-#include <sys/types.h>
-#include <unistd.h>
-#include <sys/stat.h>
-#include <sys/mman.h>
-#include <cstdio>
-#include <sstream>      // std::stringstream
-#include <string>       // std::string
-#include <iostream>     // std::cout
-#include <iomanip>
-#include <vector>
-#include <stdio.h>
-
 #include "celslc_prm.hpp"
-
-// opencv 
-#include <opencv2/opencv.hpp>
-#include "opencv2/highgui/highgui.hpp"
-#include "opencv2/imgproc/imgproc.hpp"
-
-#include "opencv2/opencv_modules.hpp"
-
-#include "opencv2/core/core.hpp"
-#include "opencv2/features2d/features2d.hpp"
-
-// Include the headers relevant to the boost::filesystem
-#include <boost/filesystem.hpp>
-#include <boost/thread.hpp>
+#include <opencv2/core/hal/interface.h>        // for CV_64F
+#include <stdlib.h>                            // for EXIT_FAILURE, EXIT_SUC...
+#include <sys/_types/_s_ifmt.h>                // for S_IRUSR, S_IWUSR
+#include <sys/fcntl.h>                         // for open, O_CREAT, O_RDWR
+#include <sys/wait.h>                          // for waitpid, WEXITSTATUS
+#include <unistd.h>                            // for pid_t, _exit, execv, dup2
+#include <boost/filesystem/operations.hpp>     // for directory_iterator
+#include <boost/filesystem/path.hpp>           // for path, operator==, oper...
+#include <boost/iterator/iterator_facade.hpp>  // for iterator_facade_base
+#include <boost/thread.hpp>      // for thread
+#include <cassert>                             // for assert
+#include <cstdio>                              // for perror
+#include <iostream>                            // for operator<<, basic_ostream
+#include <fstream>
+#include <opencv2/core/mat.hpp>                // for Mat
+#include <opencv2/core/mat.inl.hpp>            // for Mat::Mat, Mat::at, Mat...
+#include <opencv2/core/types.hpp>              // for Point3d
+#include <string>                              // for allocator, char_traits
+#include <utility>                             // for pair
+#include <vector>                              // for vector, vector<>::iter...
 
 static const std::string SLI_EXTENSION = ".sli";
 

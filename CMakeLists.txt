@@ -1,5 +1,6 @@
 # the minimum version of CMake required
 cmake_minimum_required(VERSION 3.6.2)
+set (CMAKE_CXX_COMPILER "clang++" )
 set (CMAKE_CXX_STANDARD 14)
 
 project( MSC_IM2MODEL )
@@ -20,6 +21,7 @@ if (WIN32)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /EHc /std:c++14")
 else()
   message(status "Setting GCC flags")
+  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -stdlib=libc++ -lc++abi")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fexceptions -g -Wall")
 endif(WIN32)
 

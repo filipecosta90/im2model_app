@@ -1,24 +1,12 @@
-
-#include <cctype>
-#include <fstream>
-#include <cassert>
-#include <fcntl.h>
-#include <sys/types.h>
-#include <unistd.h>
-#include <sys/stat.h>
-#include <sys/mman.h>
-#include <cstdio>
-#include <sstream>      // std::stringstream
-#include <string>       // std::string
-#include <iostream>     // std::cout
-#include <iomanip>
-#include <vector>
-#include <stdio.h>
-
 #include "unit_cell.hpp"
-#include "symbcalc.hpp"
-#include "chem_database.hpp"
-#include "atom_info.hpp"
+#include <opencv2/core/hal/interface.h>  // for CV_64F, CV_64FC1
+#include <algorithm>                     // for find
+#include <iostream>                      // for string, operator<<, basic_os...
+#include <opencv2/core.hpp>              // for norm
+#include <vector>                        // for allocator, vector, vector<>:...
+#include "atom_info.hpp"                 // for Atom_Info
+#include "chem_database.hpp"             // for Chem_Database
+#include "symbcalc.hpp"                  // for symbCalc
 
 Unit_Cell::Unit_Cell(){
   orientation_matrix.create(3,3, CV_64FC1);

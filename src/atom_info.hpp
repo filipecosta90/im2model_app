@@ -1,8 +1,9 @@
 #ifndef __ATOM_INFO_H__ 
 #define __ATOM_INFO_H__ 
 
-#include "opencv2/core/core.hpp"
-#include <string>
+#include <iosfwd>                 // for string
+#include <opencv2/core/matx.hpp>  // for Vec4d
+#include <string>                 // for basic_string
 
 //! Encapsulates information regarding an atom type.
 class Atom_Info

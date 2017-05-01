@@ -5,8 +5,10 @@
 #include <FlexLexer.h>
 #endif
 
-#include "mc_parser.tab.hh"
-#include "location.hh"
+#include <sys/errno.h>       // for errno
+#include <cstdlib>           // for NULL, free, malloc, realloc, size_t
+#include <iostream>          // for cerr, ostream, istream
+#include "mc_parser.tab.hh"  // for MC_Parser::location_type, MC_Parser, MC_...
 
 namespace MC{
 

@@ -1,26 +1,14 @@
-#include <cctype>
-#include <fstream>
-#include <cassert>
-#include <fcntl.h>
-#include <sys/types.h>
-#include <unistd.h>
-#include <sys/stat.h>
-#include <sys/mman.h>
-#include <cstdio>
-#include <sstream>      // std::stringstream
-#include <string>       // std::string
-#include <iostream>     // std::cout
-#include <iomanip>
-#include <vector>
-#include <stdio.h>
-#include <cmath>
-#include <limits>
-
 #include "wavimg_prm.hpp"
-
-// Include the headers relevant to the boost::filesystem
-#include <boost/filesystem.hpp>
-#include <boost/thread.hpp>
+#include <stdio.h>                             // for perror
+#include <stdlib.h>                            // for EXIT_FAILURE, EXIT_SUC...
+#include <sys/wait.h>                          // for wait
+#include <unistd.h>                            // for execv, fork
+#include <boost/filesystem/operations.hpp>     // for directory_iterator
+#include <boost/filesystem/path.hpp>           // for path, operator==
+#include <boost/iterator/iterator_facade.hpp>  // for iterator_facade_base
+#include <boost/thread.hpp>      // for thread
+#include <fstream>                             // for basic_ostream, operator<<
+#include <vector>                              // for allocator, vector
 
 static const std::string DAT_EXTENSION = ".dat";
 

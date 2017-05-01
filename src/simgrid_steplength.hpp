@@ -1,7 +1,16 @@
 #ifndef __SIMGRID_STEPLENGTH_H__
 #define __SIMGRID_STEPLENGTH_H__
 
-#include "wavimg_prm.hpp"
+
+#include <string>                      // for string
+#include <fstream>                    // for ofstream
+#include <opencv2/core/mat.hpp>        // for Mat
+#include <opencv2/core/mat.inl.hpp>    // for Mat::~Mat
+#include <opencv2/core/types.hpp>      // for Point, Point3d, Point2f, Rect
+#include <opencv2/video/tracking.hpp>  // for ::MOTION_EUCLIDEAN
+#include <utility>                     // for pair
+#include <vector>                      // for vector
+#include "wavimg_prm.hpp"              // for WAVIMG_prm
 
 class SIMGRID_wavimg_steplength {
   private:

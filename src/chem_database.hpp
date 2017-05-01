@@ -32,10 +32,9 @@
 #ifndef ChemDatabase_INCLUDE_ONCE
 #define ChemDatabase_INCLUDE_ONCE
 
-#include <map>
-#include <string>
-
-#include "atom_info.hpp"
+#include <iosfwd>         // for string
+#include <map>            // for map
+#include "atom_info.hpp"  // for Atom_Info
 
 class Chem_Database{
   private:

@@ -1,24 +1,10 @@
-
-#include <cctype>
-#include <fstream>
-#include <cassert>
-#include <fcntl.h>
-#include <sys/types.h>
-#include <unistd.h>
-#include <sys/stat.h>
-#include <sys/mman.h>
-#include <cstdio>
-#include <sstream>      // std::stringstream
-#include <string>       // std::string
-#include <iostream>     // std::cout
-#include <iomanip>
-#include <vector>
-#include <stdio.h>
-
-#include <algorithm>
-#include <map>
 #include "chem_database.hpp"
-#include "atom_info.hpp"
+#include <cctype>         // for isalpha
+#include <iostream>       // for string, operator<<, basic_ostream, cout, endl
+#include <map>            // for map, map<>::iterator, __map_iterator, opera...
+#include <string>         // for operator<, allocator, basic_string<>::iterator
+#include <utility>        // for pair
+#include "atom_info.hpp"  // for Atom_Info
 
 Chem_Database::Chem_Database(){
   // type_name, type_symbol, atomic_num, atomic_mass, melting_pt, boiling_pt, electroneg, electron_aff, valence, calculated_r, empirical_r, covalent_r, vdw_r, cpk_color, rasmol_color

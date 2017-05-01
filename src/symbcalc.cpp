@@ -1,10 +1,11 @@
 /* 3rd party: https://code.lbl.gov/scm/viewvc.php/trunk/symbcalc.cc?view=markup&root=zeo
 */
 
-#include <vector>
-#include <iostream>
 #include "symbcalc.hpp"
-#include "string_additions.hpp"
+#include <iostream>              // for string
+#include <string>                // for allocator, basic_string
+#include <vector>                // for vector, __vector_base<>::value_type
+#include "string_additions.hpp"  // for doubleToString, split, convert_to_do...
 
 /** This function is used to evaluate a string expresion
   It understands /,+,-,*,x,y,z,and 0-9,. the calculator returns

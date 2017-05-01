@@ -31,6 +31,8 @@ add_executable( app ${im2model_core_src} mc_driver.cpp ${FLEX_mc_lexer_OUTPUTS} 
 # Properties->Linker->Input->Additional Dependencies
 target_link_libraries( app ${OpenCV_LIBS} ${Boost_LIBRARIES} )
 
+set_target_properties( app PROPERTIES  CXX_INCLUDE_WHAT_YOU_USE /Users/filipeoliveira/Downloads/include-what-you-use/bin/include-what-you-use )
+
 # Creates a folder "executables" and adds target 
 # project (app.vcproj) under it
 set_property(TARGET app PROPERTY FOLDER "executables")

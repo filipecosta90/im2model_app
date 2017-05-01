@@ -1,13 +1,13 @@
-#include <cctype>
-#include <fstream>
-#include <cassert>
-#include <algorithm>
-#include <string>
-#include <iostream>
-
-#include "unit_cell.hpp"
-#include "string_additions.hpp"
 #include "mc_driver.hpp"
+#include <stdlib.h>              // for exit, EXIT_FAILURE
+#include <cassert>               // for assert
+#include <iostream>              // for cerr
+#include <fstream>              // for ifstream 
+#include <new>                   // for bad_alloc
+#include "mc_parser.tab.hh"      // for MC_Parser
+#include "mc_scanner.hpp"        // for MC_Scanner
+#include "string_additions.hpp"  // for convert_to_double
+#include "unit_cell.hpp"         // for Unit_Cell
 
 MC::MC_Driver::~MC_Driver(){
   delete(scanner);

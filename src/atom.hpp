@@ -1,7 +1,8 @@
 #ifndef __ATOM_H__
 #define __ATOM_H__
 
-#include <string>
+#include <iosfwd>  // for string
+#include <string>  // for basic_string
 
 class Atom {
   private:

@@ -1,18 +1,14 @@
 #ifndef __UNIT_CELL_H__
 #define __UNIT_CELL_H__
 
-// opencv 
-#include <opencv2/opencv.hpp>
-#include "opencv2/highgui/highgui.hpp"
-#include "opencv2/imgproc/imgproc.hpp"
-
-#include "opencv2/opencv_modules.hpp"
-
-#include "opencv2/core/core.hpp"
-#include "opencv2/features2d/features2d.hpp"
-
-#include "atom.hpp"
-#include "chem_database.hpp"
+#include <iosfwd>                    // for string
+#include <opencv2/core/mat.hpp>      // for Mat
+#include <opencv2/core/mat.inl.hpp>  // for Mat::~Mat
+#include <opencv2/core/matx.hpp>     // for Vec4d
+#include <opencv2/core/types.hpp>    // for Point3d
+#include <vector>                    // for vector
+#include "atom.hpp"                  // for Atom
+#include "chem_database.hpp"         // for Chem_Database
 
 class Unit_Cell {
   private:

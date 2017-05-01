@@ -1,54 +1,30 @@
-// standard C++ libraries
-#include <cassert>
-#include <stdexcept>
-#include <cmath>
-#include <list>
-#include <cctype>
-#include <fstream>
-#include <fcntl.h>
-#include <sys/types.h>
 
-#include <sys/stat.h>
-#include <cstdio>
-#include <sstream>      // std::stringstream
-#include <string>       // std::string
-#include <iostream>     // std::cout
-#include <cstdlib>
-#include <iomanip>
-#include <algorithm>    // std::min_element, std::max_element
-#include <stdio.h>
-// Include std::exception so we can handling any argument errors
-// emitted by the command line parser
-#include <exception>
-
-#include <opencv2/opencv.hpp>
-#include "opencv2/highgui/highgui.hpp"
-#include "opencv2/imgproc/imgproc.hpp"
-#include "opencv2/opencv_modules.hpp"
-#include "opencv2/core/core.hpp"
-#include "opencv2/features2d/features2d.hpp"
-
-// Include the headers relevant to the boost::program_options
-// library
-#include <boost/program_options.hpp>
-#include <boost/program_options/parsers.hpp>
-#include <boost/program_options/variables_map.hpp>
+#include <opencv2/core/hal/interface.h>                   // for CV_8UC1
+#include <opencv2/imgcodecs/imgcodecs_c.h>                // for ::CV_LOAD_I...
 #include <boost/tokenizer.hpp>
-#include <boost/token_functions.hpp>
+#include <boost/program_options.hpp>               // for error
+#include <cassert>                                        // for assert
+#include <cmath>                                          // for fabs, round
+#include <cstdlib>                                        // for div_t, div
+#include <exception>                                      // for exception
+#include <iostream>                                       // for string, str...
+#include <iomanip>      // std::setw
+#include <opencv2/core.hpp>                               // for RNG
+#include <opencv2/core/cvstd.inl.hpp>                     // for String::String
+#include <opencv2/core/mat.hpp>                           // for Mat
+#include <opencv2/core/mat.inl.hpp>                       // for Mat::Mat
+#include <opencv2/core/operations.hpp>                    // for RNG::RNG
+#include <opencv2/core/types.hpp>                         // for Rect, Point3d
+#include <opencv2/imgcodecs.hpp>                          // for imread
 
 // project classes
-#include "celslc_prm.hpp"
-#include "msa_prm.hpp"
-#include "wavimg_prm.hpp"
-#include "simgrid_steplength.hpp"
-#include "mc_driver.hpp"
-#include "unit_cell.hpp"
-#include "super_cell.hpp"
-#include "chem_database.hpp"
-
-// vis classes
-//#include "program.hpp"
-//#include "camera.hpp"
+#include "celslc_prm.hpp"                                 // for CELSLC_prm
+#include "mc_driver.hpp"                                  // for MC_Driver
+#include "msa_prm.hpp"                                    // for MSA_prm
+#include "simgrid_steplength.hpp"                         // for SIMGRID_wav...
+#include "super_cell.hpp"                                 // for Super_Cell
+#include "unit_cell.hpp"                                  // for Unit_Cell
+#include "wavimg_prm.hpp"                                 // for WAVIMG_prm
 
 using namespace cv;
 
