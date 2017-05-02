@@ -1,6 +1,7 @@
 #include "chem_database.hpp"
 #include <cctype>         // for isalpha
 #include <iostream>       // for string, operator<<, basic_ostream, cout, endl
+#include <boost/assign.hpp>
 #include <map>            // for map, map<>::iterator, __map_iterator, opera...
 #include <string>         // for operator<, allocator, basic_string<>::iterator
 #include <utility>        // for pair
@@ -8,8 +9,10 @@
 
 Chem_Database::Chem_Database(){
   // type_name, type_symbol, atomic_num, atomic_mass, melting_pt, boiling_pt, electroneg, electron_aff, valence, calculated_r, empirical_r, covalent_r, vdw_r, cpk_color, rasmol_color
-    elements_database.insert( std::make_pair<std::string, Atom_Info::Atom_Info*> ( "H",  new Atom_Info::Atom_Info( "Hydrogen",    "H",   1, 1.00794,      14.01, 20.28,2.20,   72.8,   1, 53,  25,  37,  120, 0xFFFFFF, 0xFFFFFF ) ) );
-  elements_database.insert( std::make_pair<std::string, Atom_Info::Atom_Info*> ("He", new Atom_Info::Atom_Info( "Helium",      "He",  2, 4.002602,     0.95,   4.22,  -1,      0,   0, 31, -1,   32,  140, 0xD9FFFF, 0xFFC0CB ) ) );
+   /* ele
+    elements_database = boost::assign::map_list_of
+    ("H", Atom_Info( "Hydrogen",    "H",   1, 1.00794,      14.01, 20.28,2.20,   72.8,   1, 53,  25,  37,  120, 0xFFFFFF, 0xFFFFFF ));
+  /*  ("He", Atom_Info::Atom_Info( "Helium",      "He",  2, 4.002602,     0.95,   4.22,  -1,      0,   0, 31, -1,   32,  140, 0xD9FFFF, 0xFFC0CB ));
   elements_database.insert( std::make_pair<std::string, Atom_Info::Atom_Info*> ("Li", new Atom_Info::Atom_Info( "Lithium",     "Li",  3, 6.941,        453.69, 1615, 0.98,  59.6,   1, 167, 145, 134, 182, 0xCC80FF, 0xB22121 ) ) );
   elements_database.insert( std::make_pair<std::string, Atom_Info::Atom_Info*> ("Be", new Atom_Info::Atom_Info( "Beryllium",   "Be",  4, 9.012182,     1560,   2743, 1.57,     0,   2, 112, 105, 90, -1  , 0xC2FF00, 0xFF1493 ) ) );
   elements_database.insert( std::make_pair<std::string, Atom_Info::Atom_Info*> ("B", new Atom_Info::Atom_Info( "Boron",       "B",   5, 10.811,       2348,   4273, 2.04,  26.7,   3, 87,  85,  82, -1  , 0xFFB5B5, 0x00FF00 ) ) );
@@ -127,6 +130,7 @@ elements_database.insert( std::make_pair<std::string, Atom_Info::Atom_Info*> ("N
   elements_database.insert( std::make_pair<std::string, Atom_Info::Atom_Info*> ("Uus", new Atom_Info::Atom_Info( "Ununseptium", "Uus", 117, 293,          -1,   -1,      -1, -1,    -1,  -1,  -1,  -1,  -1, 0xF00024, 0xFA1691 ) ) );
   elements_database.insert( std::make_pair<std::string, Atom_Info::Atom_Info*> ("Uuo", new Atom_Info::Atom_Info( "Ununoctium",  "Uuo", 118, 294,          -1,   -1,      -1, -1,     6,  -1,  -1,  -1,  -1, 0xF00024, 0xFA1691 ) ) );
   elements_database.insert( std::make_pair<std::string, Atom_Info::Atom_Info*> ("-", new Atom_Info::Atom_Info( "Unknown",       "-",  -1,  -1,          -1,   -1,      -1, -1,    -1,  -1,  -1,  -1,  -1, 0xFA1691, 0xFA1691 ) ) );
+  */
 }
 
 Atom_Info Chem_Database::get_atom_info( std::string type_symbol ){
@@ -141,15 +145,15 @@ Atom_Info Chem_Database::get_atom_info( std::string type_symbol ){
       i--;
     }
   }
-  std::map<std::string,Atom_Info::Atom_Info*>::iterator Atom_itt;
+  std::map<std::string,Atom_Info::Atom_Info>::iterator Atom_itt;
   Atom_itt = elements_database.find( type_symbol_alnum );
   if ( Atom_itt == elements_database.end()){
     std::cout << "element not found in element DB" << std::endl;
     Atom_itt = elements_database.find( "-" );
   }
-  Atom_Info* element = Atom_itt->second;
-  std::cout << element->name() << std::endl;
-  return *element;
+  Atom_Info element = Atom_itt->second;
+  std::cout << element.name() << std::endl;
+  return element;
 }
 
 int Chem_Database::size(){
