@@ -55,7 +55,7 @@ class Unit_Cell {
 
     /* end Atom site */
 
-    std::vector<Atom::Atom> _atoms;
+    std::vector<Atom> _atoms;
     std::vector<cv::Point3d> _symetry_atom_positions;
     std::vector<std::string> _atom_type_symbols;
     std::vector<cv::Point3d> _atom_positions;

@@ -145,7 +145,7 @@ Atom_Info Chem_Database::get_atom_info( std::string type_symbol ){
       i--;
     }
   }
-  std::map<std::string,Atom_Info::Atom_Info>::iterator Atom_itt;
+  std::map<std::string,Atom_Info>::iterator Atom_itt;
   Atom_itt = elements_database.find( type_symbol_alnum );
   if ( Atom_itt == elements_database.end()){
     std::cout << "element not found in element DB" << std::endl;

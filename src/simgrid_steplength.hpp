@@ -168,7 +168,7 @@ class SIMGRID_wavimg_steplength {
 
     void set_step_length_minimum_threshold ( double minimum_threshold );
 
-    void set_wavimg_var( WAVIMG_prm::WAVIMG_prm* wavimg_var );
+    void set_wavimg_var( WAVIMG_prm* wavimg_var );
 
     void set_simulated_image_needs_reshape( bool reshape );
 

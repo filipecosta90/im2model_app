@@ -3,9 +3,6 @@
 #include <opencv2/core/hal/interface.h>  // for CV_8UC1, CV_32F, CV_32FC1
 #include <opencv2/imgproc/imgproc_c.h>   // for cvGetSpatialMoment
 #include <opencv2/imgproc/types_c.h>     // for ::CV_THRESH_BINARY, CvMoments
-#include <sys/fcntl.h>                   // for open, O_RDONLY
-#include <sys/mman.h>                    // for mmap, MAP_FAILED, MAP_SHARED
-#include <unistd.h>                      // for close, lseek, off_t
 #include <algorithm>                     // for max_element, min_element
 #include <cassert>                       // for assert
 #include <cstdio>                        // for perror, size_t, NULL, SEEK_END

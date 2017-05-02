@@ -158,8 +158,8 @@ void SIMGRID_wavimg_steplength::set_step_length_minimum_threshold ( double minim
   step_length_minimum_threshold = minimum_threshold;
 }
 
-void SIMGRID_wavimg_steplength::set_wavimg_var( WAVIMG_prm::WAVIMG_prm *wavimg_var ){
-  wavimg_parameters = new WAVIMG_prm::WAVIMG_prm ( *wavimg_var );
+void SIMGRID_wavimg_steplength::set_wavimg_var( WAVIMG_prm *wavimg_var ){
+  wavimg_parameters = new WAVIMG_prm ( *wavimg_var );
 }
 
 void SIMGRID_wavimg_steplength::set_simulated_image_needs_reshape( bool reshape ){

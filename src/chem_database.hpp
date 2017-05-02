@@ -38,8 +38,8 @@
 
 class Chem_Database{
   private:
-    std::map<std::string,Atom_Info::Atom_Info> elements_database = {
-        {"Ce", Atom_Info::Atom_Info( "Cerium",      "Ce",  58, 140.116,     1071,    3633,  1.12, 50,    4,-1,   185,-1,    -1, 0xFFFFC7, 0xFA1691 ) }
+    std::map<std::string,Atom_Info> elements_database = {
+        {"Ce", Atom_Info::Atom_Info( "Cerium",      "Ce",  58, 140.116,     1071,    3633,  1.12, 50,    4,-1,   185,-1,    -1, 0xFFFFC7, 0xFA1691 ) },
         {"O",  Atom_Info::Atom_Info( "Oxygen",      "O",   8, 15.9994,      54.8,   90.2, 3.44,   141,   2, 48,  60,  73,  152, 0xFF0D0D, 0xFF0000 ) }
         };
   public:
