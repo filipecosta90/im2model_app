@@ -1,8 +1,8 @@
 #include "super_cell.hpp"
+#include "edge.hpp"                      // for inpolygon
+#include "unit_cell.hpp"                 // for Unit_Cell
+
 #include <math.h>                        // for fabs, ceil, pow, M_PI
-#include <opencv2/core/hal/interface.h>  // for CV_8UC1, CV_32F, CV_32FC1
-#include <opencv2/imgproc/imgproc_c.h>   // for cvGetSpatialMoment
-#include <opencv2/imgproc/types_c.h>     // for ::CV_THRESH_BINARY, CvMoments
 #include <algorithm>                     // for max_element, min_element
 #include <cassert>                       // for assert
 #include <cstdio>                        // for perror, size_t, NULL, SEEK_END
@@ -10,6 +10,12 @@
 #include <iostream>                      // for operator<<, basic_ostream
 #include <iterator>                      // for distance
 #include <limits>                        // for numeric_limits
+#include <string>                        // for allocator, char_traits, to_s...
+#include <vector>                        // for vector, vector<>::iterator
+
+#include <opencv2/core/hal/interface.h>  // for CV_8UC1, CV_32F, CV_32FC1
+#include <opencv2/imgproc/imgproc_c.h>   // for cvGetSpatialMoment
+#include <opencv2/imgproc/types_c.h>     // for ::CV_THRESH_BINARY, CvMoments
 #include <opencv2/core.hpp>              // for minMaxLoc, normalize, Exception
 #include <opencv2/core/base.hpp>         // for NormTypes::NORM_MINMAX, Code...
 #include <opencv2/core/cvstd.hpp>        // for Ptr
@@ -20,10 +26,9 @@
 #include <opencv2/imgcodecs.hpp>         // for imwrite
 #include <opencv2/imgproc.hpp>           // for Canny, boundingRect, drawCon...
 #include <opencv2/video/tracking.hpp>    // for findTransformECC, ::MOTION_E...
-#include <string>                        // for allocator, char_traits, to_s...
-#include <vector>                        // for vector, vector<>::iterator
-#include "edge.hpp"                      // for inpolygon
-#include "unit_cell.hpp"                 // for Unit_Cell
+
+#include <boost/iostreams/device/mapped_file.hpp> // for mmap
+#include <boost/iostreams/stream.hpp>             // for stream
 
   template<typename Cont, typename It>
 auto ToggleIndices(Cont &cont, It beg, It end) -> decltype(std::end(cont))
@@ -1091,27 +1096,12 @@ void Super_Cell::generate_super_cell_file(  std::string _super_cell_filename ){
 }
 
 void Super_Cell::read_simulated_super_cell_from_dat_file( std::string file_name_input_dat ){
-  int fd;
-  fd = open ( file_name_input_dat.c_str() , O_RDONLY );
-  if ( fd == -1 ){
-    perror("ERROR: in open() of *.dat image file");
-  }
 
-  off_t fsize;
-  fsize = lseek(fd, 0, SEEK_END);
+  boost::iostreams::mapped_file_source mmap( file_name_input_dat );
   float* p;
-  std::cout << "size of file: " << fsize << std::endl;
-  p = (float*) mmap (0, fsize, PROT_READ, MAP_SHARED, fd, 0);
+  std::cout << "size of file: " << mmap.size() << std::endl;
+  p = (float*)mmap.data();
 
-  if (p == MAP_FAILED) {
-    perror ("ERROR: in mmap() of *.dat image file");
-  }
-
-  if (close (fd) == -1) {
-    perror ("ERROR: in close() of *.dat image file");
-  }
-
-  std::cout << "going to create a new Mat" << std::endl;
   cv::Mat raw_simulated_image ( _cel_ny_px, _cel_nx_px , CV_32FC1);
   cv::Mat raw_gray_simulated_image_super_cell ( _cel_ny_px, _cel_nx_px , CV_8UC1);
   double min, max;
@@ -1150,27 +1140,11 @@ void Super_Cell::read_simulated_super_cells_from_dat_files( ){
     // get the .dat image name
     input_dat_name_stream << "image_" << std::setw(3) << std::setfill('0') << std::to_string(defocus) << ".dat";
 
-    int fd;
-    fd = open ( input_dat_name_stream.str().c_str() , O_RDONLY );
-    if ( fd == -1 ){
-      perror("ERROR: in open() of *.dat image file");
-    }
-
-    off_t fsize;
-    fsize = lseek(fd, 0, SEEK_END);
+    boost::iostreams::mapped_file_source mmap( input_dat_name_stream.str() );
     float* p;
-    std::cout << "size of file: " << fsize << std::endl;
-    p = (float*) mmap (0, fsize, PROT_READ, MAP_SHARED, fd, 0);
+    std::cout << "size of file: " << mmap.size() << std::endl;
+    p = (float*)mmap.data();
 
-    if (p == MAP_FAILED) {
-      perror ("ERROR: in mmap() of *.dat image file");
-    }
-
-    if (close (fd) == -1) {
-      perror ("ERROR: in close() of *.dat image file");
-    }
-
-    std::cout << "going to create a new Mat" << std::endl;
     cv::Mat raw_simulated_image ( _cel_ny_px, _cel_nx_px , CV_32FC1);
     cv::Mat raw_gray_simulated_image_super_cell ( _cel_ny_px, _cel_nx_px , CV_8UC1);
     cv::Mat final_gray_simulated_image_super_cell ( _cel_wout_margin_ny_px, _cel_wout_margin_nx_px , CV_8UC1);
