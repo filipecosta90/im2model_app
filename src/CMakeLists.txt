@@ -10,6 +10,10 @@ BISON_TARGET(mc_parser mc_parser.yy ${CMAKE_CURRENT_BINARY_DIR}/mc_parser.tab.cc
 FLEX_TARGET(mc_lexer mc_lexer.l ${CMAKE_CURRENT_BINARY_DIR}/mc_lexer.yy.cc)
 
 ADD_FLEX_BISON_DEPENDENCY(mc_lexer mc_parser)
+#include_directories ( {${FLEX_INCLUDE_DIRS} )
+message(STATUS " Flex Includes - ${FLEX_INCLUDE_DIRS}")
+message(STATUS " Flex Includes - ${FLEX_mc_lexer_OUTPUTS}")
+message(STATUS " Flex Libraries - ${FLEX_LIBRARIES}")
 
 # Properties->C/C++->General->Additional Include Directories
 include_directories( ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR} )

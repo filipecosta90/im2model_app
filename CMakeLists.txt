@@ -49,6 +49,9 @@ find_package(Boost 1.64.0 COMPONENTS system program_options filesystem thread io
 find_package(BISON REQUIRED)
 #SET ( FLEX_EXECUTABLE C:\ProgramData\chocolatey\lib\winflexbison3\tools\win_flex.exe )
 find_package(FLEX REQUIRED)
+message(STATUS " Flex Includes - ${FLEX_INCLUDE_DIRS}")
+message(STATUS " Flex Libraries - ${FLEX_LIBRARIES}")
+
 
 # unistd.h in windows
 #if (WIN32)
