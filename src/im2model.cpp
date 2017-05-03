@@ -37,16 +37,19 @@ using namespace cv;
 // Global Variables
 
 #ifdef _WIN32
-std::string celslc_bin_string =  "../simulation/bin/drprobe_clt_bin_winx64/celslc";
-std::string msa_bin_string = "../bin/drprobe_clt_bin_winx64/msa";
-std::string wavimg_bin_string = "../bin/drprobe_clt_bin_winx64/wavimg";
+boost::filesystem::path celslc_path ( "../simulation/dr_probe_bin/drprobe_clt_bin_winx64/celslc.exe" );
+boost::filesystem::path msa_path("../simulation/dr_probe_bin/drprobe_clt_bin_winx64/msa.exe");
+boost::filesystem::path wavimg_path("../simulation/dr_probe_bin/drprobe_clt_bin_winx64/wavimg.exe");
+std::string celslc_bin_string = celslc_path.string();
+std::string msa_bin_string = msa_path.string();
+std::string wavimg_bin_string = wavimg_path.string();
 #elif defined __unix__
 ////do something for unix like #include <unistd.h>
 #include <unistd.h>
 #elif defined __APPLE__
-std::string celslc_bin_string =  "../simulation/bin/drprobe_clt_bin_osx/celslc";
-std::string msa_bin_string = "../simulation/bin/drprobe_clt_bin_osx/msa";
-std::string wavimg_bin_string = "../simulation/bin/drprobe_clt_bin_osx/wavimg";
+std::string celslc_bin_string =  "../simulation/dr_probe_bin/drprobe_clt_bin_osx/celslc";
+std::string msa_bin_string = "../simulation/dr_probe_bin/drprobe_clt_bin_osx/msa";
+std::string wavimg_bin_string = "../simulation/dr_probe_bin/drprobe_clt_bin_osx/wavimg";
 #endif
 
 
@@ -537,6 +540,7 @@ int main(int argc, char** argv ){
     celslc_parameters.set_abs_switch(abs_switch);
     celslc_parameters.set_bin_path( celslc_bin_string );
     if (celslc_switch == true ){
+		std::cout << "Running ceslc" << std::endl;
       //celslc_parameters.call_bin_ssc();
       celslc_parameters.call_boost_bin();
     }

@@ -380,6 +380,7 @@ bool CELSLC_prm::call_boost_bin(){
   if ( abs_switch ){
     args_stream << " -abs";
   }
+  std::cout << "going to run boost process with args: "<< args_stream.str() << std::endl;
   boost::process::system( args_stream.str() ); 
   if( auto_equidistant_slices_switch || auto_non_equidistant_slices_switch ){
     update_nz_simulated_partitions_from_prm();
