@@ -32,9 +32,9 @@ if (WIN32)
   message(STATUS "Setting Boost flags for Windows")
   SET (Boost_DEBUG TRUE)
   set (Boost_USE_MULTITHREADED TRUE)
-  set(Boost_USE_STATIC_LIBS        OFF)
-  set(Boost_USE_STATIC_RUNTIME     OFF)
-  set(BOOST_ALL_DYN_LINK           TRUE)   # force dynamic linking for all libraries
+  set(Boost_USE_STATIC_LIBS        TRUE)
+  set(Boost_USE_STATIC_RUNTIME     TRUE)
+  set(BOOST_ALL_DYN_LINK           FALSE)   # force dynamic linking for all libraries
   set(Boost_COMPILER "-vc141")
 else()
   message(STATUS "Setting Boost flags for Unix")
