@@ -2,10 +2,10 @@
 #define __MCSCANNER_HPP__ 1
 
 #if ! defined(yyFlexLexerOnce)
-#include <FlexLexer.h>
+#include "FlexLexer.h"
 #endif
 
-#include <sys/errno.h>       // for errno
+//#include <sys/errno.h>       // for errno
 #include <cstdlib>           // for NULL, free, malloc, realloc, size_t
 #include <iostream>          // for cerr, ostream, istream
 #include "mc_parser.tab.hh"  // for MC_Parser::location_type, MC_Parser, MC_...

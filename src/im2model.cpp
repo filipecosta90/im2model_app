@@ -521,8 +521,7 @@ int main(int argc, char** argv ){
     defocus_period = ( defocus_upper_bound - defocus_lower_bound) / ( defocus_samples - 1 );
     std::cout << "defocus period " <<  defocus_period << std::endl;
 
-
-    CELSLC_prm::CELSLC_prm celslc_parameters;
+    CELSLC_prm celslc_parameters;
     celslc_parameters.set_prp_dir_uvw( perpendicular_dir_u, perpendicular_dir_v, perpendicular_dir_w );
     celslc_parameters.set_prj_dir_hkl( projection_dir_h, projection_dir_k, projection_dir_l );
     celslc_parameters.set_super_cell_size_abc( super_cell_size_a, super_cell_size_b, super_cell_size_c );
@@ -602,7 +601,7 @@ int main(int argc, char** argv ){
     std::cout << "MSA: Number slices to load " << slices_load << std::endl;
     std::cout << "MSA: Number slices to max thickness " << slices_load << std::endl;
 
-    MSA_prm::MSA_prm msa_parameters;
+    MSA_prm msa_parameters;
     // Since the release of MSA version 0.64 you may alternatively specify the electron energy in keV in line 6
     msa_parameters.set_electron_wavelength( ht_accelaration_voltage ); 
     msa_parameters.set_internal_repeat_factor_of_super_cell_along_x ( 1 );
@@ -631,7 +630,7 @@ int main(int argc, char** argv ){
       celslc_parameters.cleanup_bin();
     }
 
-    WAVIMG_prm::WAVIMG_prm wavimg_parameters;
+    WAVIMG_prm wavimg_parameters;
 
     std::string wave_function_name =  "'wave_sl.wav'";
     std::string wavimg_prm_name = "temporary_wavimg_im2model.prm";
@@ -759,7 +758,7 @@ int main(int argc, char** argv ){
       /////////////////////////////////////////////////
 
       std::cout << "Starting step length" << std::endl;
-      SIMGRID_wavimg_steplength::SIMGRID_wavimg_steplength wavimg_simgrid_steps;
+      SIMGRID_wavimg_steplength wavimg_simgrid_steps;
 
       wavimg_simgrid_steps.set_sampling_rate_super_cell_x_nm_pixel( sampling_rate_experimental_x_nm_per_pixel );
       wavimg_simgrid_steps.set_sampling_rate_super_cell_y_nm_pixel( sampling_rate_experimental_y_nm_per_pixel );
@@ -852,7 +851,7 @@ int main(int argc, char** argv ){
        *
        * */
 
-      CELSLC_prm::CELSLC_prm celslc_cel;
+      CELSLC_prm celslc_cel;
       std::string super_cell_slc_filename_prefix = "cel_slc";
       celslc_cel.set_cel_file( "test_im2model.cel" );
       celslc_cel.set_slc_filename_prefix ( super_cell_slc_filename_prefix );
@@ -871,7 +870,7 @@ int main(int argc, char** argv ){
       super_cell_nz_simulated_partitions = celslc_cel.get_nz_simulated_partitions();
       assert( super_cell_nz_simulated_partitions >= 1 );
 
-      MSA_prm::MSA_prm msa_cel;
+      MSA_prm msa_cel;
       msa_cel.set_electron_wavelength( ht_accelaration_voltage ); 
       msa_cel.set_internal_repeat_factor_of_super_cell_along_x ( 1 );
       msa_cel.set_internal_repeat_factor_of_super_cell_along_y ( 1 );
@@ -900,7 +899,7 @@ int main(int argc, char** argv ){
       super_cell_defocus_lower_bound = best_match_defocus_nm - (super_cell_defocus_interval / 2.0f);
       super_cell_defocus_upper_bound = best_match_defocus_nm + (super_cell_defocus_interval / 2.0f);
 
-      WAVIMG_prm::WAVIMG_prm wavimg_cel;
+      WAVIMG_prm wavimg_cel;
 
       std::stringstream wave_function_name_stream;
       wave_function_name_stream << "'wave_cel_sl" << std::setw(3) << std::setfill('0') << std::to_string( super_cell_nz_simulated_partitions ) << ".wav'";

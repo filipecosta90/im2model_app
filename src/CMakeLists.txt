@@ -11,7 +11,7 @@ FLEX_TARGET(mc_lexer mc_lexer.l ${CMAKE_CURRENT_BINARY_DIR}/mc_lexer.yy.cc)
 
 ADD_FLEX_BISON_DEPENDENCY(mc_lexer mc_parser)
 if(WIN32)
-include_directories ( {${FLEX_INCLUDE_DIRS} )
+include_directories( ${FLEX_INCLUDE_DIRS} )
 endif(WIN32)
 
 message(STATUS " Flex Includes - ${FLEX_INCLUDE_DIRS}")
