@@ -1,0 +1,50 @@
+'[Detector Parameters]'
+2016021801
+3
+80.0, 200.0, 0.0, 0.0, 0.0, 0.0, 'HAADF', ''
+30.0, 90.0, 0.0, 0.0, 0.0, 0.0, 'ADF', ''
+12.0, 23.0, 0.0, 0.0, 0.0, 0.0, 'ABF', ''
+
+
+
+
+# COMMENTS #
+#
+# This is a detector definition file used by the program "msa" Version 0.70b+.
+#
+# Use this file to define a series of detectors.
+# If you define more than one detector, "msa" will generate a series of output files.
+# A suffix string will be added according to the namestring parameter specified at the
+# end of the detector definition line.
+#
+# In case of only one detector definition, no detector suffix string is added to the
+# output file name. This is the identical behaviour as if no detector definition file
+# is used by msa.
+#
+#
+# General detector parameter file format used by msa v0.70b+
+#
+# line 1:		PRMNAME: string
+#  				Not used by "msa".
+#
+# line 2:       VERSION: long integer
+#                   2016021801: msa-version 0.70b+
+#                   2013041001: msa-version 0.62b-0.65b
+#
+# line 3:		DETNUM: Integer
+# 				Number of detectors defined in the following lines.
+#
+# line 4 - line 4+$DETNUM:	DETDEF(R1,R2,A1,A2,C1,C2,DN,DS): (Float,Float,Float,Float,Float,Float,String, String)
+# 					Detector definition consisting of four parameters;
+#	 				parameter 1: R1: inner detector radius [mrad]
+# 					parameter 2: R2: outer detector radius [mrad]
+#					parameter 3: A1: start azimuth [deg]
+#					parameter 4: A2: stop azimuth [deg]
+#					parameter 5: C1: decenter-theta-x [mrad]
+#					parameter 6: C2: decenter-theta-y [mrad]
+#					parameter 7: DN: detector name string
+#					parameter 8: DS: file name of a rel. radial sensitivity profile
+#
+#
+#
+# Juri Barthel, 2016-02-26
