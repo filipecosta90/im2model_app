@@ -1,11 +1,11 @@
 
 #-----------------------------------------------------------------------------#
 #                                                                             #
-#   HOWTO use the program MSA, Version 0.72b                                  #
+#   HOWTO use the program MSA, Version 0.74b                                  #
 #                                                                             #
 #-----------------------------------------------------------------------------#
 #                                                                             #
-#   Date: 2016-09-23                                                          #
+#   Date: 2017-04-11                                                          #
 #                                                                             #
 #   Author: Juri Barthel                                                      #
 #           Ernst Ruska-Centre                                                #
@@ -78,6 +78,9 @@ Command-line calling options for the program msa.exe:
 >     [-otx <x object tilt in mrad>]
 >     [-oty <y object tilt in mrad>]
 >     [-sr <effective source radius in nm>]
+>     [-abf <factor> apply absorption (potentials only)]
+>     [-buni <Biso in nm^2> apply DWF (potentials only)]
+>     [-uuni <Uiso in A^2> apply DWF (potentials only)]
 >     [/ctem, switch to imaging TEM simulation]
 >     [/txtout, switch for text output, STEM only]
 >     [/gaussap, uses a gaussian aperture profile, STEM only]
@@ -137,6 +140,19 @@ Options:
                   geometrical source profile in nm. Overrides the value set
                   in the parameter file. Half-width definitions depend on the
                   source profile chosen in the parameter file.
+-abf (float value) : [optional] Applies a fractional absorption potential.
+                  Only when the slice files are given with potential data,
+                  not possible in case of phase grating data.
+-buni (float value) : [optional] Applies a universal Debye-Waller factor.
+                  The float value is the isotropic Debye-Waller parameter
+                  (Biso) in nm^2.
+                  Only when the slice files are given with potential data,
+                  not possible in case of phase grating data.
+-uuni (float value) : [optional] Applies a universal Debye-Waller factor.
+                  The float value is the isotropic Debye-Waller parameter
+                  (Uiso) in A^2.
+                  Only when the slice files are given with potential data,
+                  not possible in case of phase grating data.
 /ctem : [optional] Activates CTEM mode calculaing a coherent(!) wave function.
                   Image aberrations can be applied to the exit-plane wave
                   function. STEM image calculations are carried out when
@@ -453,6 +469,17 @@ EXAMPLE 3: TEM SIMULATION OF A FULLY PERIODIC OBJECT WITHOUT FL CALCULATION
 
 6) History of changes
 
+170411: JB: Version 0.74b
+- Changed propagator creation algorithm form 32-bit to 64-bit arithmetics.
+170329: JB: Version 0.73b (bug fix)
+- Corrected a mistake in the potential-to-phasegrating conversion.
+170308: JB: Version 0.73b
+- Allow projected potentials as data type in slice files. MSA will generate
+  phase-gratings from the projected potentials. Absorption can be applied
+  here as well using a new command-line option -abf <value>. Universal DWFs
+  can be applied using the new command-line options -buni <value> or
+  -uuni <value>, where <value> specifies Biso (nm^2) or Uiso (A^2),
+  respectively.
 160923: JB: Version 0.72b
 - Corrected a mistake in the generation of tilted propagators for calculations
   with object mistilt. The hard aperture was shifting with the tilt vector.

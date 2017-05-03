@@ -3,9 +3,9 @@
 
 HOWTO use the WAVIMG program
 
-  Version 0.62b
+  Version 0.63b
 
-  by Juri Barthel, 2016-08-29
+  by Juri Barthel, 2016-09-14
 
 -------------------------------------------------------------------------------
 -------------------------------------------------------------------------------
@@ -59,6 +59,11 @@ wavimg -prm "C:\data\models\wavimg.prm"
 
 4) Changes
 
+160914: JB: Version 0.63b
+- Added a "secret" flag "/rnsb" to the command-line options, which
+  re-normalizes the output wave function when a side-band shifted MTF was
+  applied. The re-normalization is done be dividing again by the MTF value
+  applied to the zero beam.
 160829: JB: Version 0.62b
 - Implemented a routine, which creates folders before writing files
   when the folder doesn't exist.

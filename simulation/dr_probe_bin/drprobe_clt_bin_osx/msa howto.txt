@@ -1,11 +1,11 @@
 
 #-----------------------------------------------------------------------------#
 #                                                                             #
-#   HOWTO use the program MSA, Version 0.73b                                  #
+#   HOWTO use the program MSA, Version 0.74b                                  #
 #                                                                             #
 #-----------------------------------------------------------------------------#
 #                                                                             #
-#   Date: 2017-03-29                                                          #
+#   Date: 2017-04-11                                                          #
 #                                                                             #
 #   Author: Juri Barthel                                                      #
 #           Ernst Ruska-Centre                                                #
@@ -469,7 +469,8 @@ EXAMPLE 3: TEM SIMULATION OF A FULLY PERIODIC OBJECT WITHOUT FL CALCULATION
 
 6) History of changes
 
-
+170411: JB: Version 0.74b
+- Changed propagator creation algorithm form 32-bit to 64-bit arithmetics.
 170329: JB: Version 0.73b (bug fix)
 - Corrected a mistake in the potential-to-phasegrating conversion.
 170308: JB: Version 0.73b
