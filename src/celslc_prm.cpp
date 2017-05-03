@@ -487,7 +487,6 @@ bool CELSLC_prm::prepare_bin_ssc(){
 bool CELSLC_prm::call_bin_ssc(){
   prepare_bin_ssc();
 
-  boost::process::group ssc_group;
   std::stringstream args_stream;
   args_stream << bin_path;
 
@@ -523,8 +522,11 @@ bool CELSLC_prm::call_bin_ssc(){
     args_stream << " -abs";
   }
   // input ssc
+  std::map<int, boost::process::child> ssc_queue;
+  boost::process::group ssc_group;
+
   for ( int slice_id = 1; slice_id <= nz_simulated_partitions; slice_id++ ){
-        std::error_code ecode;
+    std::error_code ecode;
     std::stringstream ssc_stream;
     ssc_stream << args_stream.str() << " -ssc " << slice_id;
     std::cout << "Process for slice #" << slice_id << std::endl;
@@ -532,15 +534,23 @@ bool CELSLC_prm::call_bin_ssc(){
     std::stringstream celslc_stream;
     celslc_stream << "log_" << slc_file_name_prefix << "_" << slice_id << ".log"; 
     std::cout << "Saving log of slice #"<< slice_id << " in file: " << celslc_stream.str() << std::endl ;
-    boost::process::child slice_child( ssc_stream.str(), ssc_group , ecode ); //, ssc_group ); 
+    ssc_queue[slice_id] = boost::process::child ( ssc_stream.str(), ssc_group , ecode ); 
     assert( !ecode );
-    std::cout << " adding child " << slice_id << "["<< slice_child.id() <<"]" << " to group. joinable?? " << slice_child.joinable() << std::endl;
-    assert( slice_child.in_group( ecode ) );
-    //ssc_group.add( slice_child );
-    //boost::process::spawn( ssc_stream.str(), ssc_group ); 
   }
   std::cout << " waiting for all child processes do end" << std::endl;
-  ssc_group.wait();
+  while (!ssc_queue.empty()){
+    ssc_group.wait();
+    for (auto it = ssc_queue.begin(); it != ssc_queue.end(); ){
+      boost::process::child& c = it->second;
+      if (!c.running()){
+        std::cout << "exit " << it->first << std::endl;
+        it = ssc_queue.erase(it);
+      }
+      else{
+        ++it;
+      }
+    }
+  }
   ssc_runned_bin = true; 
   return true; 
 }
