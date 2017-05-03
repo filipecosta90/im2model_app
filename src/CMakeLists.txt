@@ -21,10 +21,11 @@ include_directories( ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR} )
 include_directories( ${OpenCV_INCLUDE_DIRS} )
 
 message(STATUS " Includes - ${Boost_INCLUDE_DIRS}")
-message(STATUS " Library  - ${Boost_LIBRARY_DIRS}")
-include_directories( ${Boost_INCLUDE_DIRS} )
+message(STATUS " Library path  - ${Boost_LIBRARY_DIRS}") 
+message(STATUS " Libraries : ${Boost_LIBRARIES}") 
 
-link_directories(${Boost_LIBRARY_DIRS})
+include_directories( ${Boost_INCLUDE_DIRS} )
+link_directories( ${Boost_LIBRARY_PATH} )
 
 # Set Properties->General->Configuration Type to Application(.exe)
 # Creates app.exe with the listed sources (main.cxx)

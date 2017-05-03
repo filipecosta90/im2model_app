@@ -28,19 +28,19 @@ set(OpenCV_STATIC OFF)
 set(BUILD_SHARED_LIBS ON)
 find_package(OpenCV  3.0.0 REQUIRED)
 
+SET (Boost_DEBUG TRUE)
+set (Boost_NO_SYSTEM_PATHS true)
+set (Boost_USE_STATIC_LIBS false)
+set (Boost_USE_MULTITHREADED ON)
+
 if (WIN32)
-  message(STATUS "Setting Boost flags for Windows")
-  SET (Boost_DEBUG TRUE)
-  set (Boost_USE_MULTITHREADED TRUE)
-  set(Boost_USE_STATIC_LIBS        TRUE)
-  set(Boost_USE_STATIC_RUNTIME     TRUE)
-  set(BOOST_ALL_DYN_LINK           FALSE)   # force dynamic linking for all libraries
+  message(STATUS "Setting Boost additional flags for Windows")
+  # disable autolinking in boost
+add_definitions( -DBOOST_ALL_NO_LIB )
+  ADD_DEFINITIONS(-DBOOST_LIB_DIAGNOSTIC )
+# force dynamic linking for all libraries
+  add_definitions( -DBOOST_ALL_DYN_LINK )
   set(Boost_COMPILER "-vc141")
-else()
-  message(STATUS "Setting Boost flags for Unix")
-  set(Boost_USE_STATIC_LIBS        ON)
-  set (Boost_USE_MULTITHREADED TRUE)
-  set(Boost_USE_STATIC_RUNTIME     OFF)
 endif(WIN32)
 
 find_package(Boost 1.64.0 COMPONENTS system program_options filesystem thread iostreams REQUIRED)
