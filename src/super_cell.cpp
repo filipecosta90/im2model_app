@@ -91,6 +91,8 @@ void Super_Cell::set_default_values(){
   // in the correlation coefficient between two iterations
   motion_euclidean_termination_eps = 1e-5;
   motion_euclidean_warp_mode = cv::MOTION_EUCLIDEAN;
+
+  debug_switch = false;
 }
 
 
@@ -617,12 +619,22 @@ void Super_Cell::calculate_supercell_boundaries_from_experimental_image(
 
   cv::Mat blur;
   cv::GaussianBlur(_raw_experimental_image ,blur,cv::Size(3,3), 0);
-  imwrite( "experimental_image_blur.png", blur);
+
+ 
+
   cv::Canny( blur, canny_output, threshold , threshold *2, 3 );
   cv::Canny( _raw_experimental_image, canny_output_no_blur, threshold , threshold *2, 3 );
-  imwrite( "experimental_image_canny.png", canny_output );
-  imwrite( "experimental_image_canny_no_blur.png", canny_output_no_blur );
   cv::findContours( canny_output, contours, hierarchy, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE, cv::Point(0, 0) );
+  if (debug_switch == true) {
+	  try {
+		  imwrite("experimental_image_blur.png", blur);
+		  imwrite("experimental_image_canny.png", canny_output);
+		  imwrite("experimental_image_canny_no_blur.png", canny_output_no_blur);
+	  }
+	  catch (std::runtime_error& ex) {
+		  fprintf(stderr, "Exception writing image: %s\n", ex.what());
+	  }
+  }
 
   cv::Mat1f dist(contours.size(), contours.size(), 0.f);
   cv::Mat1i in_range(contours.size(), contours.size(), 0);
@@ -740,8 +752,16 @@ void Super_Cell::calculate_supercell_boundaries_from_experimental_image(
 
   rectangle_cropped_experimental_image = temp(_experimental_image_boundary_rectangle).clone();
   _rectangle_cropped_experimental_image_w_margin = temp(_experimental_image_boundary_rectangle_w_margin).clone();
-  imwrite( "experimental_image_boundary_rectangle.png", rectangle_cropped_experimental_image  );
-  imwrite( "experimental_image_boundary_rectangle_with_margins.png", _rectangle_cropped_experimental_image_w_margin );
+
+  if (debug_switch == true) {
+	  try {
+		  imwrite("experimental_image_boundary_rectangle.png", rectangle_cropped_experimental_image);
+		  imwrite("experimental_image_boundary_rectangle_with_margins.png", _rectangle_cropped_experimental_image_w_margin);
+	  }
+	  catch (std::runtime_error& ex) {
+		  fprintf(stderr, "Exception writing image: %s\n", ex.what());
+	  }
+  }
 
   _experimental_image_roi = _raw_experimental_image( _experimental_image_boundary_rectangle ).clone();
   _experimental_image_roi_w_margin = _raw_experimental_image( _experimental_image_boundary_rectangle_w_margin ).clone();
@@ -850,8 +870,15 @@ void Super_Cell::create_experimental_image_roi_mask_from_boundary_polygon(){
   fillPoly(_experimental_image_roi_mask, hull1, cv::Scalar(255, 255, 255), 8, 0);
   fillPoly(_experimental_image_roi_mask_w_margin, hull2, cv::Scalar(255, 255, 255), 8, 0);
 
-  imwrite( "experimental_image_roi_mask.png", _experimental_image_roi_mask );
-  imwrite( "experimental_image_roi_w_margin_mask.png", _experimental_image_roi_mask_w_margin );
+  if (debug_switch == true) {
+	  try {
+		  imwrite("experimental_image_roi_mask.png", _experimental_image_roi_mask);
+		  imwrite("experimental_image_roi_w_margin_mask.png", _experimental_image_roi_mask_w_margin);
+	  }
+	  catch (std::runtime_error& ex) {
+		  fprintf(stderr, "Exception writing image: %s\n", ex.what());
+	  }
+  }
 }
 
 void Super_Cell::calculate_atomic_columns_position_w_boundary_polygon(){
@@ -860,7 +887,14 @@ void Super_Cell::calculate_atomic_columns_position_w_boundary_polygon(){
 
   cv::Mat _experimental_image_roi_bounded_mask = cv::Mat::zeros(_experimental_image_roi.size(),CV_8UC1);
   _experimental_image_roi.copyTo( _experimental_image_roi_bounded_mask , _experimental_image_roi_mask );
-  imwrite( "_experimental_image_roi_bounded_mask.png" , _experimental_image_roi_bounded_mask );
+  if (debug_switch == true) {
+	  try {
+		  imwrite("_experimental_image_roi_bounded_mask.png", _experimental_image_roi_bounded_mask);
+	  }
+	  catch (std::runtime_error& ex) {
+		  fprintf(stderr, "Exception writing image: %s\n", ex.what());
+	  }
+  }
 
   double min, max;
   cv::minMaxLoc(_experimental_image_roi_bounded_mask, &min, &max);
@@ -889,14 +923,29 @@ void Super_Cell::calculate_atomic_columns_position_w_boundary_polygon(){
   _experimental_image_result.convertTo( _experimental_image_result, CV_8UC3 );
   _experimental_image_laplacian.convertTo( _experimental_image_laplacian, CV_8UC3 );
 
-  imwrite( "experimental_img_result.png", _experimental_image_result );
+  if (debug_switch == true) {
+	  try {
+		  imwrite("experimental_img_result.png", _experimental_image_result);
+	  }
+	  catch (std::runtime_error& ex) {
+		  fprintf(stderr, "Exception writing image: %s\n", ex.what());
+	  }
+  }
 
   // Create binary image from source image
   cv::Mat _experimental_image_bw;
 
   //use Otsu algorithm to choose the optimal threshold value
   cv::threshold( _experimental_image_result , _experimental_image_bw, 40, 255, CV_THRESH_BINARY | CV_THRESH_OTSU);
-  imwrite("experimental_binary_image_threshold.png", _experimental_image_bw);
+
+  if (debug_switch == true) {
+	  try {
+		  imwrite("experimental_binary_image_threshold.png", _experimental_image_bw);
+	  }
+	  catch (std::runtime_error& ex) {
+		  fprintf(stderr, "Exception writing image: %s\n", ex.what());
+	  }
+  }
 
   // Perform the distance transform algorithm
   cv::Mat dist;
@@ -908,13 +957,30 @@ void Super_Cell::calculate_atomic_columns_position_w_boundary_polygon(){
   cv::normalize(dist, dist, 0, 1., cv::NORM_MINMAX);
   cv::normalize(dist, dist_image, 0, 255, cv::NORM_MINMAX);
 
-  imwrite("experimental_distance_transform_image.png", dist_image);
+
+  if (debug_switch == true) {
+	  try {
+		  imwrite("experimental_distance_transform_image.png", dist_image);
+	  }
+	  catch (std::runtime_error& ex) {
+		  fprintf(stderr, "Exception writing image: %s\n", ex.what());
+	  }
+  }
 
   // Threshold to obtain the peaks
   // This will be the markers for the foreground objects
   cv::threshold(dist, dist, .2, 1., CV_THRESH_BINARY );
   cv::normalize(dist, dist_image, 0, 255, cv::NORM_MINMAX);
-  imwrite("experimental_distance_transform_image_after_threshold.png", dist_image);
+
+  if (debug_switch == true) {
+	  try {
+		  imwrite("experimental_distance_transform_image_after_threshold.png", dist_image);
+	  }
+	  catch (std::runtime_error& ex) {
+		  fprintf(stderr, "Exception writing image: %s\n", ex.what());
+	  }
+  }
+
 
   // Create the CV_8U version of the distance image
   // It is needed for findContours()
@@ -972,8 +1038,16 @@ void Super_Cell::calculate_atomic_columns_position_w_boundary_polygon(){
   cv::drawKeypoints( _experimental_keypoints, _experimental_image_keypoints, black_with_keypoints, cv::Scalar(0,0,255), cv::DrawMatchesFlags::DRAW_RICH_KEYPOINTS );
 
   // Show blobs
-  imwrite("experimental_keypoints.png", im_with_keypoints );
-  imwrite("experimental_keypoints_black.png", black_with_keypoints );
+  if (debug_switch == true) {
+	  try {
+		  imwrite("experimental_keypoints.png", im_with_keypoints);
+		  imwrite("experimental_keypoints_black.png", black_with_keypoints);
+	  }
+	  catch (std::runtime_error& ex) {
+		  fprintf(stderr, "Exception writing image: %s\n", ex.what());
+	  }
+  }
+  
   for( std::vector<cv::KeyPoint>::iterator _keypoint = _experimental_image_keypoints.begin(); _keypoint != _experimental_image_keypoints.end() ; _keypoint++ ){
     cv::Point2f p = _keypoint->pt;
     const double _keypoint_diameter = _keypoint->size;
@@ -1126,7 +1200,15 @@ void Super_Cell::read_simulated_super_cell_from_dat_file( std::string file_name_
   std::stringstream output_debug_info2;
   output_debug_info2 << "raw_super_cell_image.png";
   std::string string_output_debug_info2 = output_debug_info2.str();
-  imwrite( string_output_debug_info2 , raw_gray_simulated_image_super_cell );
+  if (debug_switch == true) {
+	  try {
+		  imwrite(string_output_debug_info2, raw_gray_simulated_image_super_cell);
+	  }
+	  catch (std::runtime_error& ex) {
+		  fprintf(stderr, "Exception writing image: %s\n", ex.what());
+	  }
+  }
+
 }
 
 void Super_Cell::read_simulated_super_cells_from_dat_files( ){
@@ -1183,8 +1265,17 @@ void Super_Cell::read_simulated_super_cells_from_dat_files( ){
     output_debug_info2 << "final_super_cell_image" << std::setw(3) << std::setfill('0') << std::to_string(defocus) << ".png";
     std::string string_output_debug_info1 = output_debug_info1.str();
     std::string string_output_debug_info2 = output_debug_info2.str();
-    imwrite( string_output_debug_info1 , raw_gray_simulated_image_super_cell );
-    imwrite( string_output_debug_info2 , final_gray_simulated_image_super_cell );
+
+	if (debug_switch == true) {
+		try {
+			imwrite(string_output_debug_info1, raw_gray_simulated_image_super_cell);
+			imwrite(string_output_debug_info2, final_gray_simulated_image_super_cell);
+		}
+		catch (std::runtime_error& ex) {
+			fprintf(stderr, "Exception writing image: %s\n", ex.what());
+		}
+	}
+
   }
   assert( simulated_defocus_map_raw_images.size() == super_cell_simulated_defocus_samples );
 }
@@ -1194,7 +1285,6 @@ void Super_Cell::match_experimental_simulated_super_cells(){
 
   const int result_cols =  _cel_wout_margin_nx_px - _experimental_image_roi.cols + 1;
   const int result_rows = _cel_wout_margin_ny_px - _experimental_image_roi.rows + 1;
-  std::cout << " match matrices size: cols " << result_cols << " rows " << result_rows << std::endl;
   for (
       int defocus_map_pos = 0;
       defocus_map_pos < simulated_defocus_map_raw_images.size();
@@ -1218,7 +1308,15 @@ void Super_Cell::match_experimental_simulated_super_cells(){
     cv::Mat _experimental_image_roi_w_mask;
 
     cv::bitwise_and( _experimental_image_roi, _experimental_image_roi_mask , _experimental_image_roi_w_mask);
-    imwrite( "experimental_image_roi_with_mask.png", _experimental_image_roi_w_mask );
+	if (debug_switch == true) {
+		try {
+			imwrite("experimental_image_roi_with_mask.png", _experimental_image_roi_w_mask);
+		}
+		catch (std::runtime_error& ex) {
+			fprintf(stderr, "Exception writing image: %s\n", ex.what());
+		}
+	}
+
     cv::matchTemplate( simulated_defocus_image , _experimental_image_roi, result, CV_TM_CCORR_NORMED , _experimental_image_roi_mask);
 
     cv::minMaxLoc( result, &minVal, &maxVal, &minLoc, &maxLoc, cv::Mat() );
@@ -1249,8 +1347,15 @@ void Super_Cell::match_experimental_simulated_super_cells(){
   std::cout << "simulated data: " << _best_match_simulated_image_raw.size() << std::endl;
   _best_match_simulated_image_positioned = simulated_defocus_map_raw_images.at(dist)(_experimental_pos_best_match_rectangle);
 
-  std::cout << "calculated best _best_match_simulated_image_positioned: " << std::endl;
-  imwrite("_best_match_simulated_image_positioned.png", _best_match_simulated_image_positioned) ;
+  if (debug_switch == true) {
+	  try {
+		  std::cout << "calculated best _best_match_simulated_image_positioned: " << std::endl;
+		  imwrite("_best_match_simulated_image_positioned.png", _best_match_simulated_image_positioned);
+	  }
+	  catch (std::runtime_error& ex) {
+		  fprintf(stderr, "Exception writing image: %s\n", ex.what());
+	  }
+  }
 
   // the function findTransformECC() implements an area-based alignment
   // that builds on intensity similarities. In essence, the function
@@ -1296,7 +1401,14 @@ void Super_Cell::match_experimental_simulated_super_cells(){
   //_experimental_pos_best_match_rectangle.y = (int) motion_euclidean_warp_matrix.at<float>( 1, 2 );
 
   _best_match_simulated_image_positioned = raw_transformed_simulated_image(_experimental_pos_best_match_rectangle);
-  imwrite("_best_match_simulated_image_positioned_after_euclidean.png", _best_match_simulated_image_positioned) ;
+  if (debug_switch == true) {
+	  try {
+		  imwrite("_best_match_simulated_image_positioned_after_euclidean.png", _best_match_simulated_image_positioned);
+	  }
+	  catch (std::runtime_error& ex) {
+		  fprintf(stderr, "Exception writing image: %s\n", ex.what());
+	  }
+  }
 }
 
 

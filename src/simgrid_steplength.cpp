@@ -429,10 +429,16 @@ cv::Mat SIMGRID_wavimg_steplength::calculate_error_matrix( cv::Mat aligned_exper
     //cv::waitKey(0);
     */ }
 
-  imwrite( "normalized_aligned_simulated_image_roi.png", normalized_aligned_simulated_image_roi );
-  imwrite( "aligned_experimental_image_roi.png", aligned_experimental_image_roi );
-  imwrite( "error_roi.png", error_matrix );
-
+  if (debug_switch == true) {
+	  try {
+		  imwrite("normalized_aligned_simulated_image_roi.png", normalized_aligned_simulated_image_roi);
+		  imwrite("aligned_experimental_image_roi.png", aligned_experimental_image_roi);
+		  imwrite("error_roi.png", error_matrix);
+	  }
+	  catch (std::runtime_error& ex) {
+		  fprintf(stderr, "Exception writing image: %s\n", ex.what());
+	  }
+  }
   return error_matrix;
 }
 
@@ -529,11 +535,20 @@ bool SIMGRID_wavimg_steplength::export_sim_grid(){
     std::stringstream sim_grid_file_image;
     sim_grid_file_image << "sim_grid_thickness_" << slices_lower_bound << "_to_" << slices_upper_bound <<  "_defocus_" <<defocus_lower_bound << "_to_" << defocus_upper_bound << ".png" ;
     std::string sim_grid_file_name_image = sim_grid_file_image.str();
-    imwrite( "exp_roi.png", experimental_image_roi );
-    imwrite( sim_grid_file_name_image, sim_grid );
-    namedWindow( "SIMGRID window", cv::WINDOW_AUTOSIZE );// Create a window for display.
-    imshow( "SIMGRID window", sim_grid ); //draw );
-    cv::waitKey(0);
+
+	if (debug_switch == true) {
+		try {
+			imwrite("exp_roi.png", experimental_image_roi);
+			imwrite(sim_grid_file_name_image, sim_grid);
+			namedWindow("SIMGRID window", cv::WINDOW_AUTOSIZE);// Create a window for display.
+			imshow("SIMGRID window", sim_grid); //draw );
+			cv::waitKey(0);
+		}
+		catch (std::runtime_error& ex) {
+			fprintf(stderr, "Exception writing image: %s\n", ex.what());
+			return 1;
+		}
+	}
 
     return EXIT_SUCCESS;
   }
@@ -591,8 +606,15 @@ void SIMGRID_wavimg_steplength::produce_png_from_dat_file(){
       std::stringstream output_debug_info2;
       output_debug_info2 << "raw_simulated" << std::setw(3) << std::setfill('0') << std::to_string(thickness) << "_" << std::setw(3) << std::setfill('0') << std::to_string(defocus) << ".png";
       std::string string_output_debug_info2 = output_debug_info2.str();
-      imwrite( string_output_debug_info2 , raw_gray_simulated_image );
-      std::cout << "Cycle end" << std::endl; 
+	  if (debug_switch == true) {
+		  try {
+			  imwrite(string_output_debug_info2, raw_gray_simulated_image);
+			  std::cout << "Cycle end" << std::endl;
+		  }
+		  catch (std::runtime_error& ex) {
+			  fprintf(stderr, "Exception writing image: %s\n", ex.what());
+		  }
+	  }
     }
   }
   std::cout << "Finished writing png files from *.dat " << std::endl; 
@@ -691,7 +713,7 @@ bool SIMGRID_wavimg_steplength::simulate_from_dat_file(){
 
       output_debug_info1 << "with_rectangle_sim_" << std::setw(3) << std::setfill('0') << std::to_string(thickness) << "_" << std::setw(3) << std::setfill('0') << std::to_string(defocus) << ".png";
 	  boost::filesystem::path full_path(output_debug_info1.str());
-
+	  
 	  std::string string_output_debug_info1 = full_path.string(); // full_path.append(output_debug_info1.str()).string();
       // get the .dat image name
       std::stringstream output_debug_info2;
@@ -703,19 +725,13 @@ bool SIMGRID_wavimg_steplength::simulate_from_dat_file(){
       output_debug_info3 << "reshaped_sim_raw_" << std::setw(3) << std::setfill('0') << std::to_string(thickness) << "_" << std::setw(3) << std::setfill('0') << std::to_string(defocus) << ".png";
       std::string string_output_debug_info3 = output_debug_info3.str();
 	  if (debug_switch == true) {
-		  std::cout << "going to write image in file: "<< string_output_debug_info1 << std::endl;
-	  }
-
-	  std::vector<int> compression_params;
-	  compression_params.push_back(CV_IMWRITE_PNG_COMPRESSION);
-	  compression_params.push_back(9);
-
 	  try {
-		  //imwrite(string_output_debug_info1, with_rectangle_simulated_image, compression_params);
+		  imwrite(string_output_debug_info1, with_rectangle_simulated_image);
 	  }
 	  catch (std::runtime_error& ex) {
 		  fprintf(stderr, "Exception writing image: %s\n", ex.what());
 		  return 1;
+	  }
 	  }
 
 	  if (debug_switch == true) {
@@ -723,24 +739,14 @@ bool SIMGRID_wavimg_steplength::simulate_from_dat_file(){
 	  }
       // confirm if it needs reshaping
       if ( simulated_image_needs_reshape ){
-        imwrite( string_output_debug_info2 , raw_gray_simulated_image );
         resize(cleaned_simulated_image, cleaned_simulated_image, cv::Size(0,0), reshape_factor_from_supper_cell_to_experimental_x, reshape_factor_from_supper_cell_to_experimental_y, cv::INTER_LINEAR );
         resize(raw_gray_simulated_image, raw_gray_simulated_image, cv::Size(0,0), reshape_factor_from_supper_cell_to_experimental_x, reshape_factor_from_supper_cell_to_experimental_y, cv::INTER_LINEAR );
-        imwrite( string_output_debug_info3 , raw_gray_simulated_image );
       }
 
-
-	  if (debug_switch == true) {
-		  std::cout << "going to create results matrix" << std::endl;
-	  }
       /// Create the result matrix
       int result_cols =  experimental_image_roi.cols - cleaned_simulated_image.cols + 1;
       int result_rows = experimental_image_roi.rows  - cleaned_simulated_image.rows + 1;
 	  cv::Mat result( result_rows, result_cols, CV_8UC1 );
-
-	  if (debug_switch == true) {
-		  std::cout << "Finished creating results matrix" << std::endl;
-	  }
 
       // vars for minMaxLoc
       double minVal; double maxVal; cv::Point minLoc; cv::Point maxLoc;
@@ -748,14 +754,8 @@ bool SIMGRID_wavimg_steplength::simulate_from_dat_file(){
       cv::Point matchLoc;
       double matchVal;
 
-	  if (debug_switch == true) {
-		  std::cout << "going to match template" << std::endl;
-	  }
       cv::matchTemplate( experimental_image_roi , cleaned_simulated_image, result, CV_TM_CCOEFF_NORMED  );
       cv::minMaxLoc( result, &minVal, &maxVal, &minLoc, &maxLoc, cv::Mat() );
-	  if (debug_switch == true) {
-		  std::cout << "finished match template" << std::endl;
-	  }
       matchVal = maxVal;
 
       double slice_match, defocus_match, match_factor;
@@ -765,19 +765,13 @@ bool SIMGRID_wavimg_steplength::simulate_from_dat_file(){
       defocus_match = (double) at_defocus;
       slice_defocus_match_points.push_back (cv::Point3d ( slice_match, defocus_match, match_factor ));
 
-	  std::cout << "at defocus" << defocus_match << std::endl;
-	  std::cout << "at slice" << slice_match << std::endl;
-	  std::cout << "match factor" << match_factor << std::endl;
-
-
       defocus_values_matrix.at<float>(thickness-1, defocus-1) = defocus_match;
       thickness_values_matrix.at<float>(thickness-1, defocus-1) = slice_match;
       match_values_matrix.at<float>( thickness-1, defocus-1) =  match_factor ;
+
       simulated_images_row.push_back(cleaned_simulated_image);
       raw_simulated_images_row.push_back(raw_gray_simulated_image);
-
-      std::cout << maxLoc << std::endl;
-      experimental_images_matchloc_row.push_back(maxLoc);
+	  experimental_images_matchloc_row.push_back(maxLoc);
 
       simulated_matches.push_back(match_factor);
     }

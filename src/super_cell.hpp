@@ -168,6 +168,9 @@ class Super_Cell {
     // Define the motion model
     int motion_euclidean_warp_mode; 
 
+	// Define the motion model
+	bool debug_switch;
+
     /** Private Class methods **/
     void set_default_values();
     void set_sentinel_values();
