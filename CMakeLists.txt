@@ -24,8 +24,9 @@ else()
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fexceptions -g -Wall -std=c++14")
 endif(WIN32)
 
+SET (OpenCV_DEBUG TRUE)
 set(OpenCV_STATIC OFF)
-set(BUILD_SHARED_LIBS ON)
+#set(BUILD_SHARED_LIBS ON)
 find_package(OpenCV  3.0.0 REQUIRED)
 
 SET (Boost_DEBUG TRUE)

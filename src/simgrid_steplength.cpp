@@ -11,6 +11,7 @@
 #include <iterator>                      // for distance
 #include <limits>                        // for numeric_limits
 
+#include <opencv2/opencv.hpp>           // 
 #include <opencv2/core/hal/interface.h>  // for CV_32FC1, CV_8UC1, CV_32F
 #include <opencv2/core/types_c.h>        // for CvScalar, cvScalar, CvPoint
 #include <opencv2/imgproc/imgproc_c.h>   // for CV_AA
@@ -24,6 +25,9 @@
 
 #include <boost/iostreams/device/mapped_file.hpp> // for mmap
 #include <boost/iostreams/stream.hpp>             // for stream
+#include <boost/filesystem.hpp>                      // for path, operator==, oper...
+#include <boost/filesystem/path.hpp>                      // for path, operator==, oper...
+
 
 int SIMGRID_wavimg_steplength::imregionalmax(cv::Mat input, cv::Mat locations){
   return 1;
@@ -463,10 +467,10 @@ bool SIMGRID_wavimg_steplength::export_sim_grid(){
 
       for (int defocus = 1; defocus <= defocus_samples; defocus ++ ){
 
-        const int at_defocus = defocus_values_matrix.at<double>(thickness-1, defocus-1);
-        const int at_slice = thickness_values_matrix.at<double>(thickness-1, defocus-1);
+        const int at_defocus = defocus_values_matrix.at<float>(thickness-1, defocus-1);
+        const int at_slice = thickness_values_matrix.at<float>(thickness-1, defocus-1);
         const double slice_thickness_nm = celslc_accum_nm_slice_vec.at(at_slice-1);
-        const double match_factor = match_values_matrix.at<double>( thickness-1, defocus-1);
+        const double match_factor = match_values_matrix.at<float>( thickness-1, defocus-1);
 
         cv::Mat cleaned_simulated_image = simulated_images_row.at(defocus-1);
 
@@ -663,7 +667,9 @@ bool SIMGRID_wavimg_steplength::simulate_from_dat_file(){
       // Create a new matrix to hold the gray image
       cv::Mat raw_gray_simulated_image;
       raw_simulated_image.convertTo(raw_gray_simulated_image, CV_8UC1 , 255.0f/(max - min), -min * 255.0f/(max - min));
-
+	  if (debug_switch == true) {
+		  std::cout << "Finished converting image" << std::endl;
+	  }
       //raw_simulated_image.release();
 
       if ( !raw_gray_simulated_image.data ){
@@ -676,12 +682,17 @@ bool SIMGRID_wavimg_steplength::simulate_from_dat_file(){
       cv::Mat cleaned_simulated_image = raw_gray_simulated_image(ignore_edge_pixels_rectangle);
       cv::Mat with_rectangle_simulated_image = raw_gray_simulated_image.clone();
       rectangle ( with_rectangle_simulated_image, ignore_edge_pixels_rectangle, cvScalar(255,255,255), 1, 8, 0  );
+	  if (debug_switch == true) {
+		  std::cout << "Finished removing the ignored edge pixels" << std::endl;
+	  }
 
       // get the .dat image name
       std::stringstream output_debug_info1;
-      output_debug_info1 << "with_rectangle_sim_" << std::setw(3) << std::setfill('0') << std::to_string(thickness) << "_" << std::setw(3) << std::setfill('0') << std::to_string(defocus) << ".png";
-      std::string string_output_debug_info1 = output_debug_info1.str();
 
+      output_debug_info1 << "with_rectangle_sim_" << std::setw(3) << std::setfill('0') << std::to_string(thickness) << "_" << std::setw(3) << std::setfill('0') << std::to_string(defocus) << ".png";
+	  boost::filesystem::path full_path(output_debug_info1.str());
+
+	  std::string string_output_debug_info1 = full_path.string(); // full_path.append(output_debug_info1.str()).string();
       // get the .dat image name
       std::stringstream output_debug_info2;
       output_debug_info2 << "no_reshape_sim_raw_" << std::setw(3) << std::setfill('0') << std::to_string(thickness) << "_" << std::setw(3) << std::setfill('0') << std::to_string(defocus) << ".png";
@@ -691,9 +702,25 @@ bool SIMGRID_wavimg_steplength::simulate_from_dat_file(){
       std::stringstream output_debug_info3;
       output_debug_info3 << "reshaped_sim_raw_" << std::setw(3) << std::setfill('0') << std::to_string(thickness) << "_" << std::setw(3) << std::setfill('0') << std::to_string(defocus) << ".png";
       std::string string_output_debug_info3 = output_debug_info3.str();
+	  if (debug_switch == true) {
+		  std::cout << "going to write image in file: "<< string_output_debug_info1 << std::endl;
+	  }
 
-      imwrite( string_output_debug_info1 , with_rectangle_simulated_image );
+	  std::vector<int> compression_params;
+	  compression_params.push_back(CV_IMWRITE_PNG_COMPRESSION);
+	  compression_params.push_back(9);
 
+	  try {
+		  //imwrite(string_output_debug_info1, with_rectangle_simulated_image, compression_params);
+	  }
+	  catch (std::runtime_error& ex) {
+		  fprintf(stderr, "Exception writing image: %s\n", ex.what());
+		  return 1;
+	  }
+
+	  if (debug_switch == true) {
+		  std::cout << "Finished writing image" << std::endl;
+	  }
       // confirm if it needs reshaping
       if ( simulated_image_needs_reshape ){
         imwrite( string_output_debug_info2 , raw_gray_simulated_image );
@@ -702,11 +729,18 @@ bool SIMGRID_wavimg_steplength::simulate_from_dat_file(){
         imwrite( string_output_debug_info3 , raw_gray_simulated_image );
       }
 
+
+	  if (debug_switch == true) {
+		  std::cout << "going to create results matrix" << std::endl;
+	  }
       /// Create the result matrix
-      cv::Mat result;
       int result_cols =  experimental_image_roi.cols - cleaned_simulated_image.cols + 1;
       int result_rows = experimental_image_roi.rows  - cleaned_simulated_image.rows + 1;
-      result.create( result_rows, result_cols, CV_8UC1 );
+	  cv::Mat result( result_rows, result_cols, CV_8UC1 );
+
+	  if (debug_switch == true) {
+		  std::cout << "Finished creating results matrix" << std::endl;
+	  }
 
       // vars for minMaxLoc
       double minVal; double maxVal; cv::Point minLoc; cv::Point maxLoc;
@@ -714,9 +748,14 @@ bool SIMGRID_wavimg_steplength::simulate_from_dat_file(){
       cv::Point matchLoc;
       double matchVal;
 
+	  if (debug_switch == true) {
+		  std::cout << "going to match template" << std::endl;
+	  }
       cv::matchTemplate( experimental_image_roi , cleaned_simulated_image, result, CV_TM_CCOEFF_NORMED  );
       cv::minMaxLoc( result, &minVal, &maxVal, &minLoc, &maxLoc, cv::Mat() );
-
+	  if (debug_switch == true) {
+		  std::cout << "finished match template" << std::endl;
+	  }
       matchVal = maxVal;
 
       double slice_match, defocus_match, match_factor;
@@ -726,13 +765,18 @@ bool SIMGRID_wavimg_steplength::simulate_from_dat_file(){
       defocus_match = (double) at_defocus;
       slice_defocus_match_points.push_back (cv::Point3d ( slice_match, defocus_match, match_factor ));
 
-      defocus_values_matrix.at<double>(thickness-1, defocus-1) = (double)  at_defocus ;
-      thickness_values_matrix.at<double>(thickness-1, defocus-1) = (double)  at_slice ;
-      match_values_matrix.at<double>( thickness-1, defocus-1) = (double)  match_factor ;
+	  std::cout << "at defocus" << defocus_match << std::endl;
+	  std::cout << "at slice" << slice_match << std::endl;
+	  std::cout << "match factor" << match_factor << std::endl;
+
+
+      defocus_values_matrix.at<float>(thickness-1, defocus-1) = defocus_match;
+      thickness_values_matrix.at<float>(thickness-1, defocus-1) = slice_match;
+      match_values_matrix.at<float>( thickness-1, defocus-1) =  match_factor ;
       simulated_images_row.push_back(cleaned_simulated_image);
       raw_simulated_images_row.push_back(raw_gray_simulated_image);
 
-      //std::cout << maxLoc << std::endl;
+      std::cout << maxLoc << std::endl;
       experimental_images_matchloc_row.push_back(maxLoc);
 
       simulated_matches.push_back(match_factor);
