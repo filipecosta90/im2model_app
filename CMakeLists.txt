@@ -29,16 +29,16 @@ set(BUILD_SHARED_LIBS ON)
 find_package(OpenCV  3.0.0 REQUIRED)
 
 SET (Boost_DEBUG TRUE)
-set (Boost_NO_SYSTEM_PATHS true)
 set (Boost_USE_STATIC_LIBS false)
 set (Boost_USE_MULTITHREADED ON)
 
 if (WIN32)
   message(STATUS "Setting Boost additional flags for Windows")
   # disable autolinking in boost
-add_definitions( -DBOOST_ALL_NO_LIB )
+  set (Boost_NO_SYSTEM_PATHS true)
+  add_definitions( -DBOOST_ALL_NO_LIB )
   ADD_DEFINITIONS(-DBOOST_LIB_DIAGNOSTIC )
-# force dynamic linking for all libraries
+  # force dynamic linking for all libraries
   add_definitions( -DBOOST_ALL_DYN_LINK )
   set(Boost_COMPILER "-vc141")
 endif(WIN32)

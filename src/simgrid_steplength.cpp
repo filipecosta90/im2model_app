@@ -562,30 +562,7 @@ void SIMGRID_wavimg_steplength::produce_png_from_dat_file(){
       float* p;
       std::cout << "size of file: " << mmap.size() << std::endl;
       p = (float*)mmap.data();
-      //boost::iostreams::stream<mapped_file_source> input_stream(mmap, std::ios::binary);
-
-      /*int fd;
-
-      fd = open ( file_name_output_dat.c_str() , O_RDONLY );
-      if ( fd == -1 ){
-        perror("ERROR: in open() of *.dat image file");
-      }
-
-      off_t fsize;
-      fsize = lseek(fd, 0, SEEK_END);
-
-
-      p = (float*) mmap (0, fsize, PROT_READ, MAP_SHARED, fd, 0);
-
-      if (p == MAP_FAILED) {
-        perror ("ERROR: in mmap() of *.dat image file");
-      }
-
-      if (close (fd) == -1) {
-        perror ("ERROR: in close() of *.dat image file");
-      }
-      std::cout << "going to create a new Mat" << std::endl;
-      */
+      
       cv::Mat raw_simulated_image ( n_rows_simulated_image , n_cols_simulated_image , CV_32FC1);
       double min, max;
 
@@ -597,6 +574,8 @@ void SIMGRID_wavimg_steplength::produce_png_from_dat_file(){
           pos++;
         }
       }
+      
+      mmap.close();
       std::cout << "Finished reading file " << std::endl; 
       cv::minMaxLoc(raw_simulated_image, &min, &max);
 
@@ -660,8 +639,9 @@ bool SIMGRID_wavimg_steplength::simulate_from_dat_file(){
       boost::iostreams::mapped_file_source mmap( output_dat_name_stream.str() );
       float* p;
       std::cout << "size of file: " << mmap.size() << std::endl;
-      p = (float*)mmap.data();
-      
+      assert( mmap.is_open() );
+      p = (float*) mmap.data();
+
       cv::Mat raw_simulated_image ( n_rows_simulated_image , n_cols_simulated_image , CV_32FC1);
       double min, max;
 
@@ -669,11 +649,15 @@ bool SIMGRID_wavimg_steplength::simulate_from_dat_file(){
       for (int row = 0; row < n_rows_simulated_image; row++) {
         for (int col = 0; col < n_cols_simulated_image; col++) {
           const int inverse_col = n_rows_simulated_image - ( col + 1 );
-          raw_simulated_image.at<float>(row, inverse_col) = (float)  p[pos] ;
+          raw_simulated_image.at<float>(row, inverse_col) = (float) p[pos] ;
           pos++;
         }
       }
 
+      mmap.close();
+      if ( debug_switch == true ){
+      std::cout << "Finished reading file " << std::endl; 
+      }
       cv::minMaxLoc(raw_simulated_image, &min, &max);
 
       // Create a new matrix to hold the gray image
