@@ -25,8 +25,8 @@ else()
 endif(WIN32)
 
 SET (OpenCV_DEBUG TRUE)
-set(OpenCV_STATIC OFF)
-#set(BUILD_SHARED_LIBS ON)
+set(OpenCV_STATIC ON)
+set(BUILD_SHARED_LIBS OFF)
 find_package(OpenCV  3.0.0 REQUIRED)
 
 SET (Boost_DEBUG TRUE)

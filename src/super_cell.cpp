@@ -621,10 +621,17 @@ void Super_Cell::calculate_supercell_boundaries_from_experimental_image(
 
   cv::Mat blur;
   cv::GaussianBlur(_raw_experimental_image ,blur,cv::Size(3,3), 0);
+  assert(!blur.empty());
+ assert(( _raw_experimental_image.cols == blur.cols  ));
+ assert(( _raw_experimental_image.rows == blur.rows ));
 
   cv::Canny( blur, canny_output, threshold , threshold *2, 3 );
-  cv::Canny( _raw_experimental_image, canny_output_no_blur, threshold , threshold *2, 3 );
+  assert(!canny_output.empty());
+  assert(( canny_output.cols == blur.cols ));
+  assert(( canny_output.rows == blur.rows ));
+
   cv::findContours( canny_output, contours, hierarchy, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE, cv::Point(0, 0) );
+  assert( contours.size() != 0 );
   if (debug_switch == true) {
     try {
       imwrite("experimental_image_blur.png", blur);
@@ -638,7 +645,6 @@ void Super_Cell::calculate_supercell_boundaries_from_experimental_image(
 
   cv::Mat1f dist(contours.size(), contours.size(), 0.f);
   cv::Mat1i in_range(contours.size(), contours.size(), 0);
-
   for( size_t i = 0; i< contours.size(); i++ ){
     for( size_t j = (i+1); j< contours.size(); j++ ){
 
