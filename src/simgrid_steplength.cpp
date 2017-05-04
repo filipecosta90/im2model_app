@@ -664,7 +664,7 @@ bool SIMGRID_wavimg_steplength::simulate_from_dat_file(){
       cv::Mat raw_gray_simulated_image;
       raw_simulated_image.convertTo(raw_gray_simulated_image, CV_8UC1 , 255.0f/(max - min), -min * 255.0f/(max - min));
 
-      raw_simulated_image.release();
+      //raw_simulated_image.release();
 
       if ( !raw_gray_simulated_image.data ){
         perror("ERROR: No image data");
@@ -696,13 +696,9 @@ bool SIMGRID_wavimg_steplength::simulate_from_dat_file(){
 
       // confirm if it needs reshaping
       if ( simulated_image_needs_reshape ){
-
         imwrite( string_output_debug_info2 , raw_gray_simulated_image );
-
         resize(cleaned_simulated_image, cleaned_simulated_image, cv::Size(0,0), reshape_factor_from_supper_cell_to_experimental_x, reshape_factor_from_supper_cell_to_experimental_y, cv::INTER_LINEAR );
-
         resize(raw_gray_simulated_image, raw_gray_simulated_image, cv::Size(0,0), reshape_factor_from_supper_cell_to_experimental_x, reshape_factor_from_supper_cell_to_experimental_y, cv::INTER_LINEAR );
-
         imwrite( string_output_debug_info3 , raw_gray_simulated_image );
       }
 
@@ -741,6 +737,7 @@ bool SIMGRID_wavimg_steplength::simulate_from_dat_file(){
 
       simulated_matches.push_back(match_factor);
     }
+
     experimental_images_match_location_grid.push_back(experimental_images_matchloc_row);
     simulated_images_grid.push_back(simulated_images_row);
     raw_simulated_images_grid.push_back(raw_simulated_images_row);
