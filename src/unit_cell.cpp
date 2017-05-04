@@ -202,7 +202,6 @@ bool Unit_Cell::create_atoms_from_site_and_symetry(){
     std::cout << "Atom occupancy " << atom_occupancy << std::endl;
     std::cout << "Atom radious " << atom_radious << std::endl;
     cv::Vec4d cpk_color = atom_info.cpkColor();
-//std::cout << "Color CPK RGBA " << cpk_color.r << " , " << cpk_color.g << " , " << cpk_color.b << " , " << cpk_color.a  << std::endl;
 
     for( int value_list_pos = 0; value_list_pos < _symmetry_equiv_pos_as_x.size(); value_list_pos++ ) {
       std::string symetry_x = _symmetry_equiv_pos_as_x.at(value_list_pos); 
