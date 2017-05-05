@@ -1,8 +1,31 @@
 file(GLOB im2model_core_src 
-  "*.h"
-  "*.hpp"
-  "*.cpp"
-  "*.c"
+  atom.hpp
+  chem_database.hpp
+  mc_scanner.hpp
+  string_additions.hpp
+  unit_cell.hpp
+  atom_info.hpp
+  edge.hpp
+  msa_prm.hpp
+  super_cell.hpp
+  wavimg_prm.hpp
+  celslc_prm.hpp
+  mc_driver.hpp
+  simgrid_steplength.hpp
+  symbcalc.hpp
+  atom.cpp
+  chem_database.cpp
+  mc_driver.cpp
+  simgrid_steplength.cpp
+  symbcalc.cpp
+  atom_info.cpp
+  msa_prm.cpp
+  string_additions.cpp
+  unit_cell.cpp
+  celslc_prm.cpp
+  im2model.cpp
+  super_cell.cpp
+  wavimg_prm.cpp
   )
 
 BISON_TARGET(mc_parser mc_parser.yy ${CMAKE_CURRENT_BINARY_DIR}/mc_parser.tab.cc )
@@ -28,6 +51,25 @@ if(WIN32)
   message(STATUS " Libraries : ${Boost_LIBRARIES}") 
   message(status "OpenCV libs: ${OpenCV_LIBS} ")
 endif(WIN32)
+
+if(build_gui)
+  # Running the meta-object compiler for QObject derived classes is similar to resources, 
+  # you add QT5_WRAP_CPP in your CMake file, and just add the generated files to your source files. 
+  # The input for this function is the header of your class, not the implementation — even though it’s called QT5_WRAP_CPP, 
+  # you must pass the file containing the declaration; 
+  # this is usually the header. 
+  # Those files contain a bunch of functions which are needed for the Qt meta-object system. 
+  # These are stand-alone .cpp files that you usually never have to look at.
+  QT5_WRAP_CPP(tst_hdr_moc configwin.h)
+  QT5_WRAP_UI(tst_form_hdr configwin.ui)
+
+  add_library(configwin ${tst_hdr_moc} ${tst_form_hdr})
+  qt5_use_modules(configwin Widgets)
+  add_executable(tst setting.cpp configwin)
+  # Use the Widgets module from Qt 5.
+  #target_link_libraries(helloworld Qt5::Widgets)
+  qt5_use_modules(tst Core Gui Widgets)
+endif(build_gui)
 
 # Set Properties->General->Configuration Type to Application(.exe)
 # Creates app.exe with the listed sources (main.cxx)

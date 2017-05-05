@@ -10,6 +10,18 @@ project( MSC_IM2MODEL )
 # defined projects like INSTALL.vcproj and ZERO_CHECK.vcproj
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
+option(build_gui "build_gui" OFF)
+if(build_gui)
+  message(STATUS "GUI enabled. building command-line im2model, and gui_im2model")
+  # Instruct CMake to run moc automatically when needed.
+  set(CMAKE_AUTOMOC ON)
+  #  set(CMAKE_INCLUDE_CURRENT_DIR ON)
+  # Find the QtWidgets library
+  find_package(Qt5Widgets)
+else(build_gui)
+  message(STATUS "GUI disabled. building only command-line im2model")
+endif(build_gui)
+
 if(APPLE)
   message(STATUS "Adding Apple definition")
   add_definitions(-DAPPLE)
