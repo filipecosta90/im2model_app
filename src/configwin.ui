@@ -6,35 +6,65 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>400</width>
-    <height>355</height>
+    <width>824</width>
+    <height>512</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>MainWindow</string>
   </property>
   <widget class="QWidget" name="centralWidget">
-   <widget class="QWidget" name="">
+   <widget class="QTabWidget" name="tabWidget">
     <property name="geometry">
      <rect>
-      <x>70</x>
-      <y>40</y>
-      <width>268</width>
-      <height>235</height>
+      <x>30</x>
+      <y>30</y>
+      <width>691</width>
+      <height>401</height>
      </rect>
     </property>
-    <layout class="QVBoxLayout" name="verticalLayout">
-     <item>
-      <widget class="QTextEdit" name="textEdit"/>
-     </item>
-     <item>
-      <widget class="QPushButton" name="quitButton">
-       <property name="text">
-        <string>PushButton</string>
-       </property>
-      </widget>
-     </item>
-    </layout>
+    <property name="currentIndex">
+     <number>0</number>
+    </property>
+    <widget class="QWidget" name="structure_tab">
+     <property name="enabled">
+      <bool>true</bool>
+     </property>
+     <property name="accessibleName">
+      <string/>
+     </property>
+     <attribute name="title">
+      <string>Structure Properties</string>
+     </attribute>
+    </widget>
+    <widget class="QWidget" name="experimental_data_tab">
+     <attribute name="title">
+      <string>Experimental Data</string>
+     </attribute>
+    </widget>
+    <widget class="QWidget" name="unit_cell_tab">
+     <property name="autoFillBackground">
+      <bool>false</bool>
+     </property>
+     <attribute name="title">
+      <string>Unit-Cell</string>
+     </attribute>
+    </widget>
+    <widget class="QWidget" name="simulation_data_tab">
+     <attribute name="title">
+      <string>Simulation Data</string>
+     </attribute>
+    </widget>
+    <widget class="QWidget" name="super_cell_tab">
+     <attribute name="title">
+      <string>Super-Cell</string>
+     </attribute>
+    </widget>
+    <widget class="QWidget" name="crystal_shape_tab">
+     <attribute name="title">
+      <string>Crystal Shape</string>
+     </attribute>
+    </widget>
    </widget>
   </widget>
   <widget class="QMenuBar" name="menuBar">
@@ -42,10 +72,17 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>400</width>
+     <width>824</width>
      <height>22</height>
     </rect>
    </property>
+   <widget class="QMenu" name="menuFile">
+    <property name="title">
+     <string>File</string>
+    </property>
+    <addaction name="actionNew_Structure"/>
+   </widget>
+   <addaction name="menuFile"/>
   </widget>
   <widget class="QToolBar" name="mainToolBar">
    <attribute name="toolBarArea">
@@ -56,6 +93,11 @@
    </attribute>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
+  <action name="actionNew_Structure">
+   <property name="text">
+    <string>New Structure</string>
+   </property>
+  </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <resources/>
