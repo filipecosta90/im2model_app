@@ -1,6 +1,5 @@
 #include "super_cell.hpp"
-#include "edge.hpp"                      // for inpolygon
-#include "unit_cell.hpp"                 // for Unit_Cell
+#include "edge.hpp"
 
 #include <math.h>                        // for fabs, ceil, pow, M_PI
 #include <algorithm>                     // for max_element, min_element

@@ -1,3 +1,29 @@
+#include <boost/process.hpp>
+#include <boost/filesystem/operations.hpp>                // for directory_iterator
+#include <boost/filesystem/path.hpp>                      // for path, operator==, oper...
+#include <boost/iterator/iterator_facade.hpp>             // for iterator_facade_base
+#include <boost/thread.hpp>                               // for thread
+#include <boost/tokenizer.hpp>
+#include <boost/program_options.hpp>                      // for error
+
+#include <cassert>                                        // for assert
+#include <cmath>                                          // for fabs, round
+#include <cstdlib>                                        // for div_t, div
+#include <exception>                                      // for exception
+#include <iostream>                                       // for string, str...
+#include <iomanip>                                        // std::setw
+
+#include <opencv2/core/hal/interface.h>                   // for CV_8UC1
+#include <opencv2/imgcodecs/imgcodecs_c.h>                // for ::CV_LOAD_I...
+#include <opencv2/core.hpp>                               // for RNG
+#include <opencv2/core/cvstd.inl.hpp>                     // for String::String
+#include <opencv2/core/mat.hpp>                           // for Mat
+#include <opencv2/core/mat.inl.hpp>                       // for Mat::Mat
+#include <opencv2/core/operations.hpp>                    // for RNG::RNG
+#include <opencv2/core/types.hpp>                         // for Rect, Point3d
+#include <opencv2/imgcodecs.hpp>                          // for imread
+
+// gui includes
 #include "configwin.h"
 #include "ui_configwin.h"
 

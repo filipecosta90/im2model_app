@@ -7,7 +7,8 @@
 #include <opencv2/core/matx.hpp>     // for Vec4d
 #include <opencv2/core/types.hpp>    // for Point3d, Point, Rect, Point2d
 #include <vector>                    // for vector
-class Unit_Cell;
+
+#include "unit_cell.hpp"
 
 class Super_Cell {
   private:

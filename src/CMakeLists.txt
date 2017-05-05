@@ -10,12 +10,13 @@ file(GLOB im2model_core_src
   super_cell.hpp
   wavimg_prm.hpp
   celslc_prm.hpp
-  mc_driver.hpp
   simgrid_steplength.hpp
   symbcalc.hpp
+  structure.hpp
+  experimental_data.hpp
+  simulation_data.hpp
   atom.cpp
   chem_database.cpp
-  mc_driver.cpp
   simgrid_steplength.cpp
   symbcalc.cpp
   atom_info.cpp
@@ -25,6 +26,9 @@ file(GLOB im2model_core_src
   celslc_prm.cpp
   super_cell.cpp
   wavimg_prm.cpp
+  structure.cpp
+  experimental_data.cpp
+  simulation_data.cpp
   )
 
 BISON_TARGET(mc_parser mc_parser.yy ${CMAKE_CURRENT_BINARY_DIR}/mc_parser.tab.cc )

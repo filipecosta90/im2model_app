@@ -28,6 +28,8 @@
 #include "mc_driver.hpp"                                  // for MC_Driver
 #include "msa_prm.hpp"                                    // for MSA_prm
 #include "simgrid_steplength.hpp"                         // for SIMGRID_wav...
+#include "structure.hpp"                                 // for Super_Cell
+#include "experimental_data.hpp"                                 // for Super_Cell
 #include "super_cell.hpp"                                 // for Super_Cell
 #include "unit_cell.hpp"                                  // for Unit_Cell
 #include "wavimg_prm.hpp"                                 // for WAVIMG_prm
