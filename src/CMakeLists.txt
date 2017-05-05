@@ -26,6 +26,7 @@ link_directories( ${Boost_LIBRARY_PATH} )
 message(STATUS " Includes - ${Boost_INCLUDE_DIRS}")
 message(STATUS " Library path  - ${Boost_LIBRARY_DIRS}") 
 message(STATUS " Libraries : ${Boost_LIBRARIES}") 
+message(status "OpenCV libs: ${OpenCV_LIBS} ")
 endif(WIN32)
 
 # Set Properties->General->Configuration Type to Application(.exe)
