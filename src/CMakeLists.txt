@@ -19,24 +19,24 @@ endif(WIN32)
 include_directories( ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR} )
 
 if(WIN32)
-include_directories( ${OpenCV_INCLUDE_DIRS} )
-include_directories( ${Boost_INCLUDE_DIRS} )
-link_directories( ${Boost_LIBRARY_PATH} )
+  include_directories( ${OpenCV_INCLUDE_DIRS} )
+  include_directories( ${Boost_INCLUDE_DIRS} )
+  link_directories( ${Boost_LIBRARY_PATH} )
 
-message(STATUS " Includes - ${Boost_INCLUDE_DIRS}")
-message(STATUS " Library path  - ${Boost_LIBRARY_DIRS}") 
-message(STATUS " Libraries : ${Boost_LIBRARIES}") 
-message(status "OpenCV libs: ${OpenCV_LIBS} ")
+  message(STATUS " Includes - ${Boost_INCLUDE_DIRS}")
+  message(STATUS " Library path  - ${Boost_LIBRARY_DIRS}") 
+  message(STATUS " Libraries : ${Boost_LIBRARIES}") 
+  message(status "OpenCV libs: ${OpenCV_LIBS} ")
 endif(WIN32)
 
 # Set Properties->General->Configuration Type to Application(.exe)
 # Creates app.exe with the listed sources (main.cxx)
 # Adds sources to the Solution Explorer
 #add_executable( app main.cxx )
-add_executable( app ${im2model_core_src} mc_driver.cpp ${FLEX_mc_lexer_OUTPUTS} ${BISON_mc_parser_OUTPUTS} )
+add_executable( im2model ${im2model_core_src} mc_driver.cpp ${FLEX_mc_lexer_OUTPUTS} ${BISON_mc_parser_OUTPUTS} )
 
 # Properties->Linker->Input->Additional Dependencies
-target_link_libraries( app ${OpenCV_LIBS} ${Boost_LIBRARIES} )
+target_link_libraries( im2model ${OpenCV_LIBS} ${Boost_LIBRARIES} )
 
 if(APPLE)
   message(STATUS "Adding include-what-you-use ")
@@ -45,11 +45,11 @@ endif(APPLE)
 
 # Creates a folder "executables" and adds target 
 # project (app.vcproj) under it
-set_property(TARGET app PROPERTY FOLDER "executables")
+set_property(TARGET im2model PROPERTY FOLDER "executables")
 
 # Properties->General->Output Directory
-set_target_properties( app PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin)
+set_target_properties( im2model PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR})
 
 # Adds logic to INSTALL.vcproj to copy app.exe to destination directory
-install (TARGETS app RUNTIME DESTINATION ${PROJECT_SOURCE_DIR}/_install)
+install (TARGETS im2model RUNTIME DESTINATION ${PROJECT_SOURCE_DIR}/install)
 

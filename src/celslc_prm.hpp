@@ -51,7 +51,8 @@ class CELSLC_prm {
     void cleanup_thread(); 
     bool prepare_bin_ssc();
     bool prepare_nz_simulated_partitions_from_ssc_prm();
-   
+    bool log_std_out; 
+    bool log_std_err;
   public:
     CELSLC_prm();
     void set_prj_dir_hkl( double projection_dir_h, double projection_dir_k, double projection_dir_l );

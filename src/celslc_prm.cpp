@@ -9,6 +9,11 @@
 #include <vector>                              // for vector, vector<>::iter...
 #include <system_error>
 
+#include <cstdlib>
+#if defined(BOOST_POSIX_API)
+#   include <sys/wait.h>
+#endif
+
 #include <boost/process/error.hpp>
 #include <boost/process/io.hpp>
 #include <boost/process/args.hpp>
@@ -20,6 +25,8 @@
 #include <boost/filesystem/path.hpp>           // for path, operator==, oper...
 #include <boost/iterator/iterator_facade.hpp>  // for iterator_facade_base
 #include <boost/thread.hpp>      // for thread
+
+#include <boost/system/error_code.hpp>
 
 #include <opencv2/core/hal/interface.h>        // for CV_64F
 #include <opencv2/core/mat.hpp>                // for Mat
@@ -64,7 +71,8 @@ CELSLC_prm::CELSLC_prm()
   single_slice_calculation_prepare_bin_runned_switch = false;
   single_slice_calculation_nz_switch = false;
   single_slice_calculation_enabled_switch = true;
-
+  log_std_out = false;
+  log_std_err = false;
 }
 
 void CELSLC_prm::set_prj_dir_hkl(double projection_dir_h, double projection_dir_k, double projection_dir_l ){
@@ -535,22 +543,53 @@ bool CELSLC_prm::call_bin_ssc(){
     std::stringstream celslc_stream;
     celslc_stream << "log_" << slc_file_name_prefix << "_" << slice_id << ".log"; 
     std::cout << "Saving log of slice #"<< slice_id << " in file: " << celslc_stream.str() << std::endl ;
-    ssc_queue[slice_id] = boost::process::child ( ssc_stream.str(), ssc_group , ecode ); 
+
+    if ( log_std_out == true ){
+      ssc_queue[slice_id] = boost::process::child (
+          // command
+          ssc_stream.str(),
+          // redirecting std_out
+          boost::process::std_out > celslc_stream.str(), 
+          // process group
+          ssc_group ,
+          // error control
+          ecode );
+    }
+    else{
+      ssc_queue[slice_id] = boost::process::child (
+          // command
+          ssc_stream.str(),
+          // redirecting std_out
+          boost::process::std_out > boost::process::null, 
+          // process group
+          ssc_group ,
+          // error control
+          ecode );
+    }
     assert( !ecode );
   }
   std::cout << " waiting for all child processes do end" << std::endl;
   while (!ssc_queue.empty()){
-    ssc_group.wait();
+    //win32 error https://github.com/klemens-morgenstern/boost-process/issues/67
+    //ssc_group.wait();
+    
     for (auto it = ssc_queue.begin(); it != ssc_queue.end(); ){
       boost::process::child& c = it->second;
       if (!c.running()){
-        std::cout << "exit " << it->first << std::endl;
+        int exit_code = c.exit_code();
+#if defined(BOOST_WINDOWS_API)
+        assert (EXIT_SUCCESS == exit_code);
+#elif defined(BOOST_POSIX_API)
+        assert (EXIT_SUCCESS == WEXITSTATUS(exit_code));
+#endif
+        std::cout << "exit " << it->first << " exit code: " << exit_code << std::endl;
         it = ssc_queue.erase(it);
       }
       else{
         ++it;
       }
     }
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
   }
   ssc_runned_bin = true; 
   return true; 

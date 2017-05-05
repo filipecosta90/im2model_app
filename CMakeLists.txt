@@ -30,7 +30,7 @@ ADD_DEFINITIONS(-DOpenCV_STATIC=ON )
 ADD_DEFINITIONS(-DBUILD_SHARED_LIBS=OFF )
 find_package(OpenCV  3.0.0 REQUIRED)
 if(WIN32)
-message(status "OpenCV lib components: ${OpenCV_LIB_COMPONENTS}")
+  message(status "OpenCV lib components: ${OpenCV_LIB_COMPONENTS}")
 endif(WIN32)
 
 SET (Boost_DEBUG TRUE)

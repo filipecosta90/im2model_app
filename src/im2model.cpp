@@ -541,8 +541,8 @@ int main(int argc, char** argv ){
     celslc_parameters.set_bin_path( celslc_bin_string );
     if (celslc_switch == true ){
 		std::cout << "Running ceslc" << std::endl;
-      //celslc_parameters.call_bin_ssc();
-	  celslc_parameters.call_boost_bin();
+    celslc_parameters.call_bin_ssc();
+	  //celslc_parameters.call_boost_bin();
     }
     nz_simulated_partitions = celslc_parameters.get_nz_simulated_partitions();
 
