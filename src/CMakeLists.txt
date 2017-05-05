@@ -23,7 +23,6 @@ file(GLOB im2model_core_src
   string_additions.cpp
   unit_cell.cpp
   celslc_prm.cpp
-  im2model.cpp
   super_cell.cpp
   wavimg_prm.cpp
   )
@@ -63,22 +62,24 @@ if(build_gui)
   QT5_WRAP_CPP(tst_hdr_moc configwin.h)
   QT5_WRAP_UI(tst_form_hdr configwin.ui)
 
-  add_library(configwin ${tst_hdr_moc} ${tst_form_hdr})
+  add_library(configwin ${tst_hdr_moc} ${tst_form_hdr} )
   qt5_use_modules(configwin Widgets)
-  add_executable(tst setting.cpp configwin)
+  add_executable( im2model_gui im2model_gui.cpp configwin ${im2model_core_src} mc_driver.cpp ${FLEX_mc_lexer_OUTPUTS} ${BISON_mc_parser_OUTPUTS} )
   # Use the Widgets module from Qt 5.
-  #target_link_libraries(helloworld Qt5::Widgets)
-  qt5_use_modules(tst Core Gui Widgets)
+  qt5_use_modules( im2model_gui Core Gui Widgets )
 endif(build_gui)
 
 # Set Properties->General->Configuration Type to Application(.exe)
 # Creates app.exe with the listed sources (main.cxx)
 # Adds sources to the Solution Explorer
 #add_executable( app main.cxx )
-add_executable( im2model ${im2model_core_src} mc_driver.cpp ${FLEX_mc_lexer_OUTPUTS} ${BISON_mc_parser_OUTPUTS} )
+add_executable( im2model im2model.cpp ${im2model_core_src} mc_driver.cpp ${FLEX_mc_lexer_OUTPUTS} ${BISON_mc_parser_OUTPUTS} )
 
 # Properties->Linker->Input->Additional Dependencies
 target_link_libraries( im2model ${OpenCV_LIBS} ${Boost_LIBRARIES} )
+if(build_gui)
+  target_link_libraries( im2model_gui ${OpenCV_LIBS} ${Boost_LIBRARIES} )
+endif(build_gui)
 
 if(APPLE)
   message(STATUS "Adding include-what-you-use ")
@@ -91,7 +92,14 @@ set_property(TARGET im2model PROPERTY FOLDER "executables")
 
 # Properties->General->Output Directory
 set_target_properties( im2model PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR})
+if(build_gui)
+  set_target_properties( im2model_gui PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR})
+endif(build_gui)
 
 # Adds logic to INSTALL.vcproj to copy app.exe to destination directory
 install (TARGETS im2model RUNTIME DESTINATION ${PROJECT_SOURCE_DIR}/install)
+if(build_gui)
+  install (TARGETS im2model_gui RUNTIME DESTINATION ${PROJECT_SOURCE_DIR}/install)
+endif(build_gui)
+
 

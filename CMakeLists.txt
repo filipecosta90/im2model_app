@@ -5,6 +5,10 @@ set (CMAKE_CXX_STANDARD 14)
 
 project( MSC_IM2MODEL )
 
+set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
+ADD_DEFINITIONS(-DOpenCV_STATIC=ON )
+ADD_DEFINITIONS(-DBUILD_SHARED_LIBS=OFF )
+
 # Turn on the ability to create folders to organize projects (.vcproj)
 # It creates "CMakePredefinedTargets" folder by default and adds CMake
 # defined projects like INSTALL.vcproj and ZERO_CHECK.vcproj
@@ -17,7 +21,7 @@ if(build_gui)
   set(CMAKE_AUTOMOC ON)
   #  set(CMAKE_INCLUDE_CURRENT_DIR ON)
   # Find the QtWidgets library
-  find_package(Qt5Widgets)
+  find_package( Qt5Widgets REQUIRED )
 else(build_gui)
   message(STATUS "GUI disabled. building only command-line im2model")
 endif(build_gui)
@@ -37,9 +41,6 @@ else()
 endif(WIN32)
 
 SET (OpenCV_DEBUG TRUE)
-set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
-ADD_DEFINITIONS(-DOpenCV_STATIC=ON )
-ADD_DEFINITIONS(-DBUILD_SHARED_LIBS=OFF )
 find_package(OpenCV  3.0.0 REQUIRED)
 if(WIN32)
   message(status "OpenCV lib components: ${OpenCV_LIB_COMPONENTS}")
