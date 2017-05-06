@@ -1,3 +1,4 @@
+/*
 #include <boost/process.hpp>
 #include <boost/filesystem/operations.hpp>                // for directory_iterator
 #include <boost/filesystem/path.hpp>                      // for path, operator==, oper...
@@ -22,10 +23,12 @@
 #include <opencv2/core/operations.hpp>                    // for RNG::RNG
 #include <opencv2/core/types.hpp>                         // for Rect, Point3d
 #include <opencv2/imgcodecs.hpp>                          // for imread
-
+*/
 // gui includes
 #include "configwin.h"
 #include "ui_configwin.h"
+
+#include <QFileDialog>
 
 MainWindow::MainWindow(QWidget *parent) :
   QMainWindow(parent),
@@ -46,4 +49,23 @@ MainWindow::MainWindow(QWidget *parent) :
 MainWindow::~MainWindow()
 {
   delete ui;
+}
+
+void MainWindow::on_qpush_load_image_clicked()
+{
+    QString fileName = QFileDialog::getOpenFileName(this,
+                                                        tr("Open image"),
+                                                        tr("."),
+                                                        tr("Image Files (*.png *.jpg *.jpeg *.bmp *.tif)"));
+    ui->qline_image_path->setText(fileName);
+}
+
+void MainWindow::on_qpush_load_cif_clicked()
+{
+
+}
+
+void MainWindow::on_qpush_load_cel_clicked()
+{
+
 }

@@ -15,7 +15,14 @@ class MainWindow : public QMainWindow
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
 
-  private:
+private slots:
+    void on_qpush_load_image_clicked();
+
+    void on_qpush_load_cif_clicked();
+
+    void on_qpush_load_cel_clicked();
+
+private:
     Ui::MainWindow *ui;
 };
 

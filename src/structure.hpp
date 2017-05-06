@@ -1,40 +1,29 @@
 #ifndef __STRUCTURE_H__
 #define __STRUCTURE_H__ 
 
-#include <iosfwd>                    // for string
-#include <opencv2/core/mat.hpp>      // for Mat
-#include <opencv2/core/mat.inl.hpp>  // for Mat::~Mat
-#include <opencv2/core/matx.hpp>     // for Vec4d
-#include <opencv2/core/types.hpp>    // for Point3d, Point, Rect, Point2d
-#include <vector>                    // for vector
-
-#include "unit_cell.hpp"
 #include "experimental_data.hpp"
-#include "super_cell.hpp"
+#include "simulation_data.hpp"
 
 class Structure {
   private:
     std::string _structure_name;
 
-    /** Unit Cell **/
-    Unit_Cell* _unit_cell;
-    
     /** Experimental Data **/
     Experimental_Data* _experimental_data;
-    
-    /** Super Cell **/
-    Super_Cell* _super_cell;
-    
+
+    /** Simulation Data **/
+    Simulation_Data* _simulation_data;
+
   public:
     Structure();
 
     //setters
-    void set_unit_cell( Unit_Cell* unit_cell );
     void set_experimental_data( Experimental_Data* experimental_data );
-    void set_super_cell( Super_Cell* super_cell );
-    
+    void set_simulation_data( Simulation_Data* simulation_data );
+
     //getters
-    Unit_Cell* get_unit_cell();
+    Experimental_Data* get_experimental_data();
+    Simulation_Data* get_simulation_data();
 };
 
 #endif

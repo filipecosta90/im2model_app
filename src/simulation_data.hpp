@@ -1,22 +1,26 @@
 #ifndef __SIMULATION_DATA_H__
 #define __SIMULATION_DATA_H__
 
-#include <iosfwd>                    // for string
-#include <opencv2/core/mat.hpp>      // for Mat
-#include <opencv2/core/mat.inl.hpp>  // for Mat::~Mat
-#include <opencv2/core/matx.hpp>     // for Vec4d
-#include <opencv2/core/types.hpp>    // for Point3d, Point, Rect, Point2d
-#include <vector>                    // for vector
+#include <vector>
+#include <string>
+
+#include "simulation_step.hpp"
 
 class Simulation_Data {
   private:
-    
+    /** Unit Cell **/
+    std::vector<Simulation_Step*> _simulation_steps;
+
   public:
     Simulation_Data();
 
     /** setters **/
-    /** getters **/
+    
 
+    /** getters **/
+    
+    /** others **/
+    Simulation_Step* new_simulation_step( int step_id, std::string step_descriptor );
 };
 
 #endif

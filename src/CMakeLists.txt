@@ -15,6 +15,7 @@ file(GLOB im2model_core_src
   structure.hpp
   experimental_data.hpp
   simulation_data.hpp
+  simulation_step.hpp
   atom.cpp
   chem_database.cpp
   simgrid_steplength.cpp
@@ -29,6 +30,7 @@ file(GLOB im2model_core_src
   structure.cpp
   experimental_data.cpp
   simulation_data.cpp
+  simulation_step.cpp
   )
 
 BISON_TARGET(mc_parser mc_parser.yy ${CMAKE_CURRENT_BINARY_DIR}/mc_parser.tab.cc )

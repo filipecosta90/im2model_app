@@ -28,8 +28,9 @@
 #include "mc_driver.hpp"                                  // for MC_Driver
 #include "msa_prm.hpp"                                    // for MSA_prm
 #include "simgrid_steplength.hpp"                         // for SIMGRID_wav...
-#include "structure.hpp"                                 // for Super_Cell
-#include "experimental_data.hpp"                                 // for Super_Cell
+#include "structure.hpp"                                 // for Structure
+#include "experimental_data.hpp"                          // for Experimental_Data
+#include "simulation_data.hpp"                          // for Simulation_Data
 #include "super_cell.hpp"                                 // for Super_Cell
 #include "unit_cell.hpp"                                  // for Unit_Cell
 #include "wavimg_prm.hpp"                                 // for WAVIMG_prm
@@ -37,7 +38,6 @@
 using namespace cv;
 
 // Global Variables
-
 #ifdef _WIN32
 boost::filesystem::path celslc_path ( "../simulation/dr_probe_bin/drprobe_clt_bin_winx64/celslc.exe" );
 boost::filesystem::path msa_path("../simulation/dr_probe_bin/drprobe_clt_bin_winx64/msa.exe");
@@ -54,36 +54,38 @@ std::string msa_bin_string = "../simulation/dr_probe_bin/drprobe_clt_bin_osx/msa
 std::string wavimg_bin_string = "../simulation/dr_probe_bin/drprobe_clt_bin_osx/wavimg";
 #endif
 
-
-
-// Experimental Image info
-cv::Mat experimental_image; 
-cv::Mat experimental_image_roi;
-cv::Mat experimental_working; 
-
-Rect roi_rectangle;
-int roi_x_size;
-int roi_y_size;
-int roi_center_x;
-int roi_center_y;
-int supercell_min_width;
-int supercell_min_height;
-
-double sampling_rate_experimental_x_nm_per_pixel;
-double  sampling_rate_experimental_y_nm_per_pixel;
-
-int edge_detection_threshold = 85;
-int max_thresh = 255;
-RNG rng(12345);
-int max_contour_distance_px = 19;
-int max_contour_distance_thresh_px = 255;
-
-Unit_Cell unit_cell;
-Super_Cell super_cell;
-cv::Point3d  zone_axis_vector_uvw;
-cv::Point3d  upward_vector_hkl;
-
 int main(int argc, char** argv ){
+    
+    // Experimental Image info
+    cv::Mat experimental_image;
+    cv::Mat experimental_image_roi;
+    cv::Mat experimental_working;
+    
+    Rect roi_rectangle;
+    int roi_x_size;
+    int roi_y_size;
+    int roi_center_x;
+    int roi_center_y;
+    
+    double sampling_rate_experimental_x_nm_per_pixel;
+    double sampling_rate_experimental_y_nm_per_pixel;
+    
+    int edge_detection_threshold = 85;
+    int max_thresh = 255;
+    RNG rng(12345);
+    int max_contour_distance_px = 19;
+    int max_contour_distance_thresh_px = 255;
+    
+    Unit_Cell unit_cell;
+    Super_Cell super_cell;
+    Simulation_Data simulation_data;
+    Experimental_Data experimental_data;
+    Simulation_Step* tfocus_map_simulation_step;
+    tfocus_map_simulation_step = simulation_data.new_simulation_step( 1, "tfocus_map" );
+    
+    cv::Point3d  zone_axis_vector_uvw;
+    cv::Point3d  upward_vector_hkl;
+    
   /////////////////////////
   // Simulation info
   /////////////////////////
@@ -221,7 +223,7 @@ int main(int argc, char** argv ){
   /////////////////////////
   double cel_margin_nm; 
 
-  MC::MC_Driver driver;
+  MC::MC_Driver cif_driver;
 
   /////////////////////////
   // Super Cell parameters 
@@ -316,7 +318,7 @@ int main(int argc, char** argv ){
     if ( vm.count("help")  )
     {
       std::cout << "\n\n********************************************************************************\n\n" <<
-        "im2model -- Atomic models for TEM image simulation and matching\n"
+        "Im2Model -- Atomic models for TEM image simulation and matching\n"
         <<
         "Command Line Parameters:" << std::endl
         << desc << std::endl;
@@ -457,20 +459,23 @@ int main(int argc, char** argv ){
     if ( vm.count("estimated_thickness_slice")  ){
       user_estimated_thickness_slice_switch=true;
     }
-
     // there are any problems
     /* CIF file parser */
-    driver.parse( super_cell_cif_file.c_str() );
-    driver.populate_unit_cell();
-    driver.populate_atom_site_unit_cell();
-    driver.populate_symetry_equiv_pos_as_xyz_unit_cell();
-    unit_cell = driver.get_unit_cell();
+    //simulation_data->unit_cell.set_cif_file_name( super_cell_cif_file.c_str() );
+    cif_driver.parse( super_cell_cif_file.c_str() );
+    cif_driver.populate_unit_cell();
+    cif_driver.populate_atom_site_unit_cell();
+    cif_driver.populate_symetry_equiv_pos_as_xyz_unit_cell();
+    unit_cell = cif_driver.get_unit_cell();
 
     zone_axis_vector_uvw = cv::Point3d( perpendicular_dir_u, perpendicular_dir_v , perpendicular_dir_w );
     upward_vector_hkl = cv::Point3d( projection_dir_h, projection_dir_k , projection_dir_l );
     unit_cell.set_zone_axis_vector( zone_axis_vector_uvw );
     unit_cell.set_upward_vector( upward_vector_hkl );
-    unit_cell.form_matrix_from_miller_indices(); 
+    unit_cell.form_matrix_from_miller_indices();
+      
+    // stage 3 of dev (in migration process)
+      tfocus_map_simulation_step->set_unit_cell( &unit_cell );
 
     // Simulated image sampling rate
     if ( nx_ny_switch ){
@@ -526,42 +531,42 @@ int main(int argc, char** argv ){
     defocus_period = ( defocus_upper_bound - defocus_lower_bound) / ( defocus_samples - 1 );
     std::cout << "defocus period " <<  defocus_period << std::endl;
 
-    CELSLC_prm celslc_parameters;
-    celslc_parameters.set_prp_dir_uvw( perpendicular_dir_u, perpendicular_dir_v, perpendicular_dir_w );
-    celslc_parameters.set_prj_dir_hkl( projection_dir_h, projection_dir_k, projection_dir_l );
-    celslc_parameters.set_super_cell_size_abc( super_cell_size_a, super_cell_size_b, super_cell_size_c );
-    celslc_parameters.set_cif_file(super_cell_cif_file.c_str());
-    celslc_parameters.set_slc_filename_prefix (slc_file_name_prefix.c_str());
-    celslc_parameters.set_nx_simulated_horizontal_samples(nx_simulated_horizontal_samples);
-    celslc_parameters.set_ny_simulated_vertical_samples(ny_simulated_vertical_samples);
+    CELSLC_prm* celslc_parameters =  tfocus_map_simulation_step->get_celslc_parameters();
+    celslc_parameters->set_prp_dir_uvw( perpendicular_dir_u, perpendicular_dir_v, perpendicular_dir_w );
+    celslc_parameters->set_prj_dir_hkl( projection_dir_h, projection_dir_k, projection_dir_l );
+    celslc_parameters->set_super_cell_size_abc( super_cell_size_a, super_cell_size_b, super_cell_size_c );
+    celslc_parameters->set_cif_file(super_cell_cif_file.c_str());
+    celslc_parameters->set_slc_filename_prefix (slc_file_name_prefix.c_str());
+    celslc_parameters->set_nx_simulated_horizontal_samples(nx_simulated_horizontal_samples);
+    celslc_parameters->set_ny_simulated_vertical_samples(ny_simulated_vertical_samples);
     if( nz_switch ){
-      celslc_parameters.set_nz_simulated_partitions(nz_simulated_partitions);
+      celslc_parameters->set_nz_simulated_partitions(nz_simulated_partitions);
     }
-    celslc_parameters.set_ht_accelaration_voltage(ht_accelaration_voltage);
-    celslc_parameters.set_dwf_switch(dwf_switch);
-    celslc_parameters.set_abs_switch(abs_switch);
-    celslc_parameters.set_bin_path( celslc_bin_string );
+    celslc_parameters->set_ht_accelaration_voltage(ht_accelaration_voltage);
+    celslc_parameters->set_dwf_switch(dwf_switch);
+    celslc_parameters->set_abs_switch(abs_switch);
+    celslc_parameters->set_bin_path( celslc_bin_string );
     if (celslc_switch == true ){
 		std::cout << "Running ceslc" << std::endl;
-    celslc_parameters.call_bin_ssc();
-	  //celslc_parameters.call_boost_bin();
+    celslc_parameters->call_bin_ssc();
+	  //celslc_parameters->call_boost_bin();
     }
-    nz_simulated_partitions = celslc_parameters.get_nz_simulated_partitions();
+    nz_simulated_partitions = celslc_parameters->get_nz_simulated_partitions();
 
     assert( nz_simulated_partitions >= 1 );
 
-    celslc_accum_nm_slice_vec = celslc_parameters.get_slice_params_accum_nm_slice_vec();
+    celslc_accum_nm_slice_vec = celslc_parameters->get_slice_params_accum_nm_slice_vec();
 
     number_slices_to_max_thickness = nz_simulated_partitions;
     slices_load = nz_simulated_partitions;
 
     if ( vm.count("nm_upper_bound")  ){
-      slices_upper_bound = celslc_parameters.get_slice_number_from_nm_floor( nm_upper_bound );
+      slices_upper_bound = celslc_parameters->get_slice_number_from_nm_floor( nm_upper_bound );
       std::cout << "Calculated slice # " << slices_upper_bound << " as the upper bound for the maximum thickness of: " << nm_upper_bound << " nm" << std::endl;
     }
 
     if ( vm.count("nm_lower_bound")  ){
-      slices_lower_bound = celslc_parameters.get_slice_number_from_nm_ceil( nm_lower_bound );
+      slices_lower_bound = celslc_parameters->get_slice_number_from_nm_ceil( nm_lower_bound );
       std::cout << "Calculated slice # " << slices_lower_bound << " as the lower bound for the minimum thickness of: " << nm_lower_bound << " nm" << std::endl;
     }
 
@@ -633,7 +638,7 @@ int main(int argc, char** argv ){
 
     if (cleanup_switch == true ){
       std::cout << " cleaning up celslc temporary files. { " << slc_file_name_prefix << "_***.sli && '"<<slc_file_name_prefix<<"'.prm }" << std::endl;
-      celslc_parameters.cleanup_bin();
+      celslc_parameters->cleanup_bin();
     }
 
     WAVIMG_prm wavimg_parameters;
