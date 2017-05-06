@@ -22,6 +22,48 @@ private slots:
 
     void on_qpush_load_cel_clicked();
 
+    void on_qline_super_cell_size_a_editingFinished();
+
+    void on_qline_super_cell_size_b_editingFinished();
+
+    void on_qline_super_cell_size_c_editingFinished();
+
+    void on_qline_nx_simulated_horizontal_samples_editingFinished();
+
+    void on_qline_ny_simulated_vertical_samples_editingFinished();
+
+    void on_qline_slice_file_name_prefix_editingFinished();
+
+    void on_qline_defocus_aberration_coefficient_editingFinished();
+
+    void on_qline_spherical_aberration_coefficient_editingFinished();
+
+    void on_qline_accelaration_voltage_ht_editingFinished();
+
+    void on_qline_exp_nx_editingFinished();
+
+    void on_qline_exp_ny_editingFinished();
+
+    void on_qline_roi_center_x_editingFinished();
+
+    void on_qline_roi_center_y_editingFinished();
+
+    void on_qline_roi_size_x_editingFinished();
+
+    void on_qline_roi_size_y_editingFinished();
+
+    void on_qline_dir_h_editingFinished();
+
+    void on_qline_dir_k_editingFinished();
+
+    void on_qline_dir_l_editingFinished();
+
+    void on_qline_dir_u_editingFinished();
+
+    void on_qline_dir_v_editingFinished();
+
+    void on_qline_dir_w_editingFinished();
+
 private:
     Ui::MainWindow *ui;
 };
