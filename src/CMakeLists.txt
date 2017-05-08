@@ -54,7 +54,7 @@ if(WIN32)
   message(STATUS " Includes - ${Boost_INCLUDE_DIRS}")
   message(STATUS " Library path  - ${Boost_LIBRARY_DIRS}") 
   message(STATUS " Libraries : ${Boost_LIBRARIES}") 
-  message(status "OpenCV libs: ${OpenCV_LIBS} ")
+  message(STATUS "OpenCV libs: ${OpenCV_LIBS} ")
 endif(WIN32)
 
 if(build_gui)
@@ -101,14 +101,16 @@ if(build_gui)
   set_target_properties( im2model_gui PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR})
 endif(build_gui)
 
+set(CMAKE_INSTALL_PREFIX ${CMAKE_BINARY_DIR})
+
 # Adds logic to INSTALL.vcproj to copy app.exe to destination directory
 #--------------------------------------------------------------------------------
 # Install the QtTest application, on Apple, the bundle is at the root of the
 # install tree, and on other platforms it'll go into the bin directory.
 INSTALL(TARGETS im2model 
-    BUNDLE DESTINATION . COMPONENT Runtime
-    RUNTIME DESTINATION ${PROJECT_SOURCE_DIR}/bin COMPONENT Runtime
-    )
+  BUNDLE DESTINATION . COMPONENT Runtime
+  RUNTIME DESTINATION ${CMAKE_INSTALL_PREFIX}/bin COMPONENT Runtime
+  )
 
 if(build_gui)
   install (TARGETS im2model_gui RUNTIME DESTINATION ${PROJECT_SOURCE_DIR}/install)
@@ -121,7 +123,7 @@ endif(build_gui)
 SET(plugin_dest_dir bin)
 SET(qtconf_dest_dir bin)
 IF(WIN32)
-  SET(APPS "${PROJECT_SOURCE_DIR}/bin/im2model.exe")
+  SET(APPS "${CMAKE_INSTALL_PREFIX}/bin/im2model.exe")
 ENDIF(WIN32)
 
 #--------------------------------------------------------------------------------
@@ -138,11 +140,9 @@ SET(DIRS ${Boost_LIBRARY_PATH} ${OPENCV_LIB_DIRS} )
 # Note that the image plugins depend on QtSvg and QtXml, and it got those copied
 # over.
 INSTALL(CODE "
-    file(GLOB_RECURSE QTPLUGINS
-      \"\${PROJECT_SOURCE_DIR}/${plugin_dest_dir}/plugins/*${CMAKE_SHARED_LIBRARY_SUFFIX}\")
-    include(BundleUtilities)
-    fixup_bundle(\"${APPS}\" \"\${QTPLUGINS}\" \"${DIRS}\")
-    " COMPONENT Runtime)
+include(BundleUtilities)
+fixup_bundle(\"${APPS}\" \"${DIRS}\")
+" COMPONENT Runtime)
 
 include(CPack)
 

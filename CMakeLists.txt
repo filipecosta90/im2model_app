@@ -68,11 +68,6 @@ find_package(BISON REQUIRED)
 find_package(FLEX REQUIRED)
 
 # we add the sub-directories that we want CMake to scan
-if (WIN32)
-  add_subdirectory(src)
-  #add_subdirectory(src_win32)
-else()
-  add_subdirectory(src)
-endif(WIN32)
+add_subdirectory(src)
 
 
