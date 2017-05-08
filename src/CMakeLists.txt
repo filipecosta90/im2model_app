@@ -101,7 +101,8 @@ if(build_gui)
   set_target_properties( im2model_gui PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR})
 endif(build_gui)
 
-set(CMAKE_INSTALL_PREFIX ${CMAKE_BINARY_DIR})
+set(CMAKE_INSTALL_PREFIX ${CMAKE_CURRENT_BINARY_DIR} )
+
 
 # Adds logic to INSTALL.vcproj to copy app.exe to destination directory
 #--------------------------------------------------------------------------------
@@ -109,21 +110,20 @@ set(CMAKE_INSTALL_PREFIX ${CMAKE_BINARY_DIR})
 # install tree, and on other platforms it'll go into the bin directory.
 INSTALL(TARGETS im2model 
   BUNDLE DESTINATION . COMPONENT Runtime
-  RUNTIME DESTINATION ${CMAKE_INSTALL_PREFIX}/bin COMPONENT Runtime
+  RUNTIME DESTINATION ${PROJECT_SOURCE_DIR}/bin COMPONENT Runtime
   )
 
 if(build_gui)
-  install (TARGETS im2model_gui RUNTIME DESTINATION ${PROJECT_SOURCE_DIR}/install)
+  install (TARGETS im2model_gui RUNTIME DESTINATION ${PROJECT_SOURCE_DIR}/bin)
 endif(build_gui)
 
 
 #--------------------------------------------------------------------------------
 # Now the installation stuff below
 #--------------------------------------------------------------------------------
-SET(plugin_dest_dir bin)
-SET(qtconf_dest_dir bin)
+
 IF(WIN32)
-  SET(APPS "${CMAKE_INSTALL_PREFIX}/bin/im2model.exe")
+  SET(APPS "${PROJECT_SOURCE_DIR}/bin/im2model.exe")
 ENDIF(WIN32)
 
 #--------------------------------------------------------------------------------
@@ -141,8 +141,9 @@ SET(DIRS ${Boost_LIBRARY_PATH} ${OPENCV_LIB_DIRS} )
 # over.
 INSTALL(CODE "
 include(BundleUtilities)
-fixup_bundle(\"${APPS}\" \"${DIRS}\")
+fixup_bundle( \"${APPS}\" \"\" \"${DIRS}\")
 " COMPONENT Runtime)
 
 include(CPack)
+
 
