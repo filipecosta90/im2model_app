@@ -5,9 +5,10 @@ set (CMAKE_CXX_STANDARD 14)
 
 project( MSC_IM2MODEL )
 
-set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
-ADD_DEFINITIONS(-DOpenCV_STATIC=ON )
-ADD_DEFINITIONS(-DBUILD_SHARED_LIBS=OFF )
+set(BUILD_SHARED_LIBS ON CACHE BOOL "" FORCE)
+ADD_DEFINITIONS(-DOpenCV_STATIC=OFF )
+ADD_DEFINITIONS(-DBUILD_SHARED_LIBS=ON )
+SET (OpenCV_DEBUG TRUE)
 
 # Turn on the ability to create folders to organize projects (.vcproj)
 # It creates "CMakePredefinedTargets" folder by default and adds CMake
@@ -40,7 +41,7 @@ else()
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fexceptions -g -Wall -std=c++14")
 endif(WIN32)
 
-SET (OpenCV_DEBUG TRUE)
+
 find_package(OpenCV  3.0.0 REQUIRED)
 if(WIN32)
   message(status "OpenCV lib components: ${OpenCV_LIB_COMPONENTS}")

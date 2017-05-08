@@ -1,4 +1,4 @@
-file(GLOB im2model_core_src 
+﻿file(GLOB im2model_core_src 
   atom.hpp
   chem_database.hpp
   mc_scanner.hpp
@@ -78,7 +78,6 @@ endif(build_gui)
 # Set Properties->General->Configuration Type to Application(.exe)
 # Creates app.exe with the listed sources (main.cxx)
 # Adds sources to the Solution Explorer
-#add_executable( app main.cxx )
 add_executable( im2model im2model.cpp ${im2model_core_src} mc_driver.cpp ${FLEX_mc_lexer_OUTPUTS} ${BISON_mc_parser_OUTPUTS} )
 
 # Properties->Linker->Input->Additional Dependencies
@@ -103,9 +102,47 @@ if(build_gui)
 endif(build_gui)
 
 # Adds logic to INSTALL.vcproj to copy app.exe to destination directory
-install (TARGETS im2model RUNTIME DESTINATION ${PROJECT_SOURCE_DIR}/install)
+#--------------------------------------------------------------------------------
+# Install the QtTest application, on Apple, the bundle is at the root of the
+# install tree, and on other platforms it'll go into the bin directory.
+INSTALL(TARGETS im2model 
+    BUNDLE DESTINATION . COMPONENT Runtime
+    RUNTIME DESTINATION ${PROJECT_SOURCE_DIR}/bin COMPONENT Runtime
+    )
+
 if(build_gui)
   install (TARGETS im2model_gui RUNTIME DESTINATION ${PROJECT_SOURCE_DIR}/install)
 endif(build_gui)
 
+
+#--------------------------------------------------------------------------------
+# Now the installation stuff below
+#--------------------------------------------------------------------------------
+SET(plugin_dest_dir bin)
+SET(qtconf_dest_dir bin)
+IF(WIN32)
+  SET(APPS "${PROJECT_SOURCE_DIR}/bin/im2model.exe")
+ENDIF(WIN32)
+
+#--------------------------------------------------------------------------------
+# Use BundleUtilities to get all other dependencies for the application to work.
+# It takes a bundle or executable along with possible plugins and inspects it
+# for dependencies.  If they are not system dependencies, they are copied.
+
+# directories to look for dependencies
+SET(DIRS ${Boost_LIBRARY_PATH} ${OPENCV_LIB_DIRS} )
+
+# Now the work of copying dependencies into the bundle/package
+# The quotes are escaped and variables to use at install time have their $ escaped
+# An alternative is the do a configure_file() on a script and use install(SCRIPT  ...).
+# Note that the image plugins depend on QtSvg and QtXml, and it got those copied
+# over.
+INSTALL(CODE "
+    file(GLOB_RECURSE QTPLUGINS
+      \"\${PROJECT_SOURCE_DIR}/${plugin_dest_dir}/plugins/*${CMAKE_SHARED_LIBRARY_SUFFIX}\")
+    include(BundleUtilities)
+    fixup_bundle(\"${APPS}\" \"\${QTPLUGINS}\" \"${DIRS}\")
+    " COMPONENT Runtime)
+
+include(CPack)
 
