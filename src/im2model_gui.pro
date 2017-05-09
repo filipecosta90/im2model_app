@@ -25,8 +25,13 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES +=\
         configwin.cpp \
-    im2model_gui.cpp
+    im2model_gui.cpp \
+    treeitem.cpp \
+    treemodel.cpp
 
-HEADERS  += configwin.h
+
+HEADERS  += configwin.h \
+    treeitem.h \
+    treemodel.h
 
 FORMS    += configwin.ui

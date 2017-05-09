@@ -27,8 +27,12 @@
 // gui includes
 #include "configwin.h"
 #include "ui_configwin.h"
+#include "treemodel.h"
 
 #include <QFileDialog>
+#include <QFileSystemModel>
+#include <QTreeView>
+#include <QFile>
 
 MainWindow::MainWindow(QWidget *parent) :
   QMainWindow(parent),
@@ -44,6 +48,19 @@ MainWindow::MainWindow(QWidget *parent) :
    * In your dialog constructor, you can init the UI now using:
    * **/
   ui->setupUi(this);
+  //QFileSystemModel *model = new QFileSystemModel();
+
+  // model->setRootPath(QDir::currentPath());
+  //ui->qtree_view_image_aberrations->setModel(model);
+  //ui->qtree_view_image_aberrations->setRootIndex(model->index(QDir::currentPath()));
+  delete ui->mainToolBar; // add this line
+
+  QFile file("/Users/filipeoliveira/Documents/im2model/src/default.txt");
+  file.open(QIODevice::ReadOnly);
+  TreeModel *model = new TreeModel(file.readAll());
+  file.close();
+  ui->qtree_view_image_aberrations->setModel(model);
+  ui->qtree_view_image_aberrations->show();
 }
 
 MainWindow::~MainWindow()
@@ -61,11 +78,6 @@ void MainWindow::on_qpush_load_image_clicked()
 }
 
 void MainWindow::on_qpush_load_cif_clicked()
-{
-
-}
-
-void MainWindow::on_qpush_load_cel_clicked()
 {
 
 }
@@ -97,16 +109,6 @@ void MainWindow::on_qline_ny_simulated_vertical_samples_editingFinished()
 }
 
 void MainWindow::on_qline_slice_file_name_prefix_editingFinished()
-{
-
-}
-
-void MainWindow::on_qline_defocus_aberration_coefficient_editingFinished()
-{
-
-}
-
-void MainWindow::on_qline_spherical_aberration_coefficient_editingFinished()
 {
 
 }
@@ -147,33 +149,3 @@ void MainWindow::on_qline_roi_size_y_editingFinished()
 
 }
 
-/** Unit-Cell Data **/
-void MainWindow::on_qline_dir_h_editingFinished()
-{
-
-}
-
-void MainWindow::on_qline_dir_k_editingFinished()
-{
-
-}
-
-void MainWindow::on_qline_dir_l_editingFinished()
-{
-
-}
-
-void MainWindow::on_qline_dir_u_editingFinished()
-{
-
-}
-
-void MainWindow::on_qline_dir_v_editingFinished()
-{
-
-}
-
-void MainWindow::on_qline_dir_w_editingFinished()
-{
-
-}
