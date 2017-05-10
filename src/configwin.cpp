@@ -48,19 +48,64 @@ MainWindow::MainWindow(QWidget *parent) :
    * In your dialog constructor, you can init the UI now using:
    * **/
   ui->setupUi(this);
-  //QFileSystemModel *model = new QFileSystemModel();
-
-  // model->setRootPath(QDir::currentPath());
-  //ui->qtree_view_image_aberrations->setModel(model);
-  //ui->qtree_view_image_aberrations->setRootIndex(model->index(QDir::currentPath()));
   delete ui->mainToolBar; // add this line
 
-  QFile file("/Users/filipeoliveira/Documents/im2model/src/default.txt");
-  file.open(QIODevice::ReadOnly);
-  TreeModel *model = new TreeModel(file.readAll());
-  file.close();
-  ui->qtree_view_image_aberrations->setModel(model);
-  ui->qtree_view_image_aberrations->show();
+  QStringList headers_action;
+  headers_action << tr("Field") << tr("Value");
+
+  QStringList project_setup_fields;
+  project_setup_fields << tr("Experimental Image");
+  project_setup_fields << tr(" Path");
+
+  project_setup_fields << tr(" Sampling (nm/pixel)") << tr( "  x\t0") << tr( "  y\t0");
+  project_setup_fields << tr(" Roi Center (pixel)") << tr( "  x\t0") << tr( "  y\t0");
+  project_setup_fields << tr(" Roi Size (pixel)") << tr( "  x\t0") << tr( "  y\t0");
+
+  project_setup_fields << tr("Unit-Cell File");
+  project_setup_fields << tr(" CIF");
+  project_setup_fields << tr(" CEL");
+
+  project_setup_fields << tr("Projected y axis") << tr( " u\t0") << tr( " v\t0") << tr( " w\t0");
+  project_setup_fields << tr("Projection direction") << tr( " h\t0") << tr( " h\t0") << tr( " l\t0");
+
+  TreeModel *project_setup_fields_model = new TreeModel(headers_action, project_setup_fields );
+
+  ui->qtree_view_project_setup->setModel(project_setup_fields_model);
+  QModelIndex exp_data_index = project_setup_fields_model->index(0,0);
+  QModelIndex exp_path = project_setup_fields_model->index(0,1,exp_data_index);
+
+  QModelIndex unit_cell_index = project_setup_fields_model->index(1,0);
+  QModelIndex cif_path = project_setup_fields_model->index(0,1,unit_cell_index);
+  QModelIndex cel_path = project_setup_fields_model->index(1,1,unit_cell_index);
+
+  ui->qtree_view_project_setup->setIndexWidget(exp_path,ui->qwidget_load_experimental_image);
+  ui->qtree_view_project_setup->setIndexWidget(cif_path,ui->qwidget_load_cel);
+  ui->qtree_view_project_setup->setIndexWidget(cel_path,ui->qwidget_load_cif);
+
+  for (int column = 0; column < project_setup_fields_model->columnCount(); ++column){
+    ui->qtree_view_project_setup->resizeColumnToContents(column);
+  }
+
+  QStringList headers;
+  headers << tr("Field") << tr("Value");
+
+  QStringList simulation_fields;
+  simulation_fields << tr("Estimated Experimental Image Parameters");
+  simulation_fields << tr(" Thickness\t0");
+  simulation_fields << tr(" Defocus\t0");
+
+  simulation_fields << tr("Looped Image aberrations");
+  simulation_fields << tr(" Thickness") << tr( "  Lower Bound\t0") << tr( "  Upper Bound\t0") << tr( "  Samples\t0");
+  simulation_fields << tr(" Defocus") << tr( "  Lower Bound\t0") << tr( "  Upper Bound\t0") << tr( "  Samples\t0");
+
+  TreeModel *simulation_fields_model = new TreeModel(headers, simulation_fields );
+  ui->qtree_view_simulation_setup->setModel(simulation_fields_model);
+
+  for (int column = 0; column < simulation_fields_model->columnCount(); ++column){
+    ui->qtree_view_simulation_setup->resizeColumnToContents(column);
+  }
+  ui->qtree_view_simulation_setup->expandAll();
+
 }
 
 MainWindow::~MainWindow()
@@ -78,73 +123,6 @@ void MainWindow::on_qpush_load_image_clicked()
 }
 
 void MainWindow::on_qpush_load_cif_clicked()
-{
-
-}
-
-/** Simulation Data **/
-void MainWindow::on_qline_super_cell_size_a_editingFinished()
-{
-
-}
-
-void MainWindow::on_qline_super_cell_size_b_editingFinished()
-{
-
-}
-
-void MainWindow::on_qline_super_cell_size_c_editingFinished()
-{
-
-}
-
-void MainWindow::on_qline_nx_simulated_horizontal_samples_editingFinished()
-{
-
-}
-
-void MainWindow::on_qline_ny_simulated_vertical_samples_editingFinished()
-{
-
-}
-
-void MainWindow::on_qline_slice_file_name_prefix_editingFinished()
-{
-
-}
-
-void MainWindow::on_qline_accelaration_voltage_ht_editingFinished()
-{
-
-}
-
-/** Experimental Data **/
-void MainWindow::on_qline_exp_nx_editingFinished()
-{
-
-}
-
-void MainWindow::on_qline_exp_ny_editingFinished()
-{
-
-}
-
-void MainWindow::on_qline_roi_center_x_editingFinished()
-{
-
-}
-
-void MainWindow::on_qline_roi_center_y_editingFinished()
-{
-
-}
-
-void MainWindow::on_qline_roi_size_x_editingFinished()
-{
-
-}
-
-void MainWindow::on_qline_roi_size_y_editingFinished()
 {
 
 }
