@@ -25,6 +25,8 @@ class TreeItem
     int childNumber() const;
     bool isChecked() const;
     void setChecked( bool set );
+    bool isCheckable() const;
+    void setCheckable( bool set );
     bool setData(int column, const QVariant &value);
 
   private:
@@ -32,7 +34,7 @@ class TreeItem
     QVector<QVariant> itemData;
     TreeItem *parentItem;
     bool checked;
-
+    bool is_checkable;
 };
 
 #endif // TREEITEM_H

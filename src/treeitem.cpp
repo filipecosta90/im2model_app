@@ -34,6 +34,8 @@ TreeItem::TreeItem(const QVector<QVariant> &data, TreeItem *parent)
 {
   parentItem = parent;
   itemData = data;
+  is_checkable = false;
+  checked = false;
 }
 
 TreeItem::~TreeItem()
@@ -144,5 +146,15 @@ bool TreeItem::isChecked() const
 void TreeItem::setChecked( bool set )
 {
   checked = set;
+}
+
+bool TreeItem::isCheckable() const
+{
+  return is_checkable;
+}
+
+void TreeItem::setCheckable( bool set )
+{
+  is_checkable = set;
 }
 

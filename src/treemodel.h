@@ -28,6 +28,10 @@ class TreeModel : public QAbstractItemModel
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
     int columnCount(const QModelIndex &parent = QModelIndex()) const override;
 
+    /*
+     * Read-only tree models only need to provide the above functions.
+     * The following public functions provide support for editing and resizing:
+     */
     Qt::ItemFlags flags(const QModelIndex &index) const override;
     bool setData(const QModelIndex &index, const QVariant &value,
         int role = Qt::EditRole) override;

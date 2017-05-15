@@ -3,40 +3,36 @@
 #include "treemodel.h"
 #include <iostream>
 
-  TreeModel::TreeModel(const QStringList &headers, const QStringList &data, QObject *parent)
-: QAbstractItemModel(parent)
-{
-  QVector<QVariant> rootData;
-  foreach (QString header, headers)
-    rootData << header;
+TreeModel::TreeModel(const QStringList &headers, const QStringList &data, QObject *parent)
+  : QAbstractItemModel(parent){
+    QVector<QVariant> rootData;
+    foreach (QString header, headers)
+      rootData << header;
 
-  rootItem = new TreeItem(rootData);
-  setupModelData(data, rootItem);
-}
+    rootItem = new TreeItem(rootData);
+    setupModelData(data, rootItem);
+  }
 
-TreeModel::~TreeModel()
-{
+TreeModel::~TreeModel(){
   delete rootItem;
 }
 
-int TreeModel::columnCount(const QModelIndex & /* parent */) const
-{
+int TreeModel::columnCount(const QModelIndex & /* parent */) const{
   return rootItem->columnCount();
 }
 
-QVariant TreeModel::data(const QModelIndex &index, int role) const
-{
-  if (!index.isValid())
+QVariant TreeModel::data(const QModelIndex &index, int role) const{
+  if (!index.isValid()){
     return QVariant();
-
-  if (role != Qt::DisplayRole && role != Qt::EditRole)
-    return QVariant();
-
+  }
   TreeItem *item = getItem(index);
-
-  if ( role == Qt::CheckStateRole && index.column() == 0 )
+  if ( role == Qt::CheckStateRole && index.column() == 0 && item->isCheckable() ){
     return static_cast< int >( item->isChecked() ? Qt::Checked : Qt::Unchecked );
+  }
 
+  if (role != Qt::DisplayRole && role != Qt::EditRole){
+    return QVariant();
+  }
   return item->data(index.column());
 }
 
@@ -155,16 +151,30 @@ int TreeModel::rowCount(const QModelIndex &parent) const
   return parentItem->childCount();
 }
 
-bool TreeModel::setData(const QModelIndex &index, const QVariant &value, int role)
-{
-  if (role != Qt::EditRole)
+bool TreeModel::setData(const QModelIndex &index, const QVariant &value, int role){
+
+  if ( (role != Qt::EditRole) && ( role != Qt::CheckStateRole) ){
     return false;
+  }
 
   TreeItem *item = getItem(index);
-  bool result = item->setData(index.column(), value);
-
-  if (result)
+  bool result = false;
+  if(role == Qt::CheckStateRole){
+    std::cout<<"Ischecked "<<item->isChecked() << std::endl;
+    if(item->isChecked()){
+      item->setChecked(false);
+    }
+    else{
+      item->setChecked(true);
+    }
+    result = true;
+  }
+  if(role == Qt::EditRole ){
+    result = item->setData(index.column(), value);
+  }
+  if (result){
     emit dataChanged(index, index);
+  }
 
   return result;
 }
@@ -248,6 +258,7 @@ void TreeModel::setupModelData(const QStringList &lines, TreeItem *parent)
         QVariant column_data = columnData[column];
         QString column_data_str = column_data.toString();
         parent->child(parent->childCount() - 1)->setData(column, column_data);
+        parent->child(parent->childCount() - 1)->setCheckable ( true );
         std::cout << "row " << parent->childCount() << " col " << column << "value " << column_data_str.toStdString() << std::endl;
       }
     }
