@@ -20,6 +20,8 @@ class MainWindow : public QMainWindow
 
     void on_qpush_load_cif_clicked();
 
+    void on_actionAbout_triggered();
+
   private:
     Ui::MainWindow *ui;
 };

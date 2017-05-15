@@ -13,7 +13,6 @@ class TreeItem
   public:
     explicit TreeItem(const QVector<QVariant> &data, TreeItem *parent = 0);
     ~TreeItem();
-
     TreeItem *child(int number);
     int childCount() const;
     int columnCount() const;
@@ -24,12 +23,16 @@ class TreeItem
     bool removeChildren(int position, int count);
     bool removeColumns(int position, int columns);
     int childNumber() const;
+    bool isChecked() const;
+    void setChecked( bool set );
     bool setData(int column, const QVariant &value);
 
   private:
     QList<TreeItem*> childItems;
     QVector<QVariant> itemData;
     TreeItem *parentItem;
+    bool checked;
+
 };
 
 #endif // TREEITEM_H

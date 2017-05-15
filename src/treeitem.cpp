@@ -135,3 +135,14 @@ bool TreeItem::setData(int column, const QVariant &value)
   itemData[column] = value;
   return true;
 }
+
+bool TreeItem::isChecked() const
+{
+  return checked;
+}
+
+void TreeItem::setChecked( bool set )
+{
+  checked = set;
+}
+

@@ -34,6 +34,9 @@ QVariant TreeModel::data(const QModelIndex &index, int role) const
 
   TreeItem *item = getItem(index);
 
+  if ( role == Qt::CheckStateRole && index.column() == 0 )
+    return static_cast< int >( item->isChecked() ? Qt::Checked : Qt::Unchecked );
+
   return item->data(index.column());
 }
 
@@ -42,7 +45,11 @@ Qt::ItemFlags TreeModel::flags(const QModelIndex &index) const
   if (!index.isValid())
     return 0;
 
-  return Qt::ItemIsEditable | QAbstractItemModel::flags(index);
+  Qt::ItemFlags flags = Qt::ItemIsEditable | QAbstractItemModel::flags(index);
+  if( index.column() == 0 ){
+    flags |= Qt::ItemIsUserCheckable;
+  }
+  return flags;
 }
 
 TreeItem *TreeModel::getItem(const QModelIndex &index) const
