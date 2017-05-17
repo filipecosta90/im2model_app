@@ -54,7 +54,6 @@ MainWindow::MainWindow(QWidget *parent) :
   headers_action << tr("Field") << tr("Value");
 
   QStringList project_setup_image_fields;
-  //project_setup_image_fields << tr("Experimental image");
   project_setup_image_fields << tr("Image path");
   project_setup_image_fields << tr("Sampling (nm/pixel)");
   project_setup_image_fields << tr(" x\t0");
@@ -66,11 +65,10 @@ MainWindow::MainWindow(QWidget *parent) :
   project_setup_image_fields << tr(" Dimensions");
   project_setup_image_fields << tr("  width\t0");
   project_setup_image_fields << tr("  height\t0");
-  project_setup_image_fields << tr("Estimated thickness\t0");
-  project_setup_image_fields << tr("Estimated defocus\t0");
+  //project_setup_image_fields << tr("Estimated thickness\t0");
+  //project_setup_image_fields << tr("Estimated defocus\t0");
 
   QStringList project_setup_crystalographic_fields;
-  //project_setup_crystalographic_fields << tr("Crystalography");
   project_setup_crystalographic_fields << tr("Unit-cell file");
   project_setup_crystalographic_fields << tr(" CIF");
   project_setup_crystalographic_fields << tr(" CEL");
@@ -85,17 +83,12 @@ MainWindow::MainWindow(QWidget *parent) :
   project_setup_crystalographic_fields << tr(" k\t0");
   project_setup_crystalographic_fields << tr(" l\t0");
 
-
-
   TreeModel *project_setup_image_fields_model = new TreeModel(headers_action, project_setup_image_fields );
   TreeModel *project_setup_crystalographic_fields_model = new TreeModel(headers_action, project_setup_crystalographic_fields );
 
   ui->qtree_view_project_setup_image->setModel(project_setup_image_fields_model);
   ui->qtree_view_project_setup_crystallography->setModel(project_setup_crystalographic_fields_model);
 
-  // QModelIndex crystalographic_information_index = project_setup_crystalographic_fields_model->index(0,0);
-
-  //QModelIndex exp_data_index = project_setup_fields_model->index(0,0,crystalographic_information_index);
   QModelIndex exp_path = project_setup_image_fields_model->index(0,1);
 
   QModelIndex unit_cell_index = project_setup_crystalographic_fields_model->index(0,0);
@@ -121,36 +114,7 @@ MainWindow::MainWindow(QWidget *parent) :
   headers_simulation_parameters << tr("Field") << tr("Value");
 
   QStringList simulation_parameters;
-  simulation_parameters << tr("Multislice phase grating");
-  simulation_parameters << tr(" Slice filename prefix\tslc");
-  simulation_parameters << tr(" Super-Cell Slicing along c-axis");
-  simulation_parameters << tr("  .\t");
-  simulation_parameters << tr("  .\t");
-  simulation_parameters << tr("  .\t0");
-  simulation_parameters << tr(" Optional Parameters");
-  simulation_parameters << tr("  Apply random atomic displacements");
-  simulation_parameters << tr("  Thermal vibration models");
-  simulation_parameters << tr("   .");
-  simulation_parameters << tr("   .");
-
-  simulation_parameters << tr("Electron diffraction patterns");
-  simulation_parameters << tr(" Input Wavefunction file name\t");
-
-  simulation_parameters << tr("Image intensity distribuitions");
-  simulation_parameters << tr(" Aberration parameters");
-  simulation_parameters << tr("  [] Fixed value");
-  simulation_parameters << tr("  [] To optimize");
-  simulation_parameters << tr("  [] N/A");
-  simulation_parameters << tr(" Envelope parameters");
-  simulation_parameters << tr("  [] Fixed value");
-  simulation_parameters << tr("  [] To optimize");
-  simulation_parameters << tr("  [] N/A");
-  simulation_parameters << tr(" Modulated detector transfer function");
-  simulation_parameters << tr("  [] Fixed value");
-  simulation_parameters << tr("  [] To optimize");
-  simulation_parameters << tr("  [] N/A");
-
-  simulation_parameters << tr("Thickess Defocus");
+  simulation_parameters << tr("TD map");
   simulation_parameters << tr(" Thickness range");
   simulation_parameters << tr("  Lower Bound\t0");
   simulation_parameters << tr("  Upper Bound\t0");
@@ -162,32 +126,34 @@ MainWindow::MainWindow(QWidget *parent) :
   simulation_parameters << tr(" Incident electron beam");
   simulation_parameters << tr("  Accelaration voltage (kV)\t0");
   simulation_parameters << tr(" [] Import fixed values from refinement?");
+  simulation_parameters << tr("Advanced options");
+  simulation_parameters << tr(" Multislice phase grating");
+  simulation_parameters << tr("  Slice filename prefix\tslc");
+  simulation_parameters << tr("  Super-Cell Slicing along c-axis");
+  simulation_parameters << tr("   .\t");
+  simulation_parameters << tr("   .\t");
+  simulation_parameters << tr("   .\t0");
+  simulation_parameters << tr("  Optional Parameters");
+  simulation_parameters << tr("   Apply random atomic displacements");
+  simulation_parameters << tr("   Thermal vibration models");
+  simulation_parameters << tr("    .");
+  simulation_parameters << tr("    .");
+  simulation_parameters << tr(" Electron diffraction patterns");
+  simulation_parameters << tr("  Input Wavefunction file name\t");
+  simulation_parameters << tr(" Image intensity distribuitions");
+  simulation_parameters << tr(" Running configurations");
+  simulation_parameters << tr("  Compute multislice phase grating");
+  simulation_parameters << tr("  Compute electron diffraction patterns");
+  simulation_parameters << tr("  Compute image intensity distribuitions");
+  simulation_parameters << tr("  Compute TD map");
+
+
 
   TreeModel *simulation_parameters_model = new TreeModel(headers_simulation_parameters, simulation_parameters );
   ui->qtree_view_simulation_setup->setModel(simulation_parameters_model);
 
-  //celslc
-  QModelIndex multi_slice_index = simulation_parameters_model->index(0,0);
-  QModelIndex super_cell_slicing_index = simulation_parameters_model->index(1,0,multi_slice_index);
-  QModelIndex auto_equidistant_index = simulation_parameters_model->index(0,0,super_cell_slicing_index);
-  QModelIndex auto_non_equidistant_index = simulation_parameters_model->index(1,0,super_cell_slicing_index);
-  QModelIndex explicit_number_index = simulation_parameters_model->index(2,0,super_cell_slicing_index);
-  QModelIndex multi_slice_optional_index = simulation_parameters_model->index(2,0,multi_slice_index);
-  QModelIndex multi_slice_optional_thermal_index = simulation_parameters_model->index(1,0,multi_slice_optional_index);
-  QModelIndex multi_slice_optional_thermal_debye_index = simulation_parameters_model->index(0,0,multi_slice_optional_thermal_index);
-  QModelIndex multi_slice_optional_thermal_absorption_index = simulation_parameters_model->index(1,0,multi_slice_optional_thermal_index);
-  //msa
-  QModelIndex electron_diff_index = simulation_parameters_model->index(1,0);
-  //wavimg
-  QModelIndex image_intensity_index = simulation_parameters_model->index(2,0);
   //tdmap
-  QModelIndex tdmap_index = simulation_parameters_model->index(3,0);
-
-  ui->qtree_view_simulation_setup->setIndexWidget(auto_equidistant_index,ui->qwidget_auto_equidistant);
-  ui->qtree_view_simulation_setup->setIndexWidget(auto_non_equidistant_index,ui->qwidget_auto_non_equidistant);
-  ui->qtree_view_simulation_setup->setIndexWidget(explicit_number_index,ui->qwidget_explicit_number);
-  ui->qtree_view_simulation_setup->setIndexWidget(multi_slice_optional_thermal_debye_index,ui->qwidget_apply_debye_waller);
-  ui->qtree_view_simulation_setup->setIndexWidget(multi_slice_optional_thermal_absorption_index,ui->qwidget_apply_absorption_potentials);
+  QModelIndex tdmap_index = simulation_parameters_model->index(0,0);
 
   ui->qtree_view_simulation_setup->expand(tdmap_index);
 
@@ -202,6 +168,7 @@ MainWindow::MainWindow(QWidget *parent) :
   edge_detection_parameters << tr("Edge detection");
   edge_detection_parameters << tr(" Hysteresis Thresholding");
   edge_detection_parameters << tr("Max contour distance (pixels)");
+
   TreeModel *edge_detection_model = new TreeModel(headers_edge_detection_parameters, edge_detection_parameters);
   ui->qtree_view_supercell_model_edge_detection_setup->setModel(edge_detection_model);
 
