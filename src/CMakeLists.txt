@@ -58,6 +58,19 @@ if(WIN32)
 endif(WIN32)
 
 if(build_gui)
+  # Set PROJECT_VERSION_PATCH and PROJECT_VERSION_TWEAK to 0 if not present, needed by add_project_meta
+  fix_project_version()
+
+  # Set additional project information
+  set(COMPANY "Im2Model")
+  set(COPYRIGHT "Copyright (c) 2017 Dr. Alberto José Proença, Dr. Daniel G. Stroppa, Filipe Oliveira. All rights reserved.")
+  set(IDENTIFIER "com.example.Example")
+
+  add_project_meta(META_FILES_TO_INCLUDE)
+
+  set(RESOURCE_FILES ../im2model.qrc)
+
+
   # Running the meta-object compiler for QObject derived classes is similar to resources, 
   # you add QT5_WRAP_CPP in your CMake file, and just add the generated files to your source files. 
   # The input for this function is the header of your class, not the implementation — even though it’s called QT5_WRAP_CPP, 
@@ -65,12 +78,19 @@ if(build_gui)
   # this is usually the header. 
   # Those files contain a bunch of functions which are needed for the Qt meta-object system. 
   # These are stand-alone .cpp files that you usually never have to look at.
-  QT5_WRAP_CPP(tst_hdr_moc configwin.h)
-  QT5_WRAP_UI(tst_form_hdr configwin.ui)
 
-  add_library(configwin ${tst_hdr_moc} ${tst_form_hdr} )
-  qt5_use_modules(configwin Widgets)
-  add_executable( im2model_gui im2model_gui.cpp configwin ${im2model_core_src} mc_driver.cpp ${FLEX_mc_lexer_OUTPUTS} ${BISON_mc_parser_OUTPUTS} )
+  #  QT5_WRAP_CPP(tst_hdr_moc configwin.h treemodel.h )
+  #QT5_WRAP_UI(tst_form_hdr configwin.ui)
+
+  #
+  #qt5_use_modules(configwin Core Gui Widgets)
+  set(GUI_SOURCE_FILES
+    configwin.cpp
+    im2model_gui.cpp
+    treeitem.cpp
+    treemodel.cpp
+    )
+  add_executable( im2model_gui ${OS_BUNDLE}  ${GUI_SOURCE_FILES} ${META_FILES_TO_INCLUDE} ${RESOURCE_FILES}  ${im2model_core_src} mc_driver.cpp ${FLEX_mc_lexer_OUTPUTS} ${BISON_mc_parser_OUTPUTS} )
   # Use the Widgets module from Qt 5.
   qt5_use_modules( im2model_gui Core Gui Widgets )
 endif(build_gui)
@@ -87,7 +107,7 @@ if(build_gui)
 endif(build_gui)
 
 if(APPLE)
-  message(STATUS "Adding include-what-you-use ")
+
   #  set_target_properties( app PROPERTIES  CXX_INCLUDE_WHAT_YOU_USE /Users/filipeoliveira/Downloads/include-what-you-use/bin/include-what-you-use )
 endif(APPLE)
 
@@ -114,7 +134,11 @@ INSTALL(TARGETS im2model
   )
 
 if(build_gui)
-  install (TARGETS im2model_gui RUNTIME DESTINATION ${PROJECT_SOURCE_DIR}/bin)
+  install (
+    TARGETS im2model_gui  
+    RUNTIME DESTINATION ${PROJECT_SOURCE_DIR}/bin
+    BUNDLE DESTINATION ${PROJECT_SOURCE_DIR}/bin    
+    )
 endif(build_gui)
 
 
@@ -145,5 +169,4 @@ fixup_bundle( \"${APPS}\" \"\" \"${DIRS}\")
 " COMPONENT Runtime)
 
 include(CPack)
-
 

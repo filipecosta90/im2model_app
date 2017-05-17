@@ -1,5 +1,6 @@
 # the minimum version of CMake required
 cmake_minimum_required(VERSION 3.6.2)
+
 set (CMAKE_CXX_COMPILER "clang++" )
 set (CMAKE_CXX_STANDARD 14)
 
@@ -18,9 +19,28 @@ set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 option(build_gui "build_gui" OFF)
 if(build_gui)
   message(STATUS "GUI enabled. building command-line im2model, and gui_im2model")
+  # Add folder where are supportive functions
+  set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
+  set(CMAKE_INCLUDE_CURRENT_DIR ON)
+
+  # Include Qt basic functions
+  include(QtCommon)
+
+  # Set PROJECT_VERSION_PATCH and PROJECT_VERSION_TWEAK to 0 if not present, needed by add_project_meta
+  fix_project_version()
+
+  # Set additional project information
+  set(COMPANY "Im2Model")
+  set(COPYRIGHT "Copyright (c) 2017 Dr. Alberto José Proença, Dr. Daniel G. Stroppa, Filipe Oliveira. All rights reserved.")
+  set(IDENTIFIER "com.example.Example")
+
+  add_project_meta(META_FILES_TO_INCLUDE)
+
+  set(RESOURCE_FILES im2model.qrc)
+
   # Instruct CMake to run moc automatically when needed.
-  set(CMAKE_AUTOMOC ON)
-  #  set(CMAKE_INCLUDE_CURRENT_DIR ON)
+  #  set(CMAKE_AUTOMOC ON)
+  #set(CMAKE_INCLUDE_CURRENT_DIR ON)
   # Find the QtWidgets library
   find_package( Qt5Widgets REQUIRED )
 else(build_gui)

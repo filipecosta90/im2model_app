@@ -4,14 +4,16 @@
 #include <iostream>
 
 TreeModel::TreeModel(const QStringList &headers, const QStringList &data, QObject *parent)
-  : QAbstractItemModel(parent){
-    QVector<QVariant> rootData;
-    foreach (QString header, headers)
-      rootData << header;
-
-    rootItem = new TreeItem(rootData);
-    setupModelData(data, rootItem);
+    : QAbstractItemModel(parent)
+{
+  QVector<QVariant> rootData;
+  foreach (QString header, headers){
+    rootData << header;
   }
+
+  rootItem = new TreeItem(rootData);
+  setupModelData(data, rootItem);
+}
 
 TreeModel::~TreeModel(){
   delete rootItem;

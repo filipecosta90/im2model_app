@@ -1,8 +1,13 @@
+#include <QtWidgets>
+#include <QTreeView>
 #include "configwin.h"
+
+
 #include <QApplication>
 #include <QFileDialog>
 #include <QFileSystemModel>
-#include <QTreeView>
+
+
 
 int main(int argc, char *argv[])
 {
