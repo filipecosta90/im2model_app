@@ -29,6 +29,7 @@
 #include "ui_configwin.h"
 #include "treeitem.h"
 #include "treemodel.h"
+#include "cv_image_widget.h"
 
 #include "boost/function.hpp"
 #include "boost/bind.hpp"
@@ -37,6 +38,7 @@
 #include <QFileSystemModel>
 #include <QTreeView>
 #include <QFile>
+
 
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow) {
@@ -49,35 +51,39 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
    * to your project file — otherwise, the files won’t be found. 
    * In your dialog constructor, you can init the UI now using:
    * **/
-    image_crystal = new Image_Crystal();
+  image_crystal = new Image_Crystal();
   ui->setupUi(this);
   delete ui->mainToolBar; // add this line
 
-  QVector<QVariant> header = {"Field","Value"};
-  TreeItem* experimental_image_root = new TreeItem ( header );
+  QVector<QVariant> common_header = {"Field","Value"};
+
+  /*************************
+   * EXPERIMENTAL IMAGE
+   *************************/
+  TreeItem* experimental_image_root = new TreeItem ( common_header );
 
   ////////////////
   // Image Path
   ////////////////
-  QVector<QVariant> option_1 = {"Image path",""};
-  boost::function<bool(std::string)> function_1( boost::bind( &Image_Crystal::set_experimental_image_path, image_crystal, _1 ) );
-  TreeItem* image_path  = new TreeItem (  option_1 , function_1 );
+  QVector<QVariant> box1_option_1 = {"Image path",""};
+  boost::function<bool(std::string)> box1_function_1( boost::bind( &Image_Crystal::set_experimental_image_path, image_crystal, _1 ) );
+  TreeItem* image_path  = new TreeItem (  box1_option_1 , box1_function_1 );
   experimental_image_root->insertChildren( image_path );
 
   ////////////////
   // Sampling rate
   ////////////////
-  QVector<QVariant> option_2 = {"Sampling (nm/pixel)",""};
-  QVector<QVariant> option_2_1 = {"x",""};
-  QVector<bool> option_2_1_edit = {false,true};
-  boost::function<bool(std::string)> function_2_1 ( boost::bind( &Image_Crystal::set_experimental_sampling_x, image_crystal, _1 ) );
-  QVector<QVariant> option_2_2 = {"y",""};
-  QVector<bool> option_2_2_edit = {false,true};
-  boost::function<bool(std::string)> function_2_2 ( boost::bind( &Image_Crystal::set_experimental_sampling_y, image_crystal, _1 ) );
+  QVector<QVariant> box1_option_2 = {"Sampling (nm/pixel)",""};
+  QVector<QVariant> box1_option_2_1 = {"x",""};
+  QVector<bool> box1_option_2_1_edit = {false,true};
+  boost::function<bool(std::string)> box1_function_2_1 ( boost::bind( &Image_Crystal::set_experimental_sampling_x, image_crystal, _1 ) );
+  QVector<QVariant> box1_option_2_2 = {"y",""};
+  QVector<bool> box1_option_2_2_edit = {false,true};
+  boost::function<bool(std::string)> box1_function_2_2 ( boost::bind( &Image_Crystal::set_experimental_sampling_y, image_crystal, _1 ) );
 
-  TreeItem* experimental_sampling_rate = new TreeItem ( option_2  );
-  TreeItem* experimental_sampling_rate_x = new TreeItem ( option_2_1 , function_2_1, option_2_1_edit );
-  TreeItem* experimental_sampling_rate_y = new TreeItem ( option_2_2 , function_2_2, option_2_2_edit );
+  TreeItem* experimental_sampling_rate = new TreeItem ( box1_option_2  );
+  TreeItem* experimental_sampling_rate_x = new TreeItem ( box1_option_2_1 , box1_function_2_1, box1_option_2_1_edit );
+  TreeItem* experimental_sampling_rate_y = new TreeItem ( box1_option_2_2 , box1_function_2_2, box1_option_2_2_edit );
   experimental_image_root->insertChildren( experimental_sampling_rate );
   experimental_sampling_rate->insertChildren( experimental_sampling_rate_x );
   experimental_sampling_rate->insertChildren( experimental_sampling_rate_y );
@@ -85,100 +91,164 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
   ////////////////
   // ROI
   ////////////////
-  QVector<QVariant> option_3 = {"ROI",""};
-  TreeItem* experimental_roi = new TreeItem ( option_3  );
+  QVector<QVariant> box1_option_3 = {"ROI",""};
+  TreeItem* experimental_roi = new TreeItem ( box1_option_3  );
   experimental_image_root->insertChildren( experimental_roi );
 
   ////////////////
   // ROI Center
   ////////////////
-  QVector<QVariant> option_3_1 = {"Center",""};
-  QVector<QVariant> option_3_1_1 = {"x",""};
-  QVector<bool> option_3_1_1_edit = {false,true};
-  boost::function<bool(std::string)> function_3_1_1 ( boost::bind( &Image_Crystal::set_experimental_roi_center_x, image_crystal, _1 ) );
-  QVector<QVariant> option_3_1_2 = {"y",""};
-  QVector<bool> option_3_1_2_edit = {false,true};
-  boost::function<bool(std::string)> function_3_1_2 ( boost::bind( &Image_Crystal::set_experimental_roi_center_y, image_crystal, _1 ) );
+  QVector<QVariant> box1_option_3_1 = {"Center",""};
+  QVector<QVariant> box1_option_3_1_1 = {"x",""};
+  QVector<bool> box1_option_3_1_1_edit = {false,true};
+  boost::function<bool(std::string)> box1_function_3_1_1 ( boost::bind( &Image_Crystal::set_experimental_roi_center_x, image_crystal, _1 ) );
+  QVector<QVariant> box1_option_3_1_2 = {"y",""};
+  QVector<bool> box1_option_3_1_2_edit = {false,true};
+  boost::function<bool(std::string)> box1_function_3_1_2 ( boost::bind( &Image_Crystal::set_experimental_roi_center_y, image_crystal, _1 ) );
 
-  TreeItem* experimental_roi_center = new TreeItem ( option_3_1  );
-  TreeItem* experimental_roi_center_x = new TreeItem ( option_3_1_1 , function_3_1_1, option_3_1_1_edit );
-  TreeItem* experimental_roi_center_y = new TreeItem ( option_3_1_2 , function_3_1_2, option_3_1_2_edit );
+  TreeItem* experimental_roi_center = new TreeItem ( box1_option_3_1  );
+  TreeItem* experimental_roi_center_x = new TreeItem ( box1_option_3_1_1 , box1_function_3_1_1, box1_option_3_1_1_edit );
+  TreeItem* experimental_roi_center_y = new TreeItem ( box1_option_3_1_2 , box1_function_3_1_2, box1_option_3_1_2_edit );
   experimental_roi->insertChildren( experimental_roi_center );
   experimental_roi_center->insertChildren( experimental_roi_center_x );
   experimental_roi_center->insertChildren( experimental_roi_center_y );
-
-  QVector<QVariant> option_3_2 = {"Dimensions",""};
-  QVector<QVariant> option_3_2_1 = {"width",""};
-  QVector<bool> option_3_2_1_edit = {false,true};
-  boost::function<bool(std::string)> function_3_2_1 ( boost::bind( &Image_Crystal::set_experimental_roi_dimensions_width, image_crystal, _1 ) );
-  QVector<QVariant> option_3_2_2 = {"height",""};
-  QVector<bool> option_3_2_2_edit = {false,true};
-  boost::function<bool(std::string)> function_3_2_2 ( boost::bind( &Image_Crystal::set_experimental_roi_dimensions_height, image_crystal, _1 ) );
-
-  TreeItem* experimental_roi_dimensions = new TreeItem ( option_3_2  );
-  TreeItem* experimental_roi_dimensions_width = new TreeItem ( option_3_2_1 , function_3_2_1, option_3_2_1_edit );
-  TreeItem* experimental_roi_dimensions_height = new TreeItem ( option_3_2_2 , function_3_2_2, option_3_2_2_edit );
-  experimental_roi->insertChildren( experimental_roi_dimensions );
-  experimental_roi_dimensions->insertChildren( experimental_roi_dimensions_width );
-  experimental_roi_dimensions->insertChildren( experimental_roi_dimensions_height );
 
   ////////////////
   // ROI Dimensions
   ////////////////
 
+  QVector<QVariant> box1_option_3_2 = {"Dimensions",""};
+  QVector<QVariant> box1_option_3_2_1 = {"width",""};
+  QVector<bool> box1_option_3_2_1_edit = {false,true};
+  boost::function<bool(std::string)> box1_function_3_2_1 ( boost::bind( &Image_Crystal::set_experimental_roi_dimensions_width, image_crystal, _1 ) );
+  QVector<QVariant> box1_option_3_2_2 = {"height",""};
+  QVector<bool> box1_option_3_2_2_edit = {false,true};
+  boost::function<bool(std::string)> box1_function_3_2_2 ( boost::bind( &Image_Crystal::set_experimental_roi_dimensions_height, image_crystal, _1 ) );
+
+  TreeItem* experimental_roi_dimensions = new TreeItem ( box1_option_3_2  );
+  TreeItem* experimental_roi_dimensions_width = new TreeItem ( box1_option_3_2_1 , box1_function_3_2_1, box1_option_3_2_1_edit );
+  TreeItem* experimental_roi_dimensions_height = new TreeItem ( box1_option_3_2_2 , box1_function_3_2_2, box1_option_3_2_2_edit );
+  experimental_roi->insertChildren( experimental_roi_dimensions );
+  experimental_roi_dimensions->insertChildren( experimental_roi_dimensions_width );
+  experimental_roi_dimensions->insertChildren( experimental_roi_dimensions_height );
+
   TreeModel *project_setup_image_fields_model = new TreeModel( experimental_image_root );
   ui->qtree_view_project_setup_image->setModel(project_setup_image_fields_model);
+  QModelIndex exp_path = project_setup_image_fields_model->index(0,1);
+  ui->qtree_view_project_setup_image->setIndexWidget(exp_path,ui->qwidget_load_experimental_image);
 
-  /*QStringList headers_action;
-  headers_action << tr("Field") << tr("Value");
+  /*************************
+   * CRYSTALLOGRAPLY
+   *************************/
+  TreeItem* crystallography_root = new TreeItem ( common_header );
 
-  QStringList project_setup_image_fields;
-  project_setup_image_fields << tr("Image path");
-  project_setup_image_fields << tr("Sampling (nm/pixel)");
-  project_setup_image_fields << tr(" x\t0");
-  project_setup_image_fields << tr(" y\t0");
-  project_setup_image_fields << tr("ROI");
-  project_setup_image_fields << tr(" Center");
-  project_setup_image_fields << tr("  x\t0");
-  project_setup_image_fields << tr("  y\t0");
-  project_setup_image_fields << tr(" Dimensions");
-  project_setup_image_fields << tr("  width\t0");
-  project_setup_image_fields << tr("  height\t0");
-  //project_setup_image_fields << tr("Estimated thickness\t0");
-  //project_setup_image_fields << tr("Estimated defocus\t0");
+  ////////////////
+  // Unit-cell file
+  ////////////////
+  QVector<QVariant> box2_option_1 = {"Unit-cell file",""};
+  TreeItem* unit_cell_file  = new TreeItem ( box2_option_1 );
+  crystallography_root->insertChildren( unit_cell_file );
 
-  QStringList project_setup_crystalographic_fields;
-  project_setup_crystalographic_fields << tr("Unit-cell file");
-  project_setup_crystalographic_fields << tr(" CIF");
-  project_setup_crystalographic_fields << tr(" CEL");
+  ////////////////
+  // Unit-cell file CIF
+  ////////////////
+  QVector<QVariant> box2_option_1_1 = {"CIF",""};
+  QVector<bool> box2_option_1_1_edit = {false,true};
+  boost::function<bool(std::string)> box2_function_1_1 ( boost::bind( &Image_Crystal::set_unit_cell_cif_path, image_crystal, _1 ) );
+  TreeItem* unit_cell_file_cif = new TreeItem ( box2_option_1_1 , box2_function_1_1, box2_option_1_1_edit );
+  unit_cell_file->insertChildren( unit_cell_file_cif );
 
-  project_setup_crystalographic_fields << tr("Projected y axis");
-  project_setup_crystalographic_fields << tr(" u\t0");
-  project_setup_crystalographic_fields << tr(" v\t0");
-  project_setup_crystalographic_fields << tr(" w\t0");
+  ////////////////
+  // Unit-cell file CEL
+  ////////////////
+  QVector<QVariant> box2_option_1_2 = {"CEL",""};
+  QVector<bool> box2_option_1_2_edit = {false,true};
+  boost::function<bool(std::string)> box2_function_1_2 ( boost::bind( &Image_Crystal::set_unit_cell_cel_path, image_crystal, _1 ) );
+  TreeItem* unit_cell_file_cel = new TreeItem ( box2_option_1_2 , box2_function_1_2, box2_option_1_2_edit );
+  unit_cell_file->insertChildren( unit_cell_file_cel );
 
-  project_setup_crystalographic_fields << tr("Projection direction");
-  project_setup_crystalographic_fields << tr(" h\t0");
-  project_setup_crystalographic_fields << tr(" k\t0");
-  project_setup_crystalographic_fields << tr(" l\t0");
+  ////////////////
+  // Projected y axis
+  ////////////////
+  QVector<QVariant> box2_option_2 = {"Projected y axis",""};
+  TreeItem* projected_y_axis  = new TreeItem (  box2_option_2 );
+  crystallography_root->insertChildren( projected_y_axis );
 
-  TreeModel *project_setup_image_fields_model = new TreeModel(headers_action, project_setup_image_fields );
-  TreeModel *project_setup_crystalographic_fields_model = new TreeModel(headers_action, project_setup_crystalographic_fields );
+  ////////////////
+  //Projected y axis u
+  ////////////////
+  QVector<QVariant> box2_option_2_1 = {"u",""};
+  QVector<bool> box2_option_2_1_edit = {false,true};
+  boost::function<bool(std::string)> box2_function_2_1 ( boost::bind( &Image_Crystal::set_projected_y_axis_u, image_crystal, _1 ) );
+  TreeItem* projected_y_axis_u = new TreeItem ( box2_option_2_1 , box2_function_2_1, box2_option_2_1_edit );
+  projected_y_axis->insertChildren( projected_y_axis_u );
+
+  ////////////////
+  //Projected y axis v
+  ////////////////
+  QVector<QVariant> box2_option_2_2 = {"v",""};
+  QVector<bool> box2_option_2_2_edit = {false,true};
+  boost::function<bool(std::string)> box2_function_2_2 ( boost::bind( &Image_Crystal::set_projected_y_axis_v, image_crystal, _1 ) );
+  TreeItem* projected_y_axis_v = new TreeItem ( box2_option_2_2 , box2_function_2_2, box2_option_2_2_edit );
+  projected_y_axis->insertChildren( projected_y_axis_v );
+
+  ////////////////
+  //Projected y axis w
+  ////////////////
+  QVector<QVariant> box2_option_2_3 = {"w",""};
+  QVector<bool>  box2_option_2_3_edit = {false,true};
+  boost::function<bool(std::string)>  box2_function_2_3 ( boost::bind( &Image_Crystal::set_projected_y_axis_w, image_crystal, _1 ) );
+  TreeItem* projected_y_axis_w = new TreeItem (  box2_option_2_3 ,  box2_function_2_3,  box2_option_2_3_edit );
+  projected_y_axis->insertChildren( projected_y_axis_w );
+
+  ////////////////
+  // Projection direction
+  ////////////////
+  QVector<QVariant> box2_option_3 = {"Projection direction",""};
+  TreeItem* projection_direction  = new TreeItem (  box2_option_3 );
+  crystallography_root->insertChildren( projection_direction );
+
+  ////////////////
+  // Projection direction h
+  ////////////////
+  QVector<QVariant> box2_option_3_1 = {"h",""};
+  QVector<bool> box2_option_3_1_edit = {false,true};
+  boost::function<bool(std::string)> box2_function_3_1 ( boost::bind( &Image_Crystal::set_projection_direction_h, image_crystal, _1 ) );
+  TreeItem* projection_direction_h = new TreeItem ( box2_option_3_1 , box2_function_3_1, box2_option_3_1_edit );
+  projection_direction->insertChildren( projection_direction_h );
+
+  ////////////////
+  // Projection direction k
+  ////////////////
+  QVector<QVariant> box2_option_3_2 = {"k",""};
+  QVector<bool> box2_option_3_2_edit = {false,true};
+  boost::function<bool(std::string)> box2_function_3_2 ( boost::bind( &Image_Crystal::set_projection_direction_k, image_crystal, _1 ) );
+  TreeItem* projection_direction_k = new TreeItem ( box2_option_3_2 , box2_function_3_2, box2_option_3_2_edit );
+  projection_direction->insertChildren( projection_direction_k );
+
+  ////////////////
+  // Projection direction l
+  ////////////////
+  QVector<QVariant> box2_option_3_3 = {"l",""};
+  QVector<bool> box2_option_3_3_edit = {false,true};
+  boost::function<bool(std::string)> box2_function_3_3 ( boost::bind( &Image_Crystal::set_projection_direction_l, image_crystal, _1 ) );
+  TreeItem* projection_direction_l = new TreeItem ( box2_option_3_3 , box2_function_3_3, box2_option_3_3_edit );
+  projection_direction->insertChildren( projection_direction_l );
+
+
+  TreeModel *project_setup_crystalographic_fields_model = new TreeModel( crystallography_root );
 
   ui->qtree_view_project_setup_crystallography->setModel(project_setup_crystalographic_fields_model);
-
-  QModelIndex exp_path = project_setup_image_fields_model->index(0,1);
 
   QModelIndex unit_cell_index = project_setup_crystalographic_fields_model->index(0,0);
   QModelIndex cif_path = project_setup_crystalographic_fields_model->index(0,1,unit_cell_index);
   QModelIndex cel_path = project_setup_crystalographic_fields_model->index(1,1,unit_cell_index);
-
-  ui->qtree_view_project_setup_image->setIndexWidget(exp_path,ui->qwidget_load_experimental_image);
-  ui->qtree_view_project_setup_image->expandToDepth(0);
-
   ui->qtree_view_project_setup_crystallography->setIndexWidget(cif_path,ui->qwidget_load_cel);
   ui->qtree_view_project_setup_crystallography->setIndexWidget(cel_path,ui->qwidget_load_cif);
-  ui->qtree_view_project_setup_crystallography->expandToDepth(0);
+
+  ui->qtree_view_project_setup_image->expandAll();
+  ui->qtree_view_project_setup_crystallography->expandAll();
+
 
   for (int column = 0; column < project_setup_image_fields_model->columnCount(); ++column){
     ui->qtree_view_project_setup_image->resizeColumnToContents(column);
@@ -188,47 +258,48 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     ui->qtree_view_project_setup_crystallography->resizeColumnToContents(column);
   }
 
-  QStringList headers_simulation_parameters;
-  headers_simulation_parameters << tr("Field") << tr("Value");
+  /*
+     QStringList headers_simulation_parameters;
+     headers_simulation_parameters << tr("Field") << tr("Value");
 
-  QStringList simulation_parameters;
-  simulation_parameters << tr("TD map");
-  simulation_parameters << tr(" Thickness range");
-  simulation_parameters << tr("  Lower Bound\t0");
-  simulation_parameters << tr("  Upper Bound\t0");
-  simulation_parameters << tr("  Samples\t0");
-  simulation_parameters << tr(" Defocus range");
-  simulation_parameters << tr("  Lower Bound\t0");
-  simulation_parameters << tr("  Upper Bound\t0");
-  simulation_parameters << tr("  Samples\t0");
-  simulation_parameters << tr(" Incident electron beam");
-  simulation_parameters << tr("  Accelaration voltage (kV)\t0");
-  simulation_parameters << tr(" [] Import fixed values from refinement?");
-  simulation_parameters << tr("Advanced options");
-  simulation_parameters << tr(" Multislice phase grating");
-  simulation_parameters << tr("  Slice filename prefix\tslc");
-  simulation_parameters << tr("  Super-Cell Slicing along c-axis");
-  simulation_parameters << tr("   .\t");
-  simulation_parameters << tr("   .\t");
-  simulation_parameters << tr("   .\t0");
-  simulation_parameters << tr("  Optional Parameters");
-  simulation_parameters << tr("   Apply random atomic displacements");
-  simulation_parameters << tr("   Thermal vibration models");
-  simulation_parameters << tr("    .");
-  simulation_parameters << tr("    .");
-  simulation_parameters << tr(" Electron diffraction patterns");
-  simulation_parameters << tr("  Input Wavefunction file name\t");
-  simulation_parameters << tr(" Image intensity distribuitions");
-  simulation_parameters << tr(" Running configurations");
-  simulation_parameters << tr("  Compute multislice phase grating");
-  simulation_parameters << tr("  Compute electron diffraction patterns");
-  simulation_parameters << tr("  Compute image intensity distribuitions");
-  simulation_parameters << tr("  Compute TD map");
+     QStringList simulation_parameters;
+     simulation_parameters << tr("TD map");
+     simulation_parameters << tr(" Thickness range");
+     simulation_parameters << tr("  Lower Bound\t0");
+     simulation_parameters << tr("  Upper Bound\t0");
+     simulation_parameters << tr("  Samples\t0");
+     simulation_parameters << tr(" Defocus range");
+     simulation_parameters << tr("  Lower Bound\t0");
+     simulation_parameters << tr("  Upper Bound\t0");
+     simulation_parameters << tr("  Samples\t0");
+     simulation_parameters << tr(" Incident electron beam");
+     simulation_parameters << tr("  Accelaration voltage (kV)\t0");
+     simulation_parameters << tr(" [] Import fixed values from refinement?");
+     simulation_parameters << tr("Advanced options");
+     simulation_parameters << tr(" Multislice phase grating");
+     simulation_parameters << tr("  Slice filename prefix\tslc");
+     simulation_parameters << tr("  Super-Cell Slicing along c-axis");
+     simulation_parameters << tr("   .\t");
+     simulation_parameters << tr("   .\t");
+     simulation_parameters << tr("   .\t0");
+     simulation_parameters << tr("  Optional Parameters");
+     simulation_parameters << tr("   Apply random atomic displacements");
+     simulation_parameters << tr("   Thermal vibration models");
+     simulation_parameters << tr("    .");
+     simulation_parameters << tr("    .");
+     simulation_parameters << tr(" Electron diffraction patterns");
+     simulation_parameters << tr("  Input Wavefunction file name\t");
+     simulation_parameters << tr(" Image intensity distribuitions");
+     simulation_parameters << tr(" Running configurations");
+     simulation_parameters << tr("  Compute multislice phase grating");
+     simulation_parameters << tr("  Compute electron diffraction patterns");
+     simulation_parameters << tr("  Compute image intensity distribuitions");
+     simulation_parameters << tr("  Compute TD map");
 
 
 
-  TreeModel *simulation_parameters_model = new TreeModel(headers_simulation_parameters, simulation_parameters );
-  ui->qtree_view_simulation_setup->setModel(simulation_parameters_model);
+     TreeModel *simulation_parameters_model = new TreeModel(headers_simulation_parameters, simulation_parameters );
+     ui->qtree_view_simulation_setup->setModel(simulation_parameters_model);
 
   //tdmap
   QModelIndex tdmap_index = simulation_parameters_model->index(0,0);
@@ -236,7 +307,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
   ui->qtree_view_simulation_setup->expand(tdmap_index);
 
   for (int column = 0; column < simulation_parameters_model->columnCount(); ++column){
-    ui->qtree_view_simulation_setup->resizeColumnToContents(column);
+  ui->qtree_view_simulation_setup->resizeColumnToContents(column);
   }
 
   QStringList headers_edge_detection_parameters;
@@ -251,7 +322,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
   ui->qtree_view_supercell_model_edge_detection_setup->setModel(edge_detection_model);
 
   for (int column = 0; column < edge_detection_model->columnCount(); ++column){
-    ui->qtree_view_supercell_model_edge_detection_setup->resizeColumnToContents(column);
+  ui->qtree_view_supercell_model_edge_detection_setup->resizeColumnToContents(column);
   }
 
 
@@ -284,6 +355,10 @@ void MainWindow::on_qpush_load_image_clicked(){
       tr("."),
       tr("Image Files (*.png *.jpg *.jpeg *.bmp *.tif)"));
   ui->qline_image_path->setText(fileName);
+  cv::Mat image = cv::imread(fileName.toStdString(), true);
+
+  ui->qgraphics_full_experimental_image->setImage(image);
+  ui->qgraphics_full_experimental_image->show();
 }
 
 void MainWindow::on_qpush_load_cif_clicked(){

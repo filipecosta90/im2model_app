@@ -37,3 +37,35 @@ bool Image_Crystal::set_experimental_roi_dimensions_height( std::string roi_dime
   return true;
 }
 
+bool Image_Crystal::set_unit_cell_cif_path( std::string cif_path ){
+  return true;
+}
+
+bool Image_Crystal::set_unit_cell_cel_path( std::string cel_path ){
+  return true;
+}
+
+bool Image_Crystal::set_projected_y_axis_u( std::string y_axis_u ){
+  return true;
+}
+
+bool Image_Crystal::set_projected_y_axis_v( std::string y_axis_v ){
+  return true;
+}
+
+bool Image_Crystal::set_projected_y_axis_w( std::string y_axis_w ){
+  return true;
+}
+
+bool Image_Crystal::set_projection_direction_h( std::string dir_h ){
+  return true;
+}
+
+bool Image_Crystal::set_projection_direction_k( std::string dir_k ){
+  return true;
+}
+
+bool Image_Crystal::set_projection_direction_l( std::string dir_l ){
+  return true;
+}
+
