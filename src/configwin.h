@@ -3,6 +3,7 @@
 
 #include <QMainWindow>
 #include "image_crystal.hpp"
+#include "td_map.hpp"
 
 namespace Ui {
   class MainWindow;
@@ -24,6 +25,8 @@ class MainWindow : public QMainWindow {
   private:
     Ui::MainWindow *ui;
     Image_Crystal *image_crystal;
+    TDMap *td_map;
+
 };
 
 #endif // CONFIGWIN_H

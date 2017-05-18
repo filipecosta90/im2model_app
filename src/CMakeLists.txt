@@ -14,8 +14,7 @@
   symbcalc.hpp
   structure.hpp
   image_crystal.hpp 
-  simulation_data.hpp
-  simulation_step.hpp
+  td_map.hpp
   atom.cpp
   chem_database.cpp
   simgrid_steplength.cpp
@@ -29,8 +28,7 @@
   wavimg_prm.cpp
   structure.cpp
   image_crystal.cpp
-  simulation_data.cpp
-  simulation_step.cpp
+  td_map.cpp
   )
 
 BISON_TARGET(mc_parser mc_parser.yy ${CMAKE_CURRENT_BINARY_DIR}/mc_parser.tab.cc )

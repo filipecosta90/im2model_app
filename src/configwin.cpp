@@ -1,29 +1,4 @@
-/*
-#include <boost/process.hpp>
-#include <boost/filesystem/operations.hpp>                // for directory_iterator
-#include <boost/filesystem/path.hpp>                      // for path, operator==, oper...
-#include <boost/iterator/iterator_facade.hpp>             // for iterator_facade_base
-#include <boost/thread.hpp>                               // for thread
-#include <boost/tokenizer.hpp>
-#include <boost/program_options.hpp>                      // for error
 
-#include <cassert>                                        // for assert
-#include <cmath>                                          // for fabs, round
-#include <cstdlib>                                        // for div_t, div
-#include <exception>                                      // for exception
-#include <iostream>                                       // for string, str...
-#include <iomanip>                                        // std::setw
-
-#include <opencv2/core/hal/interface.h>                   // for CV_8UC1
-#include <opencv2/imgcodecs/imgcodecs_c.h>                // for ::CV_LOAD_I...
-#include <opencv2/core.hpp>                               // for RNG
-#include <opencv2/core/cvstd.inl.hpp>                     // for String::String
-#include <opencv2/core/mat.hpp>                           // for Mat
-#include <opencv2/core/mat.inl.hpp>                       // for Mat::Mat
-#include <opencv2/core/operations.hpp>                    // for RNG::RNG
-#include <opencv2/core/types.hpp>                         // for Rect, Point3d
-#include <opencv2/imgcodecs.hpp>                          // for imread
-*/
 // gui includes
 #include "configwin.h"
 #include "ui_configwin.h"
@@ -39,8 +14,6 @@
 #include <QTreeView>
 #include <QFile>
 
-
-
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow) {
   /**
    *
@@ -52,6 +25,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
    * In your dialog constructor, you can init the UI now using:
    * **/
   image_crystal = new Image_Crystal();
+  td_map = new TDMap();
   ui->setupUi(this);
   delete ui->mainToolBar; // add this line
 
@@ -258,22 +232,105 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     ui->qtree_view_project_setup_crystallography->resizeColumnToContents(column);
   }
 
-  /*
-     QStringList headers_simulation_parameters;
-     headers_simulation_parameters << tr("Field") << tr("Value");
+  /*************************
+   * TD MAP
+   *************************/
+  TreeItem* tdmap_root = new TreeItem ( common_header );
 
-     QStringList simulation_parameters;
-     simulation_parameters << tr("TD map");
-     simulation_parameters << tr(" Thickness range");
-     simulation_parameters << tr("  Lower Bound\t0");
-     simulation_parameters << tr("  Upper Bound\t0");
-     simulation_parameters << tr("  Samples\t0");
-     simulation_parameters << tr(" Defocus range");
-     simulation_parameters << tr("  Lower Bound\t0");
-     simulation_parameters << tr("  Upper Bound\t0");
-     simulation_parameters << tr("  Samples\t0");
-     simulation_parameters << tr(" Incident electron beam");
-     simulation_parameters << tr("  Accelaration voltage (kV)\t0");
+  ////////////////
+  // Thickness range
+  ////////////////
+  QVector<QVariant> box3_option_1 = {"Thickness range",""};
+  TreeItem* thickness_range  = new TreeItem ( box3_option_1 );
+  tdmap_root->insertChildren( thickness_range );
+
+  ////////////////
+  //Thickness range -- lower bound
+  ////////////////
+  QVector<QVariant> box3_option_1_1 = {"Lower bound",""};
+  QVector<bool> box3_option_1_1_edit = {false,true};
+  boost::function<bool(std::string)> box3_function_1_1 ( boost::bind( &TDMap::set_thickness_range_lower_bound, td_map, _1 ) );
+  TreeItem* thickness_range_lower_bound = new TreeItem ( box3_option_1_1 , box3_function_1_1, box3_option_1_1_edit );
+  thickness_range->insertChildren( thickness_range_lower_bound );
+
+  ////////////////
+  //Thickness range -- upper bound
+  ////////////////
+  QVector<QVariant> box3_option_1_2 = {"Upper bound",""};
+  QVector<bool> box3_option_1_2_edit = {false,true};
+  boost::function<bool(std::string)> box3_function_1_2 ( boost::bind( &TDMap::set_thickness_range_upper_bound, td_map, _1 ) );
+  TreeItem* thickness_range_upper_bound = new TreeItem ( box3_option_1_2 , box3_function_1_2, box3_option_1_2_edit );
+  thickness_range->insertChildren( thickness_range_upper_bound );
+
+  ////////////////
+  //Thickness range -- Samples
+  ////////////////
+  QVector<QVariant> box3_option_1_3 = {"Samples",""};
+  QVector<bool> box3_option_1_3_edit = {false,true};
+  boost::function<bool(std::string)> box3_function_1_3 ( boost::bind( &TDMap::set_thickness_range_number_samples, td_map, _1 ) );
+  TreeItem* thickness_range_number_samples = new TreeItem ( box3_option_1_3 , box3_function_1_3, box3_option_1_3_edit );
+  thickness_range->insertChildren( thickness_range_number_samples );
+
+  ////////////////
+  // Defocus range
+  ////////////////
+  QVector<QVariant> box3_option_2 = {"Defocus range",""};
+  TreeItem* defocus_range  = new TreeItem ( box3_option_2 );
+  tdmap_root->insertChildren( defocus_range );
+
+  ////////////////
+  //Defocus range -- lower bound
+  ////////////////
+  QVector<QVariant> box3_option_2_1 = {"Lower bound",""};
+  QVector<bool> box3_option_2_1_edit = {false,true};
+  boost::function<bool(std::string)> box3_function_2_1 ( boost::bind( &TDMap::set_defocus_range_lower_bound, td_map, _1 ) );
+  TreeItem* defocus_range_lower_bound = new TreeItem ( box3_option_2_1 , box3_function_2_1, box3_option_2_1_edit );
+  defocus_range->insertChildren( defocus_range_lower_bound );
+
+  ////////////////
+  //Defocus range -- upper bound
+  ////////////////
+  QVector<QVariant> box3_option_2_2 = {"Upper bound",""};
+  QVector<bool> box3_option_2_2_edit = {false,true};
+  boost::function<bool(std::string)> box3_function_2_2 ( boost::bind( &TDMap::set_defocus_range_upper_bound, td_map, _1 ) );
+  TreeItem* defocus_range_upper_bound = new TreeItem ( box3_option_2_2 , box3_function_2_2, box3_option_2_2_edit );
+  defocus_range->insertChildren( defocus_range_upper_bound );
+
+  ////////////////
+  //Defocus range -- Samples
+  ////////////////
+  QVector<QVariant> box3_option_2_3 = {"Samples",""};
+  QVector<bool> box3_option_2_3_edit = {false,true};
+  boost::function<bool(std::string)> box3_function_2_3 ( boost::bind( &TDMap::set_defocus_range_number_samples, td_map, _1 ) );
+  TreeItem* defocus_range_number_samples = new TreeItem ( box3_option_2_3 , box3_function_2_3, box3_option_2_3_edit );
+  defocus_range->insertChildren( defocus_range_number_samples );
+
+  ////////////////
+  // Incident electron beam
+  ////////////////
+  QVector<QVariant> box3_option_3 = {"Incident electron beam",""};
+  TreeItem* incident_electron_beam  = new TreeItem ( box3_option_3 );
+  tdmap_root->insertChildren( incident_electron_beam );
+
+  ////////////////
+  // Incident electron beam -- Accelaration voltage (kV)
+  ////////////////
+  QVector<QVariant> box3_option_3_1 = {"Accelaration voltage (kV)",""};
+  QVector<bool> box3_option_3_1_edit = {false,true};
+  boost::function<bool(std::string)> box3_function_3_1 ( boost::bind( &TDMap::set_accelaration_voltage_kv, td_map, _1 ) );
+  TreeItem* accelaration_voltage_kv = new TreeItem ( box3_option_3_1 , box3_function_3_1, box3_option_3_1_edit );
+  incident_electron_beam->insertChildren( accelaration_voltage_kv );
+
+  TreeModel *tdmap_simulation_setup_model = new TreeModel( tdmap_root );
+
+  ui->qtree_view_tdmap_simulation_setup->setModel( tdmap_simulation_setup_model );
+
+  ui->qtree_view_tdmap_simulation_setup->expandAll();
+  for (int column = 0; column < tdmap_simulation_setup_model->columnCount(); ++column){
+  ui->qtree_view_tdmap_simulation_setup->resizeColumnToContents(column);
+  }
+
+  /*
      simulation_parameters << tr(" [] Import fixed values from refinement?");
      simulation_parameters << tr("Advanced options");
      simulation_parameters << tr(" Multislice phase grating");
@@ -298,17 +355,13 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
 
 
-     TreeModel *simulation_parameters_model = new TreeModel(headers_simulation_parameters, simulation_parameters );
-     ui->qtree_view_simulation_setup->setModel(simulation_parameters_model);
 
   //tdmap
   QModelIndex tdmap_index = simulation_parameters_model->index(0,0);
 
   ui->qtree_view_simulation_setup->expand(tdmap_index);
 
-  for (int column = 0; column < simulation_parameters_model->columnCount(); ++column){
-  ui->qtree_view_simulation_setup->resizeColumnToContents(column);
-  }
+
 
   QStringList headers_edge_detection_parameters;
   headers_edge_detection_parameters << tr("Field") << tr("Value");

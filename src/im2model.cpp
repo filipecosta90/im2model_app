@@ -28,9 +28,9 @@
 #include "mc_driver.hpp"                                  // for MC_Driver
 #include "msa_prm.hpp"                                    // for MSA_prm
 #include "simgrid_steplength.hpp"                         // for SIMGRID_wav...
-#include "structure.hpp"                                 // for Structure
-#include "image_crystal.hpp"                          // for Image and Crystal 
-#include "simulation_data.hpp"                          // for Simulation_Data
+#include "structure.hpp"                                  // for Structure
+#include "image_crystal.hpp"                              // for Image and Crystal 
+#include "td_map.hpp"                                     // for TDMap 
 #include "super_cell.hpp"                                 // for Super_Cell
 #include "unit_cell.hpp"                                  // for Unit_Cell
 #include "wavimg_prm.hpp"                                 // for WAVIMG_prm
@@ -55,37 +55,35 @@ std::string wavimg_bin_string = "../simulation/dr_probe_bin/drprobe_clt_bin_osx/
 #endif
 
 int main(int argc, char** argv ){
-    
-    // Experimental Image info
-    cv::Mat experimental_image;
-    cv::Mat experimental_image_roi;
-    cv::Mat experimental_working;
-    
-    Rect roi_rectangle;
-    int roi_x_size;
-    int roi_y_size;
-    int roi_center_x;
-    int roi_center_y;
-    
-    double sampling_rate_experimental_x_nm_per_pixel;
-    double sampling_rate_experimental_y_nm_per_pixel;
-    
-    int edge_detection_threshold = 85;
-    int max_thresh = 255;
-    RNG rng(12345);
-    int max_contour_distance_px = 19;
-    int max_contour_distance_thresh_px = 255;
-    
-    Unit_Cell unit_cell;
-    Super_Cell super_cell;
-    Simulation_Data simulation_data;
-    Image_Crystal image_crystal;
-    Simulation_Step* tfocus_map_simulation_step;
-    tfocus_map_simulation_step = simulation_data.new_simulation_step( 1, "tfocus_map" );
-    
-    cv::Point3d  zone_axis_vector_uvw;
-    cv::Point3d  upward_vector_hkl;
-    
+
+  // Experimental Image info
+  cv::Mat experimental_image;
+  cv::Mat experimental_image_roi;
+  cv::Mat experimental_working;
+
+  Rect roi_rectangle;
+  int roi_x_size;
+  int roi_y_size;
+  int roi_center_x;
+  int roi_center_y;
+
+  double sampling_rate_experimental_x_nm_per_pixel;
+  double sampling_rate_experimental_y_nm_per_pixel;
+
+  int edge_detection_threshold = 85;
+  int max_thresh = 255;
+  RNG rng(12345);
+  int max_contour_distance_px = 19;
+  int max_contour_distance_thresh_px = 255;
+
+  Unit_Cell unit_cell;
+  Super_Cell super_cell;
+  Image_Crystal image_crystal;
+  TDMap td_map;
+
+  cv::Point3d  zone_axis_vector_uvw;
+  cv::Point3d  upward_vector_hkl;
+
   /////////////////////////
   // Simulation info
   /////////////////////////
@@ -473,9 +471,9 @@ int main(int argc, char** argv ){
     unit_cell.set_zone_axis_vector( zone_axis_vector_uvw );
     unit_cell.set_upward_vector( upward_vector_hkl );
     unit_cell.form_matrix_from_miller_indices();
-      
+
     // stage 3 of dev (in migration process)
-      tfocus_map_simulation_step->set_unit_cell( &unit_cell );
+    //tfocus_map_simulation_step->set_unit_cell( &unit_cell );
 
     // Simulated image sampling rate
     if ( nx_ny_switch ){
@@ -531,7 +529,7 @@ int main(int argc, char** argv ){
     defocus_period = ( defocus_upper_bound - defocus_lower_bound) / ( defocus_samples - 1 );
     std::cout << "defocus period " <<  defocus_period << std::endl;
 
-    CELSLC_prm* celslc_parameters =  tfocus_map_simulation_step->get_celslc_parameters();
+    CELSLC_prm* celslc_parameters =  new CELSLC_prm(); //tfocus_map_simulation_step->get_celslc_parameters();
     celslc_parameters->set_prp_dir_uvw( perpendicular_dir_u, perpendicular_dir_v, perpendicular_dir_w );
     celslc_parameters->set_prj_dir_hkl( projection_dir_h, projection_dir_k, projection_dir_l );
     celslc_parameters->set_super_cell_size_abc( super_cell_size_a, super_cell_size_b, super_cell_size_c );
@@ -547,9 +545,9 @@ int main(int argc, char** argv ){
     celslc_parameters->set_abs_switch(abs_switch);
     celslc_parameters->set_bin_path( celslc_bin_string );
     if (celslc_switch == true ){
-		std::cout << "Running ceslc" << std::endl;
-    celslc_parameters->call_bin_ssc();
-	  //celslc_parameters->call_boost_bin();
+      std::cout << "Running ceslc" << std::endl;
+      celslc_parameters->call_bin_ssc();
+      //celslc_parameters->call_boost_bin();
     }
     nz_simulated_partitions = celslc_parameters->get_nz_simulated_partitions();
 
