@@ -8,18 +8,26 @@
 #include <QVariant>
 #include <QVector>
 
+#include "boost/function.hpp"
+Q_DECLARE_METATYPE(std::string)
+
 class TreeItem
 {
   public:
-    explicit TreeItem(const QVector<QVariant> &data, TreeItem *parent = 0);
+    explicit TreeItem( QVector<QVariant> &data, boost::function<bool(std::string)> setters, TreeItem *parent, bool checkable, boost::function<bool(bool)> check_setter);
+    explicit TreeItem( QVector<QVariant> &data, boost::function<bool(std::string)> setters, TreeItem *parent = 0);
+    explicit TreeItem( QVector<QVariant> &data, TreeItem *parent = 0);
     ~TreeItem();
     TreeItem *child(int number);
     int childCount() const;
     int columnCount() const;
     QVariant data(int column) const;
     bool insertChildren(int position, int count, int columns);
+    bool insertChildren(int position, TreeItem *item);
+
     bool insertColumns(int position, int columns);
     TreeItem *parent();
+    bool set_parent( TreeItem* parent );
     bool removeChildren(int position, int count);
     bool removeColumns(int position, int columns);
     int childNumber() const;
@@ -30,11 +38,13 @@ class TreeItem
     bool setData(int column, const QVariant &value);
 
   private:
+    TreeItem *parentItem;
     QList<TreeItem*> childItems;
     QVector<QVariant> itemData;
-    TreeItem *parentItem;
     bool checked;
     bool is_checkable;
+    boost::function<bool(std::string)> fp_data_setter;
+    boost::function<bool(bool)> fp_check_setter;
 };
 
 #endif // TREEITEM_H

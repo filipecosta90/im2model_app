@@ -11,8 +11,14 @@ TreeModel::TreeModel(const QStringList &headers, const QStringList &data, QObjec
     rootData << header;
   }
 
-  rootItem = new TreeItem(rootData);
-  setupModelData(data, rootItem);
+  //rootItem = new TreeItem(rootData);
+ // setupModelData(data, rootItem);
+}
+
+TreeModel::TreeModel(TreeItem *root,  QObject *parent)
+    : QAbstractItemModel(parent)
+{
+  rootItem = root;
 }
 
 TreeModel::~TreeModel(){
@@ -194,19 +200,6 @@ bool TreeModel::setHeaderData(int section, Qt::Orientation orientation,
 
   return result;
 }
-/*
-   bool TreeModel::setItemWidget(int row, int col, QWidget* widget)
-   {
-// TreeItem *parentItem = rootItem->parent();
-
-TreeItem *childItem = rootItem->child(row);
-QTr
-bool success = true;
-this->setItemWidget(row, col, widget);
-return success;
-}*/
-
-
 
 void TreeModel::setupModelData(const QStringList &lines, TreeItem *parent)
 {

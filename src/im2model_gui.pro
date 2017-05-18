@@ -35,3 +35,5 @@ HEADERS  += configwin.h \
     treemodel.h
 
 FORMS    += configwin.ui
+
+INCLUDEPATH += /usr/local/Cellar/boost/1.64.0_1/

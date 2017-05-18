@@ -13,7 +13,7 @@
   simgrid_steplength.hpp
   symbcalc.hpp
   structure.hpp
-  experimental_data.hpp
+  image_crystal.hpp 
   simulation_data.hpp
   simulation_step.hpp
   atom.cpp
@@ -28,7 +28,7 @@
   super_cell.cpp
   wavimg_prm.cpp
   structure.cpp
-  experimental_data.cpp
+  image_crystal.cpp
   simulation_data.cpp
   simulation_step.cpp
   )

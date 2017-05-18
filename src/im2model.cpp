@@ -29,7 +29,7 @@
 #include "msa_prm.hpp"                                    // for MSA_prm
 #include "simgrid_steplength.hpp"                         // for SIMGRID_wav...
 #include "structure.hpp"                                 // for Structure
-#include "experimental_data.hpp"                          // for Experimental_Data
+#include "image_crystal.hpp"                          // for Image and Crystal 
 #include "simulation_data.hpp"                          // for Simulation_Data
 #include "super_cell.hpp"                                 // for Super_Cell
 #include "unit_cell.hpp"                                  // for Unit_Cell
@@ -79,7 +79,7 @@ int main(int argc, char** argv ){
     Unit_Cell unit_cell;
     Super_Cell super_cell;
     Simulation_Data simulation_data;
-    Experimental_Data experimental_data;
+    Image_Crystal image_crystal;
     Simulation_Step* tfocus_map_simulation_step;
     tfocus_map_simulation_step = simulation_data.new_simulation_step( 1, "tfocus_map" );
     

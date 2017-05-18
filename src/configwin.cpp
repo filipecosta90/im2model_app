@@ -27,12 +27,17 @@
 // gui includes
 #include "configwin.h"
 #include "ui_configwin.h"
+#include "treeitem.h"
 #include "treemodel.h"
+
+#include "boost/function.hpp"
+#include "boost/bind.hpp"
 
 #include <QFileDialog>
 #include <QFileSystemModel>
 #include <QTreeView>
 #include <QFile>
+
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow) {
   /**
@@ -44,10 +49,22 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
    * to your project file — otherwise, the files won’t be found. 
    * In your dialog constructor, you can init the UI now using:
    * **/
+    image_crystal = new Image_Crystal();
   ui->setupUi(this);
   delete ui->mainToolBar; // add this line
 
-  QStringList headers_action;
+  QVector<QVariant> header = {"Field","Value"};
+  TreeItem* experimental_image_root = new TreeItem ( header );
+
+  QVector<QVariant> option_1 = {"Image path",""};
+  boost::function<bool(std::string)> function_1( boost::bind( &Image_Crystal::set_experimental_image_path, image_crystal, _1 ) );
+  TreeItem* image_path  = new TreeItem (  option_1 , function_1 );
+  experimental_image_root->insertChildren(0,image_path);
+
+  TreeModel *project_setup_image_fields_model = new TreeModel( experimental_image_root );
+  ui->qtree_view_project_setup_image->setModel(project_setup_image_fields_model);
+
+  /*QStringList headers_action;
   headers_action << tr("Field") << tr("Value");
 
   QStringList project_setup_image_fields;
@@ -83,7 +100,6 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
   TreeModel *project_setup_image_fields_model = new TreeModel(headers_action, project_setup_image_fields );
   TreeModel *project_setup_crystalographic_fields_model = new TreeModel(headers_action, project_setup_crystalographic_fields );
 
-  ui->qtree_view_project_setup_image->setModel(project_setup_image_fields_model);
   ui->qtree_view_project_setup_crystallography->setModel(project_setup_crystalographic_fields_model);
 
   QModelIndex exp_path = project_setup_image_fields_model->index(0,1);
@@ -190,7 +206,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
   for (int column = 0; column < supercell_model_refinement_model->columnCount(); ++column){
     ui->qtree_view_supercell_model_refinement_setup->resizeColumnToContents(column);
-  }
+  }*/
 }
 
 MainWindow::~MainWindow(){
