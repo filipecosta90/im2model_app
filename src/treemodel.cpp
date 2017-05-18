@@ -3,8 +3,8 @@
 #include "treemodel.h"
 #include <iostream>
 
-TreeModel::TreeModel(const QStringList &headers, const QStringList &data, QObject *parent)
-    : QAbstractItemModel(parent)
+  TreeModel::TreeModel(const QStringList &headers, const QStringList &data, QObject *parent)
+: QAbstractItemModel(parent)
 {
   QVector<QVariant> rootData;
   foreach (QString header, headers){
@@ -12,11 +12,11 @@ TreeModel::TreeModel(const QStringList &headers, const QStringList &data, QObjec
   }
 
   //rootItem = new TreeItem(rootData);
- // setupModelData(data, rootItem);
+  // setupModelData(data, rootItem);
 }
 
-TreeModel::TreeModel(TreeItem *root,  QObject *parent)
-    : QAbstractItemModel(parent)
+  TreeModel::TreeModel(TreeItem *root,  QObject *parent)
+: QAbstractItemModel(parent)
 {
   rootItem = root;
 }
@@ -49,7 +49,11 @@ Qt::ItemFlags TreeModel::flags(const QModelIndex &index) const
   if (!index.isValid())
     return 0;
 
-  Qt::ItemFlags flags = Qt::ItemIsEditable | QAbstractItemModel::flags(index);
+  TreeItem *item = getItem(index);
+  Qt::ItemFlags flags =  QAbstractItemModel::flags(index);
+  if( item->isItemEditable( index.column() ) ){
+    flags |= Qt::ItemIsEditable;
+  }
   if( index.column() == 0 ){
     flags |= Qt::ItemIsUserCheckable;
   }
@@ -112,8 +116,7 @@ bool TreeModel::insertRows(int position, int rows, const QModelIndex &parent)
   return success;
 }
 
-QModelIndex TreeModel::parent(const QModelIndex &index) const
-{
+QModelIndex TreeModel::parent(const QModelIndex &index) const{
   if (!index.isValid())
     return QModelIndex();
 
@@ -126,8 +129,7 @@ QModelIndex TreeModel::parent(const QModelIndex &index) const
   return createIndex(parentItem->childNumber(), 0, parentItem);
 }
 
-bool TreeModel::removeColumns(int position, int columns, const QModelIndex &parent)
-{
+bool TreeModel::removeColumns(int position, int columns, const QModelIndex &parent){
   bool success;
 
   beginRemoveColumns(parent, position, position + columns - 1);

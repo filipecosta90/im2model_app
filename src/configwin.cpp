@@ -56,10 +56,75 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
   QVector<QVariant> header = {"Field","Value"};
   TreeItem* experimental_image_root = new TreeItem ( header );
 
+  ////////////////
+  // Image Path
+  ////////////////
   QVector<QVariant> option_1 = {"Image path",""};
   boost::function<bool(std::string)> function_1( boost::bind( &Image_Crystal::set_experimental_image_path, image_crystal, _1 ) );
   TreeItem* image_path  = new TreeItem (  option_1 , function_1 );
-  experimental_image_root->insertChildren(0,image_path);
+  experimental_image_root->insertChildren( image_path );
+
+  ////////////////
+  // Sampling rate
+  ////////////////
+  QVector<QVariant> option_2 = {"Sampling (nm/pixel)",""};
+  QVector<QVariant> option_2_1 = {"x",""};
+  QVector<bool> option_2_1_edit = {false,true};
+  boost::function<bool(std::string)> function_2_1 ( boost::bind( &Image_Crystal::set_experimental_sampling_x, image_crystal, _1 ) );
+  QVector<QVariant> option_2_2 = {"y",""};
+  QVector<bool> option_2_2_edit = {false,true};
+  boost::function<bool(std::string)> function_2_2 ( boost::bind( &Image_Crystal::set_experimental_sampling_y, image_crystal, _1 ) );
+
+  TreeItem* experimental_sampling_rate = new TreeItem ( option_2  );
+  TreeItem* experimental_sampling_rate_x = new TreeItem ( option_2_1 , function_2_1, option_2_1_edit );
+  TreeItem* experimental_sampling_rate_y = new TreeItem ( option_2_2 , function_2_2, option_2_2_edit );
+  experimental_image_root->insertChildren( experimental_sampling_rate );
+  experimental_sampling_rate->insertChildren( experimental_sampling_rate_x );
+  experimental_sampling_rate->insertChildren( experimental_sampling_rate_y );
+
+  ////////////////
+  // ROI
+  ////////////////
+  QVector<QVariant> option_3 = {"ROI",""};
+  TreeItem* experimental_roi = new TreeItem ( option_3  );
+  experimental_image_root->insertChildren( experimental_roi );
+
+  ////////////////
+  // ROI Center
+  ////////////////
+  QVector<QVariant> option_3_1 = {"Center",""};
+  QVector<QVariant> option_3_1_1 = {"x",""};
+  QVector<bool> option_3_1_1_edit = {false,true};
+  boost::function<bool(std::string)> function_3_1_1 ( boost::bind( &Image_Crystal::set_experimental_roi_center_x, image_crystal, _1 ) );
+  QVector<QVariant> option_3_1_2 = {"y",""};
+  QVector<bool> option_3_1_2_edit = {false,true};
+  boost::function<bool(std::string)> function_3_1_2 ( boost::bind( &Image_Crystal::set_experimental_roi_center_y, image_crystal, _1 ) );
+
+  TreeItem* experimental_roi_center = new TreeItem ( option_3_1  );
+  TreeItem* experimental_roi_center_x = new TreeItem ( option_3_1_1 , function_3_1_1, option_3_1_1_edit );
+  TreeItem* experimental_roi_center_y = new TreeItem ( option_3_1_2 , function_3_1_2, option_3_1_2_edit );
+  experimental_roi->insertChildren( experimental_roi_center );
+  experimental_roi_center->insertChildren( experimental_roi_center_x );
+  experimental_roi_center->insertChildren( experimental_roi_center_y );
+
+  QVector<QVariant> option_3_2 = {"Dimensions",""};
+  QVector<QVariant> option_3_2_1 = {"width",""};
+  QVector<bool> option_3_2_1_edit = {false,true};
+  boost::function<bool(std::string)> function_3_2_1 ( boost::bind( &Image_Crystal::set_experimental_roi_dimensions_width, image_crystal, _1 ) );
+  QVector<QVariant> option_3_2_2 = {"height",""};
+  QVector<bool> option_3_2_2_edit = {false,true};
+  boost::function<bool(std::string)> function_3_2_2 ( boost::bind( &Image_Crystal::set_experimental_roi_dimensions_height, image_crystal, _1 ) );
+
+  TreeItem* experimental_roi_dimensions = new TreeItem ( option_3_2  );
+  TreeItem* experimental_roi_dimensions_width = new TreeItem ( option_3_2_1 , function_3_2_1, option_3_2_1_edit );
+  TreeItem* experimental_roi_dimensions_height = new TreeItem ( option_3_2_2 , function_3_2_2, option_3_2_2_edit );
+  experimental_roi->insertChildren( experimental_roi_dimensions );
+  experimental_roi_dimensions->insertChildren( experimental_roi_dimensions_width );
+  experimental_roi_dimensions->insertChildren( experimental_roi_dimensions_height );
+
+  ////////////////
+  // ROI Dimensions
+  ////////////////
 
   TreeModel *project_setup_image_fields_model = new TreeModel( experimental_image_root );
   ui->qtree_view_project_setup_image->setModel(project_setup_image_fields_model);

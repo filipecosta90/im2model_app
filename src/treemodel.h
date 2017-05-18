@@ -11,8 +11,8 @@ class TreeItem;
 class TreeModel : public QAbstractItemModel {
   Q_OBJECT
   public:
-     TreeModel(const QStringList &headers, const QStringList &data, QObject *parent = 0);
-     TreeModel(TreeItem *root,  QObject *parent = 0);
+    TreeModel(const QStringList &headers, const QStringList &data, QObject *parent = 0);
+    TreeModel(TreeItem *root,  QObject *parent = 0);
 
     ~TreeModel();
 

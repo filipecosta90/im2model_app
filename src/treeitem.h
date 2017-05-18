@@ -3,17 +3,16 @@
 
 #include <QList>
 #include <QVariant>
-
-#include <QList>
-#include <QVariant>
 #include <QVector>
 
 #include "boost/function.hpp"
+
 Q_DECLARE_METATYPE(std::string)
 
-class TreeItem
+  class TreeItem
 {
   public:
+    explicit TreeItem( QVector<QVariant> &data, boost::function<bool(std::string)> setter, QVector<bool> editable, TreeItem *parent = 0 );
     explicit TreeItem( QVector<QVariant> &data, boost::function<bool(std::string)> setters, TreeItem *parent, bool checkable, boost::function<bool(bool)> check_setter);
     explicit TreeItem( QVector<QVariant> &data, boost::function<bool(std::string)> setters, TreeItem *parent = 0);
     explicit TreeItem( QVector<QVariant> &data, TreeItem *parent = 0);
@@ -23,7 +22,7 @@ class TreeItem
     int columnCount() const;
     QVariant data(int column) const;
     bool insertChildren(int position, int count, int columns);
-    bool insertChildren(int position, TreeItem *item);
+    bool insertChildren(TreeItem *item);
 
     bool insertColumns(int position, int columns);
     TreeItem *parent();
@@ -34,6 +33,7 @@ class TreeItem
     bool isChecked() const;
     void setChecked( bool set );
     bool isCheckable() const;
+    bool isItemEditable( int column ) const;
     void setCheckable( bool set );
     bool setData(int column, const QVariant &value);
 
@@ -41,6 +41,7 @@ class TreeItem
     TreeItem *parentItem;
     QList<TreeItem*> childItems;
     QVector<QVariant> itemData;
+    QVector<bool> itemIsEditableVec;
     bool checked;
     bool is_checkable;
     boost::function<bool(std::string)> fp_data_setter;
