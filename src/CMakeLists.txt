@@ -89,6 +89,10 @@ if(build_gui)
     treemodel.cpp
     cv_image_widget.h
     cv_image_frame.h
+    gui_tdmap_cell.h
+    gui_tdmap_cell.cpp
+    gui_tdmap_table.h
+    gui_tdmap_table.cpp
     )
   add_executable( im2model_gui ${OS_BUNDLE}  ${GUI_SOURCE_FILES} ${META_FILES_TO_INCLUDE} ${RESOURCE_FILES}  ${im2model_core_src} mc_driver.cpp ${FLEX_mc_lexer_OUTPUTS} ${BISON_mc_parser_OUTPUTS} )
   # Use the Widgets module from Qt 5.
