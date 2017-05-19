@@ -330,6 +330,11 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
   ui->qtree_view_tdmap_simulation_setup->resizeColumnToContents(column);
   }
 
+  QModelIndex tdmap_defocus_range_index = tdmap_simulation_setup_model->index(1,0);
+  QModelIndex tdmap_defocus_range_samples_index = tdmap_simulation_setup_model->index(2,1,tdmap_defocus_range_index);
+
+ui->tdmap_table->connect_thickness_changes( tdmap_defocus_range_samples_index.model() );
+
   /*
      simulation_parameters << tr(" [] Import fixed values from refinement?");
      simulation_parameters << tr("Advanced options");

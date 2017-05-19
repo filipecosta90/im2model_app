@@ -14,7 +14,7 @@ class CVImageWidget : public QWidget
     explicit CVImageWidget(QWidget *parent = 0) : QWidget(parent)
                                                   , scaleFactor(1)
   {
-
+    std::cout << "creating new cv image" << std::endl;
   }
     QSize sizeHint() const { return _qimage.size(); }
     QSize minimumSizeHint() const { return _qimage.size(); }
@@ -107,3 +107,5 @@ class CVImageWidget : public QWidget
     int _container_window_width = 0;
     int _container_window_height = 0;
 };
+
+

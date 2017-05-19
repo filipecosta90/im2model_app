@@ -2,19 +2,36 @@
 
 #include "gui_tdmap_cell.h"
 #include "gui_tdmap_table.h"
+#include "td_map.hpp"
 
   TDMap_Table::TDMap_Table(QWidget *parent)
 : QTableWidget(parent)
 {
+      table_parent = parent;
   autoRecalc = true;
+  image_delegate = new CvImageDelegate(this);
 
   setItemPrototype(new TDMap_Cell);
   setSelectionMode(ContiguousSelection);
+ // setItemDelegate(image_delegate);
 
   connect(this, SIGNAL(itemChanged(QTableWidgetItem *)),
       this, SLOT(somethingChanged()));
-
   clear();
+}
+
+void TDMap_Table::set_tdmap( TDMap* map ){
+    core_tdmap = map;
+  }
+
+void TDMap_Table::connect_thickness_changes( const QObject* thickness_object ){
+    std::cout << "connecting thickness object changes " << std::endl;
+    connect(thickness_object, SIGNAL(dataChanged(const QModelIndex &,const QModelIndex &)), this, SLOT( update_map_size_defocus() ) );
+}
+
+void TDMap_Table::update_map_size_defocus(){
+    std::cout << "updating map size defocus " << std::endl;
+clear();
 }
 
 void TDMap_Table::clear()
@@ -23,13 +40,11 @@ void TDMap_Table::clear()
   setColumnCount(0);
   setRowCount(RowCount);
   setColumnCount(ColumnCount);
-
   for (int i = 0; i < ColumnCount; ++i) {
     QTableWidgetItem *item = new QTableWidgetItem;
     item->setText(QString(QChar('A' + i)));
     setHorizontalHeaderItem(i, item);
   }
-
   setCurrentCell(0, 0);
 }
 

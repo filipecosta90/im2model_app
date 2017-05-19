@@ -171,6 +171,7 @@ bool TreeItem::setData(int column, const QVariant &value)
     std::cout << "string: " << t1 << std::endl;
     fp_data_setter( t1 );
     itemData[column] = value;
+    result = true;
   }
   return result;
 }

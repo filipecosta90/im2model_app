@@ -180,9 +180,11 @@ bool TreeModel::setData(const QModelIndex &index, const QVariant &value, int rol
     result = true;
   }
   if(role == Qt::EditRole ){
+      std::cout << "setting data" << std::endl;
     result = item->setData(index.column(), value);
   }
   if (result){
+      std::cout << "emiting data changed" << std::endl;
     emit dataChanged(index, index);
   }
 

@@ -466,7 +466,7 @@
            </widget>
           </item>
           <item>
-           <widget class="TDMap_Table" name="tableWidget"/>
+           <widget class="TDMap_Table" name="tdmap_table"/>
           </item>
          </layout>
         </item>
