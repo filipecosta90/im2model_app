@@ -6,6 +6,7 @@
 #include "gui_tdmap_cell.h"
 #include "cv_image_delegate.h"
 #include "td_map.hpp"
+#include "treeitem.h"
 
 class TDMap_Cell;
 class TDMap_TableCompare;
@@ -24,14 +25,14 @@ class TDMap_Table : public QTableWidget
     void clear();
 
     void set_tdmap( TDMap* map );
-    void connect_thickness_changes( const QObject* thickness_object );
+    void connect_thickness_changes( const TreeItem* thickness_object, int column );
 
     public slots:
     void selectCurrentRow();
     void selectCurrentColumn();
     void recalculate();
     void setAutoRecalculate(bool recalc);
-    void update_map_size_defocus();
+    void update_map_size_defocus(int column );
 
 signals:
     void modified();
@@ -47,7 +48,6 @@ int ColumnCount = 26;
     QString text(int row, int column) const;
     QString formula(int row, int column) const;
     void setFormula(int row, int column, const QString &formula);
-
     bool autoRecalc;
     // Make a member pointer to a new MyDelegate instance
     CvImageDelegate *image_delegate;
@@ -55,6 +55,7 @@ int ColumnCount = 26;
 
     /* CORE IM2MODEL*/
     TDMap* core_tdmap;
+     int _item_model_thickness_range_col;
 };
 
 class TDMap_TableCompare

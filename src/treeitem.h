@@ -9,8 +9,9 @@
 
 Q_DECLARE_METATYPE(std::string)
 
-  class TreeItem
+  class TreeItem : public QObject
 {
+      Q_OBJECT
   public:
     explicit TreeItem( QVector<QVariant> &data, boost::function<bool(std::string)> setter, QVector<bool> editable, TreeItem *parent = 0 );
     explicit TreeItem( QVector<QVariant> &data, boost::function<bool(std::string)> setters, TreeItem *parent, bool checkable, boost::function<bool(bool)> check_setter);
@@ -36,6 +37,9 @@ Q_DECLARE_METATYPE(std::string)
     bool isItemEditable( int column ) const;
     void setCheckable( bool set );
     bool setData(int column, const QVariant &value);
+
+  signals:
+     void dataChanged( int column );
 
   private:
     TreeItem *parentItem;

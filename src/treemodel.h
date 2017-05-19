@@ -49,10 +49,11 @@ class TreeModel : public QAbstractItemModel {
     bool removeRows(int position, int rows,
         const QModelIndex &parent = QModelIndex()) override;
 
-  private:
-    void setupModelData(const QStringList &lines, TreeItem *parent);
-    TreeItem *getItem(const QModelIndex &index) const;
+    //bool operator==(const TreeModel &tree_item_comp );
+    void set_data_unique_id( int row, int column, int unique_id );
 
+  private:
+    TreeItem *getItem(const QModelIndex &index) const;
     TreeItem *rootItem;
 };
 

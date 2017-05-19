@@ -24,13 +24,17 @@ void TDMap_Table::set_tdmap( TDMap* map ){
     core_tdmap = map;
   }
 
-void TDMap_Table::connect_thickness_changes( const QObject* thickness_object ){
+void TDMap_Table::connect_thickness_changes( const TreeItem* thickness_object, int column ){
     std::cout << "connecting thickness object changes " << std::endl;
-    connect(thickness_object, SIGNAL(dataChanged(const QModelIndex &,const QModelIndex &)), this, SLOT( update_map_size_defocus() ) );
+    connect(thickness_object, SIGNAL(dataChanged(int )), this, SLOT( update_map_size_defocus(int) ) );
+    _item_model_thickness_range_col = column;
 }
 
-void TDMap_Table::update_map_size_defocus(){
-    std::cout << "updating map size defocus " << std::endl;
+void TDMap_Table::update_map_size_defocus( int column ){
+    if (column == _item_model_thickness_range_col){
+        std::cout << "equal indexis " << std::endl;
+    }
+    std::cout << "updating map size defocus row " << std::endl;
 clear();
 }
 

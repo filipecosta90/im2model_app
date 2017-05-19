@@ -27,12 +27,20 @@ SOURCES +=\
         configwin.cpp \
     im2model_gui.cpp \
     treeitem.cpp \
-    treemodel.cpp
+    treemodel.cpp \
+    cv_image_delegate.cpp \
+    gui_tdmap_cell.cpp \
+    gui_tdmap_table.cpp
 
 
 HEADERS  += configwin.h \
     treeitem.h \
-    treemodel.h
+    treemodel.h \
+    cv_image_widget.h \
+    cv_image_frame.h \
+    cv_image_delegate.h \
+    gui_tdmap_cell.h \
+    gui_tdmap_table.h
 
 FORMS    += configwin.ui
 

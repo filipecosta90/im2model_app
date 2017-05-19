@@ -157,7 +157,6 @@ bool TreeModel::removeRows(int position, int rows, const QModelIndex &parent)
 int TreeModel::rowCount(const QModelIndex &parent) const
 {
   TreeItem *parentItem = getItem(parent);
-
   return parentItem->childCount();
 }
 
@@ -166,11 +165,9 @@ bool TreeModel::setData(const QModelIndex &index, const QVariant &value, int rol
   if ( (role != Qt::EditRole) && ( role != Qt::CheckStateRole) ){
     return false;
   }
-
   TreeItem *item = getItem(index);
   bool result = false;
   if(role == Qt::CheckStateRole){
-    std::cout<<"Ischecked "<<item->isChecked() << std::endl;
     if(item->isChecked()){
       item->setChecked(false);
     }
@@ -180,14 +177,11 @@ bool TreeModel::setData(const QModelIndex &index, const QVariant &value, int rol
     result = true;
   }
   if(role == Qt::EditRole ){
-      std::cout << "setting data" << std::endl;
     result = item->setData(index.column(), value);
   }
   if (result){
-      std::cout << "emiting data changed" << std::endl;
     emit dataChanged(index, index);
   }
-
   return result;
 }
 
@@ -205,63 +199,3 @@ bool TreeModel::setHeaderData(int section, Qt::Orientation orientation,
   return result;
 }
 
-void TreeModel::setupModelData(const QStringList &lines, TreeItem *parent)
-{
-  QList<TreeItem*> parents;
-  QList<int> indentations;
-  parents << parent;
-  indentations << 0;
-
-  int number = 0;
-
-  while (number < lines.count()) {
-    int position = 0;
-    while (position < lines[number].length()) {
-      if (lines[number].at(position) != ' ')
-        break;
-      ++position;
-    }
-
-    QString lineData = lines[number].mid(position).trimmed();
-
-    if (!lineData.isEmpty()) {
-      // Read the column data from the rest of the line.
-      QStringList columnStrings = lineData.split("\t", QString::SkipEmptyParts);
-      QVector<QVariant> columnData;
-      for (int column = 0; column < columnStrings.count(); ++column){
-        columnData << columnStrings[column];
-        QString column_string = columnStrings[column];
-        std::cout << "pos(" << position << ") "<<  column_string.toStdString() << std::endl;
-      }
-
-      if (position > indentations.last()) {
-        // The last child of the current parent is now the new parent
-        // unless the current parent has no children.
-
-        if (parents.last()->childCount() > 0) {
-          parents << parents.last()->child(parents.last()->childCount()-1);
-          indentations << position;
-        }
-      } else {
-        while (position < indentations.last() && parents.count() > 0) {
-          parents.pop_back();
-          indentations.pop_back();
-        }
-      }
-
-      // Append a new item to the current parent's list of children.
-      TreeItem *parent = parents.last();
-
-      parent->insertChildren(parent->childCount(), 1, rootItem->columnCount());
-      for (int column = 0; column < columnData.size(); ++column){
-        QVariant column_data = columnData[column];
-        QString column_data_str = column_data.toString();
-        parent->child(parent->childCount() - 1)->setData(column, column_data);
-        parent->child(parent->childCount() - 1)->setCheckable ( true );
-        std::cout << "row " << parent->childCount() << " col " << column << "value " << column_data_str.toStdString() << std::endl;
-      }
-    }
-
-    ++number;
-  }
-}
