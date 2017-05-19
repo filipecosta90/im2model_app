@@ -170,8 +170,8 @@ bool TreeItem::setData(int column, const QVariant &value)
     std::string t1 = value.toString().toStdString();
     fp_data_setter( t1 );
     if(itemData[column] != value ){
-        emit dataChanged(column);
-        itemData[column] = value;
+      emit dataChanged(column);
+      itemData[column] = value;
     }
     result = true;
   }

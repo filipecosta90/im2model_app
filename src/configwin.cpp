@@ -24,8 +24,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
    * to your project file — otherwise, the files won’t be found. 
    * In your dialog constructor, you can init the UI now using:
    * **/
-  image_crystal = new Image_Crystal();
-  td_map = new TDMap();
+  _core_image_crystal = new Image_Crystal();
+  _core_td_map = new TDMap();
   ui->setupUi(this);
   delete ui->mainToolBar; // add this line
 
@@ -40,7 +40,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
   // Image Path
   ////////////////
   QVector<QVariant> box1_option_1 = {"Image path",""};
-  boost::function<bool(std::string)> box1_function_1( boost::bind( &Image_Crystal::set_experimental_image_path, image_crystal, _1 ) );
+  boost::function<bool(std::string)> box1_function_1( boost::bind( &Image_Crystal::set_experimental_image_path,_core_image_crystal, _1 ) );
   TreeItem* image_path  = new TreeItem (  box1_option_1 , box1_function_1 );
   experimental_image_root->insertChildren( image_path );
 
@@ -50,10 +50,10 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
   QVector<QVariant> box1_option_2 = {"Sampling (nm/pixel)",""};
   QVector<QVariant> box1_option_2_1 = {"x",""};
   QVector<bool> box1_option_2_1_edit = {false,true};
-  boost::function<bool(std::string)> box1_function_2_1 ( boost::bind( &Image_Crystal::set_experimental_sampling_x, image_crystal, _1 ) );
+  boost::function<bool(std::string)> box1_function_2_1 ( boost::bind( &Image_Crystal::set_experimental_sampling_x,_core_image_crystal, _1 ) );
   QVector<QVariant> box1_option_2_2 = {"y",""};
   QVector<bool> box1_option_2_2_edit = {false,true};
-  boost::function<bool(std::string)> box1_function_2_2 ( boost::bind( &Image_Crystal::set_experimental_sampling_y, image_crystal, _1 ) );
+  boost::function<bool(std::string)> box1_function_2_2 ( boost::bind( &Image_Crystal::set_experimental_sampling_y,_core_image_crystal, _1 ) );
 
   TreeItem* experimental_sampling_rate = new TreeItem ( box1_option_2  );
   TreeItem* experimental_sampling_rate_x = new TreeItem ( box1_option_2_1 , box1_function_2_1, box1_option_2_1_edit );
@@ -75,10 +75,10 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
   QVector<QVariant> box1_option_3_1 = {"Center",""};
   QVector<QVariant> box1_option_3_1_1 = {"x",""};
   QVector<bool> box1_option_3_1_1_edit = {false,true};
-  boost::function<bool(std::string)> box1_function_3_1_1 ( boost::bind( &Image_Crystal::set_experimental_roi_center_x, image_crystal, _1 ) );
+  boost::function<bool(std::string)> box1_function_3_1_1 ( boost::bind( &Image_Crystal::set_experimental_roi_center_x,_core_image_crystal, _1 ) );
   QVector<QVariant> box1_option_3_1_2 = {"y",""};
   QVector<bool> box1_option_3_1_2_edit = {false,true};
-  boost::function<bool(std::string)> box1_function_3_1_2 ( boost::bind( &Image_Crystal::set_experimental_roi_center_y, image_crystal, _1 ) );
+  boost::function<bool(std::string)> box1_function_3_1_2 ( boost::bind( &Image_Crystal::set_experimental_roi_center_y,_core_image_crystal, _1 ) );
 
   TreeItem* experimental_roi_center = new TreeItem ( box1_option_3_1  );
   TreeItem* experimental_roi_center_x = new TreeItem ( box1_option_3_1_1 , box1_function_3_1_1, box1_option_3_1_1_edit );
@@ -94,10 +94,10 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
   QVector<QVariant> box1_option_3_2 = {"Dimensions",""};
   QVector<QVariant> box1_option_3_2_1 = {"width",""};
   QVector<bool> box1_option_3_2_1_edit = {false,true};
-  boost::function<bool(std::string)> box1_function_3_2_1 ( boost::bind( &Image_Crystal::set_experimental_roi_dimensions_width, image_crystal, _1 ) );
+  boost::function<bool(std::string)> box1_function_3_2_1 ( boost::bind( &Image_Crystal::set_experimental_roi_dimensions_width,_core_image_crystal, _1 ) );
   QVector<QVariant> box1_option_3_2_2 = {"height",""};
   QVector<bool> box1_option_3_2_2_edit = {false,true};
-  boost::function<bool(std::string)> box1_function_3_2_2 ( boost::bind( &Image_Crystal::set_experimental_roi_dimensions_height, image_crystal, _1 ) );
+  boost::function<bool(std::string)> box1_function_3_2_2 ( boost::bind( &Image_Crystal::set_experimental_roi_dimensions_height,_core_image_crystal, _1 ) );
 
   TreeItem* experimental_roi_dimensions = new TreeItem ( box1_option_3_2  );
   TreeItem* experimental_roi_dimensions_width = new TreeItem ( box1_option_3_2_1 , box1_function_3_2_1, box1_option_3_2_1_edit );
@@ -128,7 +128,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
   ////////////////
   QVector<QVariant> box2_option_1_1 = {"CIF",""};
   QVector<bool> box2_option_1_1_edit = {false,true};
-  boost::function<bool(std::string)> box2_function_1_1 ( boost::bind( &Image_Crystal::set_unit_cell_cif_path, image_crystal, _1 ) );
+  boost::function<bool(std::string)> box2_function_1_1 ( boost::bind( &Image_Crystal::set_unit_cell_cif_path,_core_image_crystal, _1 ) );
   TreeItem* unit_cell_file_cif = new TreeItem ( box2_option_1_1 , box2_function_1_1, box2_option_1_1_edit );
   unit_cell_file->insertChildren( unit_cell_file_cif );
 
@@ -137,7 +137,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
   ////////////////
   QVector<QVariant> box2_option_1_2 = {"CEL",""};
   QVector<bool> box2_option_1_2_edit = {false,true};
-  boost::function<bool(std::string)> box2_function_1_2 ( boost::bind( &Image_Crystal::set_unit_cell_cel_path, image_crystal, _1 ) );
+  boost::function<bool(std::string)> box2_function_1_2 ( boost::bind( &Image_Crystal::set_unit_cell_cel_path,_core_image_crystal, _1 ) );
   TreeItem* unit_cell_file_cel = new TreeItem ( box2_option_1_2 , box2_function_1_2, box2_option_1_2_edit );
   unit_cell_file->insertChildren( unit_cell_file_cel );
 
@@ -153,7 +153,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
   ////////////////
   QVector<QVariant> box2_option_2_1 = {"u",""};
   QVector<bool> box2_option_2_1_edit = {false,true};
-  boost::function<bool(std::string)> box2_function_2_1 ( boost::bind( &Image_Crystal::set_projected_y_axis_u, image_crystal, _1 ) );
+  boost::function<bool(std::string)> box2_function_2_1 ( boost::bind( &Image_Crystal::set_projected_y_axis_u,_core_image_crystal, _1 ) );
   TreeItem* projected_y_axis_u = new TreeItem ( box2_option_2_1 , box2_function_2_1, box2_option_2_1_edit );
   projected_y_axis->insertChildren( projected_y_axis_u );
 
@@ -162,7 +162,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
   ////////////////
   QVector<QVariant> box2_option_2_2 = {"v",""};
   QVector<bool> box2_option_2_2_edit = {false,true};
-  boost::function<bool(std::string)> box2_function_2_2 ( boost::bind( &Image_Crystal::set_projected_y_axis_v, image_crystal, _1 ) );
+  boost::function<bool(std::string)> box2_function_2_2 ( boost::bind( &Image_Crystal::set_projected_y_axis_v,_core_image_crystal, _1 ) );
   TreeItem* projected_y_axis_v = new TreeItem ( box2_option_2_2 , box2_function_2_2, box2_option_2_2_edit );
   projected_y_axis->insertChildren( projected_y_axis_v );
 
@@ -171,7 +171,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
   ////////////////
   QVector<QVariant> box2_option_2_3 = {"w",""};
   QVector<bool>  box2_option_2_3_edit = {false,true};
-  boost::function<bool(std::string)>  box2_function_2_3 ( boost::bind( &Image_Crystal::set_projected_y_axis_w, image_crystal, _1 ) );
+  boost::function<bool(std::string)>  box2_function_2_3 ( boost::bind( &Image_Crystal::set_projected_y_axis_w,_core_image_crystal, _1 ) );
   TreeItem* projected_y_axis_w = new TreeItem (  box2_option_2_3 ,  box2_function_2_3,  box2_option_2_3_edit );
   projected_y_axis->insertChildren( projected_y_axis_w );
 
@@ -187,7 +187,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
   ////////////////
   QVector<QVariant> box2_option_3_1 = {"h",""};
   QVector<bool> box2_option_3_1_edit = {false,true};
-  boost::function<bool(std::string)> box2_function_3_1 ( boost::bind( &Image_Crystal::set_projection_direction_h, image_crystal, _1 ) );
+  boost::function<bool(std::string)> box2_function_3_1 ( boost::bind( &Image_Crystal::set_projection_direction_h,_core_image_crystal, _1 ) );
   TreeItem* projection_direction_h = new TreeItem ( box2_option_3_1 , box2_function_3_1, box2_option_3_1_edit );
   projection_direction->insertChildren( projection_direction_h );
 
@@ -196,7 +196,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
   ////////////////
   QVector<QVariant> box2_option_3_2 = {"k",""};
   QVector<bool> box2_option_3_2_edit = {false,true};
-  boost::function<bool(std::string)> box2_function_3_2 ( boost::bind( &Image_Crystal::set_projection_direction_k, image_crystal, _1 ) );
+  boost::function<bool(std::string)> box2_function_3_2 ( boost::bind( &Image_Crystal::set_projection_direction_k,_core_image_crystal, _1 ) );
   TreeItem* projection_direction_k = new TreeItem ( box2_option_3_2 , box2_function_3_2, box2_option_3_2_edit );
   projection_direction->insertChildren( projection_direction_k );
 
@@ -205,7 +205,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
   ////////////////
   QVector<QVariant> box2_option_3_3 = {"l",""};
   QVector<bool> box2_option_3_3_edit = {false,true};
-  boost::function<bool(std::string)> box2_function_3_3 ( boost::bind( &Image_Crystal::set_projection_direction_l, image_crystal, _1 ) );
+  boost::function<bool(std::string)> box2_function_3_3 ( boost::bind( &Image_Crystal::set_projection_direction_l,_core_image_crystal, _1 ) );
   TreeItem* projection_direction_l = new TreeItem ( box2_option_3_3 , box2_function_3_3, box2_option_3_3_edit );
   projection_direction->insertChildren( projection_direction_l );
 
@@ -249,7 +249,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
   ////////////////
   QVector<QVariant> box3_option_1_1 = {"Lower bound",""};
   QVector<bool> box3_option_1_1_edit = {false,true};
-  boost::function<bool(std::string)> box3_function_1_1 ( boost::bind( &TDMap::set_thickness_range_lower_bound, td_map, _1 ) );
+  boost::function<bool(std::string)> box3_function_1_1 ( boost::bind( &TDMap::set_thickness_range_lower_bound, _core_td_map, _1 ) );
   TreeItem* thickness_range_lower_bound = new TreeItem ( box3_option_1_1 , box3_function_1_1, box3_option_1_1_edit );
   thickness_range->insertChildren( thickness_range_lower_bound );
 
@@ -258,7 +258,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
   ////////////////
   QVector<QVariant> box3_option_1_2 = {"Upper bound",""};
   QVector<bool> box3_option_1_2_edit = {false,true};
-  boost::function<bool(std::string)> box3_function_1_2 ( boost::bind( &TDMap::set_thickness_range_upper_bound, td_map, _1 ) );
+  boost::function<bool(std::string)> box3_function_1_2 ( boost::bind( &TDMap::set_thickness_range_upper_bound, _core_td_map, _1 ) );
   TreeItem* thickness_range_upper_bound = new TreeItem ( box3_option_1_2 , box3_function_1_2, box3_option_1_2_edit );
   thickness_range->insertChildren( thickness_range_upper_bound );
 
@@ -267,7 +267,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
   ////////////////
   QVector<QVariant> box3_option_1_3 = {"Samples",""};
   QVector<bool> box3_option_1_3_edit = {false,true};
-  boost::function<bool(std::string)> box3_function_1_3 ( boost::bind( &TDMap::set_thickness_range_number_samples, td_map, _1 ) );
+  boost::function<bool(std::string)> box3_function_1_3 ( boost::bind( &TDMap::set_thickness_range_number_samples, _core_td_map, _1 ) );
   TreeItem* thickness_range_number_samples = new TreeItem ( box3_option_1_3 , box3_function_1_3, box3_option_1_3_edit );
   thickness_range->insertChildren( thickness_range_number_samples );
 
@@ -283,7 +283,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
   ////////////////
   QVector<QVariant> box3_option_2_1 = {"Lower bound",""};
   QVector<bool> box3_option_2_1_edit = {false,true};
-  boost::function<bool(std::string)> box3_function_2_1 ( boost::bind( &TDMap::set_defocus_range_lower_bound, td_map, _1 ) );
+  boost::function<bool(std::string)> box3_function_2_1 ( boost::bind( &TDMap::set_defocus_range_lower_bound, _core_td_map, _1 ) );
   TreeItem* defocus_range_lower_bound = new TreeItem ( box3_option_2_1 , box3_function_2_1, box3_option_2_1_edit );
   defocus_range->insertChildren( defocus_range_lower_bound );
 
@@ -292,7 +292,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
   ////////////////
   QVector<QVariant> box3_option_2_2 = {"Upper bound",""};
   QVector<bool> box3_option_2_2_edit = {false,true};
-  boost::function<bool(std::string)> box3_function_2_2 ( boost::bind( &TDMap::set_defocus_range_upper_bound, td_map, _1 ) );
+  boost::function<bool(std::string)> box3_function_2_2 ( boost::bind( &TDMap::set_defocus_range_upper_bound, _core_td_map, _1 ) );
   TreeItem* defocus_range_upper_bound = new TreeItem ( box3_option_2_2 , box3_function_2_2, box3_option_2_2_edit );
   defocus_range->insertChildren( defocus_range_upper_bound );
 
@@ -301,7 +301,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
   ////////////////
   QVector<QVariant> box3_option_2_3 = {"Samples",""};
   QVector<bool> box3_option_2_3_edit = {false,true};
-  boost::function<bool(std::string)> box3_function_2_3 ( boost::bind( &TDMap::set_defocus_range_number_samples, td_map, _1 ) );
+  boost::function<bool(std::string)> box3_function_2_3 ( boost::bind( &TDMap::set_defocus_range_number_samples, _core_td_map, _1 ) );
   TreeItem* defocus_range_number_samples = new TreeItem ( box3_option_2_3 , box3_function_2_3, box3_option_2_3_edit );
   defocus_range->insertChildren( defocus_range_number_samples );
 
@@ -317,7 +317,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
   ////////////////
   QVector<QVariant> box3_option_3_1 = {"Accelaration voltage (kV)",""};
   QVector<bool> box3_option_3_1_edit = {false,true};
-  boost::function<bool(std::string)> box3_function_3_1 ( boost::bind( &TDMap::set_accelaration_voltage_kv, td_map, _1 ) );
+  boost::function<bool(std::string)> box3_function_3_1 ( boost::bind( &TDMap::set_accelaration_voltage_kv, _core_td_map, _1 ) );
   TreeItem* accelaration_voltage_kv = new TreeItem ( box3_option_3_1 , box3_function_3_1, box3_option_3_1_edit );
   incident_electron_beam->insertChildren( accelaration_voltage_kv );
 
@@ -327,10 +327,15 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
   ui->qtree_view_tdmap_simulation_setup->expandAll();
   for (int column = 0; column < tdmap_simulation_setup_model->columnCount(); ++column){
-  ui->qtree_view_tdmap_simulation_setup->resizeColumnToContents(column);
+    ui->qtree_view_tdmap_simulation_setup->resizeColumnToContents(column);
   }
 
-ui->tdmap_table->connect_thickness_changes(  thickness_range_number_samples, 1 );
+  ui->tdmap_table->set_tdmap( _core_td_map );
+
+  ui->tdmap_table->connect_thickness_range_number_samples_changes(  thickness_range_number_samples, 1 );
+  ui->tdmap_table->connect_defocus_range_number_samples_changes(  defocus_range_number_samples, 1 );
+
+
 
   /*
      simulation_parameters << tr(" [] Import fixed values from refinement?");
@@ -396,7 +401,7 @@ ui->tdmap_table->connect_thickness_changes(  thickness_range_number_samples, 1 )
   ui->qtree_view_supercell_model_refinement_setup->setModel(supercell_model_refinement_model);
 
   for (int column = 0; column < supercell_model_refinement_model->columnCount(); ++column){
-    ui->qtree_view_supercell_model_refinement_setup->resizeColumnToContents(column);
+  ui->qtree_view_supercell_model_refinement_setup->resizeColumnToContents(column);
   }*/
 }
 

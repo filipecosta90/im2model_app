@@ -15,8 +15,8 @@ class MainWindow : public QMainWindow {
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
 
-  private slots:
-    void on_qpush_load_image_clicked();
+    private slots:
+      void on_qpush_load_image_clicked();
 
     void on_qpush_load_cif_clicked();
 
@@ -24,8 +24,8 @@ class MainWindow : public QMainWindow {
 
   private:
     Ui::MainWindow *ui;
-    Image_Crystal *image_crystal;
-    TDMap *td_map;
+    Image_Crystal *_core_image_crystal;
+    TDMap *_core_td_map;
 
 };
 

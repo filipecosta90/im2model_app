@@ -30,7 +30,9 @@ SOURCES +=\
     treemodel.cpp \
     cv_image_delegate.cpp \
     gui_tdmap_cell.cpp \
-    gui_tdmap_table.cpp
+    gui_tdmap_table.cpp \
+    td_map.cpp \
+    image_crystal.cpp
 
 
 HEADERS  += configwin.h \
@@ -40,7 +42,9 @@ HEADERS  += configwin.h \
     cv_image_frame.h \
     cv_image_delegate.h \
     gui_tdmap_cell.h \
-    gui_tdmap_table.h
+    gui_tdmap_table.h \
+    td_map.hpp \
+    image_crystal.hpp
 
 FORMS    += configwin.ui
 

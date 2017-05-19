@@ -25,14 +25,18 @@ class TDMap_Table : public QTableWidget
     void clear();
 
     void set_tdmap( TDMap* map );
-    void connect_thickness_changes( const TreeItem* thickness_object, int column );
+
+    /* signal connecting to treeitems with simulation configuration info */
+    void connect_thickness_range_number_samples_changes( const TreeItem* item, int item_changes_column );
+    void connect_defocus_range_number_samples_changes( const TreeItem* item, int item_changes_column );
 
     public slots:
-    void selectCurrentRow();
+      void selectCurrentRow();
     void selectCurrentColumn();
     void recalculate();
     void setAutoRecalculate(bool recalc);
-    void update_map_size_defocus(int column );
+    void update_RowCount_from_thickness_range_number_samples(int signal_item_changed_column );
+    void update_ColumnCount_from_defocus_range_number_samples(int signal_item_changed_column );
 
 signals:
     void modified();
@@ -42,8 +46,8 @@ signals:
 
   private:
     enum { MagicNumber = 0x7F51C883 };
-int ColumnCount = 26;
-    int RowCount = 999;
+    int ColumnCount = 0;
+    int RowCount = 0;
     TDMap_Cell*cell(int row, int column) const;
     QString text(int row, int column) const;
     QString formula(int row, int column) const;
@@ -55,7 +59,11 @@ int ColumnCount = 26;
 
     /* CORE IM2MODEL*/
     TDMap* core_tdmap;
-     int _item_model_thickness_range_col;
+
+    /* VISUAL TDMAP vars */
+    int _treeitem_thickness_range_number_samples_watch_col;
+    int _treeitem_defocus_range_number_samples_watch_col;
+
 };
 
 class TDMap_TableCompare

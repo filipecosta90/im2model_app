@@ -7,13 +7,13 @@
   TDMap_Table::TDMap_Table(QWidget *parent)
 : QTableWidget(parent)
 {
-      table_parent = parent;
+  table_parent = parent;
   autoRecalc = true;
   image_delegate = new CvImageDelegate(this);
 
   setItemPrototype(new TDMap_Cell);
   setSelectionMode(ContiguousSelection);
- // setItemDelegate(image_delegate);
+  // setItemDelegate(image_delegate);
 
   connect(this, SIGNAL(itemChanged(QTableWidgetItem *)),
       this, SLOT(somethingChanged()));
@@ -21,22 +21,39 @@
 }
 
 void TDMap_Table::set_tdmap( TDMap* map ){
-    core_tdmap = map;
+  core_tdmap = map;
+}
+
+
+void TDMap_Table::connect_thickness_range_number_samples_changes( const TreeItem* item, int item_changes_column ){
+  connect( item, SIGNAL(dataChanged(int )), this, SLOT( update_RowCount_from_thickness_range_number_samples(int) ) );
+  _treeitem_thickness_range_number_samples_watch_col = item_changes_column;
+}
+
+void TDMap_Table::connect_defocus_range_number_samples_changes( const TreeItem* item, int item_changes_column ){
+  connect( item, SIGNAL(dataChanged(int )), this, SLOT( update_ColumnCount_from_defocus_range_number_samples(int) ) );
+  _treeitem_defocus_range_number_samples_watch_col = item_changes_column;
+}
+
+void TDMap_Table::update_RowCount_from_thickness_range_number_samples( int signal_item_changed_column ){
+  if ( signal_item_changed_column == _treeitem_thickness_range_number_samples_watch_col ){
+    int new_RowCount = core_tdmap->get_thickness_range_number_samples();
+    RowCount = new_RowCount;
+    std::cout << "new_RowCount " << new_RowCount << std::endl;
+    clear();
   }
-
-void TDMap_Table::connect_thickness_changes( const TreeItem* thickness_object, int column ){
-    std::cout << "connecting thickness object changes " << std::endl;
-    connect(thickness_object, SIGNAL(dataChanged(int )), this, SLOT( update_map_size_defocus(int) ) );
-    _item_model_thickness_range_col = column;
 }
 
-void TDMap_Table::update_map_size_defocus( int column ){
-    if (column == _item_model_thickness_range_col){
-        std::cout << "equal indexis " << std::endl;
-    }
-    std::cout << "updating map size defocus row " << std::endl;
-clear();
+void TDMap_Table::update_ColumnCount_from_defocus_range_number_samples( int signal_item_changed_column ){
+  if ( signal_item_changed_column == _treeitem_defocus_range_number_samples_watch_col ){
+    int new_ColumnCount = core_tdmap->get_defocus_range_number_samples();
+    ColumnCount = new_ColumnCount;
+    std::cout << "new_ColumnCount " << new_ColumnCount << std::endl;
+    clear();
+  }
 }
+
+
 
 void TDMap_Table::clear()
 {
