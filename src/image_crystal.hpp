@@ -4,12 +4,61 @@
 #include <iosfwd>                    // for string
 #include <iostream>
 
+#include <opencv2/core/hal/interface.h>                   // for CV_8UC1
+#include <opencv2/imgcodecs/imgcodecs_c.h>                // for ::CV_LOAD_I...
+#include <opencv2/core.hpp>                               // for RNG
+#include <opencv2/core/cvstd.inl.hpp>                     // for String::String
+#include <opencv2/core/mat.hpp>                           // for Mat
+#include <opencv2/core/mat.inl.hpp>                       // for Mat::Mat
+#include <opencv2/core/operations.hpp>                    // for RNG::RNG
+#include <opencv2/core/types.hpp>                         // for Rect, Point3d
+#include <opencv2/imgcodecs.hpp>                          // for imread
 
 class Image_Crystal {
   private:
     std::string experimental_image_path;
+
+    // Specifies the input super-cell file containing the atomic structure data in CIF file format.
+    std::string unit_cell_cif_path;
+    // Specifies the input super-cell file containing the atomic structure data in CEL file format.
+    std::string unit_cell_cel_path;
+
+    // Experimental Image info
+    cv::Mat experimental_image_full;
+    cv::Mat experimental_image_roi;
+    cv::Mat experimental_working;
+
+    cv::Rect roi_rectangle;
+    int roi_x_size;
+    int roi_y_size;
+    int roi_center_x;
+    int roi_center_y;
+    int roi_pixel_size;
+    bool _roi_defined;
+
+    double sampling_rate_experimental_x_nm_per_pixel;
+    double sampling_rate_experimental_y_nm_per_pixel;
+
+    cv::Point3d  zone_axis_vector_uvw;
+    cv::Point3d  upward_vector_hkl;
+    double projection_dir_h;
+    double projection_dir_k;
+    double projection_dir_l;
+    std::string prj_hkl;
+    double perpendicular_dir_u;
+    double perpendicular_dir_v;
+    double perpendicular_dir_w;
+    std::string prj_uvw;
+
+    void update_roi();
+
   public:
     Image_Crystal();
+
+    bool load_full_experimental_image();
+    cv::Mat get_full_experimental_image_mat();
+    cv::Mat get_roi_experimental_image_mat();
+    bool roi_defined();
 
     //setters
     bool set_experimental_image_path( std::string path );

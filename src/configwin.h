@@ -2,6 +2,17 @@
 #define CONFIGWIN_H
 
 #include <QMainWindow>
+
+#include <opencv2/core/hal/interface.h>                   // for CV_8UC1
+#include <opencv2/imgcodecs/imgcodecs_c.h>                // for ::CV_LOAD_I...
+#include <opencv2/core.hpp>                               // for RNG
+#include <opencv2/core/cvstd.inl.hpp>                     // for String::String
+#include <opencv2/core/mat.hpp>                           // for Mat
+#include <opencv2/core/mat.inl.hpp>                       // for Mat::Mat
+#include <opencv2/core/operations.hpp>                    // for RNG::RNG
+#include <opencv2/core/types.hpp>                         // for Rect, Point3d
+#include <opencv2/imgcodecs.hpp>                          // for imread
+
 #include "image_crystal.hpp"
 #include "td_map.hpp"
 
@@ -17,10 +28,13 @@ class MainWindow : public QMainWindow {
 
     private slots:
       void on_qpush_load_image_clicked();
-
     void on_qpush_load_cif_clicked();
-
     void on_actionAbout_triggered();
+    void update_full_experimental_image_frame();
+    void update_roi_experimental_image_frame();
+
+signals:
+    void experimental_image_filename_changed( );
 
   private:
     Ui::MainWindow *ui;

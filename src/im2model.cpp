@@ -310,7 +310,6 @@ int main(int argc, char** argv ){
       std::cerr << desc << std::endl;
       return -1;
     }
-
     boost::program_options::notify(vm); 
 
     if ( vm.count("help")  )

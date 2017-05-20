@@ -21,7 +21,7 @@
     <item>
      <widget class="QTabWidget" name="tabWidget">
       <property name="currentIndex">
-       <number>1</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="image_crystal_tab">
        <attribute name="title">
@@ -137,7 +137,7 @@
            <enum>QLayout::SetMaximumSize</enum>
           </property>
           <item>
-           <widget class="QLabel" name="qlabel_full_experimental_image_6">
+           <widget class="QLabel" name="qlabel_roi_experimental_image">
             <property name="font">
              <font>
               <weight>75</weight>
@@ -150,7 +150,7 @@
            </widget>
           </item>
           <item>
-           <widget class="CvImageFrameWidget" name="qgraphics_experimental_image_roi" native="true">
+           <widget class="CvImageFrameWidget" name="qgraphics_roi_experimental_image" native="true">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
               <horstretch>0</horstretch>

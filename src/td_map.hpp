@@ -4,6 +4,11 @@
 #include <vector>
 #include <string>
 
+#include "celslc_prm.hpp"
+#include "msa_prm.hpp"
+#include "wavimg_prm.hpp"
+#include "simgrid_steplength.hpp"
+
 class TDMap {
   private:
 
@@ -26,10 +31,20 @@ class TDMap {
     // Simulated Defocus info
     /////////////////////////
     int defocus_samples;
-    int defocus_lower_bound;
-    int defocus_upper_bound;
-    int defocus_period;
-    int user_estimated_defocus_nm;
+    double defocus_lower_bound;
+    double defocus_upper_bound;
+    double defocus_period;
+    double user_estimated_defocus_nm;
+
+    double ht_accelaration_voltage;
+
+    /////////////////////////
+    // Dr Probe PRM wrappers
+    /////////////////////////
+    CELSLC_prm* _tdmap_celslc_parameters;
+    MSA_prm* _tdmap_msa_parameters;
+    WAVIMG_prm* _tdmap_wavimg_parameters;
+    SIMGRID_wavimg_steplength* _td_map_simgrid;
 
   public:
     TDMap();
