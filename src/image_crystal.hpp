@@ -29,11 +29,17 @@ class Image_Crystal {
     cv::Mat experimental_working;
 
     cv::Rect roi_rectangle;
-    int roi_x_size;
-    int roi_y_size;
+    int roi_x_size_width;
+    int roi_y_size_heigth;
     int roi_center_x;
     int roi_center_y;
     int roi_pixel_size;
+
+    bool _flag_loaded_experimental_full;
+    bool _flag_roi_center_x;
+    bool _flag_roi_center_y;
+    bool _flag_roi_x_size;
+    bool _flag_roi_y_size;
     bool _roi_defined;
 
     double sampling_rate_experimental_x_nm_per_pixel;

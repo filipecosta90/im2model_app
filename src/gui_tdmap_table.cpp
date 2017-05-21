@@ -31,7 +31,7 @@ void TDMap_Table::connect_thickness_range_number_samples_changes( const TreeItem
 }
 
 void TDMap_Table::connect_defocus_range_number_samples_changes( const TreeItem* item, int item_changes_column ){
-  connect( item, SIGNAL(dataChanged(int )), this, SLOT( update_ColumnCount_from_defocus_range_number_samples(int) ) );
+  connect( item, SIGNAL(dataChanged( int )), this, SLOT( update_ColumnCount_from_defocus_range_number_samples(int) ) );
   _treeitem_defocus_range_number_samples_watch_col = item_changes_column;
 }
 

@@ -166,10 +166,10 @@ bool TreeItem::setData(int column, const QVariant &value)
 {
   bool result = false;
   if  (column >= 0 && column < itemData.size() ) {
-    //call setter on core im2model
-    std::string t1 = value.toString().toStdString();
-    fp_data_setter( t1 );
-    if(itemData[column] != value ){
+    if( itemData[column] != value ){
+        //call setter on core im2model
+        std::string t1 = value.toString().toStdString();
+        fp_data_setter( t1 );
       emit dataChanged(column);
       itemData[column] = value;
     }

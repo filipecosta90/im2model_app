@@ -1,16 +1,28 @@
 #include "image_crystal.hpp"
 #include <iostream>
 #include <boost/lexical_cast.hpp>
+#include <boost/filesystem.hpp>
 
 Image_Crystal::Image_Crystal(){
   _roi_defined = false;
+  _flag_roi_center_x = false;
+  _flag_roi_center_y = false;
+  _flag_roi_x_size = false;
+  _flag_roi_y_size = false;
+  _flag_loaded_experimental_full = false;
+  roi_rectangle = cv::Rect();
 }
 
 /** others **/
 
 bool Image_Crystal::load_full_experimental_image(){
-  experimental_image_full = cv::imread( experimental_image_path, true);
-  return true;
+  if ( boost::filesystem::exists( experimental_image_path ) )
+  {
+    experimental_image_full = cv::imread( experimental_image_path, true);
+    _flag_loaded_experimental_full = true;
+    update_roi();
+  }
+  return _flag_loaded_experimental_full;
 }
 
 bool Image_Crystal::roi_defined(){
@@ -18,7 +30,16 @@ bool Image_Crystal::roi_defined(){
 }
 
 void Image_Crystal::update_roi(){
-  // not implemented yet
+  if( _flag_roi_center_x && _flag_roi_center_y && _flag_roi_x_size && _flag_roi_y_size && _flag_loaded_experimental_full ){
+    const int top_left_x = roi_center_x - ( roi_x_size_width  / 2 );
+    const int top_left_y = roi_center_y - ( roi_y_size_heigth / 2 );
+    roi_rectangle.x = top_left_x;
+    roi_rectangle.y = top_left_y;
+    roi_rectangle.width = roi_x_size_width;
+    roi_rectangle.height = roi_y_size_heigth;
+    _roi_defined = true;
+    experimental_image_roi = experimental_image_full( roi_rectangle );
+  }
 }
 
 /** getters **/
@@ -46,23 +67,31 @@ bool Image_Crystal::set_experimental_sampling_y( std::string sampling_y ){
   return true;
 }
 
-bool Image_Crystal::set_experimental_roi_center_x( std::string roi_center_x ){
-  roi_center_x = boost::lexical_cast<int>( roi_center_x );
+bool Image_Crystal::set_experimental_roi_center_x( std::string center_x ){
+  roi_center_x = boost::lexical_cast<int>( center_x );
+  _flag_roi_center_x = true;
+  update_roi();
   return true;
 }
 
-bool Image_Crystal::set_experimental_roi_center_y( std::string roi_center_y ){
-  roi_center_y = boost::lexical_cast<int>( roi_center_y );
+bool Image_Crystal::set_experimental_roi_center_y( std::string center_y ){
+  roi_center_y = boost::lexical_cast<int>( center_y );
+  _flag_roi_center_y = true;
+  update_roi();
   return true;
 }
 
 bool Image_Crystal::set_experimental_roi_dimensions_width( std::string roi_dimension_width ){
-  roi_x_size = boost::lexical_cast<int>( roi_dimension_width );
+  roi_x_size_width = boost::lexical_cast<int>( roi_dimension_width );
+  _flag_roi_x_size = true;
+  update_roi();
   return true;
 }
 
 bool Image_Crystal::set_experimental_roi_dimensions_height( std::string roi_dimension_heigth ){
-  roi_y_size = boost::lexical_cast<int>( roi_dimension_heigth );
+  roi_y_size_heigth = boost::lexical_cast<int>( roi_dimension_heigth );
+  _flag_roi_y_size = true;
+  update_roi();
   return true;
 }
 

@@ -86,7 +86,11 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
   TreeItem* experimental_roi_center = new TreeItem ( box1_option_3_1  );
   TreeItem* experimental_roi_center_x = new TreeItem ( box1_option_3_1_1 , box1_function_3_1_1, box1_option_3_1_1_edit );
+  connect( experimental_roi_center_x, SIGNAL(dataChanged( int )), this, SLOT( update_roi_experimental_image_frame() ) );
+
   TreeItem* experimental_roi_center_y = new TreeItem ( box1_option_3_1_2 , box1_function_3_1_2, box1_option_3_1_2_edit );
+  connect( experimental_roi_center_y, SIGNAL(dataChanged( int )), this, SLOT( update_roi_experimental_image_frame() ) );
+
   experimental_roi->insertChildren( experimental_roi_center );
   experimental_roi_center->insertChildren( experimental_roi_center_x );
   experimental_roi_center->insertChildren( experimental_roi_center_y );
@@ -105,7 +109,11 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
   TreeItem* experimental_roi_dimensions = new TreeItem ( box1_option_3_2  );
   TreeItem* experimental_roi_dimensions_width = new TreeItem ( box1_option_3_2_1 , box1_function_3_2_1, box1_option_3_2_1_edit );
+  connect( experimental_roi_dimensions_width, SIGNAL(dataChanged( int )), this, SLOT( update_roi_experimental_image_frame() ) );
+
   TreeItem* experimental_roi_dimensions_height = new TreeItem ( box1_option_3_2_2 , box1_function_3_2_2, box1_option_3_2_2_edit );
+  connect( experimental_roi_dimensions_height, SIGNAL(dataChanged( int )), this, SLOT( update_roi_experimental_image_frame() ) );
+
   experimental_roi->insertChildren( experimental_roi_dimensions );
   experimental_roi_dimensions->insertChildren( experimental_roi_dimensions_width );
   experimental_roi_dimensions->insertChildren( experimental_roi_dimensions_height );
@@ -410,7 +418,6 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
 MainWindow::~MainWindow(){
   delete ui;
-
 }
 
 void MainWindow::on_qpush_load_image_clicked(){
@@ -418,12 +425,14 @@ void MainWindow::on_qpush_load_image_clicked(){
       tr("Open image"),
       tr("."),
       tr("Image Files (*.png *.jpg *.jpeg *.bmp *.tif)"));
-  ui->qline_image_path->setText(fileName);
-  _core_image_crystal->set_experimental_image_path( fileName.toStdString());
   bool load_ok = false;
-  load_ok = _core_image_crystal->load_full_experimental_image();
-  if( load_ok ){
-    emit experimental_image_filename_changed();
+  if( ! (fileName.isNull()) ){
+    ui->qline_image_path->setText(fileName);
+    _core_image_crystal->set_experimental_image_path( fileName.toStdString() );
+    load_ok = _core_image_crystal->load_full_experimental_image();
+    if( load_ok ){
+      emit experimental_image_filename_changed();
+    }
   }
 }
 
