@@ -229,8 +229,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
   QModelIndex unit_cell_index = project_setup_crystalographic_fields_model->index(0,0);
   QModelIndex cif_path = project_setup_crystalographic_fields_model->index(0,1,unit_cell_index);
   QModelIndex cel_path = project_setup_crystalographic_fields_model->index(1,1,unit_cell_index);
-  ui->qtree_view_project_setup_crystallography->setIndexWidget(cif_path,ui->qwidget_load_cel);
-  ui->qtree_view_project_setup_crystallography->setIndexWidget(cel_path,ui->qwidget_load_cif);
+  ui->qtree_view_project_setup_crystallography->setIndexWidget(cif_path,ui->qwidget_load_cif);
+  ui->qtree_view_project_setup_crystallography->setIndexWidget(cel_path,ui->qwidget_load_cel);
 
   ui->qtree_view_project_setup_image->expandAll();
   ui->qtree_view_project_setup_crystallography->expandAll();
@@ -420,7 +420,8 @@ MainWindow::~MainWindow(){
   delete ui;
 }
 
-void MainWindow::on_qpush_load_image_clicked(){
+void MainWindow::on_qpush_load_image_clicked()
+{
   QString fileName = QFileDialog::getOpenFileName(this,
       tr("Open image"),
       tr("."),
@@ -436,8 +437,17 @@ void MainWindow::on_qpush_load_image_clicked(){
   }
 }
 
-void MainWindow::on_qpush_load_cif_clicked(){
+void MainWindow::on_qpush_load_cif_clicked()
+{
+  QString fileName = QFileDialog::getOpenFileName(this,
+      tr("Open CIF"),
+      tr("."),
+      tr("Text Files (*.cif)"));
 
+  if( ! (fileName.isNull()) ){
+    ui->qline_cif_file_path->setText(fileName);
+    _core_image_crystal->set_unit_cell_cif_path( fileName.toStdString() );
+  }
 }
 
 void MainWindow::update_full_experimental_image_frame(){
@@ -448,7 +458,7 @@ void MainWindow::update_full_experimental_image_frame(){
 }
 
 void MainWindow::update_roi_experimental_image_frame(){
-  if( _core_image_crystal->roi_defined() ){
+  if( _core_image_crystal->_is_roi_defined() ){
     cv::Mat roi_image = _core_image_crystal->get_roi_experimental_image_mat();
     ui->qgraphics_roi_experimental_image->setImage( roi_image );
     ui->qgraphics_full_experimental_image->show();
@@ -457,4 +467,21 @@ void MainWindow::update_roi_experimental_image_frame(){
 
 void MainWindow::on_actionAbout_triggered(){
 
+}
+
+void MainWindow::on_qpush_run_tdmap_clicked()
+{
+  _core_td_map->run_tdmap();
+}
+
+void MainWindow::on_qpush_load_cel_clicked()
+{
+  QString fileName = QFileDialog::getOpenFileName(this,
+      tr("Open CEL"),
+      tr("."),
+      tr("Text Files (*.cel)"));
+  if( ! (fileName.isNull()) ){
+    ui->qline_cel_file_path->setText(fileName);
+    _core_image_crystal->set_unit_cell_cel_path( fileName.toStdString() );
+  }
 }

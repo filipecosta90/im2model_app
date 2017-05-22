@@ -36,17 +36,34 @@ class TDMap {
     double defocus_lower_bound;
     double defocus_upper_bound;
     double defocus_period;
+    bool _flag_defocus_lower_bound, _flag_defocus_upper_bound, _flag_defocus_samples, _flag_defocus_period;
+
     double user_estimated_defocus_nm;
 
+
     double ht_accelaration_voltage;
+    bool _flag_ht_accelaration_voltage = false;
 
     /////////////////////////
     // Dr Probe PRM wrappers
     /////////////////////////
     CELSLC_prm* _tdmap_celslc_parameters;
+    bool _flag_tdmap_celslc_parameters = false;
+    bool _run_celslc_switch = true;
+
     MSA_prm* _tdmap_msa_parameters;
+    bool _flag_tdmap_msa_parameters = false;
+    bool _run_msa_switch = false;
+
+
     WAVIMG_prm* _tdmap_wavimg_parameters;
+    bool _flag_tdmap_wavimg_parameters = false;
+    bool _run_wavimg_switch = false;
+
+
     SIMGRID_wavimg_steplength* _td_map_simgrid;
+    bool _flag_td_map_simgrid = false;
+    bool _run_simgrid_switch = false;
 
     /////////////////////////
     // Im2Model core pointers
@@ -97,13 +114,15 @@ class TDMap {
     std::string slc_file_name_prefix;
     std::string celslc_bin_string;
 
+    bool calculate_simulation_defocus_period();
+
   public:
     TDMap( Image_Crystal *image_crystal_ptr );
     /** others **/
     bool prepare_ZA_UV();
     bool calculate_simulated_image_sampling_rate_and_size();
-    bool calculate_simulation_defocus_period();
     bool prepare_celslc_parameters();
+    bool run_tdmap();
 
     /** getters **/
 

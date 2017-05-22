@@ -20,8 +20,11 @@ class Image_Crystal {
 
     // Specifies the input super-cell file containing the atomic structure data in CIF file format.
     std::string unit_cell_cif_path;
+    bool _unit_cell_cif_path_defined = false;
+
     // Specifies the input super-cell file containing the atomic structure data in CEL file format.
     std::string unit_cell_cel_path;
+    bool _unit_cell_cel_path_defined = false;
 
     // Experimental Image info
     cv::Mat experimental_image_full;
@@ -44,27 +47,46 @@ class Image_Crystal {
 
     double sampling_rate_experimental_x_nm_per_pixel;
     double sampling_rate_experimental_y_nm_per_pixel;
-
+    bool _flag_sampling_rate_experimental_x_nm_per_pixel;
+    bool _flag_sampling_rate_experimental_y_nm_per_pixel;
+    bool _sampling_rate_experimental_defined;
 
     cv::Point3d  upward_vector_hkl;
     double projection_dir_h;
     double projection_dir_k;
     double projection_dir_l;
+    bool _projection_dir_h_defined = false;
+    bool _projection_dir_k_defined = false;
+    bool _projection_dir_l_defined = false;
+    bool _projection_dir_defined = false;
+
     std::string prj_hkl;
 
     cv::Point3d  zone_axis_vector_uvw;
     double perpendicular_dir_u;
     double perpendicular_dir_v;
     double perpendicular_dir_w;
+    bool _perpendicular_dir_u_defined = false;
+    bool _perpendicular_dir_v_defined = false;
+    bool _perpendicular_dir_w_defined = false;
+    bool _perpendicular_dir_defined = false;
     std::string prj_uvw;
 
     void update_roi();
+    void update_projection_dir_defined();
+    void update_perpendicular_dir_defined();
 
   public:
     Image_Crystal();
 
     bool load_full_experimental_image();
-    bool roi_defined();
+    bool _is_roi_defined();
+    bool _is_sampling_rate_experimental_defined();
+    bool _is_perpendicular_dir_defined();
+    bool _is_projection_dir_defined();
+    bool _is_unit_cell_cif_path_defined();
+    bool _is_unit_cell_cel_path_defined();
+
 
     /** getters **/
     cv::Mat get_full_experimental_image_mat();

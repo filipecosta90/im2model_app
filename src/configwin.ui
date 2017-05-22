@@ -386,7 +386,7 @@
                    <x>0</x>
                    <y>0</y>
                    <width>282</width>
-                   <height>367</height>
+                   <height>374</height>
                   </rect>
                  </property>
                 </widget>
@@ -404,9 +404,6 @@
                <enum>Qt::Horizontal</enum>
               </property>
              </widget>
-            </item>
-            <item>
-             <layout class="QHBoxLayout" name="horizontalLayout_18"/>
             </item>
             <item>
              <layout class="QHBoxLayout" name="horizontalLayout_19">
@@ -431,7 +428,7 @@
                </widget>
               </item>
               <item>
-               <widget class="QPushButton" name="pushButton_22">
+               <widget class="QPushButton" name="qpush_run_tdmap">
                 <property name="text">
                  <string>Run</string>
                 </property>
@@ -440,7 +437,7 @@
              </layout>
             </item>
             <item>
-             <widget class="QProgressBar" name="progressBar_4">
+             <widget class="QProgressBar" name="qprogress_bar_tdmap">
               <property name="value">
                <number>24</number>
               </property>

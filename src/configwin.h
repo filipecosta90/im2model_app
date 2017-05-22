@@ -29,9 +29,11 @@ class MainWindow : public QMainWindow {
     private slots:
       void on_qpush_load_image_clicked();
     void on_qpush_load_cif_clicked();
+    void on_qpush_load_cel_clicked();
     void on_actionAbout_triggered();
     void update_full_experimental_image_frame();
     void update_roi_experimental_image_frame();
+    void on_qpush_run_tdmap_clicked();
 
 signals:
     void experimental_image_filename_changed( );
