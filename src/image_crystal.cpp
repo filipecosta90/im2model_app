@@ -51,6 +51,42 @@ cv::Mat Image_Crystal::get_roi_experimental_image_mat(){
   return experimental_image_roi.clone();
 }
 
+double Image_Crystal::get_sampling_rate_experimental_x_nm_per_pixel(){
+  return sampling_rate_experimental_x_nm_per_pixel;
+}
+
+double Image_Crystal::get_sampling_rate_experimental_y_nm_per_pixel(){
+  return sampling_rate_experimental_y_nm_per_pixel;
+}
+
+std::string Image_Crystal::get_super_cell_cif_file_path(){
+  return unit_cell_cif_path;
+}
+
+double Image_Crystal::get_perpendicular_dir_u(){
+  return perpendicular_dir_u;
+}
+
+double Image_Crystal::get_perpendicular_dir_v(){
+  return perpendicular_dir_v;
+}
+
+double Image_Crystal::get_perpendicular_dir_w(){
+  return perpendicular_dir_w;
+}
+
+double Image_Crystal::get_projection_dir_h(){
+  return projection_dir_h;
+}
+
+double Image_Crystal::get_projection_dir_k(){
+  return projection_dir_k;
+}
+
+double Image_Crystal::get_projection_dir_l(){
+  return projection_dir_l;
+}
+
 /** setters **/
 bool Image_Crystal::set_experimental_image_path( std::string path ){
   experimental_image_path = path;

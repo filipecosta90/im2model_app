@@ -45,12 +45,14 @@ class Image_Crystal {
     double sampling_rate_experimental_x_nm_per_pixel;
     double sampling_rate_experimental_y_nm_per_pixel;
 
-    cv::Point3d  zone_axis_vector_uvw;
+
     cv::Point3d  upward_vector_hkl;
     double projection_dir_h;
     double projection_dir_k;
     double projection_dir_l;
     std::string prj_hkl;
+
+    cv::Point3d  zone_axis_vector_uvw;
     double perpendicular_dir_u;
     double perpendicular_dir_v;
     double perpendicular_dir_w;
@@ -62,9 +64,21 @@ class Image_Crystal {
     Image_Crystal();
 
     bool load_full_experimental_image();
+    bool roi_defined();
+
+    /** getters **/
     cv::Mat get_full_experimental_image_mat();
     cv::Mat get_roi_experimental_image_mat();
-    bool roi_defined();
+    double get_sampling_rate_experimental_x_nm_per_pixel();
+    double get_sampling_rate_experimental_y_nm_per_pixel();
+
+    std::string get_super_cell_cif_file_path();
+    double get_perpendicular_dir_u();
+    double get_perpendicular_dir_v();
+    double get_perpendicular_dir_w();
+    double get_projection_dir_h();
+    double get_projection_dir_k();
+    double get_projection_dir_l();
 
     //setters
     bool set_experimental_image_path( std::string path );

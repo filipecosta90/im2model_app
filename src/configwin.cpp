@@ -28,7 +28,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
    * In your dialog constructor, you can init the UI now using:
    * **/
   _core_image_crystal = new Image_Crystal();
-  _core_td_map = new TDMap();
+  _core_td_map = new TDMap( _core_image_crystal );
 
   ui->setupUi(this);
   delete ui->mainToolBar; // add this line

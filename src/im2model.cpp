@@ -79,7 +79,7 @@ int main(int argc, char** argv ){
   Unit_Cell unit_cell;
   Super_Cell super_cell;
   Image_Crystal image_crystal;
-  TDMap td_map;
+  //TDMap td_map;
 
   cv::Point3d  zone_axis_vector_uvw;
   cv::Point3d  upward_vector_hkl;
