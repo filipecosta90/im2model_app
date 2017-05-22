@@ -52,6 +52,7 @@ class TreeModel : public QAbstractItemModel {
     //bool operator==(const TreeModel &tree_item_comp );
     void set_data_unique_id( int row, int column, int unique_id );
 
+    QStringList extractStringsFromModel();
   private:
     TreeItem *getItem(const QModelIndex &index) const;
     TreeItem *rootItem;

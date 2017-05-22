@@ -129,7 +129,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
   experimental_roi_dimensions->insertChildren( experimental_roi_dimensions_width );
   experimental_roi_dimensions->insertChildren( experimental_roi_dimensions_height );
 
-  TreeModel *project_setup_image_fields_model = new TreeModel( experimental_image_root );
+  project_setup_image_fields_model = new TreeModel( experimental_image_root );
   ui->qtree_view_project_setup_image->setModel(project_setup_image_fields_model);
   QModelIndex exp_path = project_setup_image_fields_model->index(0,1);
   ui->qtree_view_project_setup_image->setIndexWidget(exp_path,ui->qwidget_load_experimental_image);
@@ -476,8 +476,6 @@ void MainWindow::update_roi_experimental_image_frame(){
   }
 }
 
-
-
 void MainWindow::on_qpush_run_tdmap_clicked()
 {
   _core_td_map->run_tdmap();
@@ -524,7 +522,7 @@ void MainWindow::open()
 
 bool MainWindow::save()
 {
-  if (curFile.isEmpty()) {
+  if ( curFile.isEmpty() ){
     return saveAs();
   } else {
     return saveFile(curFile);
@@ -599,10 +597,6 @@ void MainWindow::createActions()
   QAction *aboutAct = helpMenu->addAction(tr("&About"), this, &MainWindow::about);
   aboutAct->setStatusTip(tr("Show the application's About box"));
 
-
-  QAction *aboutQtAct = helpMenu->addAction(tr("About &Qt"), qApp, &QApplication::aboutQt);
-  aboutQtAct->setStatusTip(tr("Show the Qt library's About box"));
-
 }
 
 void MainWindow::updateStatusBar()
@@ -627,6 +621,10 @@ void MainWindow::readSettings()
 void MainWindow::writeSettings()
 {
   QSettings settings(QCoreApplication::organizationName(), QCoreApplication::applicationName());
+  QStringList List = project_setup_image_fields_model->extractStringsFromModel();
+  settings.beginGroup("image_crystal");
+  settings.setValue("project_setup_image_fields_model", QVariant::fromValue(List));
+  settings.endGroup();
   settings.setValue("geometry", saveGeometry());
 }
 
@@ -674,7 +672,7 @@ void MainWindow::loadFile(const QString &fileName)
   QApplication::restoreOverrideCursor();
 #endif
 
-  setCurrentFile(fileName);
+  this->setCurrentFile(fileName);
   ui->statusBar->showMessage(tr("File loaded"), 2000);
 }
 
@@ -712,9 +710,10 @@ void MainWindow::setCurrentFile(const QString &fileName)
   setWindowModified(false);
 
   QString shownName = curFile;
-  if (curFile.isEmpty())
-    shownName = "untitled.txt";
-  setWindowFilePath(shownName);
+  if (curFile.isEmpty()){
+    shownName = "untitled.im2model";
+  }
+  this->setWindowFilePath(shownName);
 }
 
 QString MainWindow::strippedName(const QString &fullFileName)

@@ -36,7 +36,6 @@ TreeItem::TreeItem( QVector<QVariant> &data, boost::function<bool(std::string)> 
   is_checkable = false;
 }
 
-
 TreeItem::TreeItem( QVector<QVariant> &data, TreeItem *parent)
 {
   itemData = data;
@@ -61,10 +60,11 @@ int TreeItem::childCount() const
 
 int TreeItem::childNumber() const
 {
-  if (parentItem)
-    return parentItem->childItems.indexOf(const_cast<TreeItem*>(this));
-
-  return 0;
+    int child_number = 0;
+  if ( parentItem ){
+    child_number = parentItem->childItems.indexOf(const_cast<TreeItem*>(this));
+  }
+  return child_number;
 }
 
 int TreeItem::columnCount() const
@@ -94,8 +94,9 @@ bool TreeItem::insertChildren(TreeItem *item){
 
 bool TreeItem::insertChildren(int position, int count, int columns)
 {
-  if (position < 0 || position > childItems.size())
+  if (position < 0 || position > childItems.size()){
     return false;
+  }
 
   for (int row = 0; row < count; ++row) {
     QVector< QVariant > data;

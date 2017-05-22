@@ -16,6 +16,8 @@
 
 #include "image_crystal.hpp"
 #include "td_map.hpp"
+#include "treemodel.h"
+
 
 namespace Ui {
   class MainWindow;
@@ -42,10 +44,10 @@ class MainWindow : public QMainWindow {
 
     // menu slots
     void newFile();
-        void open();
-        bool save();
-        bool saveAs();
-        void about();
+    void open();
+    bool save();
+    bool saveAs();
+    void about();
     void documentWasModified();
 
 signals:
@@ -53,21 +55,23 @@ signals:
 
   private:
 
+    // menu methods
     void createActions();
-       void updateStatusBar();
-       void readSettings();
-       void writeSettings();
-       bool maybeSave();
-       bool saveFile(const QString &fileName);
-       void setCurrentFile(const QString &fileName);
-       QString strippedName(const QString &fullFileName);
+    void updateStatusBar();
+    void readSettings();
+    void writeSettings();
+    bool maybeSave();
+    bool saveFile(const QString &fileName);
+    void setCurrentFile(const QString &fileName);
+    QString strippedName(const QString &fullFileName);
 
 
     QString curFile;
-
     Ui::MainWindow *ui;
     Image_Crystal *_core_image_crystal;
     TDMap *_core_td_map;
+
+    TreeModel *project_setup_image_fields_model;
 };
 
 #endif // CONFIGWIN_H
