@@ -46,6 +46,8 @@ HEADERS  += configwin.h \
     td_map.hpp \
     image_crystal.hpp
 
+RESOURCES     = ../im2model.qrc
+
 FORMS    += configwin.ui
 
 INCLUDEPATH += /usr/local/Cellar/boost/1.64.0_1/

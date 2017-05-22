@@ -13,6 +13,9 @@
 
 int main(int argc, char *argv[])
 {
+    // to access resources
+    Q_INIT_RESOURCE(im2model);
+
   QApplication app(argc, argv);
   MainWindow window;
   window.show();

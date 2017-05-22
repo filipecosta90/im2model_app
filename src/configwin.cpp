@@ -13,8 +13,14 @@
 #include <QFileSystemModel>
 #include <QTreeView>
 #include <QFile>
+#include <QtWidgets>
+
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow) {
+
+
+  //connect(textEdit->document(), &QTextDocument::contentsChanged,
+  //           this, &MainWindow::documentWasModified);
 
   connect(this, SIGNAL(experimental_image_filename_changed()),
       this, SLOT(update_full_experimental_image_frame()));
@@ -31,7 +37,12 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
   _core_td_map = new TDMap( _core_image_crystal );
 
   ui->setupUi(this);
-  delete ui->mainToolBar; // add this line
+
+  createActions();
+  updateStatusBar();
+  readSettings();
+  setCurrentFile(QString());
+  setUnifiedTitleAndToolBarOnMac(true);
 
   QVector<QVariant> common_header = {"Field","Value"};
 
@@ -465,9 +476,7 @@ void MainWindow::update_roi_experimental_image_frame(){
   }
 }
 
-void MainWindow::on_actionAbout_triggered(){
 
-}
 
 void MainWindow::on_qpush_run_tdmap_clicked()
 {
@@ -484,4 +493,231 @@ void MainWindow::on_qpush_load_cel_clicked()
     ui->qline_cel_file_path->setText(fileName);
     _core_image_crystal->set_unit_cell_cel_path( fileName.toStdString() );
   }
+}
+
+void MainWindow::closeEvent(QCloseEvent *event)
+{
+  if (maybeSave()) {
+    writeSettings();
+    event->accept();
+  } else {
+    event->ignore();
+  }
+}
+
+void MainWindow::newFile()
+{
+  if (maybeSave()) {
+    //textEdit->clear();
+    setCurrentFile(QString());
+  }
+}
+
+void MainWindow::open()
+{
+  if (maybeSave()) {
+    QString fileName = QFileDialog::getOpenFileName(this);
+    if (!fileName.isEmpty())
+      loadFile(fileName);
+  }
+}
+
+bool MainWindow::save()
+{
+  if (curFile.isEmpty()) {
+    return saveAs();
+  } else {
+    return saveFile(curFile);
+  }
+}
+
+bool MainWindow::saveAs()
+{
+  QFileDialog dialog(this);
+  dialog.setWindowModality(Qt::WindowModal);
+  dialog.setAcceptMode(QFileDialog::AcceptSave);
+  if (dialog.exec() != QDialog::Accepted)
+    return false;
+  return saveFile(dialog.selectedFiles().first());
+}
+
+void MainWindow::about()
+{
+  QMessageBox::about(this, tr("About Application"),
+      tr("The <b>Application</b> example demonstrates how to "
+        "write modern GUI applications using Qt, with a menu bar, "
+        "toolbars, and a status bar."));
+}
+
+void MainWindow::documentWasModified()
+{
+  // setWindowModified(textEdit->document()->isModified());
+}
+
+
+void MainWindow::createActions()
+{
+
+  QMenu *fileMenu = ui->menuBar->addMenu(tr("&File"));
+  //QToolBar *fileToolBar = addToolBar(tr("File"));
+  const QIcon newIcon = QIcon::fromTheme("document-new", QIcon(":/Icons/MenuIconNew32"));
+  QAction *newAct = new QAction(newIcon, tr("&New"), this);
+  newAct->setShortcuts(QKeySequence::New);
+  newAct->setStatusTip(tr("Create a new file"));
+  connect(newAct, &QAction::triggered, this, &MainWindow::newFile);
+  fileMenu->addAction(newAct);
+
+  const QIcon openIcon = QIcon::fromTheme("document-open", QIcon( ":/Icons/MenuIconOpen32"));
+  QAction *openAct = new QAction(openIcon, tr("&Open..."), this);
+  openAct->setShortcuts(QKeySequence::Open);
+  openAct->setStatusTip(tr("Open an existing file"));
+  connect(openAct, &QAction::triggered, this, &MainWindow::open);
+  fileMenu->addAction(openAct);
+
+  const QIcon saveIcon = QIcon::fromTheme("document-save", QIcon(":/Icons/MenuIconSave32"));
+  QAction *saveAct = new QAction(saveIcon, tr("&Save"), this);
+  saveAct->setShortcuts(QKeySequence::Save);
+  saveAct->setStatusTip(tr("Save the document to disk"));
+  connect(saveAct, &QAction::triggered, this, &MainWindow::save);
+  fileMenu->addAction(saveAct);
+
+  const QIcon saveAsIcon = QIcon::fromTheme("document-save-as");
+  QAction *saveAsAct = fileMenu->addAction(saveAsIcon, tr("Save &As..."), this, &MainWindow::saveAs);
+  saveAsAct->setShortcuts(QKeySequence::SaveAs);
+  saveAsAct->setStatusTip(tr("Save the document under a new name"));
+
+  fileMenu->addSeparator();
+
+  const QIcon exitIcon = QIcon::fromTheme("application-exit");
+  QAction *exitAct = fileMenu->addAction(exitIcon, tr("E&xit"), this, &QWidget::close);
+  exitAct->setShortcuts(QKeySequence::Quit);
+  exitAct->setStatusTip(tr("Exit the application"));
+
+  QMenu *editMenu = ui->menuBar->addMenu(tr("&Edit"));
+
+  QMenu *helpMenu = ui->menuBar->addMenu(tr("&Help"));
+  QAction *aboutAct = helpMenu->addAction(tr("&About"), this, &MainWindow::about);
+  aboutAct->setStatusTip(tr("Show the application's About box"));
+
+
+  QAction *aboutQtAct = helpMenu->addAction(tr("About &Qt"), qApp, &QApplication::aboutQt);
+  aboutQtAct->setStatusTip(tr("Show the Qt library's About box"));
+
+}
+
+void MainWindow::updateStatusBar()
+{
+  ui->statusBar->showMessage(tr("Ready"));
+}
+
+void MainWindow::readSettings()
+{
+  QSettings settings(QCoreApplication::organizationName(), QCoreApplication::applicationName());
+  const QByteArray geometry = settings.value("geometry", QByteArray()).toByteArray();
+  if (geometry.isEmpty()) {
+    const QRect availableGeometry = QApplication::desktop()->availableGeometry(this);
+    resize(availableGeometry.width() / 3, availableGeometry.height() / 2);
+    move((availableGeometry.width() - width()) / 2,
+        (availableGeometry.height() - height()) / 2);
+  } else {
+    restoreGeometry(geometry);
+  }
+}
+
+void MainWindow::writeSettings()
+{
+  QSettings settings(QCoreApplication::organizationName(), QCoreApplication::applicationName());
+  settings.setValue("geometry", saveGeometry());
+}
+
+bool MainWindow::maybeSave()
+{
+  // if (!textEdit->document()->isModified())
+  //    return true;
+  const QMessageBox::StandardButton ret
+    = QMessageBox::warning(this, tr("Application"),
+        tr("The document has been modified.\n"
+          "Do you want to save your changes?"),
+        QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
+  switch (ret) {
+    case QMessageBox::Save:
+      return save();
+    case QMessageBox::Cancel:
+      return false;
+    default:
+      break;
+  }
+  return true;
+}
+
+void MainWindow::loadFile(const QString &fileName)
+{
+  QFile file(fileName);
+  if (!file.open(QFile::ReadOnly | QFile::Text)) {
+    QMessageBox::warning(this, tr("Application"),
+        tr("Cannot read file %1:\n%2.")
+        .arg(QDir::toNativeSeparators(fileName), file.errorString()));
+    return;
+  }
+
+  QTextStream in(&file);
+#ifndef QT_NO_CURSOR
+  QApplication::setOverrideCursor(Qt::WaitCursor);
+#endif
+
+  // HERE
+
+
+
+  //textEdit->setPlainText(in.readAll());
+#ifndef QT_NO_CURSOR
+  QApplication::restoreOverrideCursor();
+#endif
+
+  setCurrentFile(fileName);
+  ui->statusBar->showMessage(tr("File loaded"), 2000);
+}
+
+bool MainWindow::saveFile(const QString &fileName)
+{
+  QFile file(fileName);
+  if (!file.open(QFile::WriteOnly | QFile::Text)) {
+    QMessageBox::warning(this, tr("Application"),
+        tr("Cannot write file %1:\n%2.")
+        .arg(QDir::toNativeSeparators(fileName),
+          file.errorString()));
+    return false;
+  }
+
+  QTextStream out(&file);
+#ifndef QT_NO_CURSOR
+  QApplication::setOverrideCursor(Qt::WaitCursor);
+#endif
+  //    out << textEdit->toPlainText();
+
+
+#ifndef QT_NO_CURSOR
+  QApplication::restoreOverrideCursor();
+#endif
+
+  setCurrentFile(fileName);
+  ui->statusBar->showMessage(tr("File saved"), 2000);
+  return true;
+}
+
+void MainWindow::setCurrentFile(const QString &fileName)
+{
+  curFile = fileName;
+  // textEdit->document()->setModified(false);
+  setWindowModified(false);
+
+  QString shownName = curFile;
+  if (curFile.isEmpty())
+    shownName = "untitled.txt";
+  setWindowFilePath(shownName);
+}
+
+QString MainWindow::strippedName(const QString &fullFileName)
+{
+  return QFileInfo(fullFileName).fileName();
 }
