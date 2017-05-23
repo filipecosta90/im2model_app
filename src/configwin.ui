@@ -21,7 +21,7 @@
     <item>
      <widget class="QTabWidget" name="tabWidget">
       <property name="currentIndex">
-       <number>0</number>
+       <number>1</number>
       </property>
       <widget class="QWidget" name="image_crystal_tab">
        <attribute name="title">
@@ -326,8 +326,8 @@
        <attribute name="title">
         <string>TD Map</string>
        </attribute>
-       <layout class="QGridLayout" name="gridLayout_2" columnstretch="2,4,1">
-        <item row="0" column="0" rowspan="3">
+       <layout class="QGridLayout" name="gridLayout_2" columnstretch="3,7,1">
+        <item row="0" column="0">
          <layout class="QVBoxLayout" name="verticalLayout" stretch="1,0">
           <item>
            <widget class="QSplitter" name="splitter_layout_simulation_configuration_output">
@@ -385,11 +385,18 @@
                   <rect>
                    <x>0</x>
                    <y>0</y>
-                   <width>282</width>
-                   <height>380</height>
+                   <width>251</width>
+                   <height>366</height>
                   </rect>
                  </property>
                 </widget>
+               </widget>
+              </item>
+              <item>
+               <widget class="QProgressBar" name="qprogress_bar_tdmap">
+                <property name="value">
+                 <number>24</number>
+                </property>
                </widget>
               </item>
              </layout>
@@ -436,13 +443,6 @@
               </item>
              </layout>
             </item>
-            <item>
-             <widget class="QProgressBar" name="qprogress_bar_tdmap">
-              <property name="value">
-               <number>24</number>
-              </property>
-             </widget>
-            </item>
            </layout>
           </item>
          </layout>
@@ -468,7 +468,10 @@
          </layout>
         </item>
         <item row="0" column="2">
-         <layout class="QVBoxLayout" name="vertical_layout_TD_best_match">
+         <layout class="QVBoxLayout" name="vertical_layout_TD_best_match" stretch="0,0,0,0">
+          <property name="sizeConstraint">
+           <enum>QLayout::SetMaximumSize</enum>
+          </property>
           <item>
            <widget class="QLabel" name="qlabel_full_experimental_image_5">
             <property name="font">
@@ -513,14 +516,44 @@
             </property>
            </widget>
           </item>
+          <item>
+           <widget class="QTableWidget" name="tableWidget">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Minimum" vsizetype="Maximum">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <row>
+             <property name="text">
+              <string>Thickness</string>
+             </property>
+            </row>
+            <row>
+             <property name="text">
+              <string>Defocus</string>
+             </property>
+            </row>
+            <row>
+             <property name="text">
+              <string>Match %</string>
+             </property>
+            </row>
+            <column>
+             <property name="text">
+              <string>Value</string>
+             </property>
+            </column>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="pushButton">
+            <property name="text">
+             <string>Accept</string>
+            </property>
+           </widget>
+          </item>
          </layout>
-        </item>
-        <item row="1" column="2">
-         <widget class="QPushButton" name="pushButton">
-          <property name="text">
-           <string>Accept</string>
-          </property>
-         </widget>
         </item>
        </layout>
       </widget>

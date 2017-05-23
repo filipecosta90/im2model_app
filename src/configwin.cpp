@@ -131,6 +131,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
   project_setup_image_fields_model = new TreeModel( experimental_image_root );
   ui->qtree_view_project_setup_image->setModel(project_setup_image_fields_model);
+  project_setup_image_fields_model_index = project_setup_image_fields_model->index(0,0);
   QModelIndex exp_path = project_setup_image_fields_model->index(0,1);
   ui->qtree_view_project_setup_image->setIndexWidget(exp_path,ui->qwidget_load_experimental_image);
 
@@ -245,7 +246,6 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
   ui->qtree_view_project_setup_image->expandAll();
   ui->qtree_view_project_setup_crystallography->expandAll();
-
 
   for (int column = 0; column < project_setup_image_fields_model->columnCount(); ++column){
     ui->qtree_view_project_setup_image->resizeColumnToContents(column);
@@ -622,10 +622,15 @@ void MainWindow::writeSettings()
 {
   QSettings settings(QCoreApplication::organizationName(), QCoreApplication::applicationName());
   QStringList List = project_setup_image_fields_model->extractStringsFromModel();
-  settings.beginGroup("image_crystal");
-  settings.setValue("project_setup_image_fields_model", QVariant::fromValue(List));
-  settings.endGroup();
+  std::cout << "|" << QCoreApplication::organizationDomain().toStdString() << "|" << QCoreApplication::organizationName().toStdString() <<"|" <<  QCoreApplication::applicationName().toStdString() << "  " << List.size() << std::endl;
+  settings.beginGroup("Setup_Parameter");
+  settings.setValue("Parameter1",1);
+  settings.setValue("project_setup_image_fields_model", List );
   settings.setValue("geometry", saveGeometry());
+  settings.sync();
+  sync();
+  settings.endGroup();
+
 }
 
 bool MainWindow::maybeSave()

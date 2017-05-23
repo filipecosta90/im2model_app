@@ -6,6 +6,8 @@
 #include <QVector>
 
 #include "boost/function.hpp"
+#include <QAbstractItemModel>
+#include <QModelIndex>
 
 Q_DECLARE_METATYPE(std::string)
 
@@ -37,6 +39,8 @@ Q_DECLARE_METATYPE(std::string)
     bool isItemEditable( int column ) const;
     void setCheckable( bool set );
     bool setData(int column, const QVariant &value);
+    QStringList extractStringsFromItem();
+
 
 signals:
     void dataChanged( int column );

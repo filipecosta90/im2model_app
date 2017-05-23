@@ -59,6 +59,7 @@ signals:
 
     /* CORE IM2MODEL*/
     TDMap* core_tdmap;
+    bool _flag_core_tdmap = false;
 
     /* VISUAL TDMAP vars */
     int _treeitem_thickness_range_number_samples_watch_col;

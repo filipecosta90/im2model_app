@@ -201,3 +201,21 @@ void TreeItem::setCheckable( bool set )
   is_checkable = set;
 }
 
+
+QStringList TreeItem::extractStringsFromItem()
+{
+    QStringList retval;
+
+    for(int column = 0 ; column < itemData.size(); column++ ){
+        retval << itemData.value(column).toString();
+        std::cout << itemData.value(column).toString().toStdString() << std::endl;
+    }
+    for(int row = 0 ; row < childItems.size(); row++ ){
+            TreeItem* _child_item = childItems.at(row);
+            retval << _child_item->extractStringsFromItem( );
+        }
+    return retval;
+}
+
+
+

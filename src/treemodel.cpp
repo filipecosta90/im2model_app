@@ -200,11 +200,5 @@ bool TreeModel::setHeaderData(int section, Qt::Orientation orientation,
 
 QStringList TreeModel::extractStringsFromModel()
 {
-    QStringList retval;
-    std::cout << "TreeModel has " <<   rowCount() << " rows " << std::endl;
-    for ( int row = 0; row < rowCount(); row++ ){
-        TreeItem* _child = rootItem->child(row);
-        //retval << _child->itemData().toString();
-    }
-    return retval;
+    return rootItem->extractStringsFromItem();
 }

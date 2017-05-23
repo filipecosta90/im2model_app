@@ -22,6 +22,7 @@
 
 void TDMap_Table::set_tdmap( TDMap* map ){
   core_tdmap = map;
+  _flag_core_tdmap = true;
 }
 
 
@@ -61,11 +62,41 @@ void TDMap_Table::clear()
   setColumnCount(0);
   setRowCount(RowCount);
   setColumnCount(ColumnCount);
+  double _defocus_lower = 0.0f;
+  double _defocus_period = 0.0f;
+  int _thickness_lower_slice = 0;
+  int _thickness_period_slice = 0;
+  if( _flag_core_tdmap ){
+    if( core_tdmap->_is_defocus_range_lower_bound_defined() ){
+      _defocus_lower = core_tdmap->get_defocus_range_lower_bound();
+    }
+    if(  core_tdmap->_is_defocus_period_defined() ){
+      _defocus_period = core_tdmap->get_defocus_range_period();
+    }
+
+    if( core_tdmap->_is_thickness_range_lower_bound_slice_defined() ){
+      _thickness_lower_slice = core_tdmap->get_thickness_range_lower_bound_slice();
+    }
+    if( core_tdmap->_is_thickness_period_slice_defined() ){
+      _thickness_period_slice = core_tdmap->get_thickness_range_period_slice();
+    }
+  }
+
   for (int i = 0; i < ColumnCount; ++i) {
     QTableWidgetItem *item = new QTableWidgetItem;
-    item->setText(QString(QChar('A' + i)));
+    double _at_defocus = _defocus_lower + ( _defocus_period * i );
+    item->setText( QString::number( _at_defocus ) );
     setHorizontalHeaderItem(i, item);
   }
+
+  for (int i = 0; i < RowCount; ++i) {
+    QTableWidgetItem *item = new QTableWidgetItem;
+    const int at_slice = round( _thickness_lower_slice + _thickness_period_slice * ( i )  );
+    //const double slice_thickness_nm = _accum_nm_slice_vec.at(at_slice-1);
+    item->setText( QString::number( at_slice ) );
+    setVerticalHeaderItem(i, item);
+  }
+
   setCurrentCell(0, 0);
 }
 

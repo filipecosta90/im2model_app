@@ -72,6 +72,8 @@ signals:
     TDMap *_core_td_map;
 
     TreeModel *project_setup_image_fields_model;
+    QModelIndex project_setup_image_fields_model_index;
+
 };
 
 #endif // CONFIGWIN_H

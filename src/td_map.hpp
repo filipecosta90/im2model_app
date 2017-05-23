@@ -28,6 +28,13 @@ class TDMap {
     double user_estimated_thickness_nm;
     int user_estimated_thickness_slice;
     std::vector<double> celslc_accum_nm_slice_vec;
+    bool _flag_thickness_lower_bound = false;
+    bool _flag_thickness_upper_bound = false;
+    bool _flag_thickness_samples = false;
+    bool _flag_thickness_period_vec = false;
+    bool _flag_thickness_lower_bound_slice = false;
+    bool _flag_thickness_upper_bound_slice = false;
+    bool _flag_thickness_period_slice = false;
 
     /////////////////////////
     // Simulated Defocus info
@@ -36,10 +43,12 @@ class TDMap {
     double defocus_lower_bound;
     double defocus_upper_bound;
     double defocus_period;
-    bool _flag_defocus_lower_bound, _flag_defocus_upper_bound, _flag_defocus_samples, _flag_defocus_period;
+    bool _flag_defocus_lower_bound = false;
+    bool _flag_defocus_upper_bound = false;
+    bool _flag_defocus_samples = false;
+    bool _flag_defocus_period = false;
 
     double user_estimated_defocus_nm;
-
 
     double ht_accelaration_voltage;
     bool _flag_ht_accelaration_voltage = false;
@@ -124,7 +133,38 @@ class TDMap {
     bool prepare_celslc_parameters();
     bool run_tdmap();
 
+    // thickness nm
+    bool _is_thickness_range_lower_bound_defined();
+    bool _is_thickness_period_defined();
+    bool _is_thickness_range_upper_bound_defined();
+    // thickness #slice
+    bool _is_thickness_range_lower_bound_slice_defined();
+    bool _is_thickness_period_slice_defined();
+    bool _is_thickness_range_upper_bound_slice_defined();
+
+    bool _is_defocus_range_lower_bound_defined();
+    bool _is_defocus_period_defined();
+    bool _is_defocus_range_upper_bound_defined();
+
     /** getters **/
+
+    int get_thickness_range_number_samples( );
+
+    double get_thickness_range_lower_bound( );
+    int get_thickness_range_lower_bound_slice( );
+
+    double get_thickness_range_upper_bound( );
+    int get_thickness_range_upper_bound_slice( );
+
+    int get_thickness_range_period_slice( );
+
+    int get_defocus_range_number_samples( );
+
+    double get_defocus_range_lower_bound( );
+
+    double get_defocus_range_upper_bound( );
+
+    double get_defocus_range_period( );
 
     /** setters **/
     bool set_thickness_range_lower_bound( std::string lower_bound );
@@ -140,10 +180,6 @@ class TDMap {
     bool set_defocus_range_number_samples( std::string number_samples );
 
     bool set_accelaration_voltage_kv( std::string accelaration_voltage );
-
-    int get_thickness_range_number_samples( );
-
-    int get_defocus_range_number_samples( );
 
     bool set_core_image_crystal_ptr( Image_Crystal* image_crystal_ptr );
 

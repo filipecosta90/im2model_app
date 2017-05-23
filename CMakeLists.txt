@@ -4,7 +4,7 @@ cmake_minimum_required(VERSION 3.6.2)
 set (CMAKE_CXX_COMPILER "clang++" )
 set (CMAKE_CXX_STANDARD 14)
 
-project( MSC_IM2MODEL )
+project( Im2Model )
 
 set(BUILD_SHARED_LIBS ON CACHE BOOL "" FORCE)
 ADD_DEFINITIONS(-DOpenCV_STATIC=OFF )
@@ -30,9 +30,9 @@ if(build_gui)
   fix_project_version()
 
   # Set additional project information
-  set(COMPANY "Im2Model")
+  set(COMPANY "di")
   set(COPYRIGHT "Copyright (c) 2017 Dr. Alberto José Proença, Dr. Daniel G. Stroppa, Filipe Oliveira. All rights reserved.")
-  set(IDENTIFIER "com.example.Example")
+  set(IDENTIFIER "uminho")
 
   add_project_meta(META_FILES_TO_INCLUDE)
 
@@ -42,7 +42,10 @@ if(build_gui)
   #  set(CMAKE_AUTOMOC ON)
   #set(CMAKE_INCLUDE_CURRENT_DIR ON)
   # Find the QtWidgets library
-  find_package( Qt5Widgets REQUIRED )
+  message(STATUS "Building the Qt5 version")
+  find_package(Qt5Core 5.2 REQUIRED)
+  find_package(Qt5Gui REQUIRED)
+  find_package(Qt5Widgets REQUIRED)
 else(build_gui)
   message(STATUS "GUI disabled. building only command-line im2model")
 endif(build_gui)

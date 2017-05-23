@@ -73,6 +73,7 @@ bool  TDMap::calculate_simulation_defocus_period(){
     _flag_defocus_period = true;
   }
   std::cout << "defocus period " <<  defocus_period << std::endl;
+  return _flag_defocus_period;
 }
 
 bool TDMap::run_tdmap(){
@@ -87,7 +88,6 @@ bool TDMap::run_tdmap(){
   if ( status && _run_wavimg_switch ){
 
   }
-
   if ( status && _run_simgrid_switch ){
 
   }
@@ -130,21 +130,96 @@ bool  TDMap::prepare_celslc_parameters(){
   return _flag_tdmap_celslc_parameters;
 }
 
+bool TDMap::_is_thickness_range_lower_bound_defined(){
+  return _flag_thickness_lower_bound;
+}
+
+bool TDMap::_is_thickness_range_lower_bound_slice_defined(){
+  return _flag_thickness_lower_bound_slice;
+}
+
+bool TDMap::_is_thickness_period_slice_defined(){
+  return _flag_thickness_period_slice;
+}
+
+bool TDMap::_is_thickness_range_upper_bound_defined(){
+  return _flag_thickness_upper_bound;
+}
+
+bool TDMap::_is_thickness_range_upper_bound_slice_defined(){
+  return _flag_thickness_upper_bound_slice;
+}
+
+bool TDMap::_is_defocus_range_lower_bound_defined(){
+  return _flag_defocus_lower_bound;
+}
+
+bool TDMap::_is_defocus_period_defined(){
+  return _flag_defocus_period;
+}
+
+bool TDMap::_is_defocus_range_upper_bound_defined(){
+  return _flag_defocus_upper_bound;
+}
+
 /** getters **/
+
+int TDMap::get_thickness_range_number_samples( ){
+  return slice_samples;
+}
+
+double TDMap::get_thickness_range_lower_bound( ){
+  return nm_lower_bound;
+}
+
+int TDMap::get_thickness_range_lower_bound_slice( ){
+  return slices_lower_bound;
+}
+
+double TDMap::get_thickness_range_upper_bound( ){
+  return nm_upper_bound;
+}
+
+int TDMap::get_thickness_range_upper_bound_slice( ){
+  return slices_upper_bound;
+}
+
+int TDMap::get_thickness_range_period_slice() {
+  return slice_period;
+}
+
+int TDMap::get_defocus_range_number_samples( ){
+  return defocus_samples;
+}
+
+double TDMap::get_defocus_range_lower_bound( ){
+  return defocus_lower_bound;
+}
+
+double TDMap::get_defocus_range_upper_bound( ){
+  return defocus_upper_bound;
+}
+
+double TDMap::get_defocus_range_period( ){
+  return defocus_period;
+}
 
 /** setters **/
 bool TDMap::set_thickness_range_lower_bound( std::string lower_bound ){
   nm_lower_bound = boost::lexical_cast<double>(lower_bound);
+  _flag_thickness_lower_bound = true;
   return true;
 }
 
 bool TDMap::set_thickness_range_upper_bound( std::string upper_bound ){
   nm_upper_bound = boost::lexical_cast<double>(upper_bound);
+  _flag_thickness_upper_bound = true;
   return true;
 }
 
 bool TDMap::set_thickness_range_number_samples( std::string number_samples ){
   slice_samples = boost::lexical_cast<int>( number_samples );
+  _flag_thickness_samples = true;
   return true;
 }
 
@@ -174,16 +249,9 @@ bool TDMap::set_accelaration_voltage_kv( std::string accelaration_voltage ){
   return true;
 }
 
-int TDMap::get_thickness_range_number_samples( ){
-  return slice_samples;
-}
-
-int TDMap::get_defocus_range_number_samples( ){
-  return defocus_samples;
-}
-
 bool TDMap::set_core_image_crystal_ptr( Image_Crystal* image_crystal_ptr ){
   _core_image_crystal_ptr = image_crystal_ptr;
+  return true;
 }
 
 
