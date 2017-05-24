@@ -93,7 +93,7 @@ WAVIMG_prm::WAVIMG_prm()
 }
 
 WAVIMG_prm::WAVIMG_prm( std::string wavimg_bin_path ) : WAVIMG_prm(){
-    bin_path = wavimg_bin_path;
+  bin_path = wavimg_bin_path;
 }
 
 WAVIMG_prm::WAVIMG_prm(const WAVIMG_prm &obj){

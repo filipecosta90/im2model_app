@@ -60,17 +60,22 @@ class TDMap {
     /////////////////////////
     CELSLC_prm* _tdmap_celslc_parameters;
     bool _flag_tdmap_celslc_parameters = false;
+    bool _flag_runned_tdmap_celslc = false;
     bool _run_celslc_switch = true;
 
     MSA_prm* _tdmap_msa_parameters;
     bool _flag_tdmap_msa_parameters = false;
+    bool _flag_runned_tdmap_msa = false;
     bool _run_msa_switch = false;
-
 
     WAVIMG_prm* _tdmap_wavimg_parameters;
     bool _flag_tdmap_wavimg_parameters = false;
+    bool _flag_runned_tdmap_wavimg = false;
     bool _run_wavimg_switch = false;
 
+    std::string wave_function_name;
+    std::string wavimg_prm_name;
+    std::string file_name_output_image_wave_function;
 
     SIMGRID_wavimg_steplength* _td_map_simgrid;
     bool _flag_td_map_simgrid = false;
@@ -123,6 +128,7 @@ class TDMap {
     int reshaped_simulated_image_height;
 
     std::string slc_file_name_prefix;
+    bool _flag_slc_file_name_prefix;
     std::string celslc_bin_string;
 
     bool calculate_simulation_defocus_period();
@@ -131,10 +137,32 @@ class TDMap {
     TDMap( Image_Crystal *image_crystal_ptr );
     /** others **/
     bool prepare_ZA_UV();
+
+    /*
+     * PREPARATION  METHODS
+    */
     bool calculate_simulated_image_sampling_rate_and_size();
+    // thickness slice nm
+
+    // thickness slice #
+    bool calculate_thickness_range_upper_bound_slice_from_nm();
+    bool calculate_thickness_range_lower_bound_slice_from_nm();
+    bool calculate_thickness_range_slice_period();
+    bool set_number_slices_to_max_thickness_from_nz_simulated_partitions();
+    bool set_number_slices_to_load_from_nz_simulated_partitions();
+
     bool prepare_celslc_parameters();
+
+    bool prepare_msa_parameters();
+
+    /*
+     * RUN METHODS
+    */
     bool run_tdmap();
 
+    /*
+     * ASSERT TYPE METHODS
+    */
     // thickness nm
     bool _is_thickness_range_lower_bound_defined();
     bool _is_thickness_period_defined();
@@ -143,12 +171,15 @@ class TDMap {
     bool _is_thickness_range_lower_bound_slice_defined();
     bool _is_thickness_period_slice_defined();
     bool _is_thickness_range_upper_bound_slice_defined();
-    bool calculate_thickness_range_upper_bound_slice_from_nm();
-    bool calculate_thickness_range_lower_bound_slice_from_nm();
-
+    // defocus nm
     bool _is_defocus_range_lower_bound_defined();
     bool _is_defocus_period_defined();
     bool _is_defocus_range_upper_bound_defined();
+    // ht accelaration voltage
+    bool _is_ht_accelaration_voltage_defined();
+
+    // advanced options
+    bool _is_slc_file_name_prefix_defined();
 
     /** getters **/
 

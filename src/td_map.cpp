@@ -25,6 +25,11 @@ TDMap::TDMap( Image_Crystal* image_crystal_ptr ){
   super_cell_size_b = 2.0;
   super_cell_size_c = 16.0;
   slc_file_name_prefix = "test";
+  _flag_slc_file_name_prefix = true;
+
+  wave_function_name = "'wave_sl.wav'";
+  wavimg_prm_name = "temporary_wavimg_im2model.prm";
+  file_name_output_image_wave_function = "'image.dat'";
 
 }
 
@@ -37,9 +42,27 @@ bool TDMap::prepare_ZA_UV(){
   return true;
 }
 
+bool TDMap::set_number_slices_to_max_thickness_from_nz_simulated_partitions(){
+  bool status = false;
+  if ( _tdmap_celslc_parameters->_is_nz_simulated_partitions_defined() ){
+    number_slices_to_max_thickness = _tdmap_celslc_parameters->get_nz_simulated_partitions();
+    status = true;
+  }
+  return status;
+}
+
+bool TDMap::set_number_slices_to_load_from_nz_simulated_partitions(){
+  bool status = false;
+  if ( _tdmap_celslc_parameters->_is_nz_simulated_partitions_defined() ){
+    slices_load = _tdmap_celslc_parameters->get_nz_simulated_partitions();
+    status = true;
+  }
+  return status;
+}
+
 bool TDMap::calculate_simulated_image_sampling_rate_and_size(){
   bool status = false;
-  std::cout << " celslc bin defined " << _tdmap_celslc_parameters->is_celslc_bin_defined() << std::endl;
+  std::cout << " celslc bin defined " << _tdmap_celslc_parameters->_is_celslc_bin_defined() << std::endl;
 
   if( _core_image_crystal_ptr->_is_sampling_rate_experimental_defined() ){
     const double sampling_rate_experimental_x_nm_per_pixel = _core_image_crystal_ptr->get_sampling_rate_experimental_x_nm_per_pixel();
@@ -81,27 +104,69 @@ bool  TDMap::calculate_simulation_defocus_period(){
 }
 
 bool TDMap::calculate_thickness_range_upper_bound_slice_from_nm(){
-    bool result = false;
-    if ( _is_thickness_range_upper_bound_defined() ){
+  bool result = false;
+  if ( _is_thickness_range_upper_bound_defined() ){
     slices_upper_bound = _tdmap_celslc_parameters->get_slice_number_from_nm_floor( nm_upper_bound );
     std::cout << "Calculated slice # " << slices_upper_bound << " as the upper bound for the maximum thickness of: " << nm_upper_bound << " nm" << std::endl;
     result = true;
-    }
-    return result;
+  }
+  return result;
 }
 
 bool TDMap::calculate_thickness_range_lower_bound_slice_from_nm(){
-    bool result = false;
-    if ( _is_thickness_range_lower_bound_defined() ){
+  bool result = false;
+  if ( _is_thickness_range_lower_bound_defined() ){
     slices_lower_bound = _tdmap_celslc_parameters->get_slice_number_from_nm_ceil( nm_lower_bound );
     std::cout << "Calculated slice # " << slices_lower_bound << " as the lower bound for the minimum thickness of: " << nm_lower_bound << " nm" << std::endl;
     if (slices_lower_bound == 0){
-          std::cout << "WARNING: Defined slice lower bound as 0. Going to define slice lower bound as: " << slice_period << std::endl;
-          slices_lower_bound = (int) slice_period;
-        }
-    result = true;
+      std::cout << "WARNING: Defined slice lower bound as 0. Going to define slice lower bound as: 1" << std::endl;
+      slices_lower_bound = 1;
     }
-    return result;
+    _flag_thickness_lower_bound_slice = true;
+    result = true;
+  }
+  return result;
+}
+
+bool TDMap::calculate_thickness_range_slice_period(){
+  bool result = false;
+  if ( _is_thickness_range_lower_bound_slice_defined() && _is_thickness_range_upper_bound_slice_defined() ){
+    int slice_interval = slices_upper_bound - slices_lower_bound;
+    std::div_t divresult;
+    divresult = div (slice_interval, (slice_samples -1) );
+    slice_period = divresult.quot;
+    assert(slice_period >= 1);
+    std::cout << "Calculated slice period of " << slice_period << std::endl;
+    const int remainder_slices = divresult.rem;
+    const int slices_to_period = (slice_samples -1) - remainder_slices;
+    if ( remainder_slices > 0 ){
+      std::cout << "WARNING: an adjustment needs to be made in the slices lower or upper bound." << std::endl;
+      const int increase_top_range = slices_lower_bound + (slice_samples * slice_period );
+      const int decrease_top_range = slices_lower_bound + ((slice_samples-1) * slice_period );
+      const int decrease_bot_range = slices_lower_bound-slices_to_period + (slice_samples * slice_period );
+
+      if ( increase_top_range <= number_slices_to_max_thickness ){
+        std::cout << "Increasing top range to slice #" << increase_top_range << std::endl;
+        std::cout << "Going to use one more sample than the requested " << slice_samples << " samples. Using " << (slice_samples+1) << " samples." << std::endl;
+        slices_upper_bound = increase_top_range;
+        slice_samples++;
+      }
+      else{
+        if( decrease_bot_range >= 1 ){
+          std::cout << "Decreasing bot range to slice #" << decrease_bot_range << std::endl;
+          slices_lower_bound -= slices_to_period;
+          slice_samples++;
+        }
+        else{
+          std::cout << "Decreasing top range to slice #" << decrease_top_range << std::endl;
+          slices_upper_bound = decrease_top_range;
+        }
+      }
+    }
+    _flag_thickness_period_slice = true;
+    result = true;
+  }
+  return result;
 }
 
 bool TDMap::run_tdmap(){
@@ -110,9 +175,17 @@ bool TDMap::run_tdmap(){
   std::cout << " prepare celslc parameters status " << status << std::endl;
   if ( status && _run_celslc_switch ){
     std::cout << "Running ceslc" << std::endl;
-    status = _tdmap_celslc_parameters->call_boost_bin();
+    _flag_runned_tdmap_celslc = _tdmap_celslc_parameters->call_boost_bin();
   }
+  set_number_slices_to_load_from_nz_simulated_partitions();
+  set_number_slices_to_max_thickness_from_nz_simulated_partitions();
+  calculate_thickness_range_lower_bound_slice_from_nm();
+  calculate_thickness_range_upper_bound_slice_from_nm();
+  calculate_thickness_range_slice_period();
+  status = prepare_msa_parameters();
   if ( status && _run_msa_switch ){
+    std::cout << "Running msa" << std::endl;
+    _flag_runned_tdmap_msa = _tdmap_msa_parameters->call_bin();
   }
   if ( status && _run_wavimg_switch ){
 
@@ -130,6 +203,7 @@ bool  TDMap::prepare_celslc_parameters(){
   std::cout << "  _is_unit_cell_cif_path_defined " << _core_image_crystal_ptr->_is_unit_cell_cif_path_defined() << std::endl;
   std::cout << "  _is_perpendicular_dir_defined " << _core_image_crystal_ptr->_is_perpendicular_dir_defined() << std::endl;
   std::cout << "  _flag_ht_accelaration_voltage " << _flag_ht_accelaration_voltage << std::endl;
+  std::cout << "  _is_slc_file_name_prefix_defined " << _is_slc_file_name_prefix_defined() << std::endl;
 
   if( _core_image_crystal_ptr->_is_unit_cell_cif_path_defined()
       && _core_image_crystal_ptr->_is_perpendicular_dir_defined()
@@ -163,6 +237,41 @@ bool  TDMap::prepare_celslc_parameters(){
   return _flag_tdmap_celslc_parameters;
 }
 
+bool  TDMap::prepare_msa_parameters(){
+  _flag_tdmap_msa_parameters = false;
+  std::cout << "  _is_thickness_range_lower_bound_slice_defined " << _is_thickness_range_lower_bound_slice_defined() << std::endl;
+  std::cout << "  _is_thickness_range_upper_bound_slice_defined " << _is_thickness_range_upper_bound_slice_defined() << std::endl;
+  std::cout << "  _is_thickness_period_slice_defined " << _is_thickness_period_slice_defined() << std::endl;
+  std::cout << "  _is_ht_accelaration_voltage_defined " << _is_ht_accelaration_voltage_defined() << std::endl;
+  std::cout << "  _is_slc_file_name_prefix_defined " << _is_slc_file_name_prefix_defined() << std::endl;
+
+  if( _is_thickness_range_lower_bound_slice_defined()
+      && _is_thickness_range_upper_bound_slice_defined()
+      && _is_thickness_period_slice_defined()
+    ){
+    _tdmap_msa_parameters->set_electron_wavelength( ht_accelaration_voltage );
+    _tdmap_msa_parameters->set_internal_repeat_factor_of_super_cell_along_x ( 1 );
+    _tdmap_msa_parameters->set_internal_repeat_factor_of_super_cell_along_y ( 1 );
+    std::stringstream input_prefix_stream;
+    input_prefix_stream << "'" << slc_file_name_prefix << "'";
+    std::string input_prefix_string = input_prefix_stream.str();
+    _tdmap_msa_parameters->set_slice_filename_prefix ( input_prefix_string );
+    _tdmap_msa_parameters->set_number_slices_to_load ( slices_load );
+    _tdmap_msa_parameters->set_number_frozen_lattice_variants_considered_per_slice( 1 );
+    _tdmap_msa_parameters->set_minimum_number_frozen_phonon_configurations_used_generate_wave_functions ( 1 );
+    _tdmap_msa_parameters->set_period_readout_or_detection_in_units_of_slices ( 1 ); // bug
+    _tdmap_msa_parameters->set_number_slices_used_describe_full_object_structure_up_to_its_maximum_thickness ( number_slices_to_max_thickness );
+    _tdmap_msa_parameters->set_linear_slices_for_full_object_structure();
+    _tdmap_msa_parameters->set_prm_file_name("temporary_msa_im2model.prm");
+    _tdmap_msa_parameters->set_wave_function_name ("wave.wav");
+    _tdmap_msa_parameters->produce_prm();
+
+    _flag_tdmap_msa_parameters = true;
+  }
+  return _flag_tdmap_msa_parameters;
+}
+
+
 bool TDMap::_is_thickness_range_lower_bound_defined(){
   return _flag_thickness_lower_bound;
 }
@@ -195,6 +304,13 @@ bool TDMap::_is_defocus_range_upper_bound_defined(){
   return _flag_defocus_upper_bound;
 }
 
+bool TDMap::_is_ht_accelaration_voltage_defined(){
+  return _flag_ht_accelaration_voltage;
+}
+
+bool TDMap::_is_slc_file_name_prefix_defined(){
+  return _flag_slc_file_name_prefix;
+}
 /** getters **/
 
 int TDMap::get_thickness_range_number_samples( ){

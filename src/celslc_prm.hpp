@@ -26,17 +26,20 @@ class CELSLC_prm {
     // [Slice Parameters]
     std::vector<double> slice_params_nm_slice_vec;
     std::vector<double> slice_params_accum_nm_slice_vec;
+    bool _flag_slice_params_accum_nm_slice_vec = false;
+    bool _flag_slice_params_nm_slice_vec = false;
     std::map<int,double> slice_params_nm_slice;
     int nx_simulated_horizontal_samples;
     int ny_simulated_vertical_samples;
     int nz_simulated_partitions;
+    bool _flag_nz_simulated_partitions=false;
     double ht_accelaration_voltage;
 
     // runnable execv info
     bool runned_bin;
     bool ssc_runned_bin;
     std::string bin_path;
-    bool _flag_bin_path_defined;
+    bool _flag_bin_path_defined=false;
     bool dwf_switch;
     bool abs_switch;
 
@@ -61,7 +64,9 @@ class CELSLC_prm {
     CELSLC_prm();
     CELSLC_prm( std::string celslc_bin_path );
 
-    bool is_celslc_bin_defined();
+    bool _is_celslc_bin_defined();
+    bool _is_nz_simulated_partitions_defined();
+    bool _is_slice_params_accum_nm_slice_vec_defined();
 
     void set_prj_dir_hkl( double projection_dir_h, double projection_dir_k, double projection_dir_l );
 

@@ -82,12 +82,20 @@ CELSLC_prm::CELSLC_prm( std::string celslc_bin_path ) : CELSLC_prm() {
   //boost::filesystem::path _full_celslc_path = boost::filesystem::canonical( boost::filesystem::path(celslc_bin_path), boost::filesystem::current_path() );
   //bin_path = std::string(_full_celslc_path.string());
   bin_path = celslc_bin_path;
-    _flag_bin_path_defined = true;
+  _flag_bin_path_defined = true;
 }
 
-bool CELSLC_prm::is_celslc_bin_defined(){
+bool CELSLC_prm::_is_celslc_bin_defined(){
   std::cout << bin_path << std::endl;
   return _flag_bin_path_defined;
+}
+
+bool CELSLC_prm::_is_nz_simulated_partitions_defined(){
+  return _flag_nz_simulated_partitions;
+}
+
+bool CELSLC_prm::_is_slice_params_accum_nm_slice_vec_defined(){
+  return _flag_slice_params_accum_nm_slice_vec;
 }
 
 void CELSLC_prm::set_prj_dir_hkl(double projection_dir_h, double projection_dir_k, double projection_dir_l ){
@@ -320,6 +328,10 @@ bool CELSLC_prm::update_nz_simulated_partitions_from_prm(){
       }
       infile.close();
       result = true;
+      _flag_slice_params_accum_nm_slice_vec = true;
+      _flag_slice_params_nm_slice_vec = true;
+      _flag_nz_simulated_partitions = true;
+
     }
     else{
       std::cout << "Warning: unable to open file \"" << input_prm_stream.str() << "\"" << std::endl;
