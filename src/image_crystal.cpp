@@ -68,12 +68,23 @@ void Image_Crystal::update_roi(){
 void Image_Crystal::update_projection_dir_defined(){
   if( _projection_dir_h_defined && _projection_dir_k_defined && _projection_dir_l_defined ){
     _projection_dir_defined = true;
+    std::cout << " projection dir defined " << std::endl;
+
   }
 }
 
 void Image_Crystal::update_perpendicular_dir_defined(){
   if( _perpendicular_dir_u_defined && _perpendicular_dir_v_defined && _perpendicular_dir_w_defined ){
     _perpendicular_dir_defined = true;
+    std::cout << " perpendicular dir defined " << std::endl;
+  }
+}
+
+void Image_Crystal::update_sampling_rate_experimental_defined(){
+  if( _flag_sampling_rate_experimental_x_nm_per_pixel && _flag_sampling_rate_experimental_y_nm_per_pixel ){
+    _sampling_rate_experimental_defined = true;
+    std::cout << " _sampling rate experimental_defined dir defined " << std::endl;
+
   }
 }
 
@@ -131,12 +142,14 @@ bool Image_Crystal::set_experimental_image_path( std::string path ){
 bool Image_Crystal::set_experimental_sampling_x( std::string sampling_x ){
   sampling_rate_experimental_x_nm_per_pixel = boost::lexical_cast<double>( sampling_x );
   _flag_sampling_rate_experimental_x_nm_per_pixel = true;
+  update_sampling_rate_experimental_defined();
   return true;
 }
 
 bool Image_Crystal::set_experimental_sampling_y( std::string sampling_y ){
   sampling_rate_experimental_y_nm_per_pixel = boost::lexical_cast<double>( sampling_y );
   _flag_sampling_rate_experimental_y_nm_per_pixel = true;
+  update_sampling_rate_experimental_defined();
   return true;
 }
 

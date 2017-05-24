@@ -92,6 +92,10 @@ WAVIMG_prm::WAVIMG_prm()
   runned_bin = false;
 }
 
+WAVIMG_prm::WAVIMG_prm( std::string wavimg_bin_path ) : WAVIMG_prm(){
+    bin_path = wavimg_bin_path;
+}
+
 WAVIMG_prm::WAVIMG_prm(const WAVIMG_prm &obj){
   // line 1
   file_name_input_wave_function = obj.file_name_input_wave_function;

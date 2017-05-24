@@ -9,6 +9,7 @@
 #include <vector>                              // for vector, vector<>::iter...
 #include <system_error>
 
+
 #include <cstdlib>
 #if defined(BOOST_POSIX_API)
 #   include <sys/wait.h>
@@ -56,6 +57,7 @@ CELSLC_prm::CELSLC_prm()
 
   // runnable execv info
   bin_path = "";
+  _flag_bin_path_defined = false;
   dwf_switch = false;
   abs_switch = false;
   cel_format_switch = false;
@@ -73,6 +75,19 @@ CELSLC_prm::CELSLC_prm()
   single_slice_calculation_enabled_switch = true;
   log_std_out = false;
   log_std_err = false;
+}
+
+CELSLC_prm::CELSLC_prm( std::string celslc_bin_path ) : CELSLC_prm() {
+  // runnable execv info
+  //boost::filesystem::path _full_celslc_path = boost::filesystem::canonical( boost::filesystem::path(celslc_bin_path), boost::filesystem::current_path() );
+  //bin_path = std::string(_full_celslc_path.string());
+  bin_path = celslc_bin_path;
+    _flag_bin_path_defined = true;
+}
+
+bool CELSLC_prm::is_celslc_bin_defined(){
+  std::cout << bin_path << std::endl;
+  return _flag_bin_path_defined;
 }
 
 void CELSLC_prm::set_prj_dir_hkl(double projection_dir_h, double projection_dir_k, double projection_dir_l ){
@@ -339,6 +354,8 @@ bool CELSLC_prm::cleanup_bin(){
 }
 
 bool CELSLC_prm::call_boost_bin(){
+  std::cout << "bin path: " << bin_path <<std::endl;
+
   std::stringstream args_stream;
   args_stream << bin_path;
 
@@ -448,9 +465,11 @@ bool CELSLC_prm::prepare_nz_simulated_partitions_from_ssc_prm(){
 }
 
 bool CELSLC_prm::prepare_bin_ssc(){
+  std::cout << "|" << bin_path << std::endl;
+
   std::stringstream args_stream;
   args_stream << bin_path;
-
+  std::cout << args_stream.str() << "|" << bin_path << std::endl;
   if( cif_format_switch  ){
     args_stream << " -cif " << super_cell_cif_file;
   }
@@ -486,6 +505,7 @@ bool CELSLC_prm::prepare_bin_ssc(){
   if ( abs_switch ){
     args_stream << " -abs";
   }
+  std::cout << " prep run with args  " <<  args_stream.str() << std::endl;
   boost::process::system( args_stream.str() ); 
   prepare_nz_simulated_partitions_from_ssc_prm();
   single_slice_calculation_prepare_bin_runned_switch = true;
@@ -572,7 +592,7 @@ bool CELSLC_prm::call_bin_ssc(){
   while (!ssc_queue.empty()){
     //win32 error https://github.com/klemens-morgenstern/boost-process/issues/67
     //ssc_group.wait();
-    
+
     for (auto it = ssc_queue.begin(); it != ssc_queue.end(); ){
       boost::process::child& c = it->second;
       if (!c.running()){

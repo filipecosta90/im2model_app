@@ -14,10 +14,15 @@
 #include <opencv2/core/types.hpp>                         // for Rect, Point3d
 #include <opencv2/imgcodecs.hpp>                          // for imread
 
+#include <boost/process.hpp>
+#include <boost/bind.hpp>
+
 #include "image_crystal.hpp"
 #include "td_map.hpp"
 #include "treemodel.h"
-
+#include "ui_configwin.h"
+#include "treeitem.h"
+#include "cv_image_widget.h"
 
 namespace Ui {
   class MainWindow;
@@ -73,6 +78,11 @@ signals:
 
     TreeModel *project_setup_image_fields_model;
     QModelIndex project_setup_image_fields_model_index;
+    QString m_sSettingsFile;
+
+    QString _qsetting_celslc_bin = ":../Resources/celslc";
+    QString _qsetting_msa_bin = ":../Resources/msa";
+    QString _qsetting_wavimg_bin = ":../Resources/wavimg";
 
 };
 

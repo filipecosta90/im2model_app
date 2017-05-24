@@ -6,6 +6,9 @@
 #include <map>     // for map
 #include <vector>  // for vector
 
+#include <boost/filesystem/operations.hpp>                // for directory_iterator
+#include <boost/filesystem/path.hpp>                      // for path, operator==, oper...
+
 class CELSLC_prm {
   private:
     double prj_dir_h;
@@ -33,6 +36,7 @@ class CELSLC_prm {
     bool runned_bin;
     bool ssc_runned_bin;
     std::string bin_path;
+    bool _flag_bin_path_defined;
     bool dwf_switch;
     bool abs_switch;
 
@@ -55,6 +59,10 @@ class CELSLC_prm {
     bool log_std_err;
   public:
     CELSLC_prm();
+    CELSLC_prm( std::string celslc_bin_path );
+
+    bool is_celslc_bin_defined();
+
     void set_prj_dir_hkl( double projection_dir_h, double projection_dir_k, double projection_dir_l );
 
     void set_prp_dir_uvw( double perpendicular_dir_u , double perpendicular_dir_v , double perpendicular_dir_w );

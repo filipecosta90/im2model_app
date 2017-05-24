@@ -3,12 +3,14 @@
 
 #include <vector>
 #include <string>
+#include <boost/filesystem/operations.hpp>                // for directory_iterator
+#include <boost/filesystem/path.hpp>                      // for path, operator==, oper...
 
+#include "global_def.hpp"
 #include "celslc_prm.hpp"
 #include "msa_prm.hpp"
 #include "wavimg_prm.hpp"
 #include "simgrid_steplength.hpp"
-
 #include "image_crystal.hpp"
 
 class TDMap {
@@ -141,6 +143,8 @@ class TDMap {
     bool _is_thickness_range_lower_bound_slice_defined();
     bool _is_thickness_period_slice_defined();
     bool _is_thickness_range_upper_bound_slice_defined();
+    bool calculate_thickness_range_upper_bound_slice_from_nm();
+    bool calculate_thickness_range_lower_bound_slice_from_nm();
 
     bool _is_defocus_range_lower_bound_defined();
     bool _is_defocus_period_defined();

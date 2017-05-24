@@ -3,9 +3,12 @@
 
 TDMap::TDMap( Image_Crystal* image_crystal_ptr ){
   _core_image_crystal_ptr = image_crystal_ptr;
-  _tdmap_celslc_parameters = new CELSLC_prm();
+  _tdmap_celslc_parameters = new CELSLC_prm( std::string("../Resources/celslc") );
+
   _tdmap_msa_parameters = new MSA_prm();
+
   _tdmap_wavimg_parameters = new WAVIMG_prm();
+
   _td_map_simgrid = new SIMGRID_wavimg_steplength();
   _ignore_edge_pixels_sim_images = 0;
   nx_ny_switch = false;
@@ -22,7 +25,6 @@ TDMap::TDMap( Image_Crystal* image_crystal_ptr ){
   super_cell_size_b = 2.0;
   super_cell_size_c = 16.0;
   slc_file_name_prefix = "test";
-  celslc_bin_string = "DEBUG DEBUG TO DO";
 
 }
 
@@ -37,6 +39,8 @@ bool TDMap::prepare_ZA_UV(){
 
 bool TDMap::calculate_simulated_image_sampling_rate_and_size(){
   bool status = false;
+  std::cout << " celslc bin defined " << _tdmap_celslc_parameters->is_celslc_bin_defined() << std::endl;
+
   if( _core_image_crystal_ptr->_is_sampling_rate_experimental_defined() ){
     const double sampling_rate_experimental_x_nm_per_pixel = _core_image_crystal_ptr->get_sampling_rate_experimental_x_nm_per_pixel();
     const double sampling_rate_experimental_y_nm_per_pixel = _core_image_crystal_ptr->get_sampling_rate_experimental_y_nm_per_pixel();
@@ -76,12 +80,37 @@ bool  TDMap::calculate_simulation_defocus_period(){
   return _flag_defocus_period;
 }
 
+bool TDMap::calculate_thickness_range_upper_bound_slice_from_nm(){
+    bool result = false;
+    if ( _is_thickness_range_upper_bound_defined() ){
+    slices_upper_bound = _tdmap_celslc_parameters->get_slice_number_from_nm_floor( nm_upper_bound );
+    std::cout << "Calculated slice # " << slices_upper_bound << " as the upper bound for the maximum thickness of: " << nm_upper_bound << " nm" << std::endl;
+    result = true;
+    }
+    return result;
+}
+
+bool TDMap::calculate_thickness_range_lower_bound_slice_from_nm(){
+    bool result = false;
+    if ( _is_thickness_range_lower_bound_defined() ){
+    slices_lower_bound = _tdmap_celslc_parameters->get_slice_number_from_nm_ceil( nm_lower_bound );
+    std::cout << "Calculated slice # " << slices_lower_bound << " as the lower bound for the minimum thickness of: " << nm_lower_bound << " nm" << std::endl;
+    if (slices_lower_bound == 0){
+          std::cout << "WARNING: Defined slice lower bound as 0. Going to define slice lower bound as: " << slice_period << std::endl;
+          slices_lower_bound = (int) slice_period;
+        }
+    result = true;
+    }
+    return result;
+}
+
 bool TDMap::run_tdmap(){
   bool status = false;
   status = prepare_celslc_parameters();
+  std::cout << " prepare celslc parameters status " << status << std::endl;
   if ( status && _run_celslc_switch ){
     std::cout << "Running ceslc" << std::endl;
-    status = _tdmap_celslc_parameters->call_bin_ssc();
+    status = _tdmap_celslc_parameters->call_boost_bin();
   }
   if ( status && _run_msa_switch ){
   }
@@ -97,6 +126,11 @@ bool TDMap::run_tdmap(){
 bool  TDMap::prepare_celslc_parameters(){
   _flag_tdmap_celslc_parameters = false;
   bool is_simulated_image_sampling_rate_and_size_defined = calculate_simulated_image_sampling_rate_and_size();
+  std::cout << "  is_simulated_image_sampling_rate_and_size_defined " << is_simulated_image_sampling_rate_and_size_defined << std::endl;
+  std::cout << "  _is_unit_cell_cif_path_defined " << _core_image_crystal_ptr->_is_unit_cell_cif_path_defined() << std::endl;
+  std::cout << "  _is_perpendicular_dir_defined " << _core_image_crystal_ptr->_is_perpendicular_dir_defined() << std::endl;
+  std::cout << "  _flag_ht_accelaration_voltage " << _flag_ht_accelaration_voltage << std::endl;
+
   if( _core_image_crystal_ptr->_is_unit_cell_cif_path_defined()
       && _core_image_crystal_ptr->_is_perpendicular_dir_defined()
       && _core_image_crystal_ptr->_is_projection_dir_defined()
@@ -124,7 +158,6 @@ bool  TDMap::prepare_celslc_parameters(){
     _tdmap_celslc_parameters->set_ht_accelaration_voltage( ht_accelaration_voltage );
     _tdmap_celslc_parameters->set_dwf_switch( dwf_switch );
     _tdmap_celslc_parameters->set_abs_switch( abs_switch );
-    _tdmap_celslc_parameters->set_bin_path( celslc_bin_string );
     _flag_tdmap_celslc_parameters = true;
   }
   return _flag_tdmap_celslc_parameters;
@@ -246,6 +279,7 @@ bool TDMap::set_defocus_range_number_samples( std::string number_samples ){
 
 bool TDMap::set_accelaration_voltage_kv( std::string accelaration_voltage ){
   ht_accelaration_voltage = boost::lexical_cast<double>( accelaration_voltage );
+  _flag_ht_accelaration_voltage = true;
   return true;
 }
 

@@ -11,6 +11,10 @@ ADD_DEFINITIONS(-DOpenCV_STATIC=OFF )
 ADD_DEFINITIONS(-DBUILD_SHARED_LIBS=ON )
 SET (OpenCV_DEBUG TRUE)
 
+file(GLOB_RECURSE DR_PROBE_RESOURCES "${CMAKE_CURRENT_SOURCE_DIR}/assets/drprobe_clt_bin_osx/*")
+message(STATUS "Found Dr Probe Resources: ${DR_PROBE_RESOURCES}")
+
+
 # Turn on the ability to create folders to organize projects (.vcproj)
 # It creates "CMakePredefinedTargets" folder by default and adds CMake
 # defined projects like INSTALL.vcproj and ZERO_CHECK.vcproj
@@ -33,7 +37,6 @@ if(build_gui)
   set(COMPANY "di")
   set(COPYRIGHT "Copyright (c) 2017 Dr. Alberto José Proença, Dr. Daniel G. Stroppa, Filipe Oliveira. All rights reserved.")
   set(IDENTIFIER "uminho")
-
   add_project_meta(META_FILES_TO_INCLUDE)
 
   set(RESOURCE_FILES im2model.qrc)
@@ -46,6 +49,7 @@ if(build_gui)
   find_package(Qt5Core 5.2 REQUIRED)
   find_package(Qt5Gui REQUIRED)
   find_package(Qt5Widgets REQUIRED)
+
 else(build_gui)
   message(STATUS "GUI disabled. building only command-line im2model")
 endif(build_gui)
@@ -74,6 +78,11 @@ SET (Boost_DEBUG TRUE)
 set (Boost_USE_STATIC_LIBS false)
 set (Boost_USE_MULTITHREADED ON)
 
+  add_definitions( -DBOOST_ALL_NO_LIB )
+  ADD_DEFINITIONS(-DBOOST_LIB_DIAGNOSTIC )
+  # force dynamic linking for all libraries
+  add_definitions( -DBOOST_ALL_DYN_LINK )
+ 
 if (WIN32)
   message(STATUS "Setting Boost additional flags for Windows")
   # disable autolinking in boost

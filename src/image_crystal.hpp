@@ -75,6 +75,7 @@ class Image_Crystal {
     void update_roi();
     void update_projection_dir_defined();
     void update_perpendicular_dir_defined();
+    void update_sampling_rate_experimental_defined();
 
   public:
     Image_Crystal();

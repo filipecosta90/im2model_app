@@ -1,8 +1,6 @@
 
 #include "configwin.h"
-
 #include <iostream>
-
 #include <QtWidgets>
 #include <QTreeView>
 #include <QtCore>
@@ -13,6 +11,9 @@
 #include <QCommandLineOption>
 #include <QAction>
 
+#include <boost/filesystem/operations.hpp>                // for directory_iterator
+#include <boost/filesystem/path.hpp>                      // for path, operator==, oper...
+
 int main(int argc, char *argv[])
 {
   // to access resources
@@ -20,8 +21,8 @@ int main(int argc, char *argv[])
 
   QApplication app(argc, argv);
 
-      QApplication::setOrganizationName("di.uminho");
-      QApplication::setOrganizationDomain("di.uminho.pt");
+  QApplication::setOrganizationName("di.uminho");
+  QApplication::setOrganizationDomain("di.uminho.pt");
 
   // to ease the load process
   QCommandLineParser parser;

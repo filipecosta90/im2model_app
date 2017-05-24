@@ -32,7 +32,11 @@ SOURCES +=\
     gui_tdmap_cell.cpp \
     gui_tdmap_table.cpp \
     td_map.cpp \
-    image_crystal.cpp
+    image_crystal.cpp \
+    celslc_prm.cpp \
+    msa_prm.cpp \
+    wavimg_prm.cpp \
+    simgrid_steplength.cpp
 
 
 HEADERS  += configwin.h \
@@ -44,7 +48,12 @@ HEADERS  += configwin.h \
     gui_tdmap_cell.h \
     gui_tdmap_table.h \
     td_map.hpp \
-    image_crystal.hpp
+    image_crystal.hpp \
+    celslc_prm.hpp \
+    msa_prm.hpp \
+    wavimg_prm.hpp \
+    simgrid_steplength.hpp \
+    global_def.hpp
 
 RESOURCES     = ../im2model.qrc
 

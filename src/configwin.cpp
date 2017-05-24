@@ -1,13 +1,6 @@
 
 // gui includes
 #include "configwin.h"
-#include "ui_configwin.h"
-#include "treeitem.h"
-#include "treemodel.h"
-#include "cv_image_widget.h"
-
-#include "boost/function.hpp"
-#include "boost/bind.hpp"
 
 #include <QFileDialog>
 #include <QFileSystemModel>
@@ -15,9 +8,13 @@
 #include <QFile>
 #include <QtWidgets>
 
+#include <boost/filesystem.hpp>
+#include <boost/range/iterator_range.hpp>
+
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow) {
 
+    m_sSettingsFile = QApplication::applicationDirPath().left(1) + ":/im2model.ini";
 
   //connect(textEdit->document(), &QTextDocument::contentsChanged,
   //           this, &MainWindow::documentWasModified);
@@ -478,6 +475,7 @@ void MainWindow::update_roi_experimental_image_frame(){
 
 void MainWindow::on_qpush_run_tdmap_clicked()
 {
+    std::cout << "running tdmap" << std::endl;
   _core_td_map->run_tdmap();
 }
 
@@ -606,30 +604,20 @@ void MainWindow::updateStatusBar()
 
 void MainWindow::readSettings()
 {
-  QSettings settings(QCoreApplication::organizationName(), QCoreApplication::applicationName());
-  const QByteArray geometry = settings.value("geometry", QByteArray()).toByteArray();
-  if (geometry.isEmpty()) {
-    const QRect availableGeometry = QApplication::desktop()->availableGeometry(this);
-    resize(availableGeometry.width() / 3, availableGeometry.height() / 2);
-    move((availableGeometry.width() - width()) / 2,
-        (availableGeometry.height() - height()) / 2);
-  } else {
-    restoreGeometry(geometry);
-  }
+    QSettings settings(m_sSettingsFile, QSettings::NativeFormat);
+    QString celslc_bin = settings.value("celslc_bin", "").toString();
+    QString msa_bin = settings.value("msa_bin", "").toString();
+    QString wavimg_bin = settings.value("wavimg_bin", "").toString();
+    std::cout << " setting read: " << celslc_bin.toStdString() << std::endl;
 }
 
 void MainWindow::writeSettings()
 {
-  QSettings settings(QCoreApplication::organizationName(), QCoreApplication::applicationName());
-  QStringList List = project_setup_image_fields_model->extractStringsFromModel();
-  std::cout << "|" << QCoreApplication::organizationDomain().toStdString() << "|" << QCoreApplication::organizationName().toStdString() <<"|" <<  QCoreApplication::applicationName().toStdString() << "  " << List.size() << std::endl;
-  settings.beginGroup("Setup_Parameter");
-  settings.setValue("Parameter1",1);
-  settings.setValue("project_setup_image_fields_model", List );
-  settings.setValue("geometry", saveGeometry());
-  settings.sync();
-  sync();
-  settings.endGroup();
+  QSettings settings(m_sSettingsFile, QSettings::NativeFormat);
+  settings.setValue("celslc_bin",_qsetting_celslc_bin);
+  std::cout << " setting write: " << _qsetting_celslc_bin.toStdString() << std::endl;
+  settings.setValue("msa_bin",_qsetting_msa_bin);
+  settings.setValue("wavimg_bin",_qsetting_wavimg_bin);
 
 }
 
@@ -696,8 +684,9 @@ bool MainWindow::saveFile(const QString &fileName)
 #ifndef QT_NO_CURSOR
   QApplication::setOverrideCursor(Qt::WaitCursor);
 #endif
-  //    out << textEdit->toPlainText();
+  QStringList List = project_setup_image_fields_model->extractStringsFromModel();
 
+      out << QVariant(List).toString();
 
 #ifndef QT_NO_CURSOR
   QApplication::restoreOverrideCursor();

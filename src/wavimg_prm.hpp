@@ -89,6 +89,7 @@ class WAVIMG_prm {
     void cleanup_thread();
   public:
     WAVIMG_prm();
+    WAVIMG_prm( std::string wavimg_bin_path );
     WAVIMG_prm(const WAVIMG_prm &obj);
 
     // setters line 1

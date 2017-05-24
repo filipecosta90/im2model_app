@@ -24,6 +24,7 @@
 #include <opencv2/imgcodecs.hpp>                          // for imread
 
 // project classes
+#include "global_def.hpp"
 #include "celslc_prm.hpp"                                 // for CELSLC_prm
 #include "mc_driver.hpp"                                  // for MC_Driver
 #include "msa_prm.hpp"                                    // for MSA_prm
@@ -36,23 +37,6 @@
 #include "wavimg_prm.hpp"                                 // for WAVIMG_prm
 
 using namespace cv;
-
-// Global Variables
-#ifdef _WIN32
-boost::filesystem::path celslc_path ( "../simulation/dr_probe_bin/drprobe_clt_bin_winx64/celslc.exe" );
-boost::filesystem::path msa_path("../simulation/dr_probe_bin/drprobe_clt_bin_winx64/msa.exe");
-boost::filesystem::path wavimg_path("../simulation/dr_probe_bin/drprobe_clt_bin_winx64/wavimg.exe");
-std::string celslc_bin_string = celslc_path.string();
-std::string msa_bin_string = msa_path.string();
-std::string wavimg_bin_string = wavimg_path.string();
-#elif defined __unix__
-////do something for unix like #include <unistd.h>
-#include <unistd.h>
-#elif defined __APPLE__
-std::string celslc_bin_string =  "../simulation/dr_probe_bin/drprobe_clt_bin_osx/celslc";
-std::string msa_bin_string = "../simulation/dr_probe_bin/drprobe_clt_bin_osx/msa";
-std::string wavimg_bin_string = "../simulation/dr_probe_bin/drprobe_clt_bin_osx/wavimg";
-#endif
 
 int main(int argc, char** argv ){
 
@@ -542,7 +526,7 @@ int main(int argc, char** argv ){
     celslc_parameters->set_ht_accelaration_voltage(ht_accelaration_voltage);
     celslc_parameters->set_dwf_switch(dwf_switch);
     celslc_parameters->set_abs_switch(abs_switch);
-    celslc_parameters->set_bin_path( celslc_bin_string );
+    //celslc_parameters->set_bin_path( celslc_bin_string );
     if (celslc_switch == true ){
       std::cout << "Running ceslc" << std::endl;
       celslc_parameters->call_bin_ssc();
@@ -628,7 +612,7 @@ int main(int argc, char** argv ){
     msa_parameters.set_wave_function_name ("wave.wav");
     msa_parameters.produce_prm();
     if( msa_switch == true ){
-      msa_parameters.set_bin_path( msa_bin_string );
+      //msa_parameters.set_bin_path( msa_bin_string );
       msa_parameters.set_debug_switch(debug_switch);
       msa_parameters.call_bin();
     }
@@ -721,7 +705,7 @@ int main(int argc, char** argv ){
 
     if(wavimg_switch == true ){
       wavimg_parameters.produce_prm();
-      wavimg_parameters.set_bin_path( wavimg_bin_string );
+      //wavimg_parameters.set_bin_path( wavimg_bin_string );
       wavimg_parameters.set_debug_switch(debug_switch);
       wavimg_parameters.call_bin();
     }
@@ -869,7 +853,7 @@ int main(int argc, char** argv ){
       celslc_cel.set_dwf_switch(dwf_switch);
       celslc_cel.set_abs_switch(abs_switch);
       std::cout << "preparing for single slice parallel calculation";
-      celslc_cel.set_bin_path( celslc_bin_string );
+      //celslc_cel.set_bin_path( celslc_bin_string );
 
       if(celslc_cel_switch == true ){
         celslc_cel.call_bin_ssc( );
@@ -896,7 +880,7 @@ int main(int argc, char** argv ){
       msa_cel.set_prm_file_name("temporary_msa_im2model.prm");
       msa_cel.set_wave_function_name ("wave_cel.wav");
       msa_cel.produce_prm();
-      msa_cel.set_bin_path( msa_bin_string );
+      //msa_cel.set_bin_path( msa_bin_string );
       msa_cel.set_debug_switch( true );
       if(msa_cel_switch == true ){
         msa_cel.call_bin( );
@@ -985,7 +969,7 @@ int main(int argc, char** argv ){
       wavimg_cel.set_number_parameter_loops( 1 ); 
       wavimg_cel.add_parameter_loop ( 1 , 1 , 1, super_cell_defocus_lower_bound, super_cell_defocus_upper_bound, super_cell_defocus_samples, "'foc'" );
       wavimg_cel.produce_prm();
-      wavimg_cel.set_bin_path( wavimg_bin_string );
+      //wavimg_cel.set_bin_path( wavimg_bin_string );
       wavimg_cel.set_debug_switch( true );
 
       if(wavimg_cel_switch == true ){

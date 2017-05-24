@@ -15,6 +15,7 @@
   structure.hpp
   image_crystal.hpp 
   td_map.hpp
+  global_def.hpp
   atom.cpp
   chem_database.cpp
   simgrid_steplength.cpp
@@ -43,6 +44,11 @@ endif(WIN32)
 
 # Properties->C/C++->General->Additional Include Directories
 include_directories( ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR} )
+
+include_directories( ${OpenCV_INCLUDE_DIRS} )
+include_directories( ${Boost_INCLUDE_DIRS} )
+link_directories( ${Boost_LIBRARY_PATH} )
+
 
 if(WIN32)
   include_directories( ${OpenCV_INCLUDE_DIRS} )
@@ -96,15 +102,15 @@ if(build_gui)
     gui_tdmap_table.h
     gui_tdmap_table.cpp
     )
-  add_executable( im2model_gui ${OS_BUNDLE}  ${GUI_SOURCE_FILES} ${META_FILES_TO_INCLUDE} ${RESOURCE_FILES}  ${im2model_core_src} mc_driver.cpp ${FLEX_mc_lexer_OUTPUTS} ${BISON_mc_parser_OUTPUTS} )
+  add_executable( im2model_gui ${OS_BUNDLE}  ${GUI_SOURCE_FILES} ${META_FILES_TO_INCLUDE} ${RESOURCE_FILES}  ${im2model_core_src} mc_driver.cpp ${FLEX_mc_lexer_OUTPUTS} ${BISON_mc_parser_OUTPUTS} ${DR_PROBE_RESOURCES} )
   # Use the Widgets module from Qt 5.
   qt5_use_modules( im2model_gui Core Gui Widgets )
+  SET_SOURCE_FILES_PROPERTIES(${DR_PROBE_RESOURCES} PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
 endif(build_gui)
 
-# Set Properties->General->Configuration Type to Application(.exe)
 # Creates app.exe with the listed sources (main.cxx)
 # Adds sources to the Solution Explorer
-add_executable( im2model im2model.cpp ${im2model_core_src} mc_driver.cpp ${FLEX_mc_lexer_OUTPUTS} ${BISON_mc_parser_OUTPUTS} )
+add_executable( im2model im2model.cpp ${im2model_core_src} mc_driver.cpp ${FLEX_mc_lexer_OUTPUTS} ${BISON_mc_parser_OUTPUTS} ${DR_PROBE_RESOURCES} )
 
 # Properties->Linker->Input->Additional Dependencies
 target_link_libraries( im2model ${OpenCV_LIBS} ${Boost_LIBRARIES} )
@@ -155,6 +161,8 @@ endif(build_gui)
 IF(WIN32)
   SET(APPS "${PROJECT_SOURCE_DIR}/bin/im2model.exe")
 ENDIF(WIN32)
+IF(APPLE)
+ENDIF(APPLE)
 
 #--------------------------------------------------------------------------------
 # Use BundleUtilities to get all other dependencies for the application to work.
