@@ -242,7 +242,6 @@ bool CELSLC_prm::set_bin_path( std::string path ){
 }
 
 bool CELSLC_prm::set_bin_execname( std::string execname ){
-
   boost::filesystem::path bin_dir(bin_path);
   boost::filesystem::directory_iterator end_itr;
   // cycle through the directory

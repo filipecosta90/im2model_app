@@ -9,6 +9,8 @@
 #include <QtCore>
 
 #include <iostream>
+#include <boost/foreach.hpp>
+
 
 TreeItem::TreeItem( QVector<QVariant> &data, boost::function<bool(std::string)> setter, QVector<bool> editable, TreeItem *parent  )
 {
@@ -47,6 +49,51 @@ TreeItem::~TreeItem()
 {
   qDeleteAll(childItems);
 }
+
+boost::property_tree::ptree* TreeItem::save_data_into_property_tree( ){
+    boost::property_tree::ptree* pt = new boost::property_tree::ptree( );
+    boost::property_tree::ptree* pt_data = new boost::property_tree::ptree( );
+    boost::property_tree::ptree* pt_editable = new boost::property_tree::ptree( );
+    boost::property_tree::ptree* pt_childs = new boost::property_tree::ptree( );
+
+    for ( QVariant _data: itemData )
+    {
+        std::cout << "itemData " << _data.toString().toStdString() << std::endl;
+        // Create an unnamed node containing the value
+        boost::property_tree::ptree* pt_data_node = new boost::property_tree::ptree( );
+        pt_data_node->put("",_data.toString().toStdString());
+        // Add this node to the list.
+        pt_data->push_back(std::make_pair("data", *pt_data_node));
+    }
+
+    pt->add_child("data_vec", *pt_data);
+
+    for ( bool _editable: itemIsEditableVec )
+    {
+        std::cout << "editable " << _editable << std::endl;
+        // Create an unnamed node containing the value
+        boost::property_tree::ptree* pt_editable_node = new boost::property_tree::ptree( );
+        pt_editable_node->put( "", _editable );
+        // Add this node to the list.
+        pt_editable->push_back(std::make_pair("editable", *pt_editable_node));
+    }
+
+    pt->add_child("editable_vec", *pt_editable);
+
+    int number_childs = childCount();
+    for( int n = 0; n < number_childs; n++){
+        std::cout << "child " << n << std::endl;
+        TreeItem* _child =  childItems.value(n);
+        boost::property_tree::ptree* pt_child_node = _child->save_data_into_property_tree( );
+        // Add this node to the list.
+        pt_childs->push_back(std::make_pair("child", *pt_child_node));
+
+    }
+    pt->add_child("child_vec", *pt_childs );
+    return pt;
+
+}
+
 
 TreeItem *TreeItem::child(int number)
 {

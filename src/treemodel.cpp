@@ -25,6 +25,13 @@ TreeModel::~TreeModel(){
   delete rootItem;
 }
 
+boost::property_tree::ptree* TreeModel::save_data_into_property_tree( ){
+    // Create an empty property tree object
+    boost::property_tree::ptree* pt_root =  rootItem->save_data_into_property_tree( );
+    return pt_root;
+}
+
+
 int TreeModel::columnCount(const QModelIndex & /* parent */) const{
   return rootItem->columnCount();
 }

@@ -175,6 +175,29 @@ WAVIMG_prm::WAVIMG_prm(const WAVIMG_prm &obj){
   debug_switch = obj.debug_switch;
 }
 
+bool WAVIMG_prm::set_bin_execname( std::string execname ){
+  boost::filesystem::path bin_dir(bin_path);
+  boost::filesystem::directory_iterator end_itr;
+  // cycle through the directory
+  bool result = false;
+  for ( boost::filesystem::directory_iterator itr(bin_dir); itr != end_itr; ++itr){
+    // If it's not a directory, list it. If you want to list directories too, just remove this check.
+    if (is_regular_file(itr->path())) {
+      // assign current file name to current_file and echo it out to the console.
+      if( itr->path().filename() == execname ){
+        std::cout << itr->path().filename() << std::endl;
+        bin_execname = execname;
+        _flag_bin_execname = true;
+        full_bin_path_execname = itr->path().string();
+        _flag_full_bin_path_execname = true;
+        std::cout << full_bin_path_execname << std::endl;
+        result = true;
+      }
+    }
+  }
+  return result;
+}
+
 // setters line 1
 void WAVIMG_prm::set_file_name_input_wave_function( std::string file_name ){
   file_name_input_wave_function = file_name;
@@ -389,7 +412,7 @@ bool WAVIMG_prm::cleanup_bin(){
 
 bool WAVIMG_prm::call_bin(){
   std::stringstream args_stream;
-  args_stream << bin_path;
+  args_stream << full_bin_path_execname;
   // input -prm
   args_stream << " -prm " << prm_filename;
   // input debug switch

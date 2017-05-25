@@ -3,13 +3,11 @@
 
 TDMap::TDMap( Image_Crystal* image_crystal_ptr ){
   _core_image_crystal_ptr = image_crystal_ptr;
-  _tdmap_celslc_parameters = new CELSLC_prm( std::string("../Resources/celslc") );
-
+  _tdmap_celslc_parameters = new CELSLC_prm();
   _tdmap_msa_parameters = new MSA_prm();
-
   _tdmap_wavimg_parameters = new WAVIMG_prm();
-
   _td_map_simgrid = new SIMGRID_wavimg_steplength();
+
   _ignore_edge_pixels_sim_images = 0;
   nx_ny_switch = false;
 
@@ -195,7 +193,7 @@ bool TDMap::run_tdmap(){
   calculate_simulated_image_sampling_rate_and_size();
   status = prepare_celslc_parameters();
   std::cout << " prepare celslc parameters status " << status << std::endl;
-  if ( status && _run_celslc_switch &&  _tdmap_wavimg_parameters->_is_bin_path_defined() ){
+  if ( status && _run_celslc_switch &&  _tdmap_celslc_parameters->_is_bin_path_defined() ){
     std::cout << "Running ceslc" << std::endl;
     _flag_runned_tdmap_celslc = _tdmap_celslc_parameters->call_boost_bin();
   }
@@ -205,7 +203,7 @@ bool TDMap::run_tdmap(){
   calculate_thickness_range_upper_bound_slice_from_nm();
   calculate_thickness_range_slice_period();
   status = prepare_msa_parameters();
-  if ( status && _run_msa_switch &&  _tdmap_wavimg_parameters->_is_bin_path_defined() ){
+  if ( status && _run_msa_switch &&  _tdmap_msa_parameters->_is_bin_path_defined() ){
     std::cout << "Running msa" << std::endl;
     _flag_runned_tdmap_msa = _tdmap_msa_parameters->call_bin();
   }
@@ -565,9 +563,24 @@ bool TDMap::set_dr_probe_celslc_execname( std::string celslc_execname ){
 }
 
 bool TDMap::set_dr_probe_msa_execname( std::string msa_execname ){
-  dr_probe_msa_execname = msa_execname;
+    bool result = true;
+    result &= _tdmap_msa_parameters->set_bin_execname(msa_execname);
+    if( result ){
+      dr_probe_msa_execname = msa_execname;
+    }
+    _flag_dr_probe_msa_execname = result;
+    std::cout << " set_dr_probe_msa_execname: " << _flag_dr_probe_msa_execname << std::endl;
+    return _flag_dr_probe_msa_execname;
 }
 
 bool TDMap::set_dr_probe_wavimg_execname( std::string wavimg_execname ){
-  dr_probe_wavimg_execname = wavimg_execname;
+    bool result = true;
+    result &= _tdmap_wavimg_parameters->set_bin_execname( wavimg_execname );
+    if( result ){
+        dr_probe_wavimg_execname = wavimg_execname;
+    }
+    _flag_dr_probe_wavimg_execname = result;
+    std::cout << " set_dr_probe_wavimg_execname: " << _flag_dr_probe_wavimg_execname << std::endl;
+    return _flag_dr_probe_wavimg_execname;
+
 }

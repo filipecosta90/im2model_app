@@ -69,7 +69,10 @@ class CELSLC_prm {
     CELSLC_prm( std::string celslc_bin_path );
 
     bool _is_nz_simulated_partitions_defined();
+
     bool _is_slice_params_accum_nm_slice_vec_defined();
+
+    bool _is_bin_path_defined();
 
     void set_prj_dir_hkl( double projection_dir_h, double projection_dir_k, double projection_dir_l );
 
@@ -118,6 +121,7 @@ class CELSLC_prm {
     void set_abs_switch( bool abs_switch );
 
     bool set_bin_path( std::string path );
+
     bool set_bin_execname ( std::string execname );
 
     int get_nz_simulated_partitions(); 
@@ -140,7 +144,6 @@ class CELSLC_prm {
     bool call_boost_bin();
     bool call_bin_ssc();
 
-    bool _is_bin_path_defined();
 };
 
 #endif

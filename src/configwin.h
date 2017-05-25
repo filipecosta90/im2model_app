@@ -63,6 +63,7 @@ signals:
     // menu methods
     void createActions();
     void updateStatusBar();
+    void create_box_options();
     void readSettings();
     void writeSettings();
     bool maybeSave();
@@ -76,6 +77,8 @@ signals:
     TDMap *_core_td_map;
 
     TreeModel *project_setup_image_fields_model;
+    TreeModel *project_setup_crystalographic_fields_model;
+    TreeModel *tdmap_simulation_setup_model;
     QModelIndex project_setup_image_fields_model_index;
     QString m_sSettingsFile;
 

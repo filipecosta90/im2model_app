@@ -4,10 +4,12 @@
 #include <QList>
 #include <QVariant>
 #include <QVector>
-
-#include "boost/function.hpp"
 #include <QAbstractItemModel>
 #include <QModelIndex>
+
+#include <boost/function.hpp>
+#include <boost/property_tree/ptree.hpp>
+#include <boost/property_tree/xml_parser.hpp>
 
 Q_DECLARE_METATYPE(std::string)
 
@@ -39,8 +41,8 @@ Q_DECLARE_METATYPE(std::string)
     bool isItemEditable( int column ) const;
     void setCheckable( bool set );
     bool setData(int column, const QVariant &value);
+    boost::property_tree::ptree*  save_data_into_property_tree( );
     QStringList extractStringsFromItem();
-
 
 signals:
     void dataChanged( int column );
@@ -53,7 +55,7 @@ signals:
     bool checked;
     bool is_checkable;
     boost::function<bool(std::string)> fp_data_setter;
-    boost::function<bool(bool)> fp_check_setter;
+    boost::function<bool(bool)> fp_check_setter;        
 };
 
 #endif // TREEITEM_H

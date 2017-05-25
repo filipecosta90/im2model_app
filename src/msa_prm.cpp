@@ -53,6 +53,29 @@ MSA_prm::MSA_prm()
   runned_bin = false;
 }
 
+bool MSA_prm::set_bin_execname( std::string execname ){
+  boost::filesystem::path bin_dir(bin_path);
+  boost::filesystem::directory_iterator end_itr;
+  // cycle through the directory
+  bool result = false;
+  for ( boost::filesystem::directory_iterator itr(bin_dir); itr != end_itr; ++itr){
+    // If it's not a directory, list it. If you want to list directories too, just remove this check.
+    if (is_regular_file(itr->path())) {
+      // assign current file name to current_file and echo it out to the console.
+      if( itr->path().filename() == execname ){
+        std::cout << itr->path().filename() << std::endl;
+        bin_execname = execname;
+        _flag_bin_execname = true;
+        full_bin_path_execname = itr->path().string();
+        _flag_full_bin_path_execname = true;
+        std::cout << full_bin_path_execname << std::endl;
+        result = true;
+      }
+    }
+  }
+  return result;
+}
+
 void MSA_prm::set_electron_wavelength( double energy ){
   electron_wavelenth = energy;
 }
@@ -119,7 +142,7 @@ bool MSA_prm::cleanup_bin(){
 
 bool MSA_prm::call_bin(){
   std::stringstream args_stream;
-  args_stream << bin_path;
+  args_stream << full_bin_path_execname;
   // input -prm
   args_stream << " -prm " << prm_filename;
   // input -out

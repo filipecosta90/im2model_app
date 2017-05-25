@@ -5,6 +5,8 @@
 #include <QModelIndex>
 #include <QVariant>
 #include <vector>
+#include <boost/property_tree/ptree.hpp>
+#include <boost/property_tree/xml_parser.hpp>
 
 class TreeItem;
 
@@ -53,6 +55,7 @@ class TreeModel : public QAbstractItemModel {
     void set_data_unique_id( int row, int column, int unique_id );
 
     QStringList extractStringsFromModel( );
+    boost::property_tree::ptree* save_data_into_property_tree( );
   private:
     TreeItem *getItem(const QModelIndex &index) const;
     TreeItem *rootItem;
