@@ -36,7 +36,8 @@ SOURCES +=\
     celslc_prm.cpp \
     msa_prm.cpp \
     wavimg_prm.cpp \
-    simgrid_steplength.cpp
+    simgrid_steplength.cpp \
+    settings.cpp
 
 
 HEADERS  += configwin.h \
@@ -53,10 +54,12 @@ HEADERS  += configwin.h \
     msa_prm.hpp \
     wavimg_prm.hpp \
     simgrid_steplength.hpp \
-    global_def.hpp
+    global_def.hpp \
+    settings.h
 
 RESOURCES     = ../im2model.qrc
 
-FORMS    += configwin.ui
+FORMS    += configwin.ui \
+    settings.ui
 
 INCLUDEPATH += /usr/local/Cellar/boost/1.64.0_1/

@@ -57,7 +57,6 @@ CELSLC_prm::CELSLC_prm()
 
   // runnable execv info
   bin_path = "";
-  _flag_bin_path_defined = false;
   dwf_switch = false;
   abs_switch = false;
   cel_format_switch = false;
@@ -81,13 +80,11 @@ CELSLC_prm::CELSLC_prm( std::string celslc_bin_path ) : CELSLC_prm() {
   // runnable execv info
   //boost::filesystem::path _full_celslc_path = boost::filesystem::canonical( boost::filesystem::path(celslc_bin_path), boost::filesystem::current_path() );
   //bin_path = std::string(_full_celslc_path.string());
-  bin_path = celslc_bin_path;
-  _flag_bin_path_defined = true;
+  set_bin_path(celslc_bin_path);
 }
 
-bool CELSLC_prm::_is_celslc_bin_defined(){
-  std::cout << bin_path << std::endl;
-  return _flag_bin_path_defined;
+bool CELSLC_prm::_is_bin_path_defined(){
+  return _flag_bin_path;
 }
 
 bool CELSLC_prm::_is_nz_simulated_partitions_defined(){
@@ -233,8 +230,14 @@ void CELSLC_prm::set_abs_switch( bool abs ){
   abs_switch = abs;
 }
 
-void CELSLC_prm::set_bin_path( std::string path ){
+bool CELSLC_prm::set_bin_path( std::string path ){
+  boost::filesystem::path bin_dir(path);
+  bool result = false;
+  if( boost::filesystem::is_directory( bin_dir ) ){
   bin_path = path;
+  result = true;
+  }
+  return result;
 }
 
 int CELSLC_prm::get_nz_simulated_partitions( ){

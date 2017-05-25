@@ -14,7 +14,10 @@
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow) {
 
-    m_sSettingsFile = QApplication::applicationDirPath().left(1) + ":/im2model.ini";
+    readSettings();
+
+    //m_sSettingsFile = QApplication::applicationDirPath().left(1) + ":/im2model.ini";
+    //std::cout << "trying to read settings file from " << m_sSettingsFile.toStdString() << std::endl;
 
   //connect(textEdit->document(), &QTextDocument::contentsChanged,
   //           this, &MainWindow::documentWasModified);
@@ -32,12 +35,11 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
    * **/
   _core_image_crystal = new Image_Crystal();
   _core_td_map = new TDMap( _core_image_crystal );
-
+  _core_td_map->set_dr_probe_bin_path( _dr_probe_bin_path.toStdString() );
   ui->setupUi(this);
 
   createActions();
   updateStatusBar();
-  readSettings();
   setCurrentFile(QString());
   setUnifiedTitleAndToolBarOnMac(true);
 
@@ -550,10 +552,8 @@ void MainWindow::documentWasModified()
   // setWindowModified(textEdit->document()->isModified());
 }
 
-
 void MainWindow::createActions()
 {
-
   QMenu *fileMenu = ui->menuBar->addMenu(tr("&File"));
   //QToolBar *fileToolBar = addToolBar(tr("File"));
   const QIcon newIcon = QIcon::fromTheme("document-new", QIcon(":/Icons/MenuIconNew32"));
@@ -594,7 +594,6 @@ void MainWindow::createActions()
   QMenu *helpMenu = ui->menuBar->addMenu(tr("&Help"));
   QAction *aboutAct = helpMenu->addAction(tr("&About"), this, &MainWindow::about);
   aboutAct->setStatusTip(tr("Show the application's About box"));
-
 }
 
 void MainWindow::updateStatusBar()
@@ -604,21 +603,31 @@ void MainWindow::updateStatusBar()
 
 void MainWindow::readSettings()
 {
-    QSettings settings(m_sSettingsFile, QSettings::NativeFormat);
-    QString celslc_bin = settings.value("celslc_bin", "").toString();
-    QString msa_bin = settings.value("msa_bin", "").toString();
-    QString wavimg_bin = settings.value("wavimg_bin", "").toString();
-    std::cout << " setting read: " << celslc_bin.toStdString() << std::endl;
+    QSettings settings( QCoreApplication::organizationName(), QCoreApplication::applicationName() );
+    std::cout << "Reading settings from: " << settings.fileName().toStdString() << std::endl;
+
+    QStringList keys = settings.allKeys();
+
+    foreach (const QString &str, keys) {
+            std::cout  << QString(" [%1] ").arg(str).toStdString() << std::endl;
+        }
+    settings.beginGroup("DrProbe");
+    _dr_probe_bin_path = settings.value("path").toString();
+    settings.endGroup();
+    std::cout << "DR PROBE bin path: " << _dr_probe_bin_path.toStdString() << std::endl;
 }
 
 void MainWindow::writeSettings()
 {
-  QSettings settings(m_sSettingsFile, QSettings::NativeFormat);
-  settings.setValue("celslc_bin",_qsetting_celslc_bin);
-  std::cout << " setting write: " << _qsetting_celslc_bin.toStdString() << std::endl;
-  settings.setValue("msa_bin",_qsetting_msa_bin);
-  settings.setValue("wavimg_bin",_qsetting_wavimg_bin);
+    std::cout << "orginazation: " << QCoreApplication::organizationName().toStdString() << std::endl;
+    std::cout << "app: " << QCoreApplication::applicationName().toStdString() << std::endl;
 
+  QSettings settings( QCoreApplication::organizationName(), QCoreApplication::applicationName() ); //new QSettings(  QCoreApplication::organizationName(), QCoreApplication::applicationName() );
+  std::cout << "Writing settings to: " << settings.fileName().toStdString() << std::endl;
+  std::cout << "DR PROBE bin path: " << _dr_probe_bin_path.toStdString() << std::endl;
+  settings.beginGroup("DrProbe");
+  settings.setValue("path",_dr_probe_bin_path);
+  settings.endGroup();
 }
 
 bool MainWindow::maybeSave()

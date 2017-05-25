@@ -63,17 +63,6 @@ endif(WIN32)
 
 if(build_gui)
   # Set PROJECT_VERSION_PATCH and PROJECT_VERSION_TWEAK to 0 if not present, needed by add_project_meta
-  fix_project_version()
-
-  # Set additional project information
-  set(COMPANY "Im2Model")
-  set(COPYRIGHT "Copyright (c) 2017 Dr. Alberto José Proença, Dr. Daniel G. Stroppa, Filipe Oliveira. All rights reserved.")
-  set(IDENTIFIER "com.example.Example")
-
-  add_project_meta(META_FILES_TO_INCLUDE)
-
-  set(RESOURCE_FILES ../im2model.qrc)
-
 
   # Running the meta-object compiler for QObject derived classes is similar to resources, 
   # you add QT5_WRAP_CPP in your CMake file, and just add the generated files to your source files. 
@@ -102,6 +91,21 @@ if(build_gui)
     gui_tdmap_table.h
     gui_tdmap_table.cpp
     )
+
+  # Set PROJECT_VERSION_PATCH and PROJECT_VERSION_TWEAK to 0 if not present, needed by add_project_meta
+  fix_project_version()
+
+
+  # Set additional project information
+  set(COMPANY "UMinho")
+  set(COPYRIGHT "Copyright (c) 2017 Dr. Alberto José Proença, Dr. Daniel G. Stroppa, Filipe Oliveira. All rights reserved.")
+  set(IDENTIFIER "com.Im2Model.Uminho")
+
+
+  add_project_meta(META_FILES_TO_INCLUDE)
+  
+  set(RESOURCE_FILES ../im2model.qrc)
+
   add_executable( im2model_gui ${OS_BUNDLE}  ${GUI_SOURCE_FILES} ${META_FILES_TO_INCLUDE} ${RESOURCE_FILES}  ${im2model_core_src} mc_driver.cpp ${FLEX_mc_lexer_OUTPUTS} ${BISON_mc_parser_OUTPUTS} ${DR_PROBE_RESOURCES} )
   # Use the Widgets module from Qt 5.
   qt5_use_modules( im2model_gui Core Gui Widgets )

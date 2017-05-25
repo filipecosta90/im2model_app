@@ -80,10 +80,7 @@ signals:
     QModelIndex project_setup_image_fields_model_index;
     QString m_sSettingsFile;
 
-    QString _qsetting_celslc_bin = ":../Resources/celslc";
-    QString _qsetting_msa_bin = ":../Resources/msa";
-    QString _qsetting_wavimg_bin = ":../Resources/wavimg";
-
+    QString _dr_probe_bin_path;
 };
 
 #endif // CONFIGWIN_H

@@ -400,12 +400,22 @@ bool WAVIMG_prm::call_bin(){
   return true;
 }
 
+bool WAVIMG_prm::_is_bin_path_defined(){
+  return _flag_bin_path;
+}
+
 void WAVIMG_prm::set_prm_file_name( std::string filename ){
   prm_filename = filename;
 }
 
-void WAVIMG_prm::set_bin_path( std::string path ){
-  bin_path = path;
+bool WAVIMG_prm::set_bin_path( std::string path ){
+    boost::filesystem::path bin_dir(path);
+    bool result = false;
+    if( boost::filesystem::is_directory( bin_dir ) ){
+    bin_path = path;
+    result = true;
+    }
+    return result;
 }
 
 void WAVIMG_prm::set_debug_switch(bool deb_switch){

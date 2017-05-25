@@ -14,7 +14,6 @@ SET (OpenCV_DEBUG TRUE)
 file(GLOB_RECURSE DR_PROBE_RESOURCES "${CMAKE_CURRENT_SOURCE_DIR}/assets/drprobe_clt_bin_osx/*")
 message(STATUS "Found Dr Probe Resources: ${DR_PROBE_RESOURCES}")
 
-
 # Turn on the ability to create folders to organize projects (.vcproj)
 # It creates "CMakePredefinedTargets" folder by default and adds CMake
 # defined projects like INSTALL.vcproj and ZERO_CHECK.vcproj
@@ -29,17 +28,6 @@ if(build_gui)
 
   # Include Qt basic functions
   include(QtCommon)
-
-  # Set PROJECT_VERSION_PATCH and PROJECT_VERSION_TWEAK to 0 if not present, needed by add_project_meta
-  fix_project_version()
-
-  # Set additional project information
-  set(COMPANY "di")
-  set(COPYRIGHT "Copyright (c) 2017 Dr. Alberto José Proença, Dr. Daniel G. Stroppa, Filipe Oliveira. All rights reserved.")
-  set(IDENTIFIER "uminho")
-  add_project_meta(META_FILES_TO_INCLUDE)
-
-  set(RESOURCE_FILES im2model.qrc)
 
   # Instruct CMake to run moc automatically when needed.
   #  set(CMAKE_AUTOMOC ON)

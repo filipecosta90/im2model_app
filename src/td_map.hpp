@@ -58,7 +58,12 @@ class TDMap {
     /////////////////////////
     // Dr Probe PRM wrappers
     /////////////////////////
+
+    std::string dr_probe_bin_path;
+    bool _flag_dr_probe_bin_path = false;
+
     CELSLC_prm* _tdmap_celslc_parameters;
+
     bool _flag_tdmap_celslc_parameters = false;
     bool _flag_runned_tdmap_celslc = false;
     bool _run_celslc_switch = true;
@@ -74,8 +79,13 @@ class TDMap {
     bool _run_wavimg_switch = false;
 
     std::string wave_function_name;
+    bool _flag_wave_function_name = false;
+
     std::string wavimg_prm_name;
+    bool _flag_wavimg_prm_name = false;
+
     std::string file_name_output_image_wave_function;
+    bool _flag_file_name_output_image_wave_function = false;
 
     SIMGRID_wavimg_steplength* _td_map_simgrid;
     bool _flag_td_map_simgrid = false;
@@ -93,9 +103,14 @@ class TDMap {
     double super_cell_size_a;
     double super_cell_size_b;
     double super_cell_size_c;
+    bool _flag_super_cell_size_a = false;
+    bool _flag_super_cell_size_b = false;
 
     int nx_simulated_horizontal_samples;
     int ny_simulated_vertical_samples;
+    bool _flag_nx_simulated_horizontal_samples = false;
+    bool _flag_ny_simulated_vertical_samples = false;
+
     int nz_simulated_partitions;
     bool nx_ny_switch = false;
     bool nz_switch = false;
@@ -104,8 +119,12 @@ class TDMap {
 
     // based on super_cell_size_a and nx_simulated_horizontal_samples
     double sampling_rate_super_cell_x_nm_pixel;
+    bool _flag_sampling_rate_super_cell_x_nm_pixel = false;
+
     // based on super_cell_size_b and ny_simulated_vertical_samples
     double sampling_rate_super_cell_y_nm_pixel;
+    bool _flag_sampling_rate_super_cell_y_nm_pixel = false;
+
     // based on super_cell_size_c and nz_simulated_partitions;
     double super_cell_z_nm_slice;
 
@@ -129,7 +148,12 @@ class TDMap {
 
     std::string slc_file_name_prefix;
     bool _flag_slc_file_name_prefix;
-    std::string celslc_bin_string;
+
+    bool cd_switch = true;
+    bool cs_switch = true;
+    int number_image_aberrations;
+    double coefficient_aberration_defocus;
+    double coefficient_aberration_spherical;
 
     bool calculate_simulation_defocus_period();
 
@@ -151,9 +175,10 @@ class TDMap {
     bool set_number_slices_to_max_thickness_from_nz_simulated_partitions();
     bool set_number_slices_to_load_from_nz_simulated_partitions();
 
+    // Dr. Probe
     bool prepare_celslc_parameters();
-
     bool prepare_msa_parameters();
+    bool prepare_wavimg_parameters();
 
     /*
      * RUN METHODS
@@ -177,9 +202,14 @@ class TDMap {
     bool _is_defocus_range_upper_bound_defined();
     // ht accelaration voltage
     bool _is_ht_accelaration_voltage_defined();
-
+    // dr probe
+    bool _is_dr_probe_bin_path_defined();
     // advanced options
     bool _is_slc_file_name_prefix_defined();
+    bool _is_super_cell_size_a_defined();
+    bool _is_super_cell_size_b_defined();
+    bool _is_simulated_image_sampling_rate_and_size_defined();
+    bool _is_wave_function_name_defined();
 
     /** getters **/
 
@@ -202,6 +232,9 @@ class TDMap {
     double get_defocus_range_period( );
 
     /** setters **/
+
+    bool set_dr_probe_bin_path( std::string bin_path );
+
     bool set_thickness_range_lower_bound( std::string lower_bound );
 
     bool set_thickness_range_upper_bound( std::string upper_bound );

@@ -45,6 +45,7 @@ class MSA_prm {
     std::string prm_filename;
     std::string wave_function_name;
     std::string bin_path;
+    bool _flag_bin_path = false;
     bool debug_switch;
     bool runned_bin;
 
@@ -76,7 +77,7 @@ class MSA_prm {
 
     void set_wave_function_name ( std::string wave_function_filename );
 
-    void set_bin_path( std::string path );
+    bool set_bin_path( std::string path );
 
     void set_debug_switch(bool deb_switch);
 
@@ -85,6 +86,8 @@ class MSA_prm {
     bool cleanup_bin();
 
     bool call_bin();
+
+    bool _is_bin_path_defined();
 
 };
 

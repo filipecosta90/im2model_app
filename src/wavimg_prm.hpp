@@ -83,6 +83,7 @@ class WAVIMG_prm {
     // runnable execv info
     std::string prm_filename;
     std::string bin_path;
+    bool _flag_bin_path = false;
     bool debug_switch;
     bool runned_bin; 
 
@@ -156,7 +157,7 @@ class WAVIMG_prm {
 
     void set_prm_file_name( std::string filename );
 
-    void set_bin_path( std::string path );
+    bool set_bin_path( std::string path );
 
     void set_debug_switch(bool deb_switch);
 
@@ -165,6 +166,8 @@ class WAVIMG_prm {
     bool cleanup_bin();
 
     bool call_bin();
+
+    bool _is_bin_path_defined();
 
 };
 
