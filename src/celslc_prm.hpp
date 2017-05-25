@@ -40,6 +40,10 @@ class CELSLC_prm {
     bool ssc_runned_bin;
     std::string bin_path;
     bool _flag_bin_path = false;
+    std::string bin_execname;
+    bool _flag_bin_execname = false;
+    std::string full_bin_path_execname;
+    bool _flag_full_bin_path_execname = false;
     bool dwf_switch;
     bool abs_switch;
 
@@ -114,6 +118,7 @@ class CELSLC_prm {
     void set_abs_switch( bool abs_switch );
 
     bool set_bin_path( std::string path );
+    bool set_bin_execname ( std::string execname );
 
     int get_nz_simulated_partitions(); 
 

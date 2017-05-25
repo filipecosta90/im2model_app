@@ -409,13 +409,13 @@ void WAVIMG_prm::set_prm_file_name( std::string filename ){
 }
 
 bool WAVIMG_prm::set_bin_path( std::string path ){
-    boost::filesystem::path bin_dir(path);
-    bool result = false;
-    if( boost::filesystem::is_directory( bin_dir ) ){
+  boost::filesystem::path bin_dir(path);
+  bool result = false;
+  if( boost::filesystem::is_directory( bin_dir ) ){
     bin_path = path;
     result = true;
-    }
-    return result;
+  }
+  return result;
 }
 
 void WAVIMG_prm::set_debug_switch(bool deb_switch){

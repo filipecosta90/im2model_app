@@ -97,15 +97,17 @@ if(build_gui)
 
 
   # Set additional project information
-  set(COMPANY "UMinho")
+  set(COMPANY "uminho")
   set(COPYRIGHT "Copyright (c) 2017 Dr. Alberto José Proença, Dr. Daniel G. Stroppa, Filipe Oliveira. All rights reserved.")
-  set(IDENTIFIER "com.Im2Model.Uminho")
+  set(IDENTIFIER "com.uminho.Im2Model")
 
 
   add_project_meta(META_FILES_TO_INCLUDE)
   
   set(RESOURCE_FILES ../im2model.qrc)
 
+  message("META FILES TO INCLUDE: ${META_FILES_TO_INCLUDE}")
+  
   add_executable( im2model_gui ${OS_BUNDLE}  ${GUI_SOURCE_FILES} ${META_FILES_TO_INCLUDE} ${RESOURCE_FILES}  ${im2model_core_src} mc_driver.cpp ${FLEX_mc_lexer_OUTPUTS} ${BISON_mc_parser_OUTPUTS} ${DR_PROBE_RESOURCES} )
   # Use the Widgets module from Qt 5.
   qt5_use_modules( im2model_gui Core Gui Widgets )

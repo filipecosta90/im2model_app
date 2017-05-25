@@ -76,9 +76,9 @@ bool TDMap::calculate_simulated_image_sampling_rate_and_size(){
   bool status = false;
 
   if( _core_image_crystal_ptr->_is_sampling_rate_experimental_defined() &&
-         _is_super_cell_size_a_defined() &&
-          _is_super_cell_size_b_defined()
-          ){
+      _is_super_cell_size_a_defined() &&
+      _is_super_cell_size_b_defined()
+    ){
     const double sampling_rate_experimental_x_nm_per_pixel = _core_image_crystal_ptr->get_sampling_rate_experimental_x_nm_per_pixel();
     const double sampling_rate_experimental_y_nm_per_pixel = _core_image_crystal_ptr->get_sampling_rate_experimental_y_nm_per_pixel();
 
@@ -211,8 +211,8 @@ bool TDMap::run_tdmap(){
   }
   status = prepare_wavimg_parameters();
   if ( status && _run_wavimg_switch &&  _tdmap_wavimg_parameters->_is_bin_path_defined() ){
-      std::cout << "Running wavimg" << std::endl;
-      _flag_runned_tdmap_wavimg = _tdmap_wavimg_parameters->call_bin();
+    std::cout << "Running wavimg" << std::endl;
+    _flag_runned_tdmap_wavimg = _tdmap_wavimg_parameters->call_bin();
   }
   if ( status && _run_simgrid_switch ){
 
@@ -302,81 +302,81 @@ bool  TDMap::prepare_wavimg_parameters(){
       && _is_thickness_range_lower_bound_slice_defined()
       && _is_thickness_period_slice_defined()
     ){
-      // setters line 1
-          _tdmap_wavimg_parameters->set_file_name_input_wave_function( wave_function_name );
-          // setters line 2
-            _tdmap_wavimg_parameters->set_n_columns_samples_input_wave_function_pixels( ny_simulated_vertical_samples );
-          _tdmap_wavimg_parameters->set_n_rows_samples_input_wave_function_pixels( nx_simulated_horizontal_samples );
-          // setters line 3
-          _tdmap_wavimg_parameters->set_physical_columns_sampling_rate_input_wave_function_nm_pixels( sampling_rate_super_cell_x_nm_pixel );
-          _tdmap_wavimg_parameters->set_physical_rows_sampling_rate_input_wave_function_nm_pixels( sampling_rate_super_cell_y_nm_pixel );
-          // setters line 4
-          _tdmap_wavimg_parameters->set_primary_electron_energy( ht_accelaration_voltage );
-          // setters line 5
-          _tdmap_wavimg_parameters->set_type_of_output( 0 );
-          // setters line 6
-          _tdmap_wavimg_parameters->set_file_name_output_image_wave_function( file_name_output_image_wave_function );
-          // setters line 7
-          _tdmap_wavimg_parameters->set_n_columns_samples_output_image( nx_simulated_horizontal_samples );
-          _tdmap_wavimg_parameters->set_n_rows_samples_output_image( ny_simulated_vertical_samples );
-          // setters line 8
-          _tdmap_wavimg_parameters->set_image_data_type( 0 );
-          _tdmap_wavimg_parameters->set_image_vacuum_mean_intensity( 3000.0f );
-          _tdmap_wavimg_parameters->set_conversion_rate( 1.0f );
-          _tdmap_wavimg_parameters->set_readout_noise_rms_amplitude( 0.0f ); // colocar a zero
-          // setters line 9
-          _tdmap_wavimg_parameters->set_switch_option_extract_particular_image_frame( 1 );
-          // setters line 10
-          _tdmap_wavimg_parameters->set_image_sampling_rate_nm_pixel( sampling_rate_super_cell_x_nm_pixel );
-          // setters line 11
-          _tdmap_wavimg_parameters->set_image_frame_offset_x_pixels_input_wave_function( 0.0f );
-          _tdmap_wavimg_parameters->set_image_frame_offset_y_pixels_input_wave_function( 0.0f );
-          // setters line 12
-          _tdmap_wavimg_parameters->set_image_frame_rotation( 0.0f );
-          // setters line 13
-          _tdmap_wavimg_parameters->set_switch_coherence_model( 1 ); // colocar a zero
-          // setters line 14
-          _tdmap_wavimg_parameters->set_partial_temporal_coherence_switch( 1 );
-          _tdmap_wavimg_parameters->set_partial_temporal_coherence_focus_spread( 4.0f );
-          // setters line 15
-          _tdmap_wavimg_parameters->set_partial_spacial_coherence_switch( 1 ); // colocar a zero
-          _tdmap_wavimg_parameters->set_partial_spacial_coherence_semi_convergence_angle( 0.2f );
-          // setters line 16
-          _tdmap_wavimg_parameters->set_mtf_simulation_switch( 1 ); // alterar aqui para 0
-          _tdmap_wavimg_parameters->set_k_space_scaling( 1.0f );
-          _tdmap_wavimg_parameters->set_file_name_simulation_frequency_modulated_detector_transfer_function( "'../simulation/mtf/MTF-US2k-300.mtf'" );
-          // setters line 17
-          _tdmap_wavimg_parameters->set_simulation_image_spread_envelope_switch( 0 );
-          _tdmap_wavimg_parameters->set_isotropic_one_rms_amplitude( 0.03 ); // colocar a zero
-          //  wavimg_parameters.set_anisotropic_second_rms_amplitude( 0.0f );
-          // wavimg_parameters.set_azimuth_orientation_angle( 0.0f );
-          // setters line 18
-          _tdmap_wavimg_parameters->set_number_image_aberrations_set( number_image_aberrations );
-          // setters line 19
-          // check for wavimg defocus aberration coefficient
-          if( cd_switch == true ){
-            //Defocus (a20, C1,0, C1)
-            _tdmap_wavimg_parameters->add_aberration_definition ( 1, coefficient_aberration_defocus, 0.0f );
-          }
-          // check for wavimg spherical aberration coefficient
-          if( cs_switch == true ){
-            //Spherical aberration (a40, C3,0, C3)
-            _tdmap_wavimg_parameters->add_aberration_definition ( 5, coefficient_aberration_spherical, 0.0f );
-          }
-          // setters line 19 + aberration_definition_index_number
-          _tdmap_wavimg_parameters->set_objective_aperture_radius( 5500.0f );
-          // setters line 20 + aberration_definition_index_number
-          _tdmap_wavimg_parameters->set_center_x_of_objective_aperture( 0.0f );
-          _tdmap_wavimg_parameters->set_center_y_of_objective_aperture( 0.0f );
-          // setters line 21 + aberration_definition_index_number
-          _tdmap_wavimg_parameters->set_number_parameter_loops( 2 );
+    // setters line 1
+    _tdmap_wavimg_parameters->set_file_name_input_wave_function( wave_function_name );
+    // setters line 2
+    _tdmap_wavimg_parameters->set_n_columns_samples_input_wave_function_pixels( ny_simulated_vertical_samples );
+    _tdmap_wavimg_parameters->set_n_rows_samples_input_wave_function_pixels( nx_simulated_horizontal_samples );
+    // setters line 3
+    _tdmap_wavimg_parameters->set_physical_columns_sampling_rate_input_wave_function_nm_pixels( sampling_rate_super_cell_x_nm_pixel );
+    _tdmap_wavimg_parameters->set_physical_rows_sampling_rate_input_wave_function_nm_pixels( sampling_rate_super_cell_y_nm_pixel );
+    // setters line 4
+    _tdmap_wavimg_parameters->set_primary_electron_energy( ht_accelaration_voltage );
+    // setters line 5
+    _tdmap_wavimg_parameters->set_type_of_output( 0 );
+    // setters line 6
+    _tdmap_wavimg_parameters->set_file_name_output_image_wave_function( file_name_output_image_wave_function );
+    // setters line 7
+    _tdmap_wavimg_parameters->set_n_columns_samples_output_image( nx_simulated_horizontal_samples );
+    _tdmap_wavimg_parameters->set_n_rows_samples_output_image( ny_simulated_vertical_samples );
+    // setters line 8
+    _tdmap_wavimg_parameters->set_image_data_type( 0 );
+    _tdmap_wavimg_parameters->set_image_vacuum_mean_intensity( 3000.0f );
+    _tdmap_wavimg_parameters->set_conversion_rate( 1.0f );
+    _tdmap_wavimg_parameters->set_readout_noise_rms_amplitude( 0.0f ); // colocar a zero
+    // setters line 9
+    _tdmap_wavimg_parameters->set_switch_option_extract_particular_image_frame( 1 );
+    // setters line 10
+    _tdmap_wavimg_parameters->set_image_sampling_rate_nm_pixel( sampling_rate_super_cell_x_nm_pixel );
+    // setters line 11
+    _tdmap_wavimg_parameters->set_image_frame_offset_x_pixels_input_wave_function( 0.0f );
+    _tdmap_wavimg_parameters->set_image_frame_offset_y_pixels_input_wave_function( 0.0f );
+    // setters line 12
+    _tdmap_wavimg_parameters->set_image_frame_rotation( 0.0f );
+    // setters line 13
+    _tdmap_wavimg_parameters->set_switch_coherence_model( 1 ); // colocar a zero
+    // setters line 14
+    _tdmap_wavimg_parameters->set_partial_temporal_coherence_switch( 1 );
+    _tdmap_wavimg_parameters->set_partial_temporal_coherence_focus_spread( 4.0f );
+    // setters line 15
+    _tdmap_wavimg_parameters->set_partial_spacial_coherence_switch( 1 ); // colocar a zero
+    _tdmap_wavimg_parameters->set_partial_spacial_coherence_semi_convergence_angle( 0.2f );
+    // setters line 16
+    _tdmap_wavimg_parameters->set_mtf_simulation_switch( 1 ); // alterar aqui para 0
+    _tdmap_wavimg_parameters->set_k_space_scaling( 1.0f );
+    _tdmap_wavimg_parameters->set_file_name_simulation_frequency_modulated_detector_transfer_function( "'../simulation/mtf/MTF-US2k-300.mtf'" );
+    // setters line 17
+    _tdmap_wavimg_parameters->set_simulation_image_spread_envelope_switch( 0 );
+    _tdmap_wavimg_parameters->set_isotropic_one_rms_amplitude( 0.03 ); // colocar a zero
+    //  wavimg_parameters.set_anisotropic_second_rms_amplitude( 0.0f );
+    // wavimg_parameters.set_azimuth_orientation_angle( 0.0f );
+    // setters line 18
+    _tdmap_wavimg_parameters->set_number_image_aberrations_set( number_image_aberrations );
+    // setters line 19
+    // check for wavimg defocus aberration coefficient
+    if( cd_switch == true ){
+      //Defocus (a20, C1,0, C1)
+      _tdmap_wavimg_parameters->add_aberration_definition ( 1, coefficient_aberration_defocus, 0.0f );
+    }
+    // check for wavimg spherical aberration coefficient
+    if( cs_switch == true ){
+      //Spherical aberration (a40, C3,0, C3)
+      _tdmap_wavimg_parameters->add_aberration_definition ( 5, coefficient_aberration_spherical, 0.0f );
+    }
+    // setters line 19 + aberration_definition_index_number
+    _tdmap_wavimg_parameters->set_objective_aperture_radius( 5500.0f );
+    // setters line 20 + aberration_definition_index_number
+    _tdmap_wavimg_parameters->set_center_x_of_objective_aperture( 0.0f );
+    _tdmap_wavimg_parameters->set_center_y_of_objective_aperture( 0.0f );
+    // setters line 21 + aberration_definition_index_number
+    _tdmap_wavimg_parameters->set_number_parameter_loops( 2 );
 
-          std::cout << "WAVIMG: parameter loop DEFOCUS: lower bound " << defocus_lower_bound << ", upper bound " << defocus_upper_bound << ", defocus samples " << defocus_samples << std::endl;
-          std::cout << "WAVIMG: parameter loop SLICES: lower bound " << slices_lower_bound << ", upper bound " << slices_upper_bound << ", slice samples " << slice_samples << std::endl;
+    std::cout << "WAVIMG: parameter loop DEFOCUS: lower bound " << defocus_lower_bound << ", upper bound " << defocus_upper_bound << ", defocus samples " << defocus_samples << std::endl;
+    std::cout << "WAVIMG: parameter loop SLICES: lower bound " << slices_lower_bound << ", upper bound " << slices_upper_bound << ", slice samples " << slice_samples << std::endl;
 
-          _tdmap_wavimg_parameters->add_parameter_loop ( 1 , 1 , 1, defocus_lower_bound, defocus_upper_bound, defocus_samples, "'foc'" );
-          _tdmap_wavimg_parameters->add_parameter_loop ( 3 , 1 , 1, slices_lower_bound, slices_upper_bound, slice_samples, "'_sl'" );
-          _tdmap_wavimg_parameters->set_prm_file_name("temporary_wavimg_im2model.prm");
+    _tdmap_wavimg_parameters->add_parameter_loop ( 1 , 1 , 1, defocus_lower_bound, defocus_upper_bound, defocus_samples, "'foc'" );
+    _tdmap_wavimg_parameters->add_parameter_loop ( 3 , 1 , 1, slices_lower_bound, slices_upper_bound, slice_samples, "'_sl'" );
+    _tdmap_wavimg_parameters->set_prm_file_name("temporary_wavimg_im2model.prm");
     _flag_tdmap_wavimg_parameters = true;
   }
   return _flag_tdmap_wavimg_parameters;
@@ -423,23 +423,23 @@ bool TDMap::_is_slc_file_name_prefix_defined(){
 }
 
 bool TDMap::_is_super_cell_size_a_defined(){
-    return _flag_super_cell_size_a;
+  return _flag_super_cell_size_a;
 }
 
 bool TDMap::_is_super_cell_size_b_defined(){
-    return _flag_super_cell_size_b;
+  return _flag_super_cell_size_b;
 }
 
 bool TDMap::_is_simulated_image_sampling_rate_and_size_defined(){
-return ( _flag_nx_simulated_horizontal_samples
-         && _flag_ny_simulated_vertical_samples
-         && _flag_sampling_rate_super_cell_x_nm_pixel
-         && _flag_sampling_rate_super_cell_y_nm_pixel
-         );
+  return ( _flag_nx_simulated_horizontal_samples
+      && _flag_ny_simulated_vertical_samples
+      && _flag_sampling_rate_super_cell_x_nm_pixel
+      && _flag_sampling_rate_super_cell_y_nm_pixel
+      );
 }
 
 bool TDMap::_is_wave_function_name_defined(){
-       return _flag_wave_function_name;
+  return _flag_wave_function_name;
 }
 
 /** getters **/
@@ -536,17 +536,38 @@ bool TDMap::set_core_image_crystal_ptr( Image_Crystal* image_crystal_ptr ){
 }
 
 bool TDMap::set_dr_probe_bin_path( std::string bin_path ){
+  bool result = true;
+  result &= _tdmap_celslc_parameters->set_bin_path(bin_path);
+  result &= _tdmap_msa_parameters->set_bin_path(bin_path);
+  result &= _tdmap_wavimg_parameters->set_bin_path(bin_path);
+  if( result ){
     dr_probe_bin_path = bin_path;
-    bool result = true;
-    result &= _tdmap_celslc_parameters->set_bin_path(bin_path);
-    result &= _tdmap_msa_parameters->set_bin_path(bin_path);
-    result &= _tdmap_wavimg_parameters->set_bin_path(bin_path);
-    _flag_dr_probe_bin_path = result;
-    std::cout << " set_dr_probe_bin_path: " << _flag_dr_probe_bin_path << std::endl;
-    return _flag_dr_probe_bin_path;
+  }
+  _flag_dr_probe_bin_path = result;
+  std::cout << " set_dr_probe_bin_path: " << _flag_dr_probe_bin_path << std::endl;
+  return _flag_dr_probe_bin_path;
 }
 
 bool TDMap::_is_dr_probe_bin_path_defined(){
-    return _flag_dr_probe_bin_path;
+  return _flag_dr_probe_bin_path;
 }
 
+bool TDMap::set_dr_probe_celslc_execname( std::string celslc_execname ){
+  bool result = true;
+  result &= _tdmap_celslc_parameters->set_bin_execname(celslc_execname);
+  if( result ){
+    dr_probe_celslc_execname = celslc_execname;
+  }
+  _flag_dr_probe_celslc_execname = result;
+  std::cout << " set_dr_probe_celslc_execname: " << _flag_dr_probe_celslc_execname << std::endl;
+  return _flag_dr_probe_celslc_execname;
+
+}
+
+bool TDMap::set_dr_probe_msa_execname( std::string msa_execname ){
+  dr_probe_msa_execname = msa_execname;
+}
+
+bool TDMap::set_dr_probe_wavimg_execname( std::string wavimg_execname ){
+  dr_probe_wavimg_execname = wavimg_execname;
+}

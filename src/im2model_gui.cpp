@@ -21,9 +21,9 @@ int main(int argc, char *argv[])
 
   QApplication app(argc, argv);
 
+  //app.setOrganizationDomain("com.uminho");
   app.setOrganizationName("uminho");
-  app.setApplicationName("im2model");
-
+  app.setApplicationName("Im2Model");
 
   // to ease the load process
   QCommandLineParser parser;

@@ -70,7 +70,6 @@ signals:
     void setCurrentFile(const QString &fileName);
     QString strippedName(const QString &fullFileName);
 
-
     QString curFile;
     Ui::MainWindow *ui;
     Image_Crystal *_core_image_crystal;
@@ -81,6 +80,10 @@ signals:
     QString m_sSettingsFile;
 
     QString _dr_probe_bin_path;
+    QString _dr_probe_celslc_bin;
+    QString _dr_probe_msa_bin;
+    QString _dr_probe_wavimg_bin;
+
 };
 
 #endif // CONFIGWIN_H

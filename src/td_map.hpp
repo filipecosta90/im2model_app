@@ -67,16 +67,22 @@ class TDMap {
     bool _flag_tdmap_celslc_parameters = false;
     bool _flag_runned_tdmap_celslc = false;
     bool _run_celslc_switch = true;
+    std::string dr_probe_celslc_execname;
+    bool _flag_dr_probe_celslc_execname = false;
 
     MSA_prm* _tdmap_msa_parameters;
     bool _flag_tdmap_msa_parameters = false;
     bool _flag_runned_tdmap_msa = false;
     bool _run_msa_switch = false;
+    std::string dr_probe_msa_execname;
+    bool _flag_dr_probe_msa_execname = false;
 
     WAVIMG_prm* _tdmap_wavimg_parameters;
     bool _flag_tdmap_wavimg_parameters = false;
     bool _flag_runned_tdmap_wavimg = false;
     bool _run_wavimg_switch = false;
+    std::string dr_probe_wavimg_execname;
+    bool _flag_dr_probe_wavimg_execname = false;
 
     std::string wave_function_name;
     bool _flag_wave_function_name = false;
@@ -164,7 +170,7 @@ class TDMap {
 
     /*
      * PREPARATION  METHODS
-    */
+     */
     bool calculate_simulated_image_sampling_rate_and_size();
     // thickness slice nm
 
@@ -182,12 +188,12 @@ class TDMap {
 
     /*
      * RUN METHODS
-    */
+     */
     bool run_tdmap();
 
     /*
      * ASSERT TYPE METHODS
-    */
+     */
     // thickness nm
     bool _is_thickness_range_lower_bound_defined();
     bool _is_thickness_period_defined();
@@ -234,6 +240,9 @@ class TDMap {
     /** setters **/
 
     bool set_dr_probe_bin_path( std::string bin_path );
+    bool set_dr_probe_celslc_execname( std::string celslc_execname );
+    bool set_dr_probe_msa_execname( std::string msa_execname );
+    bool set_dr_probe_wavimg_execname( std::string wavimg_execname );
 
     bool set_thickness_range_lower_bound( std::string lower_bound );
 

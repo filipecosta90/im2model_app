@@ -14,10 +14,10 @@
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow) {
 
-    readSettings();
+  readSettings();
 
-    //m_sSettingsFile = QApplication::applicationDirPath().left(1) + ":/im2model.ini";
-    //std::cout << "trying to read settings file from " << m_sSettingsFile.toStdString() << std::endl;
+  //m_sSettingsFile = QApplication::applicationDirPath().left(1) + ":/im2model.ini";
+  //std::cout << "trying to read settings file from " << m_sSettingsFile.toStdString() << std::endl;
 
   //connect(textEdit->document(), &QTextDocument::contentsChanged,
   //           this, &MainWindow::documentWasModified);
@@ -36,6 +36,10 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
   _core_image_crystal = new Image_Crystal();
   _core_td_map = new TDMap( _core_image_crystal );
   _core_td_map->set_dr_probe_bin_path( _dr_probe_bin_path.toStdString() );
+  _core_td_map->set_dr_probe_celslc_execname( _dr_probe_celslc_bin.toStdString() );
+  _core_td_map->set_dr_probe_msa_execname( _dr_probe_msa_bin.toStdString() );
+  _core_td_map->set_dr_probe_wavimg_execname( _dr_probe_wavimg_bin.toStdString() );
+
   ui->setupUi(this);
 
   createActions();
@@ -477,7 +481,7 @@ void MainWindow::update_roi_experimental_image_frame(){
 
 void MainWindow::on_qpush_run_tdmap_clicked()
 {
-    std::cout << "running tdmap" << std::endl;
+  std::cout << "running tdmap" << std::endl;
   _core_td_map->run_tdmap();
 }
 
@@ -603,30 +607,35 @@ void MainWindow::updateStatusBar()
 
 void MainWindow::readSettings()
 {
-    QSettings settings( QCoreApplication::organizationName(), QCoreApplication::applicationName() );
-    std::cout << "Reading settings from: " << settings.fileName().toStdString() << std::endl;
+  QSettings settings; //( QCoreApplication::organizationName(), QCoreApplication::applicationName() );
+  std::cout << "Reading settings from: " << settings.fileName().toStdString() << std::endl;
 
-    QStringList keys = settings.allKeys();
+  QStringList keys = settings.allKeys();
 
-    foreach (const QString &str, keys) {
-            std::cout  << QString(" [%1] ").arg(str).toStdString() << std::endl;
-        }
-    settings.beginGroup("DrProbe");
-    _dr_probe_bin_path = settings.value("path").toString();
-    settings.endGroup();
-    std::cout << "DR PROBE bin path: " << _dr_probe_bin_path.toStdString() << std::endl;
+  foreach (const QString &str, keys) {
+    std::cout  << QString(" [%1] ").arg(str).toStdString() << std::endl;
+  }
+  settings.beginGroup("DrProbe");
+  _dr_probe_bin_path = settings.value("path").toString();
+  _dr_probe_celslc_bin = settings.value("celslc").toString();
+  _dr_probe_msa_bin = settings.value("msa").toString();
+  _dr_probe_wavimg_bin = settings.value("wavimg").toString();
+  settings.endGroup();
+  std::cout << "DR PROBE bin path: " << _dr_probe_bin_path.toStdString() << std::endl;
 }
 
 void MainWindow::writeSettings()
 {
-    std::cout << "orginazation: " << QCoreApplication::organizationName().toStdString() << std::endl;
-    std::cout << "app: " << QCoreApplication::applicationName().toStdString() << std::endl;
-
-  QSettings settings( QCoreApplication::organizationName(), QCoreApplication::applicationName() ); //new QSettings(  QCoreApplication::organizationName(), QCoreApplication::applicationName() );
+  std::cout << "orginazation: " << QCoreApplication::organizationName().toStdString() << std::endl;
+  std::cout << "app: " << QCoreApplication::applicationName().toStdString() << std::endl;
+  QSettings settings; //( QCoreApplication::organizationName(), QCoreApplication::applicationName() ); //new QSettings(  QCoreApplication::organizationName(), QCoreApplication::applicationName() );
   std::cout << "Writing settings to: " << settings.fileName().toStdString() << std::endl;
-  std::cout << "DR PROBE bin path: " << _dr_probe_bin_path.toStdString() << std::endl;
+  std::cout << "DR PROBE bins path: " << _dr_probe_bin_path.toStdString() << std::endl;
   settings.beginGroup("DrProbe");
   settings.setValue("path",_dr_probe_bin_path);
+  settings.setValue("celslc",_dr_probe_celslc_bin);
+  settings.setValue("msa",_dr_probe_msa_bin);
+  settings.setValue("wavimg",_dr_probe_wavimg_bin);
   settings.endGroup();
 }
 
@@ -695,7 +704,7 @@ bool MainWindow::saveFile(const QString &fileName)
 #endif
   QStringList List = project_setup_image_fields_model->extractStringsFromModel();
 
-      out << QVariant(List).toString();
+  out << QVariant(List).toString();
 
 #ifndef QT_NO_CURSOR
   QApplication::restoreOverrideCursor();

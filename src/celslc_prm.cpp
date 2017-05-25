@@ -234,8 +234,34 @@ bool CELSLC_prm::set_bin_path( std::string path ){
   boost::filesystem::path bin_dir(path);
   bool result = false;
   if( boost::filesystem::is_directory( bin_dir ) ){
-  bin_path = path;
-  result = true;
+    bin_path = path;
+    _flag_bin_path = true;
+    result = true;
+  }
+  return result;
+}
+
+bool CELSLC_prm::set_bin_execname( std::string execname ){
+
+  boost::filesystem::path bin_dir(bin_path);
+  boost::filesystem::directory_iterator end_itr;
+  // cycle through the directory
+  bool result = false;
+  for ( boost::filesystem::directory_iterator itr(bin_dir); itr != end_itr; ++itr)
+  {
+    // If it's not a directory, list it. If you want to list directories too, just remove this check.
+    if (is_regular_file(itr->path())) {
+      // assign current file name to current_file and echo it out to the console.
+      if( itr->path().filename() == execname ){
+        std::cout << itr->path().filename() << std::endl;
+        bin_execname = execname;
+        _flag_bin_execname = true;
+        full_bin_path_execname = itr->path().string();
+        _flag_full_bin_path_execname = true;
+        std::cout << full_bin_path_execname << std::endl;
+        result = true;
+      }
+    }
   }
   return result;
 }
@@ -369,64 +395,68 @@ bool CELSLC_prm::cleanup_bin(){
 }
 
 bool CELSLC_prm::call_boost_bin(){
-  std::cout << "bin path: " << bin_path <<std::endl;
+  bool result = false;
+  if( _flag_full_bin_path_execname ){
+    std::cout << "bin path: " << full_bin_path_execname <<std::endl;
 
-  std::stringstream args_stream;
-  args_stream << bin_path;
+    std::stringstream args_stream;
+    args_stream << full_bin_path_execname;
 
-  if( cif_format_switch  ){
-    args_stream << " -cif " << super_cell_cif_file;
-  }
-  else{
-    if( cel_format_switch  ){
-      args_stream << " -cel " << super_cell_cel_file;
-    }
-  }
-  args_stream << " -slc " << slc_file_name_prefix;
-  // input nx string
-  args_stream << " -nx " << nx_simulated_horizontal_samples;
-  // input ny string
-  args_stream << " -ny " << ny_simulated_vertical_samples;
-  // input ht
-  args_stream << " -ht " << ht_accelaration_voltage;
-
-  if( projection_dir_hkl_switch && projected_dir_uvw_switch && super_cell_size_switch ){
-    args_stream << " -prj " << (float) prj_dir_h  << "," << (float) prj_dir_k << "," << (float) prj_dir_l << ","  
-      <<  prp_dir_u << "," << prp_dir_v << "," << prp_dir_w << "," 
-      << (float) super_cell_size_a << "," << (float) super_cell_size_b << "," << (float) super_cell_size_c;
-  }
-  /**  
-   * Equidistant slicing of the super-cell along the c-axis. 
-   * Specify an explicit number of slices, 
-   * or use -nz 0 to let CELSLC determine the number of equidistant slices automatically. 
-   * Omitting the -nz option will lead to an automatic non-equidistant slicing. 
-   * **/
-  if( !auto_non_equidistant_slices_switch ){
-    args_stream << " -nz ";
-    // input nz string
-    if( auto_equidistant_slices_switch ){
-      //let CELSLC determine the number of equidistant slices automatically
-      args_stream << "0"; 
+    if( cif_format_switch  ){
+      args_stream << " -cif " << super_cell_cif_file;
     }
     else{
-      //Specify an explicit number of slices
-      args_stream << nz_simulated_partitions;
+      if( cel_format_switch  ){
+        args_stream << " -cel " << super_cell_cel_file;
+      }
     }
-  }
+    args_stream << " -slc " << slc_file_name_prefix;
+    // input nx string
+    args_stream << " -nx " << nx_simulated_horizontal_samples;
+    // input ny string
+    args_stream << " -ny " << ny_simulated_vertical_samples;
+    // input ht
+    args_stream << " -ht " << ht_accelaration_voltage;
 
-  if ( dwf_switch ){
-    args_stream << " -dwf";
+    if( projection_dir_hkl_switch && projected_dir_uvw_switch && super_cell_size_switch ){
+      args_stream << " -prj " << (float) prj_dir_h  << "," << (float) prj_dir_k << "," << (float) prj_dir_l << ","  
+        <<  prp_dir_u << "," << prp_dir_v << "," << prp_dir_w << "," 
+        << (float) super_cell_size_a << "," << (float) super_cell_size_b << "," << (float) super_cell_size_c;
+    }
+    /**  
+     * Equidistant slicing of the super-cell along the c-axis. 
+     * Specify an explicit number of slices, 
+     * or use -nz 0 to let CELSLC determine the number of equidistant slices automatically. 
+     * Omitting the -nz option will lead to an automatic non-equidistant slicing. 
+     * **/
+    if( !auto_non_equidistant_slices_switch ){
+      args_stream << " -nz ";
+      // input nz string
+      if( auto_equidistant_slices_switch ){
+        //let CELSLC determine the number of equidistant slices automatically
+        args_stream << "0"; 
+      }
+      else{
+        //Specify an explicit number of slices
+        args_stream << nz_simulated_partitions;
+      }
+    }
+
+    if ( dwf_switch ){
+      args_stream << " -dwf";
+    }
+    if ( abs_switch ){
+      args_stream << " -abs";
+    }
+    std::cout << "going to run boost process with args: "<< args_stream.str() << std::endl;
+    boost::process::system( args_stream.str() ); 
+    if( auto_equidistant_slices_switch || auto_non_equidistant_slices_switch ){
+      update_nz_simulated_partitions_from_prm();
+    }
+    runned_bin = true;
+    result = true;
   }
-  if ( abs_switch ){
-    args_stream << " -abs";
-  }
-  std::cout << "going to run boost process with args: "<< args_stream.str() << std::endl;
-  boost::process::system( args_stream.str() ); 
-  if( auto_equidistant_slices_switch || auto_non_equidistant_slices_switch ){
-    update_nz_simulated_partitions_from_prm();
-  }
-  runned_bin = true;
-  return true;
+  return result;
 }
 
 bool CELSLC_prm::prepare_nz_simulated_partitions_from_ssc_prm(){
@@ -480,154 +510,161 @@ bool CELSLC_prm::prepare_nz_simulated_partitions_from_ssc_prm(){
 }
 
 bool CELSLC_prm::prepare_bin_ssc(){
-  std::cout << "|" << bin_path << std::endl;
+  bool result = false;
+  if( _flag_full_bin_path_execname ){
 
-  std::stringstream args_stream;
-  args_stream << bin_path;
-  std::cout << args_stream.str() << "|" << bin_path << std::endl;
-  if( cif_format_switch  ){
-    args_stream << " -cif " << super_cell_cif_file;
-  }
-  else{
-    if( cel_format_switch  ){
-      args_stream << " -cel " << super_cell_cel_file;
+    std::stringstream args_stream;
+    args_stream << full_bin_path_execname;
+    std::cout << args_stream.str() << "|" << bin_path << std::endl;
+    if( cif_format_switch  ){
+      args_stream << " -cif " << super_cell_cif_file;
     }
-  }
-  args_stream << " -slc " << slc_file_name_prefix;
-  // input nx string
-  args_stream << " -nx 32";
-  // input ny string
-  args_stream << " -ny 32"; 
-  // input ht
-  args_stream << " -ht " << ht_accelaration_voltage;
+    else{
+      if( cel_format_switch  ){
+        args_stream << " -cel " << super_cell_cel_file;
+      }
+    }
+    args_stream << " -slc " << slc_file_name_prefix;
+    // input nx string
+    args_stream << " -nx 32";
+    // input ny string
+    args_stream << " -ny 32"; 
+    // input ht
+    args_stream << " -ht " << ht_accelaration_voltage;
 
-  if( projection_dir_hkl_switch && projected_dir_uvw_switch && super_cell_size_switch ){
-    args_stream << " -prj " << (float) prj_dir_h  << "," << (float) prj_dir_k << "," << (float) prj_dir_l << ","  
-      <<  prp_dir_u << "," << prp_dir_v << "," << prp_dir_w << "," 
-      << (float) super_cell_size_a << "," << (float) super_cell_size_b << "," << (float) super_cell_size_c;
-  }
-  /**  
-   * Equidistant slicing of the super-cell along the c-axis. 
-   * Specify an explicit number of slices, 
-   * or use -nz 0 to let CELSLC determine the number of equidistant slices automatically. 
-   * Omitting the -nz option will lead to an automatic non-equidistant slicing. 
-   * **/
-  args_stream << " -nz 0";
+    if( projection_dir_hkl_switch && projected_dir_uvw_switch && super_cell_size_switch ){
+      args_stream << " -prj " << (float) prj_dir_h  << "," << (float) prj_dir_k << "," << (float) prj_dir_l << ","  
+        <<  prp_dir_u << "," << prp_dir_v << "," << prp_dir_w << "," 
+        << (float) super_cell_size_a << "," << (float) super_cell_size_b << "," << (float) super_cell_size_c;
+    }
+    /**  
+     * Equidistant slicing of the super-cell along the c-axis. 
+     * Specify an explicit number of slices, 
+     * or use -nz 0 to let CELSLC determine the number of equidistant slices automatically. 
+     * Omitting the -nz option will lead to an automatic non-equidistant slicing. 
+     * **/
+    args_stream << " -nz 0";
 
-  if ( dwf_switch ){
-    args_stream << " -dwf";
+    if ( dwf_switch ){
+      args_stream << " -dwf";
+    }
+    if ( abs_switch ){
+      args_stream << " -abs";
+    }
+    std::cout << " prep run with args  " <<  args_stream.str() << std::endl;
+    boost::process::system( args_stream.str() ); 
+    prepare_nz_simulated_partitions_from_ssc_prm();
+    single_slice_calculation_prepare_bin_runned_switch = true;
+    std::cout << "ssc NZ max processes " << nz_simulated_partitions << std::endl;
+    result = true;
   }
-  if ( abs_switch ){
-    args_stream << " -abs";
-  }
-  std::cout << " prep run with args  " <<  args_stream.str() << std::endl;
-  boost::process::system( args_stream.str() ); 
-  prepare_nz_simulated_partitions_from_ssc_prm();
-  single_slice_calculation_prepare_bin_runned_switch = true;
-  std::cout << "ssc NZ max processes " << nz_simulated_partitions << std::endl;
-  return true;
+  return result;
 }
 
 bool CELSLC_prm::call_bin_ssc(){
-  prepare_bin_ssc();
+  bool result = false;
+  if( _flag_full_bin_path_execname ){
+    prepare_bin_ssc();
 
-  std::stringstream args_stream;
-  args_stream << bin_path;
+    std::stringstream args_stream;
+    args_stream << full_bin_path_execname;
 
-  if( cif_format_switch  ){
-    args_stream << " -cif " << super_cell_cif_file;
-  }
-  else{
-    if( cel_format_switch  ){
-      args_stream << " -cel " << super_cell_cel_file;
-    }
-  }
-  args_stream << " -slc " << slc_file_name_prefix;
-  // input nx string
-  args_stream << " -nx " << nx_simulated_horizontal_samples;
-  // input ny string
-  args_stream << " -ny " << ny_simulated_vertical_samples;
-
-  args_stream << " -nz " << nz_simulated_partitions;
-  // input ht
-  args_stream << " -ht " << ht_accelaration_voltage;
-
-  if( projection_dir_hkl_switch && projected_dir_uvw_switch && super_cell_size_switch ){
-    args_stream << " -prj " << (float) prj_dir_h  << "," << (float) prj_dir_k << "," << (float) prj_dir_l << ","  
-      <<  prp_dir_u << "," << prp_dir_v << "," << prp_dir_w << "," 
-      << (float) super_cell_size_a << "," << (float) super_cell_size_b << "," << (float) super_cell_size_c;
-  }
-
-
-  if ( dwf_switch ){
-    args_stream << " -dwf";
-  }
-  if ( abs_switch ){
-    args_stream << " -abs";
-  }
-  // input ssc
-  std::map<int, boost::process::child> ssc_queue;
-  boost::process::group ssc_group;
-
-  for ( int slice_id = 1; slice_id <= nz_simulated_partitions; slice_id++ ){
-    std::error_code ecode;
-    std::stringstream ssc_stream;
-    ssc_stream << args_stream.str() << " -ssc " << slice_id;
-    std::cout << "Process for slice #" << slice_id << std::endl;
-    std::cout << "\tcommand: " << ssc_stream.str() << std::endl;
-    std::stringstream celslc_stream;
-    celslc_stream << "log_" << slc_file_name_prefix << "_" << slice_id << ".log"; 
-    std::cout << "Saving log of slice #"<< slice_id << " in file: " << celslc_stream.str() << std::endl ;
-
-    if ( log_std_out == true ){
-      ssc_queue[slice_id] = boost::process::child (
-          // command
-          ssc_stream.str(),
-          // redirecting std_out
-          boost::process::std_out > celslc_stream.str(), 
-          // process group
-          ssc_group ,
-          // error control
-          ecode );
+    if( cif_format_switch  ){
+      args_stream << " -cif " << super_cell_cif_file;
     }
     else{
-      ssc_queue[slice_id] = boost::process::child (
-          // command
-          ssc_stream.str(),
-          // redirecting std_out
-          boost::process::std_out > boost::process::null, 
-          // process group
-          ssc_group ,
-          // error control
-          ecode );
+      if( cel_format_switch  ){
+        args_stream << " -cel " << super_cell_cel_file;
+      }
     }
-    assert( !ecode );
-  }
-  std::cout << " waiting for all child processes do end" << std::endl;
-  while (!ssc_queue.empty()){
-    //win32 error https://github.com/klemens-morgenstern/boost-process/issues/67
-    //ssc_group.wait();
+    args_stream << " -slc " << slc_file_name_prefix;
+    // input nx string
+    args_stream << " -nx " << nx_simulated_horizontal_samples;
+    // input ny string
+    args_stream << " -ny " << ny_simulated_vertical_samples;
 
-    for (auto it = ssc_queue.begin(); it != ssc_queue.end(); ){
-      boost::process::child& c = it->second;
-      if (!c.running()){
-        int exit_code = c.exit_code();
-#if defined(BOOST_WINDOWS_API)
-        assert (EXIT_SUCCESS == exit_code);
-#elif defined(BOOST_POSIX_API)
-        assert (EXIT_SUCCESS == WEXITSTATUS(exit_code));
-#endif
-        std::cout << "exit " << it->first << " exit code: " << exit_code << std::endl;
-        it = ssc_queue.erase(it);
+    args_stream << " -nz " << nz_simulated_partitions;
+    // input ht
+    args_stream << " -ht " << ht_accelaration_voltage;
+
+    if( projection_dir_hkl_switch && projected_dir_uvw_switch && super_cell_size_switch ){
+      args_stream << " -prj " << (float) prj_dir_h  << "," << (float) prj_dir_k << "," << (float) prj_dir_l << ","  
+        <<  prp_dir_u << "," << prp_dir_v << "," << prp_dir_w << "," 
+        << (float) super_cell_size_a << "," << (float) super_cell_size_b << "," << (float) super_cell_size_c;
+    }
+
+
+    if ( dwf_switch ){
+      args_stream << " -dwf";
+    }
+    if ( abs_switch ){
+      args_stream << " -abs";
+    }
+    // input ssc
+    std::map<int, boost::process::child> ssc_queue;
+    boost::process::group ssc_group;
+
+    for ( int slice_id = 1; slice_id <= nz_simulated_partitions; slice_id++ ){
+      std::error_code ecode;
+      std::stringstream ssc_stream;
+      ssc_stream << args_stream.str() << " -ssc " << slice_id;
+      std::cout << "Process for slice #" << slice_id << std::endl;
+      std::cout << "\tcommand: " << ssc_stream.str() << std::endl;
+      std::stringstream celslc_stream;
+      celslc_stream << "log_" << slc_file_name_prefix << "_" << slice_id << ".log"; 
+      std::cout << "Saving log of slice #"<< slice_id << " in file: " << celslc_stream.str() << std::endl ;
+
+      if ( log_std_out == true ){
+        ssc_queue[slice_id] = boost::process::child (
+            // command
+            ssc_stream.str(),
+            // redirecting std_out
+            boost::process::std_out > celslc_stream.str(), 
+            // process group
+            ssc_group ,
+            // error control
+            ecode );
       }
       else{
-        ++it;
+        ssc_queue[slice_id] = boost::process::child (
+            // command
+            ssc_stream.str(),
+            // redirecting std_out
+            boost::process::std_out > boost::process::null, 
+            // process group
+            ssc_group ,
+            // error control
+            ecode );
       }
+      assert( !ecode );
     }
-    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    std::cout << " waiting for all child processes do end" << std::endl;
+    while (!ssc_queue.empty()){
+      //win32 error https://github.com/klemens-morgenstern/boost-process/issues/67
+      //ssc_group.wait();
+
+      for (auto it = ssc_queue.begin(); it != ssc_queue.end(); ){
+        boost::process::child& c = it->second;
+        if (!c.running()){
+          int exit_code = c.exit_code();
+#if defined(BOOST_WINDOWS_API)
+          assert (EXIT_SUCCESS == exit_code);
+#elif defined(BOOST_POSIX_API)
+          assert (EXIT_SUCCESS == WEXITSTATUS(exit_code));
+#endif
+          std::cout << "exit " << it->first << " exit code: " << exit_code << std::endl;
+          it = ssc_queue.erase(it);
+        }
+        else{
+          ++it;
+        }
+      }
+      std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    }
+    ssc_runned_bin = true; 
+    result = false;
   }
-  ssc_runned_bin = true; 
-  return true; 
+  return result;
 }
 
 
