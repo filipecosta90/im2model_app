@@ -56,6 +56,7 @@ class TreeModel : public QAbstractItemModel {
 
     QStringList extractStringsFromModel( );
     boost::property_tree::ptree* save_data_into_property_tree( );
+    bool load_data_from_property_tree( boost::property_tree::ptree pt_root );
   private:
     TreeItem *getItem(const QModelIndex &index) const;
     TreeItem *rootItem;

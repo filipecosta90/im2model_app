@@ -26,11 +26,16 @@ TreeModel::~TreeModel(){
 }
 
 boost::property_tree::ptree* TreeModel::save_data_into_property_tree( ){
-    // Create an empty property tree object
-    boost::property_tree::ptree* pt_root =  rootItem->save_data_into_property_tree( );
-    return pt_root;
+  // Create an empty property tree object
+  boost::property_tree::ptree* pt_root =  rootItem->save_data_into_property_tree( );
+  return pt_root;
 }
 
+bool TreeModel::load_data_from_property_tree( boost::property_tree::ptree pt_root ){
+  // Load from the property tree object
+  rootItem->load_data_from_property_tree( pt_root );
+  return true;
+}
 
 int TreeModel::columnCount(const QModelIndex & /* parent */) const{
   return rootItem->columnCount();
@@ -207,5 +212,5 @@ bool TreeModel::setHeaderData(int section, Qt::Orientation orientation,
 
 QStringList TreeModel::extractStringsFromModel()
 {
-    return rootItem->extractStringsFromItem();
+  return rootItem->extractStringsFromItem();
 }

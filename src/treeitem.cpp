@@ -16,6 +16,7 @@ TreeItem::TreeItem( QVector<QVariant> &data, boost::function<bool(std::string)> 
 {
   itemData = data;
   fp_data_setter = setter;
+  _flag_fp_data_setter = true;
   parentItem = parent;
   is_checkable = false;
   itemIsEditableVec = editable;
@@ -25,6 +26,7 @@ TreeItem::TreeItem( QVector<QVariant> &data, boost::function<bool(std::string)> 
 {
   itemData = data;
   fp_data_setter = setter;
+  _flag_fp_data_setter = true;
   parentItem = parent;
   is_checkable = checkable;
   fp_check_setter =  check_setter;
@@ -34,6 +36,7 @@ TreeItem::TreeItem( QVector<QVariant> &data, boost::function<bool(std::string)> 
 {
   itemData = data;
   fp_data_setter = setter;
+  _flag_fp_data_setter = true;
   parentItem = parent;
   is_checkable = false;
 }
@@ -50,47 +53,78 @@ TreeItem::~TreeItem()
   qDeleteAll(childItems);
 }
 
+bool TreeItem::load_data_from_property_tree( boost::property_tree::ptree pt_root ){
+
+  boost::property_tree::ptree pt_data = pt_root.get_child("data_vec");
+  boost::property_tree::ptree pt_editable = pt_root.get_child("editable_vec");
+  boost::property_tree::ptree pt_childs = pt_root.get_child("child_vec");
+
+  int col = 0;
+
+  for ( boost::property_tree::ptree::value_type &pt_data_node : pt_data ){
+    std::string value = pt_data_node.second.data();
+    std::cout << "LOADED value " << value << std::endl;
+    setData( col , QVariant( value.c_str() ));
+    col++;
+  }
+
+  col = 0;
+  for ( boost::property_tree::ptree::value_type &pt_editable_node : pt_editable ){
+    bool value = pt_editable_node.second.get_value<bool>();
+    std::cout << "LOADED editable " << value << std::endl;
+    itemIsEditableVec[col]=value;
+    col++;
+  }
+
+  int child_num = 0;
+  for ( boost::property_tree::ptree::value_type &pt_child_node_v : pt_childs ){
+    boost::property_tree::ptree pt_child_node = pt_child_node_v.second;
+    TreeItem* _child =  childItems.value( child_num );
+    _child->load_data_from_property_tree(pt_child_node);
+    child_num++;
+  }
+}
+
 boost::property_tree::ptree* TreeItem::save_data_into_property_tree( ){
-    boost::property_tree::ptree* pt = new boost::property_tree::ptree( );
-    boost::property_tree::ptree* pt_data = new boost::property_tree::ptree( );
-    boost::property_tree::ptree* pt_editable = new boost::property_tree::ptree( );
-    boost::property_tree::ptree* pt_childs = new boost::property_tree::ptree( );
+  boost::property_tree::ptree* pt = new boost::property_tree::ptree( );
+  boost::property_tree::ptree* pt_data = new boost::property_tree::ptree( );
+  boost::property_tree::ptree* pt_editable = new boost::property_tree::ptree( );
+  boost::property_tree::ptree* pt_childs = new boost::property_tree::ptree( );
 
-    for ( QVariant _data: itemData )
-    {
-        std::cout << "itemData " << _data.toString().toStdString() << std::endl;
-        // Create an unnamed node containing the value
-        boost::property_tree::ptree* pt_data_node = new boost::property_tree::ptree( );
-        pt_data_node->put("",_data.toString().toStdString());
-        // Add this node to the list.
-        pt_data->push_back(std::make_pair("data", *pt_data_node));
-    }
+  for ( QVariant _data: itemData )
+  {
+    std::cout << "itemData " << _data.toString().toStdString() << std::endl;
+    // Create an unnamed node containing the value
+    boost::property_tree::ptree* pt_data_node = new boost::property_tree::ptree( );
+    pt_data_node->put("",_data.toString().toStdString());
+    // Add this node to the list.
+    pt_data->push_back(std::make_pair("data", *pt_data_node));
+  }
 
-    pt->add_child("data_vec", *pt_data);
+  pt->add_child("data_vec", *pt_data);
 
-    for ( bool _editable: itemIsEditableVec )
-    {
-        std::cout << "editable " << _editable << std::endl;
-        // Create an unnamed node containing the value
-        boost::property_tree::ptree* pt_editable_node = new boost::property_tree::ptree( );
-        pt_editable_node->put( "", _editable );
-        // Add this node to the list.
-        pt_editable->push_back(std::make_pair("editable", *pt_editable_node));
-    }
+  for ( bool _editable: itemIsEditableVec )
+  {
+    std::cout << "editable " << _editable << std::endl;
+    // Create an unnamed node containing the value
+    boost::property_tree::ptree* pt_editable_node = new boost::property_tree::ptree( );
+    pt_editable_node->put( "", _editable );
+    // Add this node to the list.
+    pt_editable->push_back(std::make_pair("editable", *pt_editable_node));
+  }
 
-    pt->add_child("editable_vec", *pt_editable);
+  pt->add_child("editable_vec", *pt_editable);
 
-    int number_childs = childCount();
-    for( int n = 0; n < number_childs; n++){
-        std::cout << "child " << n << std::endl;
-        TreeItem* _child =  childItems.value(n);
-        boost::property_tree::ptree* pt_child_node = _child->save_data_into_property_tree( );
-        // Add this node to the list.
-        pt_childs->push_back(std::make_pair("child", *pt_child_node));
-
-    }
-    pt->add_child("child_vec", *pt_childs );
-    return pt;
+  int number_childs = childCount();
+  for( int n = 0; n < number_childs; n++){
+    std::cout << "child " << n << std::endl;
+    TreeItem* _child =  childItems.value(n);
+    boost::property_tree::ptree* pt_child_node = _child->save_data_into_property_tree( );
+    // Add this node to the list.
+    pt_childs->push_back(std::make_pair("child", *pt_child_node));
+  }
+  pt->add_child("child_vec", *pt_childs );
+  return pt;
 
 }
 
@@ -107,7 +141,7 @@ int TreeItem::childCount() const
 
 int TreeItem::childNumber() const
 {
-    int child_number = 0;
+  int child_number = 0;
   if ( parentItem ){
     child_number = parentItem->childItems.indexOf(const_cast<TreeItem*>(this));
   }
@@ -168,7 +202,6 @@ bool TreeItem::insertColumns(int position, int columns)
   foreach (TreeItem *child, childItems){
     child->insertColumns(position, columns);
   }
-
   return true;
 }
 
@@ -185,11 +218,13 @@ bool TreeItem::set_parent( TreeItem* parent )
 
 bool TreeItem::removeChildren(int position, int count)
 {
-  if (position < 0 || position + count > childItems.size())
+  if (position < 0 || position + count > childItems.size()){
     return false;
+  }
 
-  for (int row = 0; row < count; ++row)
+  for (int row = 0; row < count; ++row){
     delete childItems.takeAt(position);
+  }
 
   return true;
 }
@@ -210,18 +245,20 @@ bool TreeItem::removeColumns(int position, int columns)
   return true;
 }
 
-bool TreeItem::setData(int column, const QVariant &value)
-{
+bool TreeItem::setData(int column, const QVariant &value){
   bool result = false;
   if  (column >= 0 && column < itemData.size() ) {
     if( itemData[column] != value ){
-        //call setter on core im2model
-        std::string t1 = value.toString().toStdString();
+      //call setter on core im2model
+      std::string t1 = value.toString().toStdString();
+      if( _flag_fp_data_setter && (_fp_data_setter_col_pos == column) ){
         fp_data_setter( t1 );
-      emit dataChanged(column);
-      itemData[column] = value;
+        emit dataChanged(column);
+        itemData[column] = value;
+        std::cout << "setted new value in data " << t1 << std::endl;
+        result = true;
+      }
     }
-    result = true;
   }
   return result;
 }
@@ -248,20 +285,19 @@ void TreeItem::setCheckable( bool set )
   is_checkable = set;
 }
 
-
 QStringList TreeItem::extractStringsFromItem()
 {
-    QStringList retval;
+  QStringList retval;
 
-    for(int column = 0 ; column < itemData.size(); column++ ){
-        retval << itemData.value(column).toString();
-        std::cout << itemData.value(column).toString().toStdString() << std::endl;
-    }
-    for(int row = 0 ; row < childItems.size(); row++ ){
-            TreeItem* _child_item = childItems.at(row);
-            retval << _child_item->extractStringsFromItem( );
-        }
-    return retval;
+  for(int column = 0 ; column < itemData.size(); column++ ){
+    retval << itemData.value(column).toString();
+    std::cout << itemData.value(column).toString().toStdString() << std::endl;
+  }
+  for(int row = 0 ; row < childItems.size(); row++ ){
+    TreeItem* _child_item = childItems.at(row);
+    retval << _child_item->extractStringsFromItem( );
+  }
+  return retval;
 }
 
 
