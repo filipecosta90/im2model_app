@@ -82,6 +82,8 @@ if(build_gui)
     im2model_gui.cpp
     treeitem.cpp
     treemodel.cpp
+    treeitem_file_delegate.hpp
+    treeitem_file_delegate.cpp
     cv_image_widget.h
     cv_image_frame.h
     cv_image_delegate.h
@@ -90,6 +92,8 @@ if(build_gui)
     gui_tdmap_cell.cpp
     gui_tdmap_table.h
     gui_tdmap_table.cpp
+    qt_file_push_button.h
+    qt_file_push_button.cpp
     )
 
   # Set PROJECT_VERSION_PATCH and PROJECT_VERSION_TWEAK to 0 if not present, needed by add_project_meta

@@ -13,6 +13,8 @@
 
 Q_DECLARE_METATYPE(std::string)
 
+enum DelegateType { _delegate_FILE, _delegate_TEXT };
+
   class TreeItem : public QObject
 {
   Q_OBJECT
@@ -21,7 +23,9 @@ Q_DECLARE_METATYPE(std::string)
     explicit TreeItem( QVector<QVariant> &data, boost::function<bool(std::string)> setters, TreeItem *parent, bool checkable, boost::function<bool(bool)> check_setter);
     explicit TreeItem( QVector<QVariant> &data, boost::function<bool(std::string)> setters, TreeItem *parent = 0);
     explicit TreeItem( QVector<QVariant> &data, TreeItem *parent = 0);
-    ~TreeItem();
+
+
+     ~TreeItem();
     TreeItem *child(int number);
     int childCount() const;
     int columnCount() const;
@@ -44,6 +48,7 @@ Q_DECLARE_METATYPE(std::string)
     boost::property_tree::ptree*  save_data_into_property_tree( );
     bool load_data_from_property_tree( boost::property_tree::ptree pt_root );
     QStringList extractStringsFromItem();
+    DelegateType get_item_delegate_type();
 
 signals:
     void dataChanged( int column );
@@ -62,6 +67,9 @@ signals:
     bool _flag_fp_data_setter = false;
     int _fp_data_setter_col_pos = 1;
     bool _flag_fp_check_setter = false;
+
+    DelegateType _item_delegate_type = _delegate_TEXT;
+
 };
 
 #endif // TREEITEM_H

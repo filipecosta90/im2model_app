@@ -23,6 +23,7 @@
 #include "ui_configwin.h"
 #include "treeitem.h"
 #include "cv_image_widget.h"
+#include "treeitem_file_delegate.hpp"
 
 namespace Ui {
   class MainWindow;
@@ -40,9 +41,12 @@ class MainWindow : public QMainWindow {
     void closeEvent(QCloseEvent *event) override;
 
     private slots:
-      void on_qpush_load_image_clicked();
+    void on_qpush_load_image_clicked();
+    bool update_qline_image_path( std::string fileName );
     void on_qpush_load_cif_clicked();
+    bool update_qline_cif_file_path( std::string fileName );
     void on_qpush_load_cel_clicked();
+    bool update_qline_cel_file_path( std::string filename );
     void update_full_experimental_image_frame();
     void update_roi_experimental_image_frame();
     void on_qpush_run_tdmap_clicked();
@@ -86,6 +90,9 @@ signals:
     QString _dr_probe_celslc_bin;
     QString _dr_probe_msa_bin;
     QString _dr_probe_wavimg_bin;
+
+    /* Delegates */
+    TreeItemFileDelegate *_load_file_delegate;
 
 };
 

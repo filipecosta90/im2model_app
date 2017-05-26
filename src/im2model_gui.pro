@@ -37,7 +37,9 @@ SOURCES +=\
     msa_prm.cpp \
     wavimg_prm.cpp \
     simgrid_steplength.cpp \
-    settings.cpp
+    settings.cpp \
+    treeitem_file_delegate.cpp \
+    qt_file_push_button.cpp
 
 
 HEADERS  += configwin.h \
@@ -55,7 +57,9 @@ HEADERS  += configwin.h \
     wavimg_prm.hpp \
     simgrid_steplength.hpp \
     global_def.hpp \
-    settings.h
+    settings.h \
+    treeitem_file_delegate.hpp \
+    qt_file_push_button.h
 
 RESOURCES     = ../im2model.qrc
 

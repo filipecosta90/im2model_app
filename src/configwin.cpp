@@ -14,6 +14,7 @@
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow) {
 
+  _load_file_delegate = new TreeItemFileDelegate(this);
   readSettings();
 
   //m_sSettingsFile = QApplication::applicationDirPath().left(1) + ":/im2model.ini";
@@ -60,15 +61,20 @@ void MainWindow::on_qpush_load_image_clicked()
       tr("Open image"),
       tr("."),
       tr("Image Files (*.png *.jpg *.jpeg *.bmp *.tif)"));
-  bool load_ok = false;
   if( ! (fileName.isNull()) ){
-    ui->qline_image_path->setText(fileName);
-    _core_image_crystal->set_experimental_image_path( fileName.toStdString() );
-    load_ok = _core_image_crystal->load_full_experimental_image();
+      update_qline_image_path( fileName.toStdString() );
+  }
+}
+
+bool MainWindow::update_qline_image_path( std::string fileName ){
+    std::cout << "inside update_qline_image_path: " << fileName << std::endl;
+    ui->qline_image_path->setText( QString::fromStdString(fileName) );
+    _core_image_crystal->set_experimental_image_path( fileName );
+    const bool load_ok = _core_image_crystal->load_full_experimental_image();
     if( load_ok ){
       emit experimental_image_filename_changed();
     }
-  }
+    return true;
 }
 
 void MainWindow::on_qpush_load_cif_clicked()
@@ -77,11 +83,14 @@ void MainWindow::on_qpush_load_cif_clicked()
       tr("Open CIF"),
       tr("."),
       tr("Text Files (*.cif)"));
-
   if( ! (fileName.isNull()) ){
-    ui->qline_cif_file_path->setText(fileName);
-    _core_image_crystal->set_unit_cell_cif_path( fileName.toStdString() );
+      update_qline_cif_file_path( fileName.toStdString() );
   }
+}
+
+bool MainWindow::update_qline_cif_file_path( std::string fileName ){
+    ui->qline_cif_file_path->setText( QString::fromStdString(fileName) );
+    _core_image_crystal->set_unit_cell_cif_path( fileName );
 }
 
 void MainWindow::update_full_experimental_image_frame(){
@@ -112,9 +121,13 @@ void MainWindow::on_qpush_load_cel_clicked()
       tr("."),
       tr("Text Files (*.cel)"));
   if( ! (fileName.isNull()) ){
-    ui->qline_cel_file_path->setText(fileName);
-    _core_image_crystal->set_unit_cell_cel_path( fileName.toStdString() );
+      update_qline_cel_file_path( fileName.toStdString() );
   }
+}
+
+bool MainWindow::update_qline_cel_file_path( std::string fileName ){
+    ui->qline_cel_file_path->setText( QString::fromStdString(fileName) );
+    _core_image_crystal->set_unit_cell_cel_path( fileName );
 }
 
 void MainWindow::closeEvent(QCloseEvent *event)
@@ -287,7 +300,7 @@ void MainWindow::loadFile(const QString &fileName)
 #endif
 
   // The first parameter in the constructor is the character used for indentation, whilst the second is the indentation length.
-  boost::property_tree::xml_writer_settings<std::string> pt_settings(' ', 4);
+  boost::property_tree::xml_writer_settings<std::string> pt_settings( ' ', 4 );
   boost::property_tree::ptree config;
 
   boost::property_tree::read_xml( fileName.toStdString(), config);
@@ -372,8 +385,9 @@ void MainWindow::create_box_options(){
   // Image Path
   ////////////////
   QVector<QVariant> box1_option_1 = {"Image path",""};
-  boost::function<bool(std::string)> box1_function_1( boost::bind( &Image_Crystal::set_experimental_image_path,_core_image_crystal, _1 ) );
-  TreeItem* image_path  = new TreeItem (  box1_option_1 , box1_function_1 );
+  QVector<bool> box1_option_1_edit = {false,true};
+  boost::function<bool(std::string)> box1_function_1( boost::bind( &MainWindow::update_qline_image_path, this, _1 ) );
+  TreeItem* image_path  = new TreeItem (  box1_option_1 , box1_function_1, box1_option_1_edit );
   experimental_image_root->insertChildren( image_path );
 
   ////////////////
@@ -558,8 +572,13 @@ void MainWindow::create_box_options(){
   QModelIndex unit_cell_index = project_setup_crystalographic_fields_model->index(0,0);
   QModelIndex cif_path = project_setup_crystalographic_fields_model->index(0,1,unit_cell_index);
   QModelIndex cel_path = project_setup_crystalographic_fields_model->index(1,1,unit_cell_index);
-  ui->qtree_view_project_setup_crystallography->setIndexWidget(cif_path,ui->qwidget_load_cif);
-  ui->qtree_view_project_setup_crystallography->setIndexWidget(cel_path,ui->qwidget_load_cel);
+  //_load_file_delegate->set_model_index
+  ui->qtree_view_project_setup_crystallography->setItemDelegate(_load_file_delegate);
+  ui->qtree_view_project_setup_crystallography->setItemDelegateForRow(1,_load_file_delegate);
+
+
+  //ui->qtree_view_project_setup_crystallography->setIndexWidget(cif_path,ui->qwidget_load_cif);
+  //ui->qtree_view_project_setup_crystallography->setIndexWidget(cel_path,ui->qwidget_load_cel);
 
   ui->qtree_view_project_setup_image->expandAll();
   ui->qtree_view_project_setup_crystallography->expandAll();

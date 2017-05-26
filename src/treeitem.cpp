@@ -251,7 +251,9 @@ bool TreeItem::setData(int column, const QVariant &value){
     if( itemData[column] != value ){
       //call setter on core im2model
       std::string t1 = value.toString().toStdString();
+      std::cout << " _flag_fp_data_setter " << _flag_fp_data_setter << std::endl;
       if( _flag_fp_data_setter && (_fp_data_setter_col_pos == column) ){
+          std::cout << "calling setter with value " << t1 << std::endl;
         fp_data_setter( t1 );
         emit dataChanged(column);
         itemData[column] = value;
@@ -300,5 +302,6 @@ QStringList TreeItem::extractStringsFromItem()
   return retval;
 }
 
-
-
+DelegateType TreeItem::get_item_delegate_type(){
+    return _item_delegate_type;
+}
