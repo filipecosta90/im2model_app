@@ -49,6 +49,7 @@ enum DelegateType { _delegate_FILE, _delegate_TEXT };
     bool load_data_from_property_tree( boost::property_tree::ptree pt_root );
     QStringList extractStringsFromItem();
     DelegateType get_item_delegate_type();
+    void set_item_delegate_type( DelegateType _delegate_type );
 
 signals:
     void dataChanged( int column );

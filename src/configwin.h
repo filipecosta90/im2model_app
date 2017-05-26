@@ -41,12 +41,8 @@ class MainWindow : public QMainWindow {
     void closeEvent(QCloseEvent *event) override;
 
     private slots:
-    void on_qpush_load_image_clicked();
+    //void on_qpush_load_image_clicked();
     bool update_qline_image_path( std::string fileName );
-    void on_qpush_load_cif_clicked();
-    bool update_qline_cif_file_path( std::string fileName );
-    void on_qpush_load_cel_clicked();
-    bool update_qline_cel_file_path( std::string filename );
     void update_full_experimental_image_frame();
     void update_roi_experimental_image_frame();
     void on_qpush_run_tdmap_clicked();

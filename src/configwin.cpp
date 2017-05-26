@@ -55,7 +55,7 @@ MainWindow::~MainWindow(){
   delete ui;
 }
 
-void MainWindow::on_qpush_load_image_clicked()
+/*void MainWindow::on_qpush_load_image_clicked()
 {
   QString fileName = QFileDialog::getOpenFileName(this,
       tr("Open image"),
@@ -65,32 +65,17 @@ void MainWindow::on_qpush_load_image_clicked()
       update_qline_image_path( fileName.toStdString() );
   }
 }
+*/
 
 bool MainWindow::update_qline_image_path( std::string fileName ){
     std::cout << "inside update_qline_image_path: " << fileName << std::endl;
-    ui->qline_image_path->setText( QString::fromStdString(fileName) );
+    //ui->qline_image_path->setText( QString::fromStdString(fileName) );
     _core_image_crystal->set_experimental_image_path( fileName );
     const bool load_ok = _core_image_crystal->load_full_experimental_image();
     if( load_ok ){
       emit experimental_image_filename_changed();
     }
     return true;
-}
-
-void MainWindow::on_qpush_load_cif_clicked()
-{
-  QString fileName = QFileDialog::getOpenFileName(this,
-      tr("Open CIF"),
-      tr("."),
-      tr("Text Files (*.cif)"));
-  if( ! (fileName.isNull()) ){
-      update_qline_cif_file_path( fileName.toStdString() );
-  }
-}
-
-bool MainWindow::update_qline_cif_file_path( std::string fileName ){
-    ui->qline_cif_file_path->setText( QString::fromStdString(fileName) );
-    _core_image_crystal->set_unit_cell_cif_path( fileName );
 }
 
 void MainWindow::update_full_experimental_image_frame(){
@@ -112,22 +97,6 @@ void MainWindow::on_qpush_run_tdmap_clicked()
 {
   std::cout << "running tdmap" << std::endl;
   _core_td_map->run_tdmap();
-}
-
-void MainWindow::on_qpush_load_cel_clicked()
-{
-  QString fileName = QFileDialog::getOpenFileName(this,
-      tr("Open CEL"),
-      tr("."),
-      tr("Text Files (*.cel)"));
-  if( ! (fileName.isNull()) ){
-      update_qline_cel_file_path( fileName.toStdString() );
-  }
-}
-
-bool MainWindow::update_qline_cel_file_path( std::string fileName ){
-    ui->qline_cel_file_path->setText( QString::fromStdString(fileName) );
-    _core_image_crystal->set_unit_cell_cel_path( fileName );
 }
 
 void MainWindow::closeEvent(QCloseEvent *event)
@@ -388,6 +357,7 @@ void MainWindow::create_box_options(){
   QVector<bool> box1_option_1_edit = {false,true};
   boost::function<bool(std::string)> box1_function_1( boost::bind( &MainWindow::update_qline_image_path, this, _1 ) );
   TreeItem* image_path  = new TreeItem (  box1_option_1 , box1_function_1, box1_option_1_edit );
+  image_path->set_item_delegate_type( _delegate_FILE );
   experimental_image_root->insertChildren( image_path );
 
   ////////////////
@@ -461,10 +431,10 @@ void MainWindow::create_box_options(){
   experimental_roi_dimensions->insertChildren( experimental_roi_dimensions_height );
 
   project_setup_image_fields_model = new TreeModel( experimental_image_root );
+
   ui->qtree_view_project_setup_image->setModel(project_setup_image_fields_model);
-  project_setup_image_fields_model_index = project_setup_image_fields_model->index(0,0);
-  QModelIndex exp_path = project_setup_image_fields_model->index(0,1);
-  ui->qtree_view_project_setup_image->setIndexWidget(exp_path,ui->qwidget_load_experimental_image);
+  ui->qtree_view_project_setup_image->setItemDelegate( _load_file_delegate );
+
 
   /*************************
    * CRYSTALLOGRAPLY
@@ -485,6 +455,7 @@ void MainWindow::create_box_options(){
   QVector<bool> box2_option_1_1_edit = {false,true};
   boost::function<bool(std::string)> box2_function_1_1 ( boost::bind( &Image_Crystal::set_unit_cell_cif_path,_core_image_crystal, _1 ) );
   TreeItem* unit_cell_file_cif = new TreeItem ( box2_option_1_1 , box2_function_1_1, box2_option_1_1_edit );
+  unit_cell_file_cif->set_item_delegate_type( _delegate_FILE );
   unit_cell_file->insertChildren( unit_cell_file_cif );
 
   ////////////////
@@ -494,6 +465,7 @@ void MainWindow::create_box_options(){
   QVector<bool> box2_option_1_2_edit = {false,true};
   boost::function<bool(std::string)> box2_function_1_2 ( boost::bind( &Image_Crystal::set_unit_cell_cel_path,_core_image_crystal, _1 ) );
   TreeItem* unit_cell_file_cel = new TreeItem ( box2_option_1_2 , box2_function_1_2, box2_option_1_2_edit );
+  unit_cell_file_cel->set_item_delegate_type( _delegate_FILE );
   unit_cell_file->insertChildren( unit_cell_file_cel );
 
   ////////////////
@@ -568,17 +540,7 @@ void MainWindow::create_box_options(){
   project_setup_crystalographic_fields_model = new TreeModel( crystallography_root );
 
   ui->qtree_view_project_setup_crystallography->setModel(project_setup_crystalographic_fields_model);
-
-  QModelIndex unit_cell_index = project_setup_crystalographic_fields_model->index(0,0);
-  QModelIndex cif_path = project_setup_crystalographic_fields_model->index(0,1,unit_cell_index);
-  QModelIndex cel_path = project_setup_crystalographic_fields_model->index(1,1,unit_cell_index);
-  //_load_file_delegate->set_model_index
-  ui->qtree_view_project_setup_crystallography->setItemDelegate(_load_file_delegate);
-  ui->qtree_view_project_setup_crystallography->setItemDelegateForRow(1,_load_file_delegate);
-
-
-  //ui->qtree_view_project_setup_crystallography->setIndexWidget(cif_path,ui->qwidget_load_cif);
-  //ui->qtree_view_project_setup_crystallography->setIndexWidget(cel_path,ui->qwidget_load_cel);
+ui->qtree_view_project_setup_crystallography->setItemDelegate( _load_file_delegate );
 
   ui->qtree_view_project_setup_image->expandAll();
   ui->qtree_view_project_setup_crystallography->expandAll();

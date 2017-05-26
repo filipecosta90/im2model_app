@@ -83,6 +83,9 @@ bool TreeItem::load_data_from_property_tree( boost::property_tree::ptree pt_root
     _child->load_data_from_property_tree(pt_child_node);
     child_num++;
   }
+
+  // more work here
+  return true;
 }
 
 boost::property_tree::ptree* TreeItem::save_data_into_property_tree( ){
@@ -128,7 +131,6 @@ boost::property_tree::ptree* TreeItem::save_data_into_property_tree( ){
 
 }
 
-
 TreeItem *TreeItem::child(int number)
 {
   return childItems.value(number);
@@ -165,7 +167,6 @@ bool TreeItem::isItemEditable( int column ) const{
   }
   return result;
 }
-
 
 bool TreeItem::insertChildren(TreeItem *item){
   item->set_parent(this);
@@ -304,4 +305,8 @@ QStringList TreeItem::extractStringsFromItem()
 
 DelegateType TreeItem::get_item_delegate_type(){
     return _item_delegate_type;
+}
+
+void TreeItem::set_item_delegate_type( DelegateType _delegate_type ){
+    _item_delegate_type = _delegate_type;
 }
