@@ -419,6 +419,8 @@ bool WAVIMG_prm::call_bin(){
   if ( debug_switch ){
     args_stream << " /dbg";
   }
+  std::cout << "going to run boost process with args: "<< args_stream.str() << std::endl;
+
   boost::process::system( args_stream.str() );
   return true;
 }
@@ -436,6 +438,7 @@ bool WAVIMG_prm::set_bin_path( std::string path ){
   bool result = false;
   if( boost::filesystem::is_directory( bin_dir ) ){
     bin_path = path;
+    _flag_bin_path = true;
     result = true;
   }
   return result;

@@ -127,6 +127,7 @@ bool TDMap::calculate_thickness_range_upper_bound_slice_from_nm(){
   if ( _is_thickness_range_upper_bound_defined() ){
     slices_upper_bound = _tdmap_celslc_parameters->get_slice_number_from_nm_floor( nm_upper_bound );
     std::cout << "Calculated slice # " << slices_upper_bound << " as the upper bound for the maximum thickness of: " << nm_upper_bound << " nm" << std::endl;
+    _flag_thickness_upper_bound_slice = true;
     result = true;
   }
   return result;
@@ -193,6 +194,8 @@ bool TDMap::run_tdmap(){
   calculate_simulated_image_sampling_rate_and_size();
   status = prepare_celslc_parameters();
   std::cout << " prepare celslc parameters status " << status << std::endl;
+  std::cout << " _run_celslc_switch " << _run_celslc_switch << std::endl;
+  std::cout << " _is_bin_path_defined " << _tdmap_celslc_parameters->_is_bin_path_defined() << std::endl;
   if ( status && _run_celslc_switch &&  _tdmap_celslc_parameters->_is_bin_path_defined() ){
     std::cout << "Running ceslc" << std::endl;
     _flag_runned_tdmap_celslc = _tdmap_celslc_parameters->call_boost_bin();
@@ -203,11 +206,19 @@ bool TDMap::run_tdmap(){
   calculate_thickness_range_upper_bound_slice_from_nm();
   calculate_thickness_range_slice_period();
   status = prepare_msa_parameters();
+
+  std::cout << " prepare_msa_parameters status " << status << std::endl;
+  std::cout << " _run_msa_switch " << _run_msa_switch << std::endl;
+  std::cout << " _is_bin_path_defined " << _tdmap_msa_parameters->_is_bin_path_defined() << std::endl;
   if ( status && _run_msa_switch &&  _tdmap_msa_parameters->_is_bin_path_defined() ){
     std::cout << "Running msa" << std::endl;
     _flag_runned_tdmap_msa = _tdmap_msa_parameters->call_bin();
   }
   status = prepare_wavimg_parameters();
+  std::cout << " prepare_wavimg_parameters status " << status << std::endl;
+  std::cout << " _run_wavimg_switch " << _run_wavimg_switch << std::endl;
+  std::cout << " _is_bin_path_defined " << _tdmap_wavimg_parameters->_is_bin_path_defined() << std::endl;
+
   if ( status && _run_wavimg_switch &&  _tdmap_wavimg_parameters->_is_bin_path_defined() ){
     std::cout << "Running wavimg" << std::endl;
     _flag_runned_tdmap_wavimg = _tdmap_wavimg_parameters->call_bin();
@@ -269,6 +280,8 @@ bool  TDMap::prepare_msa_parameters(){
   if( _is_thickness_range_lower_bound_slice_defined()
       && _is_thickness_range_upper_bound_slice_defined()
       && _is_thickness_period_slice_defined()
+          && _is_ht_accelaration_voltage_defined()
+          && _is_slc_file_name_prefix_defined()
     ){
     _tdmap_msa_parameters->set_electron_wavelength( ht_accelaration_voltage );
     _tdmap_msa_parameters->set_internal_repeat_factor_of_super_cell_along_x ( 1 );

@@ -73,14 +73,14 @@ class TDMap {
     MSA_prm* _tdmap_msa_parameters;
     bool _flag_tdmap_msa_parameters = false;
     bool _flag_runned_tdmap_msa = false;
-    bool _run_msa_switch = false;
+    bool _run_msa_switch = true;
     std::string dr_probe_msa_execname;
     bool _flag_dr_probe_msa_execname = false;
 
     WAVIMG_prm* _tdmap_wavimg_parameters;
     bool _flag_tdmap_wavimg_parameters = false;
     bool _flag_runned_tdmap_wavimg = false;
-    bool _run_wavimg_switch = false;
+    bool _run_wavimg_switch = true;
     std::string dr_probe_wavimg_execname;
     bool _flag_dr_probe_wavimg_execname = false;
 
