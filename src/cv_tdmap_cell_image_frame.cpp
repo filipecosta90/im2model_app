@@ -32,7 +32,7 @@ CvTDMapImageFrame::CvTDMapImageFrame( ) {
     toolsLayout->addLayout(contentsLayout);
 }
 
-CvTDMapImageFrame::CvTDMapImageFrame( QWidget* parent ) {
+CvTDMapImageFrame::CvTDMapImageFrame( QWidget * parent ) {
     image_widget = new CVImageWidget( parent );
     scrollArea = new QScrollArea( parent );
 

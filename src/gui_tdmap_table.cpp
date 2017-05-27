@@ -4,17 +4,19 @@
 #include "gui_tdmap_table.h"
 #include "cv_tdmap_cell_image_frame_delegate.h"
 #include "cv_tdmap_cell_image_frame.h"
+#include "cv_image_frame.h"
+
 
 #include "td_map.hpp"
 
 TDMap_Table::TDMap_Table(QWidget *parent) : QTableWidget(parent) {
-  table_parent = parent;
-  autoRecalc = true;
-  image_delegate = new CvTDMapImageFrameDelegate(this);
 
-  //setItemPrototype(new CvTDMapImageFrame);
+  table_parent = parent;
+  //image_delegate = new CvTDMapImageFrameDelegate(this);
+
+  //setItemPrototype(new TDMap_Cell);
   setSelectionMode(ContiguousSelection);
-  setItemDelegate(image_delegate);
+  //setItemDelegate(image_delegate);
 
   connect(this, SIGNAL(itemChanged(QTableWidgetItem *)), this, SLOT(somethingChanged()));
   clear();
@@ -104,12 +106,10 @@ void TDMap_Table::clear()
       for (int row = 0; row < RowCount; ++row) {
           std::vector<cv::Mat> simulated_image_row = simulated_image_grid.at(row);
           for (int col = 0; col < ColumnCount; ++col) {
-              QTableWidgetItem *item = new QTableWidgetItem;
+              CvImageFrameWidget *cell_widget  = new CvImageFrameWidget();
             cv::Mat full_image = simulated_image_row.at(col);
-              CvTDMapImageFrame* image_frame = new CvTDMapImageFrame( this );
-              image_frame->setImage( full_image.clone() );
-              item->setData(0, QVariant::fromValue( *image_frame ));
-              this->setItem(row, col, item);
+            cell_widget->setImage( full_image.clone() );
+              this->setCellWidget(row,col, cell_widget);
           }
       }
       std::cout << "finished creating Image frames " << std::endl;
@@ -127,19 +127,7 @@ TDMap_Cell* TDMap_Table::cell(int row, int column) const
 {
   return static_cast<TDMap_Cell*> (item(row, column));
 }
-/*
- * The text() private function returns the text for a given cell. 
- * If cell() returns a null pointer, the TDMap_Cellis empty, so we return an empty string.
- * */
-QString TDMap_Table::text(int row, int column) const
-{
-  TDMap_Cell*c = cell(row, column);
-  if (c) {
-    return c->text();
-  } else {
-    return "";
-  }
-}
+
 
 /*
  * The currentLocation() function returns the current cell's location in the 
@@ -158,8 +146,6 @@ QString TDMap_Table::currentLocation() const
  */
 void TDMap_Table::somethingChanged()
 {
-  if (autoRecalc)
-    recalculate();
   emit modified();
 }
 
@@ -176,45 +162,4 @@ void TDMap_Table::selectCurrentColumn()
   selectColumn(currentColumn());
 }
 
-/*
- * The recalculate() slot corresponds to Tools|Recalculate. It is also called automatically by TDMap_Table when necessary.
- * */
-void TDMap_Table::recalculate()
-{
-  for (int row = 0; row < RowCount; ++row) {
-    for (int column = 0; column < ColumnCount; ++column) {
-      if (cell(row, column))
-        cell(row, column)->setDirty();
-    }
-  }
-  viewport()->update();
-}
-
-/*
- * The setAutoRecalculate() slot corresponds to Options|Auto-Recalculate. If the feature is being turned on, we recalculate the whole TDMap_Table immediately to make sure that it's up-to-date; afterward, recalculate() is called automatically from somethingChanged().
- * */
-void TDMap_Table::setAutoRecalculate(bool recalc)
-{
-  autoRecalc = recalc;
-  if (autoRecalc)
-    recalculate();
-}
-
-bool TDMap_TableCompare::operator()(const QStringList &row1,
-    const QStringList &row2) const
-{
-  for (int i = 0; i < KeyCount; ++i) {
-    int column = keys[i];
-    if (column != -1) {
-      if (row1[column] != row2[column]) {
-        if (ascending[i]) {
-          return row1[column] < row2[column];
-        } else {
-          return row1[column] > row2[column];
-        }
-      }
-    }
-  }
-  return false;
-}
 

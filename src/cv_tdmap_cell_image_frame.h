@@ -18,7 +18,7 @@ class CvTDMapImageFrame {
 
   public:
     explicit CvTDMapImageFrame();
-    CvTDMapImageFrame( QWidget* parent );
+    CvTDMapImageFrame( QWidget * parent );
 
     void setImage(const cv::Mat& image);
   void setImageWidget( CVImageWidget* widget );
