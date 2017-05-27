@@ -7,6 +7,7 @@
 #include "cv_image_delegate.h"
 #include "td_map.hpp"
 #include "treeitem.h"
+#include "cv_tdmap_cell_image_frame_delegate.h"
 
 class TDMap_Cell;
 class TDMap_TableCompare;
@@ -20,11 +21,11 @@ class TDMap_Table : public QTableWidget
 
     bool autoRecalculate() const { return autoRecalc; }
     QString currentLocation() const;
-    QString currentFormula() const;
     QTableWidgetSelectionRange selectedRange() const;
     void clear();
 
     void set_tdmap( TDMap* map );
+    void set_simulated_images_grid( std::vector< std::vector<cv::Mat> > image_grid );
 
     /* signal connecting to treeitems with simulation configuration info */
     void connect_thickness_range_number_samples_changes( const TreeItem* item, int item_changes_column );
@@ -54,7 +55,7 @@ signals:
     void setFormula(int row, int column, const QString &formula);
     bool autoRecalc;
     // Make a member pointer to a new MyDelegate instance
-    CvImageDelegate *image_delegate;
+    CvTDMapImageFrameDelegate *image_delegate;
     QWidget *table_parent;
 
     /* CORE IM2MODEL*/
@@ -64,6 +65,8 @@ signals:
     /* VISUAL TDMAP vars */
     int _treeitem_thickness_range_number_samples_watch_col;
     int _treeitem_defocus_range_number_samples_watch_col;
+    bool _flag_simulated_image_grid = false;
+    std::vector< std::vector<cv::Mat> > simulated_image_grid;
 
 };
 

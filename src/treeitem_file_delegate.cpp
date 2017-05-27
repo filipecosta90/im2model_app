@@ -156,6 +156,3 @@ void TreeItemFileDelegate::get_filename_slot( QWidget *editor ){
     line->setText(fileName);
   }
 }
-
-
-

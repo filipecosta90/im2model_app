@@ -88,6 +88,10 @@ if(build_gui)
     cv_image_frame.h
     cv_image_delegate.h
     cv_image_delegate.cpp
+    cv_tdmap_cell_image_frame.h
+    cv_tdmap_cell_image_frame.cpp
+    cv_tdmap_cell_image_frame_delegate.h
+    cv_tdmap_cell_image_frame_delegate.cpp
     gui_tdmap_cell.h
     gui_tdmap_cell.cpp
     gui_tdmap_table.h

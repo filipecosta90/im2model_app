@@ -15,8 +15,7 @@
 #include "treeitem.h"
 #include "treemodel.h"
 
-class TreeItemFileDelegate : public QItemDelegate
-{
+class TreeItemFileDelegate : public QItemDelegate {
   Q_OBJECT
   public:
     explicit TreeItemFileDelegate( QObject *parent = 0 );

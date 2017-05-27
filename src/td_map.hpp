@@ -244,6 +244,8 @@ class TDMap {
 
     double get_defocus_range_period( );
 
+    std::vector< std::vector<cv::Mat> > get_simulated_images_grid();
+
     /** setters **/
 
     bool set_dr_probe_bin_path( std::string bin_path );

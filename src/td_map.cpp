@@ -577,6 +577,10 @@ double TDMap::get_defocus_range_period( ){
   return defocus_period;
 }
 
+std::vector< std::vector<cv::Mat> > TDMap::get_simulated_images_grid(){
+    return _td_map_simgrid->get_simulated_images_grid();
+}
+
 /** setters **/
 bool TDMap::set_thickness_range_lower_bound( std::string lower_bound ){
   nm_lower_bound = boost::lexical_cast<double>(lower_bound);

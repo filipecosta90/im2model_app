@@ -2,21 +2,21 @@
 
 #include "gui_tdmap_cell.h"
 #include "gui_tdmap_table.h"
+#include "cv_tdmap_cell_image_frame_delegate.h"
+#include "cv_tdmap_cell_image_frame.h"
+
 #include "td_map.hpp"
 
-  TDMap_Table::TDMap_Table(QWidget *parent)
-: QTableWidget(parent)
-{
+TDMap_Table::TDMap_Table(QWidget *parent) : QTableWidget(parent) {
   table_parent = parent;
   autoRecalc = true;
-  image_delegate = new CvImageDelegate(this);
+  image_delegate = new CvTDMapImageFrameDelegate(this);
 
-  setItemPrototype(new TDMap_Cell);
+  //setItemPrototype(new CvTDMapImageFrame);
   setSelectionMode(ContiguousSelection);
-  // setItemDelegate(image_delegate);
+  setItemDelegate(image_delegate);
 
-  connect(this, SIGNAL(itemChanged(QTableWidgetItem *)),
-      this, SLOT(somethingChanged()));
+  connect(this, SIGNAL(itemChanged(QTableWidgetItem *)), this, SLOT(somethingChanged()));
   clear();
 }
 
@@ -24,7 +24,6 @@ void TDMap_Table::set_tdmap( TDMap* map ){
   core_tdmap = map;
   _flag_core_tdmap = true;
 }
-
 
 void TDMap_Table::connect_thickness_range_number_samples_changes( const TreeItem* item, int item_changes_column ){
   connect( item, SIGNAL(dataChanged(int )), this, SLOT( update_RowCount_from_thickness_range_number_samples(int) ) );
@@ -54,7 +53,11 @@ void TDMap_Table::update_ColumnCount_from_defocus_range_number_samples( int sign
   }
 }
 
-
+void TDMap_Table::set_simulated_images_grid( std::vector< std::vector<cv::Mat> > image_grid ){
+    simulated_image_grid = image_grid;
+_flag_simulated_image_grid = true;
+clear();
+}
 
 void TDMap_Table::clear()
 {
@@ -97,6 +100,21 @@ void TDMap_Table::clear()
     setVerticalHeaderItem(i, item);
   }
 
+  if( _flag_simulated_image_grid ){
+      for (int row = 0; row < RowCount; ++row) {
+          std::vector<cv::Mat> simulated_image_row = simulated_image_grid.at(row);
+          for (int col = 0; col < ColumnCount; ++col) {
+              QTableWidgetItem *item = new QTableWidgetItem;
+            cv::Mat full_image = simulated_image_row.at(col);
+              CvTDMapImageFrame* image_frame = new CvTDMapImageFrame( this );
+              image_frame->setImage( full_image.clone() );
+              item->setData(0, QVariant::fromValue( *image_frame ));
+              this->setItem(row, col, item);
+          }
+      }
+      std::cout << "finished creating Image frames " << std::endl;
+  }
+
   setCurrentCell(0, 0);
 }
 
@@ -123,27 +141,6 @@ QString TDMap_Table::text(int row, int column) const
   }
 }
 
-QString TDMap_Table::formula(int row, int column) const
-{
-  TDMap_Cell*c = cell(row, column);
-  if (c) {
-    return c->formula();
-  } else {
-    return "";
-  }
-}
-
-void TDMap_Table::setFormula(int row, int column,
-    const QString &formula)
-{
-  TDMap_Cell*c = cell(row, column);
-  if (!c) {
-    c = new TDMap_Cell;
-    setItem(row, column, c);
-  }
-  c->setFormula(formula);
-}
-
 /*
  * The currentLocation() function returns the current cell's location in the 
  * usual TDMap_Table format of column letter followed by row number. 
@@ -153,17 +150,6 @@ QString TDMap_Table::currentLocation() const
 {
   return QChar('A' + currentColumn())
     + QString::number(currentRow() + 1);
-}
-
-
-/*
- * The currentFormula() function returns the current cell's formula. 
- * It is called from MainWindow::updateStatusBar().
- * */
-
-QString TDMap_Table::currentFormula() const
-{
-  return formula(currentRow(), currentColumn());
 }
 
 /*

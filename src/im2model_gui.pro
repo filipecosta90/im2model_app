@@ -39,7 +39,9 @@ SOURCES +=\
     simgrid_steplength.cpp \
     settings.cpp \
     treeitem_file_delegate.cpp \
-    qt_file_push_button.cpp
+    qt_file_push_button.cpp \
+    cv_tdmap_cell_image_frame.cpp \
+    cv_tdmap_cell_image_frame_delegate.cpp
 
 
 HEADERS  += configwin.h \
@@ -59,7 +61,9 @@ HEADERS  += configwin.h \
     global_def.hpp \
     settings.h \
     treeitem_file_delegate.hpp \
-    qt_file_push_button.h
+    qt_file_push_button.h \
+    cv_tdmap_cell_image_frame.h \
+    cv_tdmap_cell_image_frame_delegate.h
 
 RESOURCES     = ../im2model.qrc
 

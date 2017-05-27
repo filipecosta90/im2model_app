@@ -47,6 +47,7 @@ class MainWindow : public QMainWindow {
     void update_full_experimental_image_frame();
     void update_roi_experimental_image_frame();
     void on_qpush_run_tdmap_clicked();
+    void update_simgrid_frame();
 
     // menu slots
     void newFile();
@@ -58,6 +59,7 @@ class MainWindow : public QMainWindow {
 
 signals:
     void experimental_image_filename_changed( );
+    void simulated_grid_changed();
 
   private:
 

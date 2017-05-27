@@ -63,7 +63,7 @@ class CVImageWidget : public QWidget
       }
 
       // QImage needs the data to be stored continuously in memory
-      assert(_tmp_original.isContinuous());
+      assert( _tmp_original.isContinuous() );
       original_size = _tmp_original.size();
       // Assign OpenCV's image buffer to the QImage. Note that the bytesPerLine parameter
       // (http://qt-project.org/doc/qt-4.8/qimage.html#QImage-6) is 3*width because each pixel

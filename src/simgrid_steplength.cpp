@@ -849,6 +849,6 @@ bool SIMGRID_wavimg_steplength::simulate_from_dat_file(){
 
   std::cout << imregionalmax_match_values_matrix << std::endl;
   runned_simulation = true;
-  return EXIT_SUCCESS;
+  return runned_simulation;
 }
 

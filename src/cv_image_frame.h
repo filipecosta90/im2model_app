@@ -36,7 +36,6 @@ class CvImageFrameWidget : public QWidget
     contentsLayout = new QHBoxLayout;
     contentsLayout->addWidget(scrollArea);
     toolsLayout->addLayout(contentsLayout);
-
   }
     public slots:
 
