@@ -262,7 +262,6 @@ class SIMGRID_wavimg_steplength {
 
     void produce_png_from_dat_file();
 
-
     bool simulate_from_dat_file();
 };
 

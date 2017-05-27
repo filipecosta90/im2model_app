@@ -19,9 +19,8 @@ Image_Crystal::Image_Crystal(){
 /** others **/
 
 bool Image_Crystal::load_full_experimental_image(){
-  if ( boost::filesystem::exists( experimental_image_path ) )
-  {
-    experimental_image_full = cv::imread( experimental_image_path, true);
+  if ( boost::filesystem::exists( experimental_image_path ) ){
+    experimental_image_full = cv::imread( experimental_image_path, CV_LOAD_IMAGE_GRAYSCALE );
     _flag_loaded_experimental_full = true;
     update_roi();
   }
@@ -69,7 +68,6 @@ void Image_Crystal::update_projection_dir_defined(){
   if( _projection_dir_h_defined && _projection_dir_k_defined && _projection_dir_l_defined ){
     _projection_dir_defined = true;
     std::cout << " projection dir defined " << std::endl;
-
   }
 }
 
@@ -84,7 +82,6 @@ void Image_Crystal::update_sampling_rate_experimental_defined(){
   if( _flag_sampling_rate_experimental_x_nm_per_pixel && _flag_sampling_rate_experimental_y_nm_per_pixel ){
     _sampling_rate_experimental_defined = true;
     std::cout << " _sampling rate experimental_defined dir defined " << std::endl;
-
   }
 }
 

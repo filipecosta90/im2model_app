@@ -223,8 +223,11 @@ bool TDMap::run_tdmap(){
     std::cout << "Running wavimg" << std::endl;
     _flag_runned_tdmap_wavimg = _tdmap_wavimg_parameters->call_bin();
   }
+  status = prepare_simgrid_parameters();
+  std::cout << " prepare_simgrid_parameters status " << status << std::endl;
   if ( status && _run_simgrid_switch ){
-
+    std::cout << "Running simgrid" << std::endl;
+    _td_map_simgrid->simulate_from_dat_file();
   }
   return status;
 }
@@ -258,9 +261,12 @@ bool  TDMap::prepare_celslc_parameters(){
     _tdmap_celslc_parameters->set_slc_filename_prefix ( slc_file_name_prefix.c_str() );
     _tdmap_celslc_parameters->set_nx_simulated_horizontal_samples( nx_simulated_horizontal_samples );
     _tdmap_celslc_parameters->set_ny_simulated_vertical_samples( ny_simulated_vertical_samples );
-    if( nz_switch ){
-      _tdmap_celslc_parameters->set_nz_simulated_partitions ( nz_simulated_partitions );
-    }
+    // work here !!!! gui not available option
+    /*
+     * if( nz_switch ){
+     _tdmap_celslc_parameters->set_nz_simulated_partitions ( nz_simulated_partitions );
+     }
+     */
     _tdmap_celslc_parameters->set_ht_accelaration_voltage( ht_accelaration_voltage );
     _tdmap_celslc_parameters->set_dwf_switch( dwf_switch );
     _tdmap_celslc_parameters->set_abs_switch( abs_switch );
@@ -395,6 +401,76 @@ bool  TDMap::prepare_wavimg_parameters(){
   return _flag_tdmap_wavimg_parameters;
 }
 
+
+bool  TDMap::prepare_simgrid_parameters(){
+  _flag_tdmap_simgrid_parameters = false;
+  std::cout << "  _is_thickness_range_lower_bound_slice_defined " << _is_thickness_range_lower_bound_slice_defined() << std::endl;
+
+  celslc_accum_nm_slice_vec = _tdmap_celslc_parameters->get_slice_params_accum_nm_slice_vec();
+  _flag_celslc_accum_nm_slice_vec = true;
+  assert( celslc_accum_nm_slice_vec.size() == number_slices_to_max_thickness);
+  const double _sampling_rate_experimental_x_nm_per_pixel = _core_image_crystal_ptr->get_sampling_rate_experimental_x_nm_per_pixel();
+  const double _sampling_rate_experimental_y_nm_per_pixel = _core_image_crystal_ptr->get_sampling_rate_experimental_y_nm_per_pixel();
+  cv::Mat _experimental_image_roi = _core_image_crystal_ptr->get_roi_experimental_image_mat();
+
+  _td_map_simgrid->set_sampling_rate_super_cell_x_nm_pixel( _sampling_rate_experimental_x_nm_per_pixel );
+  _td_map_simgrid->set_sampling_rate_super_cell_y_nm_pixel( _sampling_rate_experimental_y_nm_per_pixel );
+  _td_map_simgrid->set_experimental_image_roi( _experimental_image_roi );
+
+  // defocus setters
+  _td_map_simgrid->set_defocus_lower_bound( defocus_lower_bound );
+  _td_map_simgrid->set_defocus_upper_bound( defocus_upper_bound );
+  _td_map_simgrid->set_defocus_samples( defocus_samples );
+  _td_map_simgrid->set_defocus_period( defocus_period );
+
+  // thickness/slice setters
+
+  _td_map_simgrid->set_celslc_accum_nm_slice_vec( celslc_accum_nm_slice_vec );
+  _td_map_simgrid->set_slice_samples(slice_samples);
+  _td_map_simgrid->set_slice_period( slice_period );
+  _td_map_simgrid->set_number_slices_to_max_thickness( number_slices_to_max_thickness );
+  _td_map_simgrid->set_slices_lower_bound( slices_lower_bound );
+  _td_map_simgrid->set_slices_upper_bound( slices_upper_bound );
+
+  _td_map_simgrid->set_n_rows_simulated_image(nx_simulated_horizontal_samples);
+  _td_map_simgrid->set_n_cols_simulated_image(ny_simulated_vertical_samples);
+
+  _td_map_simgrid->set_reshaped_simulated_image_width(reshaped_simulated_image_width);
+  _td_map_simgrid->set_reshaped_simulated_image_height(reshaped_simulated_image_height);
+
+  _td_map_simgrid->set_ignore_edge_pixels_rectangle( ignore_edge_pixels_rectangle );
+  _td_map_simgrid->set_simulated_image_needs_reshape( simulated_image_needs_reshape );
+  _td_map_simgrid->set_reshape_factor_from_supper_cell_to_experimental_x (reshape_factor_from_supper_cell_to_experimental_x);
+  _td_map_simgrid->set_reshape_factor_from_supper_cell_to_experimental_y (reshape_factor_from_supper_cell_to_experimental_y);
+  // work here !!!
+  //_td_map_simgrid->set_sim_grid_switch(sim_grid_switch);
+  // work here !!!
+  //_td_map_simgrid->set_debug_switch(debug_switch);
+
+  // user estimation of defocus and thickness
+  /*if ( user_estimated_defocus_nm_switch ){
+    _td_map_simgrid->set_user_estimated_defocus_nm_switch( user_estimated_defocus_nm_switch );
+    _td_map_simgrid->set_user_estimated_defocus_nm( user_estimated_defocus_nm );
+    }
+
+    if ( user_estimated_thickness_nm_switch ){
+    _td_map_simgrid->set_user_estimated_thickness_nm_switch( user_estimated_thickness_nm_switch );
+    _td_map_simgrid->set_user_estimated_thickness_nm( user_estimated_thickness_nm );
+    }
+
+    if ( user_estimated_thickness_slice_switch ){
+    _td_map_simgrid->set_user_estimated_thickness_slice_switch( user_estimated_thickness_slice_switch );
+    _td_map_simgrid->set_user_estimated_thickness_slice( user_estimated_thickness_slice );
+    }*/
+
+  _td_map_simgrid->set_iteration_number(1);
+  _td_map_simgrid->set_step_length_minimum_threshold ( 87.5f );
+  _td_map_simgrid->set_step_size( defocus_period, slice_period );
+  _flag_tdmap_simgrid_parameters = true;
+  return  _flag_tdmap_simgrid_parameters;
+
+
+}
 bool TDMap::_is_thickness_range_lower_bound_defined(){
   return _flag_thickness_lower_bound;
 }

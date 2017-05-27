@@ -30,6 +30,7 @@ class TDMap {
     double user_estimated_thickness_nm;
     int user_estimated_thickness_slice;
     std::vector<double> celslc_accum_nm_slice_vec;
+    bool _flag_celslc_accum_nm_slice_vec = false;
     bool _flag_thickness_lower_bound = false;
     bool _flag_thickness_upper_bound = false;
     bool _flag_thickness_samples = false;
@@ -94,8 +95,9 @@ class TDMap {
     bool _flag_file_name_output_image_wave_function = false;
 
     SIMGRID_wavimg_steplength* _td_map_simgrid;
-    bool _flag_td_map_simgrid = false;
-    bool _run_simgrid_switch = false;
+    bool _flag_tdmap_simgrid_parameters = false;
+    bool _flag_tdmap_simgrid = false;
+    bool _run_simgrid_switch = true;
 
     /////////////////////////
     // Im2Model core pointers
@@ -118,6 +120,8 @@ class TDMap {
     bool _flag_ny_simulated_vertical_samples = false;
 
     int nz_simulated_partitions;
+
+    bool _flag_nz_simulated_partitions = false;
     bool nx_ny_switch = false;
     bool nz_switch = false;
     bool dwf_switch = false;
@@ -185,6 +189,9 @@ class TDMap {
     bool prepare_celslc_parameters();
     bool prepare_msa_parameters();
     bool prepare_wavimg_parameters();
+
+    // Im2Model
+    bool prepare_simgrid_parameters();
 
     /*
      * RUN METHODS
