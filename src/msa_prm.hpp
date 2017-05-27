@@ -43,6 +43,11 @@ class MSA_prm {
     std::vector<int> slice_index;
     // runnable execv info
     std::string prm_filename;
+    bool _flag_prm_filename;
+    bool _flag_produced_prm = false;
+    std::string prm_filename_path;
+    bool _flag_prm_filename_path = false;
+
     std::string wave_function_name;
 
     std::string bin_path;
@@ -55,6 +60,12 @@ class MSA_prm {
     bool runned_bin;
 
     void cleanup_thread();
+
+    bool save_prm_filename_path();
+    bool _is_prm_filename_path_defined();
+    bool _is_prm_produced();
+    bool _is_prm_filename_defined();
+
   public:
     MSA_prm();
 
@@ -90,7 +101,7 @@ class MSA_prm {
 
     bool set_bin_execname ( std::string execname );
 
-    void produce_prm();
+    bool produce_prm();
 
     bool cleanup_bin();
 

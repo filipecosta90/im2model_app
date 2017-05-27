@@ -82,6 +82,10 @@ class WAVIMG_prm {
     std::vector<std::string> loop_string_indentifier;
     // runnable execv info
     std::string prm_filename;
+    bool _flag_prm_filename;
+    bool _flag_produced_prm = false;
+    std::string prm_filename_path;
+    bool _flag_prm_filename_path = false;
 
     std::string bin_path;
     bool _flag_bin_path = false;
@@ -93,6 +97,11 @@ class WAVIMG_prm {
     bool runned_bin;
 
     void cleanup_thread();
+    bool save_prm_filename_path();
+    bool _is_prm_filename_path_defined();
+    bool _is_prm_produced();
+    bool _is_prm_filename_defined();
+
   public:
     WAVIMG_prm();
     WAVIMG_prm( std::string wavimg_bin_path );
@@ -170,7 +179,7 @@ class WAVIMG_prm {
 
     bool set_bin_execname ( std::string execname );
 
-    void produce_prm();
+    bool produce_prm();
 
     bool cleanup_bin();
 
