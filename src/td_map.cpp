@@ -190,7 +190,7 @@ bool TDMap::calculate_thickness_range_slice_period(){
 }
 
 bool TDMap::run_tdmap(){
-  bool status = false;
+  bool status = true;
   calculate_simulated_image_sampling_rate_and_size();
   status = prepare_celslc_parameters();
   std::cout << " prepare celslc parameters status " << status << std::endl;
@@ -199,6 +199,7 @@ bool TDMap::run_tdmap(){
   if ( status && _run_celslc_switch &&  _tdmap_celslc_parameters->_is_bin_path_defined() ){
     std::cout << "Running ceslc" << std::endl;
     _flag_runned_tdmap_celslc = _tdmap_celslc_parameters->call_boost_bin();
+    status = _flag_runned_tdmap_celslc;
   }
   set_number_slices_to_load_from_nz_simulated_partitions();
   set_number_slices_to_max_thickness_from_nz_simulated_partitions();
@@ -213,6 +214,7 @@ bool TDMap::run_tdmap(){
   if ( status && _run_msa_switch &&  _tdmap_msa_parameters->_is_bin_path_defined() ){
     std::cout << "Running msa" << std::endl;
     _flag_runned_tdmap_msa = _tdmap_msa_parameters->call_bin();
+    status = _flag_runned_tdmap_msa;
   }
   status = prepare_wavimg_parameters();
   std::cout << " prepare_wavimg_parameters status " << status << std::endl;
@@ -222,12 +224,14 @@ bool TDMap::run_tdmap(){
   if ( status && _run_wavimg_switch &&  _tdmap_wavimg_parameters->_is_bin_path_defined() ){
     std::cout << "Running wavimg" << std::endl;
     _flag_runned_tdmap_wavimg = _tdmap_wavimg_parameters->call_bin();
+    status = _flag_runned_tdmap_wavimg;
   }
   status = prepare_simgrid_parameters();
   std::cout << " prepare_simgrid_parameters status " << status << std::endl;
   if ( status && _run_simgrid_switch ){
     std::cout << "Running simgrid" << std::endl;
-    _td_map_simgrid->simulate_from_dat_file();
+    _flag_runned_tdmap_simgrid = _td_map_simgrid->simulate_from_dat_file();
+    status = _flag_runned_tdmap_simgrid;
   }
   return status;
 }

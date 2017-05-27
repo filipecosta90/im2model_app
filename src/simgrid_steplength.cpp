@@ -33,6 +33,11 @@ int SIMGRID_wavimg_steplength::imregionalmax(cv::Mat input, cv::Mat locations){
   return 1;
 }
 
+std::vector< std::vector<cv::Mat> > SIMGRID_wavimg_steplength::get_simulated_images_grid(){
+  return simulated_images_grid;
+}
+
+
 std::pair<cv::Mat,cv::Mat> SIMGRID_wavimg_steplength::gradient(cv::Mat & img, double spaceX, double spaceY) {
 
   cv::Mat gradY = gradientY(img,spaceY);

@@ -18,11 +18,8 @@ class TreeModel : public QAbstractItemModel {
     ~TreeModel();
 
     QVariant data(const QModelIndex &index, int role) const override;
-    QVariant headerData(int section, Qt::Orientation orientation,
-        int role = Qt::DisplayRole) const override;
-
-    QModelIndex index(int row, int column,
-        const QModelIndex &parent = QModelIndex()) const override;
+    QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
+    QModelIndex index(int row, int column, const QModelIndex &parent = QModelIndex()) const override;
     QModelIndex parent(const QModelIndex &index) const override;
 
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
@@ -33,32 +30,27 @@ class TreeModel : public QAbstractItemModel {
      * The following public functions provide support for editing and resizing:
      */
     Qt::ItemFlags flags(const QModelIndex &index) const override;
-    bool setData(const QModelIndex &index, const QVariant &value,
-        int role = Qt::EditRole) override;
-    bool setHeaderData(int section, Qt::Orientation orientation,
-        const QVariant &value, int role = Qt::EditRole) override;
+    bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole) override;
+    bool setHeaderData(int section, Qt::Orientation orientation, const QVariant &value, int role = Qt::EditRole) override;
+    bool insertColumns(int position, int columns, const QModelIndex &parent = QModelIndex()) override;
+    bool removeColumns(int position, int columns, const QModelIndex &parent = QModelIndex()) override;
+    bool insertRows(int position, int rows, const QModelIndex &parent = QModelIndex()) override;
+    bool removeRows(int position, int rows, const QModelIndex &parent = QModelIndex()) override;
 
-    //bool setItemWidget(int row, int col, QWidget* widget);
-
-
-    bool insertColumns(int position, int columns,
-        const QModelIndex &parent = QModelIndex()) override;
-    bool removeColumns(int position, int columns,
-        const QModelIndex &parent = QModelIndex()) override;
-    bool insertRows(int position, int rows,
-        const QModelIndex &parent = QModelIndex()) override;
-    bool removeRows(int position, int rows,
-        const QModelIndex &parent = QModelIndex()) override;
-
-    //bool operator==(const TreeModel &tree_item_comp );
     void set_data_unique_id( int row, int column, int unique_id );
+    bool _was_model_modified();
 
     QStringList extractStringsFromModel( );
     boost::property_tree::ptree* save_data_into_property_tree( );
     bool load_data_from_property_tree( boost::property_tree::ptree pt_root );
+
+    public slots:
+      void set_model_modified();
   private:
+
     TreeItem *getItem(const QModelIndex &index) const;
     TreeItem *rootItem;
+    bool _flag_model_modified = false;
 };
 
 

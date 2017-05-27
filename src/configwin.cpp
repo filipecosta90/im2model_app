@@ -55,27 +55,15 @@ MainWindow::~MainWindow(){
   delete ui;
 }
 
-/*void MainWindow::on_qpush_load_image_clicked()
-{
-  QString fileName = QFileDialog::getOpenFileName(this,
-      tr("Open image"),
-      tr("."),
-      tr("Image Files (*.png *.jpg *.jpeg *.bmp *.tif)"));
-  if( ! (fileName.isNull()) ){
-      update_qline_image_path( fileName.toStdString() );
-  }
-}
-*/
-
 bool MainWindow::update_qline_image_path( std::string fileName ){
-    std::cout << "inside update_qline_image_path: " << fileName << std::endl;
-    //ui->qline_image_path->setText( QString::fromStdString(fileName) );
-    _core_image_crystal->set_experimental_image_path( fileName );
-    const bool load_ok = _core_image_crystal->load_full_experimental_image();
-    if( load_ok ){
-      emit experimental_image_filename_changed();
-    }
-    return true;
+  std::cout << "inside update_qline_image_path: " << fileName << std::endl;
+  //ui->qline_image_path->setText( QString::fromStdString(fileName) );
+  _core_image_crystal->set_experimental_image_path( fileName );
+  const bool load_ok = _core_image_crystal->load_full_experimental_image();
+  if( load_ok ){
+    emit experimental_image_filename_changed();
+  }
+  return true;
 }
 
 void MainWindow::update_full_experimental_image_frame(){
@@ -93,10 +81,34 @@ void MainWindow::update_roi_experimental_image_frame(){
   }
 }
 
-void MainWindow::on_qpush_run_tdmap_clicked()
-{
+bool MainWindow::_was_document_modified(){
+  bool result = false;
+  result |= project_setup_image_fields_model->_was_model_modified();
+  result |= project_setup_crystalographic_fields_model->_was_model_modified();
+  result |= tdmap_simulation_setup_model->_was_model_modified();
+  return result;
+}
+
+void MainWindow::on_qpush_run_tdmap_clicked(){
+  bool status = false;
   std::cout << "running tdmap" << std::endl;
-  _core_td_map->run_tdmap();
+  ui->statusBar->showMessage(tr("Running TD-Map"), 2000);
+
+#ifndef QT_NO_CURSOR
+  QApplication::setOverrideCursor(Qt::WaitCursor);
+#endif
+
+  status = _core_td_map->run_tdmap();
+
+#ifndef QT_NO_CURSOR
+  QApplication::restoreOverrideCursor();
+#endif
+  if (status){
+    ui->statusBar->showMessage(tr("Sucessfully runned TD-Map"), 2000);
+  }
+  else{
+    ui->statusBar->showMessage(tr("Error while running TD-Map"), 2000);
+  }
 }
 
 void MainWindow::closeEvent(QCloseEvent *event)
@@ -196,7 +208,6 @@ void MainWindow::createActions()
   exitAct->setStatusTip(tr("Exit the application"));
 
   QMenu *editMenu = ui->menuBar->addMenu(tr("&Edit"));
-
   QMenu *helpMenu = ui->menuBar->addMenu(tr("&Help"));
   QAction *aboutAct = helpMenu->addAction(tr("&About"), this, &MainWindow::about);
   aboutAct->setStatusTip(tr("Show the application's About box"));
@@ -243,8 +254,9 @@ void MainWindow::writeSettings()
 
 bool MainWindow::maybeSave()
 {
-  // if (!textEdit->document()->isModified())
-  //    return true;
+  if ( ! _was_document_modified() ){
+    return true;
+  }
   const QMessageBox::StandardButton ret
     = QMessageBox::warning(this, tr("Application"),
         tr("The document has been modified.\n"
@@ -540,7 +552,7 @@ void MainWindow::create_box_options(){
   project_setup_crystalographic_fields_model = new TreeModel( crystallography_root );
 
   ui->qtree_view_project_setup_crystallography->setModel(project_setup_crystalographic_fields_model);
-ui->qtree_view_project_setup_crystallography->setItemDelegate( _load_file_delegate );
+  ui->qtree_view_project_setup_crystallography->setItemDelegate( _load_file_delegate );
 
   ui->qtree_view_project_setup_image->expandAll();
   ui->qtree_view_project_setup_crystallography->expandAll();

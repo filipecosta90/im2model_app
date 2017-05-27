@@ -96,7 +96,7 @@ class TDMap {
 
     SIMGRID_wavimg_steplength* _td_map_simgrid;
     bool _flag_tdmap_simgrid_parameters = false;
-    bool _flag_tdmap_simgrid = false;
+    bool _flag_runned_tdmap_simgrid = false;
     bool _run_simgrid_switch = true;
 
     /////////////////////////

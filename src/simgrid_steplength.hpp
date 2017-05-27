@@ -252,6 +252,9 @@ class SIMGRID_wavimg_steplength {
 
     double get_simgrid_best_match_defocus_nm();
 
+    std::vector< std::vector<cv::Mat> > get_simulated_images_grid();
+
+
     void calculate_motion_euclidian_matrix(  cv::Mat cropped_experimental_image_roi, cv::Mat simulated_image_roi );
 
     cv::Mat calculate_simulated_motion_euclidean_transformed_matrix( cv::Mat raw_simulated_image_roi );

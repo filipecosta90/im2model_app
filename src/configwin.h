@@ -39,9 +39,10 @@ class MainWindow : public QMainWindow {
     ~MainWindow();
   protected:
     void closeEvent(QCloseEvent *event) override;
+    bool _was_document_modified();
 
     private slots:
-    //void on_qpush_load_image_clicked();
+    
     bool update_qline_image_path( std::string fileName );
     void update_full_experimental_image_frame();
     void update_roi_experimental_image_frame();

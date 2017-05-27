@@ -254,7 +254,7 @@ bool TreeItem::setData(int column, const QVariant &value){
       std::string t1 = value.toString().toStdString();
       std::cout << " _flag_fp_data_setter " << _flag_fp_data_setter << std::endl;
       if( _flag_fp_data_setter && (_fp_data_setter_col_pos == column) ){
-          std::cout << "calling setter with value " << t1 << std::endl;
+        std::cout << "calling setter with value " << t1 << std::endl;
         fp_data_setter( t1 );
         emit dataChanged(column);
         itemData[column] = value;
@@ -304,9 +304,9 @@ QStringList TreeItem::extractStringsFromItem()
 }
 
 DelegateType TreeItem::get_item_delegate_type(){
-    return _item_delegate_type;
+  return _item_delegate_type;
 }
 
 void TreeItem::set_item_delegate_type( DelegateType _delegate_type ){
-    _item_delegate_type = _delegate_type;
+  _item_delegate_type = _delegate_type;
 }
