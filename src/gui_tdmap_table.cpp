@@ -4,12 +4,15 @@
 #include "gui_tdmap_table.h"
 #include "cv_tdmap_cell_image_frame_delegate.h"
 #include "cv_tdmap_cell_image_frame.h"
+#include "cv_image_cell_widget.h"
 #include "cv_image_frame.h"
 
 
 #include "td_map.hpp"
 
 TDMap_Table::TDMap_Table(QWidget *parent) : QTableWidget(parent) {
+
+  this->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Expanding);
 
   table_parent = parent;
   //image_delegate = new CvTDMapImageFrameDelegate(this);
@@ -56,9 +59,9 @@ void TDMap_Table::update_ColumnCount_from_defocus_range_number_samples( int sign
 }
 
 void TDMap_Table::set_simulated_images_grid( std::vector< std::vector<cv::Mat> > image_grid ){
-    simulated_image_grid = image_grid;
-_flag_simulated_image_grid = true;
-clear();
+  simulated_image_grid = image_grid;
+  _flag_simulated_image_grid = true;
+  clear();
 }
 
 void TDMap_Table::clear()
@@ -93,29 +96,60 @@ void TDMap_Table::clear()
     item->setText( QString::number( _at_defocus ) );
     setHorizontalHeaderItem(i, item);
   }
-
+  std::vector <double> _local_accum_nm_slice_vec;
+  bool use_accum_nm = false;
+  if ( core_tdmap ){
+    if( core_tdmap->_is_celslc_accum_nm_slice_vec_defined() ){
+      use_accum_nm = true;
+      _local_accum_nm_slice_vec = core_tdmap->get_celslc_accum_nm_slice_vec();
+    }
+  }
   for (int i = 0; i < RowCount; ++i) {
     QTableWidgetItem *item = new QTableWidgetItem;
     const int at_slice = round( _thickness_lower_slice + _thickness_period_slice * ( i )  );
-    //const double slice_thickness_nm = _accum_nm_slice_vec.at(at_slice-1);
-    item->setText( QString::number( at_slice ) );
+    QString legend;
+    if( use_accum_nm ){
+      const double slice_thickness_nm = _local_accum_nm_slice_vec.at(at_slice-1);
+      //const double slice_thickness_nm = _accum_nm_slice_vec.at(at_slice-1);
+      legend = QString::number( slice_thickness_nm ) + QString( "nm  #" ) + QString::number( at_slice );
+    }
+    else {
+      legend = QString::number( at_slice );
+    }
+    item->setText( legend );
     setVerticalHeaderItem(i, item);
   }
 
-  if( _flag_simulated_image_grid ){
-      for (int row = 0; row < RowCount; ++row) {
-          std::vector<cv::Mat> simulated_image_row = simulated_image_grid.at(row);
-          for (int col = 0; col < ColumnCount; ++col) {
-              CvImageFrameWidget *cell_widget  = new CvImageFrameWidget();
-            cv::Mat full_image = simulated_image_row.at(col);
-            cell_widget->setImage( full_image.clone() );
-              this->setCellWidget(row,col, cell_widget);
-          }
-      }
-      std::cout << "finished creating Image frames " << std::endl;
-  }
 
-  setCurrentCell(0, 0);
+  if( _flag_simulated_image_grid ){
+    cv::Point2i best_match_pos = core_tdmap->get_simgrid_best_match_position();
+
+    for (int row = 0; row < RowCount; ++row) {
+      std::vector<cv::Mat> simulated_image_row = simulated_image_grid.at(row);
+      for (int col = 0; col < ColumnCount; ++col) {
+        CvImageCellWidget *cell_widget  = new CvImageCellWidget();
+        cv::Mat full_image = simulated_image_row.at(col);
+        cell_widget->setImage( full_image.clone() );
+        //cell_widget->setImage( full_image.clone() );
+        this->setCellWidget(row,col, cell_widget);
+        // cell_widget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding );
+        //  cell_widget->setMinimumSize( );
+        //horizontalHeader()->setResizeMode(QHeaderView::Stretch);
+        //verticalHeader()->setResizeMode(QHeaderView::Stretch);
+      }
+    }
+
+    this->resizeColumnsToContents();
+    this->resizeRowsToContents();
+
+    std::cout << "setting best match position to: " << best_match_pos << std::endl;
+
+    setCurrentCell(best_match_pos.x, best_match_pos.y);
+    std::cout << "finished creating Image frames " << std::endl;
+  }
+  else{
+    setCurrentCell(0, 0);
+  }
 }
 
 /*

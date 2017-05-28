@@ -159,6 +159,21 @@ SIMGRID_wavimg_steplength::SIMGRID_wavimg_steplength()
 
 }
 
+cv::Mat SIMGRID_wavimg_steplength::get_defocus_values_matrix(){
+  return defocus_values_matrix;
+}
+
+cv::Mat SIMGRID_wavimg_steplength::get_thickness_values_matrix(){
+  return thickness_values_matrix;
+}
+cv::Mat SIMGRID_wavimg_steplength::get_match_values_matrix(){
+  return match_values_matrix;
+}
+
+cv::Point2i SIMGRID_wavimg_steplength::get_best_match_position(){
+  return best_match_Point2i;
+}
+
 void SIMGRID_wavimg_steplength::set_iteration_number ( int itt ){
   iteration_number = itt;
 }
@@ -795,6 +810,7 @@ bool SIMGRID_wavimg_steplength::simulate_from_dat_file(){
 
   int col_defocus = dist % defocus_samples;
   int row_thickness = (dist - col_defocus ) / defocus_samples;
+  best_match_Point2i = cv::Point2i( row_thickness, col_defocus);
 
   simgrid_best_match_thickness_slice = (slice_period * row_thickness) + slices_lower_bound;
   simgrid_best_match_thickness_nm = celslc_accum_nm_slice_vec.at(simgrid_best_match_thickness_slice-1);

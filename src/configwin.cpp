@@ -45,6 +45,9 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
   _core_td_map->set_dr_probe_wavimg_execname( _dr_probe_wavimg_bin.toStdString() );
 
   ui->setupUi(this);
+  ui->td_map_splitter->setStretchFactor(0,3);
+  ui->td_map_splitter->setStretchFactor(1,7);
+  ui->td_map_splitter->setStretchFactor(2,2);
 
   createActions();
   updateStatusBar();
@@ -69,9 +72,9 @@ bool MainWindow::update_qline_image_path( std::string fileName ){
 }
 
 void MainWindow::update_simgrid_frame(){
-    std::cout << " updating simgrid images " << std::endl;
-    std::vector< std::vector<cv::Mat> > _simulated_images_grid = _core_td_map->get_simulated_images_grid();
-    this->ui->tdmap_table->set_simulated_images_grid( _simulated_images_grid );
+  std::cout << " updating simgrid images " << std::endl;
+  std::vector< std::vector<cv::Mat> > _simulated_images_grid = _core_td_map->get_simulated_images_grid();
+  this->ui->tdmap_table->set_simulated_images_grid( _simulated_images_grid );
 }
 
 void MainWindow::update_full_experimental_image_frame(){

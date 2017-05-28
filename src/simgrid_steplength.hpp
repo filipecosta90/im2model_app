@@ -96,6 +96,7 @@ class SIMGRID_wavimg_steplength {
     cv::Mat thickness_values_matrix;
     cv::Mat match_values_matrix;
     cv::Mat imregionalmax_match_values_matrix;
+    cv::Point2i best_match_Point2i;
 
     WAVIMG_prm* wavimg_parameters;
 
@@ -254,6 +255,10 @@ class SIMGRID_wavimg_steplength {
 
     std::vector< std::vector<cv::Mat> > get_simulated_images_grid();
 
+    cv::Mat get_defocus_values_matrix();
+    cv::Mat get_thickness_values_matrix();
+    cv::Mat get_match_values_matrix();
+    cv::Point2i get_best_match_position();
 
     void calculate_motion_euclidian_matrix(  cv::Mat cropped_experimental_image_roi, cv::Mat simulated_image_roi );
 

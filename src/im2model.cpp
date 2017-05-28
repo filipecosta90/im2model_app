@@ -532,7 +532,7 @@ int main(int argc, char** argv ){
       celslc_parameters->call_bin_ssc();
       //celslc_parameters->call_boost_bin();
     }
-      
+
     nz_simulated_partitions = celslc_parameters->get_nz_simulated_partitions();
     assert( nz_simulated_partitions >= 1 );
     celslc_accum_nm_slice_vec = celslc_parameters->get_slice_params_accum_nm_slice_vec();

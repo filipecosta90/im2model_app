@@ -205,6 +205,8 @@ class TDMap {
     bool _is_thickness_range_lower_bound_defined();
     bool _is_thickness_period_defined();
     bool _is_thickness_range_upper_bound_defined();
+    bool _is_celslc_accum_nm_slice_vec_defined();
+
     // thickness #slice
     bool _is_thickness_range_lower_bound_slice_defined();
     bool _is_thickness_period_slice_defined();
@@ -229,9 +231,11 @@ class TDMap {
     int get_thickness_range_number_samples( );
 
     double get_thickness_range_lower_bound( );
+
     int get_thickness_range_lower_bound_slice( );
 
     double get_thickness_range_upper_bound( );
+
     int get_thickness_range_upper_bound_slice( );
 
     int get_thickness_range_period_slice( );
@@ -244,7 +248,11 @@ class TDMap {
 
     double get_defocus_range_period( );
 
+    std::vector<double> get_celslc_accum_nm_slice_vec();
+
     std::vector< std::vector<cv::Mat> > get_simulated_images_grid();
+
+    cv::Point2i get_simgrid_best_match_position();
 
     /** setters **/
 
@@ -268,6 +276,7 @@ class TDMap {
     bool set_accelaration_voltage_kv( std::string accelaration_voltage );
 
     bool set_core_image_crystal_ptr( Image_Crystal* image_crystal_ptr );
+
 
 };
 

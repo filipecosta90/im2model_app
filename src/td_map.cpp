@@ -523,6 +523,14 @@ bool TDMap::_is_super_cell_size_b_defined(){
   return _flag_super_cell_size_b;
 }
 
+bool TDMap::_is_celslc_accum_nm_slice_vec_defined(){
+  return _flag_celslc_accum_nm_slice_vec;
+}
+
+std::vector<double> TDMap::get_celslc_accum_nm_slice_vec(){
+  return celslc_accum_nm_slice_vec;
+}
+
 bool TDMap::_is_simulated_image_sampling_rate_and_size_defined(){
   return ( _flag_nx_simulated_horizontal_samples
       && _flag_ny_simulated_vertical_samples
@@ -577,8 +585,13 @@ double TDMap::get_defocus_range_period( ){
   return defocus_period;
 }
 
+// more work here. asserts, etc
 std::vector< std::vector<cv::Mat> > TDMap::get_simulated_images_grid(){
-    return _td_map_simgrid->get_simulated_images_grid();
+  return _td_map_simgrid->get_simulated_images_grid();
+}
+// more work here. asserts, etc
+cv::Point2i TDMap::get_simgrid_best_match_position(){
+  return _td_map_simgrid->get_best_match_position();
 }
 
 /** setters **/

@@ -86,6 +86,7 @@ if(build_gui)
     treeitem_file_delegate.cpp
     cv_image_widget.h
     cv_image_frame.h
+    cv_image_cell_widget.h
     cv_image_delegate.h
     cv_image_delegate.cpp
     cv_tdmap_cell_image_frame.h
@@ -111,11 +112,11 @@ if(build_gui)
 
 
   add_project_meta(META_FILES_TO_INCLUDE)
-  
+
   set(RESOURCE_FILES ../im2model.qrc)
 
   message("META FILES TO INCLUDE: ${META_FILES_TO_INCLUDE}")
-  
+
   add_executable( im2model_gui ${OS_BUNDLE}  ${GUI_SOURCE_FILES} ${META_FILES_TO_INCLUDE} ${RESOURCE_FILES}  ${im2model_core_src} mc_driver.cpp ${FLEX_mc_lexer_OUTPUTS} ${BISON_mc_parser_OUTPUTS} ${DR_PROBE_RESOURCES} )
   # Use the Widgets module from Qt 5.
   qt5_use_modules( im2model_gui Core Gui Widgets )
