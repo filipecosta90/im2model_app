@@ -79,11 +79,15 @@ class CELSLC_prm {
     std::vector <char> _io_ap_buffer_err;
     boost::process::pipe _io_ap_pipe_out;
     boost::process::pipe _io_ap_pipe_err;
-    bool _flag_io_ap_pipe_out = true;
+    bool _flag_io_ap_pipe_out = false;
+    std::ostream *run_ostream = nullptr;
+    bool _flag_run_ostream = false;
 
   public:
     CELSLC_prm();
     CELSLC_prm( std::string celslc_bin_path );
+
+    bool set_run_ostream( std::ostream *stream );
 
     bool _is_nz_simulated_partitions_defined();
 

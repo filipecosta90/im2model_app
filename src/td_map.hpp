@@ -171,12 +171,15 @@ class TDMap {
 
     bool calculate_simulation_defocus_period();
 
+    std::ostream* _sim_tdmap_ostream = nullptr;
+    bool _flag_sim_tdmap_ostream = false;
 
   public:
     TDMap( Image_Crystal *image_crystal_ptr );
     /** others **/
     bool prepare_ZA_UV();
 
+    void set_sim_tdmap_ostream(  std::ostream* stream );
     /*
      * PREPARATION  METHODS
      */

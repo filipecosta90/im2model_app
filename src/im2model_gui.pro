@@ -65,7 +65,8 @@ HEADERS  += configwin.h \
     cv_tdmap_cell_image_frame.h \
     cv_tdmap_cell_image_frame_delegate.h \
     cv_image_cell_widget.h \
-    gui_sim_updater.hpp
+    gui_sim_updater.hpp \
+    gui_stream.hpp
 
 RESOURCES     = ../im2model.qrc
 

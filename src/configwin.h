@@ -25,6 +25,7 @@
 #include "cv_image_widget.h"
 #include "treeitem_file_delegate.hpp"
 #include "gui_sim_updater.hpp"
+#include "gui_stream.hpp"
 
 namespace Ui {
   class MainWindow;
@@ -97,8 +98,12 @@ signals:
     QString _dr_probe_wavimg_bin;
 
     /* Threads and workers */
-    GuiSimOutUpdater *sim_output_updater;
-    QThread *_sim_output_thread;
+    GuiSimOutUpdater *sim_tdmap_worker;
+    QThread *_sim_tdmap_thread;
+    std::ostream* _sim_tdmap_thread_ostream;
+
+    GuiSimOutUpdater *sim_tdmap_output_worker;
+    QThread *_sim_tdmap_output_thread;
 
     /* Delegates */
     TreeItemFileDelegate *_load_file_delegate;

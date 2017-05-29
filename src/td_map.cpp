@@ -55,6 +55,11 @@ bool TDMap::prepare_ZA_UV(){
   return true;
 }
 
+void  TDMap::set_sim_tdmap_ostream( std::ostream* stream ){
+    _sim_tdmap_ostream = stream;
+    _flag_sim_tdmap_ostream = true;
+}
+
 bool TDMap::set_number_slices_to_max_thickness_from_nz_simulated_partitions(){
   bool status = false;
   if ( _tdmap_celslc_parameters->_is_nz_simulated_partitions_defined() ){
@@ -278,6 +283,9 @@ bool  TDMap::prepare_celslc_parameters(){
     _tdmap_celslc_parameters->set_ht_accelaration_voltage( ht_accelaration_voltage );
     _tdmap_celslc_parameters->set_dwf_switch( dwf_switch );
     _tdmap_celslc_parameters->set_abs_switch( abs_switch );
+    if( _flag_sim_tdmap_ostream ){
+        _tdmap_celslc_parameters->set_run_ostream( _sim_tdmap_ostream );
+    }
     _flag_tdmap_celslc_parameters = true;
   }
   return _flag_tdmap_celslc_parameters;

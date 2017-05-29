@@ -35,9 +35,12 @@
 #include <opencv2/core/types.hpp>              // for Point3d
 
 #include <iostream>
+#include <boost/iostreams/stream.hpp>
+#include <boost/iostreams/output_sequence.hpp>
 #include <boost/iostreams/device/null.hpp>
 #include <boost/iostreams/stream.hpp>
-
+#include <boost/ref.hpp>
+#include <boost/iostreams/filtering_stream.hpp>
 
 static const std::string SLI_EXTENSION = ".sli";
 
@@ -456,6 +459,7 @@ bool CELSLC_prm::call_boost_bin(){
 
 
     boost::asio::io_service ioservice;
+
     int result = -1;
 
     if(  _flag_io_ap_pipe_out  ){
@@ -475,6 +479,10 @@ bool CELSLC_prm::call_boost_bin(){
 
     }
     else{
+        if( _flag_run_ostream ){
+
+        }
+        else{
       boost::process::child c(
           // command
           args_stream.str(),
@@ -490,6 +498,7 @@ bool CELSLC_prm::call_boost_bin(){
       std::cout << "_io_ap_buffer_out size: "  << _io_ap_buffer_out.size() << " result " << result << std::endl;
 
     }
+    }
     if( auto_equidistant_slices_switch || auto_non_equidistant_slices_switch ){
       update_nz_simulated_partitions_from_prm();
     }
@@ -497,6 +506,11 @@ bool CELSLC_prm::call_boost_bin(){
     result = true;
   }
   return result;
+}
+
+bool CELSLC_prm::set_run_ostream(std::ostream *stream){
+    run_ostream = stream;
+    _flag_run_ostream = true;
 }
 
 bool CELSLC_prm::prepare_nz_simulated_partitions_from_ssc_prm(){

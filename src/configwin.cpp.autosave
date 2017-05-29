@@ -52,7 +52,6 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
   // will quit thread after work done
   connect(sim_tdmap_worker, SIGNAL(finished()), _sim_tdmap_thread, SLOT(quit()), Qt::DirectConnection);
 
-
   new Q_GUI_Stream(std::cout, ui->qTextEdit_tdmap_simulation_output ); //Redirect Console output to QTextEdit
 
 }
