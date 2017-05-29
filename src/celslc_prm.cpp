@@ -34,6 +34,11 @@
 #include <opencv2/core/mat.inl.hpp>            // for Mat::Mat, Mat::at, Mat...
 #include <opencv2/core/types.hpp>              // for Point3d
 
+#include <iostream>
+#include <boost/iostreams/device/null.hpp>
+#include <boost/iostreams/stream.hpp>
+
+
 static const std::string SLI_EXTENSION = ".sli";
 
 CELSLC_prm::CELSLC_prm()
@@ -387,7 +392,7 @@ void CELSLC_prm::cleanup_thread(){
   }
 }
 
-bool CELSLC_prm::cleanup_bin(){
+bool CELSLC_prm::cleanup_bin(  ){
   boost::thread t( &CELSLC_prm::cleanup_thread , this ); 
   runned_bin = false; 
   return EXIT_SUCCESS;
@@ -448,7 +453,43 @@ bool CELSLC_prm::call_boost_bin(){
       args_stream << " -abs";
     }
     std::cout << "going to run boost process with args: "<< args_stream.str() << std::endl;
-    boost::process::system( args_stream.str() ); 
+
+
+    boost::asio::io_service ioservice;
+    int result = -1;
+
+    if(  _flag_io_ap_pipe_out  ){
+      boost::process::child c(
+          // command
+          args_stream.str(),
+          // redirecting std_out to async buffer
+          boost::process::std_out >  _io_ap_pipe_out ,
+          // redirecting std_err to null
+          boost::process::std_err > boost::process::null ,
+          ioservice
+          );
+      ioservice.run();
+      c.wait();
+      result = c.exit_code();
+      std::cout << "_io_ap_buffer_out size: "  << _io_ap_buffer_out.size() << " result " << result << std::endl;
+
+    }
+    else{
+      boost::process::child c(
+          // command
+          args_stream.str(),
+          // redirecting std_out to async buffer
+          boost::process::std_out >  boost::asio::buffer( _io_ap_buffer_out ) ,
+          // redirecting std_err to async buffer
+          boost::process::std_err > boost::asio::buffer( _io_ap_buffer_err ) ,
+          ioservice
+          );
+      ioservice.run();
+      c.wait();
+      result = c.exit_code();
+      std::cout << "_io_ap_buffer_out size: "  << _io_ap_buffer_out.size() << " result " << result << std::endl;
+
+    }
     if( auto_equidistant_slices_switch || auto_non_equidistant_slices_switch ){
       update_nz_simulated_partitions_from_prm();
     }

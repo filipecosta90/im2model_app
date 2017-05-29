@@ -1,1037 +1,1038 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
-  <class>MainWindow</class>
-  <widget class="QMainWindow" name="MainWindow">
-    <property name="geometry">
-      <rect>
-        <x>0</x>
-        <y>0</y>
-        <width>1280</width>
-        <height>1018</height>
-      </rect>
-    </property>
-    <property name="windowTitle">
-      <string>Im2Model</string>
-    </property>
-    <property name="unifiedTitleAndToolBarOnMac">
-      <bool>true</bool>
-    </property>
-    <widget class="QWidget" name="centralWidget">
-      <layout class="QHBoxLayout" name="horizontalLayout_8">
-        <item>
-          <widget class="QTabWidget" name="tabWidget">
-            <property name="currentIndex">
-              <number>1</number>
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1280</width>
+    <height>1018</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Im2Model</string>
+  </property>
+  <property name="unifiedTitleAndToolBarOnMac">
+   <bool>true</bool>
+  </property>
+  <widget class="QWidget" name="centralWidget">
+   <layout class="QHBoxLayout" name="horizontalLayout_8">
+    <item>
+     <widget class="QTabWidget" name="tabWidget">
+      <property name="currentIndex">
+       <number>1</number>
+      </property>
+      <widget class="QWidget" name="image_crystal_tab">
+       <attribute name="title">
+        <string>Image &amp; Crystal</string>
+       </attribute>
+       <layout class="QGridLayout" name="gridLayout" columnstretch="3,4,4">
+        <item row="0" column="0">
+         <layout class="QVBoxLayout" name="vertical_layout_experimental_image_setup">
+          <item>
+           <widget class="QLabel" name="qlabel_image_path_8">
+            <property name="font">
+             <font>
+              <weight>75</weight>
+              <bold>true</bold>
+             </font>
             </property>
-            <widget class="QWidget" name="image_crystal_tab">
-              <attribute name="title">
-                <string>Image &amp; Crystal</string>
-              </attribute>
-              <layout class="QGridLayout" name="gridLayout" columnstretch="3,4,4">
-                <item row="0" column="0">
-                  <layout class="QVBoxLayout" name="vertical_layout_experimental_image_setup">
-                    <item>
-                      <widget class="QLabel" name="qlabel_image_path_8">
-                        <property name="font">
-                          <font>
-                            <weight>75</weight>
-                            <bold>true</bold>
-                          </font>
-                        </property>
-                        <property name="text">
-                          <string>Experimental Image</string>
-                        </property>
-                      </widget>
-                    </item>
-                    <item>
-                      <widget class="QTreeView" name="qtree_view_project_setup_image"/>
-                    </item>
-                  </layout>
-                </item>
-                <item row="0" column="1">
-                  <layout class="QVBoxLayout" name="vertical_layout_tem">
-                    <property name="sizeConstraint">
-                      <enum>QLayout::SetMaximumSize</enum>
-                    </property>
-                    <item>
-                      <widget class="QLabel" name="qlabel_full_experimental_image">
-                        <property name="font">
-                          <font>
-                            <weight>75</weight>
-                            <bold>true</bold>
-                          </font>
-                        </property>
-                        <property name="text">
-                          <string>TEM</string>
-                        </property>
-                      </widget>
-                    </item>
-                    <item>
-                      <widget class="CvImageFrameWidget" name="qgraphics_full_experimental_image" native="true">
-                        <property name="sizePolicy">
-                          <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-                            <horstretch>0</horstretch>
-                            <verstretch>0</verstretch>
-                          </sizepolicy>
-                        </property>
-                        <property name="minimumSize">
-                          <size>
-                            <width>320</width>
-                            <height>320</height>
-                          </size>
-                        </property>
-                        <property name="sizeIncrement">
-                          <size>
-                            <width>1</width>
-                            <height>1</height>
-                          </size>
-                        </property>
-                        <property name="baseSize">
-                          <size>
-                            <width>320</width>
-                            <height>320</height>
-                          </size>
-                        </property>
-                        <property name="autoFillBackground">
-                          <bool>false</bool>
-                        </property>
-                      </widget>
-                    </item>
-                  </layout>
-                </item>
-                <item row="0" column="2">
-                  <layout class="QVBoxLayout" name="vertical_layout_experimental_image_roi">
-                    <property name="sizeConstraint">
-                      <enum>QLayout::SetMaximumSize</enum>
-                    </property>
-                    <item>
-                      <widget class="QLabel" name="qlabel_roi_experimental_image">
-                        <property name="font">
-                          <font>
-                            <weight>75</weight>
-                            <bold>true</bold>
-                          </font>
-                        </property>
-                        <property name="text">
-                          <string>ROI</string>
-                        </property>
-                      </widget>
-                    </item>
-                    <item>
-                      <widget class="CvImageFrameWidget" name="qgraphics_roi_experimental_image" native="true">
-                        <property name="sizePolicy">
-                          <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-                            <horstretch>0</horstretch>
-                            <verstretch>0</verstretch>
-                          </sizepolicy>
-                        </property>
-                        <property name="minimumSize">
-                          <size>
-                            <width>320</width>
-                            <height>320</height>
-                          </size>
-                        </property>
-                        <property name="sizeIncrement">
-                          <size>
-                            <width>1</width>
-                            <height>1</height>
-                          </size>
-                        </property>
-                        <property name="baseSize">
-                          <size>
-                            <width>320</width>
-                            <height>320</height>
-                          </size>
-                        </property>
-                        <property name="autoFillBackground">
-                          <bool>false</bool>
-                        </property>
-                      </widget>
-                    </item>
-                  </layout>
-                </item>
-                <item row="1" column="0">
-                  <layout class="QVBoxLayout" name="vertical_layout_crystallography_setup">
-                    <property name="spacing">
-                      <number>-1</number>
-                    </property>
-                    <item>
-                      <widget class="QLabel" name="qlabel_image_path_9">
-                        <property name="font">
-                          <font>
-                            <weight>75</weight>
-                            <bold>true</bold>
-                          </font>
-                        </property>
-                        <property name="text">
-                          <string>Crystallography</string>
-                        </property>
-                      </widget>
-                    </item>
-                    <item>
-                      <widget class="QTreeView" name="qtree_view_project_setup_crystallography"/>
-                    </item>
-                  </layout>
-                </item>
-                <item row="1" column="1">
-                  <layout class="QVBoxLayout" name="vertical_layout_unit_cell">
-                    <item>
-                      <widget class="QLabel" name="qlabel_full_experimental_image_3">
-                        <property name="font">
-                          <font>
-                            <weight>75</weight>
-                            <bold>true</bold>
-                          </font>
-                        </property>
-                        <property name="text">
-                          <string>Unit cell</string>
-                        </property>
-                      </widget>
-                    </item>
-                    <item>
-                      <widget class="QGraphicsView" name="qgraphics_experimental_data_2">
-                        <property name="enabled">
-                          <bool>true</bool>
-                        </property>
-                        <property name="sizePolicy">
-                          <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-                            <horstretch>0</horstretch>
-                            <verstretch>0</verstretch>
-                          </sizepolicy>
-                        </property>
-                        <property name="minimumSize">
-                          <size>
-                            <width>320</width>
-                            <height>320</height>
-                          </size>
-                        </property>
-                        <property name="sizeIncrement">
-                          <size>
-                            <width>1</width>
-                            <height>1</height>
-                          </size>
-                        </property>
-                        <property name="baseSize">
-                          <size>
-                            <width>320</width>
-                            <height>320</height>
-                          </size>
-                        </property>
-                        <property name="sizeAdjustPolicy">
-                          <enum>QAbstractScrollArea::AdjustToContents</enum>
-                        </property>
-                      </widget>
-                    </item>
-                  </layout>
-                </item>
-              </layout>
-            </widget>
-            <widget class="QWidget" name="td_map_tab">
-              <attribute name="title">
-                <string>TD Map</string>
-              </attribute>
-              <layout class="QGridLayout" name="gridLayout_2">
-                <item row="0" column="0">
-                  <widget class="QSplitter" name="td_map_splitter">
-                    <property name="sizePolicy">
-                      <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
-                        <horstretch>0</horstretch>
-                        <verstretch>0</verstretch>
-                      </sizepolicy>
-                    </property>
-                    <property name="orientation">
-                      <enum>Qt::Horizontal</enum>
-                    </property>
-                    <widget class="QWidget" name="">
-                      <layout class="QVBoxLayout" name="verticalLayout" stretch="1,0">
-                        <item>
-                          <widget class="QSplitter" name="splitter_layout_simulation_configuration_output">
-                            <property name="orientation">
-                              <enum>Qt::Vertical</enum>
-                            </property>
-                            <widget class="QWidget" name="layoutWidget_5">
-                              <layout class="QVBoxLayout" name="vertical_layout_simulation_configuration">
-                                <item>
-                                  <widget class="QLabel" name="qlabel_image_path_7">
-                                    <property name="font">
-                                      <font>
-                                        <weight>75</weight>
-                                        <bold>true</bold>
-                                      </font>
-                                    </property>
-                                    <property name="text">
-                                      <string>Simulation configuration</string>
-                                    </property>
-                                  </widget>
-                                </item>
-                                <item>
-                                  <widget class="QTreeView" name="qtree_view_tdmap_simulation_setup"/>
-                                </item>
-                              </layout>
-                            </widget>
-                            <widget class="QWidget" name="layoutWidget_6">
-                              <layout class="QVBoxLayout" name="vertical_layout_simulation_output">
-                                <item>
-                                  <widget class="QLabel" name="label_5">
-                                    <property name="font">
-                                      <font>
-                                        <weight>75</weight>
-                                        <bold>true</bold>
-                                      </font>
-                                    </property>
-                                    <property name="text">
-                                      <string>Simulation output</string>
-                                    </property>
-                                  </widget>
-                                </item>
-                                <item>
-                                  <widget class="QScrollArea" name="scrollArea">
-                                    <property name="minimumSize">
-                                      <size>
-                                        <width>0</width>
-                                        <height>200</height>
-                                      </size>
-                                    </property>
-                                    <property name="widgetResizable">
-                                      <bool>true</bool>
-                                    </property>
-                                    <widget class="QWidget" name="scrollAreaWidgetContents">
-                                      <property name="geometry">
-                                        <rect>
-                                          <x>0</x>
-                                          <y>0</y>
-                                          <width>375</width>
-                                          <height>391</height>
-                                        </rect>
-                                      </property>
-                                    </widget>
-                                  </widget>
-                                </item>
-                                <item>
-                                  <widget class="QProgressBar" name="qprogress_bar_tdmap">
-                                    <property name="value">
-                                      <number>24</number>
-                                    </property>
-                                  </widget>
-                                </item>
-                              </layout>
-                            </widget>
-                          </widget>
-                        </item>
-                        <item>
-                          <layout class="QVBoxLayout" name="vertical_layout_simulation_run">
-                            <item>
-                              <widget class="Line" name="line_3">
-                                <property name="orientation">
-                                  <enum>Qt::Horizontal</enum>
-                                </property>
-                              </widget>
-                            </item>
-                            <item>
-                              <layout class="QHBoxLayout" name="horizontalLayout_19">
-                                <item>
-                                  <spacer name="horizontalSpacer_2">
-                                    <property name="orientation">
-                                      <enum>Qt::Horizontal</enum>
-                                    </property>
-                                    <property name="sizeHint" stdset="0">
-                                      <size>
-                                        <width>40</width>
-                                        <height>20</height>
-                                      </size>
-                                    </property>
-                                  </spacer>
-                                </item>
-                                <item>
-                                  <widget class="QPushButton" name="pushButton_25">
-                                    <property name="text">
-                                      <string>Test Configuration</string>
-                                    </property>
-                                  </widget>
-                                </item>
-                                <item>
-                                  <widget class="QPushButton" name="qpush_run_tdmap">
-                                    <property name="text">
-                                      <string>Run</string>
-                                    </property>
-                                  </widget>
-                                </item>
-                              </layout>
-                            </item>
-                          </layout>
-                        </item>
-                      </layout>
-                    </widget>
-                    <widget class="QWidget" name="">
-                      <layout class="QVBoxLayout" name="vertical_layout_TD_full">
-                        <item>
-                          <widget class="QLabel" name="qlabel_full_experimental_image_4">
-                            <property name="font">
-                              <font>
-                                <weight>75</weight>
-                                <bold>true</bold>
-                              </font>
-                            </property>
-                            <property name="text">
-                              <string>Full TD map</string>
-                            </property>
-                          </widget>
-                        </item>
-                        <item>
-                          <widget class="TDMap_Table" name="tdmap_table"/>
-                        </item>
-                      </layout>
-                    </widget>
-                    <widget class="QWidget" name="">
-                      <layout class="QVBoxLayout" name="vertical_layout_TD_best_match" stretch="0,0,0,0">
-                        <property name="sizeConstraint">
-                          <enum>QLayout::SetMaximumSize</enum>
-                        </property>
-                        <item>
-                          <widget class="QLabel" name="qlabel_full_experimental_image_5">
-                            <property name="font">
-                              <font>
-                                <weight>75</weight>
-                                <bold>true</bold>
-                              </font>
-                            </property>
-                            <property name="text">
-                              <string>TD best match</string>
-                            </property>
-                          </widget>
-                        </item>
-                        <item>
-                          <widget class="QGraphicsView" name="qgraphics_experimental_data_6">
-                            <property name="sizePolicy">
-                              <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-                                <horstretch>0</horstretch>
-                                <verstretch>0</verstretch>
-                              </sizepolicy>
-                            </property>
-                            <property name="minimumSize">
-                              <size>
-                                <width>320</width>
-                                <height>320</height>
-                              </size>
-                            </property>
-                            <property name="sizeIncrement">
-                              <size>
-                                <width>1</width>
-                                <height>1</height>
-                              </size>
-                            </property>
-                            <property name="baseSize">
-                              <size>
-                                <width>320</width>
-                                <height>320</height>
-                              </size>
-                            </property>
-                            <property name="sizeAdjustPolicy">
-                              <enum>QAbstractScrollArea::AdjustToContents</enum>
-                            </property>
-                          </widget>
-                        </item>
-                        <item>
-                          <widget class="QTableWidget" name="tableWidget">
-                            <property name="sizePolicy">
-                              <sizepolicy hsizetype="Minimum" vsizetype="Maximum">
-                                <horstretch>0</horstretch>
-                                <verstretch>0</verstretch>
-                              </sizepolicy>
-                            </property>
-                            <row>
-                              <property name="text">
-                                <string>Thickness</string>
-                              </property>
-                            </row>
-                            <row>
-                              <property name="text">
-                                <string>Defocus</string>
-                              </property>
-                            </row>
-                            <row>
-                              <property name="text">
-                                <string>Match %</string>
-                              </property>
-                            </row>
-                            <column>
-                              <property name="text">
-                                <string>Value</string>
-                              </property>
-                            </column>
-                          </widget>
-                        </item>
-                        <item>
-                          <widget class="QPushButton" name="pushButton">
-                            <property name="text">
-                              <string>Accept</string>
-                            </property>
-                          </widget>
-                        </item>
-                      </layout>
-                    </widget>
-                  </widget>
-                </item>
-              </layout>
-            </widget>
-            <widget class="QWidget" name="supercell_tab">
-              <attribute name="title">
-                <string>Supercell</string>
-              </attribute>
-              <layout class="QGridLayout" name="gridLayout_4" columnstretch="3,8">
-                <item row="0" column="0">
-                  <layout class="QVBoxLayout" name="vertical_layout_simulation_configuration_3">
-                    <item>
-                      <widget class="QLabel" name="qlabel_image_path_11">
-                        <property name="font">
-                          <font>
-                            <weight>75</weight>
-                            <bold>true</bold>
-                          </font>
-                        </property>
-                        <property name="text">
-                          <string>Edge detection</string>
-                        </property>
-                      </widget>
-                    </item>
-                    <item>
-                      <widget class="QTreeView" name="qtree_view_supercell_model_edge_detection_setup"/>
-                    </item>
-                  </layout>
-                </item>
-                <item row="0" column="1" rowspan="3">
-                  <layout class="QVBoxLayout" name="vertical_layout_TD_full_3">
-                    <item>
-                      <widget class="QLabel" name="qlabel_full_experimental_image_8">
-                        <property name="font">
-                          <font>
-                            <weight>75</weight>
-                            <bold>true</bold>
-                          </font>
-                        </property>
-                        <property name="text">
-                          <string>Target Region</string>
-                        </property>
-                      </widget>
-                    </item>
-                    <item>
-                      <widget class="QGraphicsView" name="qgraphics_experimental_data_9">
-                        <property name="enabled">
-                          <bool>true</bool>
-                        </property>
-                        <property name="sizePolicy">
-                          <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-                            <horstretch>0</horstretch>
-                            <verstretch>0</verstretch>
-                          </sizepolicy>
-                        </property>
-                        <property name="minimumSize">
-                          <size>
-                            <width>640</width>
-                            <height>640</height>
-                          </size>
-                        </property>
-                        <property name="sizeIncrement">
-                          <size>
-                            <width>1</width>
-                            <height>1</height>
-                          </size>
-                        </property>
-                        <property name="baseSize">
-                          <size>
-                            <width>320</width>
-                            <height>320</height>
-                          </size>
-                        </property>
-                        <property name="sizeAdjustPolicy">
-                          <enum>QAbstractScrollArea::AdjustToContents</enum>
-                        </property>
-                      </widget>
-                    </item>
-                  </layout>
-                </item>
-                <item row="2" column="0">
-                  <widget class="QPushButton" name="pushButton_2">
-                    <property name="text">
-                      <string>Compute Supercell from contour</string>
-                    </property>
-                  </widget>
-                </item>
-                <item row="1" column="0">
-                  <widget class="QPushButton" name="pushButton_24">
-                    <property name="text">
-                      <string>Apply edge detection</string>
-                    </property>
-                  </widget>
-                </item>
-              </layout>
-              <zorder>pushButton_24</zorder>
-              <zorder>pushButton_2</zorder>
-            </widget>
-            <widget class="QWidget" name="refinement_tab">
-              <attribute name="title">
-                <string>Refinement</string>
-              </attribute>
-              <layout class="QGridLayout" name="gridLayout_6">
-                <item row="0" column="0">
-                  <layout class="QVBoxLayout" name="vertical_layout_simulation_run_3">
-                    <item>
-                      <widget class="Line" name="line_5">
-                        <property name="orientation">
-                          <enum>Qt::Horizontal</enum>
-                        </property>
-                      </widget>
-                    </item>
-                    <item>
-                      <layout class="QVBoxLayout" name="vertical_layout_simulation_output_3">
-                        <item>
-                          <widget class="QLabel" name="label_9">
-                            <property name="text">
-                              <string>Simulation Output:</string>
-                            </property>
-                          </widget>
-                        </item>
-                        <item>
-                          <widget class="QScrollArea" name="scrollArea_3">
-                            <property name="minimumSize">
-                              <size>
-                                <width>0</width>
-                                <height>200</height>
-                              </size>
-                            </property>
-                            <property name="widgetResizable">
-                              <bool>true</bool>
-                            </property>
-                            <widget class="QWidget" name="scrollAreaWidgetContents_3">
-                              <property name="geometry">
-                                <rect>
-                                  <x>0</x>
-                                  <y>0</y>
-                                  <width>1204</width>
-                                  <height>664</height>
-                                </rect>
-                              </property>
-                            </widget>
-                          </widget>
-                        </item>
-                      </layout>
-                    </item>
-                    <item>
-                      <widget class="QLabel" name="label_8">
-                        <property name="text">
-                          <string>Running Configurations</string>
-                        </property>
-                      </widget>
-                    </item>
-                    <item>
-                      <layout class="QHBoxLayout" name="horizontalLayout_24">
-                        <item>
-                          <spacer name="horizontalSpacer_5">
-                            <property name="orientation">
-                              <enum>Qt::Horizontal</enum>
-                            </property>
-                            <property name="sizeHint" stdset="0">
-                              <size>
-                                <width>20</width>
-                                <height>20</height>
-                              </size>
-                            </property>
-                          </spacer>
-                        </item>
-                        <item>
-                          <layout class="QVBoxLayout" name="verticalLayout_9">
-                            <item>
-                              <widget class="QCheckBox" name="checkBox_25">
-                                <property name="text">
-                                  <string>Compute complex valued phase grating data </string>
-                                </property>
-                              </widget>
-                            </item>
-                            <item>
-                              <widget class="QCheckBox" name="checkBox_26">
-                                <property name="text">
-                                  <string>Compute the electron diffraction patterns</string>
-                                </property>
-                              </widget>
-                            </item>
-                            <item>
-                              <widget class="QCheckBox" name="checkBox_27">
-                                <property name="text">
-                                  <string>Compute Image intensity distributions from wave functions</string>
-                                </property>
-                              </widget>
-                            </item>
-                            <item>
-                              <widget class="QCheckBox" name="checkBox_29">
-                                <property name="text">
-                                  <string>Refine Supercell</string>
-                                </property>
-                              </widget>
-                            </item>
-                          </layout>
-                        </item>
-                      </layout>
-                    </item>
-                    <item>
-                      <layout class="QHBoxLayout" name="horizontalLayout_25">
-                        <item>
-                          <spacer name="horizontalSpacer_6">
-                            <property name="orientation">
-                              <enum>Qt::Horizontal</enum>
-                            </property>
-                            <property name="sizeHint" stdset="0">
-                              <size>
-                                <width>40</width>
-                                <height>20</height>
-                              </size>
-                            </property>
-                          </spacer>
-                        </item>
-                        <item>
-                          <widget class="QPushButton" name="pushButton_28">
-                            <property name="text">
-                              <string>Test Configuration</string>
-                            </property>
-                          </widget>
-                        </item>
-                        <item>
-                          <widget class="QPushButton" name="pushButton_29">
-                            <property name="text">
-                              <string>Run refinement</string>
-                            </property>
-                          </widget>
-                        </item>
-                      </layout>
-                    </item>
-                    <item>
-                      <widget class="QProgressBar" name="progressBar_6">
-                        <property name="value">
-                          <number>24</number>
-                        </property>
-                      </widget>
-                    </item>
-                  </layout>
-                </item>
-              </layout>
-              <widget class="QWidget" name="layoutWidget_3">
-                <property name="geometry">
-                  <rect>
-                    <x>670</x>
-                    <y>210</y>
-                    <width>258</width>
-                    <height>231</height>
-                  </rect>
-                </property>
-                <layout class="QVBoxLayout" name="vertical_layout_simulation_configuration_4">
-                  <item>
-                    <widget class="Line" name="line">
-                      <property name="orientation">
-                        <enum>Qt::Horizontal</enum>
-                      </property>
-                    </widget>
-                  </item>
-                  <item>
-                    <widget class="QLabel" name="qlabel_image_path_12">
-                      <property name="text">
-                        <string>Model refinement:</string>
-                      </property>
-                    </widget>
-                  </item>
-                  <item>
-                    <widget class="QTreeView" name="qtree_view_supercell_model_refinement_setup"/>
-                  </item>
-                </layout>
-              </widget>
-            </widget>
-            <widget class="QWidget" name="results_tab">
-              <attribute name="title">
-                <string>Results</string>
-              </attribute>
-              <layout class="QGridLayout" name="gridLayout_3">
-                <item row="0" column="0">
-                  <layout class="QVBoxLayout" name="vertical_layout_TD_full_6">
-                    <item>
-                      <widget class="QLabel" name="qlabel_full_experimental_image_13">
-                        <property name="font">
-                          <font>
-                            <weight>75</weight>
-                            <bold>true</bold>
-                          </font>
-                        </property>
-                        <property name="text">
-                          <string>Simulated target region</string>
-                        </property>
-                      </widget>
-                    </item>
-                    <item>
-                      <widget class="QGraphicsView" name="qgraphics_experimental_data_13">
-                        <property name="enabled">
-                          <bool>true</bool>
-                        </property>
-                        <property name="sizePolicy">
-                          <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-                            <horstretch>0</horstretch>
-                            <verstretch>0</verstretch>
-                          </sizepolicy>
-                        </property>
-                        <property name="minimumSize">
-                          <size>
-                            <width>320</width>
-                            <height>320</height>
-                          </size>
-                        </property>
-                        <property name="sizeIncrement">
-                          <size>
-                            <width>1</width>
-                            <height>1</height>
-                          </size>
-                        </property>
-                        <property name="baseSize">
-                          <size>
-                            <width>320</width>
-                            <height>320</height>
-                          </size>
-                        </property>
-                        <property name="sizeAdjustPolicy">
-                          <enum>QAbstractScrollArea::AdjustToContents</enum>
-                        </property>
-                      </widget>
-                    </item>
-                  </layout>
-                </item>
-                <item row="0" column="1" rowspan="2">
-                  <widget class="QSplitter" name="splitter">
-                    <property name="orientation">
-                      <enum>Qt::Vertical</enum>
-                    </property>
-                    <widget class="QWidget" name="layoutWidget_17">
-                      <layout class="QVBoxLayout" name="vertical_layout_TD_full_7">
-                        <item>
-                          <widget class="QLabel" name="qlabel_full_experimental_image_14">
-                            <property name="font">
-                              <font>
-                                <weight>75</weight>
-                                <bold>true</bold>
-                              </font>
-                            </property>
-                            <property name="text">
-                              <string>Refined Supercell</string>
-                            </property>
-                          </widget>
-                        </item>
-                        <item>
-                          <widget class="QGraphicsView" name="qgraphics_experimental_data_14">
-                            <property name="enabled">
-                              <bool>true</bool>
-                            </property>
-                            <property name="sizePolicy">
-                              <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-                                <horstretch>0</horstretch>
-                                <verstretch>0</verstretch>
-                              </sizepolicy>
-                            </property>
-                            <property name="minimumSize">
-                              <size>
-                                <width>480</width>
-                                <height>480</height>
-                              </size>
-                            </property>
-                            <property name="sizeIncrement">
-                              <size>
-                                <width>1</width>
-                                <height>1</height>
-                              </size>
-                            </property>
-                            <property name="baseSize">
-                              <size>
-                                <width>480</width>
-                                <height>480</height>
-                              </size>
-                            </property>
-                            <property name="sizeAdjustPolicy">
-                              <enum>QAbstractScrollArea::AdjustToContents</enum>
-                            </property>
-                          </widget>
-                        </item>
-                      </layout>
-                    </widget>
-                    <widget class="QWidget" name="layoutWidget_18">
-                      <layout class="QVBoxLayout" name="vertical_layout_TD_full_8">
-                        <item>
-                          <widget class="QLabel" name="qlabel_full_experimental_image_15">
-                            <property name="font">
-                              <font>
-                                <weight>75</weight>
-                                <bold>true</bold>
-                              </font>
-                            </property>
-                            <property name="text">
-                              <string>Optimized parameters</string>
-                            </property>
-                          </widget>
-                        </item>
-                        <item>
-                          <widget class="QTableView" name="tableView"/>
-                        </item>
-                      </layout>
-                    </widget>
-                  </widget>
-                </item>
-                <item row="1" column="0">
-                  <layout class="QVBoxLayout" name="vertical_layout_TD_full_5">
-                    <item>
-                      <widget class="QLabel" name="qlabel_full_experimental_image_12">
-                        <property name="font">
-                          <font>
-                            <weight>75</weight>
-                            <bold>true</bold>
-                          </font>
-                        </property>
-                        <property name="text">
-                          <string>Experimental target region</string>
-                        </property>
-                      </widget>
-                    </item>
-                    <item>
-                      <widget class="QGraphicsView" name="qgraphics_experimental_data_12">
-                        <property name="enabled">
-                          <bool>true</bool>
-                        </property>
-                        <property name="sizePolicy">
-                          <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-                            <horstretch>0</horstretch>
-                            <verstretch>0</verstretch>
-                          </sizepolicy>
-                        </property>
-                        <property name="minimumSize">
-                          <size>
-                            <width>320</width>
-                            <height>320</height>
-                          </size>
-                        </property>
-                        <property name="sizeIncrement">
-                          <size>
-                            <width>1</width>
-                            <height>1</height>
-                          </size>
-                        </property>
-                        <property name="baseSize">
-                          <size>
-                            <width>320</width>
-                            <height>320</height>
-                          </size>
-                        </property>
-                        <property name="sizeAdjustPolicy">
-                          <enum>QAbstractScrollArea::AdjustToContents</enum>
-                        </property>
-                      </widget>
-                    </item>
-                  </layout>
-                </item>
-              </layout>
-            </widget>
-          </widget>
+            <property name="text">
+             <string>Experimental Image</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QTreeView" name="qtree_view_project_setup_image"/>
+          </item>
+         </layout>
         </item>
-      </layout>
-    </widget>
-    <widget class="QMenuBar" name="menuBar">
-      <property name="geometry">
-        <rect>
-          <x>0</x>
-          <y>0</y>
-          <width>1280</width>
-          <height>22</height>
-        </rect>
-      </property>
-      <property name="defaultUp">
-        <bool>true</bool>
-      </property>
-    </widget>
-    <widget class="QStatusBar" name="statusBar"/>
-    <action name="actionNew">
-      <property name="text">
-        <string>New</string>
-      </property>
-      <property name="shortcut">
-        <string>Ctrl+N</string>
-      </property>
-    </action>
-    <action name="actionSave">
-      <property name="text">
-        <string>Save</string>
-      </property>
-      <property name="shortcut">
-        <string>Ctrl+S</string>
-      </property>
-    </action>
-    <action name="actionExit">
-      <property name="text">
-        <string>Exit</string>
-      </property>
-      <property name="shortcut">
-        <string>Ctrl+W</string>
-      </property>
-      <property name="shortcutContext">
-        <enum>Qt::WidgetShortcut</enum>
-      </property>
-      <property name="menuRole">
-        <enum>QAction::ApplicationSpecificRole</enum>
-      </property>
-      <property name="iconVisibleInMenu">
-        <bool>false</bool>
-      </property>
-    </action>
-    <action name="actionLoad_Crystalographic_Information">
-      <property name="text">
-        <string>Load Crystalographic Information</string>
-      </property>
-    </action>
-    <action name="actionSave_Crystalographic_Information">
-      <property name="text">
-        <string>Save Crystalographic Information</string>
-      </property>
-    </action>
-    <action name="actionRunning_Preferences">
-      <property name="text">
-        <string>Running Preferences</string>
-      </property>
-    </action>
-    <action name="actionSave_as">
-      <property name="text">
-        <string>Save as</string>
-      </property>
-      <property name="shortcut">
-        <string>Ctrl+Shift+S</string>
-      </property>
-    </action>
-    <action name="actionAbout">
-      <property name="text">
-        <string>About </string>
-      </property>
-      <property name="iconVisibleInMenu">
-        <bool>false</bool>
-      </property>
-    </action>
-    <action name="actionLoad">
-      <property name="text">
-        <string>Load</string>
-      </property>
-    </action>
+        <item row="0" column="1">
+         <layout class="QVBoxLayout" name="vertical_layout_tem">
+          <property name="sizeConstraint">
+           <enum>QLayout::SetMaximumSize</enum>
+          </property>
+          <item>
+           <widget class="QLabel" name="qlabel_full_experimental_image">
+            <property name="font">
+             <font>
+              <weight>75</weight>
+              <bold>true</bold>
+             </font>
+            </property>
+            <property name="text">
+             <string>TEM</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="CvImageFrameWidget" name="qgraphics_full_experimental_image" native="true">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="minimumSize">
+             <size>
+              <width>320</width>
+              <height>320</height>
+             </size>
+            </property>
+            <property name="sizeIncrement">
+             <size>
+              <width>1</width>
+              <height>1</height>
+             </size>
+            </property>
+            <property name="baseSize">
+             <size>
+              <width>320</width>
+              <height>320</height>
+             </size>
+            </property>
+            <property name="autoFillBackground">
+             <bool>false</bool>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item row="0" column="2">
+         <layout class="QVBoxLayout" name="vertical_layout_experimental_image_roi">
+          <property name="sizeConstraint">
+           <enum>QLayout::SetMaximumSize</enum>
+          </property>
+          <item>
+           <widget class="QLabel" name="qlabel_roi_experimental_image">
+            <property name="font">
+             <font>
+              <weight>75</weight>
+              <bold>true</bold>
+             </font>
+            </property>
+            <property name="text">
+             <string>ROI</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="CvImageFrameWidget" name="qgraphics_roi_experimental_image" native="true">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="minimumSize">
+             <size>
+              <width>320</width>
+              <height>320</height>
+             </size>
+            </property>
+            <property name="sizeIncrement">
+             <size>
+              <width>1</width>
+              <height>1</height>
+             </size>
+            </property>
+            <property name="baseSize">
+             <size>
+              <width>320</width>
+              <height>320</height>
+             </size>
+            </property>
+            <property name="autoFillBackground">
+             <bool>false</bool>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item row="1" column="0">
+         <layout class="QVBoxLayout" name="vertical_layout_crystallography_setup">
+          <property name="spacing">
+           <number>-1</number>
+          </property>
+          <item>
+           <widget class="QLabel" name="qlabel_image_path_9">
+            <property name="font">
+             <font>
+              <weight>75</weight>
+              <bold>true</bold>
+             </font>
+            </property>
+            <property name="text">
+             <string>Crystallography</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QTreeView" name="qtree_view_project_setup_crystallography"/>
+          </item>
+         </layout>
+        </item>
+        <item row="1" column="1">
+         <layout class="QVBoxLayout" name="vertical_layout_unit_cell">
+          <item>
+           <widget class="QLabel" name="qlabel_full_experimental_image_3">
+            <property name="font">
+             <font>
+              <weight>75</weight>
+              <bold>true</bold>
+             </font>
+            </property>
+            <property name="text">
+             <string>Unit cell</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QGraphicsView" name="qgraphics_experimental_data_2">
+            <property name="enabled">
+             <bool>true</bool>
+            </property>
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="minimumSize">
+             <size>
+              <width>320</width>
+              <height>320</height>
+             </size>
+            </property>
+            <property name="sizeIncrement">
+             <size>
+              <width>1</width>
+              <height>1</height>
+             </size>
+            </property>
+            <property name="baseSize">
+             <size>
+              <width>320</width>
+              <height>320</height>
+             </size>
+            </property>
+            <property name="sizeAdjustPolicy">
+             <enum>QAbstractScrollArea::AdjustToContents</enum>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="td_map_tab">
+       <attribute name="title">
+        <string>TD Map</string>
+       </attribute>
+       <layout class="QGridLayout" name="gridLayout_2">
+        <item row="0" column="0">
+         <widget class="QSplitter" name="td_map_splitter">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <widget class="QWidget" name="layoutWidget">
+           <layout class="QVBoxLayout" name="verticalLayout" stretch="1,0">
+            <item>
+             <widget class="QSplitter" name="splitter_layout_simulation_configuration_output">
+              <property name="orientation">
+               <enum>Qt::Vertical</enum>
+              </property>
+              <widget class="QWidget" name="layoutWidget_5">
+               <layout class="QVBoxLayout" name="vertical_layout_simulation_configuration">
+                <item>
+                 <widget class="QLabel" name="qlabel_image_path_7">
+                  <property name="font">
+                   <font>
+                    <weight>75</weight>
+                    <bold>true</bold>
+                   </font>
+                  </property>
+                  <property name="text">
+                   <string>Simulation configuration</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QTreeView" name="qtree_view_tdmap_simulation_setup"/>
+                </item>
+               </layout>
+              </widget>
+              <widget class="QWidget" name="layoutWidget_6">
+               <layout class="QVBoxLayout" name="vertical_layout_simulation_output">
+                <item>
+                 <widget class="QLabel" name="label_5">
+                  <property name="font">
+                   <font>
+                    <weight>75</weight>
+                    <bold>true</bold>
+                   </font>
+                  </property>
+                  <property name="text">
+                   <string>Simulation output</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QScrollArea" name="qscrollArea_simulation_output">
+                  <property name="minimumSize">
+                   <size>
+                    <width>0</width>
+                    <height>200</height>
+                   </size>
+                  </property>
+                  <property name="widgetResizable">
+                   <bool>true</bool>
+                  </property>
+                  <widget class="QWidget" name="scrollAreaWidgetContents">
+                   <property name="geometry">
+                    <rect>
+                     <x>0</x>
+                     <y>0</y>
+                     <width>375</width>
+                     <height>391</height>
+                    </rect>
+                   </property>
+                   <layout class="QGridLayout" name="gridLayout_5"/>
+                  </widget>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QProgressBar" name="qprogress_bar_tdmap">
+                  <property name="value">
+                   <number>24</number>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </widget>
+             </widget>
+            </item>
+            <item>
+             <layout class="QVBoxLayout" name="vertical_layout_simulation_run">
+              <item>
+               <widget class="Line" name="line_3">
+                <property name="orientation">
+                 <enum>Qt::Horizontal</enum>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <layout class="QHBoxLayout" name="horizontalLayout_19">
+                <item>
+                 <spacer name="horizontalSpacer_2">
+                  <property name="orientation">
+                   <enum>Qt::Horizontal</enum>
+                  </property>
+                  <property name="sizeHint" stdset="0">
+                   <size>
+                    <width>40</width>
+                    <height>20</height>
+                   </size>
+                  </property>
+                 </spacer>
+                </item>
+                <item>
+                 <widget class="QPushButton" name="pushButton_25">
+                  <property name="text">
+                   <string>Test Configuration</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QPushButton" name="qpush_run_tdmap">
+                  <property name="text">
+                   <string>Run</string>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </item>
+             </layout>
+            </item>
+           </layout>
+          </widget>
+          <widget class="QWidget" name="layoutWidget">
+           <layout class="QVBoxLayout" name="vertical_layout_TD_full">
+            <item>
+             <widget class="QLabel" name="qlabel_full_experimental_image_4">
+              <property name="font">
+               <font>
+                <weight>75</weight>
+                <bold>true</bold>
+               </font>
+              </property>
+              <property name="text">
+               <string>Full TD map</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="TDMap_Table" name="tdmap_table"/>
+            </item>
+           </layout>
+          </widget>
+          <widget class="QWidget" name="layoutWidget">
+           <layout class="QVBoxLayout" name="vertical_layout_TD_best_match" stretch="0,0,0,0">
+            <property name="sizeConstraint">
+             <enum>QLayout::SetMaximumSize</enum>
+            </property>
+            <item>
+             <widget class="QLabel" name="qlabel_full_experimental_image_5">
+              <property name="font">
+               <font>
+                <weight>75</weight>
+                <bold>true</bold>
+               </font>
+              </property>
+              <property name="text">
+               <string>TD best match</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QGraphicsView" name="qgraphics_experimental_data_6">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="minimumSize">
+               <size>
+                <width>320</width>
+                <height>320</height>
+               </size>
+              </property>
+              <property name="sizeIncrement">
+               <size>
+                <width>1</width>
+                <height>1</height>
+               </size>
+              </property>
+              <property name="baseSize">
+               <size>
+                <width>320</width>
+                <height>320</height>
+               </size>
+              </property>
+              <property name="sizeAdjustPolicy">
+               <enum>QAbstractScrollArea::AdjustToContents</enum>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QTableWidget" name="tableWidget">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Minimum" vsizetype="Maximum">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <row>
+               <property name="text">
+                <string>Thickness</string>
+               </property>
+              </row>
+              <row>
+               <property name="text">
+                <string>Defocus</string>
+               </property>
+              </row>
+              <row>
+               <property name="text">
+                <string>Match %</string>
+               </property>
+              </row>
+              <column>
+               <property name="text">
+                <string>Value</string>
+               </property>
+              </column>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="pushButton">
+              <property name="text">
+               <string>Accept</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </widget>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="supercell_tab">
+       <attribute name="title">
+        <string>Supercell</string>
+       </attribute>
+       <layout class="QGridLayout" name="gridLayout_4" columnstretch="3,8">
+        <item row="0" column="0">
+         <layout class="QVBoxLayout" name="vertical_layout_simulation_configuration_3">
+          <item>
+           <widget class="QLabel" name="qlabel_image_path_11">
+            <property name="font">
+             <font>
+              <weight>75</weight>
+              <bold>true</bold>
+             </font>
+            </property>
+            <property name="text">
+             <string>Edge detection</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QTreeView" name="qtree_view_supercell_model_edge_detection_setup"/>
+          </item>
+         </layout>
+        </item>
+        <item row="0" column="1" rowspan="3">
+         <layout class="QVBoxLayout" name="vertical_layout_TD_full_3">
+          <item>
+           <widget class="QLabel" name="qlabel_full_experimental_image_8">
+            <property name="font">
+             <font>
+              <weight>75</weight>
+              <bold>true</bold>
+             </font>
+            </property>
+            <property name="text">
+             <string>Target Region</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QGraphicsView" name="qgraphics_experimental_data_9">
+            <property name="enabled">
+             <bool>true</bool>
+            </property>
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="minimumSize">
+             <size>
+              <width>640</width>
+              <height>640</height>
+             </size>
+            </property>
+            <property name="sizeIncrement">
+             <size>
+              <width>1</width>
+              <height>1</height>
+             </size>
+            </property>
+            <property name="baseSize">
+             <size>
+              <width>320</width>
+              <height>320</height>
+             </size>
+            </property>
+            <property name="sizeAdjustPolicy">
+             <enum>QAbstractScrollArea::AdjustToContents</enum>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item row="2" column="0">
+         <widget class="QPushButton" name="pushButton_2">
+          <property name="text">
+           <string>Compute Supercell from contour</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="0">
+         <widget class="QPushButton" name="pushButton_24">
+          <property name="text">
+           <string>Apply edge detection</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+       <zorder>pushButton_24</zorder>
+       <zorder>pushButton_2</zorder>
+      </widget>
+      <widget class="QWidget" name="refinement_tab">
+       <attribute name="title">
+        <string>Refinement</string>
+       </attribute>
+       <layout class="QGridLayout" name="gridLayout_6">
+        <item row="0" column="0">
+         <layout class="QVBoxLayout" name="vertical_layout_simulation_run_3">
+          <item>
+           <widget class="Line" name="line_5">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <layout class="QVBoxLayout" name="vertical_layout_simulation_output_3">
+            <item>
+             <widget class="QLabel" name="label_9">
+              <property name="text">
+               <string>Simulation Output:</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QScrollArea" name="scrollArea_3">
+              <property name="minimumSize">
+               <size>
+                <width>0</width>
+                <height>200</height>
+               </size>
+              </property>
+              <property name="widgetResizable">
+               <bool>true</bool>
+              </property>
+              <widget class="QWidget" name="scrollAreaWidgetContents_3">
+               <property name="geometry">
+                <rect>
+                 <x>0</x>
+                 <y>0</y>
+                 <width>1204</width>
+                 <height>664</height>
+                </rect>
+               </property>
+              </widget>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <widget class="QLabel" name="label_8">
+            <property name="text">
+             <string>Running Configurations</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_24">
+            <item>
+             <spacer name="horizontalSpacer_5">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>20</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+            <item>
+             <layout class="QVBoxLayout" name="verticalLayout_9">
+              <item>
+               <widget class="QCheckBox" name="checkBox_25">
+                <property name="text">
+                 <string>Compute complex valued phase grating data </string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QCheckBox" name="checkBox_26">
+                <property name="text">
+                 <string>Compute the electron diffraction patterns</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QCheckBox" name="checkBox_27">
+                <property name="text">
+                 <string>Compute Image intensity distributions from wave functions</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QCheckBox" name="checkBox_29">
+                <property name="text">
+                 <string>Refine Supercell</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_25">
+            <item>
+             <spacer name="horizontalSpacer_6">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>40</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+            <item>
+             <widget class="QPushButton" name="pushButton_28">
+              <property name="text">
+               <string>Test Configuration</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="pushButton_29">
+              <property name="text">
+               <string>Run refinement</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <widget class="QProgressBar" name="progressBar_6">
+            <property name="value">
+             <number>24</number>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+       </layout>
+       <widget class="QWidget" name="layoutWidget_3">
+        <property name="geometry">
+         <rect>
+          <x>670</x>
+          <y>210</y>
+          <width>258</width>
+          <height>231</height>
+         </rect>
+        </property>
+        <layout class="QVBoxLayout" name="vertical_layout_simulation_configuration_4">
+         <item>
+          <widget class="Line" name="line">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="qlabel_image_path_12">
+           <property name="text">
+            <string>Model refinement:</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QTreeView" name="qtree_view_supercell_model_refinement_setup"/>
+         </item>
+        </layout>
+       </widget>
+      </widget>
+      <widget class="QWidget" name="results_tab">
+       <attribute name="title">
+        <string>Results</string>
+       </attribute>
+       <layout class="QGridLayout" name="gridLayout_3">
+        <item row="0" column="0">
+         <layout class="QVBoxLayout" name="vertical_layout_TD_full_6">
+          <item>
+           <widget class="QLabel" name="qlabel_full_experimental_image_13">
+            <property name="font">
+             <font>
+              <weight>75</weight>
+              <bold>true</bold>
+             </font>
+            </property>
+            <property name="text">
+             <string>Simulated target region</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QGraphicsView" name="qgraphics_experimental_data_13">
+            <property name="enabled">
+             <bool>true</bool>
+            </property>
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="minimumSize">
+             <size>
+              <width>320</width>
+              <height>320</height>
+             </size>
+            </property>
+            <property name="sizeIncrement">
+             <size>
+              <width>1</width>
+              <height>1</height>
+             </size>
+            </property>
+            <property name="baseSize">
+             <size>
+              <width>320</width>
+              <height>320</height>
+             </size>
+            </property>
+            <property name="sizeAdjustPolicy">
+             <enum>QAbstractScrollArea::AdjustToContents</enum>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item row="0" column="1" rowspan="2">
+         <widget class="QSplitter" name="splitter">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+          <widget class="QWidget" name="layoutWidget_17">
+           <layout class="QVBoxLayout" name="vertical_layout_TD_full_7">
+            <item>
+             <widget class="QLabel" name="qlabel_full_experimental_image_14">
+              <property name="font">
+               <font>
+                <weight>75</weight>
+                <bold>true</bold>
+               </font>
+              </property>
+              <property name="text">
+               <string>Refined Supercell</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QGraphicsView" name="qgraphics_experimental_data_14">
+              <property name="enabled">
+               <bool>true</bool>
+              </property>
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="minimumSize">
+               <size>
+                <width>480</width>
+                <height>480</height>
+               </size>
+              </property>
+              <property name="sizeIncrement">
+               <size>
+                <width>1</width>
+                <height>1</height>
+               </size>
+              </property>
+              <property name="baseSize">
+               <size>
+                <width>480</width>
+                <height>480</height>
+               </size>
+              </property>
+              <property name="sizeAdjustPolicy">
+               <enum>QAbstractScrollArea::AdjustToContents</enum>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </widget>
+          <widget class="QWidget" name="layoutWidget_18">
+           <layout class="QVBoxLayout" name="vertical_layout_TD_full_8">
+            <item>
+             <widget class="QLabel" name="qlabel_full_experimental_image_15">
+              <property name="font">
+               <font>
+                <weight>75</weight>
+                <bold>true</bold>
+               </font>
+              </property>
+              <property name="text">
+               <string>Optimized parameters</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QTableView" name="tableView"/>
+            </item>
+           </layout>
+          </widget>
+         </widget>
+        </item>
+        <item row="1" column="0">
+         <layout class="QVBoxLayout" name="vertical_layout_TD_full_5">
+          <item>
+           <widget class="QLabel" name="qlabel_full_experimental_image_12">
+            <property name="font">
+             <font>
+              <weight>75</weight>
+              <bold>true</bold>
+             </font>
+            </property>
+            <property name="text">
+             <string>Experimental target region</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QGraphicsView" name="qgraphics_experimental_data_12">
+            <property name="enabled">
+             <bool>true</bool>
+            </property>
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="minimumSize">
+             <size>
+              <width>320</width>
+              <height>320</height>
+             </size>
+            </property>
+            <property name="sizeIncrement">
+             <size>
+              <width>1</width>
+              <height>1</height>
+             </size>
+            </property>
+            <property name="baseSize">
+             <size>
+              <width>320</width>
+              <height>320</height>
+             </size>
+            </property>
+            <property name="sizeAdjustPolicy">
+             <enum>QAbstractScrollArea::AdjustToContents</enum>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+       </layout>
+      </widget>
+     </widget>
+    </item>
+   </layout>
   </widget>
-  <layoutdefault spacing="6" margin="11"/>
-  <customwidgets>
-    <customwidget>
-      <class>CvImageFrameWidget</class>
-      <extends>QWidget</extends>
-      <header location="global">cv_image_frame.h</header>
-      <container>1</container>
-    </customwidget>
-    <customwidget>
-      <class>TDMap_Table</class>
-      <extends>QTableWidget</extends>
-      <header location="global">gui_tdmap_table.h</header>
-    </customwidget>
-  </customwidgets>
-  <resources/>
-  <connections/>
+  <widget class="QMenuBar" name="menuBar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>1280</width>
+     <height>22</height>
+    </rect>
+   </property>
+   <property name="defaultUp">
+    <bool>true</bool>
+   </property>
+  </widget>
+  <widget class="QStatusBar" name="statusBar"/>
+  <action name="actionNew">
+   <property name="text">
+    <string>New</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+N</string>
+   </property>
+  </action>
+  <action name="actionSave">
+   <property name="text">
+    <string>Save</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+S</string>
+   </property>
+  </action>
+  <action name="actionExit">
+   <property name="text">
+    <string>Exit</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+W</string>
+   </property>
+   <property name="shortcutContext">
+    <enum>Qt::WidgetShortcut</enum>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::ApplicationSpecificRole</enum>
+   </property>
+   <property name="iconVisibleInMenu">
+    <bool>false</bool>
+   </property>
+  </action>
+  <action name="actionLoad_Crystalographic_Information">
+   <property name="text">
+    <string>Load Crystalographic Information</string>
+   </property>
+  </action>
+  <action name="actionSave_Crystalographic_Information">
+   <property name="text">
+    <string>Save Crystalographic Information</string>
+   </property>
+  </action>
+  <action name="actionRunning_Preferences">
+   <property name="text">
+    <string>Running Preferences</string>
+   </property>
+  </action>
+  <action name="actionSave_as">
+   <property name="text">
+    <string>Save as</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Shift+S</string>
+   </property>
+  </action>
+  <action name="actionAbout">
+   <property name="text">
+    <string>About </string>
+   </property>
+   <property name="iconVisibleInMenu">
+    <bool>false</bool>
+   </property>
+  </action>
+  <action name="actionLoad">
+   <property name="text">
+    <string>Load</string>
+   </property>
+  </action>
+ </widget>
+ <layoutdefault spacing="6" margin="11"/>
+ <customwidgets>
+  <customwidget>
+   <class>CvImageFrameWidget</class>
+   <extends>QWidget</extends>
+   <header location="global">cv_image_frame.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>TDMap_Table</class>
+   <extends>QTableWidget</extends>
+   <header location="global">gui_tdmap_table.h</header>
+  </customwidget>
+ </customwidgets>
+ <resources/>
+ <connections/>
 </ui>

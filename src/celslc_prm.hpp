@@ -8,6 +8,17 @@
 
 #include <boost/filesystem/operations.hpp>                // for directory_iterator
 #include <boost/filesystem/path.hpp>                      // for path, operator==, oper...
+#include <boost/process.hpp>
+#include <boost/process/async_pipe.hpp>
+
+#include <boost/asio.hpp>
+#include <boost/algorithm/string/predicate.hpp>
+
+#include <boost/process/args.hpp>
+#include <boost/process/exe.hpp>
+#include <boost/process/error.hpp>
+#include <boost/process/io.hpp>
+#include <boost/process/child.hpp>
 
 class CELSLC_prm {
   private:
@@ -64,6 +75,12 @@ class CELSLC_prm {
     bool prepare_nz_simulated_partitions_from_ssc_prm();
     bool log_std_out; 
     bool log_std_err;
+    std::vector <char> _io_ap_buffer_out;
+    std::vector <char> _io_ap_buffer_err;
+    boost::process::pipe _io_ap_pipe_out;
+    boost::process::pipe _io_ap_pipe_err;
+    bool _flag_io_ap_pipe_out = true;
+
   public:
     CELSLC_prm();
     CELSLC_prm( std::string celslc_bin_path );
@@ -139,8 +156,8 @@ class CELSLC_prm {
     void produce_prm( );
 
     bool cleanup_bin();
-    
-    bool call_bin();
+
+    bool call_bin( );
     bool call_boost_bin();
     bool call_bin_ssc();
 

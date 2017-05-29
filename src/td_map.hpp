@@ -5,6 +5,10 @@
 #include <string>
 #include <boost/filesystem/operations.hpp>                // for directory_iterator
 #include <boost/filesystem/path.hpp>                      // for path, operator==, oper...
+#include <boost/process.hpp>
+#include <boost/asio.hpp>
+#include <boost/array.hpp>
+#include <boost/asio/buffer.hpp>
 
 #include "global_def.hpp"
 #include "celslc_prm.hpp"
@@ -166,6 +170,7 @@ class TDMap {
     double coefficient_aberration_spherical;
 
     bool calculate_simulation_defocus_period();
+
 
   public:
     TDMap( Image_Crystal *image_crystal_ptr );

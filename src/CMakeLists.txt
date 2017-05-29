@@ -99,6 +99,7 @@ if(build_gui)
     gui_tdmap_table.cpp
     qt_file_push_button.h
     qt_file_push_button.cpp
+    gui_sim_updater.hpp
     )
 
   # Set PROJECT_VERSION_PATCH and PROJECT_VERSION_TWEAK to 0 if not present, needed by add_project_meta

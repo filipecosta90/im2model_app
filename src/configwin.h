@@ -24,6 +24,7 @@
 #include "treeitem.h"
 #include "cv_image_widget.h"
 #include "treeitem_file_delegate.hpp"
+#include "gui_sim_updater.hpp"
 
 namespace Ui {
   class MainWindow;
@@ -35,14 +36,19 @@ class MainWindow : public QMainWindow {
     explicit MainWindow(QWidget *parent = 0);
 
     void loadFile(const QString &fileName);
-
     ~MainWindow();
+
+    public slots:
+    void update_from_TDMap_sucess();
+    void update_from_TDMap_failure();
+
+
   protected:
     void closeEvent(QCloseEvent *event) override;
     bool _was_document_modified();
 
     private slots:
-    
+
     bool update_qline_image_path( std::string fileName );
     void update_full_experimental_image_frame();
     void update_roi_experimental_image_frame();
@@ -89,6 +95,10 @@ signals:
     QString _dr_probe_celslc_bin;
     QString _dr_probe_msa_bin;
     QString _dr_probe_wavimg_bin;
+
+    /* Threads and workers */
+    GuiSimOutUpdater *sim_output_updater;
+    QThread *_sim_output_thread;
 
     /* Delegates */
     TreeItemFileDelegate *_load_file_delegate;

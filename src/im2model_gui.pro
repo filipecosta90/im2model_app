@@ -64,7 +64,8 @@ HEADERS  += configwin.h \
     qt_file_push_button.h \
     cv_tdmap_cell_image_frame.h \
     cv_tdmap_cell_image_frame_delegate.h \
-    cv_image_cell_widget.h
+    cv_image_cell_widget.h \
+    gui_sim_updater.hpp
 
 RESOURCES     = ../im2model.qrc
 

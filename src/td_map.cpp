@@ -1,5 +1,9 @@
 #include "td_map.hpp"
 #include <boost/lexical_cast.hpp>
+#include <boost/process.hpp>
+#include <boost/asio.hpp>
+#include <boost/array.hpp>
+#include <string>
 
 TDMap::TDMap( Image_Crystal* image_crystal_ptr ){
   _core_image_crystal_ptr = image_crystal_ptr;
@@ -189,7 +193,7 @@ bool TDMap::calculate_thickness_range_slice_period(){
   return result;
 }
 
-bool TDMap::run_tdmap(){
+bool TDMap::run_tdmap( ){
   bool status = true;
   calculate_simulated_image_sampling_rate_and_size();
   status = prepare_celslc_parameters();
