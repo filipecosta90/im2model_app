@@ -21,6 +21,8 @@
 #include <boost/process/child.hpp>
 #include <boost/process/group.hpp>
 #include <boost/process/system.hpp>
+#include <boost/iostreams/device/file_descriptor.hpp>
+#include <boost/iostreams/stream.hpp>
 
 #include <boost/filesystem/operations.hpp>     // for directory_iterator
 #include <boost/filesystem/path.hpp>           // for path, operator==, oper...
@@ -42,9 +44,10 @@
 #include <boost/ref.hpp>
 #include <boost/iostreams/filtering_stream.hpp>
 
+
 static const std::string SLI_EXTENSION = ".sli";
 
-CELSLC_prm::CELSLC_prm()
+CELSLC_prm::CELSLC_prm( boost::process::ipstream &async_io_buffer_out ) : _io_pipe_out(async_io_buffer_out)
 {
   prj_dir_h = 0.0f;
   prj_dir_k = 0.0f;
@@ -84,12 +87,10 @@ CELSLC_prm::CELSLC_prm()
   log_std_err = false;
 }
 
-CELSLC_prm::CELSLC_prm( std::string celslc_bin_path ) : CELSLC_prm() {
-  // runnable execv info
-  //boost::filesystem::path _full_celslc_path = boost::filesystem::canonical( boost::filesystem::path(celslc_bin_path), boost::filesystem::current_path() );
-  //bin_path = std::string(_full_celslc_path.string());
-  set_bin_path(celslc_bin_path);
+boost::asio::streambuf& CELSLC_prm::get_streambuf(){
+    //return _io_buffer_out;
 }
+
 
 bool CELSLC_prm::_is_bin_path_defined(){
   return _flag_bin_path;
@@ -401,7 +402,7 @@ bool CELSLC_prm::cleanup_bin(  ){
   return EXIT_SUCCESS;
 }
 
-bool CELSLC_prm::call_boost_bin(){
+bool CELSLC_prm::call_boost_bin(  ){
   bool result = false;
   if( _flag_full_bin_path_execname ){
     std::cout << "bin path: " << full_bin_path_execname <<std::endl;
@@ -460,44 +461,38 @@ bool CELSLC_prm::call_boost_bin(){
 
     boost::asio::io_service ioservice;
 
-    int result = -1;
 
+    //Asynchronous Pipe Output
+    //Asynchronous Pipe I/O classifies communication which has automatically handling of the async operations by the process library.
+    //This means, that a pipe will be constructed, the async_read/-write will be automatically started, and that the end of the child process will also close the pipe.
+
+
+
+
+    int result = -1;
     if(  _flag_io_ap_pipe_out  ){
       boost::process::child c(
           // command
           args_stream.str(),
           // redirecting std_out to async buffer
-          boost::process::std_out >  _io_ap_pipe_out ,
+          boost::process::std_out > _io_pipe_out
           // redirecting std_err to null
-          boost::process::std_err > boost::process::null ,
-          ioservice
+         // boost::process::std_err > boost::process::detail:: ,
+         // ioservice
           );
-      ioservice.run();
-      c.wait();
-      result = c.exit_code();
-      std::cout << "_io_ap_buffer_out size: "  << _io_ap_buffer_out.size() << " result " << result << std::endl;
+      //ioservice.run();
 
+
+
+              c.wait();
+
+      result = c.exit_code();
+
+      std::cout << "_io_pipe_out result " << result << std::endl;
     }
     else{
-        if( _flag_run_ostream ){
 
-        }
-        else{
-      boost::process::child c(
-          // command
-          args_stream.str(),
-          // redirecting std_out to async buffer
-          boost::process::std_out >  boost::asio::buffer( _io_ap_buffer_out ) ,
-          // redirecting std_err to async buffer
-          boost::process::std_err > boost::asio::buffer( _io_ap_buffer_err ) ,
-          ioservice
-          );
-      ioservice.run();
-      c.wait();
-      result = c.exit_code();
-      std::cout << "_io_ap_buffer_out size: "  << _io_ap_buffer_out.size() << " result " << result << std::endl;
 
-    }
     }
     if( auto_equidistant_slices_switch || auto_non_equidistant_slices_switch ){
       update_nz_simulated_partitions_from_prm();
@@ -505,6 +500,7 @@ bool CELSLC_prm::call_boost_bin(){
     runned_bin = true;
     result = true;
   }
+  //std::cout << "BUFFER SIZE "  << _io_buffer_out.size() << std::endl;
   return result;
 }
 

@@ -9,12 +9,13 @@
 #include <QDebug>
 #include <iostream>
 #include "td_map.hpp"
+#include "gui_stream.hpp"
 
 class GuiSimOutUpdater : public QObject {
   Q_OBJECT
 
   public:
-    explicit GuiSimOutUpdater(TDMap* core_tdmap, QObject *parent = 0) : QObject(parent) {
+    explicit GuiSimOutUpdater(TDMap* core_tdmap ,  QObject *parent = 0 ) : QObject(parent) {
         _working =false;
         _abort = false;
         tdmap = core_tdmap;
@@ -24,6 +25,7 @@ public slots:
     void newTDMapSim() {
         std::cout << "Slave thread " << QThread::currentThreadId() << std::endl;
         qDebug()<<"Starting worker process in Thread "<<thread()->currentThreadId();
+
 
         bool result = tdmap->run_tdmap();
         if ( result ){
@@ -66,9 +68,6 @@ signals:
     void TDMap_failure();
     void finished();
 
-
-private:
-
 private:
     /**
      * @brief Process is aborted when @em true
@@ -87,4 +86,5 @@ private:
      * @brief TDMap var
      */
     TDMap* tdmap;
-};
+
+ };

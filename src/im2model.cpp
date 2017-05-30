@@ -6,6 +6,19 @@
 #include <boost/tokenizer.hpp>
 #include <boost/program_options.hpp>                      // for error
 
+
+#include <boost/process/error.hpp>
+#include <boost/process/async.hpp>
+#include <boost/process/io.hpp>
+#include <boost/process/child.hpp>
+
+#include <boost/thread.hpp>
+#include <future>
+
+
+#include <boost/asio.hpp>
+#include <boost/algorithm/string/predicate.hpp>
+
 #include <cassert>                                        // for assert
 #include <cmath>                                          // for fabs, round
 #include <cstdlib>                                        // for div_t, div
@@ -40,7 +53,8 @@ using namespace cv;
 
 int main(int argc, char** argv ){
 
-  // Experimental Image info
+
+    // Experimental Image info
   cv::Mat experimental_image;
   cv::Mat experimental_image_roi;
   cv::Mat experimental_working;
@@ -511,8 +525,9 @@ int main(int argc, char** argv ){
     // Simulation Defocus Period (in nm)
     defocus_period = ( defocus_upper_bound - defocus_lower_bound) / ( defocus_samples - 1 );
     std::cout << "defocus period " <<  defocus_period << std::endl;
+      boost::process::ipstream _sim_tdmap_ostream_buffer;
 
-    CELSLC_prm* celslc_parameters =  new CELSLC_prm(); //tfocus_map_simulation_step->get_celslc_parameters();
+    CELSLC_prm* celslc_parameters =  new CELSLC_prm( _sim_tdmap_ostream_buffer ); //tfocus_map_simulation_step->get_celslc_parameters();
     celslc_parameters->set_prp_dir_uvw( perpendicular_dir_u, perpendicular_dir_v, perpendicular_dir_w );
     celslc_parameters->set_prj_dir_hkl( projection_dir_h, projection_dir_k, projection_dir_l );
     celslc_parameters->set_super_cell_size_abc( super_cell_size_a, super_cell_size_b, super_cell_size_c );
@@ -841,23 +856,23 @@ int main(int argc, char** argv ){
        *
        * */
 
-      CELSLC_prm celslc_cel;
+      CELSLC_prm* celslc_cel = new CELSLC_prm( _sim_tdmap_ostream_buffer );
       std::string super_cell_slc_filename_prefix = "cel_slc";
-      celslc_cel.set_cel_file( "test_im2model.cel" );
-      celslc_cel.set_slc_filename_prefix ( super_cell_slc_filename_prefix );
-      celslc_cel.set_nx_simulated_horizontal_samples( _super_cell_nx ); 
-      celslc_cel.set_ny_simulated_vertical_samples( _super_cell_ny ); 
-      celslc_cel.set_ht_accelaration_voltage(ht_accelaration_voltage);
-      celslc_cel.set_dwf_switch(dwf_switch);
-      celslc_cel.set_abs_switch(abs_switch);
+      celslc_cel->set_cel_file( "test_im2model.cel" );
+      celslc_cel->set_slc_filename_prefix ( super_cell_slc_filename_prefix );
+      celslc_cel->set_nx_simulated_horizontal_samples( _super_cell_nx ); 
+      celslc_cel->set_ny_simulated_vertical_samples( _super_cell_ny ); 
+      celslc_cel->set_ht_accelaration_voltage(ht_accelaration_voltage);
+      celslc_cel->set_dwf_switch(dwf_switch);
+      celslc_cel->set_abs_switch(abs_switch);
       std::cout << "preparing for single slice parallel calculation";
-      //celslc_cel.set_bin_path( celslc_bin_string );
+      //celslc_cel->set_bin_path( celslc_bin_string );
 
       if(celslc_cel_switch == true ){
-        celslc_cel.call_bin_ssc( );
+        celslc_cel->call_bin_ssc( );
       }
 
-      super_cell_nz_simulated_partitions = celslc_cel.get_nz_simulated_partitions();
+      super_cell_nz_simulated_partitions = celslc_cel->get_nz_simulated_partitions();
       assert( super_cell_nz_simulated_partitions >= 1 );
 
       MSA_prm msa_cel;

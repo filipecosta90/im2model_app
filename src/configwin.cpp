@@ -16,13 +16,12 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
   _load_file_delegate = new TreeItemFileDelegate(this);
   readSettings();
-
   connect(this, SIGNAL(experimental_image_filename_changed()), this, SLOT(update_full_experimental_image_frame()));
 
   connect(this, SIGNAL(simulated_grid_changed()), this, SLOT(update_simgrid_frame()));
 
   _core_image_crystal = new Image_Crystal();
-  _core_td_map = new TDMap( _core_image_crystal );
+  _core_td_map = new TDMap( _sim_tdmap_ostream_buffer, _core_image_crystal );
   _core_td_map->set_dr_probe_bin_path( _dr_probe_bin_path.toStdString() );
   _core_td_map->set_dr_probe_celslc_execname( _dr_probe_celslc_bin.toStdString() );
   _core_td_map->set_dr_probe_msa_execname( _dr_probe_msa_bin.toStdString() );
@@ -41,19 +40,23 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
   /* TDMap simulation thread */
   _sim_tdmap_thread = new QThread(this);
-  sim_tdmap_worker = new GuiSimOutUpdater( _core_td_map );
+  sim_tdmap_worker = new GuiSimOutUpdater( _core_td_map  );
+
   sim_tdmap_worker->moveToThread( _sim_tdmap_thread );
 
   // will only start thread when needed
   connect(sim_tdmap_worker, SIGNAL(TDMap_request()), _sim_tdmap_thread, SLOT(start()));
+  connect(_sim_tdmap_thread, SIGNAL(started()), this, SLOT(update_tdmap_sim_ostream()));
   connect(_sim_tdmap_thread, SIGNAL(started()), sim_tdmap_worker, SLOT(newTDMapSim()));
+
+
   connect(sim_tdmap_worker, SIGNAL(TDMap_sucess()), this, SLOT(update_from_TDMap_sucess()));
   connect(sim_tdmap_worker, SIGNAL(TDMap_failure()), this, SLOT(update_from_TDMap_failure()));
   // will quit thread after work done
   connect(sim_tdmap_worker, SIGNAL(finished()), _sim_tdmap_thread, SLOT(quit()), Qt::DirectConnection);
 
+//  new Q_GUI_Stream(std::cout, ui->qTextBrowser_tdmap_simulation_output ); //Redirect Console output to QTextEdit
 
-  new Q_GUI_Stream(std::cout, ui->qTextEdit_tdmap_simulation_output ); //Redirect Console output to QTextEdit
 
 }
 
@@ -110,6 +113,9 @@ bool MainWindow::_was_document_modified(){
 }
 
 void   MainWindow::update_from_TDMap_sucess(){
+    //std::cout << "MAIN BUFFER SIZE "  << _sim_tdmap_ostream_buffer.size() << std::endl;
+
+
   std::cout << "tdmap thread signaled sucess " << std::endl;
   emit simulated_grid_changed();
 }
@@ -118,12 +124,25 @@ void   MainWindow::update_from_TDMap_failure(){
   std::cout << "tdmap thread signaled failure " << std::endl;
 }
 
+void MainWindow::update_tdmap_sim_ostream(){
+    std::cout << "waiting for tdmap sim output " << std::endl;
+    ui->qTextBrowser_tdmap_simulation_output->setText(" ");
+    std::string line;
+    while(std::getline(_sim_tdmap_ostream_buffer, line)){
+        ui->qTextBrowser_tdmap_simulation_output->moveCursor (QTextCursor::End);
+         QString qt_linw =  QString::fromStdString( line);
+        ui->qTextBrowser_tdmap_simulation_output->append( qt_linw );
+          QApplication::processEvents();
+    }
+}
+
 void MainWindow::on_qpush_run_tdmap_clicked(){
   bool status = false;
   std::cout << "running tdmap" << std::endl;
   ui->statusBar->showMessage(tr("Running TD-Map"), 2000);
   std::cout << "Master thread " << QThread::currentThread() << std::endl;
   sim_tdmap_worker->requestTDMap();
+
 
   // sim_tdmap_worker->newTDMapSim( _core_td_map );
   /*

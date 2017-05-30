@@ -306,7 +306,11 @@
                    </property>
                    <layout class="QGridLayout" name="gridLayout_5">
                     <item row="0" column="0">
-                     <widget class="QTextEdit" name="qTextEdit_tdmap_simulation_output"/>
+                     <widget class="QTextBrowser" name="qTextBrowser_tdmap_simulation_output">
+                      <property name="readOnly">
+                       <bool>true</bool>
+                      </property>
+                     </widget>
                     </item>
                    </layout>
                   </widget>

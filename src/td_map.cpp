@@ -5,9 +5,9 @@
 #include <boost/array.hpp>
 #include <string>
 
-TDMap::TDMap( Image_Crystal* image_crystal_ptr ){
+TDMap::TDMap( boost::process::ipstream &ostream_buffer, Image_Crystal* image_crystal_ptr ) : _sim_tdmap_ostream_buffer( ostream_buffer ) {
   _core_image_crystal_ptr = image_crystal_ptr;
-  _tdmap_celslc_parameters = new CELSLC_prm();
+  _tdmap_celslc_parameters = new CELSLC_prm( ostream_buffer );
   _tdmap_msa_parameters = new MSA_prm();
   _tdmap_wavimg_parameters = new WAVIMG_prm();
   _td_map_simgrid = new SIMGRID_wavimg_steplength();
@@ -76,6 +76,10 @@ bool TDMap::set_number_slices_to_load_from_nz_simulated_partitions(){
     status = true;
   }
   return status;
+}
+
+boost::asio::streambuf& TDMap::get_tdmap_streambuf(){
+    return _tdmap_celslc_parameters->get_streambuf();
 }
 
 bool TDMap::calculate_simulated_image_sampling_rate_and_size(){

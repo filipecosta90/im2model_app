@@ -19,6 +19,42 @@
 #include <boost/process/error.hpp>
 #include <boost/process/io.hpp>
 #include <boost/process/child.hpp>
+#include <boost/filesystem/operations.hpp>                // for directory_iterator
+#include <boost/filesystem/path.hpp>                      // for path, operator==, oper...
+#include <boost/process.hpp>
+#include <boost/asio.hpp>
+#include <boost/array.hpp>
+#include <boost/asio/buffer.hpp>
+#include <boost/filesystem/operations.hpp>                // for directory_iterator
+#include <boost/filesystem/path.hpp>                      // for path, operator==, oper...
+#include <boost/process.hpp>
+#include <boost/asio.hpp>
+#include <boost/array.hpp>
+#include <boost/asio/buffer.hpp>
+
+#include <boost/process/error.hpp>
+#include <boost/process/async.hpp>
+#include <boost/process/io.hpp>
+#include <boost/process/child.hpp>
+
+#include <boost/thread.hpp>
+#include <future>
+
+#include <boost/system/error_code.hpp>
+
+#include <boost/asio.hpp>
+#include <boost/algorithm/string/predicate.hpp>
+
+#include <boost/process/error.hpp>
+#include <boost/process/io.hpp>
+#include <boost/process/args.hpp>
+#include <boost/process/child.hpp>
+#include <boost/process/async_pipe.hpp>
+#include <system_error>
+
+#include <boost/filesystem.hpp>
+
+
 
 class CELSLC_prm {
   private:
@@ -77,15 +113,23 @@ class CELSLC_prm {
     bool log_std_err;
     std::vector <char> _io_ap_buffer_out;
     std::vector <char> _io_ap_buffer_err;
-    boost::process::pipe _io_ap_pipe_out;
-    boost::process::pipe _io_ap_pipe_err;
-    bool _flag_io_ap_pipe_out = false;
+
+    boost::process::ipstream& _io_pipe_out;
+
+    boost::process::pipe _io_pipe_err;
+
+    bool _flag_io_ap_pipe_out = true;
     std::ostream *run_ostream = nullptr;
     bool _flag_run_ostream = false;
 
   public:
-    CELSLC_prm();
-    CELSLC_prm( std::string celslc_bin_path );
+    boost::process::ipstream& get_io_pipe_out(){ return _io_pipe_out; }
+
+   // boost::asio::streambuf& _io_buffer_out;
+
+    boost::asio::streambuf& get_streambuf();
+
+    CELSLC_prm( boost::process::ipstream& async_io_buffer_out );
 
     bool set_run_ostream( std::ostream *stream );
 

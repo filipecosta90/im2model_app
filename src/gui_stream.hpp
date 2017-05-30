@@ -8,9 +8,22 @@
 #include <QTextEdit>
 
 
+
+#include <iostream>
+#include <boost/iostreams/stream.hpp>
+#include <boost/iostreams/output_sequence.hpp>
+#include <boost/iostreams/device/null.hpp>
+#include <boost/iostreams/stream.hpp>
+#include <boost/ref.hpp>
+#include <boost/iostreams/device/file_descriptor.hpp>
+#include <boost/iostreams/stream.hpp>
+#include <boost/iostreams/filtering_stream.hpp>
+#include <boost/process/pipe.hpp>
+
 class Q_GUI_Stream : public std::basic_streambuf<char>
 {
 public:
+
     Q_GUI_Stream( std::ostream &stream , QTextEdit* text_edit) : m_stream(stream)
     {
         log_window = text_edit;
@@ -47,8 +60,7 @@ protected:
     }
 
 
-    virtual std::streamsize xsputn(const char *p, std::streamsize n)
-    {
+    virtual std::streamsize xsputn(const char *p, std::streamsize n){
         QString str(p);
         if(str.contains("\n")){
             QStringList strSplitted = str.split("\n");
@@ -59,6 +71,7 @@ protected:
             for(int i = 1; i < strSplitted.size(); i++){
                 log_window->append(strSplitted.at(i));
             }
+
         }else{
             log_window->moveCursor (QTextCursor::End);
             log_window->insertPlainText (str);
@@ -67,9 +80,10 @@ protected:
     }
 
 private:
-    std::ostream &m_stream;
-    std::streambuf *m_old_buf;
+    std::ostream& m_stream;
+    std::streambuf* m_old_buf;
     QTextEdit* log_window;
+
 };
 
 #endif // GUI_STREAM_HPP
