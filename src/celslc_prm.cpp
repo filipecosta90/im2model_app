@@ -88,9 +88,8 @@ CELSLC_prm::CELSLC_prm( boost::process::ipstream &async_io_buffer_out ) : _io_pi
 }
 
 boost::asio::streambuf& CELSLC_prm::get_streambuf(){
-    //return _io_buffer_out;
+  //return _io_buffer_out;
 }
-
 
 bool CELSLC_prm::_is_bin_path_defined(){
   return _flag_bin_path;
@@ -458,17 +457,6 @@ bool CELSLC_prm::call_boost_bin(  ){
     }
     std::cout << "going to run boost process with args: "<< args_stream.str() << std::endl;
 
-
-    boost::asio::io_service ioservice;
-
-
-    //Asynchronous Pipe Output
-    //Asynchronous Pipe I/O classifies communication which has automatically handling of the async operations by the process library.
-    //This means, that a pipe will be constructed, the async_read/-write will be automatically started, and that the end of the child process will also close the pipe.
-
-
-
-
     int result = -1;
     if(  _flag_io_ap_pipe_out  ){
       boost::process::child c(
@@ -477,21 +465,23 @@ bool CELSLC_prm::call_boost_bin(  ){
           // redirecting std_out to async buffer
           boost::process::std_out > _io_pipe_out
           // redirecting std_err to null
-         // boost::process::std_err > boost::process::detail:: ,
-         // ioservice
+          // boost::process::std_err > boost::process::detail::
           );
-      //ioservice.run();
-
-
-
-              c.wait();
+      c.wait();
 
       result = c.exit_code();
-
-      std::cout << "_io_pipe_out result " << result << std::endl;
     }
     else{
-
+      boost::process::child c(
+          // command
+          args_stream.str(),
+          // redirecting std_out to null
+          boost::process::std_out > boost::process::null,
+          // redirecting std_err to null
+          boost::process::std_err > boost::process::null
+          );
+      c.wait();
+      result = c.exit_code();
 
     }
     if( auto_equidistant_slices_switch || auto_non_equidistant_slices_switch ){
@@ -500,13 +490,12 @@ bool CELSLC_prm::call_boost_bin(  ){
     runned_bin = true;
     result = true;
   }
-  //std::cout << "BUFFER SIZE "  << _io_buffer_out.size() << std::endl;
   return result;
 }
 
 bool CELSLC_prm::set_run_ostream(std::ostream *stream){
-    run_ostream = stream;
-    _flag_run_ostream = true;
+  run_ostream = stream;
+  _flag_run_ostream = true;
 }
 
 bool CELSLC_prm::prepare_nz_simulated_partitions_from_ssc_prm(){

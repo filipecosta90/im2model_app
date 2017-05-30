@@ -29,6 +29,10 @@
 #include <boost/filesystem/path.hpp>                      // for path, operator==, oper...
 
 
+bool SIMGRID_wavimg_steplength::_is_simulated_images_grid_defined(){
+    return runned_simulation;
+}
+
 int SIMGRID_wavimg_steplength::imregionalmax(cv::Mat input, cv::Mat locations){
   return 1;
 }
@@ -98,6 +102,34 @@ cv::Mat SIMGRID_wavimg_steplength::gradientY(cv::Mat & mat, double spacing) {
   resultCenteredMat.copyTo(grad(cv::Rect(0,1,maxCols, maxRows-2)));
   return grad;
 }
+
+cv::Mat SIMGRID_wavimg_steplength::get_simulated_image_in_grid( int row_thickness, int col_defocus ){
+    std::vector<cv::Mat> simulated_images_row = simulated_images_grid.at(row_thickness);
+    cv::Mat cleaned_simulated_image = simulated_images_row.at(col_defocus);
+return cleaned_simulated_image;
+}
+
+ double SIMGRID_wavimg_steplength::get_simulated_image_match_in_grid( int row_thickness, int col_defocus ){
+     return (double) match_values_matrix.at<float>( row_thickness, col_defocus );
+ }
+
+ int SIMGRID_wavimg_steplength::get_simulated_image_thickness_slice_in_grid( int row_thickness, int col_defocus ){
+     const int at_slice = thickness_values_matrix.at<float>(row_thickness, col_defocus);
+     return at_slice;
+ }
+
+ double SIMGRID_wavimg_steplength::get_simulated_image_thickness_nm_in_grid( int row_thickness, int col_defocus ){
+     const int at_slice = thickness_values_matrix.at<float>(row_thickness, col_defocus);
+     const double slice_thickness_nm = celslc_accum_nm_slice_vec.at(at_slice-1);
+     return slice_thickness_nm;
+ }
+
+ double SIMGRID_wavimg_steplength::get_simulated_image_defocus_in_grid( int row_thickness, int col_defocus ){
+     return (double) defocus_values_matrix.at<float>( row_thickness, col_defocus );
+ }
+
+
+
 
 
 SIMGRID_wavimg_steplength::SIMGRID_wavimg_steplength()

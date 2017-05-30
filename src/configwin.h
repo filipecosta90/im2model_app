@@ -64,6 +64,7 @@
 #include "treeitem_file_delegate.hpp"
 #include "gui_sim_updater.hpp"
 #include "gui_stream.hpp"
+#include "cv_image_table_frame.h"
 
 namespace Ui {
   class MainWindow;
@@ -95,6 +96,8 @@ class MainWindow : public QMainWindow {
     void on_qpush_run_tdmap_clicked();
     void update_simgrid_frame();
     void update_tdmap_sim_ostream();
+    void update_tdmap_best_match(int x,int y);
+    void update_tdmap_current_selection(int x,int y);
 
     // menu slots
     void newFile();

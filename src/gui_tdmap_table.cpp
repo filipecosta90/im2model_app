@@ -93,7 +93,7 @@ void TDMap_Table::clear()
   for (int i = 0; i < ColumnCount; ++i) {
     QTableWidgetItem *item = new QTableWidgetItem;
     double _at_defocus = _defocus_lower + ( _defocus_period * i );
-    item->setText( QString::number( _at_defocus ) );
+    item->setText( QString::number( _at_defocus ) + QString( " nm" )  );
     setHorizontalHeaderItem(i, item);
   }
   std::vector <double> _local_accum_nm_slice_vec;
@@ -110,7 +110,6 @@ void TDMap_Table::clear()
     QString legend;
     if( use_accum_nm ){
       const double slice_thickness_nm = _local_accum_nm_slice_vec.at(at_slice-1);
-      //const double slice_thickness_nm = _accum_nm_slice_vec.at(at_slice-1);
       legend = QString::number( slice_thickness_nm ) + QString( "nm  #" ) + QString::number( at_slice );
     }
     else {
@@ -130,25 +129,22 @@ void TDMap_Table::clear()
         CvImageCellWidget *cell_widget  = new CvImageCellWidget();
         cv::Mat full_image = simulated_image_row.at(col);
         cell_widget->setImage( full_image.clone() );
-        //cell_widget->setImage( full_image.clone() );
         this->setCellWidget(row,col, cell_widget);
-        // cell_widget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding );
-        //  cell_widget->setMinimumSize( );
-        //horizontalHeader()->setResizeMode(QHeaderView::Stretch);
-        //verticalHeader()->setResizeMode(QHeaderView::Stretch);
       }
     }
 
     this->resizeColumnsToContents();
     this->resizeRowsToContents();
 
-    std::cout << "setting best match position to: " << best_match_pos << std::endl;
-
     setCurrentCell(best_match_pos.x, best_match_pos.y);
-    std::cout << "finished creating Image frames " << std::endl;
+    emit tdmap_best_match( best_match_pos.x, best_match_pos.y );
+    setCurrentCell(0, 0);
+    emit cellClicked(0,0);
+
   }
   else{
     setCurrentCell(0, 0);
+    emit cellClicked(0,0);
   }
 }
 

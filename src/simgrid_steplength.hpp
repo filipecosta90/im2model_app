@@ -155,6 +155,8 @@ class SIMGRID_wavimg_steplength {
 
   public:
 
+    bool _is_simulated_images_grid_defined();
+
     int imregionalmax(cv::Mat input , cv::Mat locations);
 
     std::pair<cv::Mat,cv::Mat> gradient(cv::Mat & img, double spaceX, double spaceY);
@@ -259,6 +261,17 @@ class SIMGRID_wavimg_steplength {
     cv::Mat get_thickness_values_matrix();
     cv::Mat get_match_values_matrix();
     cv::Point2i get_best_match_position();
+
+    cv::Mat get_simulated_image_in_grid( int row, int col );
+
+     double get_simulated_image_match_in_grid( int row, int col );
+
+     int get_simulated_image_thickness_slice_in_grid( int row, int col );
+
+     double get_simulated_image_thickness_nm_in_grid( int row, int col );
+
+     double get_simulated_image_defocus_in_grid( int row, int col );
+
 
     void calculate_motion_euclidian_matrix(  cv::Mat cropped_experimental_image_roi, cv::Mat simulated_image_roi );
 

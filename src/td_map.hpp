@@ -278,6 +278,9 @@ class TDMap {
     bool _is_simulated_image_sampling_rate_and_size_defined();
     bool _is_wave_function_name_defined();
 
+    // runned ?
+    bool _is_simulated_images_grid_defined();
+
     /** getters **/
 
     int get_thickness_range_number_samples( );
@@ -306,11 +309,24 @@ class TDMap {
 
     cv::Point2i get_simgrid_best_match_position();
 
+    cv::Mat get_simulated_image_in_grid( int row, int col );
+
+     double get_simulated_image_match_in_grid( int row, int col );
+
+     int get_simulated_image_thickness_slice_in_grid( int row, int col );
+
+     double get_simulated_image_thickness_nm_in_grid( int row, int col );
+
+     double get_simulated_image_defocus_in_grid( int row, int col );
+
     /** setters **/
 
     bool set_dr_probe_bin_path( std::string bin_path );
+
     bool set_dr_probe_celslc_execname( std::string celslc_execname );
+
     bool set_dr_probe_msa_execname( std::string msa_execname );
+
     bool set_dr_probe_wavimg_execname( std::string wavimg_execname );
 
     bool set_thickness_range_lower_bound( std::string lower_bound );

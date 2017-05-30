@@ -38,6 +38,7 @@ class TDMap_Table : public QTableWidget
 
 signals:
     void modified();
+    void tdmap_best_match( int x, int y );
 
     private slots:
       void somethingChanged();

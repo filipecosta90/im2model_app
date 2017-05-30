@@ -48,7 +48,6 @@ TDMap::TDMap( boost::process::ipstream &ostream_buffer, Image_Crystal* image_cry
 
 bool TDMap::prepare_ZA_UV(){
   /*
-
      const cv::Point3d zone_axis_vector_uvw = _core_image_crystal_ptr->get_zone_axis_vector_uvw();
      const cv::Point3d upward_vector_hkl = _core_image_crystal_ptr->get_upward_vector_hkl();
      */
@@ -161,6 +160,26 @@ bool TDMap::calculate_thickness_range_lower_bound_slice_from_nm(){
   return result;
 }
 
+cv::Mat TDMap::get_simulated_image_in_grid( int x, int y ){
+    return _td_map_simgrid->get_simulated_image_in_grid(  x,  y );
+}
+
+ double TDMap::get_simulated_image_match_in_grid( int x, int y ){
+     return _td_map_simgrid->get_simulated_image_match_in_grid(  x,  y );
+ }
+
+ double TDMap::get_simulated_image_thickness_nm_in_grid( int x, int y ){
+     return _td_map_simgrid->get_simulated_image_thickness_nm_in_grid(  x,  y );
+ }
+
+ int TDMap::get_simulated_image_thickness_slice_in_grid( int x, int y ){
+     return _td_map_simgrid->get_simulated_image_thickness_slice_in_grid(  x,  y );
+ }
+
+ double TDMap::get_simulated_image_defocus_in_grid( int x, int y ){
+     return _td_map_simgrid->get_simulated_image_defocus_in_grid(  x,  y );
+ }
+
 bool TDMap::calculate_thickness_range_slice_period(){
   bool result = false;
   if ( _is_thickness_range_lower_bound_slice_defined() && _is_thickness_range_upper_bound_slice_defined() ){
@@ -249,6 +268,10 @@ bool TDMap::run_tdmap( ){
   return status;
 }
 
+bool TDMap::_is_simulated_images_grid_defined(){
+    return _td_map_simgrid->_is_simulated_images_grid_defined();
+}
+
 bool  TDMap::prepare_celslc_parameters(){
   _flag_tdmap_celslc_parameters = false;
   std::cout << "  _is_simulated_image_sampling_rate_and_size_defined " << _is_simulated_image_sampling_rate_and_size_defined() << std::endl;
@@ -294,6 +317,8 @@ bool  TDMap::prepare_celslc_parameters(){
   }
   return _flag_tdmap_celslc_parameters;
 }
+
+
 
 bool  TDMap::prepare_msa_parameters(){
   _flag_tdmap_msa_parameters = false;

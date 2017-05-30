@@ -1,5 +1,3 @@
-
-// gui includes
 #include "configwin.h"
 
 #include <QFileDialog>
@@ -10,7 +8,7 @@
 
 #include <boost/filesystem.hpp>
 #include <boost/range/iterator_range.hpp>
-
+#include <QDebug>
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow) {
 
@@ -55,9 +53,67 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
   // will quit thread after work done
   connect(sim_tdmap_worker, SIGNAL(finished()), _sim_tdmap_thread, SLOT(quit()), Qt::DirectConnection);
 
-//  new Q_GUI_Stream(std::cout, ui->qTextBrowser_tdmap_simulation_output ); //Redirect Console output to QTextEdit
 
+  connect( ui->tdmap_table, SIGNAL(tdmap_best_match( int, int )), this, SLOT(update_tdmap_best_match(int,int)) );
+  connect(ui->tdmap_table, SIGNAL(cellClicked(int , int )), this, SLOT(update_tdmap_current_selection(int,int)) );
 
+}
+
+void MainWindow::update_tdmap_best_match(int x,int y){
+
+  ////qDebug() << "updating tdmap best match to: " << x << " y: " << y ;
+  cv::Mat _simulated_image = _core_td_map->get_simulated_image_in_grid(x,y);
+  const double _simulated_image_match = _core_td_map->get_simulated_image_match_in_grid(x,y);
+  const double _simulated_image_thickness = _core_td_map->get_simulated_image_thickness_nm_in_grid(x,y);
+  const double _simulated_image_defocus = _core_td_map->get_simulated_image_defocus_in_grid(x,y);
+
+  QStandardItemModel* model = new QStandardItemModel(3, 2,this);
+  model->setHeaderData(0, Qt::Horizontal, tr("Parameter"));
+  model->setHeaderData(1, Qt::Horizontal, tr("Value"));
+  QStandardItem *label_match_item = new QStandardItem(tr("Match %"));
+  QStandardItem *label_defocus_item = new QStandardItem(tr("Defocus"));
+  QStandardItem *label_thickness_item = new QStandardItem(tr("Thickness"));
+  QStandardItem *match_item = new QStandardItem( QString::number( _simulated_image_match ) );
+  QStandardItem *defocus_item = new QStandardItem( QString::number( _simulated_image_defocus  ) );
+  QStandardItem *thickness_item = new QStandardItem( QString::number( _simulated_image_thickness ) );
+  model->setItem(0, 0, label_match_item);
+  model->setItem(1, 0, label_thickness_item);
+  model->setItem(2, 0, label_defocus_item);
+  model->setItem(0, 1, match_item);
+  model->setItem(1, 1, thickness_item);
+  model->setItem(2, 1, defocus_item);
+
+  ui->qgraphics_tdmap_best_match->setModel(model);
+  ui->qgraphics_tdmap_best_match->setImage( _simulated_image );
+}
+
+void MainWindow::update_tdmap_current_selection(int x,int y){
+
+  if(_core_td_map->_is_simulated_images_grid_defined()){
+    ////qDebug() << "updating update_tdmap_current_selection to: " << x << " y: " << y ;
+    cv::Mat _simulated_image = _core_td_map->get_simulated_image_in_grid(x,y);
+    const double _simulated_image_match = _core_td_map->get_simulated_image_match_in_grid(x,y);
+    const double _simulated_image_thickness = _core_td_map->get_simulated_image_thickness_nm_in_grid(x,y);
+    const double _simulated_image_defocus = _core_td_map->get_simulated_image_defocus_in_grid(x,y);
+
+    QStandardItemModel* model = new QStandardItemModel(3, 2,this);
+    model->setHeaderData(0, Qt::Horizontal, tr("Parameter"));
+    model->setHeaderData(1, Qt::Horizontal, tr("Value"));
+    QStandardItem *label_match_item = new QStandardItem(tr("Match %"));
+    QStandardItem *label_defocus_item = new QStandardItem(tr("Defocus"));
+    QStandardItem *label_thickness_item = new QStandardItem(tr("Thickness"));
+    QStandardItem *match_item = new QStandardItem( QString::number( _simulated_image_match ) );
+    QStandardItem *defocus_item = new QStandardItem( QString::number( _simulated_image_defocus  ) );
+    QStandardItem *thickness_item = new QStandardItem( QString::number( _simulated_image_thickness ) );
+    model->setItem(0, 0, label_match_item);
+    model->setItem(1, 0, label_thickness_item);
+    model->setItem(2, 0, label_defocus_item);
+    model->setItem(0, 1, match_item);
+    model->setItem(1, 1, thickness_item);
+    model->setItem(2, 1, defocus_item);
+    ui->qgraphics_tdmap_selection->setModel(model);
+    ui->qgraphics_tdmap_selection->setImage( _simulated_image );
+  }
 }
 
 MainWindow::~MainWindow(){
@@ -65,7 +121,7 @@ MainWindow::~MainWindow(){
   /* END TDMap simulation thread */
   sim_tdmap_worker->abort();
   _sim_tdmap_thread->wait();
-  qDebug()<<"Deleting thread and worker in Thread "<<this->QObject::thread()->currentThreadId();
+  ////qDebug()<<"Deleting thread and worker in Thread "<<this->QObject::thread()->currentThreadId();
   delete _sim_tdmap_thread;
   delete sim_tdmap_worker;
 
@@ -74,7 +130,7 @@ MainWindow::~MainWindow(){
 }
 
 bool MainWindow::update_qline_image_path( std::string fileName ){
-  std::cout << "inside update_qline_image_path: " << fileName << std::endl;
+    ////qDebug()<<"Inside update_qline_image_path: " << fileName ;
   _core_image_crystal->set_experimental_image_path( fileName );
   const bool load_ok = _core_image_crystal->load_full_experimental_image();
   if( load_ok ){
@@ -84,7 +140,7 @@ bool MainWindow::update_qline_image_path( std::string fileName ){
 }
 
 void MainWindow::update_simgrid_frame(){
-  std::cout << " updating simgrid images " << std::endl;
+    ////qDebug()<<" updating simgrid images";
   std::vector< std::vector<cv::Mat> > _simulated_images_grid = _core_td_map->get_simulated_images_grid();
   this->ui->tdmap_table->set_simulated_images_grid( _simulated_images_grid );
 }
@@ -113,56 +169,35 @@ bool MainWindow::_was_document_modified(){
 }
 
 void   MainWindow::update_from_TDMap_sucess(){
-    //std::cout << "MAIN BUFFER SIZE "  << _sim_tdmap_ostream_buffer.size() << std::endl;
-
-
-  std::cout << "tdmap thread signaled sucess " << std::endl;
+    ////qDebug()<<"tdmap thread signaled sucess " ;
+    ui->statusBar->showMessage(tr("Sucessfully runned TD-Map"), 2000);
   emit simulated_grid_changed();
 }
 
 void   MainWindow::update_from_TDMap_failure(){
-  std::cout << "tdmap thread signaled failure " << std::endl;
+    ////qDebug()<<"tdmap thread signaled failure " ;
+    ui->statusBar->showMessage(tr("Error while running TD-Map"), 2000);
 }
 
 void MainWindow::update_tdmap_sim_ostream(){
-    std::cout << "waiting for tdmap sim output " << std::endl;
-    ui->qTextBrowser_tdmap_simulation_output->setText(" ");
-    std::string line;
-    while(std::getline(_sim_tdmap_ostream_buffer, line)){
-        ui->qTextBrowser_tdmap_simulation_output->moveCursor (QTextCursor::End);
-         QString qt_linw =  QString::fromStdString( line);
-        ui->qTextBrowser_tdmap_simulation_output->append( qt_linw );
-          QApplication::processEvents();
-    }
+    ////qDebug()<<"waiting for tdmap sim output " ;
+  ui->qTextBrowser_tdmap_simulation_output->setText(" ");
+  std::string line;
+  while(std::getline(_sim_tdmap_ostream_buffer, line)){
+    ui->qTextBrowser_tdmap_simulation_output->moveCursor (QTextCursor::End);
+    QString qt_linw =  QString::fromStdString( line);
+    ui->qTextBrowser_tdmap_simulation_output->append( qt_linw );
+    QApplication::processEvents();
+  }
 }
 
 void MainWindow::on_qpush_run_tdmap_clicked(){
   bool status = false;
-  std::cout << "running tdmap" << std::endl;
+  ////qDebug()<<"running tdmap" ;
   ui->statusBar->showMessage(tr("Running TD-Map"), 2000);
-  std::cout << "Master thread " << QThread::currentThread() << std::endl;
+  ////qDebug()<< "Master thread " << QThread::currentThread() ;
   sim_tdmap_worker->requestTDMap();
 
-
-  // sim_tdmap_worker->newTDMapSim( _core_td_map );
-  /*
-#ifndef QT_NO_CURSOR
-QApplication::setOverrideCursor(Qt::WaitCursor);
-#endif
-
-
-
-#ifndef QT_NO_CURSOR
-QApplication::restoreOverrideCursor();
-#endif
-if (status){
-ui->statusBar->showMessage(tr("Sucessfully runned TD-Map"), 2000);
-emit simulated_grid_changed();
-}
-else{
-ui->statusBar->showMessage(tr("Error while running TD-Map"), 2000);
-}
-*/
   }
 
 void MainWindow::closeEvent(QCloseEvent *event)
@@ -178,7 +213,6 @@ void MainWindow::closeEvent(QCloseEvent *event)
 void MainWindow::newFile()
 {
   if (maybeSave()) {
-    //textEdit->clear();
     setCurrentFile(QString());
   }
 }
@@ -274,13 +308,13 @@ void MainWindow::updateStatusBar()
 
 void MainWindow::readSettings()
 {
-  QSettings settings; //( QCoreApplication::organizationName(), QCoreApplication::applicationName() );
-  std::cout << "Reading settings from: " << settings.fileName().toStdString() << std::endl;
+  QSettings settings;
+  ////qDebug() << "Reading settings from: " << settings.fileName() ;
 
   QStringList keys = settings.allKeys();
 
   foreach (const QString &str, keys) {
-    std::cout  << QString(" [%1] ").arg(str).toStdString() << std::endl;
+    ////qDebug()  << QString(" [%1] ").arg(str) ;
   }
   settings.beginGroup("DrProbe");
   _dr_probe_bin_path = settings.value("path").toString();
@@ -288,16 +322,17 @@ void MainWindow::readSettings()
   _dr_probe_msa_bin = settings.value("msa").toString();
   _dr_probe_wavimg_bin = settings.value("wavimg").toString();
   settings.endGroup();
-  std::cout << "DR PROBE bin path: " << _dr_probe_bin_path.toStdString() << std::endl;
+  ////qDebug() << "DR PROBE bin path: " << _dr_probe_bin_path ;
 }
 
 void MainWindow::writeSettings()
 {
-  std::cout << "orginazation: " << QCoreApplication::organizationName().toStdString() << std::endl;
-  std::cout << "app: " << QCoreApplication::applicationName().toStdString() << std::endl;
-  QSettings settings; //( QCoreApplication::organizationName(), QCoreApplication::applicationName() ); //new QSettings(  QCoreApplication::organizationName(), QCoreApplication::applicationName() );
-  std::cout << "Writing settings to: " << settings.fileName().toStdString() << std::endl;
-  std::cout << "DR PROBE bins path: " << _dr_probe_bin_path.toStdString() << std::endl;
+    QSettings settings;
+
+  ////qDebug() << "orginazation: " << QCoreApplication::organizationName() ;
+  ////qDebug() << "app: " << QCoreApplication::applicationName() ;
+  ////qDebug() << "Writing settings to: " << settings.fileName() ;
+  ////qDebug() << "DR PROBE bins path: " << _dr_probe_bin_path ;
   settings.beginGroup("DrProbe");
   settings.setValue("path",_dr_probe_bin_path);
   settings.setValue("celslc",_dr_probe_celslc_bin);
