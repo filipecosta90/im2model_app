@@ -66,6 +66,10 @@
 #include "gui_stream.hpp"
 #include "cv_image_table_frame.h"
 
+#include "settings.h"
+#include "ui_settings.h"
+
+
 namespace Ui {
   class MainWindow;
 }
@@ -74,6 +78,10 @@ class MainWindow : public QMainWindow {
   Q_OBJECT
   public:
     explicit MainWindow(QWidget *parent = 0);
+
+    bool set_dr_probe_path( QString path );
+
+    bool checkSettings();
 
     void loadFile(const QString &fileName);
     ~MainWindow();
@@ -104,6 +112,7 @@ class MainWindow : public QMainWindow {
     void open();
     bool save();
     bool saveAs();
+    void edit_preferences();
     void about();
     void documentWasModified();
 
@@ -117,7 +126,7 @@ signals:
     void createActions();
     void updateStatusBar();
     void create_box_options();
-    void readSettings();
+    bool readSettings();
     void writeSettings();
     bool maybeSave();
     bool saveFile(const QString &fileName);
@@ -132,13 +141,8 @@ signals:
     TreeModel *project_setup_image_fields_model;
     TreeModel *project_setup_crystalographic_fields_model;
     TreeModel *tdmap_simulation_setup_model;
-    QModelIndex project_setup_image_fields_model_index;
-    QString m_sSettingsFile;
 
-    QString _dr_probe_bin_path;
-    QString _dr_probe_celslc_bin;
-    QString _dr_probe_msa_bin;
-    QString _dr_probe_wavimg_bin;
+    QModelIndex project_setup_image_fields_model_index;
 
     /* Threads and workers */
     GuiSimOutUpdater *sim_tdmap_worker;
@@ -151,7 +155,16 @@ signals:
     /* Delegates */
     TreeItemFileDelegate *_load_file_delegate;
 
-
+    /* Settings */
+    QString _q_settings_fileName;
+    QString _dr_probe_bin_path;
+    QString _dr_probe_celslc_bin;
+    QString _dr_probe_msa_bin;
+    QString _dr_probe_wavimg_bin;
+    bool _flag_dr_probe_bin_path = false;
+   bool _flag_dr_probe_celslc_bin = false;
+   bool _flag_dr_probe_msa_bin = false;
+   bool _flag_dr_probe_wavimg_bin = false;
 };
 
 #endif // CONFIGWIN_H

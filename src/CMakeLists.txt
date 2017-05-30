@@ -78,6 +78,7 @@ if(build_gui)
   #
   #qt5_use_modules(configwin Core Gui Widgets)
   set(GUI_SOURCE_FILES
+    settings.cpp
     configwin.cpp
     im2model_gui.cpp
     treeitem.cpp

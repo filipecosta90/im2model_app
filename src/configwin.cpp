@@ -1,5 +1,8 @@
 #include "configwin.h"
 
+#include "settings.h"
+#include "ui_settings.h"
+
 #include <QFileDialog>
 #include <QFileSystemModel>
 #include <QTreeView>
@@ -12,8 +15,25 @@
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow) {
 
+
+  ui->setupUi(this);
+  ui->td_map_splitter->setStretchFactor(0,3);
+  ui->td_map_splitter->setStretchFactor(1,7);
+  ui->td_map_splitter->setStretchFactor(2,2);
+  createActions();
+  updateStatusBar();
+  setCurrentFile(QString());
+  setUnifiedTitleAndToolBarOnMac(true);
   _load_file_delegate = new TreeItemFileDelegate(this);
-  readSettings();
+
+
+  bool _settings_ok = readSettings();
+  while ( ! _settings_ok ){
+    edit_preferences();
+    _settings_ok = checkSettings();
+  }
+
+  std::cout << "SETTINGS OK " << _settings_ok << std::endl;
   connect(this, SIGNAL(experimental_image_filename_changed()), this, SLOT(update_full_experimental_image_frame()));
 
   connect(this, SIGNAL(simulated_grid_changed()), this, SLOT(update_simgrid_frame()));
@@ -25,15 +45,6 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
   _core_td_map->set_dr_probe_msa_execname( _dr_probe_msa_bin.toStdString() );
   _core_td_map->set_dr_probe_wavimg_execname( _dr_probe_wavimg_bin.toStdString() );
 
-  ui->setupUi(this);
-  ui->td_map_splitter->setStretchFactor(0,3);
-  ui->td_map_splitter->setStretchFactor(1,7);
-  ui->td_map_splitter->setStretchFactor(2,2);
-
-  createActions();
-  updateStatusBar();
-  setCurrentFile(QString());
-  setUnifiedTitleAndToolBarOnMac(true);
   create_box_options();
 
   /* TDMap simulation thread */
@@ -130,7 +141,7 @@ MainWindow::~MainWindow(){
 }
 
 bool MainWindow::update_qline_image_path( std::string fileName ){
-    ////qDebug()<<"Inside update_qline_image_path: " << fileName ;
+  ////qDebug()<<"Inside update_qline_image_path: " << fileName ;
   _core_image_crystal->set_experimental_image_path( fileName );
   const bool load_ok = _core_image_crystal->load_full_experimental_image();
   if( load_ok ){
@@ -140,7 +151,7 @@ bool MainWindow::update_qline_image_path( std::string fileName ){
 }
 
 void MainWindow::update_simgrid_frame(){
-    ////qDebug()<<" updating simgrid images";
+  ////qDebug()<<" updating simgrid images";
   std::vector< std::vector<cv::Mat> > _simulated_images_grid = _core_td_map->get_simulated_images_grid();
   this->ui->tdmap_table->set_simulated_images_grid( _simulated_images_grid );
 }
@@ -169,18 +180,18 @@ bool MainWindow::_was_document_modified(){
 }
 
 void   MainWindow::update_from_TDMap_sucess(){
-    ////qDebug()<<"tdmap thread signaled sucess " ;
-    ui->statusBar->showMessage(tr("Sucessfully runned TD-Map"), 2000);
+  ////qDebug()<<"tdmap thread signaled sucess " ;
+  ui->statusBar->showMessage(tr("Sucessfully runned TD-Map"), 2000);
   emit simulated_grid_changed();
 }
 
 void   MainWindow::update_from_TDMap_failure(){
-    ////qDebug()<<"tdmap thread signaled failure " ;
-    ui->statusBar->showMessage(tr("Error while running TD-Map"), 2000);
+  ////qDebug()<<"tdmap thread signaled failure " ;
+  ui->statusBar->showMessage(tr("Error while running TD-Map"), 2000);
 }
 
 void MainWindow::update_tdmap_sim_ostream(){
-    ////qDebug()<<"waiting for tdmap sim output " ;
+  ////qDebug()<<"waiting for tdmap sim output " ;
   ui->qTextBrowser_tdmap_simulation_output->setText(" ");
   std::string line;
   while(std::getline(_sim_tdmap_ostream_buffer, line)){
@@ -198,7 +209,7 @@ void MainWindow::on_qpush_run_tdmap_clicked(){
   ////qDebug()<< "Master thread " << QThread::currentThread() ;
   sim_tdmap_worker->requestTDMap();
 
-  }
+}
 
 void MainWindow::closeEvent(QCloseEvent *event)
 {
@@ -245,21 +256,43 @@ bool MainWindow::saveAs()
   return saveFile(dialog.selectedFiles().first());
 }
 
-void MainWindow::about()
-{
-  QMessageBox::about(this, tr("About Application"),
-      tr("The <b>Application</b> example demonstrates how to "
-        "write modern GUI applications using Qt, with a menu bar, "
-        "toolbars, and a status bar."));
+
+
+void MainWindow::edit_preferences(){
+  QSettings settings;
+  Settings dialog;
+  _q_settings_fileName = settings.fileName();
+  dialog.set_q_settings_fileName( _q_settings_fileName.toStdString() );
+  dialog.set_dr_probe_bin_path( _dr_probe_bin_path.toStdString() );
+  dialog.set_dr_probe_celslc_bin( _dr_probe_celslc_bin.toStdString() );
+  dialog.set_dr_probe_msa_bin( _dr_probe_msa_bin.toStdString() );
+  dialog.set_dr_probe_wavimg_bin( _dr_probe_wavimg_bin.toStdString() );
+  dialog.produce_settings_panel();
+  dialog.exec();
+  if ( dialog._is_save_preferences() ){
+    std::cout << "GOING TO SAVE PREFERENCES" << std::endl;
+    _dr_probe_bin_path = dialog.get_dr_probe_bin_path();
+    _dr_probe_celslc_bin = dialog.get_dr_probe_celslc_bin();
+    _dr_probe_msa_bin = dialog.get_dr_probe_msa_bin();
+    _dr_probe_wavimg_bin = dialog.get_dr_probe_wavimg_bin();
+    writeSettings();
+  }
+
 }
 
-void MainWindow::documentWasModified()
+void MainWindow::about()
 {
+  QMessageBox::about(this, tr("Im2Model"),
+      tr("<b>Im2Model</b> combines transmission electron microscopy, image correlation and matching procedures,"
+        "enabling the determination of a three-dimensional atomic structure based strictly on a single high-resolution experimental image."
+        "Partialy financiated as part of the protocol between UTAustin I Portugal - UTA-P."));
+}
+
+void MainWindow::documentWasModified(){
   // setWindowModified(textEdit->document()->isModified());
 }
 
-void MainWindow::createActions()
-{
+void MainWindow::createActions(){
   QMenu *fileMenu = ui->menuBar->addMenu(tr("&File"));
   //QToolBar *fileToolBar = addToolBar(tr("File"));
   const QIcon newIcon = QIcon::fromTheme("document-new", QIcon(":/Icons/MenuIconNew32"));
@@ -296,43 +329,69 @@ void MainWindow::createActions()
   exitAct->setStatusTip(tr("Exit the application"));
 
   QMenu *editMenu = ui->menuBar->addMenu(tr("&Edit"));
+  QAction* preferencesAct = editMenu->addAction(tr("&Preferences"), this, &MainWindow::edit_preferences);
+  //preferencesAct->setShortcuts(QKeySequence::UnknownKey);
+
+  editMenu->addAction(preferencesAct);
+
   QMenu *helpMenu = ui->menuBar->addMenu(tr("&Help"));
   QAction *aboutAct = helpMenu->addAction(tr("&About"), this, &MainWindow::about);
   aboutAct->setStatusTip(tr("Show the application's About box"));
 }
 
-void MainWindow::updateStatusBar()
-{
+void MainWindow::updateStatusBar(){
   ui->statusBar->showMessage(tr("Ready"));
 }
 
-void MainWindow::readSettings()
-{
-  QSettings settings;
-  ////qDebug() << "Reading settings from: " << settings.fileName() ;
+bool MainWindow::checkSettings(){
+  bool status = true;
+  status &= _flag_dr_probe_bin_path;
 
-  QStringList keys = settings.allKeys();
-
-  foreach (const QString &str, keys) {
-    ////qDebug()  << QString(" [%1] ").arg(str) ;
+  //if its defined lets check if exists
+  if( _flag_dr_probe_bin_path ){
+    bool dr_probe_path_exists = false;
+    boost::filesystem::path bin_dir( _dr_probe_bin_path.toStdString() );
+    if( boost::filesystem::is_directory( bin_dir ) ){
+      dr_probe_path_exists = true;
+    }
+    status &= dr_probe_path_exists;
   }
-  settings.beginGroup("DrProbe");
-  _dr_probe_bin_path = settings.value("path").toString();
-  _dr_probe_celslc_bin = settings.value("celslc").toString();
-  _dr_probe_msa_bin = settings.value("msa").toString();
-  _dr_probe_wavimg_bin = settings.value("wavimg").toString();
-  settings.endGroup();
-  ////qDebug() << "DR PROBE bin path: " << _dr_probe_bin_path ;
+
+  // check if the bins are not equal to ""
+  _flag_dr_probe_celslc_bin &= ( _dr_probe_celslc_bin == QString("") ) ? false : true;
+  _flag_dr_probe_msa_bin &= ( _dr_probe_msa_bin == QString("") ) ? false : true;
+  _flag_dr_probe_wavimg_bin &= ( _dr_probe_wavimg_bin == QString("") ) ? false : true;
+
+  status &= _flag_dr_probe_celslc_bin;
+  status &= _flag_dr_probe_msa_bin;
+  status &= _flag_dr_probe_wavimg_bin;
+
+  return status;
 }
 
-void MainWindow::writeSettings()
-{
-    QSettings settings;
+bool MainWindow::readSettings(){
+  QSettings settings;
 
-  ////qDebug() << "orginazation: " << QCoreApplication::organizationName() ;
-  ////qDebug() << "app: " << QCoreApplication::applicationName() ;
-  ////qDebug() << "Writing settings to: " << settings.fileName() ;
-  ////qDebug() << "DR PROBE bins path: " << _dr_probe_bin_path ;
+  settings.beginGroup("DrProbe");
+
+  _flag_dr_probe_bin_path =  (settings.childKeys().contains("path", Qt::CaseInsensitive)) ? true : false;
+  _flag_dr_probe_celslc_bin =  (settings.childKeys().contains("celslc", Qt::CaseInsensitive)) ? true : false;
+  _flag_dr_probe_msa_bin =  (settings.childKeys().contains("msa", Qt::CaseInsensitive)) ? true : false;
+  _flag_dr_probe_wavimg_bin =  (settings.childKeys().contains("wavimg", Qt::CaseInsensitive)) ? true : false;
+
+  _q_settings_fileName = settings.fileName();
+  _dr_probe_bin_path = settings.value("path","").toString();
+  _dr_probe_celslc_bin = settings.value("celslc","").toString();
+  _dr_probe_msa_bin = settings.value("msa","").toString();
+  _dr_probe_wavimg_bin = settings.value("wavimg","").toString();
+
+  settings.endGroup();
+
+  return checkSettings();
+}
+
+void MainWindow::writeSettings(){
+  QSettings settings;
   settings.beginGroup("DrProbe");
   settings.setValue("path",_dr_probe_bin_path);
   settings.setValue("celslc",_dr_probe_celslc_bin);
@@ -341,8 +400,7 @@ void MainWindow::writeSettings()
   settings.endGroup();
 }
 
-bool MainWindow::maybeSave()
-{
+bool MainWindow::maybeSave(){
   if ( ! _was_document_modified() ){
     return true;
   }
@@ -362,8 +420,7 @@ bool MainWindow::maybeSave()
   return true;
 }
 
-void MainWindow::loadFile(const QString &fileName)
-{
+void MainWindow::loadFile(const QString &fileName){
 
 #ifndef QT_NO_CURSOR
   QApplication::setOverrideCursor(Qt::WaitCursor);
@@ -393,8 +450,7 @@ void MainWindow::loadFile(const QString &fileName)
   ui->statusBar->showMessage(tr("File loaded"), 2000);
 }
 
-bool MainWindow::saveFile(const QString &fileName)
-{
+bool MainWindow::saveFile(const QString &fileName){
 
 #ifndef QT_NO_CURSOR
   QApplication::setOverrideCursor(Qt::WaitCursor);
@@ -424,8 +480,7 @@ bool MainWindow::saveFile(const QString &fileName)
   return true;
 }
 
-void MainWindow::setCurrentFile(const QString &fileName)
-{
+void MainWindow::setCurrentFile(const QString &fileName){
   curFile = fileName;
   // textEdit->document()->setModified(false);
   setWindowModified(false);
@@ -437,8 +492,7 @@ void MainWindow::setCurrentFile(const QString &fileName)
   this->setWindowFilePath(shownName);
 }
 
-QString MainWindow::strippedName(const QString &fullFileName)
-{
+QString MainWindow::strippedName(const QString &fullFileName){
   return QFileInfo(fullFileName).fileName();
 }
 
@@ -535,7 +589,6 @@ void MainWindow::create_box_options(){
 
   ui->qtree_view_project_setup_image->setModel(project_setup_image_fields_model);
   ui->qtree_view_project_setup_image->setItemDelegate( _load_file_delegate );
-
 
   /*************************
    * CRYSTALLOGRAPLY
@@ -824,4 +877,12 @@ void MainWindow::create_box_options(){
   for (int column = 0; column < supercell_model_refinement_model->columnCount(); ++column){
   ui->qtree_view_supercell_model_refinement_setup->resizeColumnToContents(column);
   }*/
+
+  // ui->qtree_view_project_setup_image->setModel(project_setup_image_fields_model);
+  // ui->qtree_view_project_setup_image->setItemDelegate( _load_file_delegate );
+}
+
+bool MainWindow::set_dr_probe_path( QString path ){
+  _dr_probe_bin_path = path;
+  return true;
 }

@@ -14,13 +14,11 @@ class CVImageWidget : public QWidget
     explicit CVImageWidget(QWidget *parent = 0) : QWidget(parent)
                                                   , scaleFactor(1)
   {
-    std::cout << "creating new cv image" << std::endl;
   }
     QSize sizeHint() const { return _qimage.size(); }
     QSize minimumSizeHint() const { return _qimage.size(); }
 
     void set_container_window_size( const int width , const int height ){
-      std::cout << "setting container window size w: " << width << " h: "<< height << std::endl;
       _container_window_width = width;
       _container_window_height = height;
     }
@@ -90,7 +88,6 @@ class CVImageWidget : public QWidget
         repaint();
       }
     }
-
   protected:
     void paintEvent(QPaintEvent* /*event*/) {
       // Display the image
