@@ -116,9 +116,11 @@ class Settings : public QDialog
     TreeItem* _preferences_dr_probe_celslc;
     TreeItem* _preferences_dr_probe_msa;
     TreeItem* _preferences_dr_probe_wavimg;
-
     TreeItem* _preferences_dr_probe_path;
     bool _save_preferences = false;
+
+    /* Delegates */
+    TreeItemFileDelegate *_tree_delegate;
 
 };
 

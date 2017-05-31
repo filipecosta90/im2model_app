@@ -8,8 +8,7 @@ Settings::Settings(QWidget *parent) :
   ui(new Ui::Settings)
 {
   ui->setupUi(this);
-
-
+  _tree_delegate = new TreeItemFileDelegate(this);
 }
 
 Settings::~Settings()
@@ -93,6 +92,8 @@ void Settings::produce_settings_panel(){
   QVector<bool> preferences_option_1_1_edit = {false,true};
   boost::function<bool(std::string)> preferences_option_function_1_1 ( boost::bind( &Settings::set_dr_probe_bin_path, this, _1 ) );
   _preferences_dr_probe_path = new TreeItem ( preferences_option_1_1 , preferences_option_function_1_1,  preferences_option_1_1_edit  );
+  _preferences_dr_probe_path->set_item_delegate_type( _delegate_FILE );
+
   preferences_dr_probe->insertChildren( _preferences_dr_probe_path );
 
   QVector<QVariant> preferences_option_1_2 = {"celslc execname",_dr_probe_celslc_bin};
@@ -115,9 +116,8 @@ void Settings::produce_settings_panel(){
 
   project_preferences_model = new TreeModel( preferences_root );
 
-  ui->qtree_view_project_project_preferences->setModel(project_preferences_model);
-  // ui->qtree_view_project_setup_image->setItemDelegate( _load_file_delegate );
-
+  ui->qtree_view_project_project_preferences->setModel( project_preferences_model );
+  ui->qtree_view_project_project_preferences->setItemDelegate( _tree_delegate );
   ui->qtree_view_project_project_preferences->expandAll();
-
+  ui->qtree_view_project_project_preferences->setEditTriggers(QAbstractItemView::AllEditTriggers);
 }

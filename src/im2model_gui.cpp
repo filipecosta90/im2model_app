@@ -21,7 +21,6 @@ int main(int argc, char *argv[])
 
   QApplication app(argc, argv);
 
-  //app.setOrganizationDomain("com.uminho");
   app.setOrganizationName("uminho");
   app.setApplicationName("Im2Model");
 

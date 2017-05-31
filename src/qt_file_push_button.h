@@ -10,6 +10,8 @@ class FilePushButton : public QPushButton
 
   public:
     FilePushButton( QWidget *parent = 0 );
+    FilePushButton( QString text , QWidget *parent = 0 );
+
     virtual ~FilePushButton() {}
 
     public slots:

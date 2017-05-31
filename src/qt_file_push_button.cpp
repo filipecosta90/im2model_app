@@ -1,8 +1,13 @@
 #include "qt_file_push_button.h"
 #include <iostream>
 
-FilePushButton::FilePushButton( QWidget *parent ):
-  QPushButton( parent )
+FilePushButton::FilePushButton( QString text, QWidget *parent ): QPushButton( text, parent )
+{
+  _button_parent = parent;
+  connect( this, SIGNAL( clicked()),this,SLOT( __click() ));
+}
+
+FilePushButton::FilePushButton( QWidget *parent ): QPushButton( parent )
 {
   _button_parent = parent;
   connect( this, SIGNAL( clicked()),this,SLOT( __click() ));

@@ -62,24 +62,43 @@ QWidget *TreeItemFileDelegate::createEditor( QWidget *parent, const QStyleOption
   TreeItem *item = static_cast<TreeItem*>(index.internalPointer());
   QWidget *editor = 0;
 
-  switch(item->get_item_delegate_type())
+  switch( item->get_item_delegate_type() )
   {
-    case _delegate_FILE  :
+    case _delegate_FILE :
       {
         editor = new QWidget(parent);
         QString value = index.model()->data(index, Qt::EditRole).toString();
         QHBoxLayout *layout = new QHBoxLayout( editor );
+        layout->setMargin(0);
+       // layout->setSpacing(0);
+        layout->setContentsMargins(0, 0, 0, 0);
+        QSizePolicy sizePol(QSizePolicy::Expanding,QSizePolicy::Expanding);
+
         QLineEdit *line = new QLineEdit( editor );
-        FilePushButton *button = new FilePushButton(parent);
-        editor->setLayout(layout);
+        line->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+        line->setContentsMargins(0,0,0,0);
+        line->setText(value);
+line->setVisible(true);
+
+        QString _button_text = "...";
+        FilePushButton *button = new FilePushButton(  _button_text,parent);
+        button->setFixedWidth( button->fontMetrics().width( " ... " ) );
+
         layout->addWidget(line);
         layout->addWidget(button);
-        layout->setContentsMargins(0, 0, 0, 0);
-        std::cout << " creating editor" << std::endl;
+
+        editor->setLayout(layout);
+        editor->setSizePolicy(sizePol);
+       // line->setMinimumHeight(editor->height());
+
+
+editor->setFocusProxy( line );
+
+
         connect(button, SIGNAL(onClick(QWidget*)), this, SLOT(get_filename_slot(QWidget*)));
         break;
       }
-    case _delegate_TEXT  :
+    case _delegate_TEXT :
       {
         editor = QItemDelegate::createEditor(parent,option,index);
         break;

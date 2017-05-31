@@ -15,7 +15,6 @@
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow) {
 
-
   ui->setupUi(this);
   ui->td_map_splitter->setStretchFactor(0,3);
   ui->td_map_splitter->setStretchFactor(1,7);
@@ -26,17 +25,11 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
   setUnifiedTitleAndToolBarOnMac(true);
   _load_file_delegate = new TreeItemFileDelegate(this);
 
-
   bool _settings_ok = readSettings();
   while ( ! _settings_ok ){
     edit_preferences();
     _settings_ok = checkSettings();
   }
-
-  std::cout << "SETTINGS OK " << _settings_ok << std::endl;
-  connect(this, SIGNAL(experimental_image_filename_changed()), this, SLOT(update_full_experimental_image_frame()));
-
-  connect(this, SIGNAL(simulated_grid_changed()), this, SLOT(update_simgrid_frame()));
 
   _core_image_crystal = new Image_Crystal();
   _core_td_map = new TDMap( _sim_tdmap_ostream_buffer, _core_image_crystal );
@@ -48,7 +41,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
   create_box_options();
 
   /* TDMap simulation thread */
-  _sim_tdmap_thread = new QThread(this);
+  _sim_tdmap_thread = new QThread( this );
   sim_tdmap_worker = new GuiSimOutUpdater( _core_td_map  );
 
   sim_tdmap_worker->moveToThread( _sim_tdmap_thread );
@@ -67,6 +60,9 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
   connect( ui->tdmap_table, SIGNAL(tdmap_best_match( int, int )), this, SLOT(update_tdmap_best_match(int,int)) );
   connect(ui->tdmap_table, SIGNAL(cellClicked(int , int )), this, SLOT(update_tdmap_current_selection(int,int)) );
+
+  connect(this, SIGNAL(experimental_image_filename_changed()), this, SLOT(update_full_experimental_image_frame()));
+  connect(this, SIGNAL(simulated_grid_changed()), this, SLOT(update_simgrid_frame()));
 
 }
 
@@ -277,7 +273,6 @@ void MainWindow::edit_preferences(){
     _dr_probe_wavimg_bin = dialog.get_dr_probe_wavimg_bin();
     writeSettings();
   }
-
 }
 
 void MainWindow::about()
@@ -589,6 +584,8 @@ void MainWindow::create_box_options(){
 
   ui->qtree_view_project_setup_image->setModel(project_setup_image_fields_model);
   ui->qtree_view_project_setup_image->setItemDelegate( _load_file_delegate );
+  //start editing after one click
+  ui->qtree_view_project_setup_image->setEditTriggers(QAbstractItemView::AllEditTriggers);
 
   /*************************
    * CRYSTALLOGRAPLY
@@ -695,6 +692,8 @@ void MainWindow::create_box_options(){
 
   ui->qtree_view_project_setup_crystallography->setModel(project_setup_crystalographic_fields_model);
   ui->qtree_view_project_setup_crystallography->setItemDelegate( _load_file_delegate );
+  //start editing after one click
+  ui->qtree_view_project_setup_crystallography->setEditTriggers(QAbstractItemView::AllEditTriggers);
 
   ui->qtree_view_project_setup_image->expandAll();
   ui->qtree_view_project_setup_crystallography->expandAll();
@@ -799,6 +798,8 @@ void MainWindow::create_box_options(){
   tdmap_simulation_setup_model = new TreeModel( tdmap_root );
 
   ui->qtree_view_tdmap_simulation_setup->setModel( tdmap_simulation_setup_model );
+  //start editing after one click
+ui->qtree_view_tdmap_simulation_setup->setEditTriggers(QAbstractItemView::AllEditTriggers);
 
   ui->qtree_view_tdmap_simulation_setup->expandAll();
   for (int column = 0; column < tdmap_simulation_setup_model->columnCount(); ++column){
