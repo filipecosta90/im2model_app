@@ -1,4 +1,4 @@
-﻿file(GLOB im2model_core_src 
+file(GLOB im2model_core_src 
   atom.hpp
   chem_database.hpp
   mc_scanner.hpp
@@ -62,6 +62,35 @@ if(WIN32)
 endif(WIN32)
 
 if(build_gui)
+
+
+  message(STATUS " GUI enabled. building command-line im2model, and gui_im2model" )
+  # Add folder where are supportive functions
+set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake" )
+message(STATUS "module path ${CMAKE_MODULE_PATH} " )
+
+  if (WIN32)
+    set (CMAKE_PREFIX_PATH "W:/ExtraSpaceInstall/Qt/5.9/msvc2017_64//")
+    Set (QT_MAKE_EXECUTABLE "D:/Qt/5.8/mingw53_32/bin/qmake.exe")
+    Set (CMAKE_BUILD_TYPE "Release")
+    Set (Qt5Core_DIR "W:/ExtraSpaceInstall/Qt/5.9/msvc2017_64/lib/cmake/Qt5Core")
+    Set (Qt5Concurrent_DIR "W:/ExtraSpaceInstall/Qt/5.9/msvc2017_64/lib/cmake/Qt5Concurrent")
+    Set (Qt5Core_DIR "W:/ExtraSpaceInstall/Qt/5.9/msvc2017_64/lib/cmake/Qt5Core")
+    Set (Qt5Gui_DIR "W:/ExtraSpaceInstall/Qt/5.9/msvc2017_64/lib/cmake/Qt5Gui")
+    Set (Qt5Test_DIR "W:/ExtraSpaceInstall/Qt/5.9/msvc2017_64/lib/cmake/Qt5Test")
+    Set (Qt5Widgets_DIR "W:/ExtraSpaceInstall/Qt/5.9/msvc2017_64/lib/cmake/Qt5Widgets")
+    Set (Qt5OpenGL_DIR "W:/ExtraSpaceInstall/Qt/5.9/msvc2017_64/lib/cmake/Qt5OpenGL")
+  endif (WIN32)
+
+  # Include Qt basic functions
+  include(QtCommon)
+
+  # Find the QtWidgets library
+  message(STATUS "Building the Qt5 version")
+  find_package(Qt5Core 5.2 REQUIRED)
+  find_package(Qt5Gui REQUIRED)
+  find_package(Qt5Widgets REQUIRED)
+
   # Set PROJECT_VERSION_PATCH and PROJECT_VERSION_TWEAK to 0 if not present, needed by add_project_meta
 
   # Running the meta-object compiler for QObject derived classes is similar to resources, 
@@ -72,16 +101,9 @@ if(build_gui)
   # Those files contain a bunch of functions which are needed for the Qt meta-object system. 
   # These are stand-alone .cpp files that you usually never have to look at.
 
-  #QT5_WRAP_CPP(tst_hdr_moc configwin.h treemodel.h )
-  #QT5_WRAP_UI(tst_form_hdr configwin.ui)
-
-  #
-  #qt5_use_modules(configwin Core Gui Widgets)
-
   set(GUI_SOURCE_FILES
     settings.cpp
     configwin.cpp
-    im2model_gui.cpp
     treeitem.cpp
     treemodel.cpp
     treeitem_file_delegate.hpp
@@ -119,11 +141,21 @@ if(build_gui)
   set(RESOURCE_FILES ../im2model.qrc)
 
   message("META FILES TO INCLUDE: ${META_FILES_TO_INCLUDE}")
+message(" OS BUNDLE: ${OS_BUNDLE}")
 
-  add_executable( ${PROJECT_NAME} ${OS_BUNDLE}  ${GUI_SOURCE_FILES} ${META_FILES_TO_INCLUDE} ${RESOURCE_FILES}  ${im2model_core_src} mc_driver.cpp ${FLEX_mc_lexer_OUTPUTS} ${BISON_mc_parser_OUTPUTS} ${DR_PROBE_RESOURCES} )
+
+
+  add_executable( ${PROJECT_NAME}
+${OS_BUNDLE}
+im2model_gui.cpp
+${GUI_SOURCE_FILES}
+${META_FILES_TO_INCLUDE}
+${RESOURCE_FILES}  ${im2model_core_src} mc_driver.cpp ${FLEX_mc_lexer_OUTPUTS} ${BISON_mc_parser_OUTPUTS} ${DR_PROBE_RESOURCES}
+)
   # Use the Widgets module from Qt 5.
   qt5_use_modules( ${PROJECT_NAME} Core Gui Widgets )
   SET_SOURCE_FILES_PROPERTIES(${DR_PROBE_RESOURCES} PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
+
 else(build_gui)
   add_executable( ${PROJECT_NAME} im2model.cpp ${im2model_core_src} mc_driver.cpp ${FLEX_mc_lexer_OUTPUTS} ${BISON_mc_parser_OUTPUTS} ${DR_PROBE_RESOURCES} )
 endif(build_gui)
@@ -187,4 +219,3 @@ fixup_bundle( \"${APPS}\" \"\" \"${DIRS}\")
 " COMPONENT Runtime)
 
 include(CPack)
-

@@ -4,7 +4,10 @@ cmake_minimum_required(VERSION 3.6.2)
 set (CMAKE_CXX_COMPILER "clang++" )
 set (CMAKE_CXX_STANDARD 14)
 
-project( Im2Model )
+project( Im2Model VERSION 1.0 LANGUAGES CXX )
+
+  set(CMAKE_INCLUDE_CURRENT_DIR ON)
+
 
 set(BUILD_SHARED_LIBS ON CACHE BOOL "" FORCE)
 ADD_DEFINITIONS(-DOpenCV_STATIC=OFF )
@@ -20,41 +23,6 @@ message(STATUS "Found Dr Probe Resources: ${DR_PROBE_RESOURCES}")
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
 option(build_gui "build_gui" OFF)
-
-if(build_gui)
-  message(STATUS "GUI enabled. building command-line im2model, and gui_im2model")
-  # Add folder where are supportive functions
-  set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
-  set(CMAKE_INCLUDE_CURRENT_DIR ON)
-
-  if (WIN32)
-    set (CMAKE_PREFIX_PATH "W:/ExtraSpaceInstall/Qt/5.9/msvc2017_64//")
-    Set (QT_MAKE_EXECUTABLE "D:/Qt/5.8/mingw53_32/bin/qmake.exe")
-    Set (CMAKE_BUILD_TYPE "Release")
-    Set (Qt5Core_DIR "W:/ExtraSpaceInstall/Qt/5.9/msvc2017_64/lib/cmake/Qt5Core")
-    Set (Qt5Concurrent_DIR "W:/ExtraSpaceInstall/Qt/5.9/msvc2017_64/lib/cmake/Qt5Concurrent")
-    Set (Qt5Core_DIR "W:/ExtraSpaceInstall/Qt/5.9/msvc2017_64/lib/cmake/Qt5Core")
-    Set (Qt5Gui_DIR "W:/ExtraSpaceInstall/Qt/5.9/msvc2017_64/lib/cmake/Qt5Gui")
-    Set (Qt5Test_DIR "W:/ExtraSpaceInstall/Qt/5.9/msvc2017_64/lib/cmake/Qt5Test")
-    Set (Qt5Widgets_DIR "W:/ExtraSpaceInstall/Qt/5.9/msvc2017_64/lib/cmake/Qt5Widgets")
-    Set (Qt5OpenGL_DIR "W:/ExtraSpaceInstall/Qt/5.9/msvc2017_64/lib/cmake/Qt5OpenGL")
-  endif (WIN32)
-
-  # Include Qt basic functions
-  include(QtCommon)
-
-  # Instruct CMake to run moc automatically when needed.
-  #  set(CMAKE_AUTOMOC ON)
-  #set(CMAKE_INCLUDE_CURRENT_DIR ON)
-  # Find the QtWidgets library
-  message(STATUS "Building the Qt5 version")
-  find_package(Qt5Core 5.2 REQUIRED)
-  find_package(Qt5Gui REQUIRED)
-  find_package(Qt5Widgets REQUIRED)
-
-else(build_gui)
-  message(STATUS "GUI disabled. building CLI im2model")
-endif(build_gui)
 
 if(APPLE)
   message(STATUS "Adding Apple definition")
