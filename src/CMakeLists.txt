@@ -66,8 +66,8 @@ if(build_gui)
 
   message(STATUS " GUI enabled. building command-line im2model, and gui_im2model" )
   # Add folder where are supportive functions
-set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake" )
-message(STATUS "module path ${CMAKE_MODULE_PATH} " )
+  set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake" )
+  message(STATUS "module path ${CMAKE_MODULE_PATH} " )
 
   if (WIN32)
     set (CMAKE_PREFIX_PATH "W:/ExtraSpaceInstall/Qt/5.9/msvc2017_64//")
@@ -141,20 +141,22 @@ message(STATUS "module path ${CMAKE_MODULE_PATH} " )
   set(RESOURCE_FILES ../im2model.qrc)
 
   message("META FILES TO INCLUDE: ${META_FILES_TO_INCLUDE}")
-message(" OS BUNDLE: ${OS_BUNDLE}")
+  message(" OS BUNDLE: ${OS_BUNDLE}")
 
 
 
   add_executable( ${PROJECT_NAME}
-${OS_BUNDLE}
-im2model_gui.cpp
-${GUI_SOURCE_FILES}
-${META_FILES_TO_INCLUDE}
-${RESOURCE_FILES}  ${im2model_core_src} mc_driver.cpp ${FLEX_mc_lexer_OUTPUTS} ${BISON_mc_parser_OUTPUTS} ${DR_PROBE_RESOURCES}
-)
+    ${OS_BUNDLE}
+    im2model_gui.cpp
+    ${GUI_SOURCE_FILES}
+    ${META_FILES_TO_INCLUDE}
+    ${RESOURCE_FILES}  ${im2model_core_src} mc_driver.cpp ${FLEX_mc_lexer_OUTPUTS} ${BISON_mc_parser_OUTPUTS} ${DR_PROBE_RESOURCES}
+    )
   # Use the Widgets module from Qt 5.
   qt5_use_modules( ${PROJECT_NAME} Core Gui Widgets )
   SET_SOURCE_FILES_PROPERTIES(${DR_PROBE_RESOURCES} PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
+
+  fix_win_compiler()
 
 else(build_gui)
   add_executable( ${PROJECT_NAME} im2model.cpp ${im2model_core_src} mc_driver.cpp ${FLEX_mc_lexer_OUTPUTS} ${BISON_mc_parser_OUTPUTS} ${DR_PROBE_RESOURCES} )
