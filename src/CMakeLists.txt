@@ -72,7 +72,7 @@ if(build_gui)
   # Those files contain a bunch of functions which are needed for the Qt meta-object system. 
   # These are stand-alone .cpp files that you usually never have to look at.
 
-  #  QT5_WRAP_CPP(tst_hdr_moc configwin.h treemodel.h )
+  #QT5_WRAP_CPP(tst_hdr_moc configwin.h treemodel.h )
   #QT5_WRAP_UI(tst_form_hdr configwin.ui)
 
   #
@@ -120,37 +120,31 @@ if(build_gui)
 
   message("META FILES TO INCLUDE: ${META_FILES_TO_INCLUDE}")
 
-  add_executable( Im2Model ${OS_BUNDLE}  ${GUI_SOURCE_FILES} ${META_FILES_TO_INCLUDE} ${RESOURCE_FILES}  ${im2model_core_src} mc_driver.cpp ${FLEX_mc_lexer_OUTPUTS} ${BISON_mc_parser_OUTPUTS} ${DR_PROBE_RESOURCES} )
+  add_executable( ${PROJECT_NAME} ${OS_BUNDLE}  ${GUI_SOURCE_FILES} ${META_FILES_TO_INCLUDE} ${RESOURCE_FILES}  ${im2model_core_src} mc_driver.cpp ${FLEX_mc_lexer_OUTPUTS} ${BISON_mc_parser_OUTPUTS} ${DR_PROBE_RESOURCES} )
   # Use the Widgets module from Qt 5.
-  qt5_use_modules( Im2Model Core Gui Widgets )
+  qt5_use_modules( ${PROJECT_NAME} Core Gui Widgets )
   SET_SOURCE_FILES_PROPERTIES(${DR_PROBE_RESOURCES} PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
+else(build_gui)
+  add_executable( ${PROJECT_NAME} im2model.cpp ${im2model_core_src} mc_driver.cpp ${FLEX_mc_lexer_OUTPUTS} ${BISON_mc_parser_OUTPUTS} ${DR_PROBE_RESOURCES} )
 endif(build_gui)
 
 # Creates app.exe with the listed sources (main.cxx)
 # Adds sources to the Solution Explorer
-add_executable( im2model_cli im2model.cpp ${im2model_core_src} mc_driver.cpp ${FLEX_mc_lexer_OUTPUTS} ${BISON_mc_parser_OUTPUTS} ${DR_PROBE_RESOURCES} )
+
 
 # Properties->Linker->Input->Additional Dependencies
-target_link_libraries( im2model_cli ${OpenCV_LIBS} ${Boost_LIBRARIES} )
-if(build_gui)
-  target_link_libraries( Im2Model ${OpenCV_LIBS} ${Boost_LIBRARIES} )
-  fix_win_compiler()
-endif(build_gui)
+target_link_libraries( ${PROJECT_NAME} ${OpenCV_LIBS} ${Boost_LIBRARIES} )
 
 if(APPLE)
-
   #  set_target_properties( app PROPERTIES  CXX_INCLUDE_WHAT_YOU_USE /Users/filipeoliveira/Downloads/include-what-you-use/bin/include-what-you-use )
 endif(APPLE)
 
 # Creates a folder "executables" and adds target 
 # project (app.vcproj) under it
-set_property(TARGET im2model_cli PROPERTY FOLDER "executables")
+set_property(TARGET ${PROJECT_NAME} PROPERTY FOLDER "executables")
 
 # Properties->General->Output Directory
-set_target_properties( im2model_cli PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR})
-if(build_gui)
-  set_target_properties( Im2Model PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR})
-endif(build_gui)
+set_target_properties( ${PROJECT_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR})
 
 set(CMAKE_INSTALL_PREFIX ${CMAKE_CURRENT_BINARY_DIR} )
 
@@ -159,25 +153,17 @@ set(CMAKE_INSTALL_PREFIX ${CMAKE_CURRENT_BINARY_DIR} )
 #--------------------------------------------------------------------------------
 # Install the QtTest application, on Apple, the bundle is at the root of the
 # install tree, and on other platforms it'll go into the bin directory.
-INSTALL(TARGETS im2model_cli 
+INSTALL(TARGETS ${PROJECT_NAME} 
   BUNDLE DESTINATION . COMPONENT Runtime
   RUNTIME DESTINATION ${PROJECT_SOURCE_DIR}/bin COMPONENT Runtime
   )
-
-if(build_gui)
-  install (
-    TARGETS Im2Model 
-    RUNTIME DESTINATION ${PROJECT_SOURCE_DIR}/bin
-    BUNDLE DESTINATION ${PROJECT_SOURCE_DIR}/bin    
-    )
-endif(build_gui)
 
 #--------------------------------------------------------------------------------
 # Now the installation stuff below
 #--------------------------------------------------------------------------------
 
 IF(WIN32)
-  SET(APPS "${PROJECT_SOURCE_DIR}/bin/Im2Model.exe")
+  SET(APPS "${PROJECT_SOURCE_DIR}/bin/${PROJECT_NAME}.exe")
 ENDIF(WIN32)
 IF(APPLE)
 ENDIF(APPLE)

@@ -20,6 +20,7 @@ message(STATUS "Found Dr Probe Resources: ${DR_PROBE_RESOURCES}")
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
 option(build_gui "build_gui" OFF)
+
 if(build_gui)
   message(STATUS "GUI enabled. building command-line im2model, and gui_im2model")
   # Add folder where are supportive functions
@@ -52,7 +53,7 @@ if(build_gui)
   find_package(Qt5Widgets REQUIRED)
 
 else(build_gui)
-  message(STATUS "GUI disabled. building only command-line im2model")
+  message(STATUS "GUI disabled. building CLI im2model")
 endif(build_gui)
 
 if(APPLE)
@@ -64,14 +65,10 @@ if (WIN32)
   ## visual studio
   message(STATUS "Setting MSVC flags")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /EHc /W3 /MTd /std:c++14")
-
-
-
 else()
   message(status "Setting GCC flags")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fexceptions -g -Wall -std=c++14")
 endif(WIN32)
-
 
 find_package(OpenCV  3.0.0 REQUIRED)
 if(WIN32)
