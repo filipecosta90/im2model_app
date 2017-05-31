@@ -1,5 +1,3 @@
-
-#include <QtGui>
 #include "gui_tdmap_cell.h"
 
 TDMap_Cell::TDMap_Cell(){

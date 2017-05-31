@@ -1,12 +1,10 @@
-#include <QtGui>
+#include "gui_tdmap_table.h"
 
 #include "gui_tdmap_cell.h"
-#include "gui_tdmap_table.h"
 #include "cv_tdmap_cell_image_frame_delegate.h"
 #include "cv_tdmap_cell_image_frame.h"
 #include "cv_image_cell_widget.h"
 #include "cv_image_frame.h"
-
 
 #include "td_map.hpp"
 

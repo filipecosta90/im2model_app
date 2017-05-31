@@ -1,54 +1,36 @@
 #ifndef __CELSLC_PRM_H__
 #define __CELSLC_PRM_H__
 
+/** START BOOST **/
+#include <boost/process.hpp>
+#include <boost/thread.hpp>
+#include <boost/filesystem.hpp>
+#include <boost/filesystem/operations.hpp>                // for directory_iterator
+#include <boost/filesystem/path.hpp>                      // for path, operator==, oper...
+/** END BOOST **/
+
+#include <opencv2/core/hal/interface.h>                   // for CV_8UC1
+#include <opencv2/imgcodecs/imgcodecs_c.h>                // for ::CV_LOAD_I...
+#include <opencv2/core.hpp>                               // for RNG
+#include <opencv2/core/cvstd.inl.hpp>                     // for String::String
+#include <opencv2/core/mat.hpp>                           // for Mat
+#include <opencv2/core/mat.inl.hpp>                       // for Mat::Mat
+#include <opencv2/core/operations.hpp>                    // for RNG::RNG
+#include <opencv2/core/types.hpp>                         // for Rect, Point3d
+#include <opencv2/imgcodecs.hpp>                          // for imread
+
 #include <iosfwd>  // for string
 #include <string>                              // for char_traits, basic_string
 #include <map>     // for map
 #include <vector>  // for vector
-
-#include <boost/filesystem/operations.hpp>                // for directory_iterator
-#include <boost/filesystem/path.hpp>                      // for path, operator==, oper...
-#include <boost/process.hpp>
-#include <boost/process/async_pipe.hpp>
-
-#include <boost/algorithm/string/predicate.hpp>
-
-#include <boost/process/args.hpp>
-#include <boost/process/exe.hpp>
-#include <boost/process/error.hpp>
-#include <boost/process/io.hpp>
-#include <boost/process/child.hpp>
-#include <boost/filesystem/operations.hpp>                // for directory_iterator
-#include <boost/filesystem/path.hpp>                      // for path, operator==, oper...
-#include <boost/process.hpp>
-#include <boost/array.hpp>
-#include <boost/filesystem/operations.hpp>                // for directory_iterator
-#include <boost/filesystem/path.hpp>                      // for path, operator==, oper...
-#include <boost/process.hpp>
-#include <boost/array.hpp>
-
-#include <boost/process/error.hpp>
-#include <boost/process/async.hpp>
-#include <boost/process/io.hpp>
-#include <boost/process/child.hpp>
-
-#include <boost/thread.hpp>
-#include <future>
-
-#include <boost/system/error_code.hpp>
-
-#include <boost/algorithm/string/predicate.hpp>
-
-#include <boost/process/error.hpp>
-#include <boost/process/io.hpp>
-#include <boost/process/args.hpp>
-#include <boost/process/child.hpp>
-#include <boost/process/async_pipe.hpp>
+#include <cassert>                             // for assert
+#include <cstdio>                              // for perror
+#include <iostream>                            // for operator<<, basic_ostream
+#include <fstream>
+#include <string>                              // for allocator, char_traits
+#include <utility>                             // for pair
+#include <vector>                              // for vector, vector<>::iter...
 #include <system_error>
-
-#include <boost/filesystem.hpp>
-
-
 
 class CELSLC_prm {
   private:

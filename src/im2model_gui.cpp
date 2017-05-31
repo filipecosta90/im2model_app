@@ -1,7 +1,7 @@
-
-#define WIN32_LEAN_AND_MEAN
-
-#include <winsock2.h> 
+/* BEGIN BOOST */
+#include <boost/filesystem/operations.hpp>                // for directory_iterator
+#include <boost/filesystem/path.hpp>                      // for path, operator==, oper...
+/* END BOOST */
 
 #include "configwin.h"
 #include <iostream>
@@ -15,8 +15,6 @@
 #include <QCommandLineOption>
 #include <QAction>
 
-#include <boost/filesystem/operations.hpp>                // for directory_iterator
-#include <boost/filesystem/path.hpp>                      // for path, operator==, oper...
 
 int main(int argc, char *argv[])
 {

@@ -14,46 +14,11 @@
 #include <opencv2/core/types.hpp>                         // for Rect, Point3d
 #include <opencv2/imgcodecs.hpp>                          // for imread
 
+/** START BOOST **/
 #include <boost/process.hpp>
-#include <boost/bind.hpp>
 #include <boost/filesystem/operations.hpp>                // for directory_iterator
 #include <boost/filesystem/path.hpp>                      // for path, operator==, oper...
-#include <boost/process.hpp>
-#include <boost/asio.hpp>
-#include <boost/array.hpp>
-#include <boost/asio/buffer.hpp>
-
-
-#include <boost/filesystem/operations.hpp>                // for directory_iterator
-#include <boost/filesystem/path.hpp>                      // for path, operator==, oper...
-#include <boost/process.hpp>
-#include <boost/asio.hpp>
-#include <boost/array.hpp>
-#include <boost/asio/buffer.hpp>
-
-#include <boost/process/error.hpp>
-#include <boost/process/async.hpp>
-#include <boost/process/io.hpp>
-#include <boost/process/child.hpp>
-
-
-#include <boost/system/error_code.hpp>
-
-#include <boost/asio.hpp>
-#include <boost/algorithm/string/predicate.hpp>
-
-#include <boost/process/error.hpp>
-#include <boost/process/io.hpp>
-#include <boost/process/args.hpp>
-#include <boost/process/child.hpp>
-#include <boost/process/async_pipe.hpp>
-#include <system_error>
-
-#include <boost/filesystem.hpp>
-
-#include <boost/thread.hpp>
-#include <future>
-
+/** END BOOST **/
 
 #include "image_crystal.hpp"
 #include "td_map.hpp"
@@ -65,7 +30,6 @@
 #include "gui_sim_updater.hpp"
 #include "gui_stream.hpp"
 #include "cv_image_table_frame.h"
-
 #include "settings.h"
 #include "ui_settings.h"
 

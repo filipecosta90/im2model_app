@@ -1,7 +1,5 @@
 #include "image_crystal.hpp"
-#include <iostream>
-#include <boost/lexical_cast.hpp>
-#include <boost/filesystem.hpp>
+
 
 Image_Crystal::Image_Crystal(){
   _roi_defined = false;

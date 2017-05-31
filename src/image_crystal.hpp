@@ -1,6 +1,17 @@
 #ifndef __IMAGE_CRYSTAL_H__ 
 #define __IMAGE_CRYSTAL_H__
 
+/* BEGIN BOOST */
+#include <boost/process.hpp>
+#include <boost/filesystem/operations.hpp>                // for directory_iterator
+#include <boost/filesystem/path.hpp>                      // for path, operator==, oper...
+#include <boost/iterator/iterator_facade.hpp>             // for iterator_facade_base
+#include <boost/thread.hpp>                               // for thread
+#include <boost/tokenizer.hpp>
+#include <boost/lexical_cast.hpp>
+/* END BOOST */
+
+
 #include <iosfwd>                    // for string
 #include <iostream>
 

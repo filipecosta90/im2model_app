@@ -7,19 +7,6 @@
 
 #include <QTextEdit>
 
-
-
-#include <iostream>
-#include <boost/iostreams/stream.hpp>
-#include <boost/iostreams/output_sequence.hpp>
-#include <boost/iostreams/device/null.hpp>
-#include <boost/iostreams/stream.hpp>
-#include <boost/ref.hpp>
-#include <boost/iostreams/device/file_descriptor.hpp>
-#include <boost/iostreams/stream.hpp>
-#include <boost/iostreams/filtering_stream.hpp>
-#include <boost/process/pipe.hpp>
-
 class Q_GUI_Stream : public std::basic_streambuf<char>
 {
 public:

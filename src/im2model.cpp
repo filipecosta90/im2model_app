@@ -1,6 +1,4 @@
-#define WIN32_LEAN_AND_MEAN
-#include <winsock2.h> 
-
+/* BEGIN BOOST */
 #include <boost/process.hpp>
 #include <boost/filesystem/operations.hpp>                // for directory_iterator
 #include <boost/filesystem/path.hpp>                      // for path, operator==, oper...
@@ -8,18 +6,7 @@
 #include <boost/thread.hpp>                               // for thread
 #include <boost/tokenizer.hpp>
 #include <boost/program_options.hpp>                      // for error
-
-
-#include <boost/process/error.hpp>
-#include <boost/process/async.hpp>
-#include <boost/process/io.hpp>
-#include <boost/process/child.hpp>
-
-#include <boost/thread.hpp>
-#include <future>
-
-
-#include <boost/algorithm/string/predicate.hpp>
+/* END BOOST */
 
 #include <cassert>                                        // for assert
 #include <cmath>                                          // for fabs, round

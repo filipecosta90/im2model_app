@@ -1,15 +1,19 @@
 #ifndef TREEITEM_H
 #define TREEITEM_H
 
+/** START QT **/
 #include <QList>
 #include <QVariant>
 #include <QVector>
 #include <QAbstractItemModel>
 #include <QModelIndex>
+/** END QT **/
 
+/** START BOOST **/
 #include <boost/function.hpp>
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/xml_parser.hpp>
+/** END BOOST **/
 
 Q_DECLARE_METATYPE(std::string)
 

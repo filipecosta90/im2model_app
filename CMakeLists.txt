@@ -26,18 +26,21 @@ if(build_gui)
   set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
   set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
-set (CMAKE_PREFIX_PATH "W:/ExtraSpaceInstall/Qt/5.9/msvc2017_64//")
- Set (QT_MAKE_EXECUTABLE "D:/Qt/5.8/mingw53_32/bin/qmake.exe")
- Set (CMAKE_BUILD_TYPE "Release")
- Set (Qt5Core_DIR "W:/ExtraSpaceInstall/Qt/5.9/msvc2017_64/lib/cmake/Qt5Core")
- Set (Qt5Concurrent_DIR "W:/ExtraSpaceInstall/Qt/5.9/msvc2017_64/lib/cmake/Qt5Concurrent")
- Set (Qt5Core_DIR "W:/ExtraSpaceInstall/Qt/5.9/msvc2017_64/lib/cmake/Qt5Core")
- Set (Qt5Gui_DIR "W:/ExtraSpaceInstall/Qt/5.9/msvc2017_64/lib/cmake/Qt5Gui")
- Set (Qt5Test_DIR "W:/ExtraSpaceInstall/Qt/5.9/msvc2017_64/lib/cmake/Qt5Test")
- Set (Qt5Widgets_DIR "W:/ExtraSpaceInstall/Qt/5.9/msvc2017_64/lib/cmake/Qt5Widgets")
- Set (Qt5OpenGL_DIR "W:/ExtraSpaceInstall/Qt/5.9/msvc2017_64/lib/cmake/Qt5OpenGL")
+  if (WIN32)
+    set (CMAKE_PREFIX_PATH "W:/ExtraSpaceInstall/Qt/5.9/msvc2017_64//")
+    Set (QT_MAKE_EXECUTABLE "D:/Qt/5.8/mingw53_32/bin/qmake.exe")
+    Set (CMAKE_BUILD_TYPE "Release")
+    Set (Qt5Core_DIR "W:/ExtraSpaceInstall/Qt/5.9/msvc2017_64/lib/cmake/Qt5Core")
+    Set (Qt5Concurrent_DIR "W:/ExtraSpaceInstall/Qt/5.9/msvc2017_64/lib/cmake/Qt5Concurrent")
+    Set (Qt5Core_DIR "W:/ExtraSpaceInstall/Qt/5.9/msvc2017_64/lib/cmake/Qt5Core")
+    Set (Qt5Gui_DIR "W:/ExtraSpaceInstall/Qt/5.9/msvc2017_64/lib/cmake/Qt5Gui")
+    Set (Qt5Test_DIR "W:/ExtraSpaceInstall/Qt/5.9/msvc2017_64/lib/cmake/Qt5Test")
+    Set (Qt5Widgets_DIR "W:/ExtraSpaceInstall/Qt/5.9/msvc2017_64/lib/cmake/Qt5Widgets")
+    Set (Qt5OpenGL_DIR "W:/ExtraSpaceInstall/Qt/5.9/msvc2017_64/lib/cmake/Qt5OpenGL")
+  endif (WIN32)
 
-  
+  # Include Qt basic functions
+  include(QtCommon)
 
   # Instruct CMake to run moc automatically when needed.
   #  set(CMAKE_AUTOMOC ON)
@@ -47,9 +50,6 @@ set (CMAKE_PREFIX_PATH "W:/ExtraSpaceInstall/Qt/5.9/msvc2017_64//")
   find_package(Qt5Core 5.2 REQUIRED)
   find_package(Qt5Gui REQUIRED)
   find_package(Qt5Widgets REQUIRED)
-
-# Include Qt basic functions
-  include(QtCommon)
 
 else(build_gui)
   message(STATUS "GUI disabled. building only command-line im2model")
@@ -82,11 +82,11 @@ SET (Boost_DEBUG TRUE)
 set (Boost_USE_STATIC_LIBS false)
 set (Boost_USE_MULTITHREADED ON)
 
-  add_definitions( -DBOOST_ALL_NO_LIB )
-  ADD_DEFINITIONS(-DBOOST_LIB_DIAGNOSTIC )
-  # force dynamic linking for all libraries
-  add_definitions( -DBOOST_ALL_DYN_LINK )
- 
+add_definitions( -DBOOST_ALL_NO_LIB )
+ADD_DEFINITIONS(-DBOOST_LIB_DIAGNOSTIC )
+# force dynamic linking for all libraries
+add_definitions( -DBOOST_ALL_DYN_LINK )
+
 if (WIN32)
   message(STATUS "Setting Boost additional flags for Windows")
   # disable autolinking in boost

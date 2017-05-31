@@ -1,13 +1,3 @@
-#include <QWidget>
-#include <QtWidgets>
-#include <QAbstractItemView>
-#include <QImage>
-#include <QPainter>
-#include <opencv2/opencv.hpp>
-#include <QFrame>
-#include <QBoxLayout>
-
-
 #include "cv_tdmap_cell_image_frame_delegate.h"
 #include "cv_tdmap_cell_image_frame.h"
 #include "cv_image_frame.h"

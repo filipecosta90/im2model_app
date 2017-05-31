@@ -1,5 +1,6 @@
 
 #pragma once
+
 #include <QFileDialog>
 #include <QFileSystemModel>
 #include <QTreeView>
@@ -8,6 +9,7 @@
 #include <QThread>
 #include <QDebug>
 #include <iostream>
+
 #include "td_map.hpp"
 #include "gui_stream.hpp"
 

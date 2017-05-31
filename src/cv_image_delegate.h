@@ -1,7 +1,6 @@
 #ifndef __CV_IMAGE_DELEGATE_H__
 #define __CV_IMAGE_DELEGATE_H__
 
-
 #include <QItemDelegate>
 #include <QModelIndex>
 #include <QObject>

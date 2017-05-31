@@ -1,47 +1,17 @@
 #ifndef __TD_MAP_H__
 #define __TD_MAP_H__
 
+/** START BOOST **/
+#include <boost/process.hpp>
+#include <boost/lexical_cast.hpp>
+#include <boost/filesystem.hpp>
+#include <boost/filesystem/operations.hpp>                // for directory_iterator
+#include <boost/filesystem/path.hpp>                      // for path, operator==, oper...
+/** END BOOST **/
+
+
 #include <vector>
 #include <string>
-#include <boost/filesystem/operations.hpp>                // for directory_iterator
-#include <boost/filesystem/path.hpp>                      // for path, operator==, oper...
-#include <boost/process.hpp>
-#include <boost/array.hpp>
-
-#include <boost/process/error.hpp>
-#include <boost/process/async.hpp>
-#include <boost/process/io.hpp>
-#include <boost/process/child.hpp>
-
-#include <boost/thread.hpp>
-#include <future>
-
-#include <boost/filesystem/operations.hpp>                // for directory_iterator
-#include <boost/filesystem/path.hpp>                      // for path, operator==, oper...
-#include <boost/process.hpp>
-#include <boost/array.hpp>
-#include <boost/process/error.hpp>
-#include <boost/process/async.hpp>
-#include <boost/process/io.hpp>
-#include <boost/process/child.hpp>
-#include <boost/system/error_code.hpp>
-
-#include <boost/algorithm/string/predicate.hpp>
-
-#include <boost/process/error.hpp>
-#include <boost/process/io.hpp>
-#include <boost/process/args.hpp>
-#include <boost/process/child.hpp>
-#include <boost/process/async_pipe.hpp>
-#include <system_error>
-
-#include <boost/filesystem.hpp>
-
-#include <boost/thread.hpp>
-#include <future>
-
-
-
 
 #include "global_def.hpp"
 #include "celslc_prm.hpp"

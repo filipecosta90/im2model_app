@@ -1,6 +1,11 @@
 #ifndef __MCDRIVER_HPP__
 #define __MCDRIVER_HPP__ 1
 
+/* BEGIN BOOST */
+#include <boost/lexical_cast.hpp>
+#include <boost/filesystem.hpp>
+/* END BOOST */
+
 #include <istream>        // for string, istream, ostream
 
 #include "mc_scanner.hpp"

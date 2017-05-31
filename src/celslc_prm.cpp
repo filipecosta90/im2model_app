@@ -1,49 +1,5 @@
 #include "celslc_prm.hpp"
 
-#include <cassert>                             // for assert
-#include <cstdio>                              // for perror
-#include <iostream>                            // for operator<<, basic_ostream
-#include <fstream>
-#include <string>                              // for allocator, char_traits
-#include <utility>                             // for pair
-#include <vector>                              // for vector, vector<>::iter...
-#include <system_error>
-
-#include <cstdlib>
-#if defined(BOOST_POSIX_API)
-#   include <sys/wait.h>
-#endif
-
-#include <boost/process/error.hpp>
-#include <boost/process/io.hpp>
-#include <boost/process/args.hpp>
-#include <boost/process/child.hpp>
-#include <boost/process/group.hpp>
-#include <boost/process/system.hpp>
-#include <boost/iostreams/device/file_descriptor.hpp>
-#include <boost/iostreams/stream.hpp>
-
-#include <boost/filesystem/operations.hpp>     // for directory_iterator
-#include <boost/filesystem/path.hpp>           // for path, operator==, oper...
-#include <boost/iterator/iterator_facade.hpp>  // for iterator_facade_base
-#include <boost/thread.hpp>      // for thread
-
-#include <boost/system/error_code.hpp>
-
-#include <opencv2/core/hal/interface.h>        // for CV_64F
-#include <opencv2/core/mat.hpp>                // for Mat
-#include <opencv2/core/mat.inl.hpp>            // for Mat::Mat, Mat::at, Mat...
-#include <opencv2/core/types.hpp>              // for Point3d
-
-#include <iostream>
-#include <boost/iostreams/stream.hpp>
-#include <boost/iostreams/output_sequence.hpp>
-#include <boost/iostreams/device/null.hpp>
-#include <boost/iostreams/stream.hpp>
-#include <boost/ref.hpp>
-#include <boost/iostreams/filtering_stream.hpp>
-
-
 static const std::string SLI_EXTENSION = ".sli";
 
 CELSLC_prm::CELSLC_prm( boost::process::ipstream &async_io_buffer_out ) : _io_pipe_out(async_io_buffer_out)

@@ -9,7 +9,6 @@
 #include <QBoxLayout>
 
 #include <QStyledItemDelegate>
-#include <QtWidgets>
 
 #include "cv_tdmap_cell_image_frame.h"
 #include "cv_image_frame.h"

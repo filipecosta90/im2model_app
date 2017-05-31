@@ -1,14 +1,6 @@
-#include <QWidget>
-#include <QtWidgets>
-#include <QAbstractItemView>
-#include <QImage>
-#include <QPainter>
-#include <opencv2/opencv.hpp>
-#include <QFrame>
-#include <QBoxLayout>
+#include "cv_tdmap_cell_image_frame.h"
 
 #include "cv_image_widget.h"
-#include "cv_tdmap_cell_image_frame.h"
 
 CvTDMapImageFrame::CvTDMapImageFrame( ) {
     image_widget = new CVImageWidget();

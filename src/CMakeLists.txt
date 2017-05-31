@@ -106,16 +106,13 @@ if(build_gui)
     gui_stream.hpp
     )
 
-
   # Set PROJECT_VERSION_PATCH and PROJECT_VERSION_TWEAK to 0 if not present, needed by add_project_meta
   fix_project_version()
-
 
   # Set additional project information
   set(COMPANY "uminho")
   set(COPYRIGHT "Copyright (c) 2017 Dr. Alberto José Proença, Dr. Daniel G. Stroppa, Filipe Oliveira. All rights reserved.")
   set(IDENTIFIER "com.uminho.Im2Model")
-
 
   add_project_meta(META_FILES_TO_INCLUDE)
 
@@ -137,7 +134,7 @@ add_executable( im2model_cli im2model.cpp ${im2model_core_src} mc_driver.cpp ${F
 target_link_libraries( im2model_cli ${OpenCV_LIBS} ${Boost_LIBRARIES} )
 if(build_gui)
   target_link_libraries( Im2Model ${OpenCV_LIBS} ${Boost_LIBRARIES} )
-fix_win_compiler()
+  fix_win_compiler()
 endif(build_gui)
 
 if(APPLE)
@@ -174,7 +171,6 @@ if(build_gui)
     BUNDLE DESTINATION ${PROJECT_SOURCE_DIR}/bin    
     )
 endif(build_gui)
-
 
 #--------------------------------------------------------------------------------
 # Now the installation stuff below

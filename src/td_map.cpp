@@ -1,8 +1,4 @@
 #include "td_map.hpp"
-#include <boost/lexical_cast.hpp>
-#include <boost/process.hpp>
-#include <boost/array.hpp>
-#include <string>
 
 TDMap::TDMap( boost::process::ipstream &ostream_buffer, Image_Crystal* image_crystal_ptr ) : _sim_tdmap_ostream_buffer( ostream_buffer ) {
   _core_image_crystal_ptr = image_crystal_ptr;
@@ -306,9 +302,6 @@ bool  TDMap::prepare_celslc_parameters(){
     _tdmap_celslc_parameters->set_ht_accelaration_voltage( ht_accelaration_voltage );
     _tdmap_celslc_parameters->set_dwf_switch( dwf_switch );
     _tdmap_celslc_parameters->set_abs_switch( abs_switch );
-    if( _flag_sim_tdmap_ostream ){
-        _tdmap_celslc_parameters->set_run_ostream( _sim_tdmap_ostream );
-    }
     _flag_tdmap_celslc_parameters = true;
   }
   return _flag_tdmap_celslc_parameters;

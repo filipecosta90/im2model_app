@@ -1,6 +1,15 @@
 #ifndef __WAVIMG_PRM_H__
 #define __WAVIMG_PRM_H__
 
+/* BEGIN BOOST */
+#include <boost/process.hpp>
+#include <boost/filesystem/operations.hpp>                // for directory_iterator
+#include <boost/filesystem/path.hpp>                      // for path, operator==, oper...
+#include <boost/iterator/iterator_facade.hpp>             // for iterator_facade_base
+#include <boost/thread.hpp>                               // for thread
+/* END BOOST */
+
+#include <fstream>                             // for basic_ostream, operator<<
 #include <iosfwd>  // for string
 #include <string>  // for string
 #include <vector>  // for vector

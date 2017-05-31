@@ -1,14 +1,5 @@
 #include "wavimg_prm.hpp"
 
-#include <boost/process.hpp>
-#include <boost/filesystem/operations.hpp>                // for directory_iterator
-#include <boost/filesystem/path.hpp>                      // for path, operator==, oper...
-#include <boost/iterator/iterator_facade.hpp>             // for iterator_facade_base
-#include <boost/thread.hpp>                               // for thread
-
-#include <fstream>                             // for basic_ostream, operator<<
-#include <vector>                              // for allocator, vector
-
 static const std::string DAT_EXTENSION = ".dat";
 
 WAVIMG_prm::WAVIMG_prm()

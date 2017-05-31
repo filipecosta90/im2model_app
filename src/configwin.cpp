@@ -1,18 +1,5 @@
 #include "configwin.h"
 
-#include "settings.h"
-#include "ui_settings.h"
-
-#include <QFileDialog>
-#include <QFileSystemModel>
-#include <QTreeView>
-#include <QFile>
-#include <QtWidgets>
-
-#include <boost/filesystem.hpp>
-#include <boost/range/iterator_range.hpp>
-#include <QDebug>
-
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow) {
 
   ui->setupUi(this);
@@ -257,6 +244,7 @@ bool MainWindow::saveAs()
 void MainWindow::edit_preferences(){
   QSettings settings;
   Settings dialog;
+  dialog.setWindowTitle ( "Configurations panel" );
   _q_settings_fileName = settings.fileName();
   dialog.set_q_settings_fileName( _q_settings_fileName.toStdString() );
   dialog.set_dr_probe_bin_path( _dr_probe_bin_path.toStdString() );
