@@ -1,5 +1,5 @@
-#ifndef __SUPER_CELL_H__
-#define __SUPER_CELL_H__
+#ifndef _SUPER_CELL_H_
+#define _SUPER_CELL_H_
 
 /* BEGIN BOOST */
 #include <boost/iostreams/device/mapped_file.hpp> // for mmap
@@ -36,7 +36,6 @@
 #include <opencv2/core/matx.hpp>     // for Vec4d
 #include <opencv2/core/types.hpp>    // for Point3d, Point, Rect, Point2d
 
-#include "edge.hpp"
 #include "unit_cell.hpp"
 
 class Super_Cell {

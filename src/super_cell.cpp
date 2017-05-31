@@ -1,5 +1,7 @@
 #include "super_cell.hpp"
 
+#include "edge.hpp"
+
   template<typename Cont, typename It>
 auto ToggleIndices(Cont &cont, It beg, It end) -> decltype(std::end(cont))
 {
