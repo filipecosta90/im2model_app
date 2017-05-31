@@ -86,10 +86,6 @@ CELSLC_prm::CELSLC_prm( boost::process::ipstream &async_io_buffer_out ) : _io_pi
   log_std_err = false;
 }
 
-boost::asio::streambuf& CELSLC_prm::get_streambuf(){
-  //return _io_buffer_out;
-}
-
 bool CELSLC_prm::_is_bin_path_defined(){
   return _flag_bin_path;
 }
@@ -492,10 +488,6 @@ bool CELSLC_prm::call_boost_bin(  ){
   return result;
 }
 
-bool CELSLC_prm::set_run_ostream(std::ostream *stream){
-  run_ostream = stream;
-  _flag_run_ostream = true;
-}
 
 bool CELSLC_prm::prepare_nz_simulated_partitions_from_ssc_prm(){
   bool result = false;  

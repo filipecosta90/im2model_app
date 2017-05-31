@@ -11,7 +11,6 @@
 #include <boost/process.hpp>
 #include <boost/process/async_pipe.hpp>
 
-#include <boost/asio.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 
 #include <boost/process/args.hpp>
@@ -22,15 +21,11 @@
 #include <boost/filesystem/operations.hpp>                // for directory_iterator
 #include <boost/filesystem/path.hpp>                      // for path, operator==, oper...
 #include <boost/process.hpp>
-#include <boost/asio.hpp>
 #include <boost/array.hpp>
-#include <boost/asio/buffer.hpp>
 #include <boost/filesystem/operations.hpp>                // for directory_iterator
 #include <boost/filesystem/path.hpp>                      // for path, operator==, oper...
 #include <boost/process.hpp>
-#include <boost/asio.hpp>
 #include <boost/array.hpp>
-#include <boost/asio/buffer.hpp>
 
 #include <boost/process/error.hpp>
 #include <boost/process/async.hpp>
@@ -42,7 +37,6 @@
 
 #include <boost/system/error_code.hpp>
 
-#include <boost/asio.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 
 #include <boost/process/error.hpp>
@@ -124,10 +118,6 @@ class CELSLC_prm {
 
   public:
     boost::process::ipstream& get_io_pipe_out(){ return _io_pipe_out; }
-
-    // boost::asio::streambuf& _io_buffer_out;
-
-    boost::asio::streambuf& get_streambuf();
 
     CELSLC_prm( boost::process::ipstream& async_io_buffer_out );
 

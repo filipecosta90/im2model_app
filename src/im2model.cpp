@@ -1,3 +1,6 @@
+#define WIN32_LEAN_AND_MEAN
+#include <winsock2.h> 
+
 #include <boost/process.hpp>
 #include <boost/filesystem/operations.hpp>                // for directory_iterator
 #include <boost/filesystem/path.hpp>                      // for path, operator==, oper...
@@ -16,7 +19,6 @@
 #include <future>
 
 
-#include <boost/asio.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 
 #include <cassert>                                        // for assert

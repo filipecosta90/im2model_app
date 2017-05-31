@@ -6,9 +6,7 @@
 #include <boost/filesystem/operations.hpp>                // for directory_iterator
 #include <boost/filesystem/path.hpp>                      // for path, operator==, oper...
 #include <boost/process.hpp>
-#include <boost/asio.hpp>
 #include <boost/array.hpp>
-#include <boost/asio/buffer.hpp>
 
 #include <boost/process/error.hpp>
 #include <boost/process/async.hpp>
@@ -21,18 +19,13 @@
 #include <boost/filesystem/operations.hpp>                // for directory_iterator
 #include <boost/filesystem/path.hpp>                      // for path, operator==, oper...
 #include <boost/process.hpp>
-#include <boost/asio.hpp>
 #include <boost/array.hpp>
-#include <boost/asio/buffer.hpp>
-
 #include <boost/process/error.hpp>
 #include <boost/process/async.hpp>
 #include <boost/process/io.hpp>
 #include <boost/process/child.hpp>
-
 #include <boost/system/error_code.hpp>
 
-#include <boost/asio.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 
 #include <boost/process/error.hpp>
@@ -222,7 +215,6 @@ class TDMap {
     /** others **/
     bool prepare_ZA_UV();
 
-    boost::asio::streambuf& get_tdmap_streambuf();
     void set_sim_tdmap_ostream(  std::ostream* stream );
     /*
      * PREPARATION  METHODS

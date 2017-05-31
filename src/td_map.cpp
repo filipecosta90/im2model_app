@@ -1,7 +1,6 @@
 #include "td_map.hpp"
 #include <boost/lexical_cast.hpp>
 #include <boost/process.hpp>
-#include <boost/asio.hpp>
 #include <boost/array.hpp>
 #include <string>
 
@@ -75,10 +74,6 @@ bool TDMap::set_number_slices_to_load_from_nz_simulated_partitions(){
     status = true;
   }
   return status;
-}
-
-boost::asio::streambuf& TDMap::get_tdmap_streambuf(){
-    return _tdmap_celslc_parameters->get_streambuf();
 }
 
 bool TDMap::calculate_simulated_image_sampling_rate_and_size(){
