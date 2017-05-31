@@ -810,8 +810,6 @@ ui->qtree_view_tdmap_simulation_setup->setEditTriggers(QAbstractItemView::AllEdi
   ui->tdmap_table->connect_thickness_range_number_samples_changes(  thickness_range_number_samples, 1 );
   ui->tdmap_table->connect_defocus_range_number_samples_changes(  defocus_range_number_samples, 1 );
 
-
-
   /*
      simulation_parameters << tr(" [] Import fixed values from refinement?");
      simulation_parameters << tr("Advanced options");

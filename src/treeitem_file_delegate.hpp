@@ -2,6 +2,7 @@
 #define FILEDELEGATE_H
 
 #include <QItemDelegate>
+#include <QStyledItemDelegate>
 #include <QModelIndex>
 #include <QObject>
 #include <Qsize>
@@ -15,10 +16,12 @@
 #include "treeitem.h"
 #include "treemodel.h"
 
-class TreeItemFileDelegate : public QItemDelegate {
+class TreeItemFileDelegate : public QStyledItemDelegate {
   Q_OBJECT
   public:
     explicit TreeItemFileDelegate( QObject *parent = 0 );
+
+    void paint(QPainter * painter, const QStyleOptionViewItem & option, const QModelIndex & index) const;
 
     QWidget *createEditor(QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &index) const;
 

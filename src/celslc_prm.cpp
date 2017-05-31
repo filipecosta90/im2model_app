@@ -280,8 +280,10 @@ int CELSLC_prm::get_nz_simulated_partitions( ){
 }
 
 int CELSLC_prm::get_slice_number_from_nm_floor( double goal_thickness_nm ){
+
   assert( nz_simulated_partitions >= 1 );
   std::cout << "vec size: " <<  slice_params_nm_slice_vec.size() << " nz " << nz_simulated_partitions << std::endl;
+
   assert( slice_params_nm_slice_vec.size() == nz_simulated_partitions );
   double accumulated_thickness = 0.0f;
   int slice_pos = 1;
@@ -296,8 +298,10 @@ int CELSLC_prm::get_slice_number_from_nm_floor( double goal_thickness_nm ){
 }
 
 int CELSLC_prm::get_slice_number_from_nm_ceil( double goal_thickness_nm ){
+
   assert( nz_simulated_partitions >= 1 );
   assert( slice_params_nm_slice_vec.size() == nz_simulated_partitions );
+
   double accumulated_thickness = 0.0f;
   int slice_pos = 1;
   for ( 
@@ -323,7 +327,11 @@ bool CELSLC_prm::update_nz_simulated_partitions_from_prm(){
   bool result = false;  
   if( auto_equidistant_slices_switch || auto_non_equidistant_slices_switch ){
     std::stringstream input_prm_stream;
-    input_prm_stream << slc_file_name_prefix << ".prm"; 
+     boost::filesystem::path dir (full_path_runned_bin);
+     boost::filesystem::path file ( slc_file_name_prefix + ".prm");
+    boost::filesystem::path full_path = dir / file;
+
+    input_prm_stream << full_path.string() ;
 
     std::ifstream infile;
     infile.open ( input_prm_stream.str() , std::ifstream::in);
@@ -483,11 +491,15 @@ bool CELSLC_prm::call_boost_bin(  ){
       result = c.exit_code();
 
     }
+    if (result == 0 ){
+    boost::filesystem::path full_path( boost::filesystem::current_path() );
+    full_path_runned_bin = full_path.string();
     if( auto_equidistant_slices_switch || auto_non_equidistant_slices_switch ){
       update_nz_simulated_partitions_from_prm();
     }
     runned_bin = true;
     result = true;
+    }
   }
   return result;
 }
@@ -499,8 +511,14 @@ bool CELSLC_prm::set_run_ostream(std::ostream *stream){
 
 bool CELSLC_prm::prepare_nz_simulated_partitions_from_ssc_prm(){
   bool result = false;  
+
   std::stringstream input_prm_stream;
-  input_prm_stream << slc_file_name_prefix << ".prm"; 
+   boost::filesystem::path dir (full_path_runned_bin);
+   boost::filesystem::path file ( slc_file_name_prefix + ".prm");
+  boost::filesystem::path full_path = dir / file;
+
+  input_prm_stream << full_path.string() ;
+
   std::ifstream infile;
   infile.open ( input_prm_stream.str() , std::ifstream::in);
   if (infile.is_open()) {

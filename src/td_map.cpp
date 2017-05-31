@@ -48,9 +48,9 @@ TDMap::TDMap( boost::process::ipstream &ostream_buffer, Image_Crystal* image_cry
 
 bool TDMap::prepare_ZA_UV(){
   /*
-     const cv::Point3d zone_axis_vector_uvw = _core_image_crystal_ptr->get_zone_axis_vector_uvw();
-     const cv::Point3d upward_vector_hkl = _core_image_crystal_ptr->get_upward_vector_hkl();
-     */
+  const cv::Point3d zone_axis_vector_uvw = _core_image_crystal_ptr->get_zone_axis_vector_uvw();
+  const cv::Point3d upward_vector_hkl = _core_image_crystal_ptr->get_upward_vector_hkl();
+  */
   return true;
 }
 
@@ -146,6 +146,7 @@ bool TDMap::calculate_thickness_range_upper_bound_slice_from_nm(){
 }
 
 bool TDMap::calculate_thickness_range_lower_bound_slice_from_nm(){
+
   bool result = false;
   if ( _is_thickness_range_lower_bound_defined() ){
     slices_lower_bound = _tdmap_celslc_parameters->get_slice_number_from_nm_ceil( nm_lower_bound );
