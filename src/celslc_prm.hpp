@@ -78,6 +78,8 @@ class CELSLC_prm {
 
     // runnable execv info
     bool runned_bin;
+    std::string full_path_runned_bin;
+
     bool ssc_runned_bin;
     std::string bin_path;
     bool _flag_bin_path = false;

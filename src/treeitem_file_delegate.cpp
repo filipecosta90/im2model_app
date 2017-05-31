@@ -53,9 +53,29 @@
 #include "treeitem_file_delegate.hpp"
 #include <iostream>
 
-TreeItemFileDelegate::TreeItemFileDelegate( QObject *parent ) : QItemDelegate(parent){
+TreeItemFileDelegate::TreeItemFileDelegate( QObject *parent ) : QStyledItemDelegate(parent){
 
 }
+
+void TreeItemFileDelegate::paint(QPainter * painter, const QStyleOptionViewItem & option, const QModelIndex & index) const
+{
+  TreeItem *item = static_cast<TreeItem*>(index.internalPointer());
+  switch( item->get_item_delegate_type() )
+  {
+    case _delegate_FILE :
+      {
+      QStyledItemDelegate::paint( painter, option,  index);
+      break;
+      }
+    case _delegate_TEXT :
+      {
+      QStyledItemDelegate::paint( painter, option,  index);
+        break;
+      }
+  }
+
+}
+
 
 QWidget *TreeItemFileDelegate::createEditor( QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &index ) const{
 
@@ -70,15 +90,17 @@ QWidget *TreeItemFileDelegate::createEditor( QWidget *parent, const QStyleOption
         QString value = index.model()->data(index, Qt::EditRole).toString();
         QHBoxLayout *layout = new QHBoxLayout( editor );
         layout->setMargin(0);
-       // layout->setSpacing(0);
+        layout->setAlignment(Qt::AlignRight);
+        // layout->setSpacing(0);
         layout->setContentsMargins(0, 0, 0, 0);
         QSizePolicy sizePol(QSizePolicy::Expanding,QSizePolicy::Expanding);
+
 
         QLineEdit *line = new QLineEdit( editor );
         line->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
         line->setContentsMargins(0,0,0,0);
         line->setText(value);
-line->setVisible(true);
+        line->setVisible(true);
 
         QString _button_text = "...";
         FilePushButton *button = new FilePushButton(  _button_text,parent);
@@ -89,10 +111,10 @@ line->setVisible(true);
 
         editor->setLayout(layout);
         editor->setSizePolicy(sizePol);
-       // line->setMinimumHeight(editor->height());
+        // line->setMinimumHeight(editor->height());
 
 
-editor->setFocusProxy( line );
+        editor->setFocusProxy( line );
 
 
         connect(button, SIGNAL(onClick(QWidget*)), this, SLOT(get_filename_slot(QWidget*)));
@@ -100,7 +122,7 @@ editor->setFocusProxy( line );
       }
     case _delegate_TEXT :
       {
-        editor = QItemDelegate::createEditor(parent,option,index);
+        editor = QStyledItemDelegate::createEditor(parent,option,index);
         break;
       }
   }
@@ -113,14 +135,17 @@ void TreeItemFileDelegate::setEditorData(QWidget *editor, const QModelIndex &ind
   {
     case _delegate_FILE  :
       {
+
         QLineEdit* line = editor->findChild<QLineEdit*>();
         QString value = index.model()->data(index, Qt::EditRole).toString();
         line->setText(value);
+        QStyledItemDelegate::setEditorData(editor,index);
+
         break;
       }
     case _delegate_TEXT  :
       {
-        QItemDelegate::setEditorData(editor,index);
+        QStyledItemDelegate::setEditorData(editor,index);
         break;
       }
   }
@@ -139,7 +164,7 @@ void TreeItemFileDelegate::setModelData(QWidget *editor, QAbstractItemModel *mod
       }
     case _delegate_TEXT  :
       {
-        QItemDelegate::setModelData(editor,model,index);
+        QStyledItemDelegate::setModelData(editor,model,index);
         break;
       }
   }
@@ -156,7 +181,7 @@ void TreeItemFileDelegate::updateEditorGeometry(QWidget *editor, const QStyleOpt
       }
     case _delegate_TEXT  :
       {
-        QItemDelegate::updateEditorGeometry(editor,option,index);
+        QStyledItemDelegate::updateEditorGeometry(editor,option,index);
         break;
       }
   }
