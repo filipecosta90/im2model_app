@@ -41,7 +41,6 @@ bool Settings::set_dr_probe_msa_bin( std::string bin ){
 bool Settings::set_dr_probe_wavimg_bin( std::string bin ){
   _dr_probe_wavimg_bin  = QString::fromStdString(bin);
   return true;
-
 }
 
 QString Settings::get_dr_probe_bin_path(){

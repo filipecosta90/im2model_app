@@ -329,10 +329,18 @@ void MainWindow::updateStatusBar(){
 bool MainWindow::checkSettings(){
   bool status = true;
   status &= _flag_dr_probe_bin_path;
+  bool dr_probe_path_exists = false;
+  bool _temp_flag_dr_probe_celslc_bin = _flag_dr_probe_celslc_bin;
+  bool _temp_flag_dr_probe_msa_bin = _flag_dr_probe_msa_bin;
+  bool _temp_flag_dr_probe_wavimg_bin = _flag_dr_probe_wavimg_bin;
+
+  std::cout << " _flag_dr_probe_celslc_bin " << _flag_dr_probe_celslc_bin << std::endl;
+  std::cout << " _flag_dr_probe_msa_bin " << _flag_dr_probe_msa_bin << std::endl;
+  std::cout << " _flag_dr_probe_wavimg_bin " << _flag_dr_probe_wavimg_bin << std::endl;
+  std::cout << " _flag_dr_probe_bin_path " << _flag_dr_probe_bin_path << std::endl;
 
   //if its defined lets check if exists
   if( _flag_dr_probe_bin_path ){
-    bool dr_probe_path_exists = false;
     boost::filesystem::path bin_dir( _dr_probe_bin_path.toStdString() );
     if( boost::filesystem::is_directory( bin_dir ) ){
       dr_probe_path_exists = true;
@@ -341,14 +349,19 @@ bool MainWindow::checkSettings(){
   }
 
   // check if the bins are not equal to ""
-  _flag_dr_probe_celslc_bin &= ( _dr_probe_celslc_bin == QString("") ) ? false : true;
-  _flag_dr_probe_msa_bin &= ( _dr_probe_msa_bin == QString("") ) ? false : true;
-  _flag_dr_probe_wavimg_bin &= ( _dr_probe_wavimg_bin == QString("") ) ? false : true;
+  _temp_flag_dr_probe_celslc_bin &= ( _dr_probe_celslc_bin == QString("") ) ? false : true;
+  _temp_flag_dr_probe_msa_bin &= ( _dr_probe_msa_bin == QString("") ) ? false : true;
+  _temp_flag_dr_probe_wavimg_bin &= ( _dr_probe_wavimg_bin == QString("") ) ? false : true;
 
-  status &= _flag_dr_probe_celslc_bin;
-  status &= _flag_dr_probe_msa_bin;
-  status &= _flag_dr_probe_wavimg_bin;
+  status &= _temp_flag_dr_probe_celslc_bin;
+  status &= _temp_flag_dr_probe_msa_bin;
+  status &= _temp_flag_dr_probe_wavimg_bin;
 
+  std::cout << " _flag_dr_probe_celslc_bin " << _temp_flag_dr_probe_celslc_bin << std::endl;
+  std::cout << " _flag_dr_probe_msa_bin " << _temp_flag_dr_probe_msa_bin << std::endl;
+  std::cout << " _flag_dr_probe_wavimg_bin " << _temp_flag_dr_probe_wavimg_bin << std::endl;
+  std::cout << " _flag_dr_probe_bin_path " << _flag_dr_probe_bin_path << std::endl;
+  std::cout << " dr_probe_path_exists " << dr_probe_path_exists << std::endl;
   return status;
 }
 
@@ -787,7 +800,7 @@ void MainWindow::create_box_options(){
 
   ui->qtree_view_tdmap_simulation_setup->setModel( tdmap_simulation_setup_model );
   //start editing after one click
-ui->qtree_view_tdmap_simulation_setup->setEditTriggers(QAbstractItemView::AllEditTriggers);
+  ui->qtree_view_tdmap_simulation_setup->setEditTriggers(QAbstractItemView::AllEditTriggers);
 
   ui->qtree_view_tdmap_simulation_setup->expandAll();
   for (int column = 0; column < tdmap_simulation_setup_model->columnCount(); ++column){
