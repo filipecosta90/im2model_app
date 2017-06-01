@@ -6,51 +6,75 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
   ui->td_map_splitter->setStretchFactor(0,3);
   ui->td_map_splitter->setStretchFactor(1,7);
   ui->td_map_splitter->setStretchFactor(2,2);
+
+
   createActions();
   updateStatusBar();
   setCurrentFile(QString());
   setUnifiedTitleAndToolBarOnMac(true);
   _load_file_delegate = new TreeItemFileDelegate(this);
-
-  bool _settings_ok = readSettings();
-  while ( ! _settings_ok ){
-    edit_preferences();
-    _settings_ok = checkSettings();
+  _settings_ok = readSettings();
+  if( ! _settings_ok ){
+    _settings_ok = maybeSetPreferences();
   }
+  if ( !_settings_ok ){
+    _failed_initialization = true;
 
-  _core_image_crystal = new Image_Crystal();
-  _core_td_map = new TDMap( _sim_tdmap_ostream_buffer, _core_image_crystal );
-  _core_td_map->set_dr_probe_bin_path( _dr_probe_bin_path.toStdString() );
-  _core_td_map->set_dr_probe_celslc_execname( _dr_probe_celslc_bin.toStdString() );
-  _core_td_map->set_dr_probe_msa_execname( _dr_probe_msa_bin.toStdString() );
-  _core_td_map->set_dr_probe_wavimg_execname( _dr_probe_wavimg_bin.toStdString() );
+  }
+  else{
+    _core_image_crystal = new Image_Crystal();
+    _core_td_map = new TDMap( _sim_tdmap_ostream_buffer, _core_image_crystal );
+    _core_td_map->set_dr_probe_bin_path( _dr_probe_bin_path.toStdString() );
+    _core_td_map->set_dr_probe_celslc_execname( _dr_probe_celslc_bin.toStdString() );
+    _core_td_map->set_dr_probe_msa_execname( _dr_probe_msa_bin.toStdString() );
+    _core_td_map->set_dr_probe_wavimg_execname( _dr_probe_wavimg_bin.toStdString() );
 
-  create_box_options();
+    create_box_options();
 
-  /* TDMap simulation thread */
-  _sim_tdmap_thread = new QThread( this );
-  sim_tdmap_worker = new GuiSimOutUpdater( _core_td_map  );
+    /* TDMap simulation thread */
+    _sim_tdmap_thread = new QThread( this );
+    sim_tdmap_worker = new GuiSimOutUpdater( _core_td_map  );
 
-  sim_tdmap_worker->moveToThread( _sim_tdmap_thread );
+    sim_tdmap_worker->moveToThread( _sim_tdmap_thread );
 
-  // will only start thread when needed
-  connect(sim_tdmap_worker, SIGNAL(TDMap_request()), _sim_tdmap_thread, SLOT(start()));
-  connect(_sim_tdmap_thread, SIGNAL(started()), this, SLOT(update_tdmap_sim_ostream()));
-  connect(_sim_tdmap_thread, SIGNAL(started()), sim_tdmap_worker, SLOT(newTDMapSim()));
-
-
-  connect(sim_tdmap_worker, SIGNAL(TDMap_sucess()), this, SLOT(update_from_TDMap_sucess()));
-  connect(sim_tdmap_worker, SIGNAL(TDMap_failure()), this, SLOT(update_from_TDMap_failure()));
-  // will quit thread after work done
-  connect(sim_tdmap_worker, SIGNAL(finished()), _sim_tdmap_thread, SLOT(quit()), Qt::DirectConnection);
+    // will only start thread when needed
+    connect(sim_tdmap_worker, SIGNAL(TDMap_request()), _sim_tdmap_thread, SLOT(start()));
+    connect(_sim_tdmap_thread, SIGNAL(started()), this, SLOT(update_tdmap_sim_ostream()));
+    connect(_sim_tdmap_thread, SIGNAL(started()), sim_tdmap_worker, SLOT(newTDMapSim()));
 
 
-  connect( ui->tdmap_table, SIGNAL(tdmap_best_match( int, int )), this, SLOT(update_tdmap_best_match(int,int)) );
-  connect(ui->tdmap_table, SIGNAL(cellClicked(int , int )), this, SLOT(update_tdmap_current_selection(int,int)) );
+    connect(sim_tdmap_worker, SIGNAL(TDMap_sucess()), this, SLOT(update_from_TDMap_sucess()));
+    connect(sim_tdmap_worker, SIGNAL(TDMap_failure()), this, SLOT(update_from_TDMap_failure()));
+    // will quit thread after work done
+    connect(sim_tdmap_worker, SIGNAL(finished()), _sim_tdmap_thread, SLOT(quit()), Qt::DirectConnection);
 
-  connect(this, SIGNAL(experimental_image_filename_changed()), this, SLOT(update_full_experimental_image_frame()));
-  connect(this, SIGNAL(simulated_grid_changed()), this, SLOT(update_simgrid_frame()));
 
+    connect( ui->tdmap_table, SIGNAL(tdmap_best_match( int, int )), this, SLOT(update_tdmap_best_match(int,int)) );
+    connect(ui->tdmap_table, SIGNAL(cellClicked(int , int )), this, SLOT(update_tdmap_current_selection(int,int)) );
+
+    connect(this, SIGNAL(experimental_image_filename_changed()), this, SLOT(update_full_experimental_image_frame()));
+    connect(this, SIGNAL(simulated_grid_changed()), this, SLOT(update_simgrid_frame()));
+  }
+}
+
+bool MainWindow::_is_initialization_ok(){
+  return !_failed_initialization;
+}
+bool MainWindow::maybeSetPreferences(){
+  const QMessageBox::StandardButton ret
+    = QMessageBox::warning(this, tr("Application"),
+        tr("The saved prefences file is incomplete.\n""To use Im2Model all preferences vars must be set.\n"
+          "Do you want to open the preferences panel?"),
+        QMessageBox::Yes | QMessageBox::Close);
+  switch (ret) {
+    case QMessageBox::Yes:
+      return edit_preferences();
+    case QMessageBox::Close:
+      return false;
+    default:
+      break;
+  }
+  return false;
 }
 
 void MainWindow::update_tdmap_best_match(int x,int y){
@@ -111,14 +135,14 @@ void MainWindow::update_tdmap_current_selection(int x,int y){
 }
 
 MainWindow::~MainWindow(){
-
-  /* END TDMap simulation thread */
-  sim_tdmap_worker->abort();
-  _sim_tdmap_thread->wait();
-  ////qDebug()<<"Deleting thread and worker in Thread "<<this->QObject::thread()->currentThreadId();
-  delete _sim_tdmap_thread;
-  delete sim_tdmap_worker;
-
+  if( !_failed_initialization ){
+    /* END TDMap simulation thread */
+    sim_tdmap_worker->abort();
+    _sim_tdmap_thread->wait();
+    ////qDebug()<<"Deleting thread and worker in Thread "<<this->QObject::thread()->currentThreadId();
+    delete _sim_tdmap_thread;
+    delete sim_tdmap_worker;
+  }
   /* DELETE UI */
   delete ui;
 }
@@ -156,9 +180,11 @@ void MainWindow::update_roi_experimental_image_frame(){
 
 bool MainWindow::_was_document_modified(){
   bool result = false;
-  result |= project_setup_image_fields_model->_was_model_modified();
-  result |= project_setup_crystalographic_fields_model->_was_model_modified();
-  result |= tdmap_simulation_setup_model->_was_model_modified();
+  if( _settings_ok ){
+    result |= project_setup_image_fields_model->_was_model_modified();
+    result |= project_setup_crystalographic_fields_model->_was_model_modified();
+    result |= tdmap_simulation_setup_model->_was_model_modified();
+  }
   return result;
 }
 
@@ -196,12 +222,14 @@ void MainWindow::on_qpush_run_tdmap_clicked(){
 
 void MainWindow::closeEvent(QCloseEvent *event)
 {
+
   if (maybeSave()) {
     writeSettings();
     event->accept();
   } else {
     event->ignore();
   }
+
 }
 
 void MainWindow::newFile()
@@ -241,7 +269,9 @@ bool MainWindow::saveAs()
 
 
 
-void MainWindow::edit_preferences(){
+bool MainWindow::edit_preferences(){
+  // returns false if no settings were saved
+  bool result = false;
   QSettings settings;
   Settings dialog;
   dialog.setWindowTitle ( "Configurations panel" );
@@ -260,7 +290,9 @@ void MainWindow::edit_preferences(){
     _dr_probe_msa_bin = dialog.get_dr_probe_msa_bin();
     _dr_probe_wavimg_bin = dialog.get_dr_probe_wavimg_bin();
     writeSettings();
+    result = checkSettings();
   }
+  return result;
 }
 
 void MainWindow::about()

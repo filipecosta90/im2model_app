@@ -52,17 +52,17 @@ class MainWindow : public QMainWindow {
 
     boost::process::ipstream _sim_tdmap_ostream_buffer;
     public slots:
-    void update_from_TDMap_sucess();
+      void update_from_TDMap_sucess();
     void update_from_TDMap_failure();
-
-
+    bool _is_initialization_ok();
   protected:
     void closeEvent(QCloseEvent *event) override;
     bool _was_document_modified();
 
+
     private slots:
 
-    bool update_qline_image_path( std::string fileName );
+      bool update_qline_image_path( std::string fileName );
     void update_full_experimental_image_frame();
     void update_roi_experimental_image_frame();
     void on_qpush_run_tdmap_clicked();
@@ -76,15 +76,19 @@ class MainWindow : public QMainWindow {
     void open();
     bool save();
     bool saveAs();
-    void edit_preferences();
     void about();
     void documentWasModified();
 
 signals:
     void experimental_image_filename_changed( );
     void simulated_grid_changed();
+    void force_close();
 
   private:
+
+    // preferences methods
+    bool maybeSetPreferences();
+    bool edit_preferences();
 
     // menu methods
     void createActions();
@@ -126,9 +130,12 @@ signals:
     QString _dr_probe_msa_bin;
     QString _dr_probe_wavimg_bin;
     bool _flag_dr_probe_bin_path = false;
-   bool _flag_dr_probe_celslc_bin = false;
-   bool _flag_dr_probe_msa_bin = false;
-   bool _flag_dr_probe_wavimg_bin = false;
+    bool _flag_dr_probe_celslc_bin = false;
+    bool _flag_dr_probe_msa_bin = false;
+    bool _flag_dr_probe_wavimg_bin = false;
+
+    bool _settings_ok = false;
+    bool _failed_initialization = false;
 };
 
 #endif // CONFIGWIN_H

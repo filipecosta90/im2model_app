@@ -23,7 +23,6 @@ int main(int argc, char *argv[])
   QCoreApplication::addLibraryPath("./");
 
   QApplication app(argc, argv);
-
   app.setOrganizationName("uminho");
   app.setApplicationName("Im2Model");
 
@@ -35,8 +34,12 @@ int main(int argc, char *argv[])
   parser.addPositionalArgument("file", "The file to open.");
   parser.process(app);
   MainWindow window;
-  if (!parser.positionalArguments().isEmpty())
-    window.loadFile(parser.positionalArguments().first());
-  window.show();
-  return app.exec();
+  if( window._is_initialization_ok() ){
+    if (!parser.positionalArguments().isEmpty()){
+      window.loadFile(parser.positionalArguments().first());
+    }
+    window.show();
+    return app.exec();
+  }
+  return 0;
 }
