@@ -71,7 +71,8 @@ if(build_gui)
 
   if (WIN32)
     set (CMAKE_PREFIX_PATH "W:/ExtraSpaceInstall/Qt/5.9/msvc2017_64//")
-    Set (QT_MAKE_EXECUTABLE "D:/Qt/5.8/mingw53_32/bin/qmake.exe")
+    Set (QT_MAKE_EXECUTABLE "W:/ExtraSpaceInstall/Qt/5.9/msvc2017_64/bin/qmake.exe")
+    Set (QT_QPA_PLATFORM_PLUGIN_PATH "W:/ExtraSpaceInstall/Qt/5.9/msvc2017_64/plugins/platforms")
     Set (CMAKE_BUILD_TYPE "Release")
     Set (Qt5Core_DIR "W:/ExtraSpaceInstall/Qt/5.9/msvc2017_64/lib/cmake/Qt5Core")
     Set (Qt5Concurrent_DIR "W:/ExtraSpaceInstall/Qt/5.9/msvc2017_64/lib/cmake/Qt5Concurrent")
@@ -80,6 +81,7 @@ if(build_gui)
     Set (Qt5Test_DIR "W:/ExtraSpaceInstall/Qt/5.9/msvc2017_64/lib/cmake/Qt5Test")
     Set (Qt5Widgets_DIR "W:/ExtraSpaceInstall/Qt/5.9/msvc2017_64/lib/cmake/Qt5Widgets")
     Set (Qt5OpenGL_DIR "W:/ExtraSpaceInstall/Qt/5.9/msvc2017_64/lib/cmake/Qt5OpenGL")
+
   endif (WIN32)
 
   # Include Qt basic functions
