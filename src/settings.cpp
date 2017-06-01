@@ -111,7 +111,7 @@ void Settings::produce_settings_panel(){
   QVector<QVariant> preferences_option_1_4 = {"wavimg execname", _dr_probe_wavimg_bin};
   QVector<bool> preferences_option_1_4_edit = {false,true};
   boost::function<bool(std::string)> preferences_option_function_1_4 ( boost::bind( &Settings::set_dr_probe_wavimg_bin, this, _1 ) );
-  _preferences_dr_probe_wavimg = new TreeItem ( preferences_option_1_4 , preferences_option_function_1_3,  preferences_option_1_4_edit  );
+  _preferences_dr_probe_wavimg = new TreeItem ( preferences_option_1_4 , preferences_option_function_1_4,  preferences_option_1_4_edit  );
   preferences_dr_probe->insertChildren( _preferences_dr_probe_wavimg );
 
   project_preferences_model = new TreeModel( preferences_root );

@@ -20,6 +20,7 @@ int main(int argc, char *argv[])
 {
   // to access resources
   Q_INIT_RESOURCE(im2model);
+  QCoreApplication::addLibraryPath("./");
 
   QApplication app(argc, argv);
 
