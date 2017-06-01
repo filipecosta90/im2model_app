@@ -96,7 +96,7 @@ void TDMap_Table::clear()
   }
   std::vector <double> _local_accum_nm_slice_vec;
   bool use_accum_nm = false;
-  if ( core_tdmap ){
+  if ( core_tdmap != nullptr ){
     if( core_tdmap->_is_celslc_accum_nm_slice_vec_defined() ){
       use_accum_nm = true;
       _local_accum_nm_slice_vec = core_tdmap->get_celslc_accum_nm_slice_vec();

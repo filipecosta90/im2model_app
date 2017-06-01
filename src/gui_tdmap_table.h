@@ -56,7 +56,7 @@ signals:
     QWidget *table_parent;
 
     /* CORE IM2MODEL*/
-    TDMap* core_tdmap;
+    TDMap* core_tdmap = nullptr;
     bool _flag_core_tdmap = false;
 
     /* VISUAL TDMAP vars */

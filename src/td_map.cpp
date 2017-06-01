@@ -139,7 +139,8 @@ bool TDMap::calculate_thickness_range_upper_bound_slice_from_nm(){
 bool TDMap::calculate_thickness_range_lower_bound_slice_from_nm(){
 
   bool result = false;
-  if ( _is_thickness_range_lower_bound_defined() ){
+  std::cout << " _is_nz_simulated_partitions_defined() " << _tdmap_celslc_parameters->_is_nz_simulated_partitions_defined() << std::endl;
+  if ( _is_thickness_range_lower_bound_defined() && _tdmap_celslc_parameters->_is_nz_simulated_partitions_defined()  ){
     slices_lower_bound = _tdmap_celslc_parameters->get_slice_number_from_nm_ceil( nm_lower_bound );
     std::cout << "Calculated slice # " << slices_lower_bound << " as the lower bound for the minimum thickness of: " << nm_lower_bound << " nm" << std::endl;
     if (slices_lower_bound == 0){
@@ -217,21 +218,29 @@ bool TDMap::run_tdmap( ){
   bool status = true;
   calculate_simulated_image_sampling_rate_and_size();
   status = prepare_celslc_parameters();
+  assert(status);
   std::cout << " prepare celslc parameters status " << status << std::endl;
   std::cout << " _run_celslc_switch " << _run_celslc_switch << std::endl;
   std::cout << " _is_bin_path_defined " << _tdmap_celslc_parameters->_is_bin_path_defined() << std::endl;
+  assert(_tdmap_celslc_parameters->_is_bin_path_defined());
   if ( status && _run_celslc_switch &&  _tdmap_celslc_parameters->_is_bin_path_defined() ){
     std::cout << "Running ceslc" << std::endl;
     _flag_runned_tdmap_celslc = _tdmap_celslc_parameters->call_boost_bin();
     status = _flag_runned_tdmap_celslc;
   }
-  set_number_slices_to_load_from_nz_simulated_partitions();
-  set_number_slices_to_max_thickness_from_nz_simulated_partitions();
-  calculate_thickness_range_lower_bound_slice_from_nm();
-  calculate_thickness_range_upper_bound_slice_from_nm();
-  calculate_thickness_range_slice_period();
-  status = prepare_msa_parameters();
-
+  assert(status);
+  status &= set_number_slices_to_load_from_nz_simulated_partitions();
+  assert(status);
+  status &= set_number_slices_to_max_thickness_from_nz_simulated_partitions();
+  assert(status);
+  status &= calculate_thickness_range_lower_bound_slice_from_nm();
+assert(status);
+  status &= calculate_thickness_range_upper_bound_slice_from_nm();
+  assert(status);
+  status &= calculate_thickness_range_slice_period();
+  assert(status);
+  status &=  prepare_msa_parameters();
+assert(status);
   std::cout << " prepare_msa_parameters status " << status << std::endl;
   std::cout << " _run_msa_switch " << _run_msa_switch << std::endl;
   std::cout << " _is_bin_path_defined " << _tdmap_msa_parameters->_is_bin_path_defined() << std::endl;

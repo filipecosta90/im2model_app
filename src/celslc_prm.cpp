@@ -215,7 +215,8 @@ bool CELSLC_prm::set_bin_execname( std::string execname ){
         bin_execname = execname;
         _flag_bin_execname = true;
         full_bin_path_execname = itr->path().string();
-        _flag_full_bin_path_execname = true;
+        _flag_full_bin_path_execname = boost::filesystem::exists( full_bin_path_execname );
+        assert( _flag_full_bin_path_execname );
         std::cout << full_bin_path_execname << std::endl;
         result = true;
       }
@@ -278,11 +279,12 @@ bool CELSLC_prm::update_nz_simulated_partitions_from_prm(){
   assert( slc_file_name_prefix != "" );
   bool result = false;  
   if( auto_equidistant_slices_switch || auto_non_equidistant_slices_switch ){
-    std::stringstream input_prm_stream;
-     boost::filesystem::path dir (full_path_runned_bin);
-     boost::filesystem::path file ( slc_file_name_prefix + ".prm");
-    boost::filesystem::path full_path = dir / file;
 
+    std::stringstream input_prm_stream;
+    boost::filesystem::path dir (full_path_runned_bin);
+    boost::filesystem::path file ( slc_file_name_prefix + ".prm");
+    boost::filesystem::path full_path = dir / file;
+    assert( boost::filesystem::exists( full_path.string() ) );
     input_prm_stream << full_path.string() ;
 
     std::ifstream infile;
@@ -361,7 +363,9 @@ bool CELSLC_prm::cleanup_bin(  ){
 }
 
 bool CELSLC_prm::call_boost_bin(  ){
+
   bool result = false;
+  assert( _flag_full_bin_path_execname );
   if( _flag_full_bin_path_execname ){
     std::cout << "bin path: " << full_bin_path_execname <<std::endl;
 
@@ -416,19 +420,23 @@ bool CELSLC_prm::call_boost_bin(  ){
     }
     std::cout << "going to run boost process with args: "<< args_stream.str() << std::endl;
 
-    int result = -1;
+    int _child_exit_code = -1;
+    std::error_code _error_code;
+
     if(  _flag_io_ap_pipe_out  ){
       boost::process::child c(
           // command
           args_stream.str(),
           // redirecting std_out to async buffer
-          boost::process::std_out > _io_pipe_out
+          boost::process::std_out > _io_pipe_out ,
           // redirecting std_err to null
           // boost::process::std_err > boost::process::detail::
-          );
-      c.wait();
+          _error_code
 
-      result = c.exit_code();
+          );
+
+      c.wait();
+      _child_exit_code = c.exit_code();
     }
     else{
       boost::process::child c(
@@ -437,20 +445,28 @@ bool CELSLC_prm::call_boost_bin(  ){
           // redirecting std_out to null
           boost::process::std_out > boost::process::null,
           // redirecting std_err to null
-          boost::process::std_err > boost::process::null
+          boost::process::std_err > boost::process::null,
+          _error_code
           );
       c.wait();
-      result = c.exit_code();
+      _child_exit_code = c.exit_code();
 
     }
+
+#if defined(BOOST_WINDOWS_API)
+    assert((EXIT_SUCCESS == _child_exit_code));
+#elif defined(BOOST_POSIX_API)
+    assert((EXIT_SUCCESS == WEXITSTATUS(_child_exit_code)));
+#endif
+    assert ( !_error_code );
     if (result == 0 ){
-    boost::filesystem::path full_path( boost::filesystem::current_path() );
-    full_path_runned_bin = full_path.string();
-    if( auto_equidistant_slices_switch || auto_non_equidistant_slices_switch ){
-      update_nz_simulated_partitions_from_prm();
-    }
-    runned_bin = true;
-    result = true;
+      boost::filesystem::path full_path( boost::filesystem::current_path() );
+      full_path_runned_bin = full_path.string();
+      if( auto_equidistant_slices_switch || auto_non_equidistant_slices_switch ){
+        update_nz_simulated_partitions_from_prm();
+      }
+      runned_bin = true;
+      result = true;
     }
   }
   return result;
@@ -461,8 +477,8 @@ bool CELSLC_prm::prepare_nz_simulated_partitions_from_ssc_prm(){
   bool result = false;  
 
   std::stringstream input_prm_stream;
-   boost::filesystem::path dir (full_path_runned_bin);
-   boost::filesystem::path file ( slc_file_name_prefix + ".prm");
+  boost::filesystem::path dir (full_path_runned_bin);
+  boost::filesystem::path file ( slc_file_name_prefix + ".prm");
   boost::filesystem::path full_path = dir / file;
 
   input_prm_stream << full_path.string() ;
@@ -597,7 +613,6 @@ bool CELSLC_prm::call_bin_ssc(){
         << (float) super_cell_size_a << "," << (float) super_cell_size_b << "," << (float) super_cell_size_c;
     }
 
-
     if ( dwf_switch ){
       args_stream << " -dwf";
     }
@@ -670,5 +685,3 @@ bool CELSLC_prm::call_bin_ssc(){
   }
   return result;
 }
-
-

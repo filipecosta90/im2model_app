@@ -273,13 +273,13 @@ class TDMap {
 
     cv::Mat get_simulated_image_in_grid( int row, int col );
 
-     double get_simulated_image_match_in_grid( int row, int col );
+    double get_simulated_image_match_in_grid( int row, int col );
 
-     int get_simulated_image_thickness_slice_in_grid( int row, int col );
+    int get_simulated_image_thickness_slice_in_grid( int row, int col );
 
-     double get_simulated_image_thickness_nm_in_grid( int row, int col );
+    double get_simulated_image_thickness_nm_in_grid( int row, int col );
 
-     double get_simulated_image_defocus_in_grid( int row, int col );
+    double get_simulated_image_defocus_in_grid( int row, int col );
 
     /** setters **/
 

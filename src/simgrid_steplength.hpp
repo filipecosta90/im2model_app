@@ -125,7 +125,7 @@ class SIMGRID_wavimg_steplength {
     cv::Mat imregionalmax_match_values_matrix;
     cv::Point2i best_match_Point2i;
 
-    WAVIMG_prm* wavimg_parameters;
+    WAVIMG_prm* wavimg_parameters = nullptr;
 
     /***********
       image alignement vars
@@ -291,13 +291,13 @@ class SIMGRID_wavimg_steplength {
 
     cv::Mat get_simulated_image_in_grid( int row, int col );
 
-     double get_simulated_image_match_in_grid( int row, int col );
+    double get_simulated_image_match_in_grid( int row, int col );
 
-     int get_simulated_image_thickness_slice_in_grid( int row, int col );
+    int get_simulated_image_thickness_slice_in_grid( int row, int col );
 
-     double get_simulated_image_thickness_nm_in_grid( int row, int col );
+    double get_simulated_image_thickness_nm_in_grid( int row, int col );
 
-     double get_simulated_image_defocus_in_grid( int row, int col );
+    double get_simulated_image_defocus_in_grid( int row, int col );
 
 
     void calculate_motion_euclidian_matrix(  cv::Mat cropped_experimental_image_roi, cv::Mat simulated_image_roi );
