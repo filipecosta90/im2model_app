@@ -35,7 +35,7 @@ signals:
 
     public slots:
       void get_filename_slot( QWidget *editor );
-
+    void get_dirname_slot( QWidget *editor );
   private:
 
 };

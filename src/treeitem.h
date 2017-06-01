@@ -17,7 +17,7 @@
 
 Q_DECLARE_METATYPE(std::string)
 
-  enum DelegateType { _delegate_FILE, _delegate_TEXT };
+  enum DelegateType { _delegate_FILE, _delegate_DIR, _delegate_TEXT };
 
 class TreeItem : public QObject {
   Q_OBJECT

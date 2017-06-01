@@ -7,7 +7,6 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
   ui->td_map_splitter->setStretchFactor(1,7);
   ui->td_map_splitter->setStretchFactor(2,2);
 
-
   createActions();
   updateStatusBar();
   setCurrentFile(QString());
@@ -17,9 +16,9 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
   if( ! _settings_ok ){
     _settings_ok = maybeSetPreferences();
   }
+  /* if the preferences are still not correct set the flag */
   if ( !_settings_ok ){
     _failed_initialization = true;
-
   }
   else{
     _core_image_crystal = new Image_Crystal();
@@ -78,37 +77,36 @@ bool MainWindow::maybeSetPreferences(){
 }
 
 void MainWindow::update_tdmap_best_match(int x,int y){
+  if(_core_td_map->_is_simulated_images_grid_defined()){
+    cv::Mat _simulated_image = _core_td_map->get_simulated_image_in_grid(x,y);
+    const double _simulated_image_match = _core_td_map->get_simulated_image_match_in_grid(x,y);
+    const double _simulated_image_thickness = _core_td_map->get_simulated_image_thickness_nm_in_grid(x,y);
+    const double _simulated_image_defocus = _core_td_map->get_simulated_image_defocus_in_grid(x,y);
 
-  ////qDebug() << "updating tdmap best match to: " << x << " y: " << y ;
-  cv::Mat _simulated_image = _core_td_map->get_simulated_image_in_grid(x,y);
-  const double _simulated_image_match = _core_td_map->get_simulated_image_match_in_grid(x,y);
-  const double _simulated_image_thickness = _core_td_map->get_simulated_image_thickness_nm_in_grid(x,y);
-  const double _simulated_image_defocus = _core_td_map->get_simulated_image_defocus_in_grid(x,y);
+    QStandardItemModel* model = new QStandardItemModel(3, 2,this);
+    model->setHeaderData(0, Qt::Horizontal, tr("Parameter"));
+    model->setHeaderData(1, Qt::Horizontal, tr("Value"));
+    QStandardItem *label_match_item = new QStandardItem(tr("Match %"));
+    QStandardItem *label_defocus_item = new QStandardItem(tr("Defocus"));
+    QStandardItem *label_thickness_item = new QStandardItem(tr("Thickness"));
+    QStandardItem *match_item = new QStandardItem( QString::number( _simulated_image_match ) );
+    QStandardItem *defocus_item = new QStandardItem( QString::number( _simulated_image_defocus  ) );
+    QStandardItem *thickness_item = new QStandardItem( QString::number( _simulated_image_thickness ) );
+    model->setItem(0, 0, label_match_item);
+    model->setItem(1, 0, label_thickness_item);
+    model->setItem(2, 0, label_defocus_item);
+    model->setItem(0, 1, match_item);
+    model->setItem(1, 1, thickness_item);
+    model->setItem(2, 1, defocus_item);
 
-  QStandardItemModel* model = new QStandardItemModel(3, 2,this);
-  model->setHeaderData(0, Qt::Horizontal, tr("Parameter"));
-  model->setHeaderData(1, Qt::Horizontal, tr("Value"));
-  QStandardItem *label_match_item = new QStandardItem(tr("Match %"));
-  QStandardItem *label_defocus_item = new QStandardItem(tr("Defocus"));
-  QStandardItem *label_thickness_item = new QStandardItem(tr("Thickness"));
-  QStandardItem *match_item = new QStandardItem( QString::number( _simulated_image_match ) );
-  QStandardItem *defocus_item = new QStandardItem( QString::number( _simulated_image_defocus  ) );
-  QStandardItem *thickness_item = new QStandardItem( QString::number( _simulated_image_thickness ) );
-  model->setItem(0, 0, label_match_item);
-  model->setItem(1, 0, label_thickness_item);
-  model->setItem(2, 0, label_defocus_item);
-  model->setItem(0, 1, match_item);
-  model->setItem(1, 1, thickness_item);
-  model->setItem(2, 1, defocus_item);
-
-  ui->qgraphics_tdmap_best_match->setModel(model);
-  ui->qgraphics_tdmap_best_match->setImage( _simulated_image );
+    ui->qgraphics_tdmap_best_match->setModel(model);
+    ui->qgraphics_tdmap_best_match->setImage( _simulated_image );
+  }
 }
 
 void MainWindow::update_tdmap_current_selection(int x,int y){
 
   if(_core_td_map->_is_simulated_images_grid_defined()){
-    ////qDebug() << "updating update_tdmap_current_selection to: " << x << " y: " << y ;
     cv::Mat _simulated_image = _core_td_map->get_simulated_image_in_grid(x,y);
     const double _simulated_image_match = _core_td_map->get_simulated_image_match_in_grid(x,y);
     const double _simulated_image_thickness = _core_td_map->get_simulated_image_thickness_nm_in_grid(x,y);
@@ -135,6 +133,7 @@ void MainWindow::update_tdmap_current_selection(int x,int y){
 }
 
 MainWindow::~MainWindow(){
+  /* check if the initialization process was done */
   if( !_failed_initialization ){
     /* END TDMap simulation thread */
     sim_tdmap_worker->abort();
@@ -148,7 +147,6 @@ MainWindow::~MainWindow(){
 }
 
 bool MainWindow::update_qline_image_path( std::string fileName ){
-  ////qDebug()<<"Inside update_qline_image_path: " << fileName ;
   _core_image_crystal->set_experimental_image_path( fileName );
   const bool load_ok = _core_image_crystal->load_full_experimental_image();
   if( load_ok ){
@@ -158,7 +156,6 @@ bool MainWindow::update_qline_image_path( std::string fileName ){
 }
 
 void MainWindow::update_simgrid_frame(){
-  ////qDebug()<<" updating simgrid images";
   std::vector< std::vector<cv::Mat> > _simulated_images_grid = _core_td_map->get_simulated_images_grid();
   this->ui->tdmap_table->set_simulated_images_grid( _simulated_images_grid );
 }
@@ -189,18 +186,15 @@ bool MainWindow::_was_document_modified(){
 }
 
 void   MainWindow::update_from_TDMap_sucess(){
-  ////qDebug()<<"tdmap thread signaled sucess " ;
   ui->statusBar->showMessage(tr("Sucessfully runned TD-Map"), 2000);
   emit simulated_grid_changed();
 }
 
 void   MainWindow::update_from_TDMap_failure(){
-  ////qDebug()<<"tdmap thread signaled failure " ;
   ui->statusBar->showMessage(tr("Error while running TD-Map"), 2000);
 }
 
 void MainWindow::update_tdmap_sim_ostream(){
-  ////qDebug()<<"waiting for tdmap sim output " ;
   ui->qTextBrowser_tdmap_simulation_output->setText(" ");
   std::string line;
   while(std::getline(_sim_tdmap_ostream_buffer, line)){
@@ -213,34 +207,26 @@ void MainWindow::update_tdmap_sim_ostream(){
 
 void MainWindow::on_qpush_run_tdmap_clicked(){
   bool status = false;
-  ////qDebug()<<"running tdmap" ;
   ui->statusBar->showMessage(tr("Running TD-Map"), 2000);
-  ////qDebug()<< "Master thread " << QThread::currentThread() ;
   sim_tdmap_worker->requestTDMap();
-
 }
 
-void MainWindow::closeEvent(QCloseEvent *event)
-{
-
+void MainWindow::closeEvent(QCloseEvent *event){
   if (maybeSave()) {
     writeSettings();
     event->accept();
   } else {
     event->ignore();
   }
-
 }
 
-void MainWindow::newFile()
-{
+void MainWindow::newFile(){
   if (maybeSave()) {
     setCurrentFile(QString());
   }
 }
 
-void MainWindow::open()
-{
+void MainWindow::open(){
   if (maybeSave()) {
     QString fileName = QFileDialog::getOpenFileName(this);
     if (!fileName.isEmpty())

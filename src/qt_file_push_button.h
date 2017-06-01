@@ -4,10 +4,8 @@
 #include <QPushButton>
 #include <QWidget>
 
-class FilePushButton : public QPushButton
-{
+class FilePushButton : public QPushButton{
   Q_OBJECT
-
   public:
     FilePushButton( QWidget *parent = 0 );
     FilePushButton( QString text , QWidget *parent = 0 );

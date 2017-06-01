@@ -8,25 +8,25 @@ TreeItemFileDelegate::TreeItemFileDelegate( QObject *parent ) : QStyledItemDeleg
 
 }
 
+// more work here!!!!
 void TreeItemFileDelegate::paint(QPainter * painter, const QStyleOptionViewItem & option, const QModelIndex & index) const
 {
   TreeItem *item = static_cast<TreeItem*>(index.internalPointer());
   switch( item->get_item_delegate_type() )
   {
     case _delegate_FILE :
+    case _delegate_DIR :
       {
-      QStyledItemDelegate::paint( painter, option,  index);
-      break;
+        QStyledItemDelegate::paint( painter, option,  index);
+        break;
       }
     case _delegate_TEXT :
       {
-      QStyledItemDelegate::paint( painter, option,  index);
+        QStyledItemDelegate::paint( painter, option,  index);
         break;
       }
   }
-
 }
-
 
 QWidget *TreeItemFileDelegate::createEditor( QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &index ) const{
 
@@ -36,6 +36,7 @@ QWidget *TreeItemFileDelegate::createEditor( QWidget *parent, const QStyleOption
   switch( item->get_item_delegate_type() )
   {
     case _delegate_FILE :
+    case _delegate_DIR :
       {
         editor = new QWidget(parent);
         QString value = index.model()->data(index, Qt::EditRole).toString();
@@ -64,11 +65,14 @@ QWidget *TreeItemFileDelegate::createEditor( QWidget *parent, const QStyleOption
         editor->setSizePolicy(sizePol);
         // line->setMinimumHeight(editor->height());
 
-
         editor->setFocusProxy( line );
 
-
-        connect(button, SIGNAL(onClick(QWidget*)), this, SLOT(get_filename_slot(QWidget*)));
+        if( item->get_item_delegate_type() ==  _delegate_FILE ){
+          connect(button, SIGNAL(onClick(QWidget*)), this, SLOT(get_filename_slot(QWidget*)));
+        }
+        else{
+          connect(button, SIGNAL(onClick(QWidget*)), this, SLOT(get_dirname_slot(QWidget*)));
+        }
         break;
       }
     case _delegate_TEXT :
@@ -85,6 +89,7 @@ void TreeItemFileDelegate::setEditorData(QWidget *editor, const QModelIndex &ind
   switch(item->get_item_delegate_type())
   {
     case _delegate_FILE  :
+    case _delegate_DIR  :
       {
 
         QLineEdit* line = editor->findChild<QLineEdit*>();
@@ -107,6 +112,7 @@ void TreeItemFileDelegate::setModelData(QWidget *editor, QAbstractItemModel *mod
   switch(item->get_item_delegate_type())
   {
     case _delegate_FILE  :
+    case _delegate_DIR  :
       {
         QLineEdit* line = editor->findChild<QLineEdit*>();
         QString value = line->text();
@@ -126,6 +132,7 @@ void TreeItemFileDelegate::updateEditorGeometry(QWidget *editor, const QStyleOpt
   switch(item->get_item_delegate_type())
   {
     case _delegate_FILE  :
+    case _delegate_DIR  :
       {
         editor->setGeometry(option.rect);
         break;
@@ -141,9 +148,8 @@ void TreeItemFileDelegate::updateEditorGeometry(QWidget *editor, const QStyleOpt
 void TreeItemFileDelegate::get_filename_slot( QWidget *editor ){
   std::cout << " get_filename_slot called" << std::endl;
   QLineEdit* line = editor->findChild<QLineEdit*>();
-  //QString filetype = index.model()->data(index, Qt::EditRole).toString();
   QString fileName = QFileDialog::getOpenFileName( editor,
-      tr("Open"),
+      tr("Open File"),
       tr(".")
       //, tr("Text Files")
       );
@@ -151,3 +157,17 @@ void TreeItemFileDelegate::get_filename_slot( QWidget *editor ){
     line->setText(fileName);
   }
 }
+
+void TreeItemFileDelegate::get_dirname_slot( QWidget *editor ){
+  std::cout << " get_dirname_slot called" << std::endl;
+  QLineEdit* line = editor->findChild<QLineEdit*>();
+  QString dirName = QFileDialog::getExistingDirectory(editor,
+      tr("Open Directory"),
+      tr("."),
+      QFileDialog::ShowDirsOnly
+      | QFileDialog::DontResolveSymlinks);
+  if( ! (dirName.isNull()) ){
+    line->setText(dirName);
+  }
+}
+
