@@ -1,4 +1,6 @@
 file(GLOB im2model_core_src 
+  application_log.cpp
+  application_log.hpp
   atom.hpp
   chem_database.hpp
   mc_scanner.hpp
@@ -81,7 +83,6 @@ if(build_gui)
     Set (Qt5Test_DIR "W:/ExtraSpaceInstall/Qt/5.9/msvc2017_64/lib/cmake/Qt5Test")
     Set (Qt5Widgets_DIR "W:/ExtraSpaceInstall/Qt/5.9/msvc2017_64/lib/cmake/Qt5Widgets")
     Set (Qt5OpenGL_DIR "W:/ExtraSpaceInstall/Qt/5.9/msvc2017_64/lib/cmake/Qt5OpenGL")
-
   endif (WIN32)
 
   # Include Qt basic functions

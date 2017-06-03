@@ -15,9 +15,11 @@
 #include <QCommandLineOption>
 #include <QAction>
 
+#include "application_log.hpp"
 
-int main(int argc, char *argv[])
-{
+int main(int argc, char *argv[]){
+  std::cout <<  QDir::currentPath().toStdString() << std::endl;
+
   // to access resources
   Q_INIT_RESOURCE(im2model);
   QCoreApplication::addLibraryPath("./");
@@ -25,6 +27,21 @@ int main(int argc, char *argv[])
   QApplication app(argc, argv);
   app.setOrganizationName("uminho");
   app.setApplicationName("Im2Model");
+
+  std::cout <<  QCoreApplication::applicationDirPath().toStdString() << std::endl;
+  std::cout <<  QDir::currentPath().toStdString() << std::endl;
+
+  boost::filesystem::path full_path( boost::filesystem::current_path() );
+  boost::filesystem::path app_path( QCoreApplication::applicationDirPath().toStdString() );
+
+  ApplicationLog::ApplicationLog* im2model_logger = new ApplicationLog::ApplicationLog( app_path );
+  im2model_logger->logEvent(ApplicationLog::notification, "Application start");
+  std::stringstream message;
+  message << "applicationDirPath: " << app_path.string();
+  im2model_logger->logEvent( ApplicationLog::notification, message.str() );
+  message = std::stringstream();
+  message << "fullPath: " <<  full_path.string();
+  im2model_logger->logEvent( ApplicationLog::notification, message.str() );
 
   // to ease the load process
   QCommandLineParser parser;
@@ -38,8 +55,13 @@ int main(int argc, char *argv[])
     if (!parser.positionalArguments().isEmpty()){
       window.loadFile(parser.positionalArguments().first());
     }
+    window.set_application_logger( im2model_logger );
+    window.set_base_dir_path( app_path );
+
     window.show();
     return app.exec();
   }
+  im2model_logger->logEvent(ApplicationLog::normal, "Application exit");
+
   return 0;
 }

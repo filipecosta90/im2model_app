@@ -214,6 +214,20 @@ bool WAVIMG_prm::_is_prm_filename_path_defined(){
   return _flag_prm_filename_path;
 }
 
+bool WAVIMG_prm::set_base_dir_path( boost::filesystem::path path ){
+  base_dir_path = path;
+  _flag_base_dir_path = true;
+  std::stringstream message;
+  message << "WAVIMG_prm baseDirPath: " << path.string();
+  logger->logEvent( ApplicationLog::notification, message.str() );
+}
+
+bool WAVIMG_prm::set_application_logger( ApplicationLog::ApplicationLog* app_logger ){
+  logger = app_logger;
+  _flag_logger = true;
+  logger->logEvent( ApplicationLog::notification, "Application logger setted for WAVIMG_prm class." );
+}
+
 // setters line 1
 void WAVIMG_prm::set_file_name_input_wave_function( std::string file_name ){
   file_name_input_wave_function = file_name;

@@ -178,10 +178,21 @@ class TDMap {
     bool _flag_sim_tdmap_ostream = false;
     bool _flag_sim_tdmap_ostream_buffer = true;
 
+    /* Loggers */
+    ApplicationLog::ApplicationLog* logger = nullptr;
+    bool _flag_logger = false;
+
+    /* Base dir path */
+    boost::filesystem::path base_dir_path;
+    bool _flag_base_dir_path = false;
+
   public:
+
+    bool set_application_logger( ApplicationLog::ApplicationLog* app_logger );
     boost::process::ipstream& _sim_tdmap_ostream_buffer;
 
     TDMap( boost::process::ipstream& ostream_buffer, Image_Crystal *image_crystal_ptr );
+    TDMap( boost::process::ipstream &ostream_buffer, Image_Crystal* image_crystal_ptr , ApplicationLog::ApplicationLog* app_logger );
     /** others **/
     bool prepare_ZA_UV();
 
@@ -307,6 +318,7 @@ class TDMap {
 
     bool set_core_image_crystal_ptr( Image_Crystal* image_crystal_ptr );
 
+    bool set_base_dir_path( boost::filesystem::path path );
 
 };
 

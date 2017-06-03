@@ -23,6 +23,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
   else{
     _core_image_crystal = new Image_Crystal();
     _core_td_map = new TDMap( _sim_tdmap_ostream_buffer, _core_image_crystal );
+
     _core_td_map->set_dr_probe_bin_path( _dr_probe_bin_path.toStdString() );
     _core_td_map->set_dr_probe_celslc_execname( _dr_probe_celslc_bin.toStdString() );
     _core_td_map->set_dr_probe_msa_execname( _dr_probe_msa_bin.toStdString() );
@@ -54,6 +55,19 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     connect(this, SIGNAL(experimental_image_filename_changed()), this, SLOT(update_full_experimental_image_frame()));
     connect(this, SIGNAL(simulated_grid_changed()), this, SLOT(update_simgrid_frame()));
   }
+}
+
+void MainWindow::set_base_dir_path( boost::filesystem::path base_dir ){
+    base_dir_path = base_dir;
+    _flag_base_dir_path = true;
+    _core_td_map->set_base_dir_path( base_dir );
+}
+
+bool MainWindow::set_application_logger( ApplicationLog::ApplicationLog* logger ){
+im2model_logger = logger;
+ _flag_im2model_logger = true;
+ im2model_logger->logEvent( ApplicationLog::notification, "Application logger setted for MainWindow class." );
+ _core_td_map->set_application_logger( logger );
 }
 
 bool MainWindow::_is_initialization_ok(){

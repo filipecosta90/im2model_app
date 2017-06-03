@@ -185,6 +185,20 @@ bool MSA_prm::_is_bin_path_defined(){
   return _flag_bin_path;
 }
 
+bool MSA_prm::set_base_dir_path( boost::filesystem::path path ){
+  base_dir_path = path;
+  _flag_base_dir_path = true;
+  std::stringstream message;
+  message << "MSA_prm baseDirPath: " << path.string();
+  logger->logEvent( ApplicationLog::notification, message.str() );
+}
+
+bool MSA_prm::set_application_logger( ApplicationLog::ApplicationLog* app_logger ){
+  logger = app_logger;
+  _flag_logger = true;
+  logger->logEvent( ApplicationLog::notification, "Application logger setted for MSA_prm class." );
+}
+
 void MSA_prm::set_wave_function_name ( std::string wave_function_filename ){
   wave_function_name = wave_function_filename;
 }

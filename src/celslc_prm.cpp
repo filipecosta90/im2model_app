@@ -200,6 +200,20 @@ bool CELSLC_prm::set_bin_path( std::string path ){
   return result;
 }
 
+bool CELSLC_prm::set_base_dir_path( boost::filesystem::path path ){
+  base_dir_path = path;
+  _flag_base_dir_path = true;
+  std::stringstream message;
+  message << "CELSLC_prm baseDirPath: " << path.string();
+  logger->logEvent( ApplicationLog::notification, message.str() );
+}
+
+bool CELSLC_prm::set_application_logger( ApplicationLog::ApplicationLog* app_logger ){
+  logger = app_logger;
+  _flag_logger = true;
+  logger->logEvent( ApplicationLog::notification, "Application logger setted for CELSLC_prm class." );
+}
+
 bool CELSLC_prm::set_bin_execname( std::string execname ){
   boost::filesystem::path bin_dir(bin_path);
   boost::filesystem::directory_iterator end_itr;
@@ -284,6 +298,11 @@ bool CELSLC_prm::update_nz_simulated_partitions_from_prm(){
     boost::filesystem::path dir (full_path_runned_bin);
     boost::filesystem::path file ( slc_file_name_prefix + ".prm");
     boost::filesystem::path full_path = dir / file;
+
+    if( _flag_logger ){
+      logger->logEvent( ApplicationLog::notification , full_path.string().c_str() );
+    }
+
     assert( boost::filesystem::exists( full_path.string() ) );
     input_prm_stream << full_path.string() ;
 

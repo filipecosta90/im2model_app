@@ -25,6 +25,8 @@
 #include <opencv2/core/types.hpp>                         // for Rect, Point3d
 #include <opencv2/imgcodecs.hpp>                          // for imread
 
+#include "application_log.hpp"
+
 class Image_Crystal {
   private:
     std::string experimental_image_path;
@@ -88,6 +90,14 @@ class Image_Crystal {
     void update_perpendicular_dir_defined();
     void update_sampling_rate_experimental_defined();
 
+    /* Loggers */
+    ApplicationLog::ApplicationLog* logger = nullptr;
+    bool _flag_logger = false;
+
+    /* Base dir path */
+    boost::filesystem::path base_dir_path;
+    bool _flag_base_dir_path = false;
+
   public:
     Image_Crystal();
 
@@ -130,6 +140,10 @@ class Image_Crystal {
     bool set_projection_direction_h( std::string dir_h );
     bool set_projection_direction_k( std::string dir_k );
     bool set_projection_direction_l( std::string dir_l );
+
+    bool set_application_logger( ApplicationLog::ApplicationLog* logger );
+
+    bool set_base_dir_path( boost::filesystem::path base_dir );
 
 };
 

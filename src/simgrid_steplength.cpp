@@ -100,10 +100,6 @@ return cleaned_simulated_image;
      return (double) defocus_values_matrix.at<float>( row_thickness, col_defocus );
  }
 
-
-
-
-
 SIMGRID_wavimg_steplength::SIMGRID_wavimg_steplength()
 {
   // // // // //
@@ -325,6 +321,20 @@ void SIMGRID_wavimg_steplength::set_step_size( int defocus_step, int slice_step 
 
 void SIMGRID_wavimg_steplength::set_step_size( cv::Point2f defocus_slice_step ){
   step_size = defocus_slice_step;
+}
+
+bool SIMGRID_wavimg_steplength::set_base_dir_path( boost::filesystem::path path ){
+    base_dir_path = path;
+   _flag_base_dir_path = true;
+   std::stringstream message;
+   message << "SIMGRID_wavimg_steplength baseDirPath: " << path.string();
+   logger->logEvent( ApplicationLog::notification, message.str() );
+}
+
+bool SIMGRID_wavimg_steplength::set_application_logger( ApplicationLog::ApplicationLog* app_logger ){
+logger = app_logger;
+_flag_logger = true;
+logger->logEvent( ApplicationLog::notification, "Application logger setted for SIMGRID_wavimg_steplength class." );
 }
 
 void SIMGRID_wavimg_steplength::calculate_motion_euclidian_matrix( cv::Mat cropped_experimental_image_roi , cv::Mat simulated_image_roi ){

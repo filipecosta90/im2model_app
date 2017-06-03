@@ -38,6 +38,7 @@
 #include <opencv2/video/tracking.hpp>  // for ::MOTION_EUCLIDEAN
 
 #include "wavimg_prm.hpp"              // for WAVIMG_prm
+#include "application_log.hpp"
 
 class SIMGRID_wavimg_steplength {
   private:
@@ -180,6 +181,14 @@ class SIMGRID_wavimg_steplength {
     const int legend_position_y_bottom_left_line_4 = 80;
     const int legend_position_y_bottom_left_line_5 = 100;
 
+    /* Loggers */
+    ApplicationLog::ApplicationLog* logger = nullptr;
+    bool _flag_logger = false;
+
+    /* Base dir path */
+    boost::filesystem::path base_dir_path;
+    bool _flag_base_dir_path = false;
+
   public:
 
     bool _is_simulated_images_grid_defined();
@@ -270,6 +279,10 @@ class SIMGRID_wavimg_steplength {
 
     void set_step_size( cv::Point2f defocus_slice_step );
 
+    bool set_application_logger( ApplicationLog::ApplicationLog* logger );
+
+    bool set_base_dir_path( boost::filesystem::path base_dir );
+
     double get_motion_euclidian_rotation_angle();
 
     double get_motion_euclidian_translation_x();
@@ -285,8 +298,11 @@ class SIMGRID_wavimg_steplength {
     std::vector< std::vector<cv::Mat> > get_simulated_images_grid();
 
     cv::Mat get_defocus_values_matrix();
+
     cv::Mat get_thickness_values_matrix();
+
     cv::Mat get_match_values_matrix();
+
     cv::Point2i get_best_match_position();
 
     cv::Mat get_simulated_image_in_grid( int row, int col );
@@ -298,7 +314,6 @@ class SIMGRID_wavimg_steplength {
     double get_simulated_image_thickness_nm_in_grid( int row, int col );
 
     double get_simulated_image_defocus_in_grid( int row, int col );
-
 
     void calculate_motion_euclidian_matrix(  cv::Mat cropped_experimental_image_roi, cv::Mat simulated_image_roi );
 

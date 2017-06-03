@@ -6,7 +6,7 @@ set (CMAKE_CXX_STANDARD 14)
 
 project( Im2Model VERSION 1.0 LANGUAGES CXX )
 
-  set(CMAKE_INCLUDE_CURRENT_DIR ON)
+set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 
 set(BUILD_SHARED_LIBS ON CACHE BOOL "" FORCE)
@@ -33,17 +33,17 @@ if (WIN32)
   ## visual studio
   message(STATUS "Setting MSVC flags")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /EHc /W3 /MTd /std:c++14")
-	# Enable multi-core builds
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP")
+  # Enable multi-core builds
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP")
 
-# Suppress warnings about "non-secure" functions
-	add_definitions(-D_CRT_SECURE_NO_WARNINGS -D_SCL_SECURE_NO_WARNINGS -D_CRT_NONSTDC_NO_WARNINGS)
-	# Disable warning C4244: 'conversion' conversion from 'type1' to 'type2', possible loss of data
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4244")
-	# Disable warning C4267: 'var' : conversion from 'size_t' to 'type', possible loss of data (64 bit build only)
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4267")
+  # Suppress warnings about "non-secure" functions
+  add_definitions(-D_CRT_SECURE_NO_WARNINGS -D_SCL_SECURE_NO_WARNINGS -D_CRT_NONSTDC_NO_WARNINGS)
+  # Disable warning C4244: 'conversion' conversion from 'type1' to 'type2', possible loss of data
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4244")
+  # Disable warning C4267: 'var' : conversion from 'size_t' to 'type', possible loss of data (64 bit build only)
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4267")
 
-    add_definitions(-DNOMINMAX -DWIN32_LEAN_AND_MEAN -D_WINSOCK_DEPRECATED_NO_WARNINGS)
+  add_definitions(-DNOMINMAX -DWIN32_LEAN_AND_MEAN -D_WINSOCK_DEPRECATED_NO_WARNINGS)
 
 
 else()
@@ -76,12 +76,11 @@ if (WIN32)
   set(Boost_COMPILER "-vc141")
 endif(WIN32)
 
-find_package(Boost 1.64.0 COMPONENTS system program_options filesystem thread iostreams REQUIRED)
+find_package(Boost 1.64.0 COMPONENTS system program_options filesystem thread iostreams log REQUIRED)
 
 find_package(BISON REQUIRED)
 find_package(FLEX REQUIRED)
 
 # we add the sub-directories that we want CMake to scan
 add_subdirectory(src)
-
 

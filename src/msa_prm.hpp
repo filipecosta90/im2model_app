@@ -17,6 +17,8 @@
 #include <string>  // for string
 #include <vector>  // for vector
 
+#include "application_log.hpp"
+
 class MSA_prm {
   private:
     std::string microscope_parameter_block_name;
@@ -78,6 +80,14 @@ class MSA_prm {
     bool _is_prm_produced();
     bool _is_prm_filename_defined();
 
+    /* Loggers */
+    ApplicationLog::ApplicationLog* logger = nullptr;
+    bool _flag_logger = false;
+
+    /* Base dir path */
+    boost::filesystem::path base_dir_path;
+    bool _flag_base_dir_path = false;
+
   public:
     MSA_prm();
 
@@ -112,6 +122,10 @@ class MSA_prm {
     bool set_bin_path( std::string path );
 
     bool set_bin_execname ( std::string execname );
+
+    bool set_application_logger( ApplicationLog::ApplicationLog* logger );
+
+    bool set_base_dir_path( boost::filesystem::path base_dir );
 
     bool produce_prm();
 

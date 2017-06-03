@@ -32,6 +32,7 @@
 #include "cv_image_table_frame.h"
 #include "settings.h"
 #include "ui_settings.h"
+#include "application_log.hpp"
 
 
 namespace Ui {
@@ -44,21 +45,23 @@ class MainWindow : public QMainWindow {
     explicit MainWindow(QWidget *parent = 0);
 
     bool set_dr_probe_path( QString path );
-
-    bool checkSettings();
+    bool set_application_logger( ApplicationLog::ApplicationLog* logger );
+    void set_base_dir_path( boost::filesystem::path base_dir );
 
     void loadFile(const QString &fileName);
     ~MainWindow();
+
+        bool checkSettings();
 
     boost::process::ipstream _sim_tdmap_ostream_buffer;
     public slots:
       void update_from_TDMap_sucess();
     void update_from_TDMap_failure();
     bool _is_initialization_ok();
+
   protected:
     void closeEvent(QCloseEvent *event) override;
     bool _was_document_modified();
-
 
     private slots:
 
@@ -136,6 +139,15 @@ signals:
 
     bool _settings_ok = false;
     bool _failed_initialization = false;
+
+    /* Loggers */
+    ApplicationLog::ApplicationLog* im2model_logger = nullptr;
+    bool _flag_im2model_logger = false;
+
+    /* Base dir path */
+    boost::filesystem::path base_dir_path;
+    bool _flag_base_dir_path = false;
+
 };
 
 #endif // CONFIGWIN_H

@@ -229,3 +229,17 @@ bool Image_Crystal::set_projection_direction_l( std::string dir_l ){
   update_projection_dir_defined();
   return true;
 }
+
+bool Image_Crystal::set_base_dir_path( boost::filesystem::path path ){
+  base_dir_path = path;
+  _flag_base_dir_path = true;
+  std::stringstream message;
+  message << "Image_Crystal baseDirPath: " << path.string();
+  logger->logEvent( ApplicationLog::notification, message.str() );
+}
+
+bool Image_Crystal::set_application_logger( ApplicationLog::ApplicationLog* app_logger ){
+  logger = app_logger;
+  _flag_logger = true;
+  logger->logEvent( ApplicationLog::notification, "Application logger setted for Image_Crystal class." );
+}

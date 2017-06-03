@@ -9,6 +9,9 @@
 #include <boost/filesystem/path.hpp>                      // for path, operator==, oper...
 /** END BOOST **/
 
+/** BOOST LOGGING **/
+#include <boost/log/trivial.hpp>
+
 #include <opencv2/core/hal/interface.h>                   // for CV_8UC1
 #include <opencv2/imgcodecs/imgcodecs_c.h>                // for ::CV_LOAD_I...
 #include <opencv2/core.hpp>                               // for RNG
@@ -31,6 +34,8 @@
 #include <utility>                             // for pair
 #include <vector>                              // for vector, vector<>::iter...
 #include <system_error>
+
+#include "application_log.hpp"
 
 class CELSLC_prm {
   private:
@@ -100,12 +105,21 @@ class CELSLC_prm {
     std::ostream *run_ostream = nullptr;
     bool _flag_run_ostream = false;
 
+    /* Loggers */
+    ApplicationLog::ApplicationLog* logger = nullptr;
+    bool _flag_logger = false;
+
+    /* Base dir path */
+    boost::filesystem::path base_dir_path;
+    bool _flag_base_dir_path = false;
+
   public:
+
+
+
     boost::process::ipstream& get_io_pipe_out(){ return _io_pipe_out; }
 
     CELSLC_prm( boost::process::ipstream& async_io_buffer_out );
-
-    bool set_run_ostream( std::ostream *stream );
 
     bool _is_nz_simulated_partitions_defined();
 
@@ -135,6 +149,8 @@ class CELSLC_prm {
 
     void set_prp_dir_w(double perpendicular_dir_w);
 
+    bool set_run_ostream( std::ostream *stream );
+
     void set_super_cell_size_a(double super_cell_size_a);
 
     void set_super_cell_size_b(double super_cell_size_b);
@@ -163,6 +179,10 @@ class CELSLC_prm {
 
     bool set_bin_execname ( std::string execname );
 
+    bool set_application_logger( ApplicationLog::ApplicationLog* logger );
+
+    bool set_base_dir_path( boost::filesystem::path base_dir );
+
     int get_nz_simulated_partitions(); 
 
     int get_slice_number_from_nm_floor( double goal_thickness_nm );
@@ -179,7 +199,7 @@ class CELSLC_prm {
 
     bool cleanup_bin();
 
-    bool call_bin( );
+    bool call_bin();
     bool call_boost_bin();
     bool call_bin_ssc();
 

@@ -41,7 +41,8 @@ SOURCES +=\
     treeitem_file_delegate.cpp \
     qt_file_push_button.cpp \
     cv_tdmap_cell_image_frame.cpp \
-    cv_tdmap_cell_image_frame_delegate.cpp
+    cv_tdmap_cell_image_frame_delegate.cpp \
+    application_log.cpp
 
 
 HEADERS  += configwin.h \
@@ -67,7 +68,8 @@ HEADERS  += configwin.h \
     cv_image_cell_widget.h \
     gui_sim_updater.hpp \
     gui_stream.hpp \
-    cv_image_table_frame.h
+    cv_image_table_frame.h \
+    application_log.hpp
 
 RESOURCES     = ../im2model.qrc
 

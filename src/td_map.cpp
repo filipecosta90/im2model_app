@@ -38,20 +38,50 @@ TDMap::TDMap( boost::process::ipstream &ostream_buffer, Image_Crystal* image_cry
   number_image_aberrations = 2;
   coefficient_aberration_defocus = 0.0f;
   coefficient_aberration_spherical = 12000.f;
+}
 
+TDMap::TDMap( boost::process::ipstream &ostream_buffer, Image_Crystal* image_crystal_ptr , ApplicationLog::ApplicationLog* app_logger ) : TDMap::TDMap( ostream_buffer, image_crystal_ptr ) {
+  logger = app_logger;
+  _flag_logger = true;
+  _tdmap_celslc_parameters->set_application_logger( app_logger );
+}
+
+
+bool TDMap::set_application_logger( ApplicationLog::ApplicationLog* app_logger ){
+  logger = app_logger;
+  _flag_logger = true;
+  logger->logEvent( ApplicationLog::notification, "Application logger setted for TDMap class." );
+  _core_image_crystal_ptr->set_application_logger( app_logger );
+  _tdmap_celslc_parameters->set_application_logger( app_logger );
+  _tdmap_msa_parameters->set_application_logger( app_logger );
+  _tdmap_wavimg_parameters->set_application_logger( app_logger );
+  _td_map_simgrid->set_application_logger(app_logger);
+}
+
+bool TDMap::set_base_dir_path( boost::filesystem::path path ){
+  base_dir_path = path;
+  _flag_base_dir_path = true;
+  _core_image_crystal_ptr->set_base_dir_path( path );
+  _tdmap_celslc_parameters->set_base_dir_path( path );
+  _tdmap_msa_parameters->set_base_dir_path( path );
+  _tdmap_wavimg_parameters->set_base_dir_path( path );
+  _td_map_simgrid->set_base_dir_path(path);
+  std::stringstream message;
+  message << "TDMap baseDirPath: " << path.string();
+  logger->logEvent( ApplicationLog::notification, message.str() );
 }
 
 bool TDMap::prepare_ZA_UV(){
   /*
-  const cv::Point3d zone_axis_vector_uvw = _core_image_crystal_ptr->get_zone_axis_vector_uvw();
-  const cv::Point3d upward_vector_hkl = _core_image_crystal_ptr->get_upward_vector_hkl();
-  */
+     const cv::Point3d zone_axis_vector_uvw = _core_image_crystal_ptr->get_zone_axis_vector_uvw();
+     const cv::Point3d upward_vector_hkl = _core_image_crystal_ptr->get_upward_vector_hkl();
+     */
   return true;
 }
 
 void  TDMap::set_sim_tdmap_ostream( std::ostream* stream ){
-    _sim_tdmap_ostream = stream;
-    _flag_sim_tdmap_ostream = true;
+  _sim_tdmap_ostream = stream;
+  _flag_sim_tdmap_ostream = true;
 }
 
 bool TDMap::set_number_slices_to_max_thickness_from_nz_simulated_partitions(){
@@ -154,24 +184,24 @@ bool TDMap::calculate_thickness_range_lower_bound_slice_from_nm(){
 }
 
 cv::Mat TDMap::get_simulated_image_in_grid( int x, int y ){
-    return _td_map_simgrid->get_simulated_image_in_grid(  x,  y );
+  return _td_map_simgrid->get_simulated_image_in_grid(  x,  y );
 }
 
- double TDMap::get_simulated_image_match_in_grid( int x, int y ){
-     return _td_map_simgrid->get_simulated_image_match_in_grid(  x,  y );
- }
+double TDMap::get_simulated_image_match_in_grid( int x, int y ){
+  return _td_map_simgrid->get_simulated_image_match_in_grid(  x,  y );
+}
 
- double TDMap::get_simulated_image_thickness_nm_in_grid( int x, int y ){
-     return _td_map_simgrid->get_simulated_image_thickness_nm_in_grid(  x,  y );
- }
+double TDMap::get_simulated_image_thickness_nm_in_grid( int x, int y ){
+  return _td_map_simgrid->get_simulated_image_thickness_nm_in_grid(  x,  y );
+}
 
- int TDMap::get_simulated_image_thickness_slice_in_grid( int x, int y ){
-     return _td_map_simgrid->get_simulated_image_thickness_slice_in_grid(  x,  y );
- }
+int TDMap::get_simulated_image_thickness_slice_in_grid( int x, int y ){
+  return _td_map_simgrid->get_simulated_image_thickness_slice_in_grid(  x,  y );
+}
 
- double TDMap::get_simulated_image_defocus_in_grid( int x, int y ){
-     return _td_map_simgrid->get_simulated_image_defocus_in_grid(  x,  y );
- }
+double TDMap::get_simulated_image_defocus_in_grid( int x, int y ){
+  return _td_map_simgrid->get_simulated_image_defocus_in_grid(  x,  y );
+}
 
 bool TDMap::calculate_thickness_range_slice_period(){
   bool result = false;
@@ -234,13 +264,13 @@ bool TDMap::run_tdmap( ){
   status &= set_number_slices_to_max_thickness_from_nz_simulated_partitions();
   assert(status);
   status &= calculate_thickness_range_lower_bound_slice_from_nm();
-assert(status);
+  assert(status);
   status &= calculate_thickness_range_upper_bound_slice_from_nm();
   assert(status);
   status &= calculate_thickness_range_slice_period();
   assert(status);
   status &=  prepare_msa_parameters();
-assert(status);
+  assert(status);
   std::cout << " prepare_msa_parameters status " << status << std::endl;
   std::cout << " _run_msa_switch " << _run_msa_switch << std::endl;
   std::cout << " _is_bin_path_defined " << _tdmap_msa_parameters->_is_bin_path_defined() << std::endl;
@@ -270,7 +300,7 @@ assert(status);
 }
 
 bool TDMap::_is_simulated_images_grid_defined(){
-    return _td_map_simgrid->_is_simulated_images_grid_defined();
+  return _td_map_simgrid->_is_simulated_images_grid_defined();
 }
 
 bool  TDMap::prepare_celslc_parameters(){
