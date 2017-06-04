@@ -23,8 +23,14 @@ bool Settings::set_dr_probe_bin_path( std::string path ){
 
 bool Settings::set_q_settings_fileName( std::string filename ){
   _q_settings_fileName  = QString::fromStdString(filename);
-  QString label ("Presenting settings from file: ");
-  ui->qlabel_settings->setText( label + _q_settings_fileName );
+  QString label ("Settings file: ");
+  QString appDir ("Application dir: ");
+  QString workDir ( "Current path: " );
+  ui->qlabel_settings->setText(
+               appDir + QCoreApplication::applicationDirPath()
+              + "\n" + workDir + QDir::currentPath()
+              + label + _q_settings_fileName
+              );
   return true;
 }
 
