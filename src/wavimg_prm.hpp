@@ -14,6 +14,8 @@
 #include <string>  // for string
 #include <vector>  // for vector
 
+#include <stdlib.h>
+
 #include "application_log.hpp"
 
 class WAVIMG_prm {

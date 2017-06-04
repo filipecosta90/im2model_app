@@ -32,6 +32,8 @@
 #include <vector>                              // for vector, vector<>::iter...
 #include <system_error>
 
+#include <stdlib.h>
+
 #include "application_log.hpp"
 
 class CELSLC_prm {
