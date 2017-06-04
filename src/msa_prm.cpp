@@ -295,12 +295,14 @@ bool status = true;
     std::stringstream message;
     message << "MSA_prm baseDirPath: " << path.string();
     logger->logEvent( ApplicationLog::notification, message.str() );
+    return true;
   }
 
   bool MSA_prm::set_application_logger( ApplicationLog::ApplicationLog* app_logger ){
     logger = app_logger;
     _flag_logger = true;
     logger->logEvent( ApplicationLog::notification, "Application logger setted for MSA_prm class." );
+    return true;
   }
 
   void MSA_prm::set_wave_function_name ( std::string wave_function_filename ){

@@ -58,16 +58,17 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 }
 
 void MainWindow::set_base_dir_path( boost::filesystem::path base_dir ){
-    base_dir_path = base_dir;
-    _flag_base_dir_path = true;
-    _core_td_map->set_base_dir_path( base_dir );
+  base_dir_path = base_dir;
+  _flag_base_dir_path = true;
+  _core_td_map->set_base_dir_path( base_dir );
 }
 
 bool MainWindow::set_application_logger( ApplicationLog::ApplicationLog* logger ){
-im2model_logger = logger;
- _flag_im2model_logger = true;
- im2model_logger->logEvent( ApplicationLog::notification, "Application logger setted for MainWindow class." );
- _core_td_map->set_application_logger( logger );
+  im2model_logger = logger;
+  _flag_im2model_logger = true;
+  im2model_logger->logEvent( ApplicationLog::notification, "Application logger setted for MainWindow class." );
+  _core_td_map->set_application_logger( logger );
+  return true;
 }
 
 bool MainWindow::_is_initialization_ok(){

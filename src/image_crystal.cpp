@@ -236,10 +236,12 @@ bool Image_Crystal::set_base_dir_path( boost::filesystem::path path ){
   std::stringstream message;
   message << "Image_Crystal baseDirPath: " << path.string();
   logger->logEvent( ApplicationLog::notification, message.str() );
+  return true;
 }
 
 bool Image_Crystal::set_application_logger( ApplicationLog::ApplicationLog* app_logger ){
   logger = app_logger;
   _flag_logger = true;
   logger->logEvent( ApplicationLog::notification, "Application logger setted for Image_Crystal class." );
+  return true;
 }

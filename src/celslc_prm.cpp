@@ -204,12 +204,14 @@ bool CELSLC_prm::set_base_dir_path( boost::filesystem::path path ){
   std::stringstream message;
   message << "CELSLC_prm baseDirPath: " << path.string();
   logger->logEvent( ApplicationLog::notification, message.str() );
+  return true;
 }
 
 bool CELSLC_prm::set_application_logger( ApplicationLog::ApplicationLog* app_logger ){
   logger = app_logger;
   _flag_logger = true;
   logger->logEvent( ApplicationLog::notification, "Application logger setted for CELSLC_prm class." );
+  return true;
 }
 
 bool CELSLC_prm::set_bin_execname( std::string execname ){

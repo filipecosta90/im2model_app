@@ -329,12 +329,14 @@ bool SIMGRID_wavimg_steplength::set_base_dir_path( boost::filesystem::path path 
   std::stringstream message;
   message << "SIMGRID_wavimg_steplength baseDirPath: " << path.string();
   logger->logEvent( ApplicationLog::notification, message.str() );
+  return true;
 }
 
 bool SIMGRID_wavimg_steplength::set_application_logger( ApplicationLog::ApplicationLog* app_logger ){
   logger = app_logger;
   _flag_logger = true;
   logger->logEvent( ApplicationLog::notification, "Application logger setted for SIMGRID_wavimg_steplength class." );
+  return true;
 }
 
 void SIMGRID_wavimg_steplength::calculate_motion_euclidian_matrix( cv::Mat cropped_experimental_image_roi , cv::Mat simulated_image_roi ){

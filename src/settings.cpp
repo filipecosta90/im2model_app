@@ -29,7 +29,7 @@ bool Settings::set_q_settings_fileName( std::string filename ){
   ui->qlabel_settings->setText(
                appDir + QCoreApplication::applicationDirPath()
               + "\n" + workDir + QDir::currentPath()
-              + label + _q_settings_fileName
+              + "\n" + label + _q_settings_fileName
               );
   return true;
 }

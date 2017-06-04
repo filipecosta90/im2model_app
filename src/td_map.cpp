@@ -56,6 +56,7 @@ bool TDMap::set_application_logger( ApplicationLog::ApplicationLog* app_logger )
   _tdmap_msa_parameters->set_application_logger( app_logger );
   _tdmap_wavimg_parameters->set_application_logger( app_logger );
   _td_map_simgrid->set_application_logger(app_logger);
+  return true;
 }
 
 bool TDMap::set_base_dir_path( boost::filesystem::path path ){
@@ -69,6 +70,7 @@ bool TDMap::set_base_dir_path( boost::filesystem::path path ){
   std::stringstream message;
   message << "TDMap baseDirPath: " << path.string();
   logger->logEvent( ApplicationLog::notification, message.str() );
+  return true;
 }
 
 bool TDMap::prepare_ZA_UV(){
