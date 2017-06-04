@@ -2,7 +2,7 @@
 
 static const std::string DAT_EXTENSION = ".dat";
 
-WAVIMG_prm::WAVIMG_prm()
+WAVIMG_prm::WAVIMG_prm( boost::process::ipstream &async_io_buffer_out ) : _io_pipe_out(async_io_buffer_out)
 {
   // line 1
   file_name_input_wave_function = "";
@@ -83,12 +83,12 @@ WAVIMG_prm::WAVIMG_prm()
   runned_bin = false;
 }
 
-WAVIMG_prm::WAVIMG_prm( std::string wavimg_bin_path ) : WAVIMG_prm(){
+WAVIMG_prm::WAVIMG_prm( std::string wavimg_bin_path , boost::process::ipstream &async_io_buffer_out )  : WAVIMG_prm( async_io_buffer_out ){
   bin_path = wavimg_bin_path;
   _flag_bin_path = true;
 }
 
-WAVIMG_prm::WAVIMG_prm(const WAVIMG_prm &obj){
+WAVIMG_prm::WAVIMG_prm(const WAVIMG_prm &obj) : _io_pipe_out(obj._io_pipe_out) {
   // line 1
   file_name_input_wave_function = obj.file_name_input_wave_function;
   // line 2
@@ -165,6 +165,16 @@ WAVIMG_prm::WAVIMG_prm(const WAVIMG_prm &obj){
   prm_filename = obj.prm_filename;
   bin_path = obj.bin_path;
   debug_switch = obj.debug_switch;
+
+  _flag_io_ap_pipe_out = obj._flag_io_ap_pipe_out;
+
+  /* Loggers */
+  logger = obj.logger;
+  _flag_logger = obj._flag_logger;
+
+  /* Base dir path */
+  base_dir_path = obj.base_dir_path;
+  _flag_base_dir_path = obj._flag_base_dir_path;
 }
 
 bool WAVIMG_prm::set_bin_execname( std::string execname ){
@@ -446,125 +456,228 @@ bool WAVIMG_prm::call_bin(){
   std::cout << " _is_prm_filename_path_defined " <<  _is_prm_filename_path_defined() << std::endl;
 
   if( _is_prm_produced() && _is_prm_filename_path_defined() ){
+
     std::stringstream args_stream;
     args_stream << full_bin_path_execname;
+
     // input -prm
-    args_stream << " -prm " << prm_filename_path;
+    boost::filesystem::path dir ( base_dir_path );
+    boost::filesystem::path prm_file ( prm_filename );
+    boost::filesystem::path full_prm_path = dir / prm_file;
+
+    args_stream << " -prm " << "\"" << prm_file.string() << "\"";
+
     // input debug switch
     if ( debug_switch ){
       args_stream << " /dbg";
     }
-    std::cout << "going to run boost process with args: "<< args_stream.str() << std::endl;
 
-    boost::process::system( args_stream.str() );
-    result = true;
-  }
-  return result;
-}
-
-bool WAVIMG_prm::_is_bin_path_defined(){
-  return _flag_bin_path;
-}
-
-void WAVIMG_prm::set_prm_file_name( std::string filename ){
-  prm_filename = filename;
-  _flag_prm_filename = true;
-}
-
-bool WAVIMG_prm::_is_prm_filename_defined(){
-  return _flag_prm_filename;
-}
-
-bool WAVIMG_prm::_is_prm_produced(){
-  return _flag_produced_prm;
-}
-
-bool WAVIMG_prm::set_bin_path( std::string path ){
-  boost::filesystem::path bin_dir(path);
-  bool result = false;
-  if( boost::filesystem::is_directory( bin_dir ) ){
-    bin_path = path;
-    _flag_bin_path = true;
-    result = true;
-  }
-  return result;
-}
-
-void WAVIMG_prm::set_debug_switch(bool deb_switch){
-  debug_switch = deb_switch;
-}
-
-bool WAVIMG_prm::produce_prm ( ) {
-  bool result = false;
-  if ( _is_prm_filename_defined() ){
-    std::ofstream outfile;
-
-    outfile.open(prm_filename);
-    // line 1
-    outfile  << file_name_input_wave_function << " !" << std::endl;
-    // line 2
-    outfile <<  n_columns_samples_input_wave_function_pixels << ", " << n_rows_samples_input_wave_function_pixels << " !" << std::endl;
-    // line 3
-    outfile  << physical_columns_sampling_rate_input_wave_function_nm_pixels << ", " << physical_rows_sampling_rate_input_wave_function_nm_pixels << " !" << std::endl;
-    // line 4
-    outfile <<  primary_electron_energy << " !" << std::endl;
-    // line 5
-    outfile <<  type_of_output << " !" << std::endl;
-    // line 6
-    outfile <<  file_name_output_image_wave_function<< " !" << std::endl;
-    // line 7
-    outfile <<  n_columns_samples_output_image << ", " << n_rows_samples_output_image << " !" << std::endl;
-    // line 8
-    outfile <<  image_data_type << ", " << image_vacuum_mean_intensity << ", " << conversion_rate << ", " <<  readout_noise_rms_amplitude << " !" << std::endl;
-    // line 9
-    outfile <<  switch_option_extract_particular_image_frame << " !" << std::endl;
-    // line 10
-    outfile <<  image_sampling_rate_nm_pixel << " !" << std::endl;
-    // line 11
-    outfile <<  image_frame_offset_x_pixels_input_wave_function << ", " << image_frame_offset_y_pixels_input_wave_function << " !" << std::endl;
-    // line 12
-    outfile <<  image_frame_rotation << " !" << std::endl;
-    // line 13
-    outfile <<  switch_coherence_model << " !" << std::endl;
-    // line 14
-    outfile <<  partial_temporal_coherence_switch << ", " << partial_temporal_coherence_focus_spread << " !" << std::endl;
-    // line 15
-    outfile <<  partial_spacial_coherence_switch << ", " << partial_spacial_coherence_semi_convergence_angle << " !" << std::endl;
-    // line 16
-    outfile <<  mtf_simulation_switch << ", " << k_space_scaling << ", " <<  file_name_simulation_frequency_modulated_detector_transfer_function << " !" << std::endl;
-    // line 17
-    outfile <<  simulation_image_spread_envelope_switch << ", " << isotropic_one_rms_amplitude << " !" << std::endl;
-    // double anisotropic_second_rms_amplitude;
-    //double azimuth_orientation_angle;
-    // line 18
-    outfile <<  number_image_aberrations_set << " !" << std::endl;
-    // line 19
-
-    for ( int pos = 0 ; pos < number_image_aberrations_set ; pos++){
-      outfile << aberration_definition_index_number.at(pos) << ", " << aberration_definition_1st_coefficient_value_nm.at(pos) << ", "<< aberration_definition_2nd_coefficient_value_nm.at(pos) << " !" << std::endl;
+    if( _flag_logger ){
+      std::stringstream message;
+      message << "going to run boost process with args: "<< args_stream.str();
+      logger->logEvent( ApplicationLog::notification , message.str() );
     }
-    // line 19 + aberration_definition_index_number
-    outfile <<  objective_aperture_radius << " !" << std::endl;
-    // line 20 + aberration_definition_index_number
-    outfile <<  center_x_of_objective_aperture << ", " << center_y_of_objective_aperture << " !" << std::endl;
-    // line 21
-    outfile <<  number_parameter_loops << std::endl;
-    for ( int pos = 0 ; pos < number_parameter_loops ; pos++){
-      // line 22 + aberration_definition_index_number
-      outfile << loop_parameter_class.at(pos) << " !" << std::endl;
-      // line 23 + aberration_definition_index_number
-      outfile <<  loop_parameter_index.at(pos) << " !" << std::endl;
-      // line 24 + aberration_definition_index_number
-      outfile << loop_variation_form.at(pos) << " !" << std::endl;
-      // line 25 + aberration_definition_index_number
-      outfile << loop_range_0.at(pos) << ", " << loop_range_1.at(pos) << ", " << loop_range_n.at(pos) << " !" << std::endl;
-      // line 26 + aberration_definition_index_number
-      outfile << loop_string_indentifier.at(pos) << " !" << std::endl;
+
+    int _child_exit_code = -1;
+    std::error_code _error_code;
+    /////// WORK MORE HERE
+    _flag_io_ap_pipe_out = false;
+    if(  _flag_io_ap_pipe_out  ){
+      boost::process::child c(
+          // command
+          args_stream.str(),
+          //define the child's work directory.
+          boost::process::start_dir= base_dir_path,
+          // redirecting std_out to async buffer
+          boost::process::std_out > _io_pipe_out ,
+          // redirecting std_err to null
+          // boost::process::std_err > boost::process::detail::
+          _error_code
+          );
+
+      c.wait();
+      _child_exit_code = c.exit_code();
     }
-    outfile.close();
-    _flag_produced_prm = save_prm_filename_path();
-    result = _flag_produced_prm;
+    else{
+      boost::process::child c(
+          // command
+          args_stream.str(),
+          //define the child's work directory.
+          boost::process::start_dir= base_dir_path,
+          // redirecting std_out to null
+          boost::process::std_out > boost::process::null,
+          // redirecting std_err to null
+          //   boost::process::std_err > boost::process::null,
+          _error_code
+          );
+      c.wait();
+      _child_exit_code = c.exit_code();
+    }
+
+#if defined(BOOST_WINDOWS_API)
+    if( _flag_logger ){
+      std::stringstream message;
+      message << "(EXIT_SUCCESS == _child_exit_code) "<< (EXIT_SUCCESS == WEXITSTATUS(_child_exit_code));
+      logger->logEvent( ApplicationLog::notification , message.str() );
+    }
+    assert((EXIT_SUCCESS == _child_exit_code));
+#elif defined(BOOST_POSIX_API)
+    if( _flag_logger ){
+      std::stringstream message;
+      message << "(EXIT_SUCCESS == WEXITSTATUS(_child_exit_code)) "<< (EXIT_SUCCESS == WEXITSTATUS(_child_exit_code));
+      logger->logEvent( ApplicationLog::notification , message.str() );
+    }
+    assert((EXIT_SUCCESS == WEXITSTATUS(_child_exit_code)));
+#endif
+
+    if( _error_code ){
+      std::cout << "ERROR CODE:" << _error_code.value() << " MESSAGE:" << _error_code.message();
+      if( _flag_logger ){
+        std::stringstream message;
+        message << "ERROR CODE:" << _error_code.value() << " MESSAGE:" << _error_code.message();
+        logger->logEvent( ApplicationLog::notification , message.str() );
+      }
+    }
+    assert ( !_error_code );
+
+#if defined(BOOST_WINDOWS_API)
+    if (EXIT_SUCCESS == _child_exit_code){
+#elif defined(BOOST_POSIX_API)
+      if( (EXIT_SUCCESS == WEXITSTATUS(_child_exit_code)) ){
+#endif
+        runned_bin = true;
+        result = true;
+      }
+    }
+    return result;
   }
-  return result;
-}
+
+  bool WAVIMG_prm::_is_bin_path_defined(){
+    return _flag_bin_path;
+  }
+
+  void WAVIMG_prm::set_prm_file_name( std::string filename ){
+    prm_filename = filename;
+    _flag_prm_filename = true;
+  }
+
+  bool WAVIMG_prm::_is_prm_filename_defined(){
+    return _flag_prm_filename;
+  }
+
+  bool WAVIMG_prm::_is_prm_produced(){
+    return _flag_produced_prm;
+  }
+
+  bool WAVIMG_prm::set_bin_path( std::string path ){
+    boost::filesystem::path bin_dir(path);
+    bool result = false;
+    if( boost::filesystem::is_directory( bin_dir ) ){
+      bin_path = path;
+      _flag_bin_path = true;
+      result = true;
+    }
+    return result;
+  }
+
+  void WAVIMG_prm::set_debug_switch(bool deb_switch){
+    debug_switch = deb_switch;
+  }
+
+  bool WAVIMG_prm::produce_prm ( ) {
+    bool result = false;
+    if ( _is_prm_filename_defined() ){
+
+      boost::filesystem::path dir ( base_dir_path );
+      boost::filesystem::path file ( prm_filename );
+      boost::filesystem::path full_path = dir / file;
+      std::ofstream outfile;
+
+      outfile.open(full_path.string());
+      // line 1
+      boost::filesystem::path input_wave_function ( file_name_input_wave_function );
+      boost::filesystem::path input_wave_function_full_path = dir / input_wave_function;
+      std::stringstream  input_prefix_stream ;
+      input_prefix_stream << "'" << file_name_input_wave_function << "_sl.wav"<< "'";
+      outfile  << input_prefix_stream.str() << " !" << std::endl;
+      // line 2
+      outfile <<  n_columns_samples_input_wave_function_pixels << ", " << n_rows_samples_input_wave_function_pixels << " !" << std::endl;
+      // line 3
+      outfile  << physical_columns_sampling_rate_input_wave_function_nm_pixels << ", " << physical_rows_sampling_rate_input_wave_function_nm_pixels << " !" << std::endl;
+      // line 4
+      outfile <<  primary_electron_energy << " !" << std::endl;
+      // line 5
+      outfile <<  type_of_output << " !" << std::endl;
+      // line 6
+
+      boost::filesystem::path output_wave_function ( file_name_output_image_wave_function );
+      boost::filesystem::path output_wave_function_full_path = dir / output_wave_function;
+      std::stringstream  output_prefix_stream ;
+      output_prefix_stream << "'" << file_name_output_image_wave_function << ".dat" << "'";
+
+      outfile <<  output_prefix_stream.str() << " !" << std::endl;
+      // line 7
+      outfile <<  n_columns_samples_output_image << ", " << n_rows_samples_output_image << " !" << std::endl;
+      // line 8
+      outfile <<  image_data_type << ", " << image_vacuum_mean_intensity << ", " << conversion_rate << ", " <<  readout_noise_rms_amplitude << " !" << std::endl;
+      // line 9
+      outfile <<  switch_option_extract_particular_image_frame << " !" << std::endl;
+      // line 10
+      outfile <<  image_sampling_rate_nm_pixel << " !" << std::endl;
+      // line 11
+      outfile <<  image_frame_offset_x_pixels_input_wave_function << ", " << image_frame_offset_y_pixels_input_wave_function << " !" << std::endl;
+      // line 12
+      outfile <<  image_frame_rotation << " !" << std::endl;
+      // line 13
+      outfile <<  switch_coherence_model << " !" << std::endl;
+      // line 14
+      outfile <<  partial_temporal_coherence_switch << ", " << partial_temporal_coherence_focus_spread << " !" << std::endl;
+      // line 15
+      outfile <<  partial_spacial_coherence_switch << ", " << partial_spacial_coherence_semi_convergence_angle << " !" << std::endl;
+      // line 16
+      outfile <<  mtf_simulation_switch << ", " << k_space_scaling << ", " <<  file_name_simulation_frequency_modulated_detector_transfer_function << " !" << std::endl;
+      // line 17
+      outfile <<  simulation_image_spread_envelope_switch << ", " << isotropic_one_rms_amplitude << " !" << std::endl;
+      // double anisotropic_second_rms_amplitude;
+      //double azimuth_orientation_angle;
+      // line 18
+      outfile <<  number_image_aberrations_set << " !" << std::endl;
+      // line 19
+
+      for ( int pos = 0 ; pos < number_image_aberrations_set ; pos++){
+        outfile << aberration_definition_index_number.at(pos) << ", " << aberration_definition_1st_coefficient_value_nm.at(pos) << ", "<< aberration_definition_2nd_coefficient_value_nm.at(pos) << " !" << std::endl;
+      }
+      // line 19 + aberration_definition_index_number
+      outfile <<  objective_aperture_radius << " !" << std::endl;
+      // line 20 + aberration_definition_index_number
+      outfile <<  center_x_of_objective_aperture << ", " << center_y_of_objective_aperture << " !" << std::endl;
+      // line 21
+      outfile <<  number_parameter_loops << std::endl;
+      for ( int pos = 0 ; pos < number_parameter_loops ; pos++){
+        // line 22 + aberration_definition_index_number
+        outfile << loop_parameter_class.at(pos) << " !" << std::endl;
+        // line 23 + aberration_definition_index_number
+        outfile <<  loop_parameter_index.at(pos) << " !" << std::endl;
+        // line 24 + aberration_definition_index_number
+        outfile << loop_variation_form.at(pos) << " !" << std::endl;
+        // line 25 + aberration_definition_index_number
+        outfile << loop_range_0.at(pos) << ", " << loop_range_1.at(pos) << ", " << loop_range_n.at(pos) << " !" << std::endl;
+        // line 26 + aberration_definition_index_number
+        outfile << loop_string_indentifier.at(pos) << " !" << std::endl;
+      }
+
+      outfile.close();
+      if( _flag_logger ){
+        std::stringstream message;
+        message << "checking if WAVIMG prm file was produced. filename: " <<  full_path.string() << " || result: " << boost::filesystem::exists( full_path.string() ) << std::endl;
+        logger->logEvent( ApplicationLog::notification , message.str() );
+      }
+      _flag_produced_prm = boost::filesystem::exists( full_path );//save_prm_filename_path();
+
+      prm_filename_path = boost::filesystem::canonical( full_path ).string();
+      _flag_prm_filename_path = _flag_produced_prm;
+      result = _flag_produced_prm;
+    }
+    return result;
+  }
 

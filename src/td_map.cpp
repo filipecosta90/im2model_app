@@ -3,9 +3,9 @@
 TDMap::TDMap( boost::process::ipstream &ostream_buffer, Image_Crystal* image_crystal_ptr ) : _sim_tdmap_ostream_buffer( ostream_buffer ) {
   _core_image_crystal_ptr = image_crystal_ptr;
   _tdmap_celslc_parameters = new CELSLC_prm( ostream_buffer );
-  _tdmap_msa_parameters = new MSA_prm();
-  _tdmap_wavimg_parameters = new WAVIMG_prm();
-  _td_map_simgrid = new SIMGRID_wavimg_steplength();
+  _tdmap_msa_parameters = new MSA_prm( ostream_buffer );
+  _tdmap_wavimg_parameters = new WAVIMG_prm( ostream_buffer );
+  _td_map_simgrid = new SIMGRID_wavimg_steplength( ostream_buffer );
 
   _ignore_edge_pixels_sim_images = 0;
   nx_ny_switch = false;
@@ -26,11 +26,11 @@ TDMap::TDMap( boost::process::ipstream &ostream_buffer, Image_Crystal* image_cry
   slc_file_name_prefix = "test";
   _flag_slc_file_name_prefix = true;
 
-  wave_function_name = "'wave_sl.wav'";
+  wave_function_name = "wave";
   _flag_wave_function_name = true;
   wavimg_prm_name = "temporary_wavimg_im2model.prm";
   _flag_wavimg_prm_name = true;
-  file_name_output_image_wave_function = "'image.dat'";
+  file_name_output_image_wave_function = "image";
   _flag_file_name_output_image_wave_function = true;
 
   cd_switch = true;
@@ -274,16 +274,19 @@ bool TDMap::run_tdmap( ){
   std::cout << " prepare_msa_parameters status " << status << std::endl;
   std::cout << " _run_msa_switch " << _run_msa_switch << std::endl;
   std::cout << " _is_bin_path_defined " << _tdmap_msa_parameters->_is_bin_path_defined() << std::endl;
+  assert(_tdmap_msa_parameters->_is_bin_path_defined());
   if ( status && _run_msa_switch &&  _tdmap_msa_parameters->_is_bin_path_defined() ){
     std::cout << "Running msa" << std::endl;
     _flag_runned_tdmap_msa = _tdmap_msa_parameters->call_bin();
     status = _flag_runned_tdmap_msa;
   }
+  assert(status);
   status = prepare_wavimg_parameters();
+  assert(status);
   std::cout << " prepare_wavimg_parameters status " << status << std::endl;
   std::cout << " _run_wavimg_switch " << _run_wavimg_switch << std::endl;
   std::cout << " _is_bin_path_defined " << _tdmap_wavimg_parameters->_is_bin_path_defined() << std::endl;
-
+  assert(_tdmap_wavimg_parameters->_is_bin_path_defined());
   if ( status && _run_wavimg_switch &&  _tdmap_wavimg_parameters->_is_bin_path_defined() ){
     std::cout << "Running wavimg" << std::endl;
     _flag_runned_tdmap_wavimg = _tdmap_wavimg_parameters->call_bin();
@@ -366,9 +369,7 @@ bool  TDMap::prepare_msa_parameters(){
     _tdmap_msa_parameters->set_internal_repeat_factor_of_super_cell_along_x ( 1 );
     _tdmap_msa_parameters->set_internal_repeat_factor_of_super_cell_along_y ( 1 );
     std::stringstream input_prefix_stream;
-    input_prefix_stream << "'" << slc_file_name_prefix << "'";
-    std::string input_prefix_string = input_prefix_stream.str();
-    _tdmap_msa_parameters->set_slice_filename_prefix ( input_prefix_string );
+    _tdmap_msa_parameters->set_slice_filename_prefix ( slc_file_name_prefix );
     _tdmap_msa_parameters->set_number_slices_to_load ( slices_load );
     _tdmap_msa_parameters->set_number_frozen_lattice_variants_considered_per_slice( 1 );
     _tdmap_msa_parameters->set_minimum_number_frozen_phonon_configurations_used_generate_wave_functions ( 1 );
@@ -376,7 +377,7 @@ bool  TDMap::prepare_msa_parameters(){
     _tdmap_msa_parameters->set_number_slices_used_describe_full_object_structure_up_to_its_maximum_thickness ( number_slices_to_max_thickness );
     _tdmap_msa_parameters->set_linear_slices_for_full_object_structure();
     _tdmap_msa_parameters->set_prm_file_name("temporary_msa_im2model.prm");
-    _tdmap_msa_parameters->set_wave_function_name ("wave.wav");
+    _tdmap_msa_parameters->set_wave_function_name ( wave_function_name );
     _tdmap_msa_parameters->produce_prm();
 
     _flag_tdmap_msa_parameters = true;
@@ -434,7 +435,7 @@ bool  TDMap::prepare_wavimg_parameters(){
     // setters line 16
     _tdmap_wavimg_parameters->set_mtf_simulation_switch( 1 ); // alterar aqui para 0
     _tdmap_wavimg_parameters->set_k_space_scaling( 1.0f );
-    _tdmap_wavimg_parameters->set_file_name_simulation_frequency_modulated_detector_transfer_function( "'../simulation/mtf/MTF-US2k-300.mtf'" );
+    _tdmap_wavimg_parameters->set_file_name_simulation_frequency_modulated_detector_transfer_function( "'/Users/filipeoliveira/Documents/im2model/simulation/mtf/MTF-US2k-300.mtf'" );
     // setters line 17
     _tdmap_wavimg_parameters->set_simulation_image_spread_envelope_switch( 0 );
     _tdmap_wavimg_parameters->set_isotropic_one_rms_amplitude( 0.03 ); // colocar a zero

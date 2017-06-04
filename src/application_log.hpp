@@ -17,32 +17,30 @@
 #include <boost/filesystem.hpp>
 
 namespace ApplicationLog {
-namespace logging = boost::log;
-namespace expr = boost::log::expressions;
-namespace sinks = boost::log::sinks;
-namespace attrs = boost::log::attributes;
-namespace src = boost::log::sources;
-namespace keywords = boost::log::keywords;
+  namespace logging = boost::log;
+  namespace expr = boost::log::expressions;
+  namespace sinks = boost::log::sinks;
+  namespace attrs = boost::log::attributes;
+  namespace src = boost::log::sources;
+  namespace keywords = boost::log::keywords;
 
-
-enum severity_level
-{
+  enum severity_level {
     normal,
     notification,
     warning,
     error,
     critical
-};
+  };
 
-class ApplicationLog {
-  public:
-    ApplicationLog( boost::filesystem::path full_path_file );
-    void logEvent(const severity_level level, std::string message);
+  class ApplicationLog {
+    public:
+      ApplicationLog( boost::filesystem::path full_path_file );
+      void logEvent(const severity_level level, std::string message);
 
-  private:
-    src::severity_logger<severity_level> m_logger;
-    boost::filesystem::path full_path_file;
-};
+    private:
+      src::severity_logger<severity_level> m_logger;
+      boost::filesystem::path full_path_file;
+  };
 
 }
 

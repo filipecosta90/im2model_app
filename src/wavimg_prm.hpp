@@ -111,7 +111,11 @@ class WAVIMG_prm {
     bool save_prm_filename_path();
     bool _is_prm_filename_path_defined();
     bool _is_prm_produced();
-    bool _is_prm_filename_defined();
+    bool _is_prm_filename_defined(); 
+
+    /* boost process output streams */
+    boost::process::ipstream& _io_pipe_out;
+    bool _flag_io_ap_pipe_out = true;
 
     /* Loggers */
     ApplicationLog::ApplicationLog* logger = nullptr;
@@ -122,8 +126,8 @@ class WAVIMG_prm {
     bool _flag_base_dir_path = false;
 
   public:
-    WAVIMG_prm();
-    WAVIMG_prm( std::string wavimg_bin_path );
+    WAVIMG_prm( boost::process::ipstream& async_io_buffer_out );
+    WAVIMG_prm( std::string wavimg_bin_path, boost::process::ipstream& async_io_buffer_out );
     WAVIMG_prm(const WAVIMG_prm &obj);
 
     bool _is_bin_path_defined();

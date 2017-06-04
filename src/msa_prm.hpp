@@ -1,17 +1,16 @@
 #ifndef __MSA_PRM_H__
 #define __MSA_PRM_H__
 
-/* BEGIN BOOST */
+/** START BOOST **/
 #include <boost/process.hpp>
+#include <boost/thread.hpp>
+#include <boost/filesystem.hpp>
 #include <boost/filesystem/operations.hpp>                // for directory_iterator
 #include <boost/filesystem/path.hpp>                      // for path, operator==, oper...
-#include <boost/iterator/iterator_facade.hpp>             // for iterator_facade_base
-#include <boost/thread.hpp>                               // for thread
-/* END BOOST */
+/** END BOOST **/
 
 #include <fstream>                             // for basic_ostream, operator<<
 #include <vector>                              // for allocator, vector
-
 
 #include <iosfwd>  // for string
 #include <string>  // for string
@@ -80,6 +79,10 @@ class MSA_prm {
     bool _is_prm_produced();
     bool _is_prm_filename_defined();
 
+    /* boost process output streams */
+    boost::process::ipstream& _io_pipe_out;
+    bool _flag_io_ap_pipe_out = true;
+
     /* Loggers */
     ApplicationLog::ApplicationLog* logger = nullptr;
     bool _flag_logger = false;
@@ -89,7 +92,7 @@ class MSA_prm {
     bool _flag_base_dir_path = false;
 
   public:
-    MSA_prm();
+    MSA_prm( boost::process::ipstream& async_io_buffer_out );
 
     bool _is_bin_path_defined();
 
@@ -127,11 +130,15 @@ class MSA_prm {
 
     bool set_base_dir_path( boost::filesystem::path base_dir );
 
+    boost::process::ipstream& get_io_pipe_out(){ return _io_pipe_out; }
+
     bool produce_prm();
 
     bool cleanup_bin();
 
     bool call_bin();
+
+    bool check_produced_waves();
 
 };
 

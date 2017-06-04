@@ -9,9 +9,6 @@
 #include <boost/filesystem/path.hpp>                      // for path, operator==, oper...
 /** END BOOST **/
 
-/** BOOST LOGGING **/
-#include <boost/log/trivial.hpp>
-
 #include <opencv2/core/hal/interface.h>                   // for CV_8UC1
 #include <opencv2/imgcodecs/imgcodecs_c.h>                // for ::CV_LOAD_I...
 #include <opencv2/core.hpp>                               // for RNG
@@ -92,18 +89,10 @@ class CELSLC_prm {
     void cleanup_thread(); 
     bool prepare_bin_ssc();
     bool prepare_nz_simulated_partitions_from_ssc_prm();
-    bool log_std_out; 
-    bool log_std_err;
-    std::vector <char> _io_ap_buffer_out;
-    std::vector <char> _io_ap_buffer_err;
 
+    /* boost process output streams */
     boost::process::ipstream& _io_pipe_out;
-
-    boost::process::pipe _io_pipe_err;
-
     bool _flag_io_ap_pipe_out = true;
-    std::ostream *run_ostream = nullptr;
-    bool _flag_run_ostream = false;
 
     /* Loggers */
     ApplicationLog::ApplicationLog* logger = nullptr;
@@ -114,10 +103,6 @@ class CELSLC_prm {
     bool _flag_base_dir_path = false;
 
   public:
-
-
-
-    boost::process::ipstream& get_io_pipe_out(){ return _io_pipe_out; }
 
     CELSLC_prm( boost::process::ipstream& async_io_buffer_out );
 
@@ -192,6 +177,8 @@ class CELSLC_prm {
     std::vector<double> get_slice_params_nm_slice_vec();
 
     std::vector<double> get_slice_params_accum_nm_slice_vec();
+
+    boost::process::ipstream& get_io_pipe_out(){ return _io_pipe_out; }
 
     bool update_nz_simulated_partitions_from_prm();
 

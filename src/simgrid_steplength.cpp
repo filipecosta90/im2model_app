@@ -2,7 +2,7 @@
 
 
 bool SIMGRID_wavimg_steplength::_is_simulated_images_grid_defined(){
-    return runned_simulation;
+  return runned_simulation;
 }
 
 int SIMGRID_wavimg_steplength::imregionalmax(cv::Mat input, cv::Mat locations){
@@ -76,31 +76,31 @@ cv::Mat SIMGRID_wavimg_steplength::gradientY(cv::Mat & mat, double spacing) {
 }
 
 cv::Mat SIMGRID_wavimg_steplength::get_simulated_image_in_grid( int row_thickness, int col_defocus ){
-    std::vector<cv::Mat> simulated_images_row = simulated_images_grid.at(row_thickness);
-    cv::Mat cleaned_simulated_image = simulated_images_row.at(col_defocus);
-return cleaned_simulated_image;
+  std::vector<cv::Mat> simulated_images_row = simulated_images_grid.at(row_thickness);
+  cv::Mat cleaned_simulated_image = simulated_images_row.at(col_defocus);
+  return cleaned_simulated_image;
 }
 
- double SIMGRID_wavimg_steplength::get_simulated_image_match_in_grid( int row_thickness, int col_defocus ){
-     return (double) match_values_matrix.at<float>( row_thickness, col_defocus );
- }
+double SIMGRID_wavimg_steplength::get_simulated_image_match_in_grid( int row_thickness, int col_defocus ){
+  return (double) match_values_matrix.at<float>( row_thickness, col_defocus );
+}
 
- int SIMGRID_wavimg_steplength::get_simulated_image_thickness_slice_in_grid( int row_thickness, int col_defocus ){
-     const int at_slice = thickness_values_matrix.at<float>(row_thickness, col_defocus);
-     return at_slice;
- }
+int SIMGRID_wavimg_steplength::get_simulated_image_thickness_slice_in_grid( int row_thickness, int col_defocus ){
+  const int at_slice = thickness_values_matrix.at<float>(row_thickness, col_defocus);
+  return at_slice;
+}
 
- double SIMGRID_wavimg_steplength::get_simulated_image_thickness_nm_in_grid( int row_thickness, int col_defocus ){
-     const int at_slice = thickness_values_matrix.at<float>(row_thickness, col_defocus);
-     const double slice_thickness_nm = celslc_accum_nm_slice_vec.at(at_slice-1);
-     return slice_thickness_nm;
- }
+double SIMGRID_wavimg_steplength::get_simulated_image_thickness_nm_in_grid( int row_thickness, int col_defocus ){
+  const int at_slice = thickness_values_matrix.at<float>(row_thickness, col_defocus);
+  const double slice_thickness_nm = celslc_accum_nm_slice_vec.at(at_slice-1);
+  return slice_thickness_nm;
+}
 
- double SIMGRID_wavimg_steplength::get_simulated_image_defocus_in_grid( int row_thickness, int col_defocus ){
-     return (double) defocus_values_matrix.at<float>( row_thickness, col_defocus );
- }
+double SIMGRID_wavimg_steplength::get_simulated_image_defocus_in_grid( int row_thickness, int col_defocus ){
+  return (double) defocus_values_matrix.at<float>( row_thickness, col_defocus );
+}
 
-SIMGRID_wavimg_steplength::SIMGRID_wavimg_steplength()
+SIMGRID_wavimg_steplength::SIMGRID_wavimg_steplength( boost::process::ipstream& async_io_buffer_out ) : _io_pipe_out(async_io_buffer_out)
 {
   // // // // //
   // simulation parameters
@@ -324,17 +324,17 @@ void SIMGRID_wavimg_steplength::set_step_size( cv::Point2f defocus_slice_step ){
 }
 
 bool SIMGRID_wavimg_steplength::set_base_dir_path( boost::filesystem::path path ){
-    base_dir_path = path;
-   _flag_base_dir_path = true;
-   std::stringstream message;
-   message << "SIMGRID_wavimg_steplength baseDirPath: " << path.string();
-   logger->logEvent( ApplicationLog::notification, message.str() );
+  base_dir_path = path;
+  _flag_base_dir_path = true;
+  std::stringstream message;
+  message << "SIMGRID_wavimg_steplength baseDirPath: " << path.string();
+  logger->logEvent( ApplicationLog::notification, message.str() );
 }
 
 bool SIMGRID_wavimg_steplength::set_application_logger( ApplicationLog::ApplicationLog* app_logger ){
-logger = app_logger;
-_flag_logger = true;
-logger->logEvent( ApplicationLog::notification, "Application logger setted for SIMGRID_wavimg_steplength class." );
+  logger = app_logger;
+  _flag_logger = true;
+  logger->logEvent( ApplicationLog::notification, "Application logger setted for SIMGRID_wavimg_steplength class." );
 }
 
 void SIMGRID_wavimg_steplength::calculate_motion_euclidian_matrix( cv::Mat cropped_experimental_image_roi , cv::Mat simulated_image_roi ){
@@ -611,7 +611,13 @@ void SIMGRID_wavimg_steplength::produce_png_from_dat_file(){
       output_dat_name_stream << "image_" << std::setw(3) << std::setfill('0') << std::to_string(thickness) << "_" << std::setw(3) << std::setfill('0') << std::to_string(defocus) << ".dat";
       std::string file_name_output_dat = output_dat_name_stream.str();
       std::cout << "Opening " << file_name_output_dat << " to retrieve thickness " << slice_thickness_nm << " nm (sl "<< at_slice << "), defocus " << at_defocus << std::endl;
-      boost::iostreams::mapped_file_source mmap( output_dat_name_stream.str() );
+
+      boost::filesystem::path dir ( base_dir_path );
+      boost::filesystem::path file ( output_dat_name_stream.str() );
+      boost::filesystem::path full_path = dir / file;
+      // std::ofstream outfile;
+
+      boost::iostreams::mapped_file_source mmap( full_path );
       float* p;
       std::cout << "size of file: " << mmap.size() << std::endl;
       p = (float*)mmap.data();
@@ -696,7 +702,14 @@ bool SIMGRID_wavimg_steplength::simulate_from_dat_file(){
         std::cout << "Opening " << file_name_output_dat << " to retrieve thickness " << slice_thickness_nm << " nm (sl "<< at_slice << "), defocus " << at_defocus << std::endl;
       }
       // Load image
-      boost::iostreams::mapped_file_source mmap( output_dat_name_stream.str() );
+
+      boost::filesystem::path dir ( base_dir_path );
+      boost::filesystem::path file ( output_dat_name_stream.str() );
+      boost::filesystem::path full_path = dir / file;
+      // std::ofstream outfile;
+
+      boost::iostreams::mapped_file_source mmap( full_path );
+
       float* p;
       std::cout << "size of file: " << mmap.size() << std::endl;
       assert( mmap.is_open() );
@@ -746,9 +759,9 @@ bool SIMGRID_wavimg_steplength::simulate_from_dat_file(){
       std::stringstream output_debug_info1;
 
       output_debug_info1 << "with_rectangle_sim_" << std::setw(3) << std::setfill('0') << std::to_string(thickness) << "_" << std::setw(3) << std::setfill('0') << std::to_string(defocus) << ".png";
-      boost::filesystem::path full_path(output_debug_info1.str());
+      boost::filesystem::path full_path1(output_debug_info1.str());
 
-      std::string string_output_debug_info1 = full_path.string(); // full_path.append(output_debug_info1.str()).string();
+      std::string string_output_debug_info1 = full_path1.string(); // full_path.append(output_debug_info1.str()).string();
       // get the .dat image name
       std::stringstream output_debug_info2;
       output_debug_info2 << "no_reshape_sim_raw_" << std::setw(3) << std::setfill('0') << std::to_string(thickness) << "_" << std::setw(3) << std::setfill('0') << std::to_string(defocus) << ".png";

@@ -181,6 +181,10 @@ class SIMGRID_wavimg_steplength {
     const int legend_position_y_bottom_left_line_4 = 80;
     const int legend_position_y_bottom_left_line_5 = 100;
 
+    /* boost process output streams */
+    boost::process::ipstream& _io_pipe_out;
+    bool _flag_io_ap_pipe_out = true;
+
     /* Loggers */
     ApplicationLog::ApplicationLog* logger = nullptr;
     bool _flag_logger = false;
@@ -191,6 +195,8 @@ class SIMGRID_wavimg_steplength {
 
   public:
 
+    SIMGRID_wavimg_steplength( boost::process::ipstream& async_io_buffer_out );
+
     bool _is_simulated_images_grid_defined();
 
     int imregionalmax(cv::Mat input , cv::Mat locations);
@@ -200,8 +206,6 @@ class SIMGRID_wavimg_steplength {
     static cv::Mat gradientX(cv::Mat & mat, double spacing);
 
     static cv::Mat gradientY(cv::Mat & mat, double spacing);
-
-    SIMGRID_wavimg_steplength();
 
     void set_iteration_number ( int itt );
 

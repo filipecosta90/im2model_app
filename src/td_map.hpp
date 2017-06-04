@@ -9,7 +9,6 @@
 #include <boost/filesystem/path.hpp>                      // for path, operator==, oper...
 /** END BOOST **/
 
-
 #include <vector>
 #include <string>
 
