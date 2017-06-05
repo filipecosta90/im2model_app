@@ -49,17 +49,27 @@ void TDMap_Table::update_RowCount_from_thickness_range_number_samples( int signa
 }
 
 void TDMap_Table::update_column_size(){
+
+    int leftM,rightM,topM,bottomM;
+    this->getContentsMargins(&leftM,&topM,&rightM,&bottomM);
+
   const int header_size = this->verticalHeader()->width();
   std::cout << "VerticalHeaderSize" << header_size << std::endl;
-  const int total_width = this->width() -  header_size;
+  const int total_width = this->width() -  header_size - leftM - rightM - 2* (this->frameWidth());
+  std::cout << "total_width" << total_width << std::endl;
   ColumnSize = ColumnCount > 0 ? ( total_width / ColumnCount ) : total_width;
   std::cout << "adjusting tdmap cell width to << " << ColumnSize <<  "px to  fill a total of " << total_width << std::endl;
 }
 
 void TDMap_Table::update_row_size(){
+
+    int leftM,rightM,topM,bottomM;
+    this->getContentsMargins(&leftM,&topM,&rightM,&bottomM);
+
+
   const int header_size = this->horizontalHeader()->height();
   std::cout << "HorizontalHeaderSize" << header_size << std::endl;
-  const int total_height = this->height() - header_size;
+  const int total_height = this->height() - header_size - topM - bottomM - 2* (this->frameWidth());
   std::cout << "total_height" << total_height << std::endl;
 
   RowSize = RowCount > 0 ? ( total_height / RowCount ) : total_height;
@@ -144,7 +154,6 @@ void TDMap_Table::update_headers(){
     item->setText( legend );
     setVerticalHeaderItem(i, item);
   }
-
   this->resizeColumnsToContents();
   this->resizeRowsToContents();
   update_row_size();
@@ -159,8 +168,10 @@ void TDMap_Table::clear(){
   _number_calculated_cells = RowCount * ColumnCount;
   update_headers();
   if( ( _number_drawed_cells != _number_calculated_cells ) || ( ! _flag_created_cells ) ){
-    create_cells();
+    std::cout << " creating cells " << std::endl;
+      create_cells();
   }
+   std::cout << " updating cells " << std::endl;
   update_cells();
   this->resizeColumnsToContents();
   this->resizeRowsToContents();
@@ -169,10 +180,10 @@ void TDMap_Table::clear(){
 void TDMap_Table::create_cells(){
   for (int row = 0; row < RowCount; ++row) {
     for (int col = 0; col < ColumnCount; ++col) {
-      CvImageCellWidget *cell_widget  = new CvImageCellWidget();
-      cell_widget->setMinimumSize( QSize(ColumnSize, RowSize) );
+      CvImageCellWidget *cell_widget  = new CvImageCellWidget(  );
+      //cell_widget->setMinimumSize( QSize(ColumnSize, RowSize) );
       cell_widget->setMaximumSize( QSize(ColumnSize, RowSize) );
-      cell_widget->set_container_window_size(ColumnSize,RowSize);
+ //     cell_widget->set_container_window_size(ColumnSize,RowSize);
       this->setCellWidget(row,col, cell_widget);
     }
   }
@@ -181,23 +192,20 @@ void TDMap_Table::create_cells(){
 }
 
 void TDMap_Table::update_cells(){
-  if( _flag_simulated_image_grid ){
-    std::vector<cv::Mat> simulated_image_row = simulated_image_grid.at(0);
-    cv::Mat full_image = simulated_image_row.at(0);
+  if( _flag_simulated_image_grid && _flag_created_cells ){
 
     cv::Point2i best_match_pos = core_tdmap->get_simgrid_best_match_position();
     for (int row = 0; row < RowCount; ++row) {
       std::vector<cv::Mat> simulated_image_row = simulated_image_grid.at(row);
       for (int col = 0; col < ColumnCount; ++col) {
-        CvImageCellWidget *cell_widget = static_cast<CvImageCellWidget*>( this->cellWidget(row,col) );
+          CvImageCellWidget *cell_widget  = new CvImageCellWidget(  );
+          //cell_widget->setMinimumSize( QSize(ColumnSize, RowSize) );
+          cell_widget->setMaximumSize( QSize(ColumnSize, RowSize) );
+          cell_widget->set_container_size( ColumnSize, RowSize );
+       //   cell_widget->set_container_window_size(ColumnSize,RowSize);
         cv::Mat full_image = simulated_image_row.at(col);
         cell_widget->setImage( full_image.clone() );
-        cell_widget->setMinimumSize( QSize(ColumnSize, RowSize) );
-        cell_widget->setMaximumSize( QSize(ColumnSize, RowSize) );
-        cell_widget->set_container_window_size(ColumnSize,RowSize);
-
-        // cell_widget->set_container_window_size(w_cell,h_cell);
-        //  cell_widget->resize( w_cell , h_cell );
+        cell_widget->fitToContainer();
         if( best_match_pos.x ==  col && best_match_pos.y == row ){
           std::cout << "setting best position "<< best_match_pos << std::endl;
           cell_widget->set_best();

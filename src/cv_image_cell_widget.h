@@ -19,7 +19,8 @@ class CvImageCellWidget : public QWidget
     parentWidget = parent;
     image_widget = new CVImageWidget(parent);
     scrollArea = new QScrollArea(this);
-
+scrollArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+scrollArea->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     scrollArea->setSizeAdjustPolicy(QAbstractScrollArea::AdjustToContents);
     toolsLayout = new QBoxLayout(QBoxLayout::TopToBottom,this);
     //set margins to zero so the toolbar touches the widget's edges
@@ -39,31 +40,26 @@ class CvImageCellWidget : public QWidget
         return _flag_best;
     }
 
-    QSize sizeHint() const override { return scrollArea->size(); }
-
-
-    QSize minimumSizeHint() const override { return scrollArea->size(); }
-
-    void set_container_window_size( const int width , const int height ){
-        std::cout << " set_container_window_size w: " <<  width << "h: " << height << std::endl;
-      _container_window_width = width;
-      _container_window_height = height;
-      _sz_hint.setWidth( width );
-      _sz_hint.setHeight( height );
-      _mn_sz_hint.setWidth( width );
-      _mn_sz_hint.setHeight( height );
-      _flag_set_container_window_size = true;
-      scrollArea->setMinimumSize(_mn_sz_hint);
+    void set_container_size( int _width, int _heigth ){
+            _container_window_width = _width;
+            _container_window_height = _heigth;
+            scrollArea->resize(_container_window_width,_container_window_height);
     }
 
     public slots:
 
       void setImage(const cv::Mat& image) {
         image_widget->setImage(image);
-        image_widget->set_container_window_size(_container_window_width, _container_window_height);
         scrollArea->setWidget(image_widget);
         scrollArea->show();
+        image_widget->set_container_window_size(scrollArea->width(), scrollArea->height());
         _image_set = true;
+      }
+
+      void fitToContainer(){
+          image_widget->set_container_window_size(scrollArea->width(), scrollArea->height());
+          image_widget->fitToWindow();
+          scrollArea->show();
       }
 
     void setImageWidget( CVImageWidget* widget ){
