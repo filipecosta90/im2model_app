@@ -532,9 +532,9 @@ bool MainWindow::readSettings(){
   _dr_probe_celslc_bin = settings.value("celslc","").toString();
   _dr_probe_msa_bin = settings.value("msa","").toString();
   _dr_probe_wavimg_bin = settings.value("wavimg","").toString();
-
   settings.endGroup();
-
+  restoreGeometry(settings.value("geometry").toByteArray());
+  restoreState(settings.value("windowState").toByteArray());
   return checkSettings();
 }
 
@@ -546,6 +546,8 @@ void MainWindow::writeSettings(){
   settings.setValue("msa",_dr_probe_msa_bin);
   settings.setValue("wavimg",_dr_probe_wavimg_bin);
   settings.endGroup();
+  settings.setValue("geometry", saveGeometry() );
+  settings.setValue("windowState", saveState() );
 }
 
 bool MainWindow::maybeSave(){
