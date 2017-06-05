@@ -216,27 +216,10 @@ bool CELSLC_prm::set_application_logger( ApplicationLog::ApplicationLog* app_log
 
 bool CELSLC_prm::set_bin_execname( std::string execname ){
   boost::filesystem::path bin_dir(bin_path);
-  boost::filesystem::directory_iterator end_itr;
-  // cycle through the directory
-  bool result = false;
-  for ( boost::filesystem::directory_iterator itr(bin_dir); itr != end_itr; ++itr)
-  {
-    // If it's not a directory, list it. If you want to list directories too, just remove this check.
-    if (is_regular_file(itr->path())) {
-      // assign current file name to current_file and echo it out to the console.
-      if( itr->path().filename() == execname ){
-        std::cout << itr->path().filename() << std::endl;
-        bin_execname = execname;
-        _flag_bin_execname = true;
-        full_bin_path_execname = itr->path().string();
-        _flag_full_bin_path_execname = boost::filesystem::exists( full_bin_path_execname );
-        assert( _flag_full_bin_path_execname );
-        std::cout << full_bin_path_execname << std::endl;
-        result = true;
-      }
-    }
-  }
-  return result;
+  boost::filesystem::path file (execname);
+  full_bin_path_execname = bin_dir / file;
+  _flag_full_bin_path_execname = boost::filesystem::exists( full_bin_path_execname );
+  return _flag_full_bin_path_execname;
 }
 
 int CELSLC_prm::get_nz_simulated_partitions( ){
@@ -388,10 +371,8 @@ bool CELSLC_prm::call_boost_bin(  ){
   bool result = false;
   assert( _flag_full_bin_path_execname );
   if( _flag_full_bin_path_execname ){
-    std::cout << "bin path: " << full_bin_path_execname <<std::endl;
-
-    std::stringstream args_stream;
-    args_stream << full_bin_path_execname;
+  std::stringstream args_stream;
+    args_stream << full_bin_path_execname.string();
 
     if( cif_format_switch  ){
       args_stream << " -cif " << super_cell_cif_file;
@@ -403,7 +384,7 @@ bool CELSLC_prm::call_boost_bin(  ){
     }
 
     boost::filesystem::path dir ( base_dir_path );
-    boost::filesystem::path file ( slc_file_name_prefix);
+    boost::filesystem::path file ( slc_file_name_prefix );
     boost::filesystem::path full_path = dir / file;
 
     args_stream << " -slc " << full_path.string();

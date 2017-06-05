@@ -251,15 +251,34 @@ bool TDMap::run_tdmap( ){
   calculate_simulated_image_sampling_rate_and_size();
   status = prepare_celslc_parameters();
   assert(status);
-  std::cout << " prepare celslc parameters status " << status << std::endl;
-  std::cout << " _run_celslc_switch " << _run_celslc_switch << std::endl;
-  std::cout << " _is_bin_path_defined " << _tdmap_celslc_parameters->_is_bin_path_defined() << std::endl;
-  assert(_tdmap_celslc_parameters->_is_bin_path_defined());
+  if( _flag_logger ){
+    std::stringstream message;
+    message << " prepare celslc parameters status " << status;
+    logger->logEvent( ApplicationLog::notification , message.str() );
+    message = std::stringstream();
+    message << " _run_celslc_switch " << _run_celslc_switch;
+    logger->logEvent( ApplicationLog::notification , message.str() );
+    message = std::stringstream();
+    message << " _is_bin_path_defined " << _tdmap_celslc_parameters->_is_bin_path_defined();
+    logger->logEvent( ApplicationLog::notification , message.str() );
+    message = std::stringstream();
+  }
+  assert( _tdmap_celslc_parameters->_is_bin_path_defined() );
   if ( status && _run_celslc_switch &&  _tdmap_celslc_parameters->_is_bin_path_defined() ){
-    std::cout << "Running ceslc" << std::endl;
+    if( _flag_logger ){
+      std::stringstream message;
+      message << "Running ceslc";
+      logger->logEvent( ApplicationLog::notification , message.str() );
+    }
     _flag_runned_tdmap_celslc = _tdmap_celslc_parameters->call_boost_bin();
+    if( _flag_logger ){
+      std::stringstream message;
+      message << "_flag_runned_tdmap_celslc: " << _flag_runned_tdmap_celslc;
+      logger->logEvent( ApplicationLog::notification , message.str() );
+    }
     status = _flag_runned_tdmap_celslc;
   }
+
   assert(status);
   status &= set_number_slices_to_load_from_nz_simulated_partitions();
   assert(status);
@@ -273,33 +292,85 @@ bool TDMap::run_tdmap( ){
   assert(status);
   status &=  prepare_msa_parameters();
   assert(status);
-  std::cout << " prepare_msa_parameters status " << status << std::endl;
-  std::cout << " _run_msa_switch " << _run_msa_switch << std::endl;
-  std::cout << " _is_bin_path_defined " << _tdmap_msa_parameters->_is_bin_path_defined() << std::endl;
+
+  if( _flag_logger ){
+    std::stringstream message;
+    message << "prepare_msa_parameters status " << status;
+    logger->logEvent( ApplicationLog::notification , message.str() );
+    message = std::stringstream();
+    message << " _run_msa_switch " << _run_msa_switch;
+    logger->logEvent( ApplicationLog::notification , message.str() );
+    message = std::stringstream();
+    message << " _is_bin_path_defined " << _tdmap_msa_parameters->_is_bin_path_defined();
+    logger->logEvent( ApplicationLog::notification , message.str() );
+    message = std::stringstream();
+  }
   assert(_tdmap_msa_parameters->_is_bin_path_defined());
   if ( status && _run_msa_switch &&  _tdmap_msa_parameters->_is_bin_path_defined() ){
-    std::cout << "Running msa" << std::endl;
+    if( _flag_logger ){
+      std::stringstream message;
+      message << "Running msa";
+      logger->logEvent( ApplicationLog::notification , message.str() );
+    }
     _flag_runned_tdmap_msa = _tdmap_msa_parameters->call_bin();
     status = _flag_runned_tdmap_msa;
+    if( _flag_logger ){
+      std::stringstream message;
+      message << "_flag_runned_tdmap_msa: " << _flag_runned_tdmap_msa;
+      logger->logEvent( ApplicationLog::notification , message.str() );
+    }
   }
   assert(status);
   status = prepare_wavimg_parameters();
   assert(status);
-  std::cout << " prepare_wavimg_parameters status " << status << std::endl;
-  std::cout << " _run_wavimg_switch " << _run_wavimg_switch << std::endl;
-  std::cout << " _is_bin_path_defined " << _tdmap_wavimg_parameters->_is_bin_path_defined() << std::endl;
+
+  if( _flag_logger ){
+    std::stringstream message;
+    message << "prepare_wavimg_parameters status " << status;
+    logger->logEvent( ApplicationLog::notification , message.str() );
+    message = std::stringstream();
+    message << " _run_wavimg_switch " << _run_wavimg_switch;
+    logger->logEvent( ApplicationLog::notification , message.str() );
+    message = std::stringstream();
+    message << " _is_bin_path_defined " << _tdmap_wavimg_parameters->_is_bin_path_defined();
+    logger->logEvent( ApplicationLog::notification , message.str() );
+    message = std::stringstream();
+  }
   assert(_tdmap_wavimg_parameters->_is_bin_path_defined());
   if ( status && _run_wavimg_switch &&  _tdmap_wavimg_parameters->_is_bin_path_defined() ){
-    std::cout << "Running wavimg" << std::endl;
+    if( _flag_logger ){
+      std::stringstream message;
+      message << "Running wavimg";
+      logger->logEvent( ApplicationLog::notification , message.str() );
+    }
     _flag_runned_tdmap_wavimg = _tdmap_wavimg_parameters->call_bin();
     status = _flag_runned_tdmap_wavimg;
+    if( _flag_logger ){
+      std::stringstream message;
+      message << "_flag_runned_tdmap_wavimg: " << _flag_runned_tdmap_wavimg;
+      logger->logEvent( ApplicationLog::notification , message.str() );
+    }
+
   }
   status = prepare_simgrid_parameters();
-  std::cout << " prepare_simgrid_parameters status " << status << std::endl;
+  if( _flag_logger ){
+    std::stringstream message;
+    message << " prepare_simgrid_parameters status " << status;
+    logger->logEvent( ApplicationLog::notification , message.str() );
+  }
   if ( status && _run_simgrid_switch ){
-    std::cout << "Running simgrid" << std::endl;
+    if( _flag_logger ){
+      std::stringstream message;
+      message << "Running simgrid";
+      logger->logEvent( ApplicationLog::notification , message.str() );
+    }
     _flag_runned_tdmap_simgrid = _td_map_simgrid->simulate_from_dat_file();
     status = _flag_runned_tdmap_simgrid;
+    if( _flag_logger ){
+      std::stringstream message;
+      message << "_flag_runned_tdmap_simgrid: " << _flag_runned_tdmap_simgrid;
+      logger->logEvent( ApplicationLog::notification , message.str() );
+    }
   }
   return status;
 }
@@ -726,7 +797,11 @@ bool TDMap::set_dr_probe_bin_path( std::string bin_path ){
     dr_probe_bin_path = bin_path;
   }
   _flag_dr_probe_bin_path = result;
-  std::cout << " set_dr_probe_bin_path: " << _flag_dr_probe_bin_path << std::endl;
+  if( _flag_logger ){
+    std::stringstream message;
+    message << " set_dr_probe_bin_path: " << _flag_dr_probe_bin_path;
+    logger->logEvent( ApplicationLog::notification , message.str() );
+  }
   return _flag_dr_probe_bin_path;
 }
 
@@ -741,7 +816,12 @@ bool TDMap::set_dr_probe_celslc_execname( std::string celslc_execname ){
     dr_probe_celslc_execname = celslc_execname;
   }
   _flag_dr_probe_celslc_execname = result;
-  std::cout << " set_dr_probe_celslc_execname: " << _flag_dr_probe_celslc_execname << std::endl;
+
+  if( _flag_logger ){
+    std::stringstream message;
+    message << " set_dr_probe_celslc_execname result: " << _flag_dr_probe_celslc_execname;
+    logger->logEvent( ApplicationLog::notification , message.str() );
+  }
   return _flag_dr_probe_celslc_execname;
 
 }
@@ -753,7 +833,13 @@ bool TDMap::set_dr_probe_msa_execname( std::string msa_execname ){
     dr_probe_msa_execname = msa_execname;
   }
   _flag_dr_probe_msa_execname = result;
-  std::cout << " set_dr_probe_msa_execname: " << _flag_dr_probe_msa_execname << std::endl;
+
+  if( _flag_logger ){
+    std::stringstream message;
+    message << " set_dr_probe_msa_execname result: " << _flag_dr_probe_msa_execname;
+    logger->logEvent( ApplicationLog::notification , message.str() );
+  }
+
   return _flag_dr_probe_msa_execname;
 }
 
@@ -763,8 +849,14 @@ bool TDMap::set_dr_probe_wavimg_execname( std::string wavimg_execname ){
   if( result ){
     dr_probe_wavimg_execname = wavimg_execname;
   }
-  _flag_dr_probe_wavimg_execname = result;
-  std::cout << " set_dr_probe_wavimg_execname: " << _flag_dr_probe_wavimg_execname << std::endl;
-  return _flag_dr_probe_wavimg_execname;
 
+  _flag_dr_probe_wavimg_execname = result;
+
+  if( _flag_logger ){
+    std::stringstream message;
+    message << " set_dr_probe_wavimg_execname result: " << _flag_dr_probe_wavimg_execname;
+    logger->logEvent( ApplicationLog::notification , message.str() );
+  }
+
+  return _flag_dr_probe_wavimg_execname;
 }

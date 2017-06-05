@@ -14,46 +14,66 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
   _load_file_delegate = new TreeItemFileDelegate(this);
   _settings_ok = readSettings();
   if( ! _settings_ok ){
+    if( _flag_im2model_logger ){
+      im2model_logger->logEvent( ApplicationLog::critical, "Preferences are not setted. trying to resolve." );
+    }
     _settings_ok = maybeSetPreferences();
   }
   /* if the preferences are still not correct set the flag */
   if ( !_settings_ok ){
     _failed_initialization = true;
+    if( _flag_im2model_logger ){
+      im2model_logger->logEvent( ApplicationLog::critical, "Failed to initialize preferences." );
+    }
   }
   else{
     _core_image_crystal = new Image_Crystal();
     _core_td_map = new TDMap( _sim_tdmap_ostream_buffer, _core_image_crystal );
 
-    _core_td_map->set_dr_probe_bin_path( _dr_probe_bin_path.toStdString() );
-    _core_td_map->set_dr_probe_celslc_execname( _dr_probe_celslc_bin.toStdString() );
-    _core_td_map->set_dr_probe_msa_execname( _dr_probe_msa_bin.toStdString() );
-    _core_td_map->set_dr_probe_wavimg_execname( _dr_probe_wavimg_bin.toStdString() );
+    bool status = true;
+    status &= _core_td_map->set_dr_probe_bin_path( _dr_probe_bin_path.toStdString() );
+    status &= _core_td_map->set_dr_probe_celslc_execname( _dr_probe_celslc_bin.toStdString() );
+    status &= _core_td_map->set_dr_probe_msa_execname( _dr_probe_msa_bin.toStdString() );
+    status &= _core_td_map->set_dr_probe_wavimg_execname( _dr_probe_wavimg_bin.toStdString() );
 
-    create_box_options();
+    if( status == false ){
+      _failed_initialization = true;
+      if( _flag_im2model_logger ){
+        im2model_logger->logEvent( ApplicationLog::critical, "Failed setting dr probe bins." );
+      }
+    }
+    else {
+      create_box_options();
 
-    /* TDMap simulation thread */
-    _sim_tdmap_thread = new QThread( this );
-    sim_tdmap_worker = new GuiSimOutUpdater( _core_td_map  );
+      /* TDMap simulation thread */
+      _sim_tdmap_thread = new QThread( this );
+      sim_tdmap_worker = new GuiSimOutUpdater( _core_td_map  );
 
-    sim_tdmap_worker->moveToThread( _sim_tdmap_thread );
+      sim_tdmap_worker->moveToThread( _sim_tdmap_thread );
 
-    // will only start thread when needed
-    connect(sim_tdmap_worker, SIGNAL(TDMap_request()), _sim_tdmap_thread, SLOT(start()));
-    connect(_sim_tdmap_thread, SIGNAL(started()), this, SLOT(update_tdmap_sim_ostream()));
-    connect(_sim_tdmap_thread, SIGNAL(started()), sim_tdmap_worker, SLOT(newTDMapSim()));
-
-
-    connect(sim_tdmap_worker, SIGNAL(TDMap_sucess()), this, SLOT(update_from_TDMap_sucess()));
-    connect(sim_tdmap_worker, SIGNAL(TDMap_failure()), this, SLOT(update_from_TDMap_failure()));
-    // will quit thread after work done
-    connect(sim_tdmap_worker, SIGNAL(finished()), _sim_tdmap_thread, SLOT(quit()), Qt::DirectConnection);
+      // will only start thread when needed
+      connect(sim_tdmap_worker, SIGNAL(TDMap_request()), _sim_tdmap_thread, SLOT(start()));
+      connect(_sim_tdmap_thread, SIGNAL(started()), this, SLOT(update_tdmap_sim_ostream()));
+      connect(_sim_tdmap_thread, SIGNAL(started()), sim_tdmap_worker, SLOT(newTDMapSim()));
 
 
-    connect( ui->tdmap_table, SIGNAL(tdmap_best_match( int, int )), this, SLOT(update_tdmap_best_match(int,int)) );
-    connect(ui->tdmap_table, SIGNAL(cellClicked(int , int )), this, SLOT(update_tdmap_current_selection(int,int)) );
+      connect(sim_tdmap_worker, SIGNAL(TDMap_sucess()), this, SLOT(update_from_TDMap_sucess()));
+      connect(sim_tdmap_worker, SIGNAL(TDMap_failure()), this, SLOT(update_from_TDMap_failure()));
+      // will quit thread after work done
+      connect(sim_tdmap_worker, SIGNAL(finished()), _sim_tdmap_thread, SLOT(quit()), Qt::DirectConnection);
 
-    connect(this, SIGNAL(experimental_image_filename_changed()), this, SLOT(update_full_experimental_image_frame()));
-    connect(this, SIGNAL(simulated_grid_changed()), this, SLOT(update_simgrid_frame()));
+
+      connect( ui->tdmap_table, SIGNAL(tdmap_best_match( int, int )), this, SLOT(update_tdmap_best_match(int,int)) );
+      connect(ui->tdmap_table, SIGNAL(cellClicked(int , int )), this, SLOT(update_tdmap_current_selection(int,int)) );
+
+      connect(this, SIGNAL(experimental_image_filename_changed()), this, SLOT(update_full_experimental_image_frame()));
+      connect(this, SIGNAL(simulated_grid_changed()), this, SLOT(update_simgrid_frame()));
+
+      if( _flag_im2model_logger ){
+        im2model_logger->logEvent( ApplicationLog::critical, "Finished initializing App." );
+      }
+
+    }
   }
 }
 
