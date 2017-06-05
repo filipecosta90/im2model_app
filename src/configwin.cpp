@@ -453,10 +453,45 @@ bool MainWindow::checkSettings(){
   }
 
   // check if the bins are not equal to ""
-  _temp_flag_dr_probe_celslc_bin &= ( _dr_probe_celslc_bin == QString("") ) ? false : true;
-  _temp_flag_dr_probe_msa_bin &= ( _dr_probe_msa_bin == QString("") ) ? false : true;
-  _temp_flag_dr_probe_wavimg_bin &= ( _dr_probe_wavimg_bin == QString("") ) ? false : true;
+  _temp_flag_dr_probe_celslc_bin &= (_dr_probe_celslc_bin == QString("")) ? false : true;
+  _temp_flag_dr_probe_msa_bin &= (_dr_probe_msa_bin == QString("")) ? false : true;
+  _temp_flag_dr_probe_wavimg_bin &= (_dr_probe_wavimg_bin == QString("")) ? false : true;
 
+  if (_temp_flag_dr_probe_celslc_bin) {
+	  boost::filesystem::path bin_dir(_dr_probe_bin_path.toStdString());
+	  boost::filesystem::path filename(_dr_probe_celslc_bin.toStdString());
+	  boost::filesystem::path full_path_filename = bin_dir / filename; 
+	  if (boost::filesystem::exists(full_path_filename)) {
+		  _temp_flag_dr_probe_celslc_bin = true;
+	  }
+	  else {
+		  _temp_flag_dr_probe_celslc_bin = false;
+	  }
+  }
+  if (_temp_flag_dr_probe_msa_bin) {
+	  boost::filesystem::path bin_dir(_dr_probe_bin_path.toStdString());
+	  boost::filesystem::path filename(_dr_probe_msa_bin.toStdString());
+	  boost::filesystem::path full_path_filename = bin_dir / filename;
+	  if (boost::filesystem::exists(full_path_filename)) {
+		  _temp_flag_dr_probe_msa_bin = true;
+	  }
+	  else {
+		  _temp_flag_dr_probe_msa_bin = false;
+	  }
+  }
+
+  if (_temp_flag_dr_probe_wavimg_bin) {
+	  boost::filesystem::path bin_dir(_dr_probe_bin_path.toStdString());
+	  boost::filesystem::path filename(_dr_probe_celslc_bin.toStdString());
+	  boost::filesystem::path full_path_filename = bin_dir / filename;
+	  if (boost::filesystem::exists(full_path_filename)) {
+		  _temp_flag_dr_probe_wavimg_bin = true;
+	  }
+	  else {
+		  _temp_flag_dr_probe_wavimg_bin = false;
+	  }
+  }
+  
   status &= _temp_flag_dr_probe_celslc_bin;
   status &= _temp_flag_dr_probe_msa_bin;
   status &= _temp_flag_dr_probe_wavimg_bin;

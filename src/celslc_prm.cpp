@@ -216,8 +216,9 @@ bool CELSLC_prm::set_application_logger( ApplicationLog::ApplicationLog* app_log
 
 bool CELSLC_prm::set_bin_execname( std::string execname ){
   boost::filesystem::path bin_dir( bin_path );
+  if( boost::filesystem::exists(bin_dir) ) {
   boost::filesystem::path file (execname);
-  full_bin_path_execname = bin_dir;
+  full_bin_path_execname = boost::filesystem::canonical(bin_dir);
   full_bin_path_execname /= file;
   try {
     _flag_full_bin_path_execname = boost::filesystem::exists( full_bin_path_execname );
@@ -235,6 +236,7 @@ bool CELSLC_prm::set_bin_execname( std::string execname ){
     std::stringstream message;
     message << "checking if CELSLC exec exists. full path: " <<  full_bin_path_execname.string() << " || result: " << _flag_full_bin_path_execname << std::endl;
     logger->logEvent( ApplicationLog::notification , message.str() );
+  }
   }
   return _flag_full_bin_path_execname;
 }
