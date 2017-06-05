@@ -178,7 +178,6 @@ void MainWindow::update_tdmap_best_match( int x,int y ){
 }
 
 void MainWindow::update_tdmap_current_selection(int x,int y){
-
   if(_core_td_map->_is_simulated_images_grid_defined()){
     cv::Mat _simulated_image = _core_td_map->get_simulated_image_in_grid(x,y);
     const double _simulated_image_match = _core_td_map->get_simulated_image_match_in_grid(x,y);
@@ -186,6 +185,7 @@ void MainWindow::update_tdmap_current_selection(int x,int y){
     const double _simulated_image_defocus = _core_td_map->get_simulated_image_defocus_in_grid(x,y);
 
     QStandardItemModel* model = new QStandardItemModel(3, 2,this);
+
     model->setHeaderData(0, Qt::Horizontal, tr("Parameter"));
     model->setHeaderData(1, Qt::Horizontal, tr("Value"));
     QStandardItem *label_match_item = new QStandardItem(tr("Match %"));
@@ -584,12 +584,16 @@ void MainWindow::loadFile(const QString &fileName){
 
   boost::property_tree::ptree project_setup_image_fields_ptree = config.get_child("project_setup_image_fields_ptree");
   project_setup_image_fields_model->load_data_from_property_tree( project_setup_image_fields_ptree );
+ui->qtree_view_project_setup_image->update();
 
   boost::property_tree::ptree project_setup_crystalographic_fields_ptree = config.get_child("project_setup_crystalographic_fields_ptree");
   project_setup_crystalographic_fields_model->load_data_from_property_tree( project_setup_crystalographic_fields_ptree );
+ui->qtree_view_project_setup_crystallography->update();
 
   boost::property_tree::ptree tdmap_simulation_setup_ptree = config.get_child("tdmap_simulation_setup_ptree");
   tdmap_simulation_setup_model->load_data_from_property_tree( tdmap_simulation_setup_ptree );
+  ui->qtree_view_tdmap_simulation_setup->update();
+
   // Write the property tree to the XML file.
 
 #ifndef QT_NO_CURSOR
@@ -960,6 +964,7 @@ void MainWindow::create_box_options(){
   for (int column = 0; column < tdmap_simulation_setup_model->columnCount(); ++column){
     ui->qtree_view_tdmap_simulation_setup->resizeColumnToContents(column);
   }
+
 
   ui->tdmap_table->set_tdmap( _core_td_map );
   ui->tdmap_table->connect_thickness_range_number_samples_changes(  thickness_range_number_samples, 1 );

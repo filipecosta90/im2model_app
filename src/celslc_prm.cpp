@@ -160,10 +160,12 @@ void CELSLC_prm::set_slc_filename_prefix ( std::string slc_file ){
 
 void CELSLC_prm::set_nx_simulated_horizontal_samples( int nx ){
   nx_simulated_horizontal_samples = nx;
+  _flag_nx_simulated_horizontal_samples = true;
 }
 
 void CELSLC_prm::set_ny_simulated_vertical_samples( int ny ){
   ny_simulated_vertical_samples = ny;
+  _flag_ny_simulated_vertical_samples = true;
 }
 
 void CELSLC_prm::set_nz_simulated_partitions( int nz ){
@@ -239,6 +241,22 @@ bool CELSLC_prm::set_bin_execname( std::string execname ){
   }
   }
   return _flag_full_bin_path_execname;
+}
+
+bool CELSLC_prm::_is_nx_simulated_horizontal_samples_defined(){
+    return _flag_nx_simulated_horizontal_samples;
+}
+
+bool CELSLC_prm::_is_ny_simulated_vertical_samples_defined(){
+       return _flag_ny_simulated_vertical_samples;
+}
+
+int CELSLC_prm::get_nx_simulated_horizontal_samples( ){
+    return nx_simulated_horizontal_samples;
+}
+
+int CELSLC_prm::get_ny_simulated_vertical_samples( ){
+    return ny_simulated_vertical_samples;
 }
 
 int CELSLC_prm::get_nz_simulated_partitions( ){

@@ -57,7 +57,9 @@ class CELSLC_prm {
     bool _flag_slice_params_nm_slice_vec = false;
     std::map<int,double> slice_params_nm_slice;
     int nx_simulated_horizontal_samples;
+    bool _flag_nx_simulated_horizontal_samples = false;
     int ny_simulated_vertical_samples;
+    bool _flag_ny_simulated_vertical_samples = false;
     int nz_simulated_partitions;
     bool _flag_nz_simulated_partitions=false;
     double ht_accelaration_voltage;
@@ -113,6 +115,10 @@ class CELSLC_prm {
     bool _is_slice_params_accum_nm_slice_vec_defined();
 
     bool _is_bin_path_defined();
+
+    bool _is_nx_simulated_horizontal_samples_defined();
+
+    bool _is_ny_simulated_vertical_samples_defined();
 
     void set_prj_dir_hkl( double projection_dir_h, double projection_dir_k, double projection_dir_l );
 
@@ -175,6 +181,10 @@ class CELSLC_prm {
     int get_slice_number_from_nm_floor( double goal_thickness_nm );
 
     int get_slice_number_from_nm_ceil( double goal_thickness_nm );
+
+    int get_nx_simulated_horizontal_samples( );
+
+    int get_ny_simulated_vertical_samples( );
 
     std::vector<double> get_slice_params_nm_slice_vec();
 

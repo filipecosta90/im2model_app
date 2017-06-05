@@ -48,7 +48,21 @@ signals:
 
     /* class related vars */
     int ColumnCount = 0;
+    int ColumnSize = 150;
+    //int VerticalHeaderSize = 0;
+    //int HorizontalHeaderSize = 0;
     int RowCount = 0;
+    int RowSize = 50;
+    int _number_drawed_cells = 0;
+    int _number_calculated_cells = 0;
+    bool _flag_created_cells = false;
+
+    void update_headers();
+    void create_cells();
+    void update_cells();
+    void update_column_size();
+    void update_row_size();
+
     TDMap_Cell*cell(int row, int column) const;
 
     // Make a member pointer to a new MyDelegate instance
@@ -58,6 +72,7 @@ signals:
     /* CORE IM2MODEL*/
     TDMap* core_tdmap = nullptr;
     bool _flag_core_tdmap = false;
+
 
     /* VISUAL TDMAP vars */
     int _treeitem_thickness_range_number_samples_watch_col;

@@ -17,7 +17,7 @@ class CvTDMapImageFrameDelegate : public QStyledItemDelegate
 {
   Q_OBJECT
   public:
-    CvTDMapImageFrameDelegate(QWidget *parent = 0) : QStyledItemDelegate(parent) {}
+    CvTDMapImageFrameDelegate(int margin, QWidget *parent = 0) : QStyledItemDelegate(parent),  m_margin(margin) {}
 
     void paint(QPainter *painter, const QStyleOptionViewItem &option,
         const QModelIndex &index) const override;
@@ -30,5 +30,9 @@ class CvTDMapImageFrameDelegate : public QStyledItemDelegate
         const QModelIndex &index) const override;
 
     private slots:
+
+private:
+    int m_margin;
+
 
 };

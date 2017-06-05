@@ -13,11 +13,11 @@ TDMap_Table::TDMap_Table(QWidget *parent) : QTableWidget(parent) {
   this->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Expanding);
 
   table_parent = parent;
-  //image_delegate = new CvTDMapImageFrameDelegate(this);
+  //  image_delegate = new CvTDMapImageFrameDelegate( 0 , this);
 
   //setItemPrototype(new TDMap_Cell);
   setSelectionMode(ContiguousSelection);
-  //setItemDelegate(image_delegate);
+  // setItemDelegate(image_delegate);
 
   connect(this, SIGNAL(itemChanged(QTableWidgetItem *)), this, SLOT(somethingChanged()));
   clear();
@@ -42,15 +42,37 @@ void TDMap_Table::update_RowCount_from_thickness_range_number_samples( int signa
   if ( signal_item_changed_column == _treeitem_thickness_range_number_samples_watch_col ){
     int new_RowCount = core_tdmap->get_thickness_range_number_samples();
     RowCount = new_RowCount;
+    update_row_size();
     std::cout << "new_RowCount " << new_RowCount << std::endl;
     clear();
   }
+}
+
+void TDMap_Table::update_column_size(){
+  const int header_size = this->verticalHeader()->width();
+  std::cout << "VerticalHeaderSize" << header_size << std::endl;
+  const int total_width = this->width() -  header_size;
+  ColumnSize = ColumnCount > 0 ? ( total_width / ColumnCount ) : total_width;
+  std::cout << "adjusting tdmap cell width to << " << ColumnSize <<  "px to  fill a total of " << total_width << std::endl;
+}
+
+void TDMap_Table::update_row_size(){
+  const int header_size = this->horizontalHeader()->height();
+  std::cout << "HorizontalHeaderSize" << header_size << std::endl;
+  const int total_height = this->height() - header_size;
+  std::cout << "total_height" << total_height << std::endl;
+
+  RowSize = RowCount > 0 ? ( total_height / RowCount ) : total_height;
+  std::cout << "adjusting tdmap cell height to << " << RowSize <<  "px to  fill a total of " << total_height << std::endl;
 }
 
 void TDMap_Table::update_ColumnCount_from_defocus_range_number_samples( int signal_item_changed_column ){
   if ( signal_item_changed_column == _treeitem_defocus_range_number_samples_watch_col ){
     int new_ColumnCount = core_tdmap->get_defocus_range_number_samples();
     ColumnCount = new_ColumnCount;
+    update_column_size();
+
+
     std::cout << "new_ColumnCount " << new_ColumnCount << std::endl;
     clear();
   }
@@ -62,12 +84,7 @@ void TDMap_Table::set_simulated_images_grid( std::vector< std::vector<cv::Mat> >
   clear();
 }
 
-void TDMap_Table::clear()
-{
-  setRowCount(0);
-  setColumnCount(0);
-  setRowCount(RowCount);
-  setColumnCount(ColumnCount);
+void TDMap_Table::update_headers(){
   double _defocus_lower = 0.0f;
   double _defocus_period = 0.0f;
   int _thickness_lower_slice = 0;
@@ -85,6 +102,17 @@ void TDMap_Table::clear()
     }
     if( core_tdmap->_is_thickness_period_slice_defined() ){
       _thickness_period_slice = core_tdmap->get_thickness_range_period_slice();
+    }
+    std::cout << " core_tdmap->_is_nx_simulated_horizontal_samples_defined()  " << core_tdmap->_is_nx_simulated_horizontal_samples_defined()  << std::endl;
+    if( core_tdmap->_is_nx_simulated_horizontal_samples_defined() ){
+      ColumnSize = core_tdmap->get_nx_simulated_horizontal_samples();
+      std::cout << " Column size setted to " << ColumnSize << std::endl;
+    }
+    std::cout << " core_tdmap->_is_ny_simulated_vertical_samples_defined()  " << core_tdmap->_is_ny_simulated_vertical_samples_defined()  << std::endl;
+
+    if( core_tdmap->_is_ny_simulated_vertical_samples_defined() ){
+      RowSize = core_tdmap->get_ny_simulated_vertical_samples();
+      std::cout << " RowSize size setted to " << RowSize << std::endl;
     }
   }
 
@@ -117,33 +145,75 @@ void TDMap_Table::clear()
     setVerticalHeaderItem(i, item);
   }
 
+  this->resizeColumnsToContents();
+  this->resizeRowsToContents();
+  update_row_size();
+  update_column_size();
+}
 
+void TDMap_Table::clear(){
+  setRowCount(0);
+  setColumnCount(0);
+  setRowCount(RowCount);
+  setColumnCount(ColumnCount);
+  _number_calculated_cells = RowCount * ColumnCount;
+  update_headers();
+  if( ( _number_drawed_cells != _number_calculated_cells ) || ( ! _flag_created_cells ) ){
+    create_cells();
+  }
+  update_cells();
+  this->resizeColumnsToContents();
+  this->resizeRowsToContents();
+}
+
+void TDMap_Table::create_cells(){
+  for (int row = 0; row < RowCount; ++row) {
+    for (int col = 0; col < ColumnCount; ++col) {
+      CvImageCellWidget *cell_widget  = new CvImageCellWidget();
+      cell_widget->setMinimumSize( QSize(ColumnSize, RowSize) );
+      cell_widget->setMaximumSize( QSize(ColumnSize, RowSize) );
+      cell_widget->set_container_window_size(ColumnSize,RowSize);
+      this->setCellWidget(row,col, cell_widget);
+    }
+  }
+  _number_drawed_cells = RowCount * ColumnCount;
+  _flag_created_cells = true;
+}
+
+void TDMap_Table::update_cells(){
   if( _flag_simulated_image_grid ){
-    cv::Point2i best_match_pos = core_tdmap->get_simgrid_best_match_position();
+    std::vector<cv::Mat> simulated_image_row = simulated_image_grid.at(0);
+    cv::Mat full_image = simulated_image_row.at(0);
 
+    cv::Point2i best_match_pos = core_tdmap->get_simgrid_best_match_position();
     for (int row = 0; row < RowCount; ++row) {
       std::vector<cv::Mat> simulated_image_row = simulated_image_grid.at(row);
       for (int col = 0; col < ColumnCount; ++col) {
-        CvImageCellWidget *cell_widget  = new CvImageCellWidget();
+        CvImageCellWidget *cell_widget = static_cast<CvImageCellWidget*>( this->cellWidget(row,col) );
         cv::Mat full_image = simulated_image_row.at(col);
         cell_widget->setImage( full_image.clone() );
+        cell_widget->setMinimumSize( QSize(ColumnSize, RowSize) );
+        cell_widget->setMaximumSize( QSize(ColumnSize, RowSize) );
+        cell_widget->set_container_window_size(ColumnSize,RowSize);
+
+        // cell_widget->set_container_window_size(w_cell,h_cell);
+        //  cell_widget->resize( w_cell , h_cell );
+        if( best_match_pos.x ==  col && best_match_pos.y == row ){
+          std::cout << "setting best position "<< best_match_pos << std::endl;
+          cell_widget->set_best();
+        }
         this->setCellWidget(row,col, cell_widget);
       }
     }
-
-    this->resizeColumnsToContents();
-    this->resizeRowsToContents();
-
     setCurrentCell(best_match_pos.x, best_match_pos.y);
     emit tdmap_best_match( best_match_pos.x, best_match_pos.y );
     setCurrentCell(0, 0);
     emit cellClicked(0,0);
-
   }
-  else{
-    setCurrentCell(0, 0);
-    emit cellClicked(0,0);
-  }
+  /* else{
+     setCurrentCell(0, 0);
+     emit cellClicked(0,0);
+     }*/
 }
 
 /*

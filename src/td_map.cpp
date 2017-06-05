@@ -422,7 +422,21 @@ bool  TDMap::prepare_celslc_parameters(){
   return _flag_tdmap_celslc_parameters;
 }
 
+bool TDMap::_is_nx_simulated_horizontal_samples_defined(){
+    return _tdmap_celslc_parameters->_is_nx_simulated_horizontal_samples_defined();
+}
 
+bool TDMap::_is_ny_simulated_vertical_samples_defined(){
+    return _tdmap_celslc_parameters->_is_ny_simulated_vertical_samples_defined();
+}
+
+int TDMap::get_nx_simulated_horizontal_samples(){
+   return _tdmap_celslc_parameters->get_nx_simulated_horizontal_samples();
+}
+
+int TDMap::get_ny_simulated_vertical_samples(){
+   return _tdmap_celslc_parameters->get_ny_simulated_vertical_samples();
+}
 
 bool  TDMap::prepare_msa_parameters(){
   _flag_tdmap_msa_parameters = false;

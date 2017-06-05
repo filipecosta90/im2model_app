@@ -249,6 +249,8 @@ class TDMap {
     bool _is_super_cell_size_b_defined();
     bool _is_simulated_image_sampling_rate_and_size_defined();
     bool _is_wave_function_name_defined();
+    bool _is_nx_simulated_horizontal_samples_defined();
+    bool _is_ny_simulated_vertical_samples_defined();
 
     // runned ?
     bool _is_simulated_images_grid_defined();
@@ -274,6 +276,10 @@ class TDMap {
     double get_defocus_range_upper_bound( );
 
     double get_defocus_range_period( );
+
+    int get_nx_simulated_horizontal_samples( );
+
+    int get_ny_simulated_vertical_samples( );
 
     std::vector<double> get_celslc_accum_nm_slice_vec();
 

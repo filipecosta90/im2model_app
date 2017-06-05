@@ -58,8 +58,6 @@ void CvTDMapImageFrame::setImage(const cv::Mat& image) {
   _flag_image_setted = true;
 }
 
-
 void CvTDMapImageFrame::setImageWidget( CVImageWidget* widget ){
   image_widget = widget;
 }
-
