@@ -1,4 +1,4 @@
-file(GLOB im2model_core_src 
+﻿file(GLOB im2model_core_src 
   application_log.cpp
   application_log.hpp
   atom.hpp
@@ -105,9 +105,13 @@ if(build_gui)
   # These are stand-alone .cpp files that you usually never have to look at.
 
   set(GUI_SOURCE_FILES
+    settings.h
     settings.cpp
+    configwin.h
     configwin.cpp
+    treeitem.h
     treeitem.cpp
+    treemodel.h
     treemodel.cpp
     treeitem_file_delegate.hpp
     treeitem_file_delegate.cpp
@@ -125,6 +129,8 @@ if(build_gui)
     gui_tdmap_cell.cpp
     gui_tdmap_table.h
     gui_tdmap_table.cpp
+    gui_sim_updater.hpp
+    gui_stream.hpp
     qt_file_push_button.h
     qt_file_push_button.cpp
     gui_sim_updater.hpp

@@ -42,7 +42,8 @@ namespace Ui {
 class MainWindow : public QMainWindow {
   Q_OBJECT
   public:
-    explicit MainWindow(QWidget *parent = 0);
+    MainWindow(QWidget *parent = 0);
+	MainWindow( ApplicationLog::ApplicationLog* logger, QWidget *parent = 0 );
 
     bool set_dr_probe_path( QString path );
     bool set_application_logger( ApplicationLog::ApplicationLog* logger );

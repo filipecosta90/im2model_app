@@ -1,17 +1,37 @@
 #include "configwin.h"
 
-MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow) {
+MainWindow::MainWindow( QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow) {
+
+	if (_flag_im2model_logger) {
+		im2model_logger->logEvent(ApplicationLog::normal, "Setting up UI.");
+	}
 
   ui->setupUi(this);
   ui->td_map_splitter->setStretchFactor(0,3);
   ui->td_map_splitter->setStretchFactor(1,7);
   ui->td_map_splitter->setStretchFactor(2,2);
 
+  if (_flag_im2model_logger) {
+	  im2model_logger->logEvent(ApplicationLog::normal, "Creating actions.");
+  }
   createActions();
+  
+  if (_flag_im2model_logger) {
+	  im2model_logger->logEvent(ApplicationLog::normal, "Updating status bar.");
+  }
   updateStatusBar();
   setCurrentFile(QString());
   setUnifiedTitleAndToolBarOnMac(true);
+ 
+
+  if (_flag_im2model_logger) {
+	  im2model_logger->logEvent(ApplicationLog::normal, "Loading file delegate.");
+  }
   _load_file_delegate = new TreeItemFileDelegate(this);
+
+  if (_flag_im2model_logger) {
+	  im2model_logger->logEvent(ApplicationLog::normal, "Going to read settings.");
+  }
   _settings_ok = readSettings();
   if( ! _settings_ok ){
     if( _flag_im2model_logger ){
@@ -29,6 +49,11 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
   else{
     _core_image_crystal = new Image_Crystal();
     _core_td_map = new TDMap( _sim_tdmap_ostream_buffer, _core_image_crystal );
+
+	if (_flag_im2model_logger) {
+		im2model_logger->logEvent(ApplicationLog::critical, "Trying to set application logger for TDMap.");
+	_core_td_map->set_application_logger(im2model_logger);
+	}
 
     bool status = true;
     status &= _core_td_map->set_dr_probe_bin_path( _dr_probe_bin_path.toStdString() );
@@ -75,6 +100,12 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
     }
   }
+}
+
+MainWindow::MainWindow(ApplicationLog::ApplicationLog* logger , QWidget *parent) : MainWindow( parent ) {
+	im2model_logger = logger;
+	_flag_im2model_logger = true;
+	im2model_logger->logEvent(ApplicationLog::notification, "Application logger setted for MainWindow class.");
 }
 
 void MainWindow::set_base_dir_path( boost::filesystem::path base_dir ){
@@ -387,10 +418,23 @@ bool MainWindow::checkSettings(){
   bool _temp_flag_dr_probe_msa_bin = _flag_dr_probe_msa_bin;
   bool _temp_flag_dr_probe_wavimg_bin = _flag_dr_probe_wavimg_bin;
 
-  std::cout << " _flag_dr_probe_celslc_bin " << _flag_dr_probe_celslc_bin << std::endl;
-  std::cout << " _flag_dr_probe_msa_bin " << _flag_dr_probe_msa_bin << std::endl;
-  std::cout << " _flag_dr_probe_wavimg_bin " << _flag_dr_probe_wavimg_bin << std::endl;
-  std::cout << " _flag_dr_probe_bin_path " << _flag_dr_probe_bin_path << std::endl;
+  if (_flag_im2model_logger) {
+	  std::stringstream message;
+	  message << " MainWindow::checkSettings()";
+	  im2model_logger->logEvent(ApplicationLog::notification, message.str());
+	  message = std::stringstream();
+	  message << "_flag_dr_probe_celslc_bin: " << _flag_dr_probe_celslc_bin;
+	  im2model_logger->logEvent(ApplicationLog::notification, message.str());
+	  message = std::stringstream();
+	  message << "_flag_dr_probe_msa_bin: " << _flag_dr_probe_msa_bin;
+	  im2model_logger->logEvent(ApplicationLog::notification, message.str());
+	  message = std::stringstream();
+	  message << "_flag_dr_probe_wavimg_bin: " << _flag_dr_probe_wavimg_bin;
+	  im2model_logger->logEvent(ApplicationLog::notification, message.str());
+	  message = std::stringstream();
+	  message << "_flag_dr_probe_bin_path: " << _flag_dr_probe_bin_path;
+	  im2model_logger->logEvent(ApplicationLog::notification, message.str());
+  }
 
   //if its defined lets check if exists
   if( _flag_dr_probe_bin_path ){
@@ -410,11 +454,24 @@ bool MainWindow::checkSettings(){
   status &= _temp_flag_dr_probe_msa_bin;
   status &= _temp_flag_dr_probe_wavimg_bin;
 
-  std::cout << " _flag_dr_probe_celslc_bin " << _temp_flag_dr_probe_celslc_bin << std::endl;
-  std::cout << " _flag_dr_probe_msa_bin " << _temp_flag_dr_probe_msa_bin << std::endl;
-  std::cout << " _flag_dr_probe_wavimg_bin " << _temp_flag_dr_probe_wavimg_bin << std::endl;
-  std::cout << " _flag_dr_probe_bin_path " << _flag_dr_probe_bin_path << std::endl;
-  std::cout << " dr_probe_path_exists " << dr_probe_path_exists << std::endl;
+  if (_flag_im2model_logger) {
+	  std::stringstream message;
+	  message << "_flag_dr_probe_celslc_bin: " << _temp_flag_dr_probe_celslc_bin;
+	  im2model_logger->logEvent(ApplicationLog::notification, message.str());
+	  message = std::stringstream();
+	  message << "_flag_dr_probe_msa_bin: " << _temp_flag_dr_probe_msa_bin;
+	  im2model_logger->logEvent(ApplicationLog::notification, message.str());
+	  message = std::stringstream();
+	  message << "_flag_dr_probe_wavimg_bin: " << _temp_flag_dr_probe_wavimg_bin;
+	  im2model_logger->logEvent(ApplicationLog::notification, message.str());
+	  message = std::stringstream();
+	  message << "_flag_dr_probe_bin_path: " << _flag_dr_probe_bin_path;
+	  im2model_logger->logEvent(ApplicationLog::notification, message.str());
+	  message = std::stringstream();
+	  message << "dr_probe_path_exists: " << dr_probe_path_exists;
+	  im2model_logger->logEvent(ApplicationLog::notification, message.str());
+  }
+
   return status;
 }
 

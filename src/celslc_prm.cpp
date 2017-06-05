@@ -470,7 +470,7 @@ bool CELSLC_prm::call_boost_bin(  ){
 #if defined(BOOST_WINDOWS_API)
     if( _flag_logger ){
       std::stringstream message;
-      message << "(EXIT_SUCCESS == _child_exit_code) "<< (EXIT_SUCCESS == WEXITSTATUS(_child_exit_code));
+      message << "(EXIT_SUCCESS == _child_exit_code) "<< (EXIT_SUCCESS == _child_exit_code);
       logger->logEvent( ApplicationLog::notification , message.str() );
     }
     assert((EXIT_SUCCESS == _child_exit_code));
