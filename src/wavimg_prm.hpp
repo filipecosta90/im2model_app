@@ -113,7 +113,8 @@ class WAVIMG_prm {
     bool save_prm_filename_path();
     bool _is_prm_filename_path_defined();
     bool _is_prm_produced();
-    bool _is_prm_filename_defined(); 
+    bool _is_prm_filename_defined();
+    bool check_produced_dat();
 
     /* boost process output streams */
     boost::process::ipstream& _io_pipe_out;

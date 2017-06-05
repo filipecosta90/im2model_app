@@ -550,10 +550,39 @@ bool WAVIMG_prm::call_bin(){
 #elif defined(BOOST_POSIX_API)
       if( (EXIT_SUCCESS == WEXITSTATUS(_child_exit_code)) ){
 #endif
-        runned_bin = true;
-        result = true;
+        runned_bin = check_produced_dat();
+        result = runned_bin;
       }
     }
+    return result;
+  }
+
+  bool WAVIMG_prm::check_produced_dat(){
+    bool result = false;
+    boost::filesystem::path dir ( base_dir_path );
+    bool status = true;
+    if( number_parameter_loops == 2 ){
+      for ( int outter_loop_pos = 1; outter_loop_pos <= loop_range_n.at(1); outter_loop_pos++){
+        for ( int inner_loop_pos = 1; inner_loop_pos <= loop_range_n.at(0); inner_loop_pos++){
+
+          std::stringstream filename_stream;
+          filename_stream << file_name_output_image_wave_function <<
+            "_"<< std::setw(3) << std::setfill('0') << std::to_string(outter_loop_pos) <<
+            "_"<< std::setw(3) << std::setfill('0') << std::to_string(inner_loop_pos) <<
+            ".dat" ;
+          boost::filesystem::path dat_file ( filename_stream.str() );
+          boost::filesystem::path full_dat_path = dir / dat_file;
+          const bool _dat_exists = boost::filesystem::exists( full_dat_path );
+          status &= _dat_exists;
+          if( _flag_logger ){
+            std::stringstream message;
+            message << "checking if the produced dat file exists: " << full_dat_path.string() << " result: " << _dat_exists;
+            logger->logEvent( ApplicationLog::notification , message.str() );
+          }
+        }
+      }
+    }
+    result = status;
     return result;
   }
 
