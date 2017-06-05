@@ -50,7 +50,7 @@ int main(int argc, char *argv[]){
   parser.addVersionOption();
   parser.addPositionalArgument("file", "The file to open.");
   parser.process(app);
-  MainWindow window(im2model_logger);
+  MainWindow window( im2model_logger );
   if( window._is_initialization_ok() ){
     if (!parser.positionalArguments().isEmpty()){
       window.loadFile(parser.positionalArguments().first());

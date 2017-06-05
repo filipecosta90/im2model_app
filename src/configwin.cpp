@@ -1,10 +1,13 @@
 #include "configwin.h"
 
-MainWindow::MainWindow( QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow) {
+MainWindow::MainWindow( ApplicationLog::ApplicationLog* logger , QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow) {
+    im2model_logger = logger;
+  _flag_im2model_logger = true;
+  im2model_logger->logEvent(ApplicationLog::notification, "Application logger setted for MainWindow class.");
 
-	if (_flag_im2model_logger) {
-		im2model_logger->logEvent(ApplicationLog::normal, "Setting up UI.");
-	}
+  if (_flag_im2model_logger) {
+    im2model_logger->logEvent(ApplicationLog::normal, "Setting up UI.");
+  }
 
   ui->setupUi(this);
   ui->td_map_splitter->setStretchFactor(0,3);
@@ -12,25 +15,25 @@ MainWindow::MainWindow( QWidget *parent) : QMainWindow(parent), ui(new Ui::MainW
   ui->td_map_splitter->setStretchFactor(2,2);
 
   if (_flag_im2model_logger) {
-	  im2model_logger->logEvent(ApplicationLog::normal, "Creating actions.");
+    im2model_logger->logEvent(ApplicationLog::normal, "Creating actions.");
   }
   createActions();
-  
+
   if (_flag_im2model_logger) {
-	  im2model_logger->logEvent(ApplicationLog::normal, "Updating status bar.");
+    im2model_logger->logEvent(ApplicationLog::normal, "Updating status bar.");
   }
   updateStatusBar();
   setCurrentFile(QString());
   setUnifiedTitleAndToolBarOnMac(true);
- 
+
 
   if (_flag_im2model_logger) {
-	  im2model_logger->logEvent(ApplicationLog::normal, "Loading file delegate.");
+    im2model_logger->logEvent(ApplicationLog::normal, "Loading file delegate.");
   }
   _load_file_delegate = new TreeItemFileDelegate(this);
 
   if (_flag_im2model_logger) {
-	  im2model_logger->logEvent(ApplicationLog::normal, "Going to read settings.");
+    im2model_logger->logEvent(ApplicationLog::normal, "Going to read settings.");
   }
   _settings_ok = readSettings();
   if( ! _settings_ok ){
@@ -50,10 +53,10 @@ MainWindow::MainWindow( QWidget *parent) : QMainWindow(parent), ui(new Ui::MainW
     _core_image_crystal = new Image_Crystal();
     _core_td_map = new TDMap( _sim_tdmap_ostream_buffer, _core_image_crystal );
 
-	if (_flag_im2model_logger) {
-		im2model_logger->logEvent(ApplicationLog::critical, "Trying to set application logger for TDMap.");
-	_core_td_map->set_application_logger(im2model_logger);
-	}
+    if (_flag_im2model_logger) {
+      im2model_logger->logEvent(ApplicationLog::critical, "Trying to set application logger for TDMap.");
+      _core_td_map->set_application_logger(im2model_logger);
+    }
 
     bool status = true;
     status &= _core_td_map->set_dr_probe_bin_path( _dr_probe_bin_path.toStdString() );
@@ -102,11 +105,14 @@ MainWindow::MainWindow( QWidget *parent) : QMainWindow(parent), ui(new Ui::MainW
   }
 }
 
+/*
 MainWindow::MainWindow(ApplicationLog::ApplicationLog* logger , QWidget *parent) : MainWindow( parent ) {
-	im2model_logger = logger;
-	_flag_im2model_logger = true;
-	im2model_logger->logEvent(ApplicationLog::notification, "Application logger setted for MainWindow class.");
+    im2model_logger = logger;
+  _flag_im2model_logger = true;
+  std::cout << " Main window logger constructor " << _flag_im2model_logger << std::endl;
+  im2model_logger->logEvent(ApplicationLog::notification, "Application logger setted for MainWindow class.");
 }
+*/
 
 void MainWindow::set_base_dir_path( boost::filesystem::path base_dir ){
   base_dir_path = base_dir;
@@ -125,6 +131,7 @@ bool MainWindow::set_application_logger( ApplicationLog::ApplicationLog* logger 
 bool MainWindow::_is_initialization_ok(){
   return !_failed_initialization;
 }
+
 bool MainWindow::maybeSetPreferences(){
   const QMessageBox::StandardButton ret
     = QMessageBox::warning(this, tr("Application"),
@@ -142,7 +149,7 @@ bool MainWindow::maybeSetPreferences(){
   return false;
 }
 
-void MainWindow::update_tdmap_best_match(int x,int y){
+void MainWindow::update_tdmap_best_match( int x,int y ){
   if(_core_td_map->_is_simulated_images_grid_defined()){
     cv::Mat _simulated_image = _core_td_map->get_simulated_image_in_grid(x,y);
     const double _simulated_image_match = _core_td_map->get_simulated_image_match_in_grid(x,y);
@@ -419,21 +426,21 @@ bool MainWindow::checkSettings(){
   bool _temp_flag_dr_probe_wavimg_bin = _flag_dr_probe_wavimg_bin;
 
   if (_flag_im2model_logger) {
-	  std::stringstream message;
-	  message << " MainWindow::checkSettings()";
-	  im2model_logger->logEvent(ApplicationLog::notification, message.str());
-	  message = std::stringstream();
-	  message << "_flag_dr_probe_celslc_bin: " << _flag_dr_probe_celslc_bin;
-	  im2model_logger->logEvent(ApplicationLog::notification, message.str());
-	  message = std::stringstream();
-	  message << "_flag_dr_probe_msa_bin: " << _flag_dr_probe_msa_bin;
-	  im2model_logger->logEvent(ApplicationLog::notification, message.str());
-	  message = std::stringstream();
-	  message << "_flag_dr_probe_wavimg_bin: " << _flag_dr_probe_wavimg_bin;
-	  im2model_logger->logEvent(ApplicationLog::notification, message.str());
-	  message = std::stringstream();
-	  message << "_flag_dr_probe_bin_path: " << _flag_dr_probe_bin_path;
-	  im2model_logger->logEvent(ApplicationLog::notification, message.str());
+    std::stringstream message;
+    message << " MainWindow::checkSettings()";
+    im2model_logger->logEvent(ApplicationLog::notification, message.str());
+    message = std::stringstream();
+    message << "_flag_dr_probe_celslc_bin: " << _flag_dr_probe_celslc_bin;
+    im2model_logger->logEvent(ApplicationLog::notification, message.str());
+    message = std::stringstream();
+    message << "_flag_dr_probe_msa_bin: " << _flag_dr_probe_msa_bin;
+    im2model_logger->logEvent(ApplicationLog::notification, message.str());
+    message = std::stringstream();
+    message << "_flag_dr_probe_wavimg_bin: " << _flag_dr_probe_wavimg_bin;
+    im2model_logger->logEvent(ApplicationLog::notification, message.str());
+    message = std::stringstream();
+    message << "_flag_dr_probe_bin_path: " << _flag_dr_probe_bin_path;
+    im2model_logger->logEvent(ApplicationLog::notification, message.str());
   }
 
   //if its defined lets check if exists
@@ -455,21 +462,21 @@ bool MainWindow::checkSettings(){
   status &= _temp_flag_dr_probe_wavimg_bin;
 
   if (_flag_im2model_logger) {
-	  std::stringstream message;
-	  message << "_flag_dr_probe_celslc_bin: " << _temp_flag_dr_probe_celslc_bin;
-	  im2model_logger->logEvent(ApplicationLog::notification, message.str());
-	  message = std::stringstream();
-	  message << "_flag_dr_probe_msa_bin: " << _temp_flag_dr_probe_msa_bin;
-	  im2model_logger->logEvent(ApplicationLog::notification, message.str());
-	  message = std::stringstream();
-	  message << "_flag_dr_probe_wavimg_bin: " << _temp_flag_dr_probe_wavimg_bin;
-	  im2model_logger->logEvent(ApplicationLog::notification, message.str());
-	  message = std::stringstream();
-	  message << "_flag_dr_probe_bin_path: " << _flag_dr_probe_bin_path;
-	  im2model_logger->logEvent(ApplicationLog::notification, message.str());
-	  message = std::stringstream();
-	  message << "dr_probe_path_exists: " << dr_probe_path_exists;
-	  im2model_logger->logEvent(ApplicationLog::notification, message.str());
+    std::stringstream message;
+    message << "_flag_dr_probe_celslc_bin: " << _temp_flag_dr_probe_celslc_bin;
+    im2model_logger->logEvent(ApplicationLog::notification, message.str());
+    message = std::stringstream();
+    message << "_flag_dr_probe_msa_bin: " << _temp_flag_dr_probe_msa_bin;
+    im2model_logger->logEvent(ApplicationLog::notification, message.str());
+    message = std::stringstream();
+    message << "_flag_dr_probe_wavimg_bin: " << _temp_flag_dr_probe_wavimg_bin;
+    im2model_logger->logEvent(ApplicationLog::notification, message.str());
+    message = std::stringstream();
+    message << "_flag_dr_probe_bin_path: " << _flag_dr_probe_bin_path;
+    im2model_logger->logEvent(ApplicationLog::notification, message.str());
+    message = std::stringstream();
+    message << "dr_probe_path_exists: " << dr_probe_path_exists;
+    im2model_logger->logEvent(ApplicationLog::notification, message.str());
   }
 
   return status;
