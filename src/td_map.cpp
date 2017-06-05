@@ -799,7 +799,7 @@ bool TDMap::set_dr_probe_bin_path( std::string bin_path ){
   _flag_dr_probe_bin_path = result;
   if( _flag_logger ){
     std::stringstream message;
-    message << " set_dr_probe_bin_path: " << _flag_dr_probe_bin_path;
+    message << " set_dr_probe_bin_path: " << _flag_dr_probe_bin_path << " to: " << bin_path;
     logger->logEvent( ApplicationLog::notification , message.str() );
   }
   return _flag_dr_probe_bin_path;
@@ -810,13 +810,10 @@ bool TDMap::_is_dr_probe_bin_path_defined(){
 }
 
 bool TDMap::set_dr_probe_celslc_execname( std::string celslc_execname ){
-  bool result = true;
-  result &= _tdmap_celslc_parameters->set_bin_execname(celslc_execname);
-  if( result ){
+  _flag_dr_probe_celslc_execname = _tdmap_celslc_parameters->set_bin_execname(celslc_execname);
+  if( _flag_dr_probe_celslc_execname ){
     dr_probe_celslc_execname = celslc_execname;
   }
-  _flag_dr_probe_celslc_execname = result;
-
   if( _flag_logger ){
     std::stringstream message;
     message << " set_dr_probe_celslc_execname result: " << _flag_dr_probe_celslc_execname;

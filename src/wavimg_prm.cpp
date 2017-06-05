@@ -178,27 +178,18 @@ WAVIMG_prm::WAVIMG_prm(const WAVIMG_prm &obj) : _io_pipe_out(obj._io_pipe_out) {
 }
 
 bool WAVIMG_prm::set_bin_execname( std::string execname ){
-  boost::filesystem::path bin_dir(bin_path);
-  boost::filesystem::directory_iterator end_itr;
-  // cycle through the directory
-  bool result = false;
-  for ( boost::filesystem::directory_iterator itr(bin_dir); itr != end_itr; ++itr){
-    // If it's not a directory, list it. If you want to list directories too, just remove this check.
-    if (is_regular_file(itr->path())) {
-      // assign current file name to current_file and echo it out to the console.
-      if( itr->path().filename() == execname ){
-        std::cout << itr->path().filename() << std::endl;
-        bin_execname = execname;
-        _flag_bin_execname = true;
-        full_bin_path_execname = itr->path().string();
-        _flag_full_bin_path_execname = true;
-        std::cout << full_bin_path_execname << std::endl;
-        result = true;
-      }
+        boost::filesystem::path bin_dir( bin_path );
+        boost::filesystem::path file (execname);
+        full_bin_path_execname = bin_dir / file;
+        _flag_full_bin_path_execname = boost::filesystem::exists( full_bin_path_execname );
+        if( _flag_logger ){
+          std::stringstream message;
+          message << "checking if WAVIMG exec exists. full path: " <<  full_bin_path_execname.string() << " || result: " << _flag_full_bin_path_execname << std::endl;
+          logger->logEvent( ApplicationLog::notification , message.str() );
+        }
+        return _flag_full_bin_path_execname;
     }
-  }
-  return result;
-}
+
 
 bool WAVIMG_prm::save_prm_filename_path(){
   bool result = false;

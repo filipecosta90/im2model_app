@@ -69,7 +69,7 @@ class MSA_prm {
     bool _flag_bin_path = false;
     std::string bin_execname;
     bool _flag_bin_execname = false;
-    std::string full_bin_path_execname;
+    boost::filesystem::path full_bin_path_execname;
     bool _flag_full_bin_path_execname = false;
     bool debug_switch;
     bool runned_bin;
