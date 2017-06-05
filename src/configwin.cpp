@@ -1,7 +1,7 @@
 #include "configwin.h"
 
 MainWindow::MainWindow( ApplicationLog::ApplicationLog* logger , QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow) {
-    im2model_logger = logger;
+  im2model_logger = logger;
   _flag_im2model_logger = true;
   im2model_logger->logEvent(ApplicationLog::notification, "Application logger setted for MainWindow class.");
 
@@ -106,13 +106,13 @@ MainWindow::MainWindow( ApplicationLog::ApplicationLog* logger , QWidget *parent
 }
 
 /*
-MainWindow::MainWindow(ApplicationLog::ApplicationLog* logger , QWidget *parent) : MainWindow( parent ) {
-    im2model_logger = logger;
-  _flag_im2model_logger = true;
-  std::cout << " Main window logger constructor " << _flag_im2model_logger << std::endl;
-  im2model_logger->logEvent(ApplicationLog::notification, "Application logger setted for MainWindow class.");
-}
-*/
+   MainWindow::MainWindow(ApplicationLog::ApplicationLog* logger , QWidget *parent) : MainWindow( parent ) {
+   im2model_logger = logger;
+   _flag_im2model_logger = true;
+   std::cout << " Main window logger constructor " << _flag_im2model_logger << std::endl;
+   im2model_logger->logEvent(ApplicationLog::notification, "Application logger setted for MainWindow class.");
+   }
+   */
 
 void MainWindow::set_base_dir_path( boost::filesystem::path base_dir ){
   base_dir_path = base_dir;

@@ -45,16 +45,28 @@ MSA_prm::MSA_prm( boost::process::ipstream &async_io_buffer_out ) : _io_pipe_out
 }
 
 bool MSA_prm::set_bin_execname( std::string execname ){
-    boost::filesystem::path bin_dir( bin_path );
-    boost::filesystem::path file (execname);
-    full_bin_path_execname = bin_dir / file;
+  boost::filesystem::path bin_dir( bin_path );
+  boost::filesystem::path file (execname);
+  full_bin_path_execname = bin_dir;
+  full_bin_path_execname /= file;
+  try {
     _flag_full_bin_path_execname = boost::filesystem::exists( full_bin_path_execname );
+  }
+  catch (const boost::filesystem::filesystem_error& ex) {
+    std::cout << ex.what() << '\n';
+    _flag_full_bin_path_execname = false;
     if( _flag_logger ){
       std::stringstream message;
-      message << "checking if MSA exec exists. full path: " <<  full_bin_path_execname.string() << " || result: " << _flag_full_bin_path_execname << std::endl;
+      message << "ERROR: " << ex.what();
       logger->logEvent( ApplicationLog::notification , message.str() );
     }
-    return _flag_full_bin_path_execname;
+  }
+  if( _flag_logger ){
+    std::stringstream message;
+    message << "checking if MSA exec exists. full path: " <<  full_bin_path_execname.string() << " || result: " << _flag_full_bin_path_execname << std::endl;
+    logger->logEvent( ApplicationLog::notification , message.str() );
+  }
+  return _flag_full_bin_path_execname;
 }
 
 void MSA_prm::set_electron_wavelength( double energy ){
@@ -128,7 +140,7 @@ bool MSA_prm::call_bin(){
     args_stream << full_bin_path_execname;
     // input -prm
 
-  boost::filesystem::path dir ( base_dir_path );
+    boost::filesystem::path dir ( base_dir_path );
     boost::filesystem::path prm_file ( prm_filename );
     boost::filesystem::path full_prm_path = dir / prm_file;
 
@@ -177,11 +189,11 @@ bool MSA_prm::call_bin(){
       boost::process::child c(
           // command
           args_stream.str(),
-                  boost::process::start_dir= base_dir_path,
+          boost::process::start_dir= base_dir_path,
           // redirecting std_out to null
           boost::process::std_out > boost::process::null,
           // redirecting std_err to null
-       //   boost::process::std_err > boost::process::null,
+          //   boost::process::std_err > boost::process::null,
           _error_code
           );
       c.wait();
@@ -226,29 +238,29 @@ bool MSA_prm::call_bin(){
     return result;
   }
 
-bool MSA_prm::check_produced_waves(){
+  bool MSA_prm::check_produced_waves(){
     bool result = false;
 
     boost::filesystem::path dir ( base_dir_path );
-bool status = true;
+    bool status = true;
     for ( int slice_id = 1 ;
-          slice_id <= number_slices_used_describe_full_object_structure_up_to_its_maximum_thickness ;
-          slice_id++){
-     std::stringstream filename_stream;
-     filename_stream << wave_function_name << "_sl"<< std::setw(3) << std::setfill('0') << std::to_string(slice_id) << ".wav" ;
-     boost::filesystem::path wav_file ( filename_stream.str() );
-     boost::filesystem::path full_wave_path = dir / wav_file;
-    const bool _wave_exists = boost::filesystem::exists(full_wave_path );
-    status &= _wave_exists;
-    if( _flag_logger ){
-      std::stringstream message;
-      message << "checking if the produced wave file exists: " << full_wave_path.string() << " result: " << _wave_exists;
-      logger->logEvent( ApplicationLog::notification , message.str() );
-    }
+        slice_id <= number_slices_used_describe_full_object_structure_up_to_its_maximum_thickness ;
+        slice_id++){
+      std::stringstream filename_stream;
+      filename_stream << wave_function_name << "_sl"<< std::setw(3) << std::setfill('0') << std::to_string(slice_id) << ".wav" ;
+      boost::filesystem::path wav_file ( filename_stream.str() );
+      boost::filesystem::path full_wave_path = dir / wav_file;
+      const bool _wave_exists = boost::filesystem::exists(full_wave_path );
+      status &= _wave_exists;
+      if( _flag_logger ){
+        std::stringstream message;
+        message << "checking if the produced wave file exists: " << full_wave_path.string() << " result: " << _wave_exists;
+        logger->logEvent( ApplicationLog::notification , message.str() );
+      }
     }
     result = status;
     return result;
-    }
+  }
 
 
   bool MSA_prm::save_prm_filename_path(){
