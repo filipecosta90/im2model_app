@@ -29,10 +29,16 @@ class CvTDMapImageFrameDelegate : public QStyledItemDelegate
     CvTDMapImageFrameDelegate(int margin, QWidget *parent = 0) : QStyledItemDelegate(parent),  m_margin(margin) {}
 
     void paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const override;
+    bool shouldBeBest(const QModelIndex &index) const;
+    void set_best( int row, int col );
 
   private:
-      // margin between cells
-      int m_margin;
+    // margin between cells
+    int m_margin;
+    int _best_row;
+    int _best_col;
+    bool _best_defined = false;
 };
 
 #endif //CELL_DELEGATE_HPP
+

@@ -178,26 +178,26 @@ void TDMap_Table::clear(){
   this->resizeRowsToContents();
 }
 
-Q_DECLARE_METATYPE(CvImageCellWidget*)
 
-  void TDMap_Table::create_cells(){
+void TDMap_Table::create_cells(){
 
-    for (int row = 0; row < RowCount; ++row) {
-      for (int col = 0; col < ColumnCount; ++col) {
-        CvImageCellWidget *cell_widget  = new CvImageCellWidget(  );
-        cell_widget->setMaximumSize( QSize(ColumnSize, RowSize) );
-        this->setCellWidget(row, col, cell_widget);
-        this->setItem(row, col, new QTableWidgetItem());//used to find it
+  for (int row = 0; row < RowCount; ++row) {
+    for (int col = 0; col < ColumnCount; ++col) {
+      CvImageCellWidget *cell_widget  = new CvImageCellWidget(  );
+      cell_widget->setMaximumSize( QSize(ColumnSize, RowSize) );
+      //cell_widget->setStyleSheet("background-color:red;");
 
-      }
+      this->setCellWidget(row, col, cell_widget);
+      this->setItem(row, col, new QTableWidgetItem());//used to find it
+
     }
-    _number_drawed_cells = RowCount * ColumnCount;
-    _flag_created_cells = true;
   }
+  _number_drawed_cells = RowCount * ColumnCount;
+  _flag_created_cells = true;
+}
 
 void TDMap_Table::update_cells(){
   if( _flag_simulated_image_grid && _flag_created_cells ){
-
     cv::Point2i best_match_pos = core_tdmap->get_simgrid_best_match_position();
     for (int row = 0; row < RowCount; ++row) {
       std::vector<cv::Mat> simulated_image_row = simulated_image_grid.at(row);
@@ -209,23 +209,18 @@ void TDMap_Table::update_cells(){
         cv::Mat full_image = simulated_image_row.at(col);
         cell_widget->setImage( full_image.clone() );
         cell_widget->fitToContainer();
-        if( best_match_pos.x ==  col && best_match_pos.y == row ){
-          std::cout << "setting best position "<< best_match_pos << std::endl;
+        if( best_match_pos.x ==  row && best_match_pos.y == col ){
           cell_widget->set_best();
+          this->image_delegate->set_best(  row, col );
         }
         this->setCellWidget(row,col, cell_widget);
         this->setItem(row, col, new QTableWidgetItem());//used to find it
       }
     }
-    setCurrentCell(best_match_pos.x, best_match_pos.y);
     emit tdmap_best_match( best_match_pos.x, best_match_pos.y );
     setCurrentCell(0, 0);
     emit cellClicked(0,0);
   }
-  /* else{
-     setCurrentCell(0, 0);
-     emit cellClicked(0,0);
-     }*/
 }
 
 /*
