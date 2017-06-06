@@ -2,12 +2,14 @@
 #define TDMap_Table_H
 
 #include <QTableWidget>
+#include <QTableWidgetItem>
 
 #include "gui_tdmap_cell.h"
 #include "cv_image_delegate.h"
 #include "td_map.hpp"
 #include "treeitem.h"
 #include "cv_tdmap_cell_image_frame_delegate.h"
+
 
 class TDMap_Cell;
 class TDMap_TableCompare;
@@ -79,6 +81,7 @@ signals:
     int _treeitem_defocus_range_number_samples_watch_col;
     bool _flag_simulated_image_grid = false;
     std::vector< std::vector<cv::Mat> > simulated_image_grid;
+
 
 };
 

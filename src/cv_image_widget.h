@@ -11,10 +11,8 @@ class CVImageWidget : public QWidget
 {
   Q_OBJECT
   public:
-    explicit CVImageWidget(QWidget *parent = 0) : QWidget(parent)
-                                                  , scaleFactor(1)
-  {
-  }
+    explicit CVImageWidget(QWidget *parent = 0) : QWidget(parent) , scaleFactor(1) { }
+
     QSize sizeHint() const { return _qimage.size(); }
     QSize minimumSizeHint() const { return _qimage.size(); }
 

@@ -13,11 +13,13 @@ TDMap_Table::TDMap_Table(QWidget *parent) : QTableWidget(parent) {
   this->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Expanding);
 
   table_parent = parent;
-  //  image_delegate = new CvTDMapImageFrameDelegate( 0 , this);
+  this->setStyleSheet("QTableWidget::item { padding: 3px }");
 
-  //setItemPrototype(new TDMap_Cell);
+  image_delegate = new CvTDMapImageFrameDelegate( 3 , this );
+
+  // setItemPrototype(new CvImageCellWidget);
   setSelectionMode(ContiguousSelection);
-  // setItemDelegate(image_delegate);
+  this->setItemDelegate(image_delegate);
 
   connect(this, SIGNAL(itemChanged(QTableWidgetItem *)), this, SLOT(somethingChanged()));
   clear();
@@ -50,8 +52,8 @@ void TDMap_Table::update_RowCount_from_thickness_range_number_samples( int signa
 
 void TDMap_Table::update_column_size(){
 
-    int leftM,rightM,topM,bottomM;
-    this->getContentsMargins(&leftM,&topM,&rightM,&bottomM);
+  int leftM,rightM,topM,bottomM;
+  this->getContentsMargins(&leftM,&topM,&rightM,&bottomM);
 
   const int header_size = this->verticalHeader()->width();
   std::cout << "VerticalHeaderSize" << header_size << std::endl;
@@ -63,9 +65,8 @@ void TDMap_Table::update_column_size(){
 
 void TDMap_Table::update_row_size(){
 
-    int leftM,rightM,topM,bottomM;
-    this->getContentsMargins(&leftM,&topM,&rightM,&bottomM);
-
+  int leftM,rightM,topM,bottomM;
+  this->getContentsMargins(&leftM,&topM,&rightM,&bottomM);
 
   const int header_size = this->horizontalHeader()->height();
   std::cout << "HorizontalHeaderSize" << header_size << std::endl;
@@ -81,8 +82,6 @@ void TDMap_Table::update_ColumnCount_from_defocus_range_number_samples( int sign
     int new_ColumnCount = core_tdmap->get_defocus_range_number_samples();
     ColumnCount = new_ColumnCount;
     update_column_size();
-
-
     std::cout << "new_ColumnCount " << new_ColumnCount << std::endl;
     clear();
   }
@@ -127,6 +126,7 @@ void TDMap_Table::update_headers(){
   }
 
   for (int i = 0; i < ColumnCount; ++i) {
+    setItemDelegateForColumn(i, image_delegate);
     QTableWidgetItem *item = new QTableWidgetItem;
     double _at_defocus = _defocus_lower + ( _defocus_period * i );
     item->setText( QString::number( _at_defocus ) + QString( " nm" )  );
@@ -141,6 +141,7 @@ void TDMap_Table::update_headers(){
     }
   }
   for (int i = 0; i < RowCount; ++i) {
+    setItemDelegateForRow(i, image_delegate);
     QTableWidgetItem *item = new QTableWidgetItem;
     const int at_slice = round( _thickness_lower_slice + _thickness_period_slice * ( i )  );
     QString legend;
@@ -169,27 +170,30 @@ void TDMap_Table::clear(){
   update_headers();
   if( ( _number_drawed_cells != _number_calculated_cells ) || ( ! _flag_created_cells ) ){
     std::cout << " creating cells " << std::endl;
-      create_cells();
+    create_cells();
   }
-   std::cout << " updating cells " << std::endl;
+  std::cout << " updating cells " << std::endl;
   update_cells();
   this->resizeColumnsToContents();
   this->resizeRowsToContents();
 }
 
-void TDMap_Table::create_cells(){
-  for (int row = 0; row < RowCount; ++row) {
-    for (int col = 0; col < ColumnCount; ++col) {
-      CvImageCellWidget *cell_widget  = new CvImageCellWidget(  );
-      //cell_widget->setMinimumSize( QSize(ColumnSize, RowSize) );
-      cell_widget->setMaximumSize( QSize(ColumnSize, RowSize) );
- //     cell_widget->set_container_window_size(ColumnSize,RowSize);
-      this->setCellWidget(row,col, cell_widget);
+Q_DECLARE_METATYPE(CvImageCellWidget*)
+
+  void TDMap_Table::create_cells(){
+
+    for (int row = 0; row < RowCount; ++row) {
+      for (int col = 0; col < ColumnCount; ++col) {
+        CvImageCellWidget *cell_widget  = new CvImageCellWidget(  );
+        cell_widget->setMaximumSize( QSize(ColumnSize, RowSize) );
+        this->setCellWidget(row, col, cell_widget);
+        this->setItem(row, col, new QTableWidgetItem());//used to find it
+
+      }
     }
+    _number_drawed_cells = RowCount * ColumnCount;
+    _flag_created_cells = true;
   }
-  _number_drawed_cells = RowCount * ColumnCount;
-  _flag_created_cells = true;
-}
 
 void TDMap_Table::update_cells(){
   if( _flag_simulated_image_grid && _flag_created_cells ){
@@ -198,11 +202,10 @@ void TDMap_Table::update_cells(){
     for (int row = 0; row < RowCount; ++row) {
       std::vector<cv::Mat> simulated_image_row = simulated_image_grid.at(row);
       for (int col = 0; col < ColumnCount; ++col) {
-          CvImageCellWidget *cell_widget  = new CvImageCellWidget(  );
-          //cell_widget->setMinimumSize( QSize(ColumnSize, RowSize) );
-          cell_widget->setMaximumSize( QSize(ColumnSize, RowSize) );
-          cell_widget->set_container_size( ColumnSize, RowSize );
-       //   cell_widget->set_container_window_size(ColumnSize,RowSize);
+
+        CvImageCellWidget *cell_widget  = new CvImageCellWidget(  );
+        cell_widget->setMaximumSize( QSize(ColumnSize, RowSize) );
+        cell_widget->set_container_size( ColumnSize, RowSize );
         cv::Mat full_image = simulated_image_row.at(col);
         cell_widget->setImage( full_image.clone() );
         cell_widget->fitToContainer();
@@ -211,6 +214,7 @@ void TDMap_Table::update_cells(){
           cell_widget->set_best();
         }
         this->setCellWidget(row,col, cell_widget);
+        this->setItem(row, col, new QTableWidgetItem());//used to find it
       }
     }
     setCurrentCell(best_match_pos.x, best_match_pos.y);
@@ -267,5 +271,3 @@ void TDMap_Table::selectCurrentColumn()
 {
   selectColumn(currentColumn());
 }
-
-
