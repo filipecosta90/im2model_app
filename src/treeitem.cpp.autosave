@@ -64,7 +64,6 @@ TreeItem::~TreeItem(){
 }
 
 bool TreeItem::load_data_from_property_tree( boost::property_tree::ptree pt_root ){
-
   boost::property_tree::ptree pt_data = pt_root.get_child("data_vec");
   boost::property_tree::ptree pt_editable = pt_root.get_child("editable_vec");
   boost::property_tree::ptree pt_childs = pt_root.get_child("child_vec");
@@ -245,7 +244,7 @@ bool TreeItem::removeColumns(int position, int columns){
 }
 
 int TreeItem::get_dropdown_column(){
-  return dropdown_column;
+return dropdown_column;
 }
 
 bool TreeItem::setData(int column, const QVariant &value){
@@ -302,14 +301,14 @@ void TreeItem::set_item_delegate_type( DelegateType _delegate_type ){
 }
 
 void TreeItem::set_dropdown_options(int column , QVector<QVariant>& drop, QVector<QVariant> &drop_enum ){
-  dropdown_column = column;
-  dropdown_data = drop;
-  dropdown_enum = drop_enum;
-  _flag_dropdown = true;
+    dropdown_column = column;
+    dropdown_data = drop;
+   dropdown_enum = drop_enum;
+   _flag_dropdown = true;
 }
 
 QVector<QVariant> TreeItem::get_dropdown_data(){
-  return dropdown_data;
+return dropdown_data;
 }
 
 QVector<QVariant> TreeItem::get_dropdown_enum(){

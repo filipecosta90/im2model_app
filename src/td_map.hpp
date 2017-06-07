@@ -20,6 +20,7 @@
 #include "image_crystal.hpp"
 
 class TDMap {
+
   private:
 
     /////////////////////////
@@ -185,11 +186,16 @@ class TDMap {
     boost::filesystem::path base_dir_path;
     bool _flag_base_dir_path = false;
 
-int image_correlation_matching_method = CV_TM_CCOEFF_NORMED;
-        bool _flag_image_correlation_matching_method = true;
+    int image_correlation_matching_method = CV_TM_CCOEFF_NORMED;
+    bool _flag_image_correlation_matching_method = true;
+
+    int _aberration_definition_method = AberrationPreset::NO_ABERRATION ;
+    bool _flag_aberration_definition_method = true;
 
   public:
+    enum AberrationPreset { NO_ABERRATION, MICROSCOPE_CORRECTED, MICROSCOPE_NON_CORRECTED, USER_DEFINED };
 
+    bool set_aberration_definition_method( int method);
     bool set_application_logger( ApplicationLog::ApplicationLog* app_logger );
     boost::process::ipstream& _sim_tdmap_ostream_buffer;
 

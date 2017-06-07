@@ -423,19 +423,19 @@ bool  TDMap::prepare_celslc_parameters(){
 }
 
 bool TDMap::_is_nx_simulated_horizontal_samples_defined(){
-    return _tdmap_celslc_parameters->_is_nx_simulated_horizontal_samples_defined();
+  return _tdmap_celslc_parameters->_is_nx_simulated_horizontal_samples_defined();
 }
 
 bool TDMap::_is_ny_simulated_vertical_samples_defined(){
-    return _tdmap_celslc_parameters->_is_ny_simulated_vertical_samples_defined();
+  return _tdmap_celslc_parameters->_is_ny_simulated_vertical_samples_defined();
 }
 
 int TDMap::get_nx_simulated_horizontal_samples(){
-   return _tdmap_celslc_parameters->get_nx_simulated_horizontal_samples();
+  return _tdmap_celslc_parameters->get_nx_simulated_horizontal_samples();
 }
 
 int TDMap::get_ny_simulated_vertical_samples(){
-   return _tdmap_celslc_parameters->get_ny_simulated_vertical_samples();
+  return _tdmap_celslc_parameters->get_ny_simulated_vertical_samples();
 }
 
 bool  TDMap::prepare_msa_parameters(){
@@ -873,7 +873,16 @@ bool TDMap::set_dr_probe_wavimg_execname( std::string wavimg_execname ){
 }
 
 bool TDMap::set_image_correlation_matching_method( int method ){
-    std::cout << " set_image_correlation_matching_method to enum " << method << std::endl;
-     _flag_image_correlation_matching_method = _td_map_simgrid->set_sim_correlation_method( method );
-    return _flag_image_correlation_matching_method;
+  std::cout << " set_image_correlation_matching_method to enum " << method << std::endl;
+  _flag_image_correlation_matching_method = _td_map_simgrid->set_sim_correlation_method( method );
+  return _flag_image_correlation_matching_method;
 }
+
+
+bool TDMap::set_aberration_definition_method ( int method ){
+  std::cout << " set_aberration_definition_method to enum " << method << std::endl;
+  _aberration_definition_method = method;
+  _flag_aberration_definition_method = true;
+  return _flag_aberration_definition_method;
+}
+

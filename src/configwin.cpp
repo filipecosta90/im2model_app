@@ -458,40 +458,40 @@ bool MainWindow::checkSettings(){
   _temp_flag_dr_probe_wavimg_bin &= (_dr_probe_wavimg_bin == QString("")) ? false : true;
 
   if (_temp_flag_dr_probe_celslc_bin) {
-	  boost::filesystem::path bin_dir(_dr_probe_bin_path.toStdString());
-	  boost::filesystem::path filename(_dr_probe_celslc_bin.toStdString());
-	  boost::filesystem::path full_path_filename = bin_dir / filename; 
-	  if (boost::filesystem::exists(full_path_filename)) {
-		  _temp_flag_dr_probe_celslc_bin = true;
-	  }
-	  else {
-		  _temp_flag_dr_probe_celslc_bin = false;
-	  }
+    boost::filesystem::path bin_dir(_dr_probe_bin_path.toStdString());
+    boost::filesystem::path filename(_dr_probe_celslc_bin.toStdString());
+    boost::filesystem::path full_path_filename = bin_dir / filename; 
+    if (boost::filesystem::exists(full_path_filename)) {
+      _temp_flag_dr_probe_celslc_bin = true;
+    }
+    else {
+      _temp_flag_dr_probe_celslc_bin = false;
+    }
   }
   if (_temp_flag_dr_probe_msa_bin) {
-	  boost::filesystem::path bin_dir(_dr_probe_bin_path.toStdString());
-	  boost::filesystem::path filename(_dr_probe_msa_bin.toStdString());
-	  boost::filesystem::path full_path_filename = bin_dir / filename;
-	  if (boost::filesystem::exists(full_path_filename)) {
-		  _temp_flag_dr_probe_msa_bin = true;
-	  }
-	  else {
-		  _temp_flag_dr_probe_msa_bin = false;
-	  }
+    boost::filesystem::path bin_dir(_dr_probe_bin_path.toStdString());
+    boost::filesystem::path filename(_dr_probe_msa_bin.toStdString());
+    boost::filesystem::path full_path_filename = bin_dir / filename;
+    if (boost::filesystem::exists(full_path_filename)) {
+      _temp_flag_dr_probe_msa_bin = true;
+    }
+    else {
+      _temp_flag_dr_probe_msa_bin = false;
+    }
   }
 
   if (_temp_flag_dr_probe_wavimg_bin) {
-	  boost::filesystem::path bin_dir(_dr_probe_bin_path.toStdString());
-	  boost::filesystem::path filename(_dr_probe_celslc_bin.toStdString());
-	  boost::filesystem::path full_path_filename = bin_dir / filename;
-	  if (boost::filesystem::exists(full_path_filename)) {
-		  _temp_flag_dr_probe_wavimg_bin = true;
-	  }
-	  else {
-		  _temp_flag_dr_probe_wavimg_bin = false;
-	  }
+    boost::filesystem::path bin_dir(_dr_probe_bin_path.toStdString());
+    boost::filesystem::path filename(_dr_probe_celslc_bin.toStdString());
+    boost::filesystem::path full_path_filename = bin_dir / filename;
+    if (boost::filesystem::exists(full_path_filename)) {
+      _temp_flag_dr_probe_wavimg_bin = true;
+    }
+    else {
+      _temp_flag_dr_probe_wavimg_bin = false;
+    }
   }
-  
+
   status &= _temp_flag_dr_probe_celslc_bin;
   status &= _temp_flag_dr_probe_msa_bin;
   status &= _temp_flag_dr_probe_wavimg_bin;
@@ -584,11 +584,11 @@ void MainWindow::loadFile(const QString &fileName){
 
   boost::property_tree::ptree project_setup_image_fields_ptree = config.get_child("project_setup_image_fields_ptree");
   project_setup_image_fields_model->load_data_from_property_tree( project_setup_image_fields_ptree );
-ui->qtree_view_project_setup_image->update();
+  ui->qtree_view_project_setup_image->update();
 
   boost::property_tree::ptree project_setup_crystalographic_fields_ptree = config.get_child("project_setup_crystalographic_fields_ptree");
   project_setup_crystalographic_fields_model->load_data_from_property_tree( project_setup_crystalographic_fields_ptree );
-ui->qtree_view_project_setup_crystallography->update();
+  ui->qtree_view_project_setup_crystallography->update();
 
   boost::property_tree::ptree tdmap_simulation_setup_ptree = config.get_child("tdmap_simulation_setup_ptree");
   tdmap_simulation_setup_model->load_data_from_property_tree( tdmap_simulation_setup_ptree );
@@ -956,10 +956,30 @@ void MainWindow::create_box_options(){
 
 
   ////////////////
+  // Aberrations defenition
+  ////////////////
+  QVector<QVariant> box3_option_4 = {"Aberrations definition",""};
+  QVector<bool> box3_option_4_edit = {false,true};
+  boost::function<bool(int)> box3_function_4 ( boost::bind( &TDMap::set_aberration_definition_method, _core_td_map, _1 ) );
+
+  TreeItem* _aberration_definition  = new TreeItem ( box3_option_4, box3_function_4, box3_option_4_edit );
+
+  QVector<QVariant> box3_option_4_drop = {"No aberrations","Corrected","Non-Corrected", "User defined"};
+
+  QVector<QVariant> box3_option_4_drop_enum( { TDMap::AberrationPreset::NO_ABERRATION, TDMap::AberrationPreset::MICROSCOPE_CORRECTED, TDMap::AberrationPreset::MICROSCOPE_NON_CORRECTED, TDMap::AberrationPreset::USER_DEFINED } );
+
+  _aberration_definition->set_item_delegate_type( _delegate_DROP );
+  _aberration_definition->set_dropdown_options( 1, box3_option_4_drop, box3_option_4_drop_enum  );
+
+  tdmap_root->insertChildren( _aberration_definition );
+
+
+
+  ////////////////
   // Image Correlation
   ////////////////
-  QVector<QVariant> box3_option_4 = {"Image correlation",""};
-  TreeItem* image_correlation  = new TreeItem ( box3_option_4 );
+  QVector<QVariant> box3_option_5 = {"Image correlation",""};
+  TreeItem* image_correlation  = new TreeItem ( box3_option_5 );
   tdmap_root->insertChildren( image_correlation );
 
   ////////////////
@@ -968,17 +988,17 @@ void MainWindow::create_box_options(){
   //: , non-normalized correlation and sum-absolute-difference
 
 
-  QVector<QVariant> box3_option_4_1 = {"Matching method",""};
-  QVector<bool> box3_option_4_1_edit = {false,true};
-  boost::function<bool(int)> box3_function_4_1 ( boost::bind( &TDMap::set_image_correlation_matching_method, _core_td_map, _1 ) );
-  TreeItem* image_correlation_matching_method = new TreeItem ( box3_option_4_1 , box3_function_4_1, box3_option_4_1_edit );
+  QVector<QVariant> box3_option_5_1 = {"Matching method",""};
+  QVector<bool> box3_option_5_1_edit = {false,true};
+  boost::function<bool(int)> box3_function_5_1 ( boost::bind( &TDMap::set_image_correlation_matching_method, _core_td_map, _1 ) );
+  TreeItem* image_correlation_matching_method = new TreeItem ( box3_option_5_1 , box3_function_5_1, box3_option_5_1_edit );
 
-QVector<QVariant> box3_option_4_1_drop = {"Normalized squared difference","Normalized cross correlation","Normalized correlation coefficient"};
+  QVector<QVariant> box3_option_5_1_drop = {"Normalized squared difference","Normalized cross correlation","Normalized correlation coefficient"};
 
- QVector<QVariant> box3_option_4_1_drop_enum( { CV_TM_SQDIFF_NORMED, CV_TM_CCORR_NORMED, CV_TM_CCOEFF_NORMED} );
+  QVector<QVariant> box3_option_5_1_drop_enum( { CV_TM_SQDIFF_NORMED, CV_TM_CCORR_NORMED, CV_TM_CCOEFF_NORMED} );
 
   image_correlation_matching_method->set_item_delegate_type( _delegate_DROP );
-  image_correlation_matching_method->set_dropdown_options( 1, box3_option_4_1_drop, box3_option_4_1_drop_enum  );
+  image_correlation_matching_method->set_dropdown_options( 1, box3_option_5_1_drop, box3_option_5_1_drop_enum  );
 
   image_correlation->insertChildren( image_correlation_matching_method );
 
@@ -1023,33 +1043,33 @@ QVector<QVariant> box3_option_4_1_drop = {"Normalized squared difference","Norma
 
 
 
-  QStringList headers_edge_detection_parameters;
-  headers_edge_detection_parameters << tr("Field") << tr("Value");
+     QStringList headers_edge_detection_parameters;
+     headers_edge_detection_parameters << tr("Field") << tr("Value");
 
-  QStringList edge_detection_parameters;
-  edge_detection_parameters << tr("Edge detection");
-  edge_detection_parameters << tr("Hysteresis Thresholding");
-  edge_detection_parameters << tr("Max contour distance (pixels)");
+     QStringList edge_detection_parameters;
+     edge_detection_parameters << tr("Edge detection");
+     edge_detection_parameters << tr("Hysteresis Thresholding");
+     edge_detection_parameters << tr("Max contour distance (pixels)");
 
-  TreeModel *edge_detection_model = new TreeModel(headers_edge_detection_parameters, edge_detection_parameters);
-  ui->qtree_view_supercell_model_edge_detection_setup->setModel(edge_detection_model);
+     TreeModel *edge_detection_model = new TreeModel(headers_edge_detection_parameters, edge_detection_parameters);
+     ui->qtree_view_supercell_model_edge_detection_setup->setModel(edge_detection_model);
 
-  for (int column = 0; column < edge_detection_model->columnCount(); ++column){
-  ui->qtree_view_supercell_model_edge_detection_setup->resizeColumnToContents(column);
-  }
+     for (int column = 0; column < edge_detection_model->columnCount(); ++column){
+     ui->qtree_view_supercell_model_edge_detection_setup->resizeColumnToContents(column);
+     }
 
 
-  QStringList headers_supercell_model_refinement_parameters;
-  headers_supercell_model_refinement_parameters << tr("Field") << tr("Value");
+     QStringList headers_supercell_model_refinement_parameters;
+     headers_supercell_model_refinement_parameters << tr("Field") << tr("Value");
 
-  QStringList supercell_model_refinement_parameters;
-  supercell_model_refinement_parameters << tr("Supercell file");
-  supercell_model_refinement_parameters << tr(" CIF");
-  supercell_model_refinement_parameters << tr(" CEL");
-  supercell_model_refinement_parameters << tr("Edge refinement");
-  supercell_model_refinement_parameters << tr("Columns Refinement");
-  supercell_model_refinement_parameters << tr("Calculation");
-*/
+     QStringList supercell_model_refinement_parameters;
+     supercell_model_refinement_parameters << tr("Supercell file");
+     supercell_model_refinement_parameters << tr(" CIF");
+     supercell_model_refinement_parameters << tr(" CEL");
+     supercell_model_refinement_parameters << tr("Edge refinement");
+     supercell_model_refinement_parameters << tr("Columns Refinement");
+     supercell_model_refinement_parameters << tr("Calculation");
+     */
 }
 
 bool MainWindow::set_dr_probe_path( QString path ){
