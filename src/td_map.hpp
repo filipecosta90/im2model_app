@@ -36,6 +36,8 @@ class TDMap {
     int slice_period;
     double user_estimated_thickness_nm;
     int user_estimated_thickness_slice;
+    bool _flag_user_estimated_thickness_nm = false;
+
     std::vector<double> celslc_accum_nm_slice_vec;
     bool _flag_celslc_accum_nm_slice_vec = false;
     bool _flag_thickness_lower_bound = false;
@@ -59,6 +61,7 @@ class TDMap {
     bool _flag_defocus_period = false;
 
     double user_estimated_defocus_nm;
+    bool _flag_user_estimated_defocus_nm = false;
 
     double ht_accelaration_voltage;
     bool _flag_ht_accelaration_voltage = false;
@@ -189,13 +192,13 @@ class TDMap {
     int image_correlation_matching_method = CV_TM_CCOEFF_NORMED;
     bool _flag_image_correlation_matching_method = true;
 
-    int _aberration_definition_method = AberrationPreset::NO_ABERRATION ;
-    bool _flag_aberration_definition_method = true;
+    int _refinement_definition_method = RefinementPreset::NO_REFINEMENT ;
+    bool _flag_refinement_definition_method = true;
 
   public:
-    enum AberrationPreset { NO_ABERRATION, MICROSCOPE_CORRECTED, MICROSCOPE_NON_CORRECTED, USER_DEFINED };
+    enum RefinementPreset { NO_REFINEMENT, MICROSCOPE_CORRECTED, MICROSCOPE_NON_CORRECTED, USER_DEFINED };
 
-    bool set_aberration_definition_method( int method);
+    bool set_refinement_definition_method( int method);
     bool set_application_logger( ApplicationLog::ApplicationLog* app_logger );
     boost::process::ipstream& _sim_tdmap_ostream_buffer;
 
@@ -322,11 +325,15 @@ class TDMap {
 
     bool set_thickness_range_number_samples( std::string number_samples );
 
+    bool set_thickness_user_estimated_nm( double estimated_nm );
+
     bool set_defocus_range_lower_bound( std::string lower_bound );
 
     bool set_defocus_range_upper_bound( std::string upper_bound );
 
     bool set_defocus_range_number_samples( std::string number_samples );
+
+    bool set_defocus_user_estimated_nm( double estimated_nm );
 
     bool set_accelaration_voltage_kv( std::string accelaration_voltage );
 

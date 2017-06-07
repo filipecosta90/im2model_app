@@ -7,6 +7,9 @@
 #include <QVector>
 #include <QAbstractItemModel>
 #include <QModelIndex>
+#include <QToolBar>
+#include <QMenu>
+#include <QAction>
 /** END QT **/
 
 /** START BOOST **/
@@ -15,13 +18,16 @@
 #include <boost/property_tree/xml_parser.hpp>
 /** END BOOST **/
 
+#include "custom_tool_button.h"
+
 Q_DECLARE_METATYPE(std::string)
 
-  enum DelegateType { _delegate_FILE, _delegate_DIR, _delegate_TEXT, _delegate_DROP };
+  enum DelegateType { _delegate_FILE, _delegate_DIR, _delegate_TEXT, _delegate_TEXT_ACTION, _delegate_DROP };
 
 class TreeItem : public QObject {
   Q_OBJECT
   public:
+
     explicit TreeItem( QVector<QVariant> &data, TreeItem *parent = 0);
     explicit  TreeItem( QVector<QVariant> &data, boost::function<bool(std::string)> setter, TreeItem *parent = 0);
     explicit TreeItem( QVector<QVariant> &data, boost::function<bool(double)> setter, TreeItem *parent = 0);
@@ -32,7 +38,6 @@ class TreeItem : public QObject {
     explicit TreeItem( QVector<QVariant> &data, boost::function<bool(std::string)> setter, bool checkable, boost::function<bool(bool)> check_setter, TreeItem *parent = 0);
     explicit TreeItem( QVector<QVariant> &data, boost::function<bool(double)> setter, bool checkable, boost::function<bool(bool)> check_setter, TreeItem *parent = 0);
     explicit TreeItem( QVector<QVariant> &data, boost::function<bool(int)> setter, bool checkable, boost::function<bool(bool)> check_setter, TreeItem *parent = 0);
-
 
     ~TreeItem();
     TreeItem *parent();
@@ -63,6 +68,8 @@ class TreeItem : public QObject {
 
     void set_item_delegate_type( DelegateType _delegate_type );
     void set_dropdown_options( int column , QVector<QVariant>& drop, QVector<QVariant>& drop_enum );
+void set_action_toolBar( CustomToolButton* editToolBar );
+ CustomToolButton* get_action_toolBar();
 
 signals:
     void dataChanged( int column );
@@ -91,6 +98,9 @@ signals:
     bool _flag_fp_check_setter = false;
 
     DelegateType _item_delegate_type = _delegate_TEXT;
+    QToolBar* _action_toolBar;
+    CustomToolButton* alignToolButton;
+
 };
 
 #endif // TREEITEM_H

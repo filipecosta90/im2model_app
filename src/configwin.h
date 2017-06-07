@@ -26,6 +26,10 @@
 #include "ui_configwin.h"
 #include "treeitem.h"
 #include "cv_image_widget.h"
+#include <QToolBar>
+#include <QMenu>
+#include <QAction>
+
 #include "treeitem_file_delegate.hpp"
 #include "gui_sim_updater.hpp"
 #include "gui_stream.hpp"
@@ -148,6 +152,12 @@ signals:
     /* Base dir path */
     boost::filesystem::path base_dir_path;
     bool _flag_base_dir_path = false;
+
+    QMenu* alignMenu;
+    QAction*  auto_range_lower_upper;
+    QAction*  auto_lower_upper;
+    CustomToolButton* alignToolButton;
+
 
 };
 

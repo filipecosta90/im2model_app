@@ -878,11 +878,21 @@ bool TDMap::set_image_correlation_matching_method( int method ){
   return _flag_image_correlation_matching_method;
 }
 
-
-bool TDMap::set_aberration_definition_method ( int method ){
-  std::cout << " set_aberration_definition_method to enum " << method << std::endl;
-  _aberration_definition_method = method;
-  _flag_aberration_definition_method = true;
-  return _flag_aberration_definition_method;
+bool TDMap::set_refinement_definition_method ( int method ){
+  std::cout << " set_refinement_definition_method to enum " << method << std::endl;
+  _refinement_definition_method = method;
+  _flag_refinement_definition_method = true;
+  return _flag_refinement_definition_method;
 }
 
+bool TDMap::set_thickness_user_estimated_nm( double estimated_nm ){
+    user_estimated_thickness_nm = estimated_nm;
+    _flag_user_estimated_thickness_nm = true;
+    return _flag_user_estimated_thickness_nm;
+}
+
+bool TDMap::set_defocus_user_estimated_nm( double estimated_nm ){
+    user_estimated_defocus_nm = estimated_nm;
+    _flag_user_estimated_defocus_nm = true;
+    return _flag_user_estimated_defocus_nm;
+}

@@ -12,6 +12,14 @@
 #include <boost/foreach.hpp>
 
 
+void TreeItem::set_action_toolBar( CustomToolButton* tool ){
+    alignToolButton = tool;
+}
+
+CustomToolButton* TreeItem::get_action_toolBar(){
+    return alignToolButton;
+}
+
 TreeItem::TreeItem( QVector<QVariant> &data, TreeItem *parent){
   itemData = data;
   parentItem = parent;
@@ -26,6 +34,7 @@ TreeItem::TreeItem( QVector<QVariant> &data, boost::function<bool(double)> sette
   fp_data_setter_double = setter;
   _flag_fp_data_setter_double = true;
 }
+
 
 TreeItem::TreeItem( QVector<QVariant> &data, boost::function<bool(int)> setter, TreeItem *parent) : TreeItem( data, parent ) {
   fp_data_setter_int = setter;

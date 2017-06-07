@@ -11,10 +11,16 @@
 #include <QFile>
 #include <QPushButton>
 #include <QTextLine>
+#include <QtGui>
+#include <QToolBar>
+#include <QMenu>
+#include <QAction>
 
 #include "qt_file_push_button.h"
 #include "treeitem.h"
 #include "treemodel.h"
+#include "custom_tool_button.h"
+
 
 
 
@@ -36,10 +42,11 @@ class TreeItemFileDelegate : public QStyledItemDelegate {
 signals:
 
     public slots:
-      void get_filename_slot( QWidget *editor );
+      void get_filename_slot( QWidget *editor ) const;
     void get_dirname_slot( QWidget *editor );
 
   private:
+    QToolBar* _editor_toolbar;
 };
 
 #endif // end FILEDELEGATE_H

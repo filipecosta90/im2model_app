@@ -405,7 +405,6 @@ void MainWindow::createActions(){
   QMenu *editMenu = ui->menuBar->addMenu(tr("&Edit"));
   QAction* preferencesAct = editMenu->addAction(tr("&Preferences"), this, &MainWindow::edit_preferences);
   //preferencesAct->setShortcuts(QKeySequence::UnknownKey);
-
   editMenu->addAction(preferencesAct);
 
   QMenu *helpMenu = ui->menuBar->addMenu(tr("&Help"));
@@ -871,11 +870,51 @@ void MainWindow::create_box_options(){
   TreeItem* tdmap_root = new TreeItem ( common_header );
 
   ////////////////
+  // 2D variation map
+  ////////////////
+  QVector<QVariant> box3_option_0 = {"Parameter variation map",""};
+  TreeItem* _parameter_variation_map  = new TreeItem ( box3_option_0 );
+  tdmap_root->insertChildren( _parameter_variation_map );
+
+  ////////////////
+  // 2D variation map - thickness
+  ////////////////
+  QVector<QVariant> box3_option_0_1 = {"Thickness",""};
+  TreeItem* _parameter_variation_map_thickness  = new TreeItem ( box3_option_0_1 );
+  _parameter_variation_map->insertChildren( _parameter_variation_map_thickness );
+
+  ////////////////
+  // 2D variation map - > thickness - > user estimation
+  ////////////////
+  QVector<QVariant> box3_option_0_1_1 = {"Estimated nm",""};
+  QVector<bool> box3_option_0_1_1_edit = {false,true};
+  boost::function<bool(double)> box3_function_0_1_1 ( boost::bind( &TDMap::set_thickness_user_estimated_nm, _core_td_map, _1 ) );
+  TreeItem* _parameter_variation_map_thickness_estimated_nm  = new TreeItem ( box3_option_0_1_1, box3_function_0_1_1, box3_option_0_1_1_edit  );
+  _parameter_variation_map_thickness_estimated_nm->set_item_delegate_type( _delegate_TEXT_ACTION );
+
+
+
+  //_parameter_variation_map_thickness_estimated_nm->set_action_toolBar( alignToolButton );
+
+  _parameter_variation_map_thickness->insertChildren( _parameter_variation_map_thickness_estimated_nm );
+
+  ////////////////
+  //Thickness range -- Samples
+  ////////////////
+  QVector<QVariant> box3_option_1_3 = {"Samples",""};
+  QVector<bool> box3_option_1_3_edit = {false,true};
+  boost::function<bool(std::string)> box3_function_1_3 ( boost::bind( &TDMap::set_thickness_range_number_samples, _core_td_map, _1 ) );
+  TreeItem* thickness_range_number_samples = new TreeItem ( box3_option_1_3 , box3_function_1_3, box3_option_1_3_edit );
+  _parameter_variation_map_thickness->insertChildren( thickness_range_number_samples );
+
+  ////////////////
   // Thickness range
   ////////////////
   QVector<QVariant> box3_option_1 = {"Thickness range",""};
   TreeItem* thickness_range  = new TreeItem ( box3_option_1 );
-  tdmap_root->insertChildren( thickness_range );
+  _parameter_variation_map_thickness->insertChildren( thickness_range );
+
+
 
   ////////////////
   //Thickness range -- lower bound
@@ -896,20 +935,36 @@ void MainWindow::create_box_options(){
   thickness_range->insertChildren( thickness_range_upper_bound );
 
   ////////////////
-  //Thickness range -- Samples
+  // 2D variation map - defocus
   ////////////////
-  QVector<QVariant> box3_option_1_3 = {"Samples",""};
-  QVector<bool> box3_option_1_3_edit = {false,true};
-  boost::function<bool(std::string)> box3_function_1_3 ( boost::bind( &TDMap::set_thickness_range_number_samples, _core_td_map, _1 ) );
-  TreeItem* thickness_range_number_samples = new TreeItem ( box3_option_1_3 , box3_function_1_3, box3_option_1_3_edit );
-  thickness_range->insertChildren( thickness_range_number_samples );
+  QVector<QVariant> box3_option_0_2 = {"Defocus",""};
+  TreeItem* _parameter_variation_map_defocous  = new TreeItem ( box3_option_0_2 );
+  _parameter_variation_map->insertChildren( _parameter_variation_map_defocous );
+
+  ////////////////
+  // 2D variation map - > defocus - > user estimation
+  ////////////////
+  QVector<QVariant> box3_option_0_2_1 = {"Estimated nm",""};
+  QVector<bool> box3_option_0_2_1_edit = {false,true};
+  boost::function<bool(double)> box3_function_0_2_1 ( boost::bind( &TDMap::set_defocus_user_estimated_nm, _core_td_map, _1 ) );
+  TreeItem* _parameter_variation_map_defocus_estimated_nm  = new TreeItem ( box3_option_0_2_1, box3_function_0_2_1, box3_option_0_2_1_edit  );
+  _parameter_variation_map_defocous->insertChildren( _parameter_variation_map_defocus_estimated_nm );
+
+  ////////////////
+  //Defocus range -- Samples
+  ////////////////
+  QVector<QVariant> box3_option_2_3 = {"Samples",""};
+  QVector<bool> box3_option_2_3_edit = {false,true};
+  boost::function<bool(std::string)> box3_function_2_3 ( boost::bind( &TDMap::set_defocus_range_number_samples, _core_td_map, _1 ) );
+  TreeItem* defocus_range_number_samples = new TreeItem ( box3_option_2_3 , box3_function_2_3, box3_option_2_3_edit );
+  _parameter_variation_map_defocous->insertChildren( defocus_range_number_samples );
 
   ////////////////
   // Defocus range
   ////////////////
   QVector<QVariant> box3_option_2 = {"Defocus range",""};
   TreeItem* defocus_range  = new TreeItem ( box3_option_2 );
-  tdmap_root->insertChildren( defocus_range );
+  _parameter_variation_map_defocous->insertChildren( defocus_range );
 
   ////////////////
   //Defocus range -- lower bound
@@ -930,20 +985,11 @@ void MainWindow::create_box_options(){
   defocus_range->insertChildren( defocus_range_upper_bound );
 
   ////////////////
-  //Defocus range -- Samples
-  ////////////////
-  QVector<QVariant> box3_option_2_3 = {"Samples",""};
-  QVector<bool> box3_option_2_3_edit = {false,true};
-  boost::function<bool(std::string)> box3_function_2_3 ( boost::bind( &TDMap::set_defocus_range_number_samples, _core_td_map, _1 ) );
-  TreeItem* defocus_range_number_samples = new TreeItem ( box3_option_2_3 , box3_function_2_3, box3_option_2_3_edit );
-  defocus_range->insertChildren( defocus_range_number_samples );
-
-  ////////////////
   // Incident electron beam
   ////////////////
   QVector<QVariant> box3_option_3 = {"Incident electron beam",""};
   TreeItem* incident_electron_beam  = new TreeItem ( box3_option_3 );
-  tdmap_root->insertChildren( incident_electron_beam );
+  _parameter_variation_map->insertChildren( incident_electron_beam );
 
   ////////////////
   // Incident electron beam -- Accelaration voltage (kV)
@@ -954,26 +1000,44 @@ void MainWindow::create_box_options(){
   TreeItem* accelaration_voltage_kv = new TreeItem ( box3_option_3_1 , box3_function_3_1, box3_option_3_1_edit );
   incident_electron_beam->insertChildren( accelaration_voltage_kv );
 
-
   ////////////////
-  // Aberrations defenition
+  // Simulation Refinement
   ////////////////
-  QVector<QVariant> box3_option_4 = {"Aberrations definition",""};
+  QVector<QVariant> box3_option_4 = {"Refinement",""};
   QVector<bool> box3_option_4_edit = {false,true};
-  boost::function<bool(int)> box3_function_4 ( boost::bind( &TDMap::set_aberration_definition_method, _core_td_map, _1 ) );
+  boost::function<bool(int)> box3_function_4 ( boost::bind( &TDMap::set_refinement_definition_method, _core_td_map, _1 ) );
 
-  TreeItem* _aberration_definition  = new TreeItem ( box3_option_4, box3_function_4, box3_option_4_edit );
+  TreeItem* _simulation_refinement  = new TreeItem ( box3_option_4, box3_function_4, box3_option_4_edit );
 
-  QVector<QVariant> box3_option_4_drop = {"No aberrations","Corrected","Non-Corrected", "User defined"};
+  QVector<QVariant> box3_option_4_drop = {"No refinement","Corrected","Non-Corrected", "User defined"};
 
-  QVector<QVariant> box3_option_4_drop_enum( { TDMap::AberrationPreset::NO_ABERRATION, TDMap::AberrationPreset::MICROSCOPE_CORRECTED, TDMap::AberrationPreset::MICROSCOPE_NON_CORRECTED, TDMap::AberrationPreset::USER_DEFINED } );
+  QVector<QVariant> box3_option_4_drop_enum( { TDMap::RefinementPreset::NO_REFINEMENT, TDMap::RefinementPreset::MICROSCOPE_CORRECTED, TDMap::RefinementPreset::MICROSCOPE_NON_CORRECTED, TDMap::RefinementPreset::USER_DEFINED } );
 
-  _aberration_definition->set_item_delegate_type( _delegate_DROP );
-  _aberration_definition->set_dropdown_options( 1, box3_option_4_drop, box3_option_4_drop_enum  );
+  _simulation_refinement->set_item_delegate_type( _delegate_DROP );
+  _simulation_refinement->set_dropdown_options( 1, box3_option_4_drop, box3_option_4_drop_enum  );
 
-  tdmap_root->insertChildren( _aberration_definition );
+  tdmap_root->insertChildren( _simulation_refinement );
 
+  ////////////////
+  //Simulation Refinement -- Aberration parameters
+  ////////////////
+  QVector<QVariant> box3_option_4_1 = {"Aberration parameters",""};
+  TreeItem* _aberration_parameters = new TreeItem ( box3_option_4_1 );
+  _simulation_refinement->insertChildren( _aberration_parameters );
 
+  ////////////////
+  //Simulation Refinement -- envelope parameters
+  ////////////////
+  QVector<QVariant> box3_option_4_2 = {"Envelope parameters",""};
+  TreeItem* _envelope_parameters = new TreeItem ( box3_option_4_2 );
+  _simulation_refinement->insertChildren( _envelope_parameters );
+
+  ////////////////
+  //Simulation Refinement -- MTF
+  ////////////////
+  QVector<QVariant> box3_option_4_3 = {"MTF",""};
+  TreeItem* _mtf_parameters = new TreeItem ( box3_option_4_3 );
+  _simulation_refinement->insertChildren( _mtf_parameters );
 
   ////////////////
   // Image Correlation
@@ -987,8 +1051,7 @@ void MainWindow::create_box_options(){
   ////////////////
   //: , non-normalized correlation and sum-absolute-difference
 
-
-  QVector<QVariant> box3_option_5_1 = {"Matching method",""};
+  QVector<QVariant> box3_option_5_1 = {"Match method",""};
   QVector<bool> box3_option_5_1_edit = {false,true};
   boost::function<bool(int)> box3_function_5_1 ( boost::bind( &TDMap::set_image_correlation_matching_method, _core_td_map, _1 ) );
   TreeItem* image_correlation_matching_method = new TreeItem ( box3_option_5_1 , box3_function_5_1, box3_option_5_1_edit );

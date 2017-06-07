@@ -135,6 +135,8 @@ if(build_gui)
     qt_file_push_button.cpp
     gui_sim_updater.hpp
     gui_stream.hpp
+    custom_tool_button.h
+    custom_tool_button.cpp
     )
 
   # Set PROJECT_VERSION_PATCH and PROJECT_VERSION_TWEAK to 0 if not present, needed by add_project_meta

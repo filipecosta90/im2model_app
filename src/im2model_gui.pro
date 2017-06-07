@@ -42,7 +42,8 @@ SOURCES +=\
     qt_file_push_button.cpp \
     cv_tdmap_cell_image_frame.cpp \
     cv_tdmap_cell_image_frame_delegate.cpp \
-    application_log.cpp
+    application_log.cpp \
+    custom_tool_button.cpp
 
 
 HEADERS  += configwin.h \
@@ -69,7 +70,8 @@ HEADERS  += configwin.h \
     gui_sim_updater.hpp \
     gui_stream.hpp \
     cv_image_table_frame.h \
-    application_log.hpp
+    application_log.hpp \
+    custom_tool_button.h
 
 RESOURCES     = ../im2model.qrc
 
