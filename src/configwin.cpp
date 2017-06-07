@@ -954,9 +954,38 @@ void MainWindow::create_box_options(){
   TreeItem* accelaration_voltage_kv = new TreeItem ( box3_option_3_1 , box3_function_3_1, box3_option_3_1_edit );
   incident_electron_beam->insertChildren( accelaration_voltage_kv );
 
+
+  ////////////////
+  // Image Correlation
+  ////////////////
+  QVector<QVariant> box3_option_4 = {"Image correlation",""};
+  TreeItem* image_correlation  = new TreeItem ( box3_option_4 );
+  tdmap_root->insertChildren( image_correlation );
+
+  ////////////////
+  // Image Correlation -- Hysteresis Thresholding
+  ////////////////
+  //: , non-normalized correlation and sum-absolute-difference
+
+
+  QVector<QVariant> box3_option_4_1 = {"Matching method",""};
+  QVector<bool> box3_option_4_1_edit = {false,true};
+  boost::function<bool(int)> box3_function_4_1 ( boost::bind( &TDMap::set_image_correlation_matching_method, _core_td_map, _1 ) );
+  TreeItem* image_correlation_matching_method = new TreeItem ( box3_option_4_1 , box3_function_4_1, box3_option_4_1_edit );
+
+QVector<QVariant> box3_option_4_1_drop = {"Normalized squared difference","Normalized cross correlation","Normalized correlation coefficient"};
+
+ QVector<QVariant> box3_option_4_1_drop_enum( { CV_TM_SQDIFF_NORMED, CV_TM_CCORR_NORMED, CV_TM_CCOEFF_NORMED} );
+
+  image_correlation_matching_method->set_item_delegate_type( _delegate_DROP );
+  image_correlation_matching_method->set_dropdown_options( 1, box3_option_4_1_drop, box3_option_4_1_drop_enum  );
+
+  image_correlation->insertChildren( image_correlation_matching_method );
+
   tdmap_simulation_setup_model = new TreeModel( tdmap_root );
 
   ui->qtree_view_tdmap_simulation_setup->setModel( tdmap_simulation_setup_model );
+  ui->qtree_view_tdmap_simulation_setup->setItemDelegate( _load_file_delegate );
   //start editing after one click
   ui->qtree_view_tdmap_simulation_setup->setEditTriggers(QAbstractItemView::AllEditTriggers);
 
@@ -964,7 +993,6 @@ void MainWindow::create_box_options(){
   for (int column = 0; column < tdmap_simulation_setup_model->columnCount(); ++column){
     ui->qtree_view_tdmap_simulation_setup->resizeColumnToContents(column);
   }
-
 
   ui->tdmap_table->set_tdmap( _core_td_map );
   ui->tdmap_table->connect_thickness_range_number_samples_changes(  thickness_range_number_samples, 1 );
@@ -995,20 +1023,12 @@ void MainWindow::create_box_options(){
 
 
 
-
-  //tdmap
-  QModelIndex tdmap_index = simulation_parameters_model->index(0,0);
-
-  ui->qtree_view_simulation_setup->expand(tdmap_index);
-
-
-
   QStringList headers_edge_detection_parameters;
   headers_edge_detection_parameters << tr("Field") << tr("Value");
 
   QStringList edge_detection_parameters;
   edge_detection_parameters << tr("Edge detection");
-  edge_detection_parameters << tr(" Hysteresis Thresholding");
+  edge_detection_parameters << tr("Hysteresis Thresholding");
   edge_detection_parameters << tr("Max contour distance (pixels)");
 
   TreeModel *edge_detection_model = new TreeModel(headers_edge_detection_parameters, edge_detection_parameters);
@@ -1029,16 +1049,7 @@ void MainWindow::create_box_options(){
   supercell_model_refinement_parameters << tr("Edge refinement");
   supercell_model_refinement_parameters << tr("Columns Refinement");
   supercell_model_refinement_parameters << tr("Calculation");
-  TreeModel *supercell_model_refinement_model = new TreeModel(headers_supercell_model_refinement_parameters, supercell_model_refinement_parameters);
-
-  ui->qtree_view_supercell_model_refinement_setup->setModel(supercell_model_refinement_model);
-
-  for (int column = 0; column < supercell_model_refinement_model->columnCount(); ++column){
-  ui->qtree_view_supercell_model_refinement_setup->resizeColumnToContents(column);
-  }*/
-
-  // ui->qtree_view_project_setup_image->setModel(project_setup_image_fields_model);
-  // ui->qtree_view_project_setup_image->setItemDelegate( _load_file_delegate );
+*/
 }
 
 bool MainWindow::set_dr_probe_path( QString path ){

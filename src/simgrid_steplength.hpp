@@ -113,6 +113,9 @@ class SIMGRID_wavimg_steplength {
     std::vector<double> simulated_matches;
     std::vector<cv::Point3d> slice_defocus_match_points;
 
+    //: normalized correlation, non-normalized correlation and sum-absolute-difference
+    int _sim_correlation_method = CV_TM_CCOEFF_NORMED;
+
     /***********
       step-length algorithm vars
      ***********/
@@ -206,6 +209,8 @@ class SIMGRID_wavimg_steplength {
     static cv::Mat gradientX(cv::Mat & mat, double spacing);
 
     static cv::Mat gradientY(cv::Mat & mat, double spacing);
+
+    bool set_sim_correlation_method( int enumerator );
 
     void set_iteration_number ( int itt );
 

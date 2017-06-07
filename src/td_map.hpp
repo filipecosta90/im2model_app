@@ -185,6 +185,9 @@ class TDMap {
     boost::filesystem::path base_dir_path;
     bool _flag_base_dir_path = false;
 
+int image_correlation_matching_method = CV_TM_CCOEFF_NORMED;
+        bool _flag_image_correlation_matching_method = true;
+
   public:
 
     bool set_application_logger( ApplicationLog::ApplicationLog* app_logger );
@@ -325,6 +328,7 @@ class TDMap {
 
     bool set_base_dir_path( boost::filesystem::path path );
 
+    bool set_image_correlation_matching_method( int method );
 };
 
 #endif

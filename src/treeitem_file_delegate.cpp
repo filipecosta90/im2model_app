@@ -14,13 +14,34 @@ void TreeItemFileDelegate::paint(QPainter * painter, const QStyleOptionViewItem 
   TreeItem *item = static_cast<TreeItem*>(index.internalPointer());
   switch( item->get_item_delegate_type() )
   {
-    case _delegate_FILE :
-    case _delegate_DIR :
-      {
-        QStyledItemDelegate::paint( painter, option,  index);
-        break;
-      }
-    case _delegate_TEXT :
+    case _delegate_DROP:
+  {
+     if( item->get_dropdown_column() == index.column() ){
+
+         const QVector<QVariant> drop_data = item->get_dropdown_data();
+         const QVector<QVariant> drop_enum = item->get_dropdown_enum();
+         QVariant value = index.model()->data(index, Qt::EditRole);
+
+         QString _option_text;
+         for( int enum_pos = 0; enum_pos < drop_enum.size(); enum_pos++ ){
+           if( drop_enum[enum_pos] == value ){
+               _option_text = drop_data[enum_pos].toString();
+           }
+         }
+         QStyleOptionViewItem itemOption(option);
+         initStyleOption(&itemOption, index);
+         // override text
+            itemOption.text = _option_text;
+            QApplication::style()->drawControl(QStyle::CE_ItemViewItem, &itemOption, painter, nullptr);
+            }
+     else{
+         QStyledItemDelegate::paint( painter, option,  index);
+     }
+      break;
+  }
+    case _delegate_FILE:
+    case _delegate_DIR:
+    case _delegate_TEXT:
       {
         QStyledItemDelegate::paint( painter, option,  index);
         break;
@@ -38,6 +59,7 @@ QWidget *TreeItemFileDelegate::createEditor( QWidget *parent, const QStyleOption
     case _delegate_FILE :
     case _delegate_DIR :
       {
+      std::cout << " delegate FILE DIR" << std::endl;
         editor = new QWidget(parent);
         QString value = index.model()->data(index, Qt::EditRole).toString();
         QHBoxLayout *layout = new QHBoxLayout( editor );
@@ -46,7 +68,6 @@ QWidget *TreeItemFileDelegate::createEditor( QWidget *parent, const QStyleOption
         // layout->setSpacing(0);
         layout->setContentsMargins(0, 0, 0, 0);
         QSizePolicy sizePol(QSizePolicy::Expanding,QSizePolicy::Expanding);
-
 
         QLineEdit *line = new QLineEdit( editor );
         line->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
@@ -75,8 +96,56 @@ QWidget *TreeItemFileDelegate::createEditor( QWidget *parent, const QStyleOption
         }
         break;
       }
+    case _delegate_DROP:
+      {
+      if( item->get_dropdown_column() == index.column() ){
+        std::cout << "creating dropdown" << std::endl;
+        editor = new QWidget(parent);
+        int value = index.model()->data(index, Qt::EditRole).toInt();
+        std::cout << " drop value is :" << value << std::endl;
+        QHBoxLayout *layout = new QHBoxLayout( editor );
+        layout->setMargin(0);
+        layout->setContentsMargins(0, 0, 0, 0);
+        QSizePolicy sizePol(QSizePolicy::Expanding,QSizePolicy::Expanding);
+
+        // _combo_editor_widged = editor;
+         QComboBox* combo = new QComboBox(editor);
+         combo->setContentsMargins(0,0,0,0);
+
+
+// combo commands
+        QStringList commands;
+        const QVector<QVariant> drop_data = item->get_dropdown_data();
+        const QVector<QVariant> drop_enum = item->get_dropdown_enum();
+
+        foreach (const QVariant var_command, drop_data) {
+            std::cout << "command " <<  var_command.toString().toStdString() << std::endl;
+            commands << var_command.toString();
+        }
+
+        foreach (const QVariant var_enum, drop_enum ) {
+            std::cout << "enum " <<  var_enum.toInt() << std::endl;
+        }
+
+        for( int enum_pos = 0; enum_pos < drop_enum.size(); enum_pos++ ){
+          if( drop_enum[enum_pos] == value ){
+              std::cout << " initial index  " << enum_pos << std::endl;
+              combo->setCurrentIndex(enum_pos);
+          }
+        }
+
+        // fill combo
+        combo->addItems(commands);
+        layout->addWidget(combo);
+        editor->setLayout(layout);
+        editor->setSizePolicy(sizePol);
+        editor->setFocusProxy( combo );
+      }
+        break;
+      }
     case _delegate_TEXT :
       {
+      std::cout << " delegate text" << std::endl;
         editor = QStyledItemDelegate::createEditor(parent,option,index);
         break;
       }
@@ -88,6 +157,28 @@ void TreeItemFileDelegate::setEditorData(QWidget *editor, const QModelIndex &ind
   TreeItem *item = static_cast<TreeItem*>(index.internalPointer());
   switch(item->get_item_delegate_type())
   {
+    case _delegate_DROP:
+      {
+      if( item->get_dropdown_column() == index.column() ){
+      QComboBox* combo = editor->findChild<QComboBox*>();
+      QVariant value = index.model()->data(index, Qt::EditRole);
+      std::cout << "setEditorData model value was" << value.toInt() << std::endl;
+
+      const QVector<QVariant> drop_data = item->get_dropdown_data();
+      QString drop_string;
+     const QVector<QVariant> drop_enum = item->get_dropdown_enum();
+      for( int enum_pos = 0; enum_pos < drop_enum.size(); enum_pos++ ){
+          std::cout << " \t\ttesting pos " << enum_pos << " enum " << drop_enum[enum_pos].toInt() << " data "<< drop_data[enum_pos].toString().toStdString() << std::endl;
+        if( drop_enum[enum_pos] == value ){
+            std::cout << " equal " << std::endl;
+            combo->setCurrentIndex(enum_pos);
+        }
+      }
+      std::cout << "setEditorData dropdown index " << combo->currentIndex() << std::endl;
+        std::cout << "setEditorData dropdown with value" << drop_string.toStdString() << std::endl;
+      }
+        break;
+      }
     case _delegate_FILE  :
     case _delegate_DIR  :
       {
@@ -111,8 +202,24 @@ void TreeItemFileDelegate::setModelData(QWidget *editor, QAbstractItemModel *mod
   TreeItem *item = static_cast<TreeItem*>(index.internalPointer());
   switch(item->get_item_delegate_type())
   {
-    case _delegate_FILE  :
-    case _delegate_DIR  :
+    case _delegate_DROP:
+      {
+
+      if( item->get_dropdown_column() == index.column() ){
+      QComboBox* combo = editor->findChild<QComboBox*>();
+      int pos = combo->currentIndex();
+     const QVector<QVariant> drop_enum = item->get_dropdown_enum();
+      std::cout << "setModelData dropdown to index " <<  pos << " enum " <<  drop_enum[pos].toInt() << std::endl;
+ const QVariant value = drop_enum[pos];
+      model->setData(index, value , Qt::EditRole);
+      }
+      else{
+      std::cout << " wrong column on delegate DROP" << std::endl;
+      }
+        break;
+      }
+    case _delegate_FILE:
+    case _delegate_DIR:
       {
         QLineEdit* line = editor->findChild<QLineEdit*>();
         QString value = line->text();
@@ -131,12 +238,14 @@ void TreeItemFileDelegate::updateEditorGeometry(QWidget *editor, const QStyleOpt
   TreeItem *item = static_cast<TreeItem*>(index.internalPointer());
   switch(item->get_item_delegate_type())
   {
+    case _delegate_DROP:
     case _delegate_FILE  :
     case _delegate_DIR  :
       {
         editor->setGeometry(option.rect);
         break;
       }
+
     case _delegate_TEXT  :
       {
         QStyledItemDelegate::updateEditorGeometry(editor,option,index);
@@ -170,4 +279,5 @@ void TreeItemFileDelegate::get_dirname_slot( QWidget *editor ){
     line->setText(dirName);
   }
 }
+
 

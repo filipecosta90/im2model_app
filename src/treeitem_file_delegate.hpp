@@ -16,6 +16,8 @@
 #include "treeitem.h"
 #include "treemodel.h"
 
+
+
 class TreeItemFileDelegate : public QStyledItemDelegate {
   Q_OBJECT
   public:
@@ -36,8 +38,8 @@ signals:
     public slots:
       void get_filename_slot( QWidget *editor );
     void get_dirname_slot( QWidget *editor );
-  private:
 
+  private:
 };
 
 #endif // end FILEDELEGATE_H

@@ -871,3 +871,9 @@ bool TDMap::set_dr_probe_wavimg_execname( std::string wavimg_execname ){
 
   return _flag_dr_probe_wavimg_execname;
 }
+
+bool TDMap::set_image_correlation_matching_method( int method ){
+    std::cout << " set_image_correlation_matching_method to enum " << method << std::endl;
+     _flag_image_correlation_matching_method = _td_map_simgrid->set_sim_correlation_method( method );
+    return _flag_image_correlation_matching_method;
+}

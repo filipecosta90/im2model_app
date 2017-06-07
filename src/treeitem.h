@@ -17,15 +17,22 @@
 
 Q_DECLARE_METATYPE(std::string)
 
-  enum DelegateType { _delegate_FILE, _delegate_DIR, _delegate_TEXT };
+  enum DelegateType { _delegate_FILE, _delegate_DIR, _delegate_TEXT, _delegate_DROP };
 
 class TreeItem : public QObject {
   Q_OBJECT
   public:
-    explicit TreeItem( QVector<QVariant> &data, boost::function<bool(std::string)> setter, QVector<bool> editable, TreeItem *parent = 0 );
-    explicit TreeItem( QVector<QVariant> &data, boost::function<bool(std::string)> setters, TreeItem *parent, bool checkable, boost::function<bool(bool)> check_setter);
-    explicit TreeItem( QVector<QVariant> &data, boost::function<bool(std::string)> setters, TreeItem *parent = 0);
     explicit TreeItem( QVector<QVariant> &data, TreeItem *parent = 0);
+    explicit  TreeItem( QVector<QVariant> &data, boost::function<bool(std::string)> setter, TreeItem *parent = 0);
+    explicit TreeItem( QVector<QVariant> &data, boost::function<bool(double)> setter, TreeItem *parent = 0);
+    explicit TreeItem( QVector<QVariant> &data, boost::function<bool(int)> setter, TreeItem *parent = 0);
+    explicit TreeItem( QVector<QVariant> &data, boost::function<bool(std::string)> setter, QVector<bool> editable, TreeItem *parent = 0);
+    explicit TreeItem( QVector<QVariant> &data, boost::function<bool(double)> setter, QVector<bool> editable, TreeItem *parent = 0);
+    explicit TreeItem( QVector<QVariant> &data, boost::function<bool(int)> setter, QVector<bool> editable, TreeItem *parent = 0);
+    explicit TreeItem( QVector<QVariant> &data, boost::function<bool(std::string)> setter, bool checkable, boost::function<bool(bool)> check_setter, TreeItem *parent = 0);
+    explicit TreeItem( QVector<QVariant> &data, boost::function<bool(double)> setter, bool checkable, boost::function<bool(bool)> check_setter, TreeItem *parent = 0);
+    explicit TreeItem( QVector<QVariant> &data, boost::function<bool(int)> setter, bool checkable, boost::function<bool(bool)> check_setter, TreeItem *parent = 0);
+
 
     ~TreeItem();
     TreeItem *parent();
@@ -49,9 +56,13 @@ class TreeItem : public QObject {
 
     boost::property_tree::ptree*  save_data_into_property_tree( );
     bool load_data_from_property_tree( boost::property_tree::ptree pt_root );
-    QStringList extractStringsFromItem();
     DelegateType get_item_delegate_type();
+    QVector<QVariant> get_dropdown_data();
+    QVector<QVariant> get_dropdown_enum();
+    int get_dropdown_column();
+
     void set_item_delegate_type( DelegateType _delegate_type );
+    void set_dropdown_options( int column , QVector<QVariant>& drop, QVector<QVariant>& drop_enum );
 
 signals:
     void dataChanged( int column );
@@ -61,13 +72,21 @@ signals:
     QList<TreeItem*> childItems;
     QVector<QVariant> itemData;
     QVector<bool> itemIsEditableVec;
+    QVector<QVariant> dropdown_data;
+    QVector<QVariant> dropdown_enum;
+    int dropdown_column;
+    bool _flag_dropdown = false;
 
-    bool checked;
-    bool is_checkable;
-    boost::function<bool(std::string)> fp_data_setter;
+    bool checked = false;
+    bool is_checkable = false;
+    boost::function<bool(std::string)> fp_data_setter_string;
     boost::function<bool(bool)> fp_check_setter;
+    boost::function<bool(double)> fp_data_setter_double;
+    boost::function<bool(int)> fp_data_setter_int;
 
-    bool _flag_fp_data_setter = false;
+    bool _flag_fp_data_setter_string = false;
+    bool _flag_fp_data_setter_double = false;
+    bool _flag_fp_data_setter_int = false;
     int _fp_data_setter_col_pos = 1;
     bool _flag_fp_check_setter = false;
 

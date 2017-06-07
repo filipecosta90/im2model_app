@@ -193,10 +193,6 @@ bool TreeModel::setHeaderData(int section, Qt::Orientation orientation, const QV
   return result;
 }
 
-QStringList TreeModel::extractStringsFromModel(){
-  return rootItem->extractStringsFromItem();
-}
-
 bool TreeModel::_was_model_modified(){
   return _flag_model_modified;
 }

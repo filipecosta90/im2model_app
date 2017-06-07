@@ -40,7 +40,6 @@ class TreeModel : public QAbstractItemModel {
     void set_data_unique_id( int row, int column, int unique_id );
     bool _was_model_modified();
 
-    QStringList extractStringsFromModel( );
     boost::property_tree::ptree* save_data_into_property_tree( );
     bool load_data_from_property_tree( boost::property_tree::ptree pt_root );
 

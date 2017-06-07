@@ -43,7 +43,6 @@ class CVImageWidget : public QWidget
       float w_factor = ((float) window_width) / ((float) original_size.width );
       float h_factor = ((float) window_height) / ((float) original_size.height );
       scaleFactor = std::min(w_factor,h_factor);
-      std::cout << "scale factor" << scaleFactor << std::endl;
       updateImage();
     }
 

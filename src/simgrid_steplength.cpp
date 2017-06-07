@@ -174,6 +174,30 @@ cv::Point2i SIMGRID_wavimg_steplength::get_best_match_position(){
   return best_match_Point2i;
 }
 
+bool SIMGRID_wavimg_steplength::set_sim_correlation_method( int enumerator ){
+bool result = false;
+
+/*
+0 - (CV_TM_SQDIFF): squared difference
+1 - (CV_TM_SQDIFF_NORMED): normalized squared difference
+2 - (CV_TM_CCORR): cross correlation
+3 - (CV_TM_CCORR_NORMED): normalized cross correlation
+4 - (CV_TM_CCOEFF): correlation coefficient
+5- (CV_TM_CCOEFF_NORMED): normalized correlation coefficient
+*/
+
+if(
+        ( enumerator == CV_TM_SQDIFF_NORMED )
+        || ( enumerator == CV_TM_CCORR_NORMED )
+        || ( enumerator == CV_TM_CCOEFF_NORMED )
+        ) {
+    _sim_correlation_method = enumerator;
+    result = true;
+}
+return result;
+}
+
+
 void SIMGRID_wavimg_steplength::set_iteration_number ( int itt ){
   iteration_number = itt;
 }
@@ -803,7 +827,8 @@ bool SIMGRID_wavimg_steplength::simulate_from_dat_file(){
       cv::Point matchLoc;
       double matchVal;
 
-      cv::matchTemplate( experimental_image_roi , cleaned_simulated_image, result, CV_TM_CCOEFF_NORMED  );
+      //: normalized correlation, non-normalized correlation and sum-absolute-difference
+      cv::matchTemplate( experimental_image_roi , cleaned_simulated_image, result, _sim_correlation_method  );
       cv::minMaxLoc( result, &minVal, &maxVal, &minLoc, &maxLoc, cv::Mat() );
       matchVal = maxVal;
 
