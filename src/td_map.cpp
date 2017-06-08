@@ -522,7 +522,7 @@ bool  TDMap::prepare_wavimg_parameters(){
     // setters line 16
     _tdmap_wavimg_parameters->set_mtf_simulation_switch( 1 ); // alterar aqui para 0
     _tdmap_wavimg_parameters->set_k_space_scaling( 1.0f );
-    _tdmap_wavimg_parameters->set_file_name_simulation_frequency_modulated_detector_transfer_function( "'/Users/filipeoliveira/Documents/im2model/simulation/mtf/MTF-US2k-300.mtf'" );
+    _tdmap_wavimg_parameters->set_mtf_filename( "'/Users/filipeoliveira/Documents/im2model/simulation/mtf/MTF-US2k-300.mtf'" );
     // setters line 17
     _tdmap_wavimg_parameters->set_simulation_image_spread_envelope_switch( 0 );
     _tdmap_wavimg_parameters->set_isotropic_one_rms_amplitude( 0.03 ); // colocar a zero
@@ -886,24 +886,32 @@ bool TDMap::set_refinement_definition_method ( int method ){
 }
 
 bool TDMap::set_thickness_user_estimated_nm( double estimated_nm ){
-    user_estimated_thickness_nm = estimated_nm;
-    _flag_user_estimated_thickness_nm = true;
-    return _flag_user_estimated_thickness_nm;
+  user_estimated_thickness_nm = estimated_nm;
+  _flag_user_estimated_thickness_nm = true;
+  return _flag_user_estimated_thickness_nm;
 }
 
 bool TDMap::set_defocus_user_estimated_nm( double estimated_nm ){
-    user_estimated_defocus_nm = estimated_nm;
-    _flag_user_estimated_defocus_nm = true;
-    return _flag_user_estimated_defocus_nm;
+  user_estimated_defocus_nm = estimated_nm;
+  _flag_user_estimated_defocus_nm = true;
+  return _flag_user_estimated_defocus_nm;
 }
 
 bool TDMap::auto_calculate_thickness_range_lower_upper_nm(){
-std::cout << " auto auto_calculate_thickness_range_lower_upper_nm " << std::endl;
-return true;
+  std::cout << " auto auto_calculate_thickness_range_lower_upper_nm " << std::endl;
+  return true;
 }
 
 bool TDMap::auto_calculate_thickness_lower_upper_nm(){
-std::cout << " auto auto_calculate_thickness_lower_upper_nm " << std::endl;
-return true;
+  std::cout << " auto auto_calculate_thickness_lower_upper_nm " << std::endl;
+  return true;
+}
+
+bool TDMap::set_mtf_filename( std::string file_name ){
+  bool result = _tdmap_wavimg_parameters->set_mtf_filename( file_name );
+  if( result ){
+    _tdmap_wavimg_parameters->set_mtf_simulation_switch( true );
+  }
+  return result;
 }
 

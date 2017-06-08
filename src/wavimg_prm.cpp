@@ -44,9 +44,9 @@ WAVIMG_prm::WAVIMG_prm( boost::process::ipstream &async_io_buffer_out ) : _io_pi
   partial_spacial_coherence_switch = 0;
   partial_spacial_coherence_semi_convergence_angle = 0.0f;
   // line 16
-  mtf_simulation_switch = 0;
+  mtf_simulation_switch = false;
   k_space_scaling = 0.0f;
-  file_name_simulation_frequency_modulated_detector_transfer_function = "";
+  mtf_filename = "";
   // line 17
   simulation_image_spread_envelope_switch = 0;
   isotropic_one_rms_amplitude = 0.0f;
@@ -131,7 +131,7 @@ WAVIMG_prm::WAVIMG_prm(const WAVIMG_prm &obj) : _io_pipe_out(obj._io_pipe_out) {
   // line 16
   mtf_simulation_switch = obj.mtf_simulation_switch;
   k_space_scaling = obj.k_space_scaling;
-  file_name_simulation_frequency_modulated_detector_transfer_function = obj.file_name_simulation_frequency_modulated_detector_transfer_function;
+  mtf_filename = obj.mtf_filename;
   // line 17
   simulation_image_spread_envelope_switch = obj.simulation_image_spread_envelope_switch;
   isotropic_one_rms_amplitude = obj.isotropic_one_rms_amplitude;
@@ -355,16 +355,44 @@ void WAVIMG_prm::set_partial_spacial_coherence_semi_convergence_angle( double co
 }
 
 // setters line 16
-void WAVIMG_prm::set_mtf_simulation_switch( int simulation_switch ){
-  mtf_simulation_switch = simulation_switch;
+/*
+   void WAVIMG_prm::set_mtf_simulation_switch( int simulation_switch ){
+   mtf_simulation_switch = simulation_switch;
+   }
+   */
+
+void WAVIMG_prm::set_mtf_simulation_switch( bool status ){
+  mtf_simulation_switch = status;
+}
+
+bool WAVIMG_prm::get_mtf_simulation_switch(){
+  return mtf_simulation_switch;
 }
 
 void WAVIMG_prm::set_k_space_scaling( double scale ){
   k_space_scaling = scale;
 }
 
-void WAVIMG_prm::set_file_name_simulation_frequency_modulated_detector_transfer_function( std::string file_name ){
-  file_name_simulation_frequency_modulated_detector_transfer_function = file_name;
+bool WAVIMG_prm::set_mtf_filename( std::string file_name ){
+  boost::filesystem::path full_path( file_name );
+  _flag_mtf_filename = boost::filesystem::exists(full_path);
+  if( _flag_mtf_filename ) {
+    mtf_filename = boost::filesystem::canonical(full_path).string();
+
+    if( _flag_logger ){
+      std::stringstream message;
+      message << "specified mtf file: " <<  mtf_filename;
+      logger->logEvent( ApplicationLog::normal , message.str() );
+    }
+  }
+  else{
+    if( _flag_logger ){
+      std::stringstream message;
+      message << "the specified mtf file does not exist: " <<  file_name;
+      logger->logEvent( ApplicationLog::error , message.str() );
+    }
+  }
+  return _flag_mtf_filename;
 }
 
 // setters line 17
@@ -669,7 +697,8 @@ bool WAVIMG_prm::call_bin(){
       // line 15
       outfile <<  partial_spacial_coherence_switch << ", " << partial_spacial_coherence_semi_convergence_angle << " !" << std::endl;
       // line 16
-      outfile <<  mtf_simulation_switch << ", " << k_space_scaling << ", " <<  file_name_simulation_frequency_modulated_detector_transfer_function << " !" << std::endl;
+      int _mtf_swith = mtf_simulation_switch ? 1 : 0;
+      outfile <<  _mtf_swith << ", " << k_space_scaling << ", " <<  mtf_filename << " !" << std::endl;
       // line 17
       outfile <<  simulation_image_spread_envelope_switch << ", " << isotropic_one_rms_amplitude << " !" << std::endl;
       // double anisotropic_second_rms_amplitude;

@@ -346,6 +346,9 @@ class TDMap {
     bool set_base_dir_path( boost::filesystem::path path );
 
     bool set_image_correlation_matching_method( int method );
+
+    bool set_mtf_filename( std::string file_name );
+
 };
 
 #endif

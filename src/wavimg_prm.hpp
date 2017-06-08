@@ -59,10 +59,11 @@ class WAVIMG_prm {
     // line 15
     int partial_spacial_coherence_switch;
     double partial_spacial_coherence_semi_convergence_angle;
-    // line 16
-    int mtf_simulation_switch;
+    // line 16  
+    bool mtf_simulation_switch;
     double k_space_scaling;
-    std::string file_name_simulation_frequency_modulated_detector_transfer_function;
+    std::string mtf_filename;
+    bool _flag_mtf_filename = false;
     // line 17
     int simulation_image_spread_envelope_switch;
     double isotropic_one_rms_amplitude;
@@ -175,9 +176,10 @@ class WAVIMG_prm {
     void set_partial_spacial_coherence_switch( int coherence_switch );
     void set_partial_spacial_coherence_semi_convergence_angle( double convergence_angle );
     // setters line 16
-    void set_mtf_simulation_switch( int simulation_switch );
+    void set_mtf_simulation_switch( bool simulation_switch );
+    bool get_mtf_simulation_switch();
     void set_k_space_scaling( double scale );
-    void set_file_name_simulation_frequency_modulated_detector_transfer_function( std::string file_name );
+    bool set_mtf_filename( std::string file_name );
     // setters line 17
     void set_simulation_image_spread_envelope_switch( int spread_switch );
     void set_isotropic_one_rms_amplitude( double amplitude );

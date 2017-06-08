@@ -1042,7 +1042,10 @@ void MainWindow::create_box_options(){
   //Simulation Refinement -- MTF
   ////////////////
   QVector<QVariant> box3_option_4_3 = {"MTF",""};
-  TreeItem* _mtf_parameters = new TreeItem ( box3_option_4_3 );
+  QVector<bool> box3_option_4_3_edit = {false,true};
+  boost::function<bool(std::string)> box3_function_4_3 ( boost::bind( &TDMap::set_mtf_filename,_core_td_map, _1 ) );
+  TreeItem* _mtf_parameters = new TreeItem ( box3_option_4_3 , box3_function_4_3, box3_option_4_3_edit );
+  _mtf_parameters->set_item_delegate_type( _delegate_FILE );
   _simulation_refinement->insertChildren( _mtf_parameters );
 
   ////////////////
