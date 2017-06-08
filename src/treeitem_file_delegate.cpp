@@ -1,5 +1,6 @@
 
 #include <QtWidgets>
+#include <QItemDelegate>
 
 #include "treeitem_file_delegate.hpp"
 #include <iostream>
@@ -14,7 +15,7 @@ void TreeItemFileDelegate::paint(QPainter * painter, const QStyleOptionViewItem 
   TreeItem *item = static_cast<TreeItem*>(index.internalPointer());
   switch( item->get_item_delegate_type() )
   {
-    case _delegate_DROP:
+    case TreeItem::_delegate_DROP:
       {
         if( item->get_dropdown_column() == index.column() ){
 
@@ -39,10 +40,42 @@ void TreeItemFileDelegate::paint(QPainter * painter, const QStyleOptionViewItem 
         }
         break;
       }
-    case _delegate_TEXT_ACTION:
-    case _delegate_FILE:
-    case _delegate_DIR:
-    case _delegate_TEXT:
+    case TreeItem::_delegate_CHECK:
+      {
+        if( item->get_checkbox_column() == index.column() ){
+          QRect rect = option.rect;
+
+          // Painting the checkbox
+          painter->save();
+          painter->translate( rect.topLeft() );
+          QPoint topLeft( 0, 0 );
+          QStyleOptionViewItem itemOption(option);
+          initStyleOption(&itemOption, index);
+          QStyleOptionButton checkbox = checkboxOption( option, index, topLeft.x(), Qt::AlignLeft );
+          bool value = index.model()->data(index, Qt::EditRole).toBool();
+          checkbox.state = value ? (QStyle::State_Enabled | QStyle::State_On) :  (QStyle::State_Enabled | QStyle::State_Off);
+
+          QApplication::style()->drawControl(QStyle::CE_CheckBox, &checkbox, painter , nullptr);
+
+          // Painting the checkbox text from legend string
+          topLeft += QPoint( checkbox.rect.width(), 0 );
+          QString legend = item->get_legend(index.column()).toString();
+          QSize legendSize ( QApplication::fontMetrics().size( 0, legend ) );
+          QRect nameRect( QPoint( 0, 0 ), legendSize );
+          nameRect.setHeight( rect.height() );
+          nameRect.moveTopLeft( topLeft );
+          QApplication::style()->drawItemText( painter, nameRect,   Qt::AlignLeft | Qt::AlignVCenter, option.palette, true, legend );
+          painter->restore();
+        }
+        else{
+          QStyledItemDelegate::paint( painter, option,  index);
+        }
+        break;
+      }
+    case TreeItem::_delegate_TEXT_ACTION:
+    case TreeItem::_delegate_FILE:
+    case TreeItem::_delegate_DIR:
+    case TreeItem::_delegate_TEXT:
       {
         QStyledItemDelegate::paint( painter, option,  index);
         break;
@@ -50,53 +83,88 @@ void TreeItemFileDelegate::paint(QPainter * painter, const QStyleOptionViewItem 
   }
 }
 
+QRect TreeItemFileDelegate::alignRect( QRect object,  QRect frame, int position,   Qt::AlignmentFlag alignment ) const {
+  QRect rect = object;
+
+  rect.setTopLeft( QPoint( 0, 0 ) );
+  // Moves the object to the middle of the item.
+  if ( rect.height() < frame.height() ) {
+    rect.moveTop( ( frame.height() - rect.height() ) / 2 );
+  }
+
+  if ( alignment & Qt::AlignLeft ) {
+    rect.moveLeft( position );
+  }
+  else if ( alignment & Qt::AlignRight ) {
+    rect.moveRight( position );
+  }
+
+  return rect;
+}
+
+QStyleOptionButton TreeItemFileDelegate::checkboxOption( const QStyleOptionViewItem& option,  const QModelIndex& index, int position, Qt::AlignmentFlag alignment ) const {
+  QStyleOptionButton checkboxOption;
+  if ( index.data( Qt::CheckStateRole ).toBool() )
+    checkboxOption.state = option.state | QStyle::State_On;
+  else
+    checkboxOption.state = option.state | QStyle::State_Off;
+  QSize size = QApplication::style()->sizeFromContents( QStyle::CT_CheckBox, &option, QSize() );
+  if ( size.isEmpty() ) {
+    // A checkbox has definately a size != 0
+    checkboxOption.rect.setSize( QSize( 22, 22 ) );
+  }
+  else {
+    checkboxOption.rect.setSize( QSize( size.width(), size.height() ) );
+  }
+  checkboxOption.rect = alignRect( checkboxOption.rect, option.rect, position, alignment );
+  return checkboxOption;
+}
+
 QWidget *TreeItemFileDelegate::createEditor( QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &index ) const{
 
+  parent->update();
   TreeItem *item = static_cast<TreeItem*>(index.internalPointer());
   QWidget *editor = 0;
 
   switch( item->get_item_delegate_type() )
   {
-    case _delegate_FILE :
-    case _delegate_DIR :
+    case TreeItem::_delegate_FILE :
+    case TreeItem::_delegate_DIR :
       {
-        std::cout << " delegate FILE DIR" << std::endl;
         editor = new QWidget(parent);
-        QString value = index.model()->data(index, Qt::EditRole).toString();
-        QHBoxLayout *layout = new QHBoxLayout( editor );
-        layout->setMargin(0);
-        layout->setAlignment(Qt::AlignRight);
-        // layout->setSpacing(0);
-        layout->setContentsMargins(0, 0, 0, 0);
-        QSizePolicy sizePol(QSizePolicy::Expanding,QSizePolicy::Expanding);
 
-        QLineEdit *line = new QLineEdit( editor );
-        line->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-        line->setContentsMargins(0,0,0,0);
-        line->setText(value);
-        line->setVisible(true);
+        QVariant::Type t = static_cast<QVariant::Type>(index.data(Qt::EditRole).userType());
+        QWidget* text_editor = QItemEditorFactory().createEditor(t,parent);
+        //text_editor->setMinimumHeight(box_size.height());
+
+        QHBoxLayout* editor_layout = new QHBoxLayout( editor );
+        editor_layout->setMargin(0);
+        editor_layout->setContentsMargins(QMargins(0,0,0,0));
+        editor_layout->setSpacing(0);
+        editor_layout->setAlignment(Qt::AlignRight);
 
         QString _button_text = "...";
-        FilePushButton *button = new FilePushButton(  _button_text, parent );
-        button->setFixedWidth( button->fontMetrics().width( " ... " ) );
+        FilePushButton *button = new FilePushButton( _button_text, editor );
 
-        layout->addWidget(line);
-        layout->addWidget(button);
-
-        editor->setLayout(layout);
-        editor->setSizePolicy(sizePol);
-
-        editor->setFocusProxy( line );
-
-        if( item->get_item_delegate_type() ==  _delegate_FILE ){
+        if( item->get_item_delegate_type() ==  TreeItem::_delegate_FILE ){
           connect(button, SIGNAL(onClick(QWidget*)), this, SLOT(get_filename_slot(QWidget*)));
         }
         else{
           connect(button, SIGNAL(onClick(QWidget*)), this, SLOT(get_dirname_slot(QWidget*)));
         }
+
+        QSizePolicy spLeft(QSizePolicy::Expanding, QSizePolicy::Expanding);
+        spLeft.setHorizontalStretch(3);
+        text_editor->setSizePolicy(spLeft);
+        editor_layout->addWidget(text_editor);
+
+        QSizePolicy spRight(QSizePolicy::Preferred, QSizePolicy::Preferred);
+        spRight.setHorizontalStretch(1);
+        button->setFixedWidth( button->fontMetrics().width( " ... " ) );
+        editor_layout->addWidget(button);
         break;
       }
-    case _delegate_DROP:
+    case TreeItem::_delegate_DROP:
       {
         if( item->get_dropdown_column() == index.column() ){
           editor = new QWidget(parent);
@@ -138,15 +206,30 @@ QWidget *TreeItemFileDelegate::createEditor( QWidget *parent, const QStyleOption
         }
         break;
       }
-    case _delegate_TEXT_ACTION:
+    case TreeItem::_delegate_CHECK:
+      {
+        editor = new QWidget(parent);
+
+        QHBoxLayout *editor_layout = new QHBoxLayout(editor);
+        QString legend = item->get_legend( index.column() ).toString();
+        QCheckBox *checkbox = new QCheckBox( legend , editor );
+        editor_layout->setAlignment(Qt::AlignLeft);
+
+        bool _is_checked = index.model()->data(index, Qt::EditRole).toBool();
+        checkbox->setChecked(_is_checked);
+
+        editor_layout->setContentsMargins( QMargins(0,0,0,0) );
+        editor_layout->addWidget( checkbox );
+        editor->setLayout( editor_layout );
+        break;
+      }
+    case TreeItem::_delegate_TEXT_ACTION:
       {
 
         editor = new QWidget(parent);
 
         QVariant::Type t = static_cast<QVariant::Type>(index.data(Qt::EditRole).userType());
         QWidget* text_editor = QItemEditorFactory().createEditor(t,parent);
-      //  editor->connect(text_editor, &QWidget::focus , this, &LengthTextBoxDelegate::commitAndCloseEditor);
-
 
         QHBoxLayout* editor_layout = new QHBoxLayout( editor );
 
@@ -161,22 +244,23 @@ QWidget *TreeItemFileDelegate::createEditor( QWidget *parent, const QStyleOption
 
         /* get actions */
         if( item->_is_toolbar_defined() ){
-            QVector<QVariant> _actions_description = item->get_toolbar_actions_description();
-            std::vector<boost::function<bool()>> _actions = item->get_toolbar_actions();
-            std::vector<QAction*> _actions_vec;
-            assert( _actions_description.size() == _actions.size() );
-            for( int _n_action = 0; _n_action < _actions.size(); _n_action++ ){
-                QString _act_description = _actions_description.at(_n_action).toString();
-               QAction* action = new QAction( _act_description);
-                //connect(action, &QAction::triggered, this, commit_and_call( editor, _actions.at(_n_action)) );
-                connect(action, &QAction::triggered, item,  _actions.at(_n_action) );
-             //   connect(action, &QAction::triggered, this, SLOT(commit_and_call(  editor, _actions.at(_n_action))  ) );
-                _actions_vec.push_back(action);
-                alignMenu->addAction(action);
-            }
-            if( _actions_vec.size() > 0 ){
+          QVector<QVariant> _actions_description = item->get_toolbar_actions_description();
+          std::vector<boost::function<bool()>> _actions = item->get_toolbar_actions();
+          std::vector<QAction*> _actions_vec;
+          assert( _actions_description.size() == _actions.size() );
+          for( int _n_action = 0; _n_action < _actions.size(); _n_action++ ){
+            QString _act_description = _actions_description.at(_n_action).toString();
+            QAction* action = new QAction( _act_description);
+            //connect(action, &QAction::triggered, this, commit_and_call( editor, _actions.at(_n_action)) );
+            connect(action, &QAction::triggered, item,  _actions.at(_n_action) );
+            // more work here
+            //   connect(action, &QAction::triggered, this, SLOT(commit_and_call(  editor, _actions.at(_n_action))  ) );
+            _actions_vec.push_back(action);
+            alignMenu->addAction(action);
+          }
+          if( _actions_vec.size() > 0 ){
             alignToolButton->setDefaultAction(_actions_vec.at(0));
-            }
+          }
         }
 
 
@@ -192,7 +276,7 @@ QWidget *TreeItemFileDelegate::createEditor( QWidget *parent, const QStyleOption
 
         break;
       }
-    case _delegate_TEXT :
+    case TreeItem::_delegate_TEXT :
       {
         std::cout << " delegate text" << std::endl;
         editor = QStyledItemDelegate::createEditor(parent,option,index);
@@ -206,7 +290,7 @@ void TreeItemFileDelegate::setEditorData(QWidget *editor, const QModelIndex &ind
   TreeItem *item = static_cast<TreeItem*>(index.internalPointer());
   switch(item->get_item_delegate_type())
   {
-    case _delegate_DROP:
+    case TreeItem::_delegate_DROP:
       {
         if( item->get_dropdown_column() == index.column() ){
           QComboBox* combo = editor->findChild<QComboBox*>();
@@ -222,8 +306,15 @@ void TreeItemFileDelegate::setEditorData(QWidget *editor, const QModelIndex &ind
         }
         break;
       }
-    case _delegate_FILE  :
-    case _delegate_DIR  :
+    case TreeItem::_delegate_CHECK:
+      {
+        QCheckBox* checkbox = editor->findChild<QCheckBox*>();
+        bool _is_checked = index.model()->data(index, Qt::EditRole).toBool();
+        checkbox->setChecked(_is_checked);
+        break;
+      }
+    case TreeItem::_delegate_FILE  :
+    case TreeItem::_delegate_DIR  :
       {
 
         QLineEdit* line = editor->findChild<QLineEdit*>();
@@ -233,14 +324,14 @@ void TreeItemFileDelegate::setEditorData(QWidget *editor, const QModelIndex &ind
 
         break;
       }
-    case _delegate_TEXT_ACTION:
+    case TreeItem::_delegate_TEXT_ACTION:
       {
         QLineEdit* line = editor->findChild<QLineEdit*>();
         QString value =  index.model()->data(index, Qt::EditRole).toString();
         line->setText(  value );
         break;
       }
-    case _delegate_TEXT  :
+    case TreeItem::_delegate_TEXT  :
       {
         QStyledItemDelegate::setEditorData(editor,index);
         break;
@@ -252,7 +343,7 @@ void TreeItemFileDelegate::setModelData(QWidget *editor, QAbstractItemModel *mod
   TreeItem *item = static_cast<TreeItem*>(index.internalPointer());
   switch(item->get_item_delegate_type())
   {
-    case _delegate_DROP:
+    case TreeItem::_delegate_DROP:
       {
         if( item->get_dropdown_column() == index.column() ){
           QComboBox* combo = editor->findChild<QComboBox*>();
@@ -267,23 +358,30 @@ void TreeItemFileDelegate::setModelData(QWidget *editor, QAbstractItemModel *mod
         }
         break;
       }
-    case _delegate_FILE:
-    case _delegate_DIR:
+    case TreeItem::_delegate_CHECK:
+      {
+        QCheckBox* checkbox = editor->findChild<QCheckBox*>();
+        bool _is_checked = checkbox->isChecked();
+        const QVariant value = QVariant::fromValue( _is_checked );
+        model->setData(index, value , Qt::EditRole);
+        break;
+      }
+    case TreeItem::_delegate_FILE:
+    case TreeItem::_delegate_DIR:
       {
         QLineEdit* line = editor->findChild<QLineEdit*>();
         QString value = line->text();
         model->setData(index,value, Qt::EditRole);
         break;
       }
-    case _delegate_TEXT_ACTION:
+    case TreeItem::_delegate_TEXT_ACTION:
       {
-      std::cout << "set model data called" << std::endl;
         QLineEdit* line = editor->findChild<QLineEdit*>();
         QVariant value = QVariant::fromValue( line->text() );
         model->setData(index,value, Qt::EditRole);
         break;
       }
-    case _delegate_TEXT  :
+    case TreeItem::_delegate_TEXT  :
       {
         QStyledItemDelegate::setModelData(editor,model,index);
         break;
@@ -295,15 +393,12 @@ void TreeItemFileDelegate::updateEditorGeometry(QWidget *editor, const QStyleOpt
   TreeItem *item = static_cast<TreeItem*>(index.internalPointer());
   switch(item->get_item_delegate_type())
   {
-    case _delegate_DROP:
-    case _delegate_FILE  :
-    case _delegate_DIR  :
-      {
-        editor->setGeometry(option.rect);
-        break;
-      }
-    case _delegate_TEXT_ACTION:
-    case _delegate_TEXT  :
+    case TreeItem::_delegate_DROP:
+    case TreeItem::_delegate_FILE:
+    case TreeItem::_delegate_DIR:
+    case TreeItem::_delegate_CHECK:
+    case TreeItem::_delegate_TEXT_ACTION:
+    case TreeItem::_delegate_TEXT:
       {
         QStyledItemDelegate::updateEditorGeometry(editor,option,index);
         break;
@@ -338,16 +433,16 @@ void TreeItemFileDelegate::get_dirname_slot( QWidget *editor ) {
 }
 
 void TreeItemFileDelegate::commit_and_call( QWidget * editor, boost::function<bool()> _action  ) {
-    std::cout << " commit and call" << std::endl;
-    emit commitData(editor);
+  std::cout << " commit and call" << std::endl;
+  emit commitData(editor);
 
 }
 
 
 /*
-void TreeItemFileDelegate::valueChanged( QWidget *editor ) const {
-    std::cout << " value changed" << std::endl;
-  emit commitData( editor );
-}
-*/
+   void TreeItemFileDelegate::valueChanged( QWidget *editor ) const {
+   std::cout << " value changed" << std::endl;
+   emit commitData( editor );
+   }
+   */
 

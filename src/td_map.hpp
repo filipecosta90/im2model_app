@@ -195,9 +195,14 @@ class TDMap {
     int _refinement_definition_method = RefinementPreset::NO_REFINEMENT ;
     bool _flag_refinement_definition_method = true;
 
-  public:
-    enum RefinementPreset { NO_REFINEMENT, MICROSCOPE_CORRECTED, MICROSCOPE_NON_CORRECTED, USER_DEFINED };
+    int _exec_log_level = ExecLogMode::FULL_LOG;
 
+  public:
+    enum RefinementPreset { NO_REFINEMENT, MICROSCOPE_CORRECTED, MICROSCOPE_NON_CORRECTED, USER_DEFINED_PRESET };
+
+    enum ExecLogMode {FULL_LOG, DEBUG_MODE, SILENT_MODE, USER_DEFINED_LOG_MODE };
+
+    bool set_log_level( int level );
     bool set_refinement_definition_method( int method);
     bool set_application_logger( ApplicationLog::ApplicationLog* app_logger );
     boost::process::ipstream& _sim_tdmap_ostream_buffer;
@@ -233,6 +238,10 @@ class TDMap {
      * RUN METHODS
      */
     bool run_tdmap();
+    bool set_run_celslc_switch( bool value );
+    bool set_run_msa_switch( bool value );
+    bool set_run_wavimg_switch( bool value );
+    bool set_run_simgrid_switch( bool value );
 
     /*
      * ASSERT TYPE METHODS

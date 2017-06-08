@@ -294,27 +294,23 @@
                     <rect>
                      <x>0</x>
                      <y>0</y>
-                     <width>374</width>
-                     <height>391</height>
+                     <width>384</width>
+                     <height>433</height>
                     </rect>
                    </property>
                    <layout class="QGridLayout" name="gridLayout_5">
-                    <item row="0" column="0">
+                    <item row="1" column="0">
                      <widget class="QTextBrowser" name="qTextBrowser_tdmap_simulation_output">
                       <property name="readOnly">
                        <bool>true</bool>
                       </property>
                      </widget>
                     </item>
+                    <item row="0" column="0">
+                     <widget class="QTreeView" name="qtree_view_tdmap_running_configuration"/>
+                    </item>
                    </layout>
                   </widget>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QProgressBar" name="qprogress_bar_tdmap">
-                  <property name="value">
-                   <number>24</number>
-                  </property>
                  </widget>
                 </item>
                </layout>
@@ -385,7 +381,7 @@
             </item>
            </layout>
           </widget>
-          <widget class="QWidget" name="">
+          <widget class="QWidget" name="layoutWidget">
            <layout class="QVBoxLayout" name="verticalLayout_2">
             <item>
              <layout class="QVBoxLayout" name="vertical_layout_experimental_image_roi_2">
@@ -491,6 +487,13 @@
                 </property>
                 <property name="autoFillBackground">
                  <bool>false</bool>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="Line" name="line_4">
+                <property name="orientation">
+                 <enum>Qt::Horizontal</enum>
                 </property>
                </widget>
               </item>

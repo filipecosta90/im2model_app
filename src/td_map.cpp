@@ -379,6 +379,26 @@ bool TDMap::_is_simulated_images_grid_defined(){
   return _td_map_simgrid->_is_simulated_images_grid_defined();
 }
 
+bool TDMap::set_run_celslc_switch( bool value ){
+    _run_celslc_switch = value;
+    return true;
+}
+
+bool TDMap::set_run_msa_switch( bool value ){
+    _run_msa_switch = value;
+    return true;
+}
+
+bool TDMap::set_run_wavimg_switch( bool value ){
+    _run_wavimg_switch = value;
+    return true;
+}
+
+bool TDMap::set_run_simgrid_switch( bool value ){
+    _run_simgrid_switch = value;
+    return true;
+}
+
 bool  TDMap::prepare_celslc_parameters(){
   _flag_tdmap_celslc_parameters = false;
   std::cout << "  _is_simulated_image_sampling_rate_and_size_defined " << _is_simulated_image_sampling_rate_and_size_defined() << std::endl;
@@ -913,5 +933,10 @@ bool TDMap::set_mtf_filename( std::string file_name ){
     _tdmap_wavimg_parameters->set_mtf_simulation_switch( true );
   }
   return result;
+}
+
+bool TDMap::set_log_level( int level ){
+_exec_log_level = level;
+    return true;
 }
 

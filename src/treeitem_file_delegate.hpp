@@ -21,9 +21,6 @@
 #include "treemodel.h"
 #include "custom_tool_button.h"
 
-
-
-
 class TreeItemFileDelegate : public QStyledItemDelegate {
   Q_OBJECT
   public:
@@ -38,6 +35,17 @@ class TreeItemFileDelegate : public QStyledItemDelegate {
     void setModelData(QWidget *editor, QAbstractItemModel *model, const QModelIndex &index) const;
 
     void updateEditorGeometry(QWidget *editor, const QStyleOptionViewItem &option, const QModelIndex &index) const;
+
+    QStyleOptionButton checkboxOption( const QStyleOptionViewItem& option,
+                                                           const QModelIndex& index,
+                                                           int position,
+                                                           Qt::AlignmentFlag alignment ) const;
+
+    QRect alignRect( QRect object,
+                                         QRect frame,
+                                         int position,
+                                         Qt::AlignmentFlag alignment ) const;
+
 
 signals:
 

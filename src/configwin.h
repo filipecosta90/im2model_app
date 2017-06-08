@@ -117,6 +117,7 @@ signals:
     TreeModel *project_setup_image_fields_model;
     TreeModel *project_setup_crystalographic_fields_model;
     TreeModel *tdmap_simulation_setup_model;
+    TreeModel *tdmap_running_configuration_model;
 
     QModelIndex project_setup_image_fields_model_index;
 

@@ -97,7 +97,7 @@ void Settings::produce_settings_panel(){
   QVector<bool> preferences_option_1_1_edit = {false,true};
   boost::function<bool(std::string)> preferences_option_function_1_1 ( boost::bind( &Settings::set_dr_probe_bin_path, this, _1 ) );
   _preferences_dr_probe_path = new TreeItem ( preferences_option_1_1 , preferences_option_function_1_1,  preferences_option_1_1_edit  );
-  _preferences_dr_probe_path->set_item_delegate_type( _delegate_DIR );
+  _preferences_dr_probe_path->set_item_delegate_type( TreeItem::_delegate_DIR );
 
   preferences_dr_probe->insertChildren( _preferences_dr_probe_path );
 

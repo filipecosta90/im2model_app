@@ -665,7 +665,7 @@ void MainWindow::create_box_options(){
   QVector<bool> box1_option_1_edit = {false,true};
   boost::function<bool(std::string)> box1_function_1( boost::bind( &MainWindow::update_qline_image_path, this, _1 ) );
   TreeItem* image_path  = new TreeItem (  box1_option_1 , box1_function_1, box1_option_1_edit );
-  image_path->set_item_delegate_type( _delegate_FILE );
+  image_path->set_item_delegate_type( TreeItem::_delegate_FILE );
   experimental_image_root->insertChildren( image_path );
 
   ////////////////
@@ -764,7 +764,7 @@ void MainWindow::create_box_options(){
   QVector<bool> box2_option_1_1_edit = {false,true};
   boost::function<bool(std::string)> box2_function_1_1 ( boost::bind( &Image_Crystal::set_unit_cell_cif_path,_core_image_crystal, _1 ) );
   TreeItem* unit_cell_file_cif = new TreeItem ( box2_option_1_1 , box2_function_1_1, box2_option_1_1_edit );
-  unit_cell_file_cif->set_item_delegate_type( _delegate_FILE );
+  unit_cell_file_cif->set_item_delegate_type( TreeItem::_delegate_FILE );
   unit_cell_file->insertChildren( unit_cell_file_cif );
 
   ////////////////
@@ -774,7 +774,7 @@ void MainWindow::create_box_options(){
   QVector<bool> box2_option_1_2_edit = {false,true};
   boost::function<bool(std::string)> box2_function_1_2 ( boost::bind( &Image_Crystal::set_unit_cell_cel_path,_core_image_crystal, _1 ) );
   TreeItem* unit_cell_file_cel = new TreeItem ( box2_option_1_2 , box2_function_1_2, box2_option_1_2_edit );
-  unit_cell_file_cel->set_item_delegate_type( _delegate_FILE );
+  unit_cell_file_cel->set_item_delegate_type( TreeItem::_delegate_FILE );
   unit_cell_file->insertChildren( unit_cell_file_cel );
 
   ////////////////
@@ -890,7 +890,7 @@ void MainWindow::create_box_options(){
   QVector<bool> box3_option_0_1_1_edit = {false,true};
   boost::function<bool(double)> box3_function_0_1_1 ( boost::bind( &TDMap::set_thickness_user_estimated_nm, _core_td_map, _1 ) );
   TreeItem* _parameter_variation_map_thickness_estimated_nm  = new TreeItem ( box3_option_0_1_1, box3_function_0_1_1, box3_option_0_1_1_edit  );
-  _parameter_variation_map_thickness_estimated_nm->set_item_delegate_type( _delegate_TEXT_ACTION );
+  _parameter_variation_map_thickness_estimated_nm->set_item_delegate_type( TreeItem::_delegate_TEXT_ACTION );
 
   QVector<QVariant> box3_function_0_1_1_action_description = {"Auto range","Auto lower/upper"};
   boost::function<bool()> box3_function_0_1_1_auto ( boost::bind( &TDMap::auto_calculate_thickness_range_lower_upper_nm, _core_td_map ) );
@@ -919,8 +919,6 @@ void MainWindow::create_box_options(){
   QVector<QVariant> box3_option_1 = {"Thickness range",""};
   TreeItem* thickness_range  = new TreeItem ( box3_option_1 );
   _parameter_variation_map_thickness->insertChildren( thickness_range );
-
-
 
   ////////////////
   //Thickness range -- lower bound
@@ -1017,9 +1015,9 @@ void MainWindow::create_box_options(){
 
   QVector<QVariant> box3_option_4_drop = {"No refinement","Corrected","Non-Corrected", "User defined"};
 
-  QVector<QVariant> box3_option_4_drop_enum( { TDMap::RefinementPreset::NO_REFINEMENT, TDMap::RefinementPreset::MICROSCOPE_CORRECTED, TDMap::RefinementPreset::MICROSCOPE_NON_CORRECTED, TDMap::RefinementPreset::USER_DEFINED } );
+  QVector<QVariant> box3_option_4_drop_enum( { TDMap::RefinementPreset::NO_REFINEMENT, TDMap::RefinementPreset::MICROSCOPE_CORRECTED, TDMap::RefinementPreset::MICROSCOPE_NON_CORRECTED, TDMap::RefinementPreset::USER_DEFINED_PRESET } );
 
-  _simulation_refinement->set_item_delegate_type( _delegate_DROP );
+  _simulation_refinement->set_item_delegate_type( TreeItem::_delegate_DROP );
   _simulation_refinement->set_dropdown_options( 1, box3_option_4_drop, box3_option_4_drop_enum  );
 
   tdmap_root->insertChildren( _simulation_refinement );
@@ -1045,7 +1043,7 @@ void MainWindow::create_box_options(){
   QVector<bool> box3_option_4_3_edit = {false,true};
   boost::function<bool(std::string)> box3_function_4_3 ( boost::bind( &TDMap::set_mtf_filename,_core_td_map, _1 ) );
   TreeItem* _mtf_parameters = new TreeItem ( box3_option_4_3 , box3_function_4_3, box3_option_4_3_edit );
-  _mtf_parameters->set_item_delegate_type( _delegate_FILE );
+  _mtf_parameters->set_item_delegate_type( TreeItem::_delegate_FILE );
   _simulation_refinement->insertChildren( _mtf_parameters );
 
   ////////////////
@@ -1069,7 +1067,7 @@ void MainWindow::create_box_options(){
 
   QVector<QVariant> box3_option_5_1_drop_enum( { CV_TM_SQDIFF_NORMED, CV_TM_CCORR_NORMED, CV_TM_CCOEFF_NORMED} );
 
-  image_correlation_matching_method->set_item_delegate_type( _delegate_DROP );
+  image_correlation_matching_method->set_item_delegate_type( TreeItem::_delegate_DROP );
   image_correlation_matching_method->set_dropdown_options( 1, box3_option_5_1_drop, box3_option_5_1_drop_enum  );
 
   image_correlation->insertChildren( image_correlation_matching_method );
@@ -1090,58 +1088,104 @@ void MainWindow::create_box_options(){
   ui->tdmap_table->connect_thickness_range_number_samples_changes(  thickness_range_number_samples, 1 );
   ui->tdmap_table->connect_defocus_range_number_samples_changes(  defocus_range_number_samples, 1 );
 
-  /*
-     simulation_parameters << tr(" [] Import fixed values from refinement?");
-     simulation_parameters << tr("Advanced options");
-     simulation_parameters << tr(" Multislice phase grating");
-     simulation_parameters << tr("  Slice filename prefix\tslc");
-     simulation_parameters << tr("  Super-Cell Slicing along c-axis");
-     simulation_parameters << tr("   .\t");
-     simulation_parameters << tr("   .\t");
-     simulation_parameters << tr("   .\t0");
-     simulation_parameters << tr("  Optional Parameters");
-     simulation_parameters << tr("   Apply random atomic displacements");
-     simulation_parameters << tr("   Thermal vibration models");
-     simulation_parameters << tr("    .");
-     simulation_parameters << tr("    .");
-     simulation_parameters << tr(" Electron diffraction patterns");
-     simulation_parameters << tr("  Input Wavefunction file name\t");
-     simulation_parameters << tr(" Image intensity distribuitions");
-     simulation_parameters << tr(" Running configurations");
-     simulation_parameters << tr("  Compute multislice phase grating");
-     simulation_parameters << tr("  Compute electron diffraction patterns");
-     simulation_parameters << tr("  Compute image intensity distribuitions");
-     simulation_parameters << tr("  Compute TD map");
+  /*************************
+   * Running configuration
+   *************************/
 
+  QVector<QVariant> running_header = {"Status","Step"};
 
+  TreeItem* running_configuration_root = new TreeItem ( running_header );
 
-     QStringList headers_edge_detection_parameters;
-     headers_edge_detection_parameters << tr("Field") << tr("Value");
+  ////////////////
+  // Log level
+  ////////////////
 
-     QStringList edge_detection_parameters;
-     edge_detection_parameters << tr("Edge detection");
-     edge_detection_parameters << tr("Hysteresis Thresholding");
-     edge_detection_parameters << tr("Max contour distance (pixels)");
+  QVector<QVariant> box4_option_0 = {"", "Log level"};
+  TreeItem* _log_level  = new TreeItem ( box4_option_0 );
+  running_configuration_root->insertChildren( _log_level );
 
-     TreeModel *edge_detection_model = new TreeModel(headers_edge_detection_parameters, edge_detection_parameters);
-     ui->qtree_view_supercell_model_edge_detection_setup->setModel(edge_detection_model);
+  QVector<QVariant> box4_option_1 = {"", ""};
+  QVector<bool> box4_option_1_edit = {false,true};
+  boost::function<bool(int)> box4_function_1 ( boost::bind( &TDMap::set_log_level, _core_td_map, _1 ) );
 
-     for (int column = 0; column < edge_detection_model->columnCount(); ++column){
-     ui->qtree_view_supercell_model_edge_detection_setup->resizeColumnToContents(column);
-     }
+  TreeItem* _log_level_setter  = new TreeItem ( box4_option_1, box4_function_1, box4_option_1_edit );
 
+  QVector<QVariant> box4_option_1_drop = {"Full log","Debug mode","Silent mode", "User defined"};
 
-     QStringList headers_supercell_model_refinement_parameters;
-     headers_supercell_model_refinement_parameters << tr("Field") << tr("Value");
+  QVector<QVariant> box4_option_1_drop_enum( { TDMap::ExecLogMode::FULL_LOG, TDMap::ExecLogMode::DEBUG_MODE, TDMap::ExecLogMode::SILENT_MODE, TDMap::ExecLogMode::USER_DEFINED_LOG_MODE } );
 
-     QStringList supercell_model_refinement_parameters;
-     supercell_model_refinement_parameters << tr("Supercell file");
-     supercell_model_refinement_parameters << tr(" CIF");
-     supercell_model_refinement_parameters << tr(" CEL");
-     supercell_model_refinement_parameters << tr("Edge refinement");
-     supercell_model_refinement_parameters << tr("Columns Refinement");
-     supercell_model_refinement_parameters << tr("Calculation");
-     */
+  _log_level_setter->set_item_delegate_type( TreeItem::_delegate_DROP );
+  _log_level_setter->set_dropdown_options( 1, box4_option_1_drop, box4_option_1_drop_enum  );
+  _log_level->insertChildren( _log_level_setter );
+
+  QVector<QVariant> box4_data_2 = {"",""};
+  QVector<QVariant> box4_legend_2 = {"","Multislice phase granting" };
+  boost::function<bool(bool)> box4_option_2_checker ( boost::bind( &TDMap::set_run_celslc_switch, _core_td_map, _1 ) );
+  QVector<bool> box4_option_2_edit = {false,true};
+  TreeItem* _multislice_phase_granting  = new TreeItem ( box4_data_2 ,box4_option_2_checker, box4_legend_2, box4_option_2_edit );
+  _multislice_phase_granting->set_item_delegate_type( TreeItem::_delegate_CHECK );
+  running_configuration_root->insertChildren( _multislice_phase_granting );
+
+  QVector<QVariant> box4_option_2_1 = {"", "Output"};
+  TreeItem* _multislice_phase_granting_output  = new TreeItem ( box4_option_2_1 );
+  _multislice_phase_granting->insertChildren( _multislice_phase_granting_output );
+
+  QVector<QVariant> box4_option_2_2 = {"","Temporary files"};
+  TreeItem* _multislice_phase_granting_temporary_files  = new TreeItem ( box4_option_2_2 );
+  _multislice_phase_granting->insertChildren( _multislice_phase_granting_temporary_files );
+
+  QVector<QVariant> box4_data_3 = {"",""};
+  QVector<QVariant> box4_legend_3 = {"","Electron diffraction patterns" };
+  boost::function<bool(bool)> box4_option_3_checker ( boost::bind( &TDMap::set_run_msa_switch, _core_td_map, _1 ) );
+  QVector<bool> box4_option_3_edit = {false,true};
+  TreeItem* _electron_diffraction_patterns  = new TreeItem ( box4_data_3 ,box4_option_3_checker, box4_legend_3, box4_option_3_edit );
+  _electron_diffraction_patterns->set_item_delegate_type( TreeItem::_delegate_CHECK );
+  running_configuration_root->insertChildren( _electron_diffraction_patterns );
+
+  QVector<QVariant> box4_option_3_1 = {"","Output"};
+  TreeItem* _electron_diffraction_patterns_output  = new TreeItem ( box4_option_3_1 );
+  _electron_diffraction_patterns->insertChildren( _electron_diffraction_patterns_output );
+
+  QVector<QVariant> box4_option_3_2 = {"","Temporary files"};
+  TreeItem* _electron_diffraction_patterns_temporary_files  = new TreeItem ( box4_option_3_2 );
+  _electron_diffraction_patterns->insertChildren( _electron_diffraction_patterns_temporary_files );
+
+  QVector<QVariant> box4_data_4 = {"",""};
+  QVector<QVariant> box4_legend_4 = {"","Image intensity distribuitions"};
+  boost::function<bool(bool)> box4_option_4_checker ( boost::bind( &TDMap::set_run_wavimg_switch, _core_td_map, _1 ) );
+  QVector<bool> box4_option_4_edit = {false,true};
+  TreeItem* _image_intensity_distribuitions  = new TreeItem ( box4_data_4 ,box4_option_4_checker, box4_legend_4, box4_option_4_edit );
+  _image_intensity_distribuitions->set_item_delegate_type( TreeItem::_delegate_CHECK );
+  running_configuration_root->insertChildren( _image_intensity_distribuitions );
+
+  QVector<QVariant> box4_option_4_1 = {"","Output"};
+  TreeItem* _image_intensity_distribuitions_output  = new TreeItem ( box4_option_4_1 );
+  _image_intensity_distribuitions->insertChildren( _image_intensity_distribuitions_output );
+
+  QVector<QVariant> box4_option_4_2 = {"","Temporary files"};
+  TreeItem* _image_intensity_distribuitions_temporary_files  = new TreeItem ( box4_option_4_2 );
+  _image_intensity_distribuitions->insertChildren( _image_intensity_distribuitions_temporary_files );
+
+  QVector<QVariant> box4_data_5 = {"",""};
+  QVector<QVariant> box4_legend_5 = {"","Image correlation"};
+  boost::function<bool(bool)> box4_option_5_checker ( boost::bind( &TDMap::set_run_simgrid_switch, _core_td_map, _1 ) );
+  QVector<bool> box4_option_5_edit = {false,true};
+  TreeItem* _image_correlation  = new TreeItem ( box4_data_5 ,box4_option_5_checker, box4_legend_5, box4_option_5_edit );
+  _image_correlation->set_item_delegate_type( TreeItem::_delegate_CHECK );
+  running_configuration_root->insertChildren( _image_correlation );
+
+  QVector<QVariant> box4_option_5_1 = {"","Output"};
+  TreeItem* _image_correlation_output  = new TreeItem ( box4_option_5_1 );
+  _image_correlation->insertChildren( _image_correlation_output );
+
+  tdmap_running_configuration_model = new TreeModel( running_configuration_root );
+  ui->qtree_view_tdmap_running_configuration->setModel( tdmap_running_configuration_model );
+  ui->qtree_view_tdmap_running_configuration->setItemDelegate( _load_file_delegate );
+  //start editing after one click
+  ui->qtree_view_tdmap_running_configuration->setEditTriggers(QAbstractItemView::AllEditTriggers);
+  for (int column = 0; column < tdmap_simulation_setup_model->columnCount(); ++column){
+    ui->qtree_view_tdmap_running_configuration->resizeColumnToContents(column);
+  }
 }
 
 bool MainWindow::set_dr_probe_path( QString path ){
