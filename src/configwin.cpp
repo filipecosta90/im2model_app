@@ -892,9 +892,15 @@ void MainWindow::create_box_options(){
   TreeItem* _parameter_variation_map_thickness_estimated_nm  = new TreeItem ( box3_option_0_1_1, box3_function_0_1_1, box3_option_0_1_1_edit  );
   _parameter_variation_map_thickness_estimated_nm->set_item_delegate_type( _delegate_TEXT_ACTION );
 
+  QVector<QVariant> box3_function_0_1_1_action_description = {"Auto range","Auto lower/upper"};
+  boost::function<bool()> box3_function_0_1_1_auto ( boost::bind( &TDMap::auto_calculate_thickness_range_lower_upper_nm, _core_td_map ) );
+  boost::function<bool()> box3_function_0_1_1_auto_lower_upper ( boost::bind( &TDMap::auto_calculate_thickness_lower_upper_nm, _core_td_map ) );
 
+  std::vector<boost::function<bool()>> box3_function_0_1_1_actions;
+  box3_function_0_1_1_actions.push_back(box3_function_0_1_1_auto);
+  box3_function_0_1_1_actions.push_back(box3_function_0_1_1_auto_lower_upper);
 
-  //_parameter_variation_map_thickness_estimated_nm->set_action_toolBar( alignToolButton );
+  _parameter_variation_map_thickness_estimated_nm->add_toolbar( box3_function_0_1_1_action_description, box3_function_0_1_1_actions );
 
   _parameter_variation_map_thickness->insertChildren( _parameter_variation_map_thickness_estimated_nm );
 

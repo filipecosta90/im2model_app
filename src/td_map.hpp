@@ -267,6 +267,10 @@ class TDMap {
     // runned ?
     bool _is_simulated_images_grid_defined();
 
+    /** autos **/
+    bool auto_calculate_thickness_range_lower_upper_nm();
+    bool auto_calculate_thickness_lower_upper_nm();
+
     /** getters **/
 
     int get_thickness_range_number_samples( );

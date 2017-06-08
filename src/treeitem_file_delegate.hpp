@@ -44,6 +44,7 @@ signals:
     public slots:
       void get_filename_slot( QWidget *editor ) const;
     void get_dirname_slot( QWidget *editor );
+    void commit_and_call(  QWidget * editor, boost::function<bool()> _action  ) ;
 
   private:
     QToolBar* _editor_toolbar;

@@ -13,11 +13,11 @@
 
 
 void TreeItem::set_action_toolBar( CustomToolButton* tool ){
-    alignToolButton = tool;
+  alignToolButton = tool;
 }
 
 CustomToolButton* TreeItem::get_action_toolBar(){
-    return alignToolButton;
+  return alignToolButton;
 }
 
 TreeItem::TreeItem( QVector<QVariant> &data, TreeItem *parent){
@@ -34,7 +34,6 @@ TreeItem::TreeItem( QVector<QVariant> &data, boost::function<bool(double)> sette
   fp_data_setter_double = setter;
   _flag_fp_data_setter_double = true;
 }
-
 
 TreeItem::TreeItem( QVector<QVariant> &data, boost::function<bool(int)> setter, TreeItem *parent) : TreeItem( data, parent ) {
   fp_data_setter_int = setter;
@@ -70,6 +69,25 @@ TreeItem::TreeItem( QVector<QVariant> &data, boost::function<bool(int)> setter, 
 
 TreeItem::~TreeItem(){
   qDeleteAll(childItems);
+}
+
+
+void TreeItem::add_toolbar ( QVector<QVariant> actions_description , std::vector<boost::function<bool()>> actions ){
+  _toolbar_actions_description = actions_description;
+  _toolbar_actions = actions;
+  _flag_toolbar = true;
+}
+
+QVector<QVariant> TreeItem::get_toolbar_actions_description(){
+  return _toolbar_actions_description;
+}
+
+std::vector<boost::function<bool()>> TreeItem::get_toolbar_actions(){
+  return _toolbar_actions;
+}
+
+bool TreeItem::_is_toolbar_defined(){
+  return _flag_toolbar;
 }
 
 bool TreeItem::load_data_from_property_tree( boost::property_tree::ptree pt_root ){

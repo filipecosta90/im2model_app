@@ -170,6 +170,7 @@ QWidget *TreeItemFileDelegate::createEditor( QWidget *parent, const QStyleOption
                QAction* action = new QAction( _act_description);
                 //connect(action, &QAction::triggered, this, commit_and_call( editor, _actions.at(_n_action)) );
                 connect(action, &QAction::triggered, item,  _actions.at(_n_action) );
+                // more work here
              //   connect(action, &QAction::triggered, this, SLOT(commit_and_call(  editor, _actions.at(_n_action))  ) );
                 _actions_vec.push_back(action);
                 alignMenu->addAction(action);

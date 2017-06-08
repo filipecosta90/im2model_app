@@ -68,10 +68,15 @@ class TreeItem : public QObject {
 
     void set_item_delegate_type( DelegateType _delegate_type );
     void set_dropdown_options( int column , QVector<QVariant>& drop, QVector<QVariant>& drop_enum );
-void set_action_toolBar( CustomToolButton* editToolBar );
- CustomToolButton* get_action_toolBar();
+    void set_action_toolBar( CustomToolButton* editToolBar );
+    CustomToolButton* get_action_toolBar();
+    void add_toolbar ( QVector<QVariant> actions_description , std::vector<boost::function<bool()>> actions );
+    QVector<QVariant> get_toolbar_actions_description();
+    std::vector<boost::function<bool()>> get_toolbar_actions();
+    bool _is_toolbar_defined();
 
 signals:
+
     void dataChanged( int column );
 
   private:
@@ -100,7 +105,9 @@ signals:
     DelegateType _item_delegate_type = _delegate_TEXT;
     QToolBar* _action_toolBar;
     CustomToolButton* alignToolButton;
-
+    QVector<QVariant> _toolbar_actions_description;
+    std::vector<boost::function<bool()>> _toolbar_actions;
+    bool _flag_toolbar = false;
 };
 
 #endif // TREEITEM_H

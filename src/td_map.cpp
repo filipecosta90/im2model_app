@@ -896,3 +896,14 @@ bool TDMap::set_defocus_user_estimated_nm( double estimated_nm ){
     _flag_user_estimated_defocus_nm = true;
     return _flag_user_estimated_defocus_nm;
 }
+
+bool TDMap::auto_calculate_thickness_range_lower_upper_nm(){
+std::cout << " auto auto_calculate_thickness_range_lower_upper_nm " << std::endl;
+return true;
+}
+
+bool TDMap::auto_calculate_thickness_lower_upper_nm(){
+std::cout << " auto auto_calculate_thickness_lower_upper_nm " << std::endl;
+return true;
+}
+
