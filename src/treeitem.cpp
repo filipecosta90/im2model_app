@@ -300,6 +300,33 @@ int TreeItem::get_dropdown_column(){
   return dropdown_column;
 }
 
+
+bool TreeItem::appendData( int column, const QVariant &value){
+    bool result = false;
+    if  (column >= 0 && column < itemData.size() ) {
+        if( ( _fp_data_data_appender_col_pos == column ) && (_flag_fp_data_appender_string ) ){
+          std::string t1 = value.toString().toStdString();
+        //  fp_data_appender_string( t1 );
+          QString before_string = itemData[column].toString();
+          before_string.append( value.toString());
+              itemData[column].setValue(QVariant::fromValue(before_string));
+              emit dataChanged(column);
+          result = true;
+        }
+    }
+    return result;
+}
+
+bool TreeItem::set_fp_data_data_appender_col_pos( int col ){
+    _fp_data_data_appender_col_pos = col;
+    return true;
+}
+
+bool TreeItem::set_flag_fp_data_appender_string( bool set ){
+    _flag_fp_data_appender_string = set;
+    return true;
+}
+
 bool TreeItem::setData(int column, const QVariant &value){
   bool result = false;
   if  (column >= 0 && column < itemData.size() ) {

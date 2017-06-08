@@ -159,6 +159,8 @@ signals:
     QAction*  auto_lower_upper;
     CustomToolButton* alignToolButton;
 
+     TreeItem* _multislice_phase_granting_output;
+     QModelIndex* _index_multislice_phase_granting_output;
 
 };
 

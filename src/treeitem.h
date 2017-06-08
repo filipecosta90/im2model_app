@@ -26,7 +26,7 @@ Q_DECLARE_METATYPE(std::string)
 class TreeItem : public QObject {
   Q_OBJECT
   public:
-    enum DelegateType { _delegate_FILE, _delegate_DIR, _delegate_TEXT, _delegate_CHECK, _delegate_TEXT_ACTION, _delegate_DROP };
+    enum DelegateType { _delegate_FILE, _delegate_DIR, _delegate_TEXT, _delegate_TEXT_ACTION, _delegate_TEXT_BROWSER, _delegate_CHECK, _delegate_DROP };
 
     explicit TreeItem( QVector<QVariant> &data, TreeItem *parent = 0);
     explicit  TreeItem( QVector<QVariant> &data, boost::function<bool(std::string)> setter, TreeItem *parent = 0);
@@ -61,6 +61,9 @@ class TreeItem : public QObject {
     bool isItemEditable( int column ) const;
     void setCheckable( bool set );
     bool setData(int column, const QVariant &value);
+    bool appendData( int column, const QVariant &value);
+    bool set_fp_data_data_appender_col_pos( int col );
+    bool set_flag_fp_data_appender_string( bool set );
 
     boost::property_tree::ptree*  save_data_into_property_tree( );
     bool load_data_from_property_tree( boost::property_tree::ptree pt_root );
@@ -98,20 +101,22 @@ signals:
     bool checked = false;
     bool is_checkable = false;
     boost::function<bool(std::string)> fp_data_setter_string;
+    boost::function<bool(std::string)> fp_data_appender_string;
     boost::function<bool(double)> fp_data_setter_double;
     boost::function<bool(bool)> fp_data_setter_bool;
     boost::function<bool(int)> fp_data_setter_int;
 
     bool _flag_fp_data_setter_string = false;
+    bool _flag_fp_data_appender_string = false;
     bool _flag_fp_data_setter_bool = false;
     bool _flag_fp_data_setter_double = false;
     bool _flag_fp_data_setter_int = false;
     int _fp_data_setter_col_pos = 1;
+    int _fp_data_data_appender_col_pos = 1;
 
     boost::function<bool(bool)> fp_check_setter;
     bool _flag_fp_check_setter = false;
     int _fp_check_setter_col_pos = 1;
-
 
     DelegateType _item_delegate_type = _delegate_TEXT;
     QToolBar* _action_toolBar;

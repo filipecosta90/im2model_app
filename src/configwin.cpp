@@ -105,15 +105,6 @@ MainWindow::MainWindow( ApplicationLog::ApplicationLog* logger , QWidget *parent
   }
 }
 
-/*
-   MainWindow::MainWindow(ApplicationLog::ApplicationLog* logger , QWidget *parent) : MainWindow( parent ) {
-   im2model_logger = logger;
-   _flag_im2model_logger = true;
-   std::cout << " Main window logger constructor " << _flag_im2model_logger << std::endl;
-   im2model_logger->logEvent(ApplicationLog::notification, "Application logger setted for MainWindow class.");
-   }
-   */
-
 void MainWindow::set_base_dir_path( boost::filesystem::path base_dir ){
   base_dir_path = base_dir;
   _flag_base_dir_path = true;
@@ -271,8 +262,12 @@ void MainWindow::update_tdmap_sim_ostream(){
   ui->qTextBrowser_tdmap_simulation_output->setText(" ");
   std::string line;
   while(std::getline(_sim_tdmap_ostream_buffer, line)){
+   //   ui->qtree_view_tdmap_running_configuration-
     ui->qTextBrowser_tdmap_simulation_output->moveCursor (QTextCursor::End);
-    QString qt_linw =  QString::fromStdString( line);
+    QString qt_linw =  QString::fromStdString( line );
+    ui->qtree_view_tdmap_running_configuration->model();
+QVariant _new_line_var = QVariant::fromValue(qt_linw + "\n");
+    _multislice_phase_granting_output->appendData( 1, _new_line_var );
     ui->qTextBrowser_tdmap_simulation_output->append( qt_linw );
     QApplication::processEvents();
   }
@@ -593,6 +588,10 @@ void MainWindow::loadFile(const QString &fileName){
   tdmap_simulation_setup_model->load_data_from_property_tree( tdmap_simulation_setup_ptree );
   ui->qtree_view_tdmap_simulation_setup->update();
 
+  boost::property_tree::ptree tdmap_running_configuration_ptree = config.get_child("tdmap_running_configuration_ptree");
+  tdmap_running_configuration_model->load_data_from_property_tree( tdmap_running_configuration_ptree );
+  ui->qtree_view_tdmap_running_configuration->update();
+
   // Write the property tree to the XML file.
 
 #ifndef QT_NO_CURSOR
@@ -614,12 +613,14 @@ bool MainWindow::saveFile(const QString &fileName){
   boost::property_tree::ptree *project_setup_image_fields_ptree = project_setup_image_fields_model->save_data_into_property_tree();
   boost::property_tree::ptree *project_setup_crystalographic_fields_ptree = project_setup_crystalographic_fields_model->save_data_into_property_tree();
   boost::property_tree::ptree *tdmap_simulation_setup_ptree = tdmap_simulation_setup_model->save_data_into_property_tree();
+  boost::property_tree::ptree *tdmap_running_configuration_ptree = tdmap_running_configuration_model->save_data_into_property_tree();
 
   boost::property_tree::ptree *config = new boost::property_tree::ptree();
 
   config->add_child("project_setup_image_fields_ptree", *project_setup_image_fields_ptree);
   config->add_child("project_setup_crystalographic_fields_ptree", *project_setup_crystalographic_fields_ptree);
   config->add_child("tdmap_simulation_setup_ptree", *tdmap_simulation_setup_ptree);
+  config->add_child("tdmap_running_configuration_ptree", *tdmap_running_configuration_ptree);
 
   // Write the property tree to the XML file.
   boost::property_tree::write_xml( fileName.toStdString(), *config, std::locale(), pt_settings );
@@ -1127,8 +1128,15 @@ void MainWindow::create_box_options(){
   running_configuration_root->insertChildren( _multislice_phase_granting );
 
   QVector<QVariant> box4_option_2_1 = {"", "Output"};
-  TreeItem* _multislice_phase_granting_output  = new TreeItem ( box4_option_2_1 );
+  QVector<bool> box4_option_2_1_edit = {false,true};
+  _multislice_phase_granting_output  = new TreeItem ( box4_option_2_1 );
+  _multislice_phase_granting_output->set_fp_data_data_appender_col_pos( 1 );
+  _multislice_phase_granting_output->set_flag_fp_data_appender_string( true );
+  _multislice_phase_granting_output->set_item_delegate_type( TreeItem::_delegate_TEXT_BROWSER );
+
   _multislice_phase_granting->insertChildren( _multislice_phase_granting_output );
+
+
 
   QVector<QVariant> box4_option_2_2 = {"","Temporary files"};
   TreeItem* _multislice_phase_granting_temporary_files  = new TreeItem ( box4_option_2_2 );
@@ -1177,7 +1185,6 @@ void MainWindow::create_box_options(){
   QVector<QVariant> box4_option_5_1 = {"","Output"};
   TreeItem* _image_correlation_output  = new TreeItem ( box4_option_5_1 );
   _image_correlation->insertChildren( _image_correlation_output );
-
   tdmap_running_configuration_model = new TreeModel( running_configuration_root );
   ui->qtree_view_tdmap_running_configuration->setModel( tdmap_running_configuration_model );
   ui->qtree_view_tdmap_running_configuration->setItemDelegate( _load_file_delegate );

@@ -36,16 +36,11 @@ class TreeItemFileDelegate : public QStyledItemDelegate {
 
     void updateEditorGeometry(QWidget *editor, const QStyleOptionViewItem &option, const QModelIndex &index) const;
 
-    QStyleOptionButton checkboxOption( const QStyleOptionViewItem& option,
-                                                           const QModelIndex& index,
-                                                           int position,
-                                                           Qt::AlignmentFlag alignment ) const;
+    QStyleOptionButton checkboxOption( const QStyleOptionViewItem& option,const QModelIndex& index, int position,  Qt::AlignmentFlag alignment ) const;
 
-    QRect alignRect( QRect object,
-                                         QRect frame,
-                                         int position,
-                                         Qt::AlignmentFlag alignment ) const;
+    QRect alignRect( QRect object, QRect frame, int position,  Qt::AlignmentFlag alignment ) const;
 
+    QSize sizeHint ( const QStyleOptionViewItem & option, const QModelIndex & index ) const;
 
 signals:
 

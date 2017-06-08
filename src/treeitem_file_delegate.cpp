@@ -72,14 +72,35 @@ void TreeItemFileDelegate::paint(QPainter * painter, const QStyleOptionViewItem 
         }
         break;
       }
+    case TreeItem::_delegate_TEXT_BROWSER:
+  {
+                                            QStyleOptionViewItemV4 options = option;
+                                            initStyleOption(&options, index);
+
+                                            painter->save();
+
+                                            QTextDocument doc;
+                                            doc.setHtml(options.text);
+                                            QSizeF size(200, 200);
+                                            doc.setPageSize(size);
+                                           // options.text = "";
+                                            options.widget->style()->drawControl(QStyle::CE_ItemViewItem, &options, painter);
+
+                                            painter->translate(options.rect.left(), options.rect.top());
+                                            QRect clip(0, 0, options.rect.width(), options.rect.height());
+                                            doc.drawContents(painter, clip);
+
+                                            painter->restore();
+                                            break;
+                                          }
     case TreeItem::_delegate_TEXT_ACTION:
     case TreeItem::_delegate_FILE:
     case TreeItem::_delegate_DIR:
     case TreeItem::_delegate_TEXT:
-      {
-        QStyledItemDelegate::paint( painter, option,  index);
-        break;
-      }
+                                          {
+                                            QStyledItemDelegate::paint( painter, option,  index);
+                                            break;
+                                          }
   }
 }
 
@@ -276,6 +297,11 @@ QWidget *TreeItemFileDelegate::createEditor( QWidget *parent, const QStyleOption
 
         break;
       }
+    case TreeItem::_delegate_TEXT_BROWSER:
+      {
+        std::cout << " delegate text browser" << std::endl;
+        break;
+      }
     case TreeItem::_delegate_TEXT :
       {
         std::cout << " delegate text" << std::endl;
@@ -398,9 +424,44 @@ void TreeItemFileDelegate::updateEditorGeometry(QWidget *editor, const QStyleOpt
     case TreeItem::_delegate_DIR:
     case TreeItem::_delegate_CHECK:
     case TreeItem::_delegate_TEXT_ACTION:
+    case TreeItem::_delegate_TEXT_BROWSER:
     case TreeItem::_delegate_TEXT:
       {
         QStyledItemDelegate::updateEditorGeometry(editor,option,index);
+        break;
+      }
+  }
+}
+
+QSize TreeItemFileDelegate::sizeHint ( const QStyleOptionViewItem & option, const QModelIndex & index ) const
+{
+  TreeItem *item = static_cast<TreeItem*>(index.internalPointer());
+  switch(item->get_item_delegate_type())
+  {
+    case TreeItem::_delegate_TEXT_BROWSER:
+      {
+        QStyleOptionViewItemV4 options = option;
+        initStyleOption(&options, index);
+
+        QTextDocument doc;
+        doc.setHtml(options.text);
+        doc.setTextWidth(options.rect.width());
+        int lines_count = doc.toPlainText().count("\n");
+
+        QFontMetricsF fm(doc.defaultFont());
+        auto const _line_height = fm.height() + fm.leading();
+        std::cout << "doc lines" << lines_count << std::endl;
+        std::cout << "doc line heigth" << _line_height << std::endl;
+        std::cout << "doc heigth" << doc.size().height() << std::endl;
+        std::cout << "doc ideal heigth" << lines_count * _line_height << std::endl;
+
+
+        return QSize(doc.idealWidth(), doc.size().height());
+        break;
+      }
+    default:
+      {
+        return QStyledItemDelegate::sizeHint(option,index);
         break;
       }
   }
