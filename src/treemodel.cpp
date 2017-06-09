@@ -164,6 +164,7 @@ bool TreeModel::appendData(const QModelIndex &index, const QVariant &value){
   result = item->appendData( index.column(), value);
   if (result){
     emit dataChanged(index, index);
+      emit layoutChanged();
   }
   return result;
 }

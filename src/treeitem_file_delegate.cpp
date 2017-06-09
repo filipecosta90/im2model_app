@@ -92,6 +92,9 @@ void TreeItemFileDelegate::paint(QPainter * painter, const QStyleOptionViewItem 
       }
     case TreeItem::_delegate_TEXT_BROWSER:
       {
+      QStyledItemDelegate::paint( painter, option,  index);
+      break;
+/*
         if( 1 == index.column() ){
          QTextBrowser browser;
           QString value  = index.model()->data(index, Qt::EditRole).toString();
@@ -101,17 +104,17 @@ void TreeItemFileDelegate::paint(QPainter * painter, const QStyleOptionViewItem 
           browser.resize( browser_size );
           std::cout << "option size w: " << option.rect.width() << " h " << option.rect.height() << std::endl;
           std::cout << "text browser size w: " << browser.width() << " h " << browser.height() << std::endl;
+          browser.moveCursor (QTextCursor::End);
           painter->save();
           painter->translate(option.rect.topLeft());
           browser.render(painter);
           painter->restore();
-         // QStyledItemDelegate::paint( painter, option,  index);
           break;
         }
         else{
           QStyledItemDelegate::paint( painter, option,  index);
           break;
-        }
+        }*/
       }
     case TreeItem::_delegate_TEXT_ACTION:
     case TreeItem::_delegate_FILE:
@@ -126,7 +129,6 @@ void TreeItemFileDelegate::paint(QPainter * painter, const QStyleOptionViewItem 
 
 QWidget *TreeItemFileDelegate::createEditor( QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &index ) const{
 
-  parent->update();
   TreeItem *item = static_cast<TreeItem*>(index.internalPointer());
   QWidget *editor = 0;
 
@@ -228,12 +230,9 @@ QWidget *TreeItemFileDelegate::createEditor( QWidget *parent, const QStyleOption
       }
     case TreeItem::_delegate_TEXT_ACTION:
       {
-
         editor = new QWidget(parent);
-
         QVariant::Type t = static_cast<QVariant::Type>(index.data(Qt::EditRole).userType());
         QWidget* text_editor = QItemEditorFactory().createEditor(t,parent);
-
         QHBoxLayout* editor_layout = new QHBoxLayout( editor );
 
         editor_layout->setMargin(0);
@@ -281,7 +280,6 @@ QWidget *TreeItemFileDelegate::createEditor( QWidget *parent, const QStyleOption
       }
        case TreeItem::_delegate_TEXT_BROWSER:
   {
-
       editor = new QWidget(parent);
       QHBoxLayout* editor_layout = new QHBoxLayout( parent );
       editor_layout->setMargin(0);
@@ -290,21 +288,17 @@ QWidget *TreeItemFileDelegate::createEditor( QWidget *parent, const QStyleOption
       editor_layout->setAlignment(Qt::AlignRight);
 
       QTextBrowser* browser = new QTextBrowser( editor );
-      //browser->resize(option.rect.size());
-      //std::cout << "text browser size w: " << option.rect.width() << " h " << option.rect.height() << std::endl;
       QString value  = index.model()->data(index, Qt::EditRole).toString();
       browser->setText( value );
+      browser->moveCursor (QTextCursor::End);
       editor_layout->addWidget(browser);
       editor->setLayout( editor_layout );
-
-      std::cout << " delegate text browser" << std::endl;
       break;
   }
 
     default:
       {
         editor = QStyledItemDelegate::createEditor(parent,option,index);
-
         break;
       }
   }
@@ -354,6 +348,7 @@ void TreeItemFileDelegate::setEditorData(QWidget *editor, const QModelIndex &ind
       QTextBrowser* browser = editor->findChild<QTextBrowser*>();
       QString value  = index.model()->data(index, Qt::EditRole).toString();
       browser->setText( value );
+      browser->moveCursor (QTextCursor::End);
       std::cout << " setEditorData text browser" << std::endl;
       break;
     }
@@ -432,14 +427,14 @@ void TreeItemFileDelegate::updateEditorGeometry(QWidget *editor, const QStyleOpt
   TreeItem *item = static_cast<TreeItem*>(index.internalPointer());
   switch(item->get_item_delegate_type())
   {
-    case TreeItem::_delegate_TEXT_BROWSER:
+   /* case TreeItem::_delegate_TEXT_BROWSER:
       {
         QTextBrowser* browser  = editor->findChild<QTextBrowser*>();
         QRect browser_rect = browser->rect();
         editor->setGeometry( browser_rect );
         std::cout << " adjusting  cell size to browser size" <<  browser_rect.width() << " heigth " << browser_rect.height() << std::endl;
         break;
-      }
+      }*/
     default:
       {
         QStyledItemDelegate::updateEditorGeometry(editor,option,index);

@@ -46,8 +46,8 @@ namespace Ui {
 class MainWindow : public QMainWindow {
   Q_OBJECT
   public:
-  //  MainWindow(QWidget *parent = 0);
-	MainWindow( ApplicationLog::ApplicationLog* logger, QWidget *parent = 0 );
+    //  MainWindow(QWidget *parent = 0);
+    MainWindow( ApplicationLog::ApplicationLog* logger, QWidget *parent = 0 );
 
     bool set_dr_probe_path( QString path );
     bool set_application_logger( ApplicationLog::ApplicationLog* logger );
@@ -56,7 +56,7 @@ class MainWindow : public QMainWindow {
     void loadFile(const QString &fileName);
     ~MainWindow();
 
-        bool checkSettings();
+    bool checkSettings();
 
     boost::process::ipstream _sim_tdmap_ostream_buffer;
     public slots:
@@ -159,8 +159,17 @@ signals:
     QAction*  auto_lower_upper;
     CustomToolButton* alignToolButton;
 
-     TreeItem* _multislice_phase_granting_output;
-     QModelIndex* _index_multislice_phase_granting_output;
+    /* simulation outputs */
+    TreeItem* _multislice_phase_granting_output;
+    TreeItem* _electron_diffraction_patterns_output;
+    TreeItem* _image_intensity_distribuitions_output;
+    TreeItem* _image_correlation_output;
+
+    QModelIndex* _index_multislice_phase_granting_output;
+    QModelIndex* _index_electron_diffraction_patterns_output;
+    QModelIndex* _index_image_intensity_distribuitions_output;
+    QModelIndex* _index_image_correlation_output;
+
 
 };
 

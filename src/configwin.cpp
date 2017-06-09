@@ -260,28 +260,35 @@ void MainWindow::update_from_TDMap_failure(){
 }
 
 void MainWindow::update_tdmap_sim_ostream(){
-  ui->qTextBrowser_tdmap_simulation_output->setText(" ");
   std::string line;
 
   QModelIndex celslc_index = tdmap_running_configuration_model->index(1,0);
-  TreeItem* aa = tdmap_running_configuration_model->getItem(celslc_index);
-  QVariant aa_legend = aa->data(1);
-  std::cout << "####celslc_index VALID: " << celslc_index.isValid() <<  " data: "<< aa_legend.toString().toStdString() << std::endl;
-
   QModelIndex celslc_out_legend_index = tdmap_running_configuration_model->index(0,0,celslc_index);
-  TreeItem* aaa = tdmap_running_configuration_model->getItem(celslc_out_legend_index);
-  QVariant aaa_legend = aaa->data(1);
-  std::cout << "####celslc_out_legend_index  VALID: " << celslc_out_legend_index.isValid()  <<  " data: "<< aaa_legend.toString().toStdString() << std::endl;
-
   QModelIndex celslc_out_index = project_setup_crystalographic_fields_model->index(0,1,celslc_out_legend_index);
   std::cout << "####celslc_out_index  VALID: " << celslc_out_index.isValid() << std::endl;
 
+  QModelIndex msa_index = tdmap_running_configuration_model->index(2,0);
+  QModelIndex msa_out_legend_index = tdmap_running_configuration_model->index(0,0,msa_index);
+  QModelIndex msa_out_index = project_setup_crystalographic_fields_model->index(0,1,msa_out_legend_index);
+  std::cout << "####msa_out_index  VALID: " << msa_out_index.isValid() << std::endl;
+
+  QModelIndex wavimg_index = tdmap_running_configuration_model->index(2,0);
+  QModelIndex wavimg_out_legend_index = tdmap_running_configuration_model->index(0,0,wavimg_index);
+  QModelIndex wavimg_out_index = project_setup_crystalographic_fields_model->index(0,1,wavimg_out_legend_index);
+  std::cout << "####wavimg_out_index  VALID: " << wavimg_out_index.isValid() << std::endl;
+
+  QModelIndex simgrid_index = tdmap_running_configuration_model->index(2,0);
+  QModelIndex simgrid_out_legend_index = tdmap_running_configuration_model->index(0,0,simgrid_index);
+  QModelIndex simgrid_out_index = project_setup_crystalographic_fields_model->index(0,1,simgrid_out_legend_index);
+  std::cout << "####simgrid_out_index  VALID: " << simgrid_out_index.isValid() << std::endl;
+
   while(std::getline(_sim_tdmap_ostream_buffer, line)){
     //   ui->qtree_view_tdmap_running_configuration-
-    ui->qTextBrowser_tdmap_simulation_output->moveCursor (QTextCursor::End);
+    //ui->qTextBrowser_tdmap_simulation_output->moveCursor (QTextCursor::End);
     QString qt_linw =  QString::fromStdString( line );
     QVariant _new_line_var = QVariant::fromValue(qt_linw + "\n");
     bool result = tdmap_running_configuration_model->appendData( celslc_out_index, _new_line_var );
+    ui->qtree_view_tdmap_simulation_setup->update();
     std::cout << "append result " << result << std::endl;
     //  _multislice_phase_granting_output->appendData( 1, _new_line_var );
     //ui->qTextBrowser_tdmap_simulation_output->append( qt_linw );
@@ -1132,6 +1139,10 @@ void MainWindow::create_box_options(){
   _log_level_setter->set_dropdown_options( 1, box4_option_1_drop, box4_option_1_drop_enum  );
   _log_level->insertChildren( _log_level_setter );
 
+
+  /*
+   * CELSLC
+   * */
   QVector<QVariant> box4_data_2 = {"",""};
   QVector<QVariant> box4_legend_2 = {"","Multislice phase granting" };
   boost::function<bool(bool)> box4_option_2_checker ( boost::bind( &TDMap::set_run_celslc_switch, _core_td_map, _1 ) );
@@ -1156,6 +1167,9 @@ void MainWindow::create_box_options(){
   TreeItem* _multislice_phase_granting_temporary_files  = new TreeItem ( box4_option_2_2 );
   _multislice_phase_granting->insertChildren( _multislice_phase_granting_temporary_files );
 
+  /*
+   * MSA
+   * */
   QVector<QVariant> box4_data_3 = {"",""};
   QVector<QVariant> box4_legend_3 = {"","Electron diffraction patterns" };
   boost::function<bool(bool)> box4_option_3_checker ( boost::bind( &TDMap::set_run_msa_switch, _core_td_map, _1 ) );
@@ -1164,13 +1178,25 @@ void MainWindow::create_box_options(){
   _electron_diffraction_patterns->set_item_delegate_type( TreeItem::_delegate_CHECK );
   running_configuration_root->insertChildren( _electron_diffraction_patterns );
 
-  QVector<QVariant> box4_option_3_1 = {"","Output"};
-  TreeItem* _electron_diffraction_patterns_output  = new TreeItem ( box4_option_3_1 );
-  _electron_diffraction_patterns->insertChildren( _electron_diffraction_patterns_output );
+  QVector<QVariant> box4_option_3_0 = {"", "Output"};
+  TreeItem* _electron_diffraction_patterns_output_legend   = new TreeItem ( box4_option_3_0 );
+  _electron_diffraction_patterns->insertChildren( _electron_diffraction_patterns_output_legend );
+
+  QVector<QVariant> box4_option_3_1 = {"", ""};
+  QVector<bool> box4_option_3_1_edit = {false,true};
+  _electron_diffraction_patterns_output  = new TreeItem ( box4_option_3_1, box4_option_3_1_edit );
+  _electron_diffraction_patterns_output->set_fp_data_data_appender_col_pos( 1 );
+  _electron_diffraction_patterns_output->set_flag_fp_data_appender_string( true );
+  _electron_diffraction_patterns_output->set_item_delegate_type( TreeItem::_delegate_TEXT_BROWSER );
+  _electron_diffraction_patterns_output_legend->insertChildren( _electron_diffraction_patterns_output );
 
   QVector<QVariant> box4_option_3_2 = {"","Temporary files"};
   TreeItem* _electron_diffraction_patterns_temporary_files  = new TreeItem ( box4_option_3_2 );
   _electron_diffraction_patterns->insertChildren( _electron_diffraction_patterns_temporary_files );
+
+  /*
+   * WAVIMG
+   * */
 
   QVector<QVariant> box4_data_4 = {"",""};
   QVector<QVariant> box4_legend_4 = {"","Image intensity distribuitions"};
@@ -1180,14 +1206,25 @@ void MainWindow::create_box_options(){
   _image_intensity_distribuitions->set_item_delegate_type( TreeItem::_delegate_CHECK );
   running_configuration_root->insertChildren( _image_intensity_distribuitions );
 
-  QVector<QVariant> box4_option_4_1 = {"","Output"};
-  TreeItem* _image_intensity_distribuitions_output  = new TreeItem ( box4_option_4_1 );
-  _image_intensity_distribuitions->insertChildren( _image_intensity_distribuitions_output );
+  QVector<QVariant> box4_option_4_0 = {"","Output"};
+  TreeItem* _image_intensity_distribuitions_output_legend   = new TreeItem ( box4_option_4_0 );
+  _image_intensity_distribuitions->insertChildren( _image_intensity_distribuitions_output_legend );
+
+  QVector<QVariant> box4_option_4_1 = {"", ""};
+  QVector<bool> box4_option_4_1_edit = {false,true};
+  _image_intensity_distribuitions_output  = new TreeItem ( box4_option_4_1, box4_option_4_1_edit );
+  _image_intensity_distribuitions_output->set_fp_data_data_appender_col_pos( 1 );
+  _image_intensity_distribuitions_output->set_flag_fp_data_appender_string( true );
+  _image_intensity_distribuitions_output->set_item_delegate_type( TreeItem::_delegate_TEXT_BROWSER );
+  _image_intensity_distribuitions_output_legend->insertChildren( _image_intensity_distribuitions_output );
 
   QVector<QVariant> box4_option_4_2 = {"","Temporary files"};
   TreeItem* _image_intensity_distribuitions_temporary_files  = new TreeItem ( box4_option_4_2 );
   _image_intensity_distribuitions->insertChildren( _image_intensity_distribuitions_temporary_files );
 
+  /*
+   * SIMGRID
+   * */
   QVector<QVariant> box4_data_5 = {"",""};
   QVector<QVariant> box4_legend_5 = {"","Image correlation"};
   boost::function<bool(bool)> box4_option_5_checker ( boost::bind( &TDMap::set_run_simgrid_switch, _core_td_map, _1 ) );
@@ -1196,9 +1233,18 @@ void MainWindow::create_box_options(){
   _image_correlation->set_item_delegate_type( TreeItem::_delegate_CHECK );
   running_configuration_root->insertChildren( _image_correlation );
 
-  QVector<QVariant> box4_option_5_1 = {"","Output"};
-  TreeItem* _image_correlation_output  = new TreeItem ( box4_option_5_1 );
-  _image_correlation->insertChildren( _image_correlation_output );
+  QVector<QVariant> box4_option_5_0 = {"","Output"};
+  TreeItem* _image_correlation_output_legend  = new TreeItem ( box4_option_5_0 );
+  _image_correlation->insertChildren( _image_correlation_output_legend );
+
+  QVector<QVariant> box4_option_5_1 = {"", ""};
+  QVector<bool> box4_option_5_1_edit = {false,true};
+  _image_correlation_output  = new TreeItem ( box4_option_5_1, box4_option_5_1_edit );
+  _image_correlation_output->set_fp_data_data_appender_col_pos( 1 );
+  _image_correlation_output->set_flag_fp_data_appender_string( true );
+  _image_correlation_output->set_item_delegate_type( TreeItem::_delegate_TEXT_BROWSER );
+  _image_correlation_output_legend->insertChildren( _image_correlation_output );
+
   tdmap_running_configuration_model = new TreeModel( running_configuration_root );
   ui->qtree_view_tdmap_running_configuration->setModel( tdmap_running_configuration_model );
   ui->qtree_view_tdmap_running_configuration->setItemDelegate( _load_file_delegate );
