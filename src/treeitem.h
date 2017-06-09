@@ -26,10 +26,11 @@ Q_DECLARE_METATYPE(std::string)
 class TreeItem : public QObject {
   Q_OBJECT
   public:
-    enum DelegateType { _delegate_FILE, _delegate_DIR, _delegate_TEXT, _delegate_TEXT_ACTION, _delegate_TEXT_BROWSER, _delegate_CHECK, _delegate_DROP };
+    enum DelegateType { _delegate_FILE, _delegate_DIR, _delegate_TEXT, _delegate_TEXT_ACTION, _delegate_TEXT_DOCUMENT, _delegate_TEXT_BROWSER, _delegate_CHECK, _delegate_DROP };
 
     explicit TreeItem( QVector<QVariant> &data, TreeItem *parent = 0);
-    explicit  TreeItem( QVector<QVariant> &data, boost::function<bool(std::string)> setter, TreeItem *parent = 0);
+    explicit TreeItem( QVector<QVariant> &data,QVector<bool> editable, TreeItem *parent = 0);
+    explicit TreeItem( QVector<QVariant> &data, boost::function<bool(std::string)> setter, TreeItem *parent = 0);
     explicit TreeItem( QVector<QVariant> &data, boost::function<bool(double)> setter, TreeItem *parent = 0);
     explicit TreeItem( QVector<QVariant> &data, boost::function<bool(bool)> setter, QVector<QVariant> &legend, TreeItem *parent = 0);
     explicit TreeItem( QVector<QVariant> &data, boost::function<bool(int)> setter, TreeItem *parent = 0);

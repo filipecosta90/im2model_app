@@ -25,6 +25,10 @@ TreeItem::TreeItem( QVector<QVariant> &data, TreeItem *parent){
   parentItem = parent;
 }
 
+TreeItem::TreeItem( QVector<QVariant> &data, QVector<bool> editable, TreeItem *parent  ) : TreeItem( data, parent ){
+  itemIsEditableVec = editable;
+}
+
 TreeItem::TreeItem( QVector<QVariant> &data, boost::function<bool(std::string)> setter, TreeItem *parent) : TreeItem( data, parent ) {
   fp_data_setter_string = setter;
   _flag_fp_data_setter_string = true;

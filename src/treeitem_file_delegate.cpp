@@ -72,13 +72,11 @@ void TreeItemFileDelegate::paint(QPainter * painter, const QStyleOptionViewItem 
         }
         break;
       }
-    case TreeItem::_delegate_TEXT_BROWSER:
+    case TreeItem::_delegate_TEXT_DOCUMENT:
       {
         QStyleOptionViewItemV4 options = option;
         initStyleOption(&options, index);
-
         painter->save();
-
         QTextDocument doc;
         doc.setHtml(options.text);
         QSizeF size(200, 200);
@@ -89,9 +87,31 @@ void TreeItemFileDelegate::paint(QPainter * painter, const QStyleOptionViewItem 
         painter->translate(options.rect.left(), options.rect.top());
         QRect clip(0, 0, options.rect.width(), options.rect.height());
         doc.drawContents(painter, clip);
-
         painter->restore();
         break;
+      }
+    case TreeItem::_delegate_TEXT_BROWSER:
+      {
+        if( 1 == index.column() ){
+         QTextBrowser browser;
+          QString value  = index.model()->data(index, Qt::EditRole).toString();
+          browser.setText( value );
+          QSize browser_size = option.rect.size();
+          browser_size.setWidth( browser_size.width() - 20 );
+          browser.resize( browser_size );
+          std::cout << "option size w: " << option.rect.width() << " h " << option.rect.height() << std::endl;
+          std::cout << "text browser size w: " << browser.width() << " h " << browser.height() << std::endl;
+          painter->save();
+          painter->translate(option.rect.topLeft());
+          browser.render(painter);
+          painter->restore();
+         // QStyledItemDelegate::paint( painter, option,  index);
+          break;
+        }
+        else{
+          QStyledItemDelegate::paint( painter, option,  index);
+          break;
+        }
       }
     case TreeItem::_delegate_TEXT_ACTION:
     case TreeItem::_delegate_FILE:
@@ -102,43 +122,6 @@ void TreeItemFileDelegate::paint(QPainter * painter, const QStyleOptionViewItem 
         break;
       }
   }
-}
-
-QRect TreeItemFileDelegate::alignRect( QRect object,  QRect frame, int position,   Qt::AlignmentFlag alignment ) const {
-  QRect rect = object;
-
-  rect.setTopLeft( QPoint( 0, 0 ) );
-  // Moves the object to the middle of the item.
-  if ( rect.height() < frame.height() ) {
-    rect.moveTop( ( frame.height() - rect.height() ) / 2 );
-  }
-
-  if ( alignment & Qt::AlignLeft ) {
-    rect.moveLeft( position );
-  }
-  else if ( alignment & Qt::AlignRight ) {
-    rect.moveRight( position );
-  }
-
-  return rect;
-}
-
-QStyleOptionButton TreeItemFileDelegate::checkboxOption( const QStyleOptionViewItem& option,  const QModelIndex& index, int position, Qt::AlignmentFlag alignment ) const {
-  QStyleOptionButton checkboxOption;
-  if ( index.data( Qt::CheckStateRole ).toBool() )
-    checkboxOption.state = option.state | QStyle::State_On;
-  else
-    checkboxOption.state = option.state | QStyle::State_Off;
-  QSize size = QApplication::style()->sizeFromContents( QStyle::CT_CheckBox, &option, QSize() );
-  if ( size.isEmpty() ) {
-    // A checkbox has definately a size != 0
-    checkboxOption.rect.setSize( QSize( 22, 22 ) );
-  }
-  else {
-    checkboxOption.rect.setSize( QSize( size.width(), size.height() ) );
-  }
-  checkboxOption.rect = alignRect( checkboxOption.rect, option.rect, position, alignment );
-  return checkboxOption;
 }
 
 QWidget *TreeItemFileDelegate::createEditor( QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &index ) const{
@@ -153,7 +136,6 @@ QWidget *TreeItemFileDelegate::createEditor( QWidget *parent, const QStyleOption
     case TreeItem::_delegate_DIR :
       {
         editor = new QWidget(parent);
-
         QVariant::Type t = static_cast<QVariant::Type>(index.data(Qt::EditRole).userType());
         QWidget* text_editor = QItemEditorFactory().createEditor(t,parent);
         //text_editor->setMinimumHeight(box_size.height());
@@ -297,15 +279,32 @@ QWidget *TreeItemFileDelegate::createEditor( QWidget *parent, const QStyleOption
 
         break;
       }
-    case TreeItem::_delegate_TEXT_BROWSER:
+       case TreeItem::_delegate_TEXT_BROWSER:
+  {
+
+      editor = new QWidget(parent);
+      QHBoxLayout* editor_layout = new QHBoxLayout( parent );
+      editor_layout->setMargin(0);
+      editor_layout->setContentsMargins(QMargins(0,0,0,0));
+      editor_layout->setSpacing(0);
+      editor_layout->setAlignment(Qt::AlignRight);
+
+      QTextBrowser* browser = new QTextBrowser( editor );
+      //browser->resize(option.rect.size());
+      //std::cout << "text browser size w: " << option.rect.width() << " h " << option.rect.height() << std::endl;
+      QString value  = index.model()->data(index, Qt::EditRole).toString();
+      browser->setText( value );
+      editor_layout->addWidget(browser);
+      editor->setLayout( editor_layout );
+
+      std::cout << " delegate text browser" << std::endl;
+      break;
+  }
+
+    default:
       {
-        std::cout << " delegate text browser" << std::endl;
-        break;
-      }
-    case TreeItem::_delegate_TEXT :
-      {
-        std::cout << " delegate text" << std::endl;
         editor = QStyledItemDelegate::createEditor(parent,option,index);
+
         break;
       }
   }
@@ -350,6 +349,14 @@ void TreeItemFileDelegate::setEditorData(QWidget *editor, const QModelIndex &ind
 
         break;
       }
+  case TreeItem::_delegate_TEXT_BROWSER:
+    {
+      QTextBrowser* browser = editor->findChild<QTextBrowser*>();
+      QString value  = index.model()->data(index, Qt::EditRole).toString();
+      browser->setText( value );
+      std::cout << " setEditorData text browser" << std::endl;
+      break;
+    }
     case TreeItem::_delegate_TEXT_ACTION:
       {
         QLineEdit* line = editor->findChild<QLineEdit*>();
@@ -357,7 +364,7 @@ void TreeItemFileDelegate::setEditorData(QWidget *editor, const QModelIndex &ind
         line->setText(  value );
         break;
       }
-    case TreeItem::_delegate_TEXT  :
+    default  :
       {
         QStyledItemDelegate::setEditorData(editor,index);
         break;
@@ -407,7 +414,13 @@ void TreeItemFileDelegate::setModelData(QWidget *editor, QAbstractItemModel *mod
         model->setData(index,value, Qt::EditRole);
         break;
       }
-    case TreeItem::_delegate_TEXT  :
+  case TreeItem::_delegate_TEXT_BROWSER:
+    {
+      std::cout << " setModelData text browser" << std::endl;
+      break;
+    }
+
+    default:
       {
         QStyledItemDelegate::setModelData(editor,model,index);
         break;
@@ -419,17 +432,20 @@ void TreeItemFileDelegate::updateEditorGeometry(QWidget *editor, const QStyleOpt
   TreeItem *item = static_cast<TreeItem*>(index.internalPointer());
   switch(item->get_item_delegate_type())
   {
-    case TreeItem::_delegate_DROP:
-    case TreeItem::_delegate_FILE:
-    case TreeItem::_delegate_DIR:
-    case TreeItem::_delegate_CHECK:
-    case TreeItem::_delegate_TEXT_ACTION:
     case TreeItem::_delegate_TEXT_BROWSER:
-    case TreeItem::_delegate_TEXT:
+      {
+        QTextBrowser* browser  = editor->findChild<QTextBrowser*>();
+        QRect browser_rect = browser->rect();
+        editor->setGeometry( browser_rect );
+        std::cout << " adjusting  cell size to browser size" <<  browser_rect.width() << " heigth " << browser_rect.height() << std::endl;
+        break;
+      }
+    default:
       {
         QStyledItemDelegate::updateEditorGeometry(editor,option,index);
         break;
       }
+
   }
 }
 
@@ -438,7 +454,7 @@ QSize TreeItemFileDelegate::sizeHint ( const QStyleOptionViewItem & option, cons
   TreeItem *item = static_cast<TreeItem*>(index.internalPointer());
   switch(item->get_item_delegate_type())
   {
-    case TreeItem::_delegate_TEXT_BROWSER:
+    case TreeItem::_delegate_TEXT_DOCUMENT:
       {
         QStyleOptionViewItemV4 options = option;
         initStyleOption(&options, index);
@@ -459,6 +475,16 @@ QSize TreeItemFileDelegate::sizeHint ( const QStyleOptionViewItem & option, cons
         return QSize(doc.idealWidth(), _ideal_doc_heigth );
         break;
       }
+    case TreeItem::_delegate_TEXT_BROWSER:
+      {
+
+        //QTextBrowser* browser  = editor->findChild<QTextBrowser*>();
+       // QRect browser_rect = browser->rect();
+        std::cout << " sizeHint for _delegate_TEXT_EDITOR" << std::endl; //<<  browser_rect.width() << " heigth " << browser_rect.height() << std::endl;
+
+        return QSize( option.rect.width(), 100 );
+        break;
+      }
     default:
       {
         return QStyledItemDelegate::sizeHint(option,index);
@@ -466,6 +492,7 @@ QSize TreeItemFileDelegate::sizeHint ( const QStyleOptionViewItem & option, cons
       }
   }
 }
+
 
 void TreeItemFileDelegate::get_filename_slot( QWidget *editor ) const {
   std::cout << " get_filename_slot called" << std::endl;
@@ -500,10 +527,39 @@ void TreeItemFileDelegate::commit_and_call( QWidget * editor, boost::function<bo
 }
 
 
-/*
-   void TreeItemFileDelegate::valueChanged( QWidget *editor ) const {
-   std::cout << " value changed" << std::endl;
-   emit commitData( editor );
-   }
-   */
+QRect TreeItemFileDelegate::alignRect( QRect object,  QRect frame, int position,   Qt::AlignmentFlag alignment ) const {
+  QRect rect = object;
 
+  rect.setTopLeft( QPoint( 0, 0 ) );
+  // Moves the object to the middle of the item.
+  if ( rect.height() < frame.height() ) {
+    rect.moveTop( ( frame.height() - rect.height() ) / 2 );
+  }
+
+  if ( alignment & Qt::AlignLeft ) {
+    rect.moveLeft( position );
+  }
+  else if ( alignment & Qt::AlignRight ) {
+    rect.moveRight( position );
+  }
+
+  return rect;
+}
+
+QStyleOptionButton TreeItemFileDelegate::checkboxOption( const QStyleOptionViewItem& option,  const QModelIndex& index, int position, Qt::AlignmentFlag alignment ) const {
+  QStyleOptionButton checkboxOption;
+  if ( index.data( Qt::CheckStateRole ).toBool() )
+    checkboxOption.state = option.state | QStyle::State_On;
+  else
+    checkboxOption.state = option.state | QStyle::State_Off;
+  QSize size = QApplication::style()->sizeFromContents( QStyle::CT_CheckBox, &option, QSize() );
+  if ( size.isEmpty() ) {
+    // A checkbox has definately a size != 0
+    checkboxOption.rect.setSize( QSize( 22, 22 ) );
+  }
+  else {
+    checkboxOption.rect.setSize( QSize( size.width(), size.height() ) );
+  }
+  checkboxOption.rect = alignRect( checkboxOption.rect, option.rect, position, alignment );
+  return checkboxOption;
+}

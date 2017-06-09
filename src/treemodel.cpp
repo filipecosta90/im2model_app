@@ -22,6 +22,7 @@ boost::property_tree::ptree* TreeModel::save_data_into_property_tree( ){
 bool TreeModel::load_data_from_property_tree( boost::property_tree::ptree pt_root ){
   // Load from the property tree object
   rootItem->load_data_from_property_tree( pt_root );
+  emit layoutChanged();
   return true;
 }
 
@@ -48,7 +49,6 @@ Qt::ItemFlags TreeModel::flags(const QModelIndex &index) const{
   if (!index.isValid()){
     return 0;
   }
-
   TreeItem *item = getItem(index);
   Qt::ItemFlags flags =  QAbstractItemModel::flags(index);
   if( item->isItemEditable( index.column() ) ){

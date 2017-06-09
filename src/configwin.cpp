@@ -592,6 +592,7 @@ void MainWindow::loadFile(const QString &fileName){
   tdmap_running_configuration_model->load_data_from_property_tree( tdmap_running_configuration_ptree );
   ui->qtree_view_tdmap_running_configuration->update();
 
+
   // Write the property tree to the XML file.
 
 #ifndef QT_NO_CURSOR
@@ -1133,7 +1134,7 @@ void MainWindow::create_box_options(){
 
   QVector<QVariant> box4_option_2_1 = {"", ""};
   QVector<bool> box4_option_2_1_edit = {false,true};
-  _multislice_phase_granting_output  = new TreeItem ( box4_option_2_1 );
+  _multislice_phase_granting_output  = new TreeItem ( box4_option_2_1, box4_option_2_1_edit );
   _multislice_phase_granting_output->set_fp_data_data_appender_col_pos( 1 );
   _multislice_phase_granting_output->set_flag_fp_data_appender_string( true );
   _multislice_phase_granting_output->set_item_delegate_type( TreeItem::_delegate_TEXT_BROWSER );
@@ -1194,6 +1195,14 @@ void MainWindow::create_box_options(){
   for (int column = 0; column < tdmap_simulation_setup_model->columnCount(); ++column){
     ui->qtree_view_tdmap_running_configuration->resizeColumnToContents(column);
   }
+/*
+  QModelIndex celslc_index = tdmap_running_configuration_model->index(1,0);
+  QModelIndex celslc_out_legend_index = tdmap_running_configuration_model->index(1,0,celslc_index);
+    QModelIndex celslc_out_index = project_setup_crystalographic_fields_model->index(0,1,celslc_out_legend_index);
+    ui->qtree_view_tdmap_running_configuration->setIndexWidget(celslc_out_index,ui->qTextBrowser_tdmap_simulation_output);
+  //  ui->qtree_view_project_setup_crystallography->setIndexWidget(cel_path,ui->qwidget_load_cif);
+*/
+
 }
 
 bool MainWindow::set_dr_probe_path( QString path ){
