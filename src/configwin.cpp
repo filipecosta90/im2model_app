@@ -262,11 +262,11 @@ void MainWindow::update_tdmap_sim_ostream(){
   ui->qTextBrowser_tdmap_simulation_output->setText(" ");
   std::string line;
   while(std::getline(_sim_tdmap_ostream_buffer, line)){
-   //   ui->qtree_view_tdmap_running_configuration-
+    //   ui->qtree_view_tdmap_running_configuration-
     ui->qTextBrowser_tdmap_simulation_output->moveCursor (QTextCursor::End);
     QString qt_linw =  QString::fromStdString( line );
     ui->qtree_view_tdmap_running_configuration->model();
-QVariant _new_line_var = QVariant::fromValue(qt_linw + "\n");
+    QVariant _new_line_var = QVariant::fromValue(qt_linw + "\n");
     _multislice_phase_granting_output->appendData( 1, _new_line_var );
     ui->qTextBrowser_tdmap_simulation_output->append( qt_linw );
     QApplication::processEvents();
@@ -1127,16 +1127,17 @@ void MainWindow::create_box_options(){
   _multislice_phase_granting->set_item_delegate_type( TreeItem::_delegate_CHECK );
   running_configuration_root->insertChildren( _multislice_phase_granting );
 
-  QVector<QVariant> box4_option_2_1 = {"", "Output"};
+  QVector<QVariant> box4_option_2_0 = {"", "Output"};
+  TreeItem* _multislice_phase_granting_output_legend   = new TreeItem ( box4_option_2_0 );
+  _multislice_phase_granting->insertChildren( _multislice_phase_granting_output_legend );
+
+  QVector<QVariant> box4_option_2_1 = {"", ""};
   QVector<bool> box4_option_2_1_edit = {false,true};
   _multislice_phase_granting_output  = new TreeItem ( box4_option_2_1 );
   _multislice_phase_granting_output->set_fp_data_data_appender_col_pos( 1 );
   _multislice_phase_granting_output->set_flag_fp_data_appender_string( true );
   _multislice_phase_granting_output->set_item_delegate_type( TreeItem::_delegate_TEXT_BROWSER );
-
-  _multislice_phase_granting->insertChildren( _multislice_phase_granting_output );
-
-
+  _multislice_phase_granting_output_legend->insertChildren( _multislice_phase_granting_output );
 
   QVector<QVariant> box4_option_2_2 = {"","Temporary files"};
   TreeItem* _multislice_phase_granting_temporary_files  = new TreeItem ( box4_option_2_2 );

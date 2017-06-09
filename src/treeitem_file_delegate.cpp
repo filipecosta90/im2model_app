@@ -73,34 +73,34 @@ void TreeItemFileDelegate::paint(QPainter * painter, const QStyleOptionViewItem 
         break;
       }
     case TreeItem::_delegate_TEXT_BROWSER:
-  {
-                                            QStyleOptionViewItemV4 options = option;
-                                            initStyleOption(&options, index);
+      {
+        QStyleOptionViewItemV4 options = option;
+        initStyleOption(&options, index);
 
-                                            painter->save();
+        painter->save();
 
-                                            QTextDocument doc;
-                                            doc.setHtml(options.text);
-                                            QSizeF size(200, 200);
-                                            doc.setPageSize(size);
-                                           // options.text = "";
-                                            options.widget->style()->drawControl(QStyle::CE_ItemViewItem, &options, painter);
+        QTextDocument doc;
+        doc.setHtml(options.text);
+        QSizeF size(200, 200);
+        doc.setPageSize(size);
+        // options.text = "";
+        options.widget->style()->drawControl(QStyle::CE_ItemViewItem, &options, painter);
 
-                                            painter->translate(options.rect.left(), options.rect.top());
-                                            QRect clip(0, 0, options.rect.width(), options.rect.height());
-                                            doc.drawContents(painter, clip);
+        painter->translate(options.rect.left(), options.rect.top());
+        QRect clip(0, 0, options.rect.width(), options.rect.height());
+        doc.drawContents(painter, clip);
 
-                                            painter->restore();
-                                            break;
-                                          }
+        painter->restore();
+        break;
+      }
     case TreeItem::_delegate_TEXT_ACTION:
     case TreeItem::_delegate_FILE:
     case TreeItem::_delegate_DIR:
     case TreeItem::_delegate_TEXT:
-                                          {
-                                            QStyledItemDelegate::paint( painter, option,  index);
-                                            break;
-                                          }
+      {
+        QStyledItemDelegate::paint( painter, option,  index);
+        break;
+      }
   }
 }
 
@@ -442,21 +442,21 @@ QSize TreeItemFileDelegate::sizeHint ( const QStyleOptionViewItem & option, cons
       {
         QStyleOptionViewItemV4 options = option;
         initStyleOption(&options, index);
+        QString value = index.model()->data(index, Qt::EditRole).toString();
+
+        int lines_count = value.count("\n") +1 ;
 
         QTextDocument doc;
         doc.setHtml(options.text);
-        doc.setTextWidth(options.rect.width());
-        int lines_count = doc.toPlainText().count("\n");
-
         QFontMetricsF fm(doc.defaultFont());
         auto const _line_height = fm.height() + fm.leading();
+        int _ideal_doc_heigth = lines_count * _line_height;
         std::cout << "doc lines" << lines_count << std::endl;
         std::cout << "doc line heigth" << _line_height << std::endl;
         std::cout << "doc heigth" << doc.size().height() << std::endl;
-        std::cout << "doc ideal heigth" << lines_count * _line_height << std::endl;
+        std::cout << "doc ideal heigth" << _ideal_doc_heigth << std::endl;
 
-
-        return QSize(doc.idealWidth(), doc.size().height());
+        return QSize(doc.idealWidth(), _ideal_doc_heigth );
         break;
       }
     default:
