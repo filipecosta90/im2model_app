@@ -157,6 +157,17 @@ int TreeModel::rowCount(const QModelIndex &parent) const{
   return parentItem->childCount();
 }
 
+bool TreeModel::appendData(const QModelIndex &index, const QVariant &value){
+  bool result = false;
+  TreeItem *item = getItem(index);
+  std::cout << "appending data to item in index pos: row " << index.row() << " col "<< index.column()   << std::endl;
+  result = item->appendData( index.column(), value);
+  if (result){
+    emit dataChanged(index, index);
+  }
+  return result;
+}
+
 bool TreeModel::setData(const QModelIndex &index, const QVariant &value, int role){
   if ( (role != Qt::EditRole) && ( role != Qt::CheckStateRole) ){
     return false;

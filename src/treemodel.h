@@ -31,6 +31,7 @@ class TreeModel : public QAbstractItemModel {
      */
     Qt::ItemFlags flags(const QModelIndex &index) const override;
     bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole) override;
+    bool appendData(const QModelIndex &index, const QVariant &value);
     bool setHeaderData(int section, Qt::Orientation orientation, const QVariant &value, int role = Qt::EditRole) override;
     bool insertColumns(int position, int columns, const QModelIndex &parent = QModelIndex()) override;
     bool removeColumns(int position, int columns, const QModelIndex &parent = QModelIndex()) override;
@@ -42,12 +43,12 @@ class TreeModel : public QAbstractItemModel {
 
     boost::property_tree::ptree* save_data_into_property_tree( );
     bool load_data_from_property_tree( boost::property_tree::ptree pt_root );
+    TreeItem *getItem(const QModelIndex &index) const;
 
     public slots:
       void set_model_modified();
   private:
 
-    TreeItem *getItem(const QModelIndex &index) const;
     TreeItem *rootItem;
     bool _flag_model_modified = false;
 };

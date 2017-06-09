@@ -245,30 +245,46 @@ bool MainWindow::_was_document_modified(){
     result |= project_setup_image_fields_model->_was_model_modified();
     result |= project_setup_crystalographic_fields_model->_was_model_modified();
     result |= tdmap_simulation_setup_model->_was_model_modified();
+    result |= tdmap_running_configuration_model->_was_model_modified();
   }
   return result;
 }
 
-void   MainWindow::update_from_TDMap_sucess(){
+void MainWindow::update_from_TDMap_sucess(){
   ui->statusBar->showMessage(tr("Sucessfully runned TD-Map"), 2000);
   emit simulated_grid_changed();
 }
 
-void   MainWindow::update_from_TDMap_failure(){
+void MainWindow::update_from_TDMap_failure(){
   ui->statusBar->showMessage(tr("Error while running TD-Map"), 2000);
 }
 
 void MainWindow::update_tdmap_sim_ostream(){
   ui->qTextBrowser_tdmap_simulation_output->setText(" ");
   std::string line;
+
+  QModelIndex celslc_index = tdmap_running_configuration_model->index(1,0);
+  TreeItem* aa = tdmap_running_configuration_model->getItem(celslc_index);
+  QVariant aa_legend = aa->data(1);
+  std::cout << "####celslc_index VALID: " << celslc_index.isValid() <<  " data: "<< aa_legend.toString().toStdString() << std::endl;
+
+  QModelIndex celslc_out_legend_index = tdmap_running_configuration_model->index(0,0,celslc_index);
+  TreeItem* aaa = tdmap_running_configuration_model->getItem(celslc_out_legend_index);
+  QVariant aaa_legend = aaa->data(1);
+  std::cout << "####celslc_out_legend_index  VALID: " << celslc_out_legend_index.isValid()  <<  " data: "<< aaa_legend.toString().toStdString() << std::endl;
+
+  QModelIndex celslc_out_index = project_setup_crystalographic_fields_model->index(0,1,celslc_out_legend_index);
+  std::cout << "####celslc_out_index  VALID: " << celslc_out_index.isValid() << std::endl;
+
   while(std::getline(_sim_tdmap_ostream_buffer, line)){
     //   ui->qtree_view_tdmap_running_configuration-
     ui->qTextBrowser_tdmap_simulation_output->moveCursor (QTextCursor::End);
     QString qt_linw =  QString::fromStdString( line );
-    ui->qtree_view_tdmap_running_configuration->model();
     QVariant _new_line_var = QVariant::fromValue(qt_linw + "\n");
-    _multislice_phase_granting_output->appendData( 1, _new_line_var );
-    ui->qTextBrowser_tdmap_simulation_output->append( qt_linw );
+    bool result = tdmap_running_configuration_model->appendData( celslc_out_index, _new_line_var );
+    std::cout << "append result " << result << std::endl;
+    //  _multislice_phase_granting_output->appendData( 1, _new_line_var );
+    //ui->qTextBrowser_tdmap_simulation_output->append( qt_linw );
     QApplication::processEvents();
   }
 }
@@ -321,8 +337,6 @@ bool MainWindow::saveAs()
   return saveFile(dialog.selectedFiles().first());
 }
 
-
-
 bool MainWindow::edit_preferences(){
   // returns false if no settings were saved
   bool result = false;
@@ -349,8 +363,7 @@ bool MainWindow::edit_preferences(){
   return result;
 }
 
-void MainWindow::about()
-{
+void MainWindow::about(){
   QMessageBox::about(this, tr("Im2Model"),
       tr("<b>Im2Model</b> combines transmission electron microscopy, image correlation and matching procedures,"
         "enabling the determination of a three-dimensional atomic structure based strictly on a single high-resolution experimental image."
@@ -591,7 +604,6 @@ void MainWindow::loadFile(const QString &fileName){
   boost::property_tree::ptree tdmap_running_configuration_ptree = config.get_child("tdmap_running_configuration_ptree");
   tdmap_running_configuration_model->load_data_from_property_tree( tdmap_running_configuration_ptree );
   ui->qtree_view_tdmap_running_configuration->update();
-
 
   // Write the property tree to the XML file.
 
@@ -1195,13 +1207,6 @@ void MainWindow::create_box_options(){
   for (int column = 0; column < tdmap_simulation_setup_model->columnCount(); ++column){
     ui->qtree_view_tdmap_running_configuration->resizeColumnToContents(column);
   }
-/*
-  QModelIndex celslc_index = tdmap_running_configuration_model->index(1,0);
-  QModelIndex celslc_out_legend_index = tdmap_running_configuration_model->index(1,0,celslc_index);
-    QModelIndex celslc_out_index = project_setup_crystalographic_fields_model->index(0,1,celslc_out_legend_index);
-    ui->qtree_view_tdmap_running_configuration->setIndexWidget(celslc_out_index,ui->qTextBrowser_tdmap_simulation_output);
-  //  ui->qtree_view_project_setup_crystallography->setIndexWidget(cel_path,ui->qwidget_load_cif);
-*/
 
 }
 

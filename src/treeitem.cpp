@@ -304,7 +304,6 @@ int TreeItem::get_dropdown_column(){
   return dropdown_column;
 }
 
-
 bool TreeItem::appendData( int column, const QVariant &value){
     bool result = false;
     if  (column >= 0 && column < itemData.size() ) {
@@ -312,9 +311,11 @@ bool TreeItem::appendData( int column, const QVariant &value){
           std::string t1 = value.toString().toStdString();
         //  fp_data_appender_string( t1 );
           QString before_string = itemData[column].toString();
+          std::cout << "before string "<<  before_string.size() << std::endl;
           before_string.append( value.toString());
-              itemData[column].setValue(QVariant::fromValue(before_string));
-              emit dataChanged(column);
+          std::cout << "after string "<<  before_string.size() << std::endl;
+          itemData[column].setValue(QVariant::fromValue(before_string));
+          emit dataChanged(column);
           result = true;
         }
     }
