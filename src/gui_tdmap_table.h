@@ -23,6 +23,7 @@ class TDMap_Table : public QTableWidget
 
     QString currentLocation() const;
     QTableWidgetSelectionRange selectedRange() const;
+    void resizeEvent(QResizeEvent* ev);
     void clear();
 
     void set_tdmap( TDMap* map );

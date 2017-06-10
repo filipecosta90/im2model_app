@@ -40,3 +40,6 @@ void CvTDMapImageFrameDelegate::set_best( int row, int col ){
   _best_defined = true;
 }
 
+void CvTDMapImageFrameDelegate::clean_best( ){
+  _best_defined = false;
+}

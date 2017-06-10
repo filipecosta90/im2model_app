@@ -25,29 +25,39 @@ TDMap_Table::TDMap_Table(QWidget *parent) : QTableWidget(parent) {
   clear();
 }
 
+void TDMap_Table::resizeEvent(QResizeEvent* ev) {
+  update_column_size();
+  update_row_size();
+  // Call our base resizeEvent to handle the resizing itself
+  // we don't bother with here
+  QTableView::resizeEvent(ev);
+  clear();
+}
+
 void TDMap_Table::set_tdmap( TDMap* map ){
   core_tdmap = map;
   _flag_core_tdmap = true;
 }
 
 void TDMap_Table::connect_item_changes_to_invalidate_grid( const TreeItem* item, int item_changes_column ){
-    connect( item, SIGNAL(dataChanged( int )), this, SLOT( invalidate_grid(int) ) );
-    _treeitem_changes_to_invalidate_grid_watch_col = item_changes_column;
-  }
+  connect( item, SIGNAL(dataChanged( int )), this, SLOT( invalidate_grid(int) ) );
+  _treeitem_changes_to_invalidate_grid_watch_col = item_changes_column;
+}
 
 void TDMap_Table::invalidate_grid( int signal_item_changed_column ){
   if ( signal_item_changed_column == _treeitem_changes_to_invalidate_grid_watch_col ){
-      if( _flag_simulated_image_grid ){
-          std::cout << "cleaned grid due to data change in connected TreeItems" << std::endl;
-          _flag_simulated_image_grid = false;
-          for( int row = 0; row < simulated_image_grid.size() ; row++ ){
-            std::vector<cv::Mat> row_image_grid = simulated_image_grid.at(row);
-            row_image_grid.clear();
-          }
-          simulated_image_grid.clear();
-          clear();
+    if( _flag_simulated_image_grid ){
+      std::cout << "cleaned grid due to data change in connected TreeItems" << std::endl;
+      _flag_simulated_image_grid = false;
+      for( int row = 0; row < simulated_image_grid.size() ; row++ ){
+        std::vector<cv::Mat> row_image_grid = simulated_image_grid.at(row);
+        row_image_grid.clear();
       }
-}
+      simulated_image_grid.clear();
+      this->image_delegate->clean_best();
+      clear();
+    }
+  }
 }
 
 void TDMap_Table::connect_thickness_range_number_samples_changes( const TreeItem* item, int item_changes_column ){
@@ -182,8 +192,6 @@ void TDMap_Table::update_headers(){
 }
 
 void TDMap_Table::clear(){
-  setRowCount(0);
-  setColumnCount(0);
   setRowCount(RowCount);
   setColumnCount(ColumnCount);
   _number_calculated_cells = RowCount * ColumnCount;
@@ -205,11 +213,11 @@ void TDMap_Table::create_cells(){
     for (int col = 0; col < ColumnCount; ++col) {
       CvImageCellWidget *cell_widget  = new CvImageCellWidget(  );
       cell_widget->setMaximumSize( QSize(ColumnSize, RowSize) );
-      //cell_widget->setStyleSheet("background-color:red;");
+      cell_widget->set_container_size( ColumnSize, RowSize );
 
+      //cell_widget->setStyleSheet("background-color:red;");
       this->setCellWidget(row, col, cell_widget);
       this->setItem(row, col, new QTableWidgetItem());//used to find it
-
     }
   }
   _number_drawed_cells = RowCount * ColumnCount;
@@ -217,29 +225,44 @@ void TDMap_Table::create_cells(){
 }
 
 void TDMap_Table::update_cells(){
-  if( _flag_simulated_image_grid && _flag_created_cells ){
-    cv::Point2i best_match_pos = core_tdmap->get_simgrid_best_match_position();
-    for (int row = 0; row < RowCount; ++row) {
-      std::vector<cv::Mat> simulated_image_row = simulated_image_grid.at(row);
-      for (int col = 0; col < ColumnCount; ++col) {
+  if( _flag_created_cells ){
+    if( _flag_simulated_image_grid ){
+      cv::Point2i best_match_pos = core_tdmap->get_simgrid_best_match_position();
+      for (int row = 0; row < RowCount; ++row) {
+        std::vector<cv::Mat> simulated_image_row = simulated_image_grid.at(row);
+        for (int col = 0; col < ColumnCount; ++col) {
 
-        CvImageCellWidget *cell_widget  = new CvImageCellWidget(  );
-        cell_widget->setMaximumSize( QSize(ColumnSize, RowSize) );
-        cell_widget->set_container_size( ColumnSize, RowSize );
-        cv::Mat full_image = simulated_image_row.at(col);
-        cell_widget->setImage( full_image.clone() );
-        cell_widget->fitToContainer();
-        if( best_match_pos.x ==  row && best_match_pos.y == col ){
-          cell_widget->set_best();
-          this->image_delegate->set_best(  row, col );
+          CvImageCellWidget *cell_widget  = new CvImageCellWidget(  );
+          cell_widget->setMaximumSize( QSize(ColumnSize, RowSize) );
+          cell_widget->set_container_size( ColumnSize, RowSize );
+          cv::Mat full_image = simulated_image_row.at(col);
+          cell_widget->setImage( full_image.clone() );
+          cell_widget->fitToContainer();
+          if( best_match_pos.x ==  row && best_match_pos.y == col ){
+            cell_widget->set_best();
+            this->image_delegate->set_best(  row, col );
+          }
+          this->setCellWidget(row,col, cell_widget);
+          this->setItem(row, col, new QTableWidgetItem());//used to find it
         }
-        this->setCellWidget(row,col, cell_widget);
-        this->setItem(row, col, new QTableWidgetItem());//used to find it
+      }
+      emit tdmap_best_match( best_match_pos.x, best_match_pos.y );
+      setCurrentCell(0, 0);
+      emit cellClicked(0,0);
+    }
+    else{
+      //only visualy update cells
+      for (int row = 0; row < RowCount; ++row) {
+        for (int col = 0; col < ColumnCount; ++col) {
+          CvImageCellWidget *cell_widget  = new CvImageCellWidget(  );
+          cell_widget->setMaximumSize( QSize(ColumnSize, RowSize) );
+          cell_widget->set_container_size( ColumnSize, RowSize );
+          cell_widget->fitToContainer();
+          this->setCellWidget(row,col, cell_widget);
+          this->setItem(row, col, new QTableWidgetItem());//used to find it
+        }
       }
     }
-    emit tdmap_best_match( best_match_pos.x, best_match_pos.y );
-    setCurrentCell(0, 0);
-    emit cellClicked(0,0);
   }
 }
 

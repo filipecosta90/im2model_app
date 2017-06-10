@@ -31,6 +31,7 @@ class CvTDMapImageFrameDelegate : public QStyledItemDelegate
     void paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const override;
     bool shouldBeBest(const QModelIndex &index) const;
     void set_best( int row, int col );
+    void clean_best( );
 
   private:
     // margin between cells
