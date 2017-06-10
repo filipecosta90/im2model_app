@@ -96,6 +96,10 @@ class MSA_prm {
   public:
     MSA_prm( boost::process::ipstream& async_io_buffer_out );
 
+    void set_flag_io_ap_pipe_out( bool value );
+
+    bool get_flag_io_ap_pipe_out();
+
     bool _is_bin_path_defined();
 
     void set_electron_wavelength( double energy );
@@ -141,6 +145,8 @@ class MSA_prm {
     bool call_bin();
 
     bool check_produced_waves();
+
+    bool clean_for_re_run();
 
 };
 

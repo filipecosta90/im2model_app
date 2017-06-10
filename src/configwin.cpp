@@ -52,11 +52,11 @@ MainWindow::MainWindow( ApplicationLog::ApplicationLog* logger , QWidget *parent
   else{
     _core_image_crystal = new Image_Crystal();
     _core_td_map = new TDMap(
-                _sim_tdmap_celslc_ostream_buffer,
-                _sim_tdmap_msa_ostream_buffer,
-                _sim_tdmap_wavimg_ostream_buffer,
-                _sim_tdmap_simgrid_ostream_buffer,
-                _core_image_crystal );
+        _sim_tdmap_celslc_ostream_buffer,
+        _sim_tdmap_msa_ostream_buffer,
+        _sim_tdmap_wavimg_ostream_buffer,
+        _sim_tdmap_simgrid_ostream_buffer,
+        _core_image_crystal );
 
     if (_flag_im2model_logger) {
       im2model_logger->logEvent(ApplicationLog::critical, "Trying to set application logger for TDMap.");
@@ -103,7 +103,7 @@ MainWindow::MainWindow( ApplicationLog::ApplicationLog* logger , QWidget *parent
       connect(this, SIGNAL(simulated_grid_changed()), this, SLOT(update_simgrid_frame()));
 
       if( _flag_im2model_logger ){
-        im2model_logger->logEvent( ApplicationLog::critical, "Finished initializing App." );
+        im2model_logger->logEvent( ApplicationLog::notification, "Finished initializing App." );
       }
 
     }
@@ -267,58 +267,84 @@ void MainWindow::update_from_TDMap_failure(){
 void MainWindow::update_tdmap_sim_ostream(){
   std::string line;
 
-  QModelIndex celslc_index = tdmap_running_configuration_model->index(1,0);
-  QModelIndex celslc_out_legend_index = tdmap_running_configuration_model->index(0,0,celslc_index);
-  QModelIndex celslc_out_index = project_setup_crystalographic_fields_model->index(0,1,celslc_out_legend_index);
-  std::cout << "####celslc_out_index  VALID: " << celslc_out_index.isValid() << std::endl;
+  if( _core_td_map->get_run_celslc_switch() ){
+    if( _core_td_map->_is_sim_tdmap_celslc_ostream_buffer_active() ){
 
-  QModelIndex msa_index = tdmap_running_configuration_model->index(2,0);
-  QModelIndex msa_out_legend_index = tdmap_running_configuration_model->index(0,0,msa_index);
-  QModelIndex msa_out_index = project_setup_crystalographic_fields_model->index(0,1,msa_out_legend_index);
-  std::cout << "####msa_out_index  VALID: " << msa_out_index.isValid() << std::endl;
+      QModelIndex celslc_index = tdmap_running_configuration_model->index(1,0);
+      QModelIndex celslc_out_legend_index = tdmap_running_configuration_model->index(0,0,celslc_index);
+      QModelIndex celslc_out_index = project_setup_crystalographic_fields_model->index(0,1,celslc_out_legend_index);
+      std::cout << "####celslc_out_index  VALID: " << celslc_out_index.isValid() << std::endl;
 
-  QModelIndex wavimg_index = tdmap_running_configuration_model->index(2,0);
-  QModelIndex wavimg_out_legend_index = tdmap_running_configuration_model->index(0,0,wavimg_index);
-  QModelIndex wavimg_out_index = project_setup_crystalographic_fields_model->index(0,1,wavimg_out_legend_index);
-  std::cout << "####wavimg_out_index  VALID: " << wavimg_out_index.isValid() << std::endl;
-
-  QModelIndex simgrid_index = tdmap_running_configuration_model->index(2,0);
-  QModelIndex simgrid_out_legend_index = tdmap_running_configuration_model->index(0,0,simgrid_index);
-  QModelIndex simgrid_out_index = project_setup_crystalographic_fields_model->index(0,1,simgrid_out_legend_index);
-  std::cout << "####simgrid_out_index  VALID: " << simgrid_out_index.isValid() << std::endl;
-
-  while(std::getline(_sim_tdmap_celslc_ostream_buffer, line)){
-    //   ui->qtree_view_tdmap_running_configuration-
-    //ui->qTextBrowser_tdmap_simulation_output->moveCursor (QTextCursor::End);
-    QString qt_linw =  QString::fromStdString( line );
-    QVariant _new_line_var = QVariant::fromValue(qt_linw + "\n");
-    bool result = tdmap_running_configuration_model->appendData( celslc_out_index, _new_line_var );
-    ui->qtree_view_tdmap_simulation_setup->update();
-    std::cout << "append result " << result << std::endl;
-    //  _multislice_phase_granting_output->appendData( 1, _new_line_var );
-    //ui->qTextBrowser_tdmap_simulation_output->append( qt_linw );
-    QApplication::processEvents();
+      while(std::getline(_sim_tdmap_celslc_ostream_buffer, line)){
+        //   ui->qtree_view_tdmap_running_configuration-
+        //ui->qTextBrowser_tdmap_simulation_output->moveCursor (QTextCursor::End);
+        QString qt_linw =  QString::fromStdString( line );
+        QVariant _new_line_var = QVariant::fromValue(qt_linw + "\n");
+        bool result = tdmap_running_configuration_model->appendData( celslc_out_index, _new_line_var );
+        ui->qtree_view_tdmap_simulation_setup->update();
+        std::cout << "append result " << result << std::endl;
+        //  _multislice_phase_granting_output->appendData( 1, _new_line_var );
+        //ui->qTextBrowser_tdmap_simulation_output->append( qt_linw );
+        QApplication::processEvents();
+      }
+      // reset pipe
+      _sim_tdmap_celslc_ostream_buffer.pipe( boost::process::pipe() );
+    }
   }
 
-  while(std::getline(_sim_tdmap_msa_ostream_buffer, line)){
-    QString qt_linw =  QString::fromStdString( line );
-    QVariant _new_line_var = QVariant::fromValue(qt_linw + "\n");
-    bool result = tdmap_running_configuration_model->appendData( msa_out_index, _new_line_var );
-    ui->qtree_view_tdmap_simulation_setup->update();
-    std::cout << "append result " << result << std::endl;
-    QApplication::processEvents();
+  if( _core_td_map->get_run_msa_switch() ){
+    if( _core_td_map->_is_sim_tdmap_msa_ostream_buffer_active() ){
+
+      QModelIndex msa_index = tdmap_running_configuration_model->index(2,0);
+      QModelIndex msa_out_legend_index = tdmap_running_configuration_model->index(0,0,msa_index);
+      QModelIndex msa_out_index = project_setup_crystalographic_fields_model->index(0,1,msa_out_legend_index);
+      std::cout << "####msa_out_index  VALID: " << msa_out_index.isValid() << std::endl;
+
+      while(std::getline(_sim_tdmap_msa_ostream_buffer, line)){
+        QString qt_linw =  QString::fromStdString( line );
+        QVariant _new_line_var = QVariant::fromValue(qt_linw + "\n");
+        bool result = tdmap_running_configuration_model->appendData( msa_out_index, _new_line_var );
+        ui->qtree_view_tdmap_simulation_setup->update();
+        std::cout << "append result " << result << std::endl;
+        QApplication::processEvents();
+      }
+      // reset pipe
+      _sim_tdmap_msa_ostream_buffer.pipe( boost::process::pipe() );
+    }
   }
 
-  while(std::getline(_sim_tdmap_wavimg_ostream_buffer, line)){
-    QString qt_linw =  QString::fromStdString( line );
-    QVariant _new_line_var = QVariant::fromValue(qt_linw + "\n");
-    bool result = tdmap_running_configuration_model->appendData( wavimg_out_index, _new_line_var );
-    ui->qtree_view_tdmap_simulation_setup->update();
-    std::cout << "append result " << result << std::endl;
-    QApplication::processEvents();
+  if( _core_td_map->get_run_wavimg_switch() ){
+    if( _core_td_map->_is_sim_tdmap_wavimg_ostream_buffer_active() ){
+
+      QModelIndex wavimg_index = tdmap_running_configuration_model->index(2,0);
+      QModelIndex wavimg_out_legend_index = tdmap_running_configuration_model->index(0,0,wavimg_index);
+      QModelIndex wavimg_out_index = project_setup_crystalographic_fields_model->index(0,1,wavimg_out_legend_index);
+      std::cout << "####wavimg_out_index  VALID: " << wavimg_out_index.isValid() << std::endl;
+
+      while(std::getline(_sim_tdmap_wavimg_ostream_buffer, line)){
+        QString qt_linw =  QString::fromStdString( line );
+        QVariant _new_line_var = QVariant::fromValue(qt_linw + "\n");
+        bool result = tdmap_running_configuration_model->appendData( wavimg_out_index, _new_line_var );
+        ui->qtree_view_tdmap_simulation_setup->update();
+        std::cout << "append result " << result << std::endl;
+        QApplication::processEvents();
+      }
+      // reset pipe
+      _sim_tdmap_wavimg_ostream_buffer.pipe( boost::process::pipe() );
+    }
   }
 
+  if( _core_td_map->get_run_simgrid_switch() ){
+    if( _core_td_map->_is_sim_tdmap_simgrid_ostream_buffer_active() ){
 
+      QModelIndex simgrid_index = tdmap_running_configuration_model->index(2,0);
+      QModelIndex simgrid_out_legend_index = tdmap_running_configuration_model->index(0,0,simgrid_index);
+      QModelIndex simgrid_out_index = project_setup_crystalographic_fields_model->index(0,1,simgrid_out_legend_index);
+      std::cout << "####simgrid_out_index  VALID: " << simgrid_out_index.isValid() << std::endl;
+      // reset pipe
+      _sim_tdmap_simgrid_ostream_buffer.pipe( boost::process::pipe() );
+    }
+  }
 }
 
 void MainWindow::on_qpush_run_tdmap_clicked(){

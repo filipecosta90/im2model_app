@@ -462,19 +462,52 @@ void WAVIMG_prm::add_parameter_loop ( int parameter_class , int parameter_index,
 }
 
 void WAVIMG_prm::cleanup_thread(){
-  boost::filesystem::path p (".");
-  boost::filesystem::directory_iterator end_itr;
-  // cycle through the directory
-  for ( boost::filesystem::directory_iterator itr(p); itr != end_itr; ++itr)
-  {
-    // If it's not a directory, list it. If you want to list directories too, just remove this check.
-    if (is_regular_file(itr->path())) {
-      // assign current file name to current_file and echo it out to the console.
-      if( itr->path().extension() == DAT_EXTENSION ){
-        bool remove_result = boost::filesystem::remove( itr->path().filename() );
+
+    bool status = true;
+    boost::filesystem::path dir ( base_dir_path );
+
+    // remove prm first
+    boost::filesystem::path prm_file ( prm_filename );
+    boost::filesystem::path full_prm_path = dir / prm_file;
+
+    if( boost::filesystem::exists( full_prm_path ) ){
+      const bool remove_result = boost::filesystem::remove( prm_file );
+      // if the remove process was sucessfull the prm no longer exists
+      _flag_produced_prm = !remove_result;
+      status &= remove_result;
+      if( _flag_logger ){
+        std::stringstream message;
+        message << "removing the wavimg prm file: " << full_prm_path.string() << " result: " << remove_result;
+        logger->logEvent( ApplicationLog::notification , message.str() );
       }
     }
-  }
+
+    // remove the dat files
+    if( number_parameter_loops == 2 ){
+      for ( int outter_loop_pos = 1; outter_loop_pos <= loop_range_n.at(1); outter_loop_pos++){
+        for ( int inner_loop_pos = 1; inner_loop_pos <= loop_range_n.at(0); inner_loop_pos++){
+
+          std::stringstream filename_stream;
+          filename_stream << file_name_output_image_wave_function <<
+            "_"<< std::setw(3) << std::setfill('0') << std::to_string(outter_loop_pos) <<
+            "_"<< std::setw(3) << std::setfill('0') << std::to_string(inner_loop_pos) <<
+            ".dat" ;
+          boost::filesystem::path dat_file ( filename_stream.str() );
+          boost::filesystem::path full_dat_path = dir / dat_file;
+
+          if( boost::filesystem::exists( full_dat_path ) ){
+            const bool remove_result = boost::filesystem::remove( full_dat_path );
+            status &= remove_result;
+            if( _flag_logger ){
+              std::stringstream message;
+              message << "removing the wave file: " << full_dat_path.string() << " result: " << remove_result;
+              logger->logEvent( ApplicationLog::notification , message.str() );
+            }
+          }
+
+        }
+      }
+    }
 }
 
 bool WAVIMG_prm::cleanup_bin(){
@@ -612,6 +645,18 @@ bool WAVIMG_prm::call_bin(){
     }
     result = status;
     return result;
+  }
+
+  bool WAVIMG_prm::get_flag_io_ap_pipe_out(){
+    return _flag_io_ap_pipe_out;
+  }
+
+  void WAVIMG_prm::set_flag_io_ap_pipe_out( bool value ){
+    _flag_io_ap_pipe_out = value;
+  }
+
+  bool WAVIMG_prm::clean_for_re_run(){
+    return cleanup_bin();
   }
 
   bool WAVIMG_prm::_is_bin_path_defined(){

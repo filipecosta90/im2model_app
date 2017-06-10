@@ -30,7 +30,7 @@
 #include <string>                              // for allocator, char_traits
 #include <utility>                             // for pair
 #include <vector>                              // for vector, vector<>::iter...
-#include <system_error>
+#include <system_error>     // platform-dependent error code.
 
 #include <stdlib.h>
 
@@ -95,6 +95,7 @@ class CELSLC_prm {
     bool prepare_nz_simulated_partitions_from_ssc_prm();
 
     /* boost process output streams */
+    // Implementation of a reading pipe stream.
     boost::process::ipstream& _io_pipe_out;
     bool _flag_io_ap_pipe_out = true;
 
@@ -176,6 +177,8 @@ class CELSLC_prm {
 
     bool set_base_dir_path( boost::filesystem::path base_dir );
 
+    void set_flag_io_ap_pipe_out( bool value );
+
     int get_nz_simulated_partitions(); 
 
     int get_slice_number_from_nm_floor( double goal_thickness_nm );
@@ -185,6 +188,8 @@ class CELSLC_prm {
     int get_nx_simulated_horizontal_samples( );
 
     int get_ny_simulated_vertical_samples( );
+
+    bool get_flag_io_ap_pipe_out();
 
     std::vector<double> get_slice_params_nm_slice_vec();
 
@@ -202,6 +207,7 @@ class CELSLC_prm {
 
     bool call_bin();
     bool call_boost_bin();
+    bool clean_for_re_run();
     bool call_bin_ssc();
 
 };

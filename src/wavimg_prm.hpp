@@ -115,7 +115,6 @@ class WAVIMG_prm {
     bool _is_prm_filename_path_defined();
     bool _is_prm_produced();
     bool _is_prm_filename_defined();
-    bool check_produced_dat();
 
     /* boost process output streams */
     boost::process::ipstream& _io_pipe_out;
@@ -211,11 +210,20 @@ class WAVIMG_prm {
 
     bool set_base_dir_path( boost::filesystem::path base_dir );
 
+    void set_flag_io_ap_pipe_out( bool value );
+
+    bool get_flag_io_ap_pipe_out();
+
     bool produce_prm();
 
     bool cleanup_bin();
 
     bool call_bin();
+
+    bool clean_for_re_run();
+
+    bool check_produced_dat();
+
 };
 
 #endif

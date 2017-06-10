@@ -66,48 +66,7 @@ class TDMap {
     double ht_accelaration_voltage;
     bool _flag_ht_accelaration_voltage = false;
 
-    /////////////////////////
-    // Dr Probe PRM wrappers
-    /////////////////////////
 
-    std::string dr_probe_bin_path;
-    bool _flag_dr_probe_bin_path = false;
-
-    CELSLC_prm* _tdmap_celslc_parameters;
-
-    bool _flag_tdmap_celslc_parameters = false;
-    bool _flag_runned_tdmap_celslc = false;
-    bool _run_celslc_switch = true;
-    std::string dr_probe_celslc_execname;
-    bool _flag_dr_probe_celslc_execname = false;
-
-    MSA_prm* _tdmap_msa_parameters;
-    bool _flag_tdmap_msa_parameters = false;
-    bool _flag_runned_tdmap_msa = false;
-    bool _run_msa_switch = true;
-    std::string dr_probe_msa_execname;
-    bool _flag_dr_probe_msa_execname = false;
-
-    WAVIMG_prm* _tdmap_wavimg_parameters;
-    bool _flag_tdmap_wavimg_parameters = false;
-    bool _flag_runned_tdmap_wavimg = false;
-    bool _run_wavimg_switch = true;
-    std::string dr_probe_wavimg_execname;
-    bool _flag_dr_probe_wavimg_execname = false;
-
-    std::string wave_function_name;
-    bool _flag_wave_function_name = false;
-
-    std::string wavimg_prm_name;
-    bool _flag_wavimg_prm_name = false;
-
-    std::string file_name_output_image_wave_function;
-    bool _flag_file_name_output_image_wave_function = false;
-
-    SIMGRID_wavimg_steplength* _td_map_simgrid;
-    bool _flag_tdmap_simgrid_parameters = false;
-    bool _flag_runned_tdmap_simgrid = false;
-    bool _run_simgrid_switch = true;
 
     /////////////////////////
     // Im2Model core pointers
@@ -181,6 +140,86 @@ class TDMap {
     bool _flag_sim_tdmap_ostream = false;
     bool _flag_sim_tdmap_ostream_buffer = true;
 
+    std::string wave_function_name;
+    bool _flag_wave_function_name = false;
+
+    std::string wavimg_prm_name;
+    bool _flag_wavimg_prm_name = false;
+
+    std::string file_name_output_image_wave_function;
+    bool _flag_file_name_output_image_wave_function = false;
+
+    int image_correlation_matching_method = CV_TM_CCOEFF_NORMED;
+    bool _flag_image_correlation_matching_method = true;
+
+    int _refinement_definition_method = RefinementPreset::NO_REFINEMENT ;
+    bool _flag_refinement_definition_method = true;
+
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    // RUNNING CONFIGS
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    /////////////////////////
+    // Dr Probe PRM wrappers
+    /////////////////////////
+
+    std::string dr_probe_bin_path;
+    bool _flag_dr_probe_bin_path = false;
+
+    /* *
+     * CELSLC
+     * */
+    CELSLC_prm* _tdmap_celslc_parameters;
+    bool _flag_tdmap_celslc_parameters = false;
+
+    std::string dr_probe_celslc_execname;
+    bool _flag_dr_probe_celslc_execname = false;
+
+    bool _flag_runned_tdmap_celslc = false;
+    bool _run_celslc_switch = true;
+    int _run_celslc_exec_log_level = ExecLogMode::FULL_LOG;
+    boost::process::ipstream& _sim_tdmap_celslc_ostream_buffer;
+    bool _flag_sim_tdmap_celslc_ostream_buffer = true;
+
+    /* *
+     * MSA
+     * */
+    MSA_prm* _tdmap_msa_parameters;
+    bool _flag_tdmap_msa_parameters = false;
+    std::string dr_probe_msa_execname;
+    bool _flag_dr_probe_msa_execname = false;
+
+    bool _flag_runned_tdmap_msa = false;
+    bool _run_msa_switch = true;
+
+    int _run_msa_exec_log_level = ExecLogMode::FULL_LOG;
+    boost::process::ipstream& _sim_tdmap_msa_ostream_buffer;
+    bool _flag_sim_tdmap_msa_ostream_buffer = true;
+
+    /* *
+     * WAVIMG
+     * */
+    WAVIMG_prm* _tdmap_wavimg_parameters;
+    bool _flag_tdmap_wavimg_parameters = false;
+    std::string dr_probe_wavimg_execname;
+    bool _flag_dr_probe_wavimg_execname = false;
+
+    bool _flag_runned_tdmap_wavimg = false;
+    bool _run_wavimg_switch = true;
+
+    int _run_wavimg_exec_log_level = ExecLogMode::FULL_LOG;
+    boost::process::ipstream& _sim_tdmap_wavimg_ostream_buffer;
+    bool _flag_sim_tdmap_wavimg_ostream_buffer = true;
+
+    /* *
+     * SIMGRID
+     * */
+    SIMGRID_wavimg_steplength* _td_map_simgrid;
+    bool _flag_tdmap_simgrid_parameters = false;
+    bool _flag_runned_tdmap_simgrid = false;
+    bool _run_simgrid_switch = true;
+    boost::process::ipstream& _sim_tdmap_simgrid_ostream_buffer;
+
     /* Loggers */
     ApplicationLog::ApplicationLog* logger = nullptr;
     bool _flag_logger = false;
@@ -188,12 +227,6 @@ class TDMap {
     /* Base dir path */
     boost::filesystem::path base_dir_path;
     bool _flag_base_dir_path = false;
-
-    int image_correlation_matching_method = CV_TM_CCOEFF_NORMED;
-    bool _flag_image_correlation_matching_method = true;
-
-    int _refinement_definition_method = RefinementPreset::NO_REFINEMENT ;
-    bool _flag_refinement_definition_method = true;
 
     int _exec_log_level = ExecLogMode::FULL_LOG;
 
@@ -206,24 +239,19 @@ class TDMap {
     bool set_refinement_definition_method( int method);
     bool set_application_logger( ApplicationLog::ApplicationLog* app_logger );
 
-    boost::process::ipstream& _sim_tdmap_celslc_ostream_buffer;
-    boost::process::ipstream& _sim_tdmap_msa_ostream_buffer;
-    boost::process::ipstream& _sim_tdmap_wavimg_ostream_buffer;
-    boost::process::ipstream& _sim_tdmap_simgrid_ostream_buffer;
-
     /* base constructor */
     TDMap( boost::process::ipstream& ostream_celslc_buffer,
-           boost::process::ipstream& ostream_msa_buffer,
-           boost::process::ipstream& ostream_wavimg_buffer,
-           boost::process::ipstream& ostream_simgrid_buffer,
-           Image_Crystal *image_crystal_ptr );
+        boost::process::ipstream& ostream_msa_buffer,
+        boost::process::ipstream& ostream_wavimg_buffer,
+        boost::process::ipstream& ostream_simgrid_buffer,
+        Image_Crystal *image_crystal_ptr );
 
     /* constructor with logger */
     TDMap( boost::process::ipstream& ostream_celslc_buffer,
-           boost::process::ipstream& ostream_msa_buffer,
-           boost::process::ipstream& ostream_wavimg_buffer,
-           boost::process::ipstream& ostream_simgrid_buffer,
-           Image_Crystal* image_crystal_ptr , ApplicationLog::ApplicationLog* app_logger );
+        boost::process::ipstream& ostream_msa_buffer,
+        boost::process::ipstream& ostream_wavimg_buffer,
+        boost::process::ipstream& ostream_simgrid_buffer,
+        Image_Crystal* image_crystal_ptr , ApplicationLog::ApplicationLog* app_logger );
     /** others **/
     bool prepare_ZA_UV();
 
@@ -254,9 +282,20 @@ class TDMap {
      */
     bool run_tdmap();
     bool set_run_celslc_switch( bool value );
+    bool get_run_celslc_switch();
+    bool _is_sim_tdmap_celslc_ostream_buffer_active();
+
     bool set_run_msa_switch( bool value );
+    bool get_run_msa_switch();
+    bool _is_sim_tdmap_msa_ostream_buffer_active();
+
     bool set_run_wavimg_switch( bool value );
+    bool get_run_wavimg_switch();
+    bool _is_sim_tdmap_wavimg_ostream_buffer_active();
+
     bool set_run_simgrid_switch( bool value );
+    bool get_run_simgrid_switch();
+    bool _is_sim_tdmap_simgrid_ostream_buffer_active();
 
     /*
      * ASSERT TYPE METHODS
@@ -287,6 +326,9 @@ class TDMap {
     bool _is_wave_function_name_defined();
     bool _is_nx_simulated_horizontal_samples_defined();
     bool _is_ny_simulated_vertical_samples_defined();
+
+    // going to run
+
 
     // runned ?
     bool _is_simulated_images_grid_defined();

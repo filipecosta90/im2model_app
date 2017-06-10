@@ -380,6 +380,8 @@ bool CELSLC_prm::update_nz_simulated_partitions_from_prm(){
 void CELSLC_prm::cleanup_thread(){
   bool status = true;
   boost::filesystem::path dir ( base_dir_path );
+
+  // remove prm first
   std::string prm_filename = slc_file_name_prefix + ".prm";
   boost::filesystem::path prm_file ( prm_filename );
   boost::filesystem::path full_prm_path = dir / prm_file;
@@ -440,6 +442,29 @@ bool CELSLC_prm::cleanup_bin(  ){
   boost::thread t( &CELSLC_prm::cleanup_thread , this ); 
   runned_bin = false; 
   return EXIT_SUCCESS;
+}
+
+bool CELSLC_prm::get_flag_io_ap_pipe_out(){
+  return _flag_io_ap_pipe_out;
+}
+
+void CELSLC_prm::set_flag_io_ap_pipe_out( bool value ){
+  _flag_io_ap_pipe_out = value;
+}
+
+bool CELSLC_prm::clean_for_re_run(){
+  bool result = true;
+  if( runned_bin ){
+    slice_params_nm_slice.clear();
+    slice_params_accum_nm_slice_vec.clear();
+    slice_params_nm_slice_vec.clear();
+    _flag_slice_params_accum_nm_slice_vec = false;
+    _flag_slice_params_nm_slice_vec = false;
+    _flag_nz_simulated_partitions = false;
+    runned_bin = false;
+    result &= cleanup_bin();
+  }
+  return result;
 }
 
 bool CELSLC_prm::call_boost_bin(  ){
@@ -512,20 +537,28 @@ bool CELSLC_prm::call_boost_bin(  ){
     std::error_code _error_code;
 
     if(  _flag_io_ap_pipe_out  ){
-      boost::process::child c(
-          // command
-          args_stream.str(),
-          boost::process::start_dir= base_dir_path,
-          // redirecting std_out to async buffer
-          boost::process::std_out > _io_pipe_out,
-          // redirecting std_err to null
-          // boost::process::std_err > boost::process::detail::
-          _error_code
-
-          );
-
-      c.wait();
-      _child_exit_code = c.exit_code();
+      if( _io_pipe_out.pipe().is_open() ){
+        boost::process::child c(
+            // command
+            args_stream.str(),
+            boost::process::start_dir= base_dir_path,
+            // redirecting std_out to async buffer
+            boost::process::std_out > _io_pipe_out,
+            // redirecting std_err to null
+            // boost::process::std_err > boost::process::detail::
+            _error_code
+            );
+        c.wait();
+        _child_exit_code = c.exit_code();
+      }
+      else{
+        std::cout << " ERROR. pipe output is enabled but pipe is closed" ;
+        if( _flag_logger ){
+          std::stringstream message;
+          message << " ERROR in child process. message: "<< _error_code.message() ;
+          logger->logEvent( ApplicationLog::error , " ERROR. pipe output is enabled but pipe is closed" );
+        }
+      }
     }
     else{
       boost::process::child c(
@@ -557,12 +590,19 @@ bool CELSLC_prm::call_boost_bin(  ){
     }
     assert((EXIT_SUCCESS == WEXITSTATUS(_child_exit_code)));
 #endif
-    assert ( !_error_code );
+    if( _error_code ){
+      std::cout << " ERROR in child process. message: "<< _error_code.message() ;
 
+      if( _flag_logger ){
+        std::stringstream message;
+        message << " ERROR in child process. message: "<< _error_code.message() ;
+        logger->logEvent( ApplicationLog::critical , message.str() );
+      }
+    }
 #if defined(BOOST_WINDOWS_API)
-    if (EXIT_SUCCESS == _child_exit_code ){
+    if( (EXIT_SUCCESS == _child_exit_code ) && (!_error_code) ) {
 #elif defined(BOOST_POSIX_API)
-      if( (EXIT_SUCCESS == WEXITSTATUS(_child_exit_code)) ){
+      if( (EXIT_SUCCESS == WEXITSTATUS(_child_exit_code)) && (!_error_code)) {
 #endif
         boost::filesystem::path full_path( boost::filesystem::current_path() );
         full_path_runned_bin = full_path.string();
@@ -570,7 +610,7 @@ bool CELSLC_prm::call_boost_bin(  ){
           update_nz_simulated_partitions_from_prm();
         }
         runned_bin = check_produced_slices();
-        result = true;
+        result = runned_bin;
       }
     }
     return result;

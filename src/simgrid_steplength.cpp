@@ -175,28 +175,63 @@ cv::Point2i SIMGRID_wavimg_steplength::get_best_match_position(){
 }
 
 bool SIMGRID_wavimg_steplength::set_sim_correlation_method( int enumerator ){
-bool result = false;
+  bool result = false;
 
-/*
-0 - (CV_TM_SQDIFF): squared difference
-1 - (CV_TM_SQDIFF_NORMED): normalized squared difference
-2 - (CV_TM_CCORR): cross correlation
-3 - (CV_TM_CCORR_NORMED): normalized cross correlation
-4 - (CV_TM_CCOEFF): correlation coefficient
-5- (CV_TM_CCOEFF_NORMED): normalized correlation coefficient
-*/
+  /*
+     0 - (CV_TM_SQDIFF): squared difference
+     1 - (CV_TM_SQDIFF_NORMED): normalized squared difference
+     2 - (CV_TM_CCORR): cross correlation
+     3 - (CV_TM_CCORR_NORMED): normalized cross correlation
+     4 - (CV_TM_CCOEFF): correlation coefficient
+     5- (CV_TM_CCOEFF_NORMED): normalized correlation coefficient
+     */
 
-if(
-        ( enumerator == CV_TM_SQDIFF_NORMED )
-        || ( enumerator == CV_TM_CCORR_NORMED )
-        || ( enumerator == CV_TM_CCOEFF_NORMED )
-        ) {
+  if(
+      ( enumerator == CV_TM_SQDIFF_NORMED )
+      || ( enumerator == CV_TM_CCORR_NORMED )
+      || ( enumerator == CV_TM_CCOEFF_NORMED )
+    ) {
     _sim_correlation_method = enumerator;
     result = true;
-}
-return result;
+  }
+  return result;
 }
 
+bool SIMGRID_wavimg_steplength::get_flag_io_ap_pipe_out(){
+  return _flag_io_ap_pipe_out;
+}
+
+bool SIMGRID_wavimg_steplength::clean_for_re_run(){
+  if( runned_simulation ){
+    slice_defocus_match_points.clear();
+    defocus_values_matrix.release();
+    thickness_values_matrix.release();
+    match_values_matrix.release();
+
+    for (int thickness_row = 0; thickness_row < raw_simulated_images_grid.size(); thickness_row ++ ){
+      //will contain the row of simulated images (same thickness, diferent defocus)
+      std::vector<cv::Mat> raw_simulated_images_row = raw_simulated_images_grid.at(thickness_row);
+      raw_simulated_images_row.empty();
+    }
+    raw_simulated_images_grid.empty();
+    for (int thickness_row = 0; thickness_row < simulated_images_grid.size(); thickness_row ++ ){
+      std::vector<cv::Mat> simulated_images_row = simulated_images_grid.at(thickness_row);
+      simulated_images_row.empty();
+    }
+    simulated_images_grid.empty();
+    for (int thickness_row = 0; thickness_row < experimental_images_match_location_grid.size(); thickness_row ++ ){
+      std::vector<cv::Point> experimental_images_matchloc_row = experimental_images_match_location_grid.at(thickness_row);
+      experimental_images_matchloc_row.empty();
+    }
+    experimental_images_match_location_grid.empty();
+    runned_simulation = false;
+  }
+  return true;
+}
+
+void SIMGRID_wavimg_steplength::set_flag_io_ap_pipe_out( bool value ){
+  _flag_io_ap_pipe_out = value;
+}
 
 void SIMGRID_wavimg_steplength::set_iteration_number ( int itt ){
   iteration_number = itt;

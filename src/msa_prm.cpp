@@ -112,19 +112,45 @@ void MSA_prm::set_linear_slices_for_full_object_structure () {
 }
 
 void MSA_prm::cleanup_thread(){
-  boost::filesystem::path p (".");
-  boost::filesystem::directory_iterator end_itr;
-  // cycle through the directory
-  for ( boost::filesystem::directory_iterator itr(p); itr != end_itr; ++itr)
-  {
-    // If it's not a directory, list it. If you want to list directories too, just remove this check.
-    if (is_regular_file(itr->path())) {
-      // assign current file name to current_file and echo it out to the console.
-      if( itr->path().extension() == WAV_EXTENSION ){
-        bool remove_result = boost::filesystem::remove( itr->path().filename() );
+
+    bool status = true;
+    boost::filesystem::path dir ( base_dir_path );
+
+    // remove prm first
+    boost::filesystem::path prm_file ( prm_filename );
+    boost::filesystem::path full_prm_path = dir / prm_file;
+
+    if( boost::filesystem::exists( full_prm_path ) ){
+      const bool remove_result = boost::filesystem::remove( prm_file );
+      // if the remove process was sucessfull the prm no longer exists
+      _flag_produced_prm = !remove_result;
+      status &= remove_result;
+      if( _flag_logger ){
+        std::stringstream message;
+        message << "removing the msa prm file: " << full_prm_path.string() << " result: " << remove_result;
+        logger->logEvent( ApplicationLog::notification , message.str() );
       }
     }
-  }
+
+   // remove the wav files
+    for ( int slice_id = 1 ;
+        slice_id <= number_slices_used_describe_full_object_structure_up_to_its_maximum_thickness;
+        slice_id++){
+      std::stringstream filename_stream;
+      filename_stream << wave_function_name << "_sl"<< std::setw(3) << std::setfill('0') << std::to_string(slice_id) << ".wav" ;
+      boost::filesystem::path wav_file ( filename_stream.str() );
+      boost::filesystem::path full_wave_path = dir / wav_file;
+
+      if( boost::filesystem::exists( full_wave_path ) ){
+        const bool remove_result = boost::filesystem::remove( full_wave_path );
+        status &= remove_result;
+        if( _flag_logger ){
+          std::stringstream message;
+          message << "removing the wave file: " << full_wave_path.string() << " result: " << remove_result;
+          logger->logEvent( ApplicationLog::notification , message.str() );
+        }
+      }
+    }
 }
 
 bool MSA_prm::cleanup_bin(){
@@ -262,6 +288,13 @@ bool MSA_prm::call_bin(){
     return result;
   }
 
+  bool MSA_prm::get_flag_io_ap_pipe_out(){
+    return _flag_io_ap_pipe_out;
+  }
+
+  void MSA_prm::set_flag_io_ap_pipe_out( bool value ){
+    _flag_io_ap_pipe_out = value;
+  }
 
   bool MSA_prm::save_prm_filename_path(){
     bool result = false;
@@ -281,6 +314,10 @@ bool MSA_prm::call_bin(){
       }
     }
     return result;
+  }
+
+  bool MSA_prm::clean_for_re_run(){
+    return cleanup_bin();
   }
 
   bool MSA_prm::_is_prm_filename_path_defined(){

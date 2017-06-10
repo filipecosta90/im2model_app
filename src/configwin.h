@@ -18,6 +18,13 @@
 #include <boost/process.hpp>
 #include <boost/filesystem/operations.hpp>                // for directory_iterator
 #include <boost/filesystem/path.hpp>                      // for path, operator==, oper...
+
+#if defined(BOOST_POSIX_API)
+#include <boost/process/detail/posix/basic_pipe.hpp>
+#elif defined(BOOST_WINDOWS_API)
+#include <boost/process/detail/windows/basic_pipe.hpp>
+#endif
+
 /** END BOOST **/
 
 #include "image_crystal.hpp"
