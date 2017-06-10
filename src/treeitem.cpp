@@ -100,6 +100,7 @@ bool TreeItem::set_fp_checker( int col,  boost::function<bool(bool)> check_sette
     _fp_check_setter_col_pos = col;
     _flag_fp_check_setter = true;
 fp_check_setter = check_setter;
+return true;
 }
 
 std::vector<boost::function<bool()>> TreeItem::get_toolbar_actions(){

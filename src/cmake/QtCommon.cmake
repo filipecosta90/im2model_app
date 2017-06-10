@@ -14,7 +14,7 @@ if (NOT RESOURCE_FOLDER)
 endif()
 
 if (NOT ICON_NAME)
-    set(ICON_NAME AppIcon)
+    set(ICON_NAME Im2Model_AppIcon)
 endif()
 
 if (APPLE)
