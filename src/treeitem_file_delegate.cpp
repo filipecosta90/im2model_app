@@ -43,29 +43,17 @@ void TreeItemFileDelegate::paint(QPainter * painter, const QStyleOptionViewItem 
     case TreeItem::_delegate_CHECK:
       {
         if( item->get_checkbox_column() == index.column() ){
-          QRect rect = option.rect;
 
-          // Painting the checkbox
-          painter->save();
-          painter->translate( rect.topLeft() );
-          QPoint topLeft( 0, 0 );
-          QStyleOptionViewItem itemOption(option);
-          initStyleOption(&itemOption, index);
-          QStyleOptionButton checkbox = checkboxOption( option, index, topLeft.x(), Qt::AlignLeft );
-          bool value = index.model()->data(index, Qt::EditRole).toBool();
-          checkbox.state = value ? (QStyle::State_Enabled | QStyle::State_On) :  (QStyle::State_Enabled | QStyle::State_Off);
+            QString legend = item->get_legend( index.column() ).toString();
+            QCheckBox *checkbox = new QCheckBox( legend  );
+            bool _is_checked = index.model()->data(index, Qt::EditRole).toBool();
+            checkbox->setChecked(_is_checked);
+            painter->save();
+            painter->translate(option.rect.topLeft());
+            checkbox->render(painter);
+            painter->restore();
+            break;
 
-          QApplication::style()->drawControl(QStyle::CE_CheckBox, &checkbox, painter , nullptr);
-
-          // Painting the checkbox text from legend string
-          topLeft += QPoint( checkbox.rect.width(), 0 );
-          QString legend = item->get_legend(index.column()).toString();
-          QSize legendSize ( QApplication::fontMetrics().size( 0, legend ) );
-          QRect nameRect( QPoint( 0, 0 ), legendSize );
-          nameRect.setHeight( rect.height() );
-          nameRect.moveTopLeft( topLeft );
-          QApplication::style()->drawItemText( painter, nameRect,   Qt::AlignLeft | Qt::AlignVCenter, option.palette, true, legend );
-          painter->restore();
         }
         else{
           QStyledItemDelegate::paint( painter, option,  index);

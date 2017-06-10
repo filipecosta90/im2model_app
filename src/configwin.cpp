@@ -8,7 +8,6 @@ MainWindow::MainWindow( ApplicationLog::ApplicationLog* logger , QWidget *parent
   if (_flag_im2model_logger) {
     im2model_logger->logEvent(ApplicationLog::normal, "Setting up UI.");
   }
-
   ui->setupUi(this);
   ui->td_map_splitter->setStretchFactor(0,3);
   ui->td_map_splitter->setStretchFactor(1,7);
@@ -25,7 +24,6 @@ MainWindow::MainWindow( ApplicationLog::ApplicationLog* logger , QWidget *parent
   updateStatusBar();
   setCurrentFile(QString());
   setUnifiedTitleAndToolBarOnMac(true);
-
 
   if (_flag_im2model_logger) {
     im2model_logger->logEvent(ApplicationLog::normal, "Loading file delegate.");
