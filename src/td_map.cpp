@@ -672,9 +672,11 @@ bool  TDMap::prepare_wavimg_parameters(){
     _tdmap_wavimg_parameters->set_partial_spacial_coherence_switch( 1 ); // colocar a zero
     _tdmap_wavimg_parameters->set_partial_spacial_coherence_semi_convergence_angle( 0.2f );
     // setters line 16
-    _tdmap_wavimg_parameters->set_mtf_simulation_switch( 1 ); // alterar aqui para 0
-    _tdmap_wavimg_parameters->set_k_space_scaling( 1.0f );
-    _tdmap_wavimg_parameters->set_mtf_filename( "'/Users/filipeoliveira/Documents/im2model/simulation/mtf/MTF-US2k-300.mtf'" );
+   // if( _tdmap_wavimg_parameters->_is_mtf_filename_defined() ){
+  //  _tdmap_wavimg_parameters->set_mtf_simulation_switch( true ); // alterar aqui para 0
+  //  _tdmap_wavimg_parameters->set_k_space_scaling( 1.0f );
+  //  _tdmap_wavimg_parameters->set_mtf_filename( "'/Users/filipeoliveira/Documents/im2model/simulation/mtf/MTF-US2k-300.mtf'" );
+   // }
     // setters line 17
     _tdmap_wavimg_parameters->set_simulation_image_spread_envelope_switch( 0 );
     _tdmap_wavimg_parameters->set_isotropic_one_rms_amplitude( 0.03 ); // colocar a zero

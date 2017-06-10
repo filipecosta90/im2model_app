@@ -45,7 +45,7 @@ WAVIMG_prm::WAVIMG_prm( boost::process::ipstream &async_io_buffer_out ) : _io_pi
   partial_spacial_coherence_semi_convergence_angle = 0.0f;
   // line 16
   mtf_simulation_switch = false;
-  k_space_scaling = 0.0f;
+  k_space_scaling = 1.0f;
   mtf_filename = "";
   // line 17
   simulation_image_spread_envelope_switch = 0;
@@ -378,7 +378,6 @@ bool WAVIMG_prm::set_mtf_filename( std::string file_name ){
   _flag_mtf_filename = boost::filesystem::exists(full_path);
   if( _flag_mtf_filename ) {
     mtf_filename = boost::filesystem::canonical(full_path).string();
-
     if( _flag_logger ){
       std::stringstream message;
       message << "specified mtf file: " <<  mtf_filename;
@@ -388,7 +387,7 @@ bool WAVIMG_prm::set_mtf_filename( std::string file_name ){
   else{
     if( _flag_logger ){
       std::stringstream message;
-      message << "the specified mtf file does not exist: " <<  file_name;
+      message << "the specified mtf file does not exist: " <<  file_name << " result " << _flag_mtf_filename;
       logger->logEvent( ApplicationLog::error , message.str() );
     }
   }
@@ -743,7 +742,7 @@ bool WAVIMG_prm::call_bin(){
       outfile <<  partial_spacial_coherence_switch << ", " << partial_spacial_coherence_semi_convergence_angle << " !" << std::endl;
       // line 16
       int _mtf_swith = mtf_simulation_switch ? 1 : 0;
-      outfile <<  _mtf_swith << ", " << k_space_scaling << ", " <<  mtf_filename << " !" << std::endl;
+      outfile <<  _mtf_swith << ", " << k_space_scaling << ", \'" <<  mtf_filename << "\' !" << std::endl;
       // line 17
       outfile <<  simulation_image_spread_envelope_switch << ", " << isotropic_one_rms_amplitude << " !" << std::endl;
       // double anisotropic_second_rms_amplitude;
