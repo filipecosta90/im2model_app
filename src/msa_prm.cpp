@@ -194,22 +194,30 @@ bool MSA_prm::call_bin(){
 
     int _child_exit_code = -1;
     std::error_code _error_code;
-    /////// WORK MORE HERE
-    //_flag_io_ap_pipe_out = false;
-    if(  _flag_io_ap_pipe_out  ){
-      boost::process::child c(
-          // command
-          args_stream.str(),
-          boost::process::start_dir= base_dir_path,
-          // redirecting std_out to async buffer
-          boost::process::std_out > _io_pipe_out,
-          // redirecting std_err to null
-          // boost::process::std_err > boost::process::detail::
-          _error_code
-          );
 
-      c.wait();
-      _child_exit_code = c.exit_code();
+    if(  _flag_io_ap_pipe_out  ){
+      if( _io_pipe_out.pipe().is_open() ){
+        boost::process::child c(
+            // command
+            args_stream.str(),
+            boost::process::start_dir= base_dir_path,
+            // redirecting std_out to async buffer
+            boost::process::std_out > _io_pipe_out,
+            // redirecting std_err to null
+            // boost::process::std_err > boost::process::detail::
+            _error_code
+            );
+        c.wait();
+        _child_exit_code = c.exit_code();
+      }
+      else{
+        std::cout << " ERROR. pipe output is enabled but pipe is closed" ;
+        if( _flag_logger ){
+          std::stringstream message;
+          message << " ERROR. pipe output is enabled but pipe is closed";
+          logger->logEvent( ApplicationLog::error ,  message.str() );
+        }
+      }
     }
     else{
       boost::process::child c(
@@ -224,6 +232,11 @@ bool MSA_prm::call_bin(){
           );
       c.wait();
       _child_exit_code = c.exit_code();
+      if( _flag_logger ){
+        std::stringstream message;
+        message << " runned in silent mode";
+        logger->logEvent( ApplicationLog::notification ,  message.str() );
+      }
     }
 
 #if defined(BOOST_WINDOWS_API)

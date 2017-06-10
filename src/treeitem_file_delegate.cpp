@@ -475,7 +475,7 @@ QSize TreeItemFileDelegate::sizeHint ( const QStyleOptionViewItem & option, cons
 
         //QTextBrowser* browser  = editor->findChild<QTextBrowser*>();
        // QRect browser_rect = browser->rect();
-        std::cout << " sizeHint for _delegate_TEXT_EDITOR" << std::endl; //<<  browser_rect.width() << " heigth " << browser_rect.height() << std::endl;
+        //std::cout << " sizeHint for _delegate_TEXT_EDITOR" << std::endl; //<<  browser_rect.width() << " heigth " << browser_rect.height() << std::endl;
 
         return QSize( option.rect.width(), 100 );
         break;

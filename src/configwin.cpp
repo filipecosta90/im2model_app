@@ -316,7 +316,7 @@ void MainWindow::update_tdmap_sim_ostream(){
   if( _core_td_map->get_run_wavimg_switch() ){
     if( _core_td_map->_is_sim_tdmap_wavimg_ostream_buffer_active() ){
 
-      QModelIndex wavimg_index = tdmap_running_configuration_model->index(2,0);
+      QModelIndex wavimg_index = tdmap_running_configuration_model->index(3,0);
       QModelIndex wavimg_out_legend_index = tdmap_running_configuration_model->index(0,0,wavimg_index);
       QModelIndex wavimg_out_index = project_setup_crystalographic_fields_model->index(0,1,wavimg_out_legend_index);
       std::cout << "####wavimg_out_index  VALID: " << wavimg_out_index.isValid() << std::endl;
@@ -1160,8 +1160,8 @@ void MainWindow::create_box_options(){
 
 
   // any change on the following fields causes the grid to be reset:
-    //# thick samples, thick lower bound, thick upper bound
-    //# defocus samples, lower bound, upper bound,
+  //# thick samples, thick lower bound, thick upper bound
+  //# defocus samples, lower bound, upper bound,
   // more work here
 
   ui->tdmap_table->connect_item_changes_to_invalidate_grid( thickness_range_number_samples, 1 );
@@ -1173,7 +1173,6 @@ void MainWindow::create_box_options(){
 
   ui->tdmap_table->connect_thickness_range_number_samples_changes(  thickness_range_number_samples, 1 );
   ui->tdmap_table->connect_defocus_range_number_samples_changes(  defocus_range_number_samples, 1 );
-
 
   /*************************
    * Running configuration
