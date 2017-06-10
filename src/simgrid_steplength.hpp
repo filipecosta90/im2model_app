@@ -330,7 +330,9 @@ class SIMGRID_wavimg_steplength {
 
     cv::Mat calculate_error_matrix( cv::Mat aligned_experimental_image_roi, cv::Mat aligned_simulated_image_roi );
 
-    bool export_sim_grid();
+    bool export_sim_grid( std::string filename );
+
+    std::string get_export_sim_grid_filename_hint();
 
     void produce_png_from_dat_file();
 

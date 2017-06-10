@@ -395,6 +395,34 @@ bool MainWindow::saveAs()
   return saveFile(dialog.selectedFiles().first());
 }
 
+
+bool MainWindow::export_TDMap(){
+  // returns false if no settings were saved
+  bool result = false;
+  if( _core_td_map ){
+    if( _core_td_map->_is_simulated_images_grid_defined() ){
+      QFileDialog dialog(this);
+      dialog.setWindowModality(Qt::WindowModal);
+      std::string preset_filename = _core_td_map->get_export_sim_grid_filename_hint();
+
+      boost::filesystem::path filename( preset_filename );
+      boost::filesystem::path full_path_filename = base_dir_path / preset_filename ;
+      dialog.selectFile( QString::fromStdString(full_path_filename.string() ) );
+
+      dialog.setAcceptMode(QFileDialog::AcceptSave);
+      if (dialog.exec() != QDialog::Accepted){
+        result = false;
+      }
+      else{
+        QString tdmap_filename = dialog.selectedFiles().first();
+        result = _core_td_map->export_sim_grid(  tdmap_filename.toStdString() );
+      }
+    }
+  }
+  return result;
+}
+
+
 bool MainWindow::edit_preferences(){
   // returns false if no settings were saved
   bool result = false;
@@ -470,12 +498,20 @@ void MainWindow::createActions(){
 
   QMenu *editMenu = ui->menuBar->addMenu(tr("&Edit"));
   QAction* preferencesAct = editMenu->addAction(tr("&Preferences"), this, &MainWindow::edit_preferences);
-  //preferencesAct->setShortcuts(QKeySequence::UnknownKey);
+  preferencesAct->setShortcuts(QKeySequence::UnknownKey);
   editMenu->addAction(preferencesAct);
 
   QMenu *helpMenu = ui->menuBar->addMenu(tr("&Help"));
   QAction *aboutAct = helpMenu->addAction(tr("&About"), this, &MainWindow::about);
   aboutAct->setStatusTip(tr("Show the application's About box"));
+
+  QMenu *tdmapMenu = ui->menuBar->addMenu(tr("&TD Map"));
+  //QToolBar *fileToolBar = addToolBar(tr("File"));
+  QAction *exportTDMap = tdmapMenu->addAction( tr("&Export"), this , &MainWindow::export_TDMap );
+  // newAct->setShortcuts(QKeySequence::);
+  newAct->setStatusTip(tr("Export the current TD Map"));
+  tdmapMenu->addAction(exportTDMap);
+
 }
 
 void MainWindow::updateStatusBar(){
@@ -1318,7 +1354,6 @@ void MainWindow::create_box_options(){
   for (int column = 0; column < tdmap_simulation_setup_model->columnCount(); ++column){
     ui->qtree_view_tdmap_running_configuration->resizeColumnToContents(column);
   }
-
 }
 
 bool MainWindow::set_dr_probe_path( QString path ){

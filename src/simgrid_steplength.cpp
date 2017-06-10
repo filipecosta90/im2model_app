@@ -537,13 +537,19 @@ cv::Mat SIMGRID_wavimg_steplength::calculate_error_matrix( cv::Mat aligned_exper
   return error_matrix;
 }
 
-bool SIMGRID_wavimg_steplength::export_sim_grid(){
+std::string SIMGRID_wavimg_steplength::get_export_sim_grid_filename_hint(){
+  std::stringstream sim_grid_file_image;
+  sim_grid_file_image << "sim_grid_thickness_" << slices_lower_bound << "_to_" << slices_upper_bound <<  "_defocus_" <<defocus_lower_bound << "_to_" << defocus_upper_bound << ".png" ;
+  std::string sim_grid_file_name_image = sim_grid_file_image.str();
+  return sim_grid_file_name_image;
+}
+
+bool SIMGRID_wavimg_steplength::export_sim_grid( std::string sim_grid_file_name_image ){
   assert ( slice_samples >= 1 );
   assert ( defocus_samples >= 1 );
   assert ( slices_lower_bound >= 1 );
   assert ( celslc_accum_nm_slice_vec.size() == number_slices_to_max_thickness );
   if( runned_simulation ){
-
     sim_grid_width  = ( reshaped_simulated_image_width * defocus_samples );
     sim_grid_height = ( reshaped_simulated_image_height * slice_samples );
     sim_grid.create ( sim_grid_height, sim_grid_width , CV_8UC1 );
@@ -627,14 +633,11 @@ bool SIMGRID_wavimg_steplength::export_sim_grid(){
     thickness_file_matrix.close();
     match_factor_file_matrix.close();
 
-    std::stringstream sim_grid_file_image;
-    sim_grid_file_image << "sim_grid_thickness_" << slices_lower_bound << "_to_" << slices_upper_bound <<  "_defocus_" <<defocus_lower_bound << "_to_" << defocus_upper_bound << ".png" ;
-    std::string sim_grid_file_name_image = sim_grid_file_image.str();
+    imwrite(sim_grid_file_name_image, sim_grid);
 
     if (debug_switch == true) {
       try {
         imwrite("exp_roi.png", experimental_image_roi);
-        imwrite(sim_grid_file_name_image, sim_grid);
         namedWindow("SIMGRID window", cv::WINDOW_AUTOSIZE);// Create a window for display.
         imshow("SIMGRID window", sim_grid); //draw );
         cv::waitKey(0);
@@ -645,10 +648,10 @@ bool SIMGRID_wavimg_steplength::export_sim_grid(){
       }
     }
 
-    return EXIT_SUCCESS;
+    return true;
   }
   else{
-    return EXIT_FAILURE;
+    return false;
   }
 }
 

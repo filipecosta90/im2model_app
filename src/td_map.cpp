@@ -412,7 +412,7 @@ bool TDMap::run_tdmap( ){
       }
       //if run msa flag is false, the wav files should exist and we should update from them
       else{
-          _msa_stage_ok = _tdmap_msa_parameters->check_produced_waves();
+        _msa_stage_ok = _tdmap_msa_parameters->check_produced_waves();
       }
     }
     else{
@@ -424,7 +424,7 @@ bool TDMap::run_tdmap( ){
     const bool _wavimg_parameters_ok = prepare_wavimg_parameters();
     // check that msa parameters are prepared and paths are defined
     if( _wavimg_parameters_ok && _tdmap_wavimg_parameters->_is_bin_path_defined() ){
-        //if run wavimg flag is true, the dat files should be produced
+      //if run wavimg flag is true, the dat files should be produced
       if ( _run_wavimg_switch ){
         bool _clean_run_env = !_flag_runned_tdmap_wavimg;
         if( _flag_runned_tdmap_wavimg ){
@@ -455,11 +455,11 @@ bool TDMap::run_tdmap( ){
       }
       //if run wavimg flag is false, the dat files should exist and we should update from them
       else{
-          _wavimg_stage_ok = _tdmap_wavimg_parameters->check_produced_dat();
+        _wavimg_stage_ok = _tdmap_wavimg_parameters->check_produced_dat();
       }
     }
     else {
-        _wavimg_stage_ok = false;
+      _wavimg_stage_ok = false;
     }
   }
   if( _celslc_stage_ok && _msa_stage_ok && _wavimg_stage_ok ){
@@ -500,7 +500,7 @@ bool TDMap::run_tdmap( ){
       }
     }
     else{
-        _simgrid_stage_ok = false;
+      _simgrid_stage_ok = false;
     }
   }
   _simulation_status = _celslc_stage_ok & _msa_stage_ok & _wavimg_stage_ok & _simgrid_stage_ok;
@@ -672,11 +672,11 @@ bool  TDMap::prepare_wavimg_parameters(){
     _tdmap_wavimg_parameters->set_partial_spacial_coherence_switch( 1 ); // colocar a zero
     _tdmap_wavimg_parameters->set_partial_spacial_coherence_semi_convergence_angle( 0.2f );
     // setters line 16
-   // if( _tdmap_wavimg_parameters->_is_mtf_filename_defined() ){
-  //  _tdmap_wavimg_parameters->set_mtf_simulation_switch( true ); // alterar aqui para 0
-  //  _tdmap_wavimg_parameters->set_k_space_scaling( 1.0f );
-  //  _tdmap_wavimg_parameters->set_mtf_filename( "'/Users/filipeoliveira/Documents/im2model/simulation/mtf/MTF-US2k-300.mtf'" );
-   // }
+    // if( _tdmap_wavimg_parameters->_is_mtf_filename_defined() ){
+    //  _tdmap_wavimg_parameters->set_mtf_simulation_switch( true ); // alterar aqui para 0
+    //  _tdmap_wavimg_parameters->set_k_space_scaling( 1.0f );
+    //  _tdmap_wavimg_parameters->set_mtf_filename( "'/Users/filipeoliveira/Documents/im2model/simulation/mtf/MTF-US2k-300.mtf'" );
+    // }
     // setters line 17
     _tdmap_wavimg_parameters->set_simulation_image_spread_envelope_switch( 0 );
     _tdmap_wavimg_parameters->set_isotropic_one_rms_amplitude( 0.03 ); // colocar a zero
@@ -782,6 +782,14 @@ bool  TDMap::prepare_simgrid_parameters(){
   _td_map_simgrid->set_step_size( defocus_period, slice_period );
   _flag_tdmap_simgrid_parameters = true;
   return  _flag_tdmap_simgrid_parameters;
+}
+
+bool TDMap::export_sim_grid( std::string sim_grid_file_name_image ){
+  return _td_map_simgrid->export_sim_grid( sim_grid_file_name_image );
+}
+
+std::string TDMap::get_export_sim_grid_filename_hint(){
+  return _td_map_simgrid->get_export_sim_grid_filename_hint();
 }
 
 bool TDMap::_is_thickness_range_lower_bound_defined(){

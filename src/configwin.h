@@ -97,6 +97,7 @@ class MainWindow : public QMainWindow {
     bool saveAs();
     void about();
     void documentWasModified();
+    bool export_TDMap();
 
 signals:
     void experimental_image_filename_changed( );

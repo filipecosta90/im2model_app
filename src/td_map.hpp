@@ -367,6 +367,10 @@ class TDMap {
 
     std::vector< std::vector<cv::Mat> > get_simulated_images_grid();
 
+    bool export_sim_grid( std::string sim_grid_file_name_image );
+
+    std::string get_export_sim_grid_filename_hint();
+
     cv::Point2i get_simgrid_best_match_position();
 
     cv::Mat get_simulated_image_in_grid( int row, int col );
