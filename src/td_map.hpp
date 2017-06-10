@@ -236,6 +236,7 @@ class TDMap {
     enum ExecLogMode {FULL_LOG, DEBUG_MODE, SILENT_MODE, USER_DEFINED_LOG_MODE };
 
     bool set_log_level( int level );
+    int get_log_level();
     bool set_refinement_definition_method( int method);
     int get_refinement_definition_method();
     bool set_application_logger( ApplicationLog::ApplicationLog* app_logger );
@@ -417,6 +418,8 @@ class TDMap {
     bool set_base_dir_path( boost::filesystem::path path );
 
     bool set_image_correlation_matching_method( int method );
+
+    int  get_image_correlation_matching_method();
 
     bool set_mtf_filename( std::string file_name );
 

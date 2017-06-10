@@ -174,7 +174,11 @@ cv::Point2i SIMGRID_wavimg_steplength::get_best_match_position(){
   return best_match_Point2i;
 }
 
-bool SIMGRID_wavimg_steplength::set_sim_correlation_method( int enumerator ){
+int SIMGRID_wavimg_steplength::get_image_correlation_matching_method(){
+       return _sim_correlation_method;
+}
+
+bool SIMGRID_wavimg_steplength::set_image_correlation_matching_method( int enumerator ){
   bool result = false;
 
   /*

@@ -1020,7 +1020,6 @@ bool TDMap::set_dr_probe_wavimg_execname( std::string wavimg_execname ){
   if( result ){
     dr_probe_wavimg_execname = wavimg_execname;
   }
-
   _flag_dr_probe_wavimg_execname = result;
 
   if( _flag_logger ){
@@ -1028,14 +1027,17 @@ bool TDMap::set_dr_probe_wavimg_execname( std::string wavimg_execname ){
     message << " set_dr_probe_wavimg_execname result: " << _flag_dr_probe_wavimg_execname;
     logger->logEvent( ApplicationLog::notification , message.str() );
   }
-
   return _flag_dr_probe_wavimg_execname;
 }
 
 bool TDMap::set_image_correlation_matching_method( int method ){
   std::cout << " set_image_correlation_matching_method to enum " << method << std::endl;
-  _flag_image_correlation_matching_method = _td_map_simgrid->set_sim_correlation_method( method );
+  _flag_image_correlation_matching_method = _td_map_simgrid->set_image_correlation_matching_method( method );
   return _flag_image_correlation_matching_method;
+}
+
+int TDMap::get_image_correlation_matching_method(){
+    return _td_map_simgrid->get_image_correlation_matching_method( );
 }
 
 bool TDMap::set_refinement_definition_method ( int method ){
@@ -1084,3 +1086,6 @@ bool TDMap::set_log_level( int level ){
   return true;
 }
 
+int TDMap::get_log_level(){
+    return _exec_log_level;
+}

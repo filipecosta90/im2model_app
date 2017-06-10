@@ -37,6 +37,8 @@ class TreeItem : public QObject {
 
     explicit TreeItem( QVector<QVariant> &data, boost::function<bool(bool)> setter, QVector<QVariant> &legend, TreeItem *parent = 0);
     explicit TreeItem( QVector<QVariant> &data, boost::function<bool(bool)> setter, QVector<QVariant> &legend, QVector<bool> editable, TreeItem *parent = 0);
+    explicit TreeItem( QVector<QVariant> &data, boost::function<bool(bool)> setter, boost::function<bool(void)> getter, QVector<QVariant> &legend, TreeItem *parent = 0);
+    explicit TreeItem( QVector<QVariant> &data, boost::function<bool(bool)> setter, boost::function<bool(void)> getter, QVector<QVariant> &legend, QVector<bool> editable, TreeItem *parent = 0);
 
     explicit TreeItem( QVector<QVariant> &data, boost::function<bool(int)> setter, TreeItem *parent = 0);
     explicit TreeItem( QVector<QVariant> &data, boost::function<bool(int)> setter, boost::function<int(void)> getter, TreeItem *parent = 0 );

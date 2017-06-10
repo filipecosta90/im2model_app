@@ -210,7 +210,9 @@ class SIMGRID_wavimg_steplength {
 
     static cv::Mat gradientY(cv::Mat & mat, double spacing);
 
-    bool set_sim_correlation_method( int enumerator );
+    bool set_image_correlation_matching_method( int enumerator );
+
+    int  get_image_correlation_matching_method();
 
     void set_iteration_number ( int itt );
 

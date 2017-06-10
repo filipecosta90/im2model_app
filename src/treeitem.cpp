@@ -28,9 +28,37 @@ TreeItem::TreeItem( QVector<QVariant> &data, QVector<bool> editable, TreeItem *p
   itemIsEditableVec = editable;
 }
 
+TreeItem::TreeItem( QVector<QVariant> &data, boost::function<bool(bool)> setter, QVector<QVariant> &legend, TreeItem *parent) : TreeItem( data, parent ) {
+  fp_data_setter_bool = setter;
+  _flag_fp_data_setter_bool = true;
+  itemLegend = legend;
+}
+
+TreeItem::TreeItem( QVector<QVariant> &data, boost::function<bool(bool)> setter, boost::function<bool(void)> getter, QVector<QVariant> &legend, TreeItem *parent) : TreeItem( data, setter, legend, parent ) {
+  fp_data_getter_bool = getter;
+  _flag_fp_data_getter_bool = true;
+}
+
+TreeItem::TreeItem( QVector<QVariant> &data, boost::function<bool(bool)> setter,  QVector<QVariant> &legend, QVector<bool> editable, TreeItem *parent  ) : TreeItem( data, setter, legend, parent ){
+  itemIsEditableVec = editable;
+}
+
+TreeItem::TreeItem( QVector<QVariant> &data, boost::function<bool(bool)> setter, boost::function<bool(void)> getter, QVector<QVariant> &legend, QVector<bool> editable, TreeItem *parent  ) : TreeItem( data, setter, getter, legend, parent ){
+  itemIsEditableVec = editable;
+}
+
 TreeItem::TreeItem( QVector<QVariant> &data, boost::function<bool(std::string)> setter, TreeItem *parent) : TreeItem( data, parent ) {
   fp_data_setter_string = setter;
   _flag_fp_data_setter_string = true;
+}
+
+TreeItem::TreeItem( QVector<QVariant> &data, boost::function<bool(std::string)> setter, QVector<bool> editable, TreeItem *parent  ) : TreeItem( data, setter, parent ){
+  itemIsEditableVec = editable;
+}
+
+TreeItem::TreeItem( QVector<QVariant> &data, boost::function<bool(std::string)> setter, bool checkable, boost::function<bool(bool)> check_setter, TreeItem *parent) : TreeItem( data, setter, parent ){
+  is_checkable = checkable;
+  fp_check_setter =  check_setter;
 }
 
 TreeItem::TreeItem( QVector<QVariant> &data, boost::function<bool(double)> setter, TreeItem *parent) : TreeItem( data, parent ) {
@@ -38,11 +66,15 @@ TreeItem::TreeItem( QVector<QVariant> &data, boost::function<bool(double)> sette
   _flag_fp_data_setter_double = true;
 }
 
-TreeItem::TreeItem( QVector<QVariant> &data, boost::function<bool(bool)> setter, QVector<QVariant> &legend, TreeItem *parent) : TreeItem( data, parent ) {
-  fp_data_setter_bool = setter;
-  _flag_fp_data_setter_bool = true;
-  itemLegend = legend;
+TreeItem::TreeItem( QVector<QVariant> &data, boost::function<bool(double)> setter, QVector<bool> editable, TreeItem *parent  ) : TreeItem( data, setter, parent ){
+  itemIsEditableVec = editable;
 }
+
+TreeItem::TreeItem( QVector<QVariant> &data, boost::function<bool(double)> setter, bool checkable, boost::function<bool(bool)> check_setter, TreeItem *parent) : TreeItem( data, setter, parent ){
+  is_checkable = checkable;
+  fp_check_setter =  check_setter;
+}
+
 
 TreeItem::TreeItem( QVector<QVariant> &data, boost::function<bool(int)> setter, TreeItem *parent) : TreeItem( data, parent ) {
   fp_data_setter_int = setter;
@@ -54,34 +86,12 @@ TreeItem::TreeItem( QVector<QVariant> &data, boost::function<bool(int)> setter, 
     _flag_fp_data_getter_int = true;
 }
 
-TreeItem::TreeItem( QVector<QVariant> &data, boost::function<bool(std::string)> setter, QVector<bool> editable, TreeItem *parent  ) : TreeItem( data, setter, parent ){
-  itemIsEditableVec = editable;
-}
-
-TreeItem::TreeItem( QVector<QVariant> &data, boost::function<bool(bool)> setter,  QVector<QVariant> &legend, QVector<bool> editable, TreeItem *parent  ) : TreeItem( data, setter, legend, parent ){
-  itemIsEditableVec = editable;
-}
-
-TreeItem::TreeItem( QVector<QVariant> &data, boost::function<bool(double)> setter, QVector<bool> editable, TreeItem *parent  ) : TreeItem( data, setter, parent ){
-  itemIsEditableVec = editable;
-}
-
 TreeItem::TreeItem( QVector<QVariant> &data, boost::function<bool(int)> setter, QVector<bool> editable, TreeItem *parent  ) : TreeItem( data, setter, parent ){
   itemIsEditableVec = editable;
 }
 
 TreeItem::TreeItem( QVector<QVariant> &data, boost::function<bool(int)> setter, boost::function<int(void)> getter, QVector<bool> editable, TreeItem *parent  ) : TreeItem( data, setter, getter, parent ){
   itemIsEditableVec = editable;
-}
-
-TreeItem::TreeItem( QVector<QVariant> &data, boost::function<bool(std::string)> setter, bool checkable, boost::function<bool(bool)> check_setter, TreeItem *parent) : TreeItem( data, setter, parent ){
-  is_checkable = checkable;
-  fp_check_setter =  check_setter;
-}
-
-TreeItem::TreeItem( QVector<QVariant> &data, boost::function<bool(double)> setter, bool checkable, boost::function<bool(bool)> check_setter, TreeItem *parent) : TreeItem( data, setter, parent ){
-  is_checkable = checkable;
-  fp_check_setter =  check_setter;
 }
 
 TreeItem::TreeItem( QVector<QVariant> &data, boost::function<bool(int)> setter, bool checkable, boost::function<bool(bool)> check_setter, TreeItem *parent) : TreeItem( data, setter, parent ){

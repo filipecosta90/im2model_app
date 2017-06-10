@@ -633,6 +633,8 @@ bool MainWindow::readSettings(){
   _dr_probe_wavimg_bin = settings.value("wavimg","").toString();
   settings.endGroup();
   restoreGeometry(settings.value("geometry").toByteArray());
+  ui->td_map_splitter->restoreGeometry( settings.value("geometry.tdmap_splitter").toByteArray() );
+  ui->td_map_splitter->restoreState( settings.value("state.tdmap_splitter").toByteArray() );
   restoreState(settings.value("windowState").toByteArray());
   return checkSettings();
 }
@@ -646,6 +648,8 @@ void MainWindow::writeSettings(){
   settings.setValue("wavimg",_dr_probe_wavimg_bin);
   settings.endGroup();
   settings.setValue("geometry", saveGeometry() );
+  settings.setValue("geometry.tdmap_splitter", ui->td_map_splitter->saveGeometry() );
+  settings.setValue("state.tdmap_splitter", ui->td_map_splitter->saveState() );
   settings.setValue("windowState", saveState() );
 }
 
@@ -1120,6 +1124,7 @@ void MainWindow::create_box_options(){
   boost::function<bool(int)> box3_function_4_setter ( boost::bind( &TDMap::set_refinement_definition_method, _core_td_map, _1 ) );
 
   TreeItem* _simulation_refinement  = new TreeItem ( box3_option_4, box3_function_4_setter, box3_function_4_getter, box3_option_4_edit );
+ // load the preset data from core constuctor
   _simulation_refinement->load_data_from_getter();
   QVector<QVariant> box3_option_4_drop = {"No refinement","Corrected","Non-Corrected", "User defined"};
 
@@ -1168,11 +1173,14 @@ void MainWindow::create_box_options(){
 
   QVector<QVariant> box3_option_5_1 = {"Match method",""};
   QVector<bool> box3_option_5_1_edit = {false,true};
-  boost::function<bool(int)> box3_function_5_1 ( boost::bind( &TDMap::set_image_correlation_matching_method, _core_td_map, _1 ) );
-  TreeItem* image_correlation_matching_method = new TreeItem ( box3_option_5_1 , box3_function_5_1, box3_option_5_1_edit );
+
+  boost::function<int(void)> box3_function_5_1_getter ( boost::bind( &TDMap::get_image_correlation_matching_method, _core_td_map ) );
+  boost::function<bool(int)> box3_function_5_1_setter ( boost::bind( &TDMap::set_image_correlation_matching_method, _core_td_map, _1 ) );
+  TreeItem* image_correlation_matching_method = new TreeItem ( box3_option_5_1 , box3_function_5_1_setter, box3_function_5_1_getter,  box3_option_5_1_edit );
+  // load the preset data from core constuctor
+   image_correlation_matching_method->load_data_from_getter();
 
   QVector<QVariant> box3_option_5_1_drop = {"Normalized squared difference","Normalized cross correlation","Normalized correlation coefficient"};
-
   QVector<QVariant> box3_option_5_1_drop_enum( { CV_TM_SQDIFF_NORMED, CV_TM_CCORR_NORMED, CV_TM_CCOEFF_NORMED} );
 
   image_correlation_matching_method->set_item_delegate_type( TreeItem::_delegate_DROP );
@@ -1193,7 +1201,6 @@ void MainWindow::create_box_options(){
   }
 
   ui->tdmap_table->set_tdmap( _core_td_map );
-
 
   // any change on the following fields causes the grid to be reset:
   //# thick samples, thick lower bound, thick upper bound
@@ -1228,12 +1235,14 @@ void MainWindow::create_box_options(){
 
   QVector<QVariant> box4_option_1 = {"", ""};
   QVector<bool> box4_option_1_edit = {false,true};
-  boost::function<bool(int)> box4_function_1 ( boost::bind( &TDMap::set_log_level, _core_td_map, _1 ) );
+  boost::function<int()> box4_function_1_getter ( boost::bind( &TDMap::get_log_level, _core_td_map ) );
+  boost::function<bool(int)> box4_function_1_setter ( boost::bind( &TDMap::set_log_level, _core_td_map, _1 ) );
 
-  TreeItem* _log_level_setter  = new TreeItem ( box4_option_1, box4_function_1, box4_option_1_edit );
+  TreeItem* _log_level_setter  = new TreeItem ( box4_option_1, box4_function_1_setter, box4_function_1_getter, box4_option_1_edit );
+  // load the preset data from core constuctor
+   _log_level_setter->load_data_from_getter();
 
   QVector<QVariant> box4_option_1_drop = {"Full log","Debug mode","Silent mode", "User defined"};
-
   QVector<QVariant> box4_option_1_drop_enum( { TDMap::ExecLogMode::FULL_LOG, TDMap::ExecLogMode::DEBUG_MODE, TDMap::ExecLogMode::SILENT_MODE, TDMap::ExecLogMode::USER_DEFINED_LOG_MODE } );
 
   _log_level_setter->set_item_delegate_type( TreeItem::_delegate_DROP );
@@ -1246,11 +1255,14 @@ void MainWindow::create_box_options(){
    * */
   QVector<QVariant> box4_data_2 = {"",""};
   QVector<QVariant> box4_legend_2 = {"","Multislice phase granting" };
-  boost::function<bool(bool)> box4_option_2_checker ( boost::bind( &TDMap::set_run_celslc_switch, _core_td_map, _1 ) );
+  boost::function<bool()> box4_option_2_check_getter ( boost::bind( &TDMap::get_run_celslc_switch, _core_td_map  ) );
+  boost::function<bool(bool)> box4_option_2_check_setter ( boost::bind( &TDMap::set_run_celslc_switch, _core_td_map, _1 ) );
   QVector<bool> box4_option_2_edit = {false,true};
-  TreeItem* _multislice_phase_granting  = new TreeItem ( box4_data_2 ,box4_option_2_checker, box4_legend_2, box4_option_2_edit );
+  TreeItem* _multislice_phase_granting  = new TreeItem ( box4_data_2 ,box4_option_2_check_setter, box4_option_2_check_getter, box4_legend_2, box4_option_2_edit );
   _multislice_phase_granting->set_item_delegate_type( TreeItem::_delegate_CHECK );
   running_configuration_root->insertChildren( _multislice_phase_granting );
+  // load the preset data from core constuctor
+  _multislice_phase_granting->load_data_from_getter();
 
   QVector<QVariant> box4_option_2_0 = {"", "Output"};
   TreeItem* _multislice_phase_granting_output_legend   = new TreeItem ( box4_option_2_0 );
@@ -1273,9 +1285,12 @@ void MainWindow::create_box_options(){
    * */
   QVector<QVariant> box4_data_3 = {"",""};
   QVector<QVariant> box4_legend_3 = {"","Electron diffraction patterns" };
-  boost::function<bool(bool)> box4_option_3_checker ( boost::bind( &TDMap::set_run_msa_switch, _core_td_map, _1 ) );
+  boost::function<bool(void)> box4_option_3_check_getter ( boost::bind( &TDMap::get_run_msa_switch, _core_td_map ) );
+  boost::function<bool(bool)> box4_option_3_check_setter ( boost::bind( &TDMap::set_run_msa_switch, _core_td_map, _1 ) );
   QVector<bool> box4_option_3_edit = {false,true};
-  TreeItem* _electron_diffraction_patterns  = new TreeItem ( box4_data_3 ,box4_option_3_checker, box4_legend_3, box4_option_3_edit );
+  TreeItem* _electron_diffraction_patterns  = new TreeItem ( box4_data_3 ,box4_option_3_check_setter, box4_option_3_check_getter, box4_legend_3, box4_option_3_edit );
+  // load the preset data from core constuctor
+  _electron_diffraction_patterns->load_data_from_getter();
   _electron_diffraction_patterns->set_item_delegate_type( TreeItem::_delegate_CHECK );
   running_configuration_root->insertChildren( _electron_diffraction_patterns );
 
@@ -1301,11 +1316,14 @@ void MainWindow::create_box_options(){
 
   QVector<QVariant> box4_data_4 = {"",""};
   QVector<QVariant> box4_legend_4 = {"","Image intensity distribuitions"};
-  boost::function<bool(bool)> box4_option_4_checker ( boost::bind( &TDMap::set_run_wavimg_switch, _core_td_map, _1 ) );
+  boost::function<bool(void)> box4_option_4_check_getter ( boost::bind( &TDMap::get_run_wavimg_switch, _core_td_map ) );
+  boost::function<bool(bool)> box4_option_4_check_setter ( boost::bind( &TDMap::set_run_wavimg_switch, _core_td_map, _1 ) );
   QVector<bool> box4_option_4_edit = {false,true};
-  TreeItem* _image_intensity_distribuitions  = new TreeItem ( box4_data_4 ,box4_option_4_checker, box4_legend_4, box4_option_4_edit );
+  TreeItem* _image_intensity_distribuitions  = new TreeItem ( box4_data_4 ,box4_option_4_check_setter, box4_option_4_check_getter, box4_legend_4, box4_option_4_edit );
   _image_intensity_distribuitions->set_item_delegate_type( TreeItem::_delegate_CHECK );
   running_configuration_root->insertChildren( _image_intensity_distribuitions );
+  // load the preset data from core constuctor
+  _image_intensity_distribuitions->load_data_from_getter();
 
   QVector<QVariant> box4_option_4_0 = {"","Output"};
   TreeItem* _image_intensity_distribuitions_output_legend   = new TreeItem ( box4_option_4_0 );
@@ -1328,11 +1346,14 @@ void MainWindow::create_box_options(){
    * */
   QVector<QVariant> box4_data_5 = {"",""};
   QVector<QVariant> box4_legend_5 = {"","Image correlation"};
-  boost::function<bool(bool)> box4_option_5_checker ( boost::bind( &TDMap::set_run_simgrid_switch, _core_td_map, _1 ) );
+  boost::function<bool(void)> box4_option_5_check_getter ( boost::bind( &TDMap::get_run_simgrid_switch, _core_td_map ) );
+  boost::function<bool(bool)> box4_option_5_check_setter ( boost::bind( &TDMap::set_run_simgrid_switch, _core_td_map, _1 ) );
   QVector<bool> box4_option_5_edit = {false,true};
-  TreeItem* _image_correlation  = new TreeItem ( box4_data_5 ,box4_option_5_checker, box4_legend_5, box4_option_5_edit );
+  TreeItem* _image_correlation  = new TreeItem ( box4_data_5 ,box4_option_5_check_setter, box4_option_5_check_getter, box4_legend_5, box4_option_5_edit );
   _image_correlation->set_item_delegate_type( TreeItem::_delegate_CHECK );
   running_configuration_root->insertChildren( _image_correlation );
+  // load the preset data from core constuctor
+  _image_correlation->load_data_from_getter();
 
   QVector<QVariant> box4_option_5_0 = {"","Output"};
   TreeItem* _image_correlation_output_legend  = new TreeItem ( box4_option_5_0 );
