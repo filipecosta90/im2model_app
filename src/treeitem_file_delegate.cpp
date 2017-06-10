@@ -17,6 +17,43 @@ void TreeItemFileDelegate::paint(QPainter * painter, const QStyleOptionViewItem 
   {
     case TreeItem::_delegate_DROP:
       {
+    /*  if( item->get_dropdown_column() == index.column() ){
+        int value = index.model()->data(index, Qt::EditRole).toInt();
+        QHBoxLayout *layout = new QHBoxLayout( );
+        layout->setMargin(0);
+        layout->setContentsMargins(0, 0, 0, 0);
+        QSizePolicy sizePol(QSizePolicy::Expanding,QSizePolicy::Expanding);
+
+        QComboBox* combo = new QComboBox();
+        combo->setContentsMargins(0,0,0,0);
+
+        // combo commands
+        QStringList commands;
+        const QVector<QVariant> drop_data = item->get_dropdown_data();
+        const QVector<QVariant> drop_enum = item->get_dropdown_enum();
+
+        foreach (const QVariant var_command, drop_data) {
+          commands << var_command.toString();
+        }
+
+        for( int enum_pos = 0; enum_pos < drop_enum.size(); enum_pos++ ){
+          if( drop_enum[enum_pos] == value ){
+            combo->setCurrentIndex(enum_pos);
+          }
+        }
+        // fill combo
+        combo->addItems(commands);
+        layout->addWidget(combo);
+     //   editor->setLayout(layout);
+        //editor->setSizePolicy(sizePol);
+       // editor->setFocusProxy( combo );
+
+        painter->save();
+        painter->translate(option.rect.topLeft());
+        combo->render(painter);
+        painter->restore();
+      }
+      */
         if( item->get_dropdown_column() == index.column() ){
 
           const QVector<QVariant> drop_data = item->get_dropdown_data();
@@ -33,7 +70,7 @@ void TreeItemFileDelegate::paint(QPainter * painter, const QStyleOptionViewItem 
           initStyleOption(&itemOption, index);
           // override text
           itemOption.text = _option_text;
-          QApplication::style()->drawControl(QStyle::CE_ItemViewItem, &itemOption, painter, nullptr);
+          QApplication::style()->drawControl(QStyle::CE_ItemViewItem, &itemOption, painter);
         }
         else{
           QStyledItemDelegate::paint( painter, option,  index);
@@ -196,6 +233,9 @@ QWidget *TreeItemFileDelegate::createEditor( QWidget *parent, const QStyleOption
           editor->setLayout(layout);
           editor->setSizePolicy(sizePol);
           editor->setFocusProxy( combo );
+        }
+        else{
+            editor = QStyledItemDelegate::createEditor(parent,option,index);
         }
         break;
       }

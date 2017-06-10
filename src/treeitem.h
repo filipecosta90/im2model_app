@@ -29,18 +29,24 @@ class TreeItem : public QObject {
     enum DelegateType { _delegate_FILE, _delegate_DIR, _delegate_TEXT, _delegate_TEXT_ACTION, _delegate_TEXT_DOCUMENT, _delegate_TEXT_BROWSER, _delegate_CHECK, _delegate_DROP };
 
     explicit TreeItem( QVector<QVariant> &data, TreeItem *parent = 0);
-    explicit TreeItem( QVector<QVariant> &data,QVector<bool> editable, TreeItem *parent = 0);
-    explicit TreeItem( QVector<QVariant> &data, boost::function<bool(std::string)> setter, TreeItem *parent = 0);
+    explicit TreeItem( QVector<QVariant> &data, QVector<bool> editable, TreeItem *parent = 0);
+
     explicit TreeItem( QVector<QVariant> &data, boost::function<bool(double)> setter, TreeItem *parent = 0);
-    explicit TreeItem( QVector<QVariant> &data, boost::function<bool(bool)> setter, QVector<QVariant> &legend, TreeItem *parent = 0);
-    explicit TreeItem( QVector<QVariant> &data, boost::function<bool(int)> setter, TreeItem *parent = 0);
-    explicit TreeItem( QVector<QVariant> &data, boost::function<bool(std::string)> setter, QVector<bool> editable, TreeItem *parent = 0);
     explicit TreeItem( QVector<QVariant> &data, boost::function<bool(double)> setter, QVector<bool> editable, TreeItem *parent = 0);
-    explicit TreeItem( QVector<QVariant> &data, boost::function<bool(int)> setter, QVector<bool> editable, TreeItem *parent = 0);
-    explicit TreeItem( QVector<QVariant> &data, boost::function<bool(bool)> setter, QVector<QVariant> &legend, QVector<bool> editable, TreeItem *parent = 0);
-    explicit TreeItem( QVector<QVariant> &data, boost::function<bool(std::string)> setter, bool checkable, boost::function<bool(bool)> check_setter, TreeItem *parent = 0);
     explicit TreeItem( QVector<QVariant> &data, boost::function<bool(double)> setter, bool checkable, boost::function<bool(bool)> check_setter, TreeItem *parent = 0);
+
+    explicit TreeItem( QVector<QVariant> &data, boost::function<bool(bool)> setter, QVector<QVariant> &legend, TreeItem *parent = 0);
+    explicit TreeItem( QVector<QVariant> &data, boost::function<bool(bool)> setter, QVector<QVariant> &legend, QVector<bool> editable, TreeItem *parent = 0);
+
+    explicit TreeItem( QVector<QVariant> &data, boost::function<bool(int)> setter, TreeItem *parent = 0);
+    explicit TreeItem( QVector<QVariant> &data, boost::function<bool(int)> setter, boost::function<int(void)> getter, TreeItem *parent = 0 );
+    explicit TreeItem( QVector<QVariant> &data, boost::function<bool(int)> setter, QVector<bool> editable, TreeItem *parent = 0);
+    explicit TreeItem( QVector<QVariant> &data, boost::function<bool(int)> setter, boost::function<int(void)> getter, QVector<bool> editable, TreeItem *parent = 0);
     explicit TreeItem( QVector<QVariant> &data, boost::function<bool(int)> setter, bool checkable, boost::function<bool(bool)> check_setter, TreeItem *parent = 0);
+
+    explicit TreeItem( QVector<QVariant> &data, boost::function<bool(std::string)> setter, TreeItem *parent = 0);
+    explicit TreeItem( QVector<QVariant> &data, boost::function<bool(std::string)> setter, QVector<bool> editable, TreeItem *parent = 0);
+    explicit TreeItem( QVector<QVariant> &data, boost::function<bool(std::string)> setter, bool checkable, boost::function<bool(bool)> check_setter, TreeItem *parent = 0);
 
     ~TreeItem();
     TreeItem *parent();
@@ -68,6 +74,7 @@ class TreeItem : public QObject {
 
     boost::property_tree::ptree*  save_data_into_property_tree( );
     bool load_data_from_property_tree( boost::property_tree::ptree pt_root );
+    bool load_data_from_getter();
     DelegateType get_item_delegate_type();
     QVector<QVariant> get_dropdown_data();
     QVector<QVariant> get_dropdown_enum();
@@ -103,16 +110,32 @@ signals:
     bool is_checkable = false;
     boost::function<bool(std::string)> fp_data_setter_string;
     boost::function<bool(std::string)> fp_data_appender_string;
+    boost::function<std::string(void)> fp_data_getter_string;
+
     boost::function<bool(double)> fp_data_setter_double;
+    boost::function<double(void)> fp_data_getter_double;
+
     boost::function<bool(bool)> fp_data_setter_bool;
+    boost::function<bool(void)> fp_data_getter_bool;
+
     boost::function<bool(int)> fp_data_setter_int;
+    boost::function<int(void)> fp_data_getter_int;
 
     bool _flag_fp_data_setter_string = false;
     bool _flag_fp_data_appender_string = false;
+    bool _flag_fp_data_getter_string = false;
+
     bool _flag_fp_data_setter_bool = false;
+    bool _flag_fp_data_getter_bool = false;
+
     bool _flag_fp_data_setter_double = false;
+    bool _flag_fp_data_getter_double = false;
+
     bool _flag_fp_data_setter_int = false;
+    bool _flag_fp_data_getter_int = false;
+
     int _fp_data_setter_col_pos = 1;
+    int _fp_data_getter_col_pos = 1;
     int _fp_data_data_appender_col_pos = 1;
 
     boost::function<bool(bool)> fp_check_setter;

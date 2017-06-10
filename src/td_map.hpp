@@ -237,6 +237,7 @@ class TDMap {
 
     bool set_log_level( int level );
     bool set_refinement_definition_method( int method);
+    int get_refinement_definition_method();
     bool set_application_logger( ApplicationLog::ApplicationLog* app_logger );
 
     /* base constructor */

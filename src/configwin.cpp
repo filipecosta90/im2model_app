@@ -1115,10 +1115,12 @@ void MainWindow::create_box_options(){
   ////////////////
   QVector<QVariant> box3_option_4 = {"Refinement",""};
   QVector<bool> box3_option_4_edit = {false,true};
-  boost::function<bool(int)> box3_function_4 ( boost::bind( &TDMap::set_refinement_definition_method, _core_td_map, _1 ) );
 
-  TreeItem* _simulation_refinement  = new TreeItem ( box3_option_4, box3_function_4, box3_option_4_edit );
+  boost::function<int(void)> box3_function_4_getter ( boost::bind( &TDMap::get_refinement_definition_method, _core_td_map ) );
+  boost::function<bool(int)> box3_function_4_setter ( boost::bind( &TDMap::set_refinement_definition_method, _core_td_map, _1 ) );
 
+  TreeItem* _simulation_refinement  = new TreeItem ( box3_option_4, box3_function_4_setter, box3_function_4_getter, box3_option_4_edit );
+  _simulation_refinement->load_data_from_getter();
   QVector<QVariant> box3_option_4_drop = {"No refinement","Corrected","Non-Corrected", "User defined"};
 
   QVector<QVariant> box3_option_4_drop_enum( { TDMap::RefinementPreset::NO_REFINEMENT, TDMap::RefinementPreset::MICROSCOPE_CORRECTED, TDMap::RefinementPreset::MICROSCOPE_NON_CORRECTED, TDMap::RefinementPreset::USER_DEFINED_PRESET } );

@@ -11,7 +11,6 @@
 #include <iostream>
 #include <boost/foreach.hpp>
 
-
 void TreeItem::set_action_toolBar( CustomToolButton* tool ){
   alignToolButton = tool;
 }
@@ -50,6 +49,11 @@ TreeItem::TreeItem( QVector<QVariant> &data, boost::function<bool(int)> setter, 
   _flag_fp_data_setter_int = true;
 }
 
+TreeItem::TreeItem( QVector<QVariant> &data, boost::function<bool(int)> setter, boost::function<int(void)> getter, TreeItem *parent  ) : TreeItem( data, setter, parent ){
+    fp_data_getter_int = getter;
+    _flag_fp_data_getter_int = true;
+}
+
 TreeItem::TreeItem( QVector<QVariant> &data, boost::function<bool(std::string)> setter, QVector<bool> editable, TreeItem *parent  ) : TreeItem( data, setter, parent ){
   itemIsEditableVec = editable;
 }
@@ -63,6 +67,10 @@ TreeItem::TreeItem( QVector<QVariant> &data, boost::function<bool(double)> sette
 }
 
 TreeItem::TreeItem( QVector<QVariant> &data, boost::function<bool(int)> setter, QVector<bool> editable, TreeItem *parent  ) : TreeItem( data, setter, parent ){
+  itemIsEditableVec = editable;
+}
+
+TreeItem::TreeItem( QVector<QVariant> &data, boost::function<bool(int)> setter, boost::function<int(void)> getter, QVector<bool> editable, TreeItem *parent  ) : TreeItem( data, setter, getter, parent ){
   itemIsEditableVec = editable;
 }
 
@@ -85,6 +93,34 @@ TreeItem::~TreeItem(){
   qDeleteAll(childItems);
 }
 
+bool TreeItem::load_data_from_getter( ){
+    bool result = false;
+    int column = _fp_data_getter_col_pos;
+    if  (column >= 0 && column < itemData.size() ) {
+        //call getter on core im2model
+        if( ( _fp_data_setter_col_pos == column )
+                && (_flag_fp_data_setter_string || _flag_fp_data_setter_bool ||
+                    _flag_fp_data_setter_int || _flag_fp_data_setter_double ) ){
+            QVariant value;
+            if( _flag_fp_data_getter_int ){
+                value = QVariant::fromValue( fp_data_getter_int() );
+            }
+            if( _flag_fp_data_getter_bool ){
+                value = QVariant::fromValue( fp_data_getter_bool() );
+          }
+          if( _flag_fp_data_getter_string ){
+              value = QVariant::fromValue( fp_data_getter_string() );
+          }
+          if( _flag_fp_data_getter_double ){
+              value = QVariant::fromValue( fp_data_getter_double() );
+          }
+          emit dataChanged(column);
+          itemData[column] = value;
+          result = true;
+        }
+    }
+    return result;
+}
 
 void TreeItem::add_toolbar ( QVector<QVariant> actions_description , std::vector<boost::function<bool()>> actions ){
   _toolbar_actions_description = actions_description;

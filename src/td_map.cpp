@@ -1045,6 +1045,10 @@ bool TDMap::set_refinement_definition_method ( int method ){
   return _flag_refinement_definition_method;
 }
 
+int TDMap::get_refinement_definition_method(){
+    return _refinement_definition_method;
+}
+
 bool TDMap::set_thickness_user_estimated_nm( double estimated_nm ){
   user_estimated_thickness_nm = estimated_nm;
   _flag_user_estimated_thickness_nm = true;
