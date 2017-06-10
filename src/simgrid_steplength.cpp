@@ -745,7 +745,6 @@ bool SIMGRID_wavimg_steplength::simulate_from_dat_file(){
     //will contain the row of simulated images (same thickness, diferent defocus)
     std::vector<cv::Mat> simulated_images_row;
     std::vector<cv::Mat> raw_simulated_images_row;
-
     std::vector<cv::Point> experimental_images_matchloc_row;
 
     // for the same thickness iterate through every defocus
@@ -884,11 +883,9 @@ bool SIMGRID_wavimg_steplength::simulate_from_dat_file(){
 
       simulated_matches.push_back(match_factor);
     }
-
     experimental_images_match_location_grid.push_back(experimental_images_matchloc_row);
     simulated_images_grid.push_back(simulated_images_row);
     raw_simulated_images_grid.push_back(raw_simulated_images_row);
-
   }
 
   // now that we have the simulated images lets compare them
@@ -901,7 +898,7 @@ bool SIMGRID_wavimg_steplength::simulate_from_dat_file(){
   int row_thickness = (dist - col_defocus ) / defocus_samples;
   best_match_Point2i = cv::Point2i( row_thickness, col_defocus);
 
-  simgrid_best_match_thickness_slice = (slice_period * row_thickness) + slices_lower_bound;
+  simgrid_best_match_thickness_slice = round((slice_period * row_thickness) + slices_lower_bound);
   simgrid_best_match_thickness_nm = celslc_accum_nm_slice_vec.at(simgrid_best_match_thickness_slice-1);
   simgrid_best_match_defocus_nm = (col_defocus * defocus_period ) + defocus_lower_bound;
 

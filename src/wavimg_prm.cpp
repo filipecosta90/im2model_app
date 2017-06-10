@@ -512,7 +512,7 @@ void WAVIMG_prm::cleanup_thread(){
 bool WAVIMG_prm::cleanup_bin(){
   boost::thread t( &WAVIMG_prm::cleanup_thread , this ); 
   runned_bin = false; 
-  return EXIT_SUCCESS;
+  return true;
 }
 
 bool WAVIMG_prm::call_bin(){

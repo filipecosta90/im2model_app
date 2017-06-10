@@ -723,7 +723,8 @@ bool  TDMap::prepare_simgrid_parameters(){
 
   celslc_accum_nm_slice_vec = _tdmap_celslc_parameters->get_slice_params_accum_nm_slice_vec();
   _flag_celslc_accum_nm_slice_vec = true;
-  assert( celslc_accum_nm_slice_vec.size() == number_slices_to_max_thickness);
+  assert( celslc_accum_nm_slice_vec.size() == number_slices_to_max_thickness );
+
   const double _sampling_rate_experimental_x_nm_per_pixel = _core_image_crystal_ptr->get_sampling_rate_experimental_x_nm_per_pixel();
   const double _sampling_rate_experimental_y_nm_per_pixel = _core_image_crystal_ptr->get_sampling_rate_experimental_y_nm_per_pixel();
   cv::Mat _experimental_image_roi = _core_image_crystal_ptr->get_roi_experimental_image_mat();
@@ -741,7 +742,7 @@ bool  TDMap::prepare_simgrid_parameters(){
   // thickness/slice setters
 
   _td_map_simgrid->set_celslc_accum_nm_slice_vec( celslc_accum_nm_slice_vec );
-  _td_map_simgrid->set_slice_samples(slice_samples);
+  _td_map_simgrid->set_slice_samples( slice_samples );
   _td_map_simgrid->set_slice_period( slice_period );
   _td_map_simgrid->set_number_slices_to_max_thickness( number_slices_to_max_thickness );
   _td_map_simgrid->set_slices_lower_bound( slices_lower_bound );
@@ -757,10 +758,8 @@ bool  TDMap::prepare_simgrid_parameters(){
   _td_map_simgrid->set_simulated_image_needs_reshape( simulated_image_needs_reshape );
   _td_map_simgrid->set_reshape_factor_from_supper_cell_to_experimental_x (reshape_factor_from_supper_cell_to_experimental_x);
   _td_map_simgrid->set_reshape_factor_from_supper_cell_to_experimental_y (reshape_factor_from_supper_cell_to_experimental_y);
+
   // work here !!!
-  //_td_map_simgrid->set_sim_grid_switch(sim_grid_switch);
-  // work here !!!
-  //_td_map_simgrid->set_debug_switch(debug_switch);
 
   // user estimation of defocus and thickness
   /*if ( user_estimated_defocus_nm_switch ){
@@ -783,9 +782,8 @@ bool  TDMap::prepare_simgrid_parameters(){
   _td_map_simgrid->set_step_size( defocus_period, slice_period );
   _flag_tdmap_simgrid_parameters = true;
   return  _flag_tdmap_simgrid_parameters;
-
-
 }
+
 bool TDMap::_is_thickness_range_lower_bound_defined(){
   return _flag_thickness_lower_bound;
 }

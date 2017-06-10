@@ -1174,7 +1174,6 @@ void MainWindow::create_box_options(){
   ui->tdmap_table->connect_thickness_range_number_samples_changes(  thickness_range_number_samples, 1 );
   ui->tdmap_table->connect_defocus_range_number_samples_changes(  defocus_range_number_samples, 1 );
 
-
   /*************************
    * Running configuration
    *************************/

@@ -30,8 +30,28 @@ void TDMap_Table::set_tdmap( TDMap* map ){
   _flag_core_tdmap = true;
 }
 
+void TDMap_Table::connect_item_changes_to_invalidate_grid( const TreeItem* item, int item_changes_column ){
+    connect( item, SIGNAL(dataChanged( int )), this, SLOT( invalidate_grid(int) ) );
+    _treeitem_changes_to_invalidate_grid_watch_col = item_changes_column;
+  }
+
+void TDMap_Table::invalidate_grid( int signal_item_changed_column ){
+  if ( signal_item_changed_column == _treeitem_changes_to_invalidate_grid_watch_col ){
+      if( _flag_simulated_image_grid ){
+          std::cout << "cleaned grid due to data change in connected TreeItems" << std::endl;
+          _flag_simulated_image_grid = false;
+          for( int row = 0; row < simulated_image_grid.size() ; row++ ){
+            std::vector<cv::Mat> row_image_grid = simulated_image_grid.at(row);
+            row_image_grid.clear();
+          }
+          simulated_image_grid.clear();
+          clear();
+      }
+}
+}
+
 void TDMap_Table::connect_thickness_range_number_samples_changes( const TreeItem* item, int item_changes_column ){
-  connect( item, SIGNAL(dataChanged(int )), this, SLOT( update_RowCount_from_thickness_range_number_samples(int) ) );
+  connect( item, SIGNAL(dataChanged( int )), this, SLOT( update_RowCount_from_thickness_range_number_samples(int) ) );
   _treeitem_thickness_range_number_samples_watch_col = item_changes_column;
 }
 

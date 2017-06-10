@@ -438,10 +438,10 @@ bool CELSLC_prm::check_produced_slices(){
   return result;
 }
 
-bool CELSLC_prm::cleanup_bin(  ){
+bool CELSLC_prm::cleanup_bin( ){
   boost::thread t( &CELSLC_prm::cleanup_thread , this ); 
   runned_bin = false; 
-  return EXIT_SUCCESS;
+  return true;
 }
 
 bool CELSLC_prm::get_flag_io_ap_pipe_out(){

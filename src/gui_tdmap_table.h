@@ -31,12 +31,14 @@ class TDMap_Table : public QTableWidget
     /* signal connecting to treeitems with simulation configuration info */
     void connect_thickness_range_number_samples_changes( const TreeItem* item, int item_changes_column );
     void connect_defocus_range_number_samples_changes( const TreeItem* item, int item_changes_column );
+    void connect_item_changes_to_invalidate_grid( const TreeItem* item, int item_changes_column );
 
     public slots:
       void selectCurrentRow();
     void selectCurrentColumn();
     void update_RowCount_from_thickness_range_number_samples(int signal_item_changed_column );
     void update_ColumnCount_from_defocus_range_number_samples(int signal_item_changed_column );
+     void invalidate_grid(int signal_item_changed_column );
 
 signals:
     void modified();
@@ -79,6 +81,8 @@ signals:
     /* VISUAL TDMAP vars */
     int _treeitem_thickness_range_number_samples_watch_col;
     int _treeitem_defocus_range_number_samples_watch_col;
+    int _treeitem_changes_to_invalidate_grid_watch_col;
+
     bool _flag_simulated_image_grid = false;
     std::vector< std::vector<cv::Mat> > simulated_image_grid;
 

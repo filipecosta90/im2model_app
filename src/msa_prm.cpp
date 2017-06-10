@@ -156,7 +156,7 @@ void MSA_prm::cleanup_thread(){
 bool MSA_prm::cleanup_bin(){
   boost::thread t( &MSA_prm::cleanup_thread , this ); 
   runned_bin = false; 
-  return EXIT_SUCCESS;
+  return true;
 }
 
 bool MSA_prm::call_bin(){
