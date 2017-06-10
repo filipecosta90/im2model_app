@@ -205,10 +205,25 @@ class TDMap {
     bool set_log_level( int level );
     bool set_refinement_definition_method( int method);
     bool set_application_logger( ApplicationLog::ApplicationLog* app_logger );
-    boost::process::ipstream& _sim_tdmap_ostream_buffer;
 
-    TDMap( boost::process::ipstream& ostream_buffer, Image_Crystal *image_crystal_ptr );
-    TDMap( boost::process::ipstream &ostream_buffer, Image_Crystal* image_crystal_ptr , ApplicationLog::ApplicationLog* app_logger );
+    boost::process::ipstream& _sim_tdmap_celslc_ostream_buffer;
+    boost::process::ipstream& _sim_tdmap_msa_ostream_buffer;
+    boost::process::ipstream& _sim_tdmap_wavimg_ostream_buffer;
+    boost::process::ipstream& _sim_tdmap_simgrid_ostream_buffer;
+
+    /* base constructor */
+    TDMap( boost::process::ipstream& ostream_celslc_buffer,
+           boost::process::ipstream& ostream_msa_buffer,
+           boost::process::ipstream& ostream_wavimg_buffer,
+           boost::process::ipstream& ostream_simgrid_buffer,
+           Image_Crystal *image_crystal_ptr );
+
+    /* constructor with logger */
+    TDMap( boost::process::ipstream& ostream_celslc_buffer,
+           boost::process::ipstream& ostream_msa_buffer,
+           boost::process::ipstream& ostream_wavimg_buffer,
+           boost::process::ipstream& ostream_simgrid_buffer,
+           Image_Crystal* image_crystal_ptr , ApplicationLog::ApplicationLog* app_logger );
     /** others **/
     bool prepare_ZA_UV();
 

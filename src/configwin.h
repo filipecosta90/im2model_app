@@ -58,7 +58,11 @@ class MainWindow : public QMainWindow {
 
     bool checkSettings();
 
-    boost::process::ipstream _sim_tdmap_ostream_buffer;
+    boost::process::ipstream _sim_tdmap_celslc_ostream_buffer;
+    boost::process::ipstream _sim_tdmap_msa_ostream_buffer;
+    boost::process::ipstream _sim_tdmap_wavimg_ostream_buffer;
+    boost::process::ipstream _sim_tdmap_simgrid_ostream_buffer;
+
     public slots:
       void update_from_TDMap_sucess();
     void update_from_TDMap_failure();

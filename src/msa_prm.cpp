@@ -40,7 +40,7 @@ MSA_prm::MSA_prm( boost::process::ipstream &async_io_buffer_out ) : _io_pipe_out
   prm_filename = "";
   wave_function_name = "";
   bin_path = "";
-  debug_switch = true;
+  debug_switch = false;
   runned_bin = false;
 }
 
@@ -169,7 +169,7 @@ bool MSA_prm::call_bin(){
     int _child_exit_code = -1;
     std::error_code _error_code;
     /////// WORK MORE HERE
-    _flag_io_ap_pipe_out = false;
+    //_flag_io_ap_pipe_out = false;
     if(  _flag_io_ap_pipe_out  ){
       boost::process::child c(
           // command
@@ -244,7 +244,7 @@ bool MSA_prm::call_bin(){
     boost::filesystem::path dir ( base_dir_path );
     bool status = true;
     for ( int slice_id = 1 ;
-        slice_id <= number_slices_used_describe_full_object_structure_up_to_its_maximum_thickness ;
+        slice_id <= number_slices_used_describe_full_object_structure_up_to_its_maximum_thickness;
         slice_id++){
       std::stringstream filename_stream;
       filename_stream << wave_function_name << "_sl"<< std::setw(3) << std::setfill('0') << std::to_string(slice_id) << ".wav" ;

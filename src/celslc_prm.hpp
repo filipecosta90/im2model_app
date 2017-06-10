@@ -194,6 +194,8 @@ class CELSLC_prm {
 
     bool update_nz_simulated_partitions_from_prm();
 
+    bool check_produced_slices();
+
     void produce_prm( );
 
     bool cleanup_bin();

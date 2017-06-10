@@ -63,7 +63,6 @@ public slots:
         mutex.unlock();
     }
 
-
 signals:
     void TDMap_request();
     void TDMap_sucess();

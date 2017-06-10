@@ -51,7 +51,12 @@ MainWindow::MainWindow( ApplicationLog::ApplicationLog* logger , QWidget *parent
   }
   else{
     _core_image_crystal = new Image_Crystal();
-    _core_td_map = new TDMap( _sim_tdmap_ostream_buffer, _core_image_crystal );
+    _core_td_map = new TDMap(
+                _sim_tdmap_celslc_ostream_buffer,
+                _sim_tdmap_msa_ostream_buffer,
+                _sim_tdmap_wavimg_ostream_buffer,
+                _sim_tdmap_simgrid_ostream_buffer,
+                _core_image_crystal );
 
     if (_flag_im2model_logger) {
       im2model_logger->logEvent(ApplicationLog::critical, "Trying to set application logger for TDMap.");
@@ -282,7 +287,7 @@ void MainWindow::update_tdmap_sim_ostream(){
   QModelIndex simgrid_out_index = project_setup_crystalographic_fields_model->index(0,1,simgrid_out_legend_index);
   std::cout << "####simgrid_out_index  VALID: " << simgrid_out_index.isValid() << std::endl;
 
-  while(std::getline(_sim_tdmap_ostream_buffer, line)){
+  while(std::getline(_sim_tdmap_celslc_ostream_buffer, line)){
     //   ui->qtree_view_tdmap_running_configuration-
     //ui->qTextBrowser_tdmap_simulation_output->moveCursor (QTextCursor::End);
     QString qt_linw =  QString::fromStdString( line );
@@ -294,6 +299,26 @@ void MainWindow::update_tdmap_sim_ostream(){
     //ui->qTextBrowser_tdmap_simulation_output->append( qt_linw );
     QApplication::processEvents();
   }
+
+  while(std::getline(_sim_tdmap_msa_ostream_buffer, line)){
+    QString qt_linw =  QString::fromStdString( line );
+    QVariant _new_line_var = QVariant::fromValue(qt_linw + "\n");
+    bool result = tdmap_running_configuration_model->appendData( msa_out_index, _new_line_var );
+    ui->qtree_view_tdmap_simulation_setup->update();
+    std::cout << "append result " << result << std::endl;
+    QApplication::processEvents();
+  }
+
+  while(std::getline(_sim_tdmap_wavimg_ostream_buffer, line)){
+    QString qt_linw =  QString::fromStdString( line );
+    QVariant _new_line_var = QVariant::fromValue(qt_linw + "\n");
+    bool result = tdmap_running_configuration_model->appendData( wavimg_out_index, _new_line_var );
+    ui->qtree_view_tdmap_simulation_setup->update();
+    std::cout << "append result " << result << std::endl;
+    QApplication::processEvents();
+  }
+
+
 }
 
 void MainWindow::on_qpush_run_tdmap_clicked(){

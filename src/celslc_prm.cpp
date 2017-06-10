@@ -219,44 +219,44 @@ bool CELSLC_prm::set_application_logger( ApplicationLog::ApplicationLog* app_log
 bool CELSLC_prm::set_bin_execname( std::string execname ){
   boost::filesystem::path bin_dir( bin_path );
   if( boost::filesystem::exists(bin_dir) ) {
-  boost::filesystem::path file (execname);
-  full_bin_path_execname = boost::filesystem::canonical(bin_dir);
-  full_bin_path_execname /= file;
-  try {
-    _flag_full_bin_path_execname = boost::filesystem::exists( full_bin_path_execname );
-  }
-  catch (const boost::filesystem::filesystem_error& ex) {
-    std::cout << ex.what() << '\n';
-    _flag_full_bin_path_execname = false;
+    boost::filesystem::path file (execname);
+    full_bin_path_execname = boost::filesystem::canonical(bin_dir);
+    full_bin_path_execname /= file;
+    try {
+      _flag_full_bin_path_execname = boost::filesystem::exists( full_bin_path_execname );
+    }
+    catch (const boost::filesystem::filesystem_error& ex) {
+      std::cout << ex.what() << '\n';
+      _flag_full_bin_path_execname = false;
+      if( _flag_logger ){
+        std::stringstream message;
+        message << "ERROR: " << ex.what();
+        logger->logEvent( ApplicationLog::notification , message.str() );
+      }
+    }
     if( _flag_logger ){
       std::stringstream message;
-      message << "ERROR: " << ex.what();
+      message << "checking if CELSLC exec exists. full path: " <<  full_bin_path_execname.string() << " || result: " << _flag_full_bin_path_execname << std::endl;
       logger->logEvent( ApplicationLog::notification , message.str() );
     }
-  }
-  if( _flag_logger ){
-    std::stringstream message;
-    message << "checking if CELSLC exec exists. full path: " <<  full_bin_path_execname.string() << " || result: " << _flag_full_bin_path_execname << std::endl;
-    logger->logEvent( ApplicationLog::notification , message.str() );
-  }
   }
   return _flag_full_bin_path_execname;
 }
 
 bool CELSLC_prm::_is_nx_simulated_horizontal_samples_defined(){
-    return _flag_nx_simulated_horizontal_samples;
+  return _flag_nx_simulated_horizontal_samples;
 }
 
 bool CELSLC_prm::_is_ny_simulated_vertical_samples_defined(){
-       return _flag_ny_simulated_vertical_samples;
+  return _flag_ny_simulated_vertical_samples;
 }
 
 int CELSLC_prm::get_nx_simulated_horizontal_samples( ){
-    return nx_simulated_horizontal_samples;
+  return nx_simulated_horizontal_samples;
 }
 
 int CELSLC_prm::get_ny_simulated_vertical_samples( ){
-    return ny_simulated_vertical_samples;
+  return ny_simulated_vertical_samples;
 }
 
 int CELSLC_prm::get_nz_simulated_partitions( ){
@@ -369,7 +369,6 @@ bool CELSLC_prm::update_nz_simulated_partitions_from_prm(){
       _flag_slice_params_accum_nm_slice_vec = true;
       _flag_slice_params_nm_slice_vec = true;
       _flag_nz_simulated_partitions = true;
-
     }
     else{
       std::cout << "Warning: unable to open file \"" << input_prm_stream.str() << "\"" << std::endl;
@@ -379,22 +378,62 @@ bool CELSLC_prm::update_nz_simulated_partitions_from_prm(){
 }
 
 void CELSLC_prm::cleanup_thread(){
-  boost::filesystem::path p (".");
-  boost::filesystem::directory_iterator end_itr;
-  // cycle through the directory
-  std::string prm_filename = slc_file_name_prefix + ".prm"; 
-  for ( boost::filesystem::directory_iterator itr(p); itr != end_itr; ++itr)
-  {
-    // If it's not a directory, list it. If you want to list directories too, just remove this check.
-    if (is_regular_file(itr->path())) {
-      // assign current file name to current_file and echo it out to the console.
-      if( (itr->path().extension() == SLI_EXTENSION ) ||itr->path().filename() == prm_filename ){
-        std::cout << itr->path().filename() << std::endl;
-        bool remove_result = boost::filesystem::remove( itr->path().filename() );
+  bool status = true;
+  boost::filesystem::path dir ( base_dir_path );
+  std::string prm_filename = slc_file_name_prefix + ".prm";
+  boost::filesystem::path prm_file ( prm_filename );
+  boost::filesystem::path full_prm_path = dir / prm_file;
 
+  if( boost::filesystem::exists( full_prm_path ) ){
+    const bool remove_result = boost::filesystem::remove( prm_file );
+    status &= remove_result;
+    if( _flag_logger ){
+      std::stringstream message;
+      message << "removing the celslc prm file: " << full_prm_path.string() << " result: " << remove_result;
+      logger->logEvent( ApplicationLog::notification , message.str() );
+    }
+  }
+
+  for ( int slice_id = 1 ;
+      slice_id <= nz_simulated_partitions;
+      slice_id++){
+    std::stringstream filename_stream;
+    filename_stream << slc_file_name_prefix << "_"<< std::setw(3) << std::setfill('0') << std::to_string(slice_id) << ".sli" ;
+    boost::filesystem::path slice_file ( filename_stream.str() );
+    boost::filesystem::path full_slice_path = dir / slice_file;
+    if( boost::filesystem::exists( full_slice_path ) ){
+      const bool remove_result = boost::filesystem::remove( full_slice_path );
+      status &= remove_result;
+      if( _flag_logger ){
+        std::stringstream message;
+        message << "removing the slice file: " << full_slice_path.string() << " result: " << remove_result;
+        logger->logEvent( ApplicationLog::notification , message.str() );
       }
     }
   }
+}
+
+bool CELSLC_prm::check_produced_slices(){
+  bool result = false;
+  boost::filesystem::path dir ( base_dir_path );
+  bool status = true;
+  for ( int slice_id = 1 ;
+      slice_id <= nz_simulated_partitions;
+      slice_id++){
+    std::stringstream filename_stream;
+    filename_stream << slc_file_name_prefix << "_"<< std::setw(3) << std::setfill('0') << std::to_string(slice_id) << ".sli" ;
+    boost::filesystem::path slice_file ( filename_stream.str() );
+    boost::filesystem::path full_slice_path = dir / slice_file;
+    const bool _slice_exists = boost::filesystem::exists( full_slice_path );
+    status &= _slice_exists;
+    if( _flag_logger ){
+      std::stringstream message;
+      message << "checking if the produced slice file exists: " << full_slice_path.string() << " result: " << _slice_exists;
+      logger->logEvent( ApplicationLog::notification , message.str() );
+    }
+  }
+  result = status;
+  return result;
 }
 
 bool CELSLC_prm::cleanup_bin(  ){
@@ -404,7 +443,6 @@ bool CELSLC_prm::cleanup_bin(  ){
 }
 
 bool CELSLC_prm::call_boost_bin(  ){
-
   bool result = false;
   assert( _flag_full_bin_path_execname );
   if( _flag_full_bin_path_execname ){
@@ -479,7 +517,7 @@ bool CELSLC_prm::call_boost_bin(  ){
           args_stream.str(),
           boost::process::start_dir= base_dir_path,
           // redirecting std_out to async buffer
-          boost::process::std_out > _io_pipe_out ,
+          boost::process::std_out > _io_pipe_out,
           // redirecting std_err to null
           // boost::process::std_err > boost::process::detail::
           _error_code
@@ -531,13 +569,12 @@ bool CELSLC_prm::call_boost_bin(  ){
         if( auto_equidistant_slices_switch || auto_non_equidistant_slices_switch ){
           update_nz_simulated_partitions_from_prm();
         }
-        runned_bin = true;
+        runned_bin = check_produced_slices();
         result = true;
       }
     }
     return result;
   }
-
 
   bool CELSLC_prm::prepare_nz_simulated_partitions_from_ssc_prm(){
     bool result = false;  

@@ -514,7 +514,7 @@ bool WAVIMG_prm::call_bin(){
     int _child_exit_code = -1;
     std::error_code _error_code;
     /////// WORK MORE HERE
-    _flag_io_ap_pipe_out = false;
+    //_flag_io_ap_pipe_out = false;
     if(  _flag_io_ap_pipe_out  ){
       boost::process::child c(
           // command

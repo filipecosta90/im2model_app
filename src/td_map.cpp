@@ -1,11 +1,21 @@
 #include "td_map.hpp"
 
-TDMap::TDMap( boost::process::ipstream &ostream_buffer, Image_Crystal* image_crystal_ptr ) : _sim_tdmap_ostream_buffer( ostream_buffer ) {
+/* base constructor */
+TDMap::TDMap( boost::process::ipstream& ostream_celslc_buffer,
+       boost::process::ipstream& ostream_msa_buffer,
+       boost::process::ipstream& ostream_wavimg_buffer,
+       boost::process::ipstream& ostream_simgrid_buffer,
+       Image_Crystal *image_crystal_ptr )
+    : _sim_tdmap_celslc_ostream_buffer( ostream_celslc_buffer ) ,
+_sim_tdmap_msa_ostream_buffer( ostream_msa_buffer ),
+_sim_tdmap_wavimg_ostream_buffer( ostream_wavimg_buffer ),
+_sim_tdmap_simgrid_ostream_buffer( ostream_simgrid_buffer )
+{
   _core_image_crystal_ptr = image_crystal_ptr;
-  _tdmap_celslc_parameters = new CELSLC_prm( ostream_buffer );
-  _tdmap_msa_parameters = new MSA_prm( ostream_buffer );
-  _tdmap_wavimg_parameters = new WAVIMG_prm( ostream_buffer );
-  _td_map_simgrid = new SIMGRID_wavimg_steplength( ostream_buffer );
+  _tdmap_celslc_parameters = new CELSLC_prm( ostream_celslc_buffer );
+  _tdmap_msa_parameters = new MSA_prm( ostream_msa_buffer );
+  _tdmap_wavimg_parameters = new WAVIMG_prm( ostream_wavimg_buffer );
+  _td_map_simgrid = new SIMGRID_wavimg_steplength( ostream_simgrid_buffer );
 
   _ignore_edge_pixels_sim_images = 0;
   nx_ny_switch = false;
@@ -40,7 +50,13 @@ TDMap::TDMap( boost::process::ipstream &ostream_buffer, Image_Crystal* image_cry
   coefficient_aberration_spherical = 12000.f;
 }
 
-TDMap::TDMap( boost::process::ipstream &ostream_buffer, Image_Crystal* image_crystal_ptr , ApplicationLog::ApplicationLog* app_logger ) : TDMap::TDMap( ostream_buffer, image_crystal_ptr ) {
+TDMap::TDMap( boost::process::ipstream& ostream_celslc_buffer,
+       boost::process::ipstream& ostream_msa_buffer,
+       boost::process::ipstream& ostream_wavimg_buffer,
+       boost::process::ipstream& ostream_simgrid_buffer,
+       Image_Crystal *image_crystal_ptr,
+              ApplicationLog::ApplicationLog* app_logger ) :
+    TDMap::TDMap( ostream_celslc_buffer, ostream_msa_buffer, ostream_wavimg_buffer, ostream_simgrid_buffer,  image_crystal_ptr ) {
   logger = app_logger;
   _flag_logger = true;
   _tdmap_celslc_parameters->set_application_logger( app_logger );
@@ -263,7 +279,6 @@ bool TDMap::run_tdmap( ){
     logger->logEvent( ApplicationLog::notification , message.str() );
     message = std::stringstream();
   }
-  assert( _tdmap_celslc_parameters->_is_bin_path_defined() );
   if ( status && _run_celslc_switch &&  _tdmap_celslc_parameters->_is_bin_path_defined() ){
     if( _flag_logger ){
       std::stringstream message;
@@ -278,7 +293,6 @@ bool TDMap::run_tdmap( ){
     }
     status = _flag_runned_tdmap_celslc;
   }
-
   assert(status);
   status &= set_number_slices_to_load_from_nz_simulated_partitions();
   assert(status);
