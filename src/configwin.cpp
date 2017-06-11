@@ -632,7 +632,7 @@ bool MainWindow::readSettings(){
   _dr_probe_msa_bin = settings.value("msa","").toString();
   _dr_probe_wavimg_bin = settings.value("wavimg","").toString();
   settings.endGroup();
-  restoreGeometry(settings.value("geometry").toByteArray());
+  restoreGeometry(settings.value("geometry.main_window").toByteArray());
   ui->td_map_splitter->restoreGeometry( settings.value("geometry.tdmap_splitter").toByteArray() );
   ui->td_map_splitter->restoreState( settings.value("state.tdmap_splitter").toByteArray() );
   restoreState(settings.value("windowState").toByteArray());
@@ -647,7 +647,7 @@ void MainWindow::writeSettings(){
   settings.setValue("msa",_dr_probe_msa_bin);
   settings.setValue("wavimg",_dr_probe_wavimg_bin);
   settings.endGroup();
-  settings.setValue("geometry", saveGeometry() );
+  settings.setValue("geometry.main_window", saveGeometry() );
   settings.setValue("geometry.tdmap_splitter", ui->td_map_splitter->saveGeometry() );
   settings.setValue("state.tdmap_splitter", ui->td_map_splitter->saveState() );
   settings.setValue("windowState", saveState() );
@@ -1124,7 +1124,7 @@ void MainWindow::create_box_options(){
   boost::function<bool(int)> box3_function_4_setter ( boost::bind( &TDMap::set_refinement_definition_method, _core_td_map, _1 ) );
 
   TreeItem* _simulation_refinement  = new TreeItem ( box3_option_4, box3_function_4_setter, box3_function_4_getter, box3_option_4_edit );
- // load the preset data from core constuctor
+  // load the preset data from core constuctor
   _simulation_refinement->load_data_from_getter();
   QVector<QVariant> box3_option_4_drop = {"No refinement","Corrected","Non-Corrected", "User defined"};
 
@@ -1178,7 +1178,7 @@ void MainWindow::create_box_options(){
   boost::function<bool(int)> box3_function_5_1_setter ( boost::bind( &TDMap::set_image_correlation_matching_method, _core_td_map, _1 ) );
   TreeItem* image_correlation_matching_method = new TreeItem ( box3_option_5_1 , box3_function_5_1_setter, box3_function_5_1_getter,  box3_option_5_1_edit );
   // load the preset data from core constuctor
-   image_correlation_matching_method->load_data_from_getter();
+  image_correlation_matching_method->load_data_from_getter();
 
   QVector<QVariant> box3_option_5_1_drop = {"Normalized squared difference","Normalized cross correlation","Normalized correlation coefficient"};
   QVector<QVariant> box3_option_5_1_drop_enum( { CV_TM_SQDIFF_NORMED, CV_TM_CCORR_NORMED, CV_TM_CCOEFF_NORMED} );
@@ -1240,7 +1240,7 @@ void MainWindow::create_box_options(){
 
   TreeItem* _log_level_setter  = new TreeItem ( box4_option_1, box4_function_1_setter, box4_function_1_getter, box4_option_1_edit );
   // load the preset data from core constuctor
-   _log_level_setter->load_data_from_getter();
+  _log_level_setter->load_data_from_getter();
 
   QVector<QVariant> box4_option_1_drop = {"Full log","Debug mode","Silent mode", "User defined"};
   QVector<QVariant> box4_option_1_drop_enum( { TDMap::ExecLogMode::FULL_LOG, TDMap::ExecLogMode::DEBUG_MODE, TDMap::ExecLogMode::SILENT_MODE, TDMap::ExecLogMode::USER_DEFINED_LOG_MODE } );
