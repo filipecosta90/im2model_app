@@ -1,3 +1,6 @@
+![alt text](https://raw.githubusercontent.com/filipecosta90/im2model/master/src/res/AppIcon1024.png)
+
+
 # Im2Model
 Msc. Thesis regarding efficient computation to refine atomic models for TEM image simulation and matching 
 ********************************************************************************
