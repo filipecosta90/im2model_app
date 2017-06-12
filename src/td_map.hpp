@@ -32,13 +32,15 @@ class TDMap {
     int slices_upper_bound;
     double nm_lower_bound;
     double nm_upper_bound;
+    double _preset_thickness_range_nm = 5.0;
+    double thickness_range_nm_interval_dimension;
     int number_slices_to_max_thickness;
     int slice_period;
     double user_estimated_thickness_nm;
     int user_estimated_thickness_slice;
-    bool _flag_user_estimated_thickness_nm = false;
-
     std::vector<double> celslc_accum_nm_slice_vec;
+
+    bool _flag_user_estimated_thickness_nm = false;
     bool _flag_celslc_accum_nm_slice_vec = false;
     bool _flag_thickness_lower_bound = false;
     bool _flag_thickness_upper_bound = false;
@@ -47,6 +49,7 @@ class TDMap {
     bool _flag_thickness_lower_bound_slice = false;
     bool _flag_thickness_upper_bound_slice = false;
     bool _flag_thickness_period_slice = false;
+    bool _flag_thickness_range_nm_interval_dimension = false;
 
     /////////////////////////
     // Simulated Defocus info
@@ -55,13 +58,16 @@ class TDMap {
     double defocus_lower_bound;
     double defocus_upper_bound;
     double defocus_period;
+    double _preset_defocus_range_nm = 5.0;
+    double user_estimated_defocus_nm;
+    double defocus_range_nm_interval_dimension;
+
     bool _flag_defocus_lower_bound = false;
     bool _flag_defocus_upper_bound = false;
     bool _flag_defocus_samples = false;
     bool _flag_defocus_period = false;
-
-    double user_estimated_defocus_nm;
     bool _flag_user_estimated_defocus_nm = false;
+    bool _flag_defocus_range_nm_interval_dimension = false;
 
     double ht_accelaration_voltage;
     bool _flag_ht_accelaration_voltage = false;
@@ -395,12 +401,19 @@ class TDMap {
 
     bool set_dr_probe_wavimg_execname( std::string wavimg_execname );
 
-    bool set_thickness_range_lower_bound( std::string lower_bound );
+    bool set_thickness_range_lower_bound_cast( std::string lower_bound );
+    bool set_thickness_range_lower_bound( double lower_bound );
 
-    bool set_thickness_range_upper_bound( std::string upper_bound );
+    bool set_thickness_range_nm_interval_dimension_cast( std::string dimension );
+    bool set_thickness_range_nm_interval_dimension(  double dimension );
 
-    bool set_thickness_range_number_samples( std::string number_samples );
+    bool set_thickness_range_upper_bound_cast( std::string upper_bound );
+    bool set_thickness_range_upper_bound( double upper_bound );
 
+    bool set_thickness_range_number_samples_cast( std::string number_samples );
+    bool set_thickness_range_number_samples( int number_samples );
+
+    bool set_thickness_user_estimated_nm_cast( std::string estimated_nm );
     bool set_thickness_user_estimated_nm( double estimated_nm );
 
     bool set_defocus_range_lower_bound( std::string lower_bound );
@@ -410,6 +423,8 @@ class TDMap {
     bool set_defocus_range_number_samples( std::string number_samples );
 
     bool set_defocus_user_estimated_nm( double estimated_nm );
+
+    bool set_defocus_range_nm_interval_dimension( std::string dimension );
 
     bool set_accelaration_voltage_kv( std::string accelaration_voltage );
 

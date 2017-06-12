@@ -486,7 +486,7 @@
        </attribute>
        <layout class="QGridLayout" name="gridLayout_4">
         <item row="0" column="0">
-         <widget class="QSplitter" name="splitter_2">
+         <widget class="QSplitter" name="super_cell_splitter">
           <property name="orientation">
            <enum>Qt::Horizontal</enum>
           </property>

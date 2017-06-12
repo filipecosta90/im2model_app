@@ -21,6 +21,7 @@
 #include "treemodel.h"
 #include "custom_tool_button.h"
 
+
 class TreeItemFileDelegate : public QStyledItemDelegate {
   Q_OBJECT
   public:
@@ -54,6 +55,7 @@ private slots:
 
   private:
     QToolBar* _editor_toolbar;
+    bool* _flag_temp_data;
 };
 
 #endif // end FILEDELEGATE_H

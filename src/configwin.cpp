@@ -13,6 +13,9 @@ MainWindow::MainWindow( ApplicationLog::ApplicationLog* logger , QWidget *parent
   ui->td_map_splitter->setStretchFactor(1,7);
   ui->td_map_splitter->setStretchFactor(2,2);
 
+  ui->super_cell_splitter->setStretchFactor(0,3);
+  ui->super_cell_splitter->setStretchFactor(1,7);
+
   if (_flag_im2model_logger) {
     im2model_logger->logEvent(ApplicationLog::normal, "Creating actions.");
   }
@@ -1021,7 +1024,7 @@ void MainWindow::create_box_options(){
   ////////////////
   QVector<QVariant> box3_option_1_3 = {"Samples",""};
   QVector<bool> box3_option_1_3_edit = {false,true};
-  boost::function<bool(std::string)> box3_function_1_3 ( boost::bind( &TDMap::set_thickness_range_number_samples, _core_td_map, _1 ) );
+  boost::function<bool(std::string)> box3_function_1_3 ( boost::bind( &TDMap::set_thickness_range_number_samples_cast, _core_td_map, _1 ) );
   TreeItem* thickness_range_number_samples = new TreeItem ( box3_option_1_3 , box3_function_1_3, box3_option_1_3_edit );
   _parameter_variation_map_thickness->insertChildren( thickness_range_number_samples );
 
@@ -1037,7 +1040,7 @@ void MainWindow::create_box_options(){
   ////////////////
   QVector<QVariant> box3_option_1_1 = {"Lower bound",""};
   QVector<bool> box3_option_1_1_edit = {false,true};
-  boost::function<bool(std::string)> box3_function_1_1 ( boost::bind( &TDMap::set_thickness_range_lower_bound, _core_td_map, _1 ) );
+  boost::function<bool(std::string)> box3_function_1_1 ( boost::bind( &TDMap::set_thickness_range_lower_bound_cast, _core_td_map, _1 ) );
   TreeItem* thickness_range_lower_bound = new TreeItem ( box3_option_1_1 , box3_function_1_1, box3_option_1_1_edit );
   thickness_range->insertChildren( thickness_range_lower_bound );
 
@@ -1046,7 +1049,7 @@ void MainWindow::create_box_options(){
   ////////////////
   QVector<QVariant> box3_option_1_2 = {"Upper bound",""};
   QVector<bool> box3_option_1_2_edit = {false,true};
-  boost::function<bool(std::string)> box3_function_1_2 ( boost::bind( &TDMap::set_thickness_range_upper_bound, _core_td_map, _1 ) );
+  boost::function<bool(std::string)> box3_function_1_2 ( boost::bind( &TDMap::set_thickness_range_upper_bound_cast, _core_td_map, _1 ) );
   TreeItem* thickness_range_upper_bound = new TreeItem ( box3_option_1_2 , box3_function_1_2, box3_option_1_2_edit );
   thickness_range->insertChildren( thickness_range_upper_bound );
 
@@ -1390,7 +1393,6 @@ void MainWindow::create_box_options(){
   TreeItem* edge_detection  = new TreeItem ( box5_option_1 );
   super_cell_setup_root->insertChildren( edge_detection );
 
-
   QVector<QVariant> box5_option_1_data_1 = {"Hysteresis thresholding",""};
   boost::function<int(void)> box5_option_1_check_getter ( boost::bind( &Super_Cell::get_hysteresis_threshold, _core_super_cell ) );
   boost::function<bool(int)> box5_option_1_check_setter ( boost::bind( &Super_Cell::set_hysteresis_threshold, _core_super_cell, _1 ) );
@@ -1427,7 +1429,7 @@ void MainWindow::create_box_options(){
   ui->qtree_view_supercell_model_edge_detection_setup->setModel( super_cell_setup_model );
   ui->qtree_view_supercell_model_edge_detection_setup->setItemDelegate( _load_file_delegate );
   //start editing after one click
-  ui->qtree_view_supercell_model_edge_detection_setup->setEditTriggers(QAbstractItemView::AllEditTriggers);
+  ui->qtree_view_supercell_model_edge_detection_setup->setEditTriggers( QAbstractItemView::AllEditTriggers );
   ui->qtree_view_supercell_model_edge_detection_setup->expandAll();
 
   for (int column = 0; column < super_cell_setup_model->columnCount(); ++column){

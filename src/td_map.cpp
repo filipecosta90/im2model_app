@@ -912,22 +912,110 @@ cv::Point2i TDMap::get_simgrid_best_match_position(){
 }
 
 /** setters **/
-bool TDMap::set_thickness_range_lower_bound( std::string lower_bound ){
-  nm_lower_bound = boost::lexical_cast<double>(lower_bound);
+
+
+bool TDMap::set_thickness_range_lower_bound_cast( std::string lower_bound ){
+  bool set_result = false;
+  try {
+    const double casted_value = boost::lexical_cast<double>( lower_bound );
+    set_result = set_thickness_range_lower_bound ( casted_value );
+  }
+  catch(const boost::bad_lexical_cast &)
+  {
+    set_result = false;
+    // send exception
+    // more WORK HERE!!!!
+  }
+  return set_result;
+}
+
+bool TDMap::set_thickness_range_lower_bound(  double lower_bound ){
+  nm_lower_bound = lower_bound;
   _flag_thickness_lower_bound = true;
   return true;
 }
 
-bool TDMap::set_thickness_range_upper_bound( std::string upper_bound ){
-  nm_upper_bound = boost::lexical_cast<double>(upper_bound);
+bool TDMap::set_thickness_range_upper_bound_cast( std::string upper_bound ){
+  bool set_result = false;
+  try {
+    const double casted_value = boost::lexical_cast<double>( upper_bound );
+    set_result = set_thickness_range_upper_bound ( casted_value );
+  }
+  catch(const boost::bad_lexical_cast &){
+    set_result = false;
+    // send exception
+    // more WORK HERE!!!!
+  }
+  return set_result;
+}
+
+bool TDMap::set_thickness_range_upper_bound(  double upper_bound ){
+  nm_upper_bound = upper_bound;
   _flag_thickness_upper_bound = true;
   return true;
 }
 
-bool TDMap::set_thickness_range_number_samples( std::string number_samples ){
-  slice_samples = boost::lexical_cast<int>( number_samples );
+bool TDMap::set_thickness_range_nm_interval_dimension_cast( std::string dimension ){
+  bool set_result = false;
+  try {
+    const double casted_value = boost::lexical_cast<double>( dimension );
+    set_result = set_thickness_range_nm_interval_dimension ( casted_value );
+  }
+  catch(const boost::bad_lexical_cast &)
+  {
+    set_result = false;
+    // send exception
+    // more WORK HERE!!!!
+  }
+  return set_result;
+}
+
+bool TDMap::set_thickness_range_nm_interval_dimension(  double dimension ){
+  thickness_range_nm_interval_dimension = dimension;
+  _flag_thickness_range_nm_interval_dimension = true;
+  return true;
+}
+
+bool TDMap::set_thickness_range_number_samples_cast( std::string number_samples ){
+  bool set_result = false;
+  try {
+    const int casted_value = boost::lexical_cast<int>( number_samples );
+    set_result = set_thickness_range_number_samples ( casted_value );
+  }
+  catch(const boost::bad_lexical_cast &)
+  {
+    set_result = false;
+    // send exception
+    // more WORK HERE!!!!
+  }
+  return set_result;
+}
+
+bool TDMap::set_thickness_range_number_samples(  int samples ){
+  slice_samples = samples;
   _flag_thickness_samples = true;
   return true;
+}
+
+bool TDMap::set_thickness_user_estimated_nm_cast( std::string estimated_nm ){
+    bool set_result = false;
+    try {
+      const double casted_value = boost::lexical_cast<double>( estimated_nm );
+      set_result = set_thickness_user_estimated_nm ( casted_value );
+    }
+    catch(const boost::bad_lexical_cast &)
+    {
+      set_result = false;
+      // send exception
+      // more WORK HERE!!!!
+    }
+    return set_result;
+}
+
+bool TDMap::set_thickness_user_estimated_nm( double estimated_nm ){
+  user_estimated_thickness_nm = estimated_nm;
+  _flag_user_estimated_thickness_nm = true;
+  return _flag_user_estimated_thickness_nm;
 }
 
 bool TDMap::set_defocus_range_lower_bound( std::string lower_bound ){    
@@ -948,6 +1036,12 @@ bool TDMap::set_defocus_range_number_samples( std::string number_samples ){
   defocus_samples = boost::lexical_cast<int>(number_samples);
   _flag_defocus_samples = true;
   calculate_simulation_defocus_period();
+  return true;
+}
+
+bool TDMap::set_defocus_range_nm_interval_dimension( std::string dimension ){
+  defocus_range_nm_interval_dimension = boost::lexical_cast<double>( dimension );
+  _flag_defocus_range_nm_interval_dimension = true;
   return true;
 }
 
@@ -1031,30 +1125,22 @@ bool TDMap::set_dr_probe_wavimg_execname( std::string wavimg_execname ){
 }
 
 bool TDMap::set_image_correlation_matching_method( int method ){
-  std::cout << " set_image_correlation_matching_method to enum " << method << std::endl;
   _flag_image_correlation_matching_method = _td_map_simgrid->set_image_correlation_matching_method( method );
   return _flag_image_correlation_matching_method;
 }
 
 int TDMap::get_image_correlation_matching_method(){
-    return _td_map_simgrid->get_image_correlation_matching_method( );
+  return _td_map_simgrid->get_image_correlation_matching_method( );
 }
 
 bool TDMap::set_refinement_definition_method ( int method ){
-  std::cout << " set_refinement_definition_method to enum " << method << std::endl;
   _refinement_definition_method = method;
   _flag_refinement_definition_method = true;
   return _flag_refinement_definition_method;
 }
 
 int TDMap::get_refinement_definition_method(){
-    return _refinement_definition_method;
-}
-
-bool TDMap::set_thickness_user_estimated_nm( double estimated_nm ){
-  user_estimated_thickness_nm = estimated_nm;
-  _flag_user_estimated_thickness_nm = true;
-  return _flag_user_estimated_thickness_nm;
+  return _refinement_definition_method;
 }
 
 bool TDMap::set_defocus_user_estimated_nm( double estimated_nm ){
@@ -1064,11 +1150,34 @@ bool TDMap::set_defocus_user_estimated_nm( double estimated_nm ){
 }
 
 bool TDMap::auto_calculate_thickness_range_lower_upper_nm(){
-  std::cout << " auto auto_calculate_thickness_range_lower_upper_nm " << std::endl;
-  return true;
+  bool result = false;
+  const double _half_interval = _preset_thickness_range_nm / 2.0f;
+  std::cout << " user estimated thick  "  << user_estimated_thickness_nm << std::endl;
+
+  if ( _flag_user_estimated_thickness_nm ){
+    const double _temp_nm_thickness_range = _preset_thickness_range_nm;
+    const double _temp_nm_lower_bound = user_estimated_thickness_nm - _half_interval;
+    const double _temp_nm_upper_bound = user_estimated_thickness_nm + _half_interval;
+
+    std::cout << " user estimated thick  "  << user_estimated_thickness_nm << std::endl;
+
+    result = true;
+    result &= set_thickness_range_lower_bound( _temp_nm_lower_bound );
+    result &= set_thickness_range_upper_bound( _temp_nm_upper_bound );
+    result &= set_thickness_range_nm_interval_dimension( _temp_nm_thickness_range );
+  }
+  std::cout << " auto auto_calculate_thickness_range_lower_upper_nm result "  << result << std::endl;
+  return result;
 }
 
 bool TDMap::auto_calculate_thickness_lower_upper_nm(){
+  bool result = false;
+  const double _half_interval = thickness_range_nm_interval_dimension / 2.0f;
+  if ( _flag_user_estimated_thickness_nm ){
+    const double _temp_nm_lower_bound = user_estimated_thickness_nm - _half_interval;
+    const double _temp_nm_upper_bound = user_estimated_thickness_nm + _half_interval;
+    result = true;
+  }
   std::cout << " auto auto_calculate_thickness_lower_upper_nm " << std::endl;
   return true;
 }
@@ -1087,5 +1196,5 @@ bool TDMap::set_log_level( int level ){
 }
 
 int TDMap::get_log_level(){
-    return _exec_log_level;
+  return _exec_log_level;
 }
