@@ -302,6 +302,7 @@ class Super_Cell {
     void set_experimental_min_size_nm_from_unit_cell();
     void calculate_experimental_min_size_nm(); 
     void calculate_expand_factor(); 
+    bool calculate_supercell_boundaries_from_experimental_image();
     void calculate_supercell_boundaries_from_experimental_image( cv::Point2f roi_center, int threshold, int max_contour_distance_px );
     void update_super_cell_boundary_polygon();
     void remove_z_out_of_range_atoms();

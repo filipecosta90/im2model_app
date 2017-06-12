@@ -34,35 +34,37 @@ Super_Cell::Super_Cell( Unit_Cell* cell ){
 }
 
 bool Super_Cell::set_hysteresis_threshold( int threshold ){
- _hysteresis_threshold = threshold;
+  _hysteresis_threshold = threshold;
+  return true;
 }
 
 bool Super_Cell::set_max_contour_distance_px( int max_distance ){
- return _max_contour_distance_px = max_distance;
+  _max_contour_distance_px = max_distance;
+  return true;
 }
 
 int  Super_Cell::get_hysteresis_threshold( ){
- return _hysteresis_threshold;
+  return _hysteresis_threshold;
 }
 
 int  Super_Cell::get_hysteresis_threshold_range_bottom_limit( ){
- return _hysteresis_threshold_range_bottom_limit;
+  return _hysteresis_threshold_range_bottom_limit;
 }
 
 int  Super_Cell::get_hysteresis_threshold_range_top_limit( ){
- return _hysteresis_threshold_range_top_limit;
+  return _hysteresis_threshold_range_top_limit;
 }
 
 int Super_Cell::get_max_contour_distance_px( ){
- return _max_contour_distance_px;
+  return _max_contour_distance_px;
 }
 
 int  Super_Cell::get_max_contour_distance_px_range_bottom_limit( ){
- return _max_contour_distance_px_range_bottom_limit;
+  return _max_contour_distance_px_range_bottom_limit;
 }
 
 int  Super_Cell::get_max_contour_distance_px_range_top_limit( ){
- return _max_contour_distance_px_range_top_limit;
+  return _max_contour_distance_px_range_top_limit;
 }
 
 void Super_Cell::set_default_values(){ 
@@ -204,11 +206,11 @@ void Super_Cell::set_experimental_image ( cv::Mat raw_image, double sampling_rat
   assert( !raw_image.empty() );
   assert( sampling_rate_exp_image_x_nm_pixel > 0.0f );
   assert( sampling_rate_exp_image_y_nm_pixel > 0.0f );
-  
+
   _raw_experimental_image = raw_image;
   _sampling_rate_super_cell_x_nm_pixel = sampling_rate_exp_image_x_nm_pixel;
   _sampling_rate_super_cell_y_nm_pixel = sampling_rate_exp_image_y_nm_pixel;
-  
+
   // get the maximum and minimum values for normalizing the simulated images
   cv::minMaxLoc( _raw_experimental_image, &experimental_image_minVal, &experimental_image_maxVal, NULL, NULL, cv::Mat() );
 }
@@ -610,6 +612,184 @@ bool Super_Cell::update_unit_cell_parameters(){
   return true;
 }
 
+bool Super_Cell::calculate_supercell_boundaries_from_experimental_image(){
+  bool result = false;
+  /* general assertions */
+  if(!_raw_experimental_image.empty()){
+
+    std::cout << "inside calculate_supercell_boundaries_from_experimental_image " << std::endl;
+    /* method */
+    cv::Mat canny_output;
+    cv::Mat canny_output_no_blur;
+    std::vector< std::vector<cv::Point> > contours;
+    std::vector<cv::Vec4i> hierarchy;
+
+    cv::Mat blur;
+    cv::GaussianBlur(_raw_experimental_image ,blur,cv::Size(3,3), 0);
+    assert(!blur.empty());
+    assert(( _raw_experimental_image.cols == blur.cols  ));
+    assert(( _raw_experimental_image.rows == blur.rows ));
+
+
+
+    cv::Canny( blur, canny_output, _hysteresis_threshold , _hysteresis_threshold *2, 3 );
+    assert(!canny_output.empty());
+    assert(( canny_output.cols == blur.cols ));
+    assert(( canny_output.rows == blur.rows ));
+
+    cv::findContours( canny_output, contours, hierarchy, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE, cv::Point(0, 0) );
+    assert( contours.size() != 0 );
+    if (debug_switch == true) {
+      try {
+        imwrite("experimental_image_blur.png", blur);
+        imwrite("experimental_image_canny.png", canny_output);
+        imwrite("experimental_image_canny_no_blur.png", canny_output_no_blur);
+      }
+      catch (std::runtime_error& ex) {
+        fprintf(stderr, "Exception writing image: %s\n", ex.what());
+      }
+    }
+
+    cv::Mat1f dist(contours.size(), contours.size(), 0.f);
+    cv::Mat1i in_range(contours.size(), contours.size(), 0);
+    for( size_t i = 0; i< contours.size(); i++ ){
+      for( size_t j = (i+1); j< contours.size(); j++ ){
+
+        const double raw_distance = fabs(cv::pointPolygonTest( contours[i], contours[j][0] , true ));
+        dist[i][j]=raw_distance;
+        dist[j][i]=raw_distance;
+      }
+    }
+
+    int contours_in_range = 0;
+    for( size_t i = 0; i< contours.size(); i++ ){
+      const double raw_distance = fabs(cv::pointPolygonTest( contours[i], roi_center , true ));
+      if ( raw_distance < _max_contour_distance_px ){
+        in_range[i][1]=1;
+        contours_in_range++;
+      }
+    }
+
+
+    std::cout << "There are " << contours_in_range << " contours in range("<< _max_contour_distance_px <<"px) of the ROI" << std::endl;
+    int itt_num = 1;
+    int added_itt = 1;
+
+    while ( added_itt > 0 ){
+      added_itt = 0;
+      for( size_t i = 0; i< contours.size(); i++ ){
+        if ( in_range[i][1] == 1 ){
+          for( size_t j = 0; j < contours.size(); j++ ){
+            if ( in_range[j][1] == 0 ){
+              if ( ( dist[i][j] < _max_contour_distance_px )|| (dist[j][i] < _max_contour_distance_px ) ){
+                in_range[j][1]=1;
+                added_itt++;
+              }
+            }
+          }
+        }
+      }
+      std::cout << "Added  " << added_itt << " contours in iteration # "<< itt_num << std::endl;
+      itt_num++;
+    }
+
+    /// Find the convex hull object for each contour
+    std::vector<std::vector<cv::Point> > roi_contours;
+
+    for( size_t i = 0; i< contours.size(); i++ ){
+      if ( in_range[i][1] == 1 ){
+        roi_contours.push_back(contours[i]);
+      }
+    }
+    std::cout << "There are " << roi_contours.size() << "contours in ROI." << std::endl;
+
+    std::vector<cv::Point> contours_merged;
+    for( size_t i = 0; i < roi_contours.size(); i++ ){
+      for ( size_t j = 0; j< roi_contours[i].size(); j++  ){
+        contours_merged.push_back(roi_contours[i][j]);
+      }
+    }
+
+    /** The functions find the convex hull of a 2D point set using the Sklansky’s algorithm [Sklansky82]
+     * that has O(N logN) complexity in the current implementation. See the OpenCV sample convexhull.cpp
+     * that demonstrates the usage of different function variants. **/
+    convexHull( cv::Mat(contours_merged), _experimental_image_boundary_polygon, false );
+    std::vector<std::vector<cv::Point>> hull;
+    hull.push_back( _experimental_image_boundary_polygon );
+
+    /** Lets find the centroid of the exp. image boundary poligon **/
+    CvMoments moments;
+    double M00, M01, M10;
+
+    moments = cv::moments( _experimental_image_boundary_polygon );
+    M00 = cvGetSpatialMoment(&moments,0,0);
+    M10 = cvGetSpatialMoment(&moments,1,0);
+    M01 = cvGetSpatialMoment(&moments,0,1);
+    const int _experimental_image_boundary_polygon_center_x = (int)(M10/M00);
+    const int _experimental_image_boundary_polygon_center_y = (int)(M01/M00);
+    const cv::Point boundary_polygon_center( _experimental_image_boundary_polygon_center_x, _experimental_image_boundary_polygon_center_y );
+
+    cv::Mat temp;
+    cv::cvtColor( _raw_experimental_image, temp, cv::COLOR_GRAY2BGR);
+    cv::Scalar color = cv::Scalar( 1, 1, 1 );
+
+    drawContours( temp, hull, 0, color, 3, 8, std::vector<cv::Vec4i>(), 0, cv::Point() );
+    _experimental_image_boundary_polygon_margin_width_px = _experimental_image_boundary_polygon_margin_x_Nanometers / _sampling_rate_super_cell_x_nm_pixel;
+    _experimental_image_boundary_polygon_margin_height_px = _experimental_image_boundary_polygon_margin_y_Nanometers / _sampling_rate_super_cell_y_nm_pixel;
+
+    std::vector<cv::Point>::iterator  _exp_itt;
+
+    for (
+        _exp_itt = _experimental_image_boundary_polygon.begin();
+        _exp_itt != _experimental_image_boundary_polygon.end();
+        _exp_itt++
+        ){
+      const cv::Point initial_point = *_exp_itt;
+      const cv::Point direction_centroid_boundary = initial_point - boundary_polygon_center;
+      const double direction_centroid_boundary_x = direction_centroid_boundary.x / cv::norm( direction_centroid_boundary );
+      const double direction_centroid_boundary_y = direction_centroid_boundary.y / cv::norm( direction_centroid_boundary );
+      const int direction_centroid_boundary_x_px = (int) ( direction_centroid_boundary_x * _experimental_image_boundary_polygon_margin_width_px);
+      const int direction_centroid_boundary_y_px = (int) ( direction_centroid_boundary_y * _experimental_image_boundary_polygon_margin_height_px);
+      const cv::Point boundary ( direction_centroid_boundary_x_px, direction_centroid_boundary_y_px );
+      const cv::Point boundary_point = initial_point +  boundary;
+      _experimental_image_boundary_polygon_w_margin.push_back( boundary_point );
+    }
+
+    std::vector<std::vector<cv::Point>> hull1;
+    hull1.push_back( _experimental_image_boundary_polygon_w_margin );
+    drawContours( temp, hull1, 0, color, 3, 8, std::vector<cv::Vec4i>(), 0, cv::Point() );
+
+    cv::Mat rectangle_cropped_experimental_image;
+
+    _experimental_image_boundary_rectangle = boundingRect(contours_merged);
+    _experimental_image_boundary_rectangle_w_margin = boundingRect( _experimental_image_boundary_polygon_w_margin );
+
+    rectangle_cropped_experimental_image = temp(_experimental_image_boundary_rectangle).clone();
+    _rectangle_cropped_experimental_image_w_margin = temp(_experimental_image_boundary_rectangle_w_margin).clone();
+
+    if (debug_switch == true) {
+      try {
+        imwrite("experimental_image_boundary_rectangle.png", rectangle_cropped_experimental_image);
+        imwrite("experimental_image_boundary_rectangle_with_margins.png", _rectangle_cropped_experimental_image_w_margin);
+      }
+      catch (std::runtime_error& ex) {
+        fprintf(stderr, "Exception writing image: %s\n", ex.what());
+      }
+    }
+
+    _experimental_image_roi = _raw_experimental_image( _experimental_image_boundary_rectangle ).clone();
+    _experimental_image_roi_w_margin = _raw_experimental_image( _experimental_image_boundary_rectangle_w_margin ).clone();
+
+    calculate_experimental_min_size_nm();
+    calculate_expand_factor();
+    update_super_cell_length_parameters();
+    update_experimental_image_size_parameters();
+    update_super_cell_boundary_polygon();
+    result = true;
+  }
+  return result;
+}
+
 void Super_Cell::calculate_supercell_boundaries_from_experimental_image( 
     cv::Point2f roi_center, int threshold, int max_contour_distance_px 
     ){
@@ -626,8 +806,8 @@ void Super_Cell::calculate_supercell_boundaries_from_experimental_image(
   cv::Mat blur;
   cv::GaussianBlur(_raw_experimental_image ,blur,cv::Size(3,3), 0);
   assert(!blur.empty());
- assert(( _raw_experimental_image.cols == blur.cols  ));
- assert(( _raw_experimental_image.rows == blur.rows ));
+  assert(( _raw_experimental_image.cols == blur.cols  ));
+  assert(( _raw_experimental_image.rows == blur.rows ));
 
   cv::Canny( blur, canny_output, threshold , threshold *2, 3 );
   assert(!canny_output.empty());

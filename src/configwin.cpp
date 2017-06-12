@@ -92,11 +92,27 @@ MainWindow::MainWindow( ApplicationLog::ApplicationLog* logger , QWidget *parent
       connect(_sim_tdmap_thread, SIGNAL(started()), this, SLOT(update_tdmap_sim_ostream()));
       connect(_sim_tdmap_thread, SIGNAL(started()), sim_tdmap_worker, SLOT(newTDMapSim()));
 
-
       connect(sim_tdmap_worker, SIGNAL(TDMap_sucess()), this, SLOT(update_from_TDMap_sucess()));
       connect(sim_tdmap_worker, SIGNAL(TDMap_failure()), this, SLOT(update_from_TDMap_failure()));
       // will quit thread after work done
-      connect(sim_tdmap_worker, SIGNAL(finished()), _sim_tdmap_thread, SLOT(quit()), Qt::DirectConnection);
+      connect(sim_tdmap_worker, SIGNAL(TDMap_finished()), _sim_tdmap_thread, SLOT(quit()), Qt::DirectConnection);
+
+
+      /* Super-Cell Edge Detection  thread */
+      _sim_super_cell_thread = new QThread( this );
+      sim_super_cell_worker = new GuiSimOutUpdater( _core_super_cell  );
+
+      sim_super_cell_worker->moveToThread( _sim_super_cell_thread );
+
+      // will only start thread when needed
+      connect(sim_super_cell_worker, SIGNAL(SuperCell_edge_request()), _sim_super_cell_thread, SLOT(start()));
+      //connect(_sim_super_cell_thread, SIGNAL(started()), this, SLOT(update_tdmap_sim_ostream()));
+      connect(_sim_super_cell_thread, SIGNAL(started()), sim_super_cell_worker, SLOT(newSuperCellEdge()));
+
+      connect(sim_super_cell_worker, SIGNAL(SuperCell_edge_sucess()), this, SLOT(update_from_SuperCell_edge_sucess()));
+      connect(sim_super_cell_worker, SIGNAL(SuperCell_edge_failure()), this, SLOT(update_from_SuperCell_edge_failure()));
+      // will quit thread after work done
+      connect(sim_super_cell_worker, SIGNAL(SuperCell_edge_finished()), _sim_super_cell_thread, SLOT(quit()), Qt::DirectConnection);
 
 
       connect( ui->tdmap_table, SIGNAL(tdmap_best_match( int, int )), this, SLOT(update_tdmap_best_match(int,int)) );
@@ -265,6 +281,14 @@ void MainWindow::update_from_TDMap_sucess(){
 
 void MainWindow::update_from_TDMap_failure(){
   ui->statusBar->showMessage(tr("Error while running TD-Map"), 2000);
+}
+
+void MainWindow::update_from_SuperCell_edge_sucess(){
+
+}
+
+void MainWindow::update_from_SuperCell_edge_failure(){
+
 }
 
 void MainWindow::update_tdmap_sim_ostream(){
@@ -1424,6 +1448,8 @@ void MainWindow::create_box_options(){
   _max_contour_distance->set_slider_int_range_max( max_contour_distance_top_limit );
 
   edge_detection->insertChildren( _max_contour_distance );
+  //connect( _max_contour_distance, SIGNAL(dataChanged( int )), this, SLOT( update_supercell_model_edge_detection_setup() ) );
+
 
   super_cell_setup_model = new TreeModel( super_cell_setup_root );
   ui->qtree_view_supercell_model_edge_detection_setup->setModel( super_cell_setup_model );
@@ -1441,4 +1467,8 @@ void MainWindow::create_box_options(){
 bool MainWindow::set_dr_probe_path( QString path ){
   _dr_probe_bin_path = path;
   return true;
+}
+
+void MainWindow::on_qpush_apply_edge_detection_clicked(){
+
 }

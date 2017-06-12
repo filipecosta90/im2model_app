@@ -242,7 +242,7 @@ QWidget *TreeItemFileDelegate::createEditor( QWidget *parent, const QStyleOption
         QVariant::Type t = static_cast<QVariant::Type>(index.data(Qt::EditRole).userType());
         QWidget* text_editor = QItemEditorFactory().createEditor(t,parent);
         QHBoxLayout* editor_layout = new QHBoxLayout( editor );
-        connect(text_editor, SIGNAL(textChanged(const QString&)), this, SLOT(emitCommitData(  )));
+        connect(text_editor, SIGNAL(textChanged(const QString&)), this, SLOT(emitCommitData( )));
         editor_layout->setMargin(0);
         editor_layout->setContentsMargins(QMargins(0,0,0,0));
         editor_layout->setSpacing(0);

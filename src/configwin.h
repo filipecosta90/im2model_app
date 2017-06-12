@@ -90,6 +90,8 @@ class MainWindow : public QMainWindow {
     void update_tdmap_sim_ostream();
     void update_tdmap_best_match(int x,int y);
     void update_tdmap_current_selection(int x,int y);
+    void update_from_SuperCell_edge_sucess();
+    void update_from_SuperCell_edge_failure();
 
     // menu slots
     void newFile();
@@ -99,6 +101,8 @@ class MainWindow : public QMainWindow {
     void about();
     void documentWasModified();
     bool export_TDMap();
+
+    void on_qpush_apply_edge_detection_clicked();
 
 signals:
     void experimental_image_filename_changed( );
@@ -144,7 +148,9 @@ signals:
     /* Threads and workers */
     GuiSimOutUpdater *sim_tdmap_worker;
     QThread *_sim_tdmap_thread;
-    std::ostream* _sim_tdmap_thread_ostream;
+
+    GuiSimOutUpdater *sim_super_cell_worker;
+    QThread *_sim_super_cell_thread;
 
     GuiSimOutUpdater *sim_tdmap_output_worker;
     QThread *_sim_tdmap_output_thread;

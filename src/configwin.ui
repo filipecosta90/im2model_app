@@ -524,7 +524,7 @@
                </spacer>
               </item>
               <item>
-               <widget class="QPushButton" name="pushButton_24">
+               <widget class="QPushButton" name="qpush_apply_edge_detection">
                 <property name="text">
                  <string>Apply edge detection</string>
                 </property>
@@ -609,7 +609,7 @@
          </widget>
         </item>
        </layout>
-       <zorder>pushButton_24</zorder>
+       <zorder>qpush_apply_edge_detection</zorder>
        <zorder>pushButton_2</zorder>
        <zorder>horizontalSpacer</zorder>
        <zorder>horizontalSpacer_3</zorder>
