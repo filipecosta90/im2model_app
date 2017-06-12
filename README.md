@@ -1,7 +1,42 @@
-# im2model
+# Im2Model
 Msc. Thesis regarding efficient computation to refine atomic models for TEM image simulation and matching 
 ********************************************************************************
 
+
+## Installation
+### Command Line Interface
+
+```sh
+$ git clone https://github.com/filipecosta90/im2model.git
+$ cd im2model
+$ mkdir build
+$ cd build
+$ cmake ..
+$ make
+$ ./Im2Model --help
+```
+
+### Graphical User Interface
+Clone and open the project with Qt Creator, or:
+
+```sh
+$ git clone https://github.com/filipecosta90/im2model.git
+$ cd im2model 
+$ mkdir build
+$ cd build
+$ cmake .. -Dbuild_gui:BOOL=ON
+$ make
+$ ./Im2Model
+```
+
+
+License
+----
+
+GNU General Public License v3.0
+
+
+----
 
 Command Line Parameters:
 Options:
