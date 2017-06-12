@@ -44,6 +44,9 @@ class TreeItemFileDelegate : public QStyledItemDelegate {
 
 signals:
 
+private slots:
+    void emitCommitData();
+
     public slots:
       void get_filename_slot( QWidget *editor ) const;
     void get_dirname_slot( QWidget *editor );

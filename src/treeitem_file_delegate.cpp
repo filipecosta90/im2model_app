@@ -78,8 +78,11 @@ void TreeItemFileDelegate::paint(QPainter * painter, const QStyleOptionViewItem 
         break;
       }
 
-    case TreeItem::_delegate_SLIDER_INT:
+  /*  case TreeItem::_delegate_SLIDER_INT:
       {
+      QStyledItemDelegate::paint( painter, option,  index);
+      break;
+      /*
         if( item->get_slider_column() == index.column() ){
           int _slider_value = index.model()->data(index, Qt::EditRole).toInt();
           int _range_min = item->get_slider_int_range_min();
@@ -100,7 +103,7 @@ void TreeItemFileDelegate::paint(QPainter * painter, const QStyleOptionViewItem 
           QStyledItemDelegate::paint( painter, option,  index);
         }
         break;
-      }
+      }*/
 
     case TreeItem::_delegate_CHECK:
       {
@@ -170,6 +173,7 @@ void TreeItemFileDelegate::paint(QPainter * painter, const QStyleOptionViewItem 
     case TreeItem::_delegate_FILE:
     case TreeItem::_delegate_DIR:
     case TreeItem::_delegate_TEXT:
+  case TreeItem::_delegate_SLIDER_INT:
       {
         QStyledItemDelegate::paint( painter, option,  index);
         break;
@@ -188,27 +192,17 @@ QWidget *TreeItemFileDelegate::createEditor( QWidget *parent, const QStyleOption
       {
 
         if( item->get_slider_column() == index.column() ){
-          editor = new QWidget(parent);
-          int _slider_value = index.model()->data(index, Qt::EditRole).toInt();
-          int _range_min = item->get_slider_int_range_min();
-          int _range_max = item->get_slider_int_range_max();
 
-          QHBoxLayout *layout = new QHBoxLayout( editor );
-          layout->setMargin(0);
-          layout->setContentsMargins(0, 0, 0, 0);
-          QSizePolicy sizePol(QSizePolicy::Expanding,QSizePolicy::Expanding);
-          layout->setSpacing(0);
-          layout->setAlignment(Qt::AlignRight);
+            int _slider_value = index.model()->data(index, Qt::EditRole).toInt();
+            int _range_min = item->get_slider_int_range_min();
+            int _range_max = item->get_slider_int_range_max();
 
-          QSlider *slider = new QSlider(Qt::Horizontal, editor);
-          slider->setContentsMargins(0,0,0,0);
-          slider->setRange(_range_min, _range_max);
-          layout->addWidget(slider);
-          slider->setValue(_slider_value);
-
-          editor->setLayout(layout);
-          editor->setSizePolicy(sizePol);
-          editor->setFocusProxy( slider );
+            QSlider *slider = new QSlider(Qt::Horizontal, parent);
+                slider->setRange(_range_min, _range_max);
+                slider->setValue(_slider_value);
+                slider->setTickPosition(QSlider::TicksRight);
+                connect(slider, SIGNAL(valueChanged(int)), this, SLOT(emitCommitData()));
+                return slider;
         }
         else{
           editor = QStyledItemDelegate::createEditor(parent,option,index);
@@ -306,7 +300,6 @@ QWidget *TreeItemFileDelegate::createEditor( QWidget *parent, const QStyleOption
 
         bool _is_checked = index.model()->data(index, Qt::EditRole).toBool();
         checkbox->setChecked(_is_checked);
-
         editor_layout->setContentsMargins( QMargins(0,0,0,0) );
         editor_layout->addWidget( checkbox );
         editor->setLayout( editor_layout );
@@ -396,8 +389,10 @@ void TreeItemFileDelegate::setEditorData(QWidget *editor, const QModelIndex &ind
     case TreeItem::_delegate_SLIDER_INT:
       {
         if( item->get_slider_column() == index.column() ){
-          QSlider* slider = editor->findChild<QSlider*>();
-          int _slider_value = index.model()->data(index, Qt::EditRole).toInt();
+
+            int _slider_value = index.model()->data(index, Qt::EditRole).toInt();
+
+              QSlider *slider = static_cast<QSlider*>(editor);
           slider->setValue(_slider_value);
         }
         else{
@@ -461,6 +456,11 @@ void TreeItemFileDelegate::setEditorData(QWidget *editor, const QModelIndex &ind
   }
 }
 
+void TreeItemFileDelegate::emitCommitData()
+{
+    emit commitData(qobject_cast<QWidget *>(sender()));
+}
+
 void TreeItemFileDelegate::setModelData(QWidget *editor, QAbstractItemModel *model, const QModelIndex &index) const {
   TreeItem *item = static_cast<TreeItem*>(index.internalPointer());
   switch(item->get_item_delegate_type())
@@ -468,10 +468,11 @@ void TreeItemFileDelegate::setModelData(QWidget *editor, QAbstractItemModel *mod
     case TreeItem::_delegate_SLIDER_INT:
       {
         if( item->get_slider_column() == index.column() ){
-          QSlider* slider = editor->findChild<QSlider*>();
-          int int_value = slider->value();
+            QSlider *slider = static_cast<QSlider*>(editor);
+            int int_value = slider->value();
           const QVariant value (int_value);
           model->setData(index, value , Qt::EditRole);
+          model->setData(index, value, Qt::UserRole);
         }
         else{
           QStyledItemDelegate::setModelData(editor,model,index);
