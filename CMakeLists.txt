@@ -4,7 +4,7 @@ cmake_minimum_required(VERSION 3.6.2)
 set (CMAKE_CXX_COMPILER "clang++" )
 set (CMAKE_CXX_STANDARD 14)
 
-project( Im2Model VERSION 1.0 LANGUAGES CXX )
+project( Im2Model VERSION 0.1 LANGUAGES CXX )
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
