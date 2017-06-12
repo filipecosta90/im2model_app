@@ -1,4 +1,4 @@
-![alt text](https://raw.githubusercontent.com/filipecosta90/im2model/master/src/res/AppIcon1024.png)
+![alt text](https://raw.githubusercontent.com/filipecosta90/im2model/master/src/res/AppIcon128.png)
 
 
 # Im2Model
