@@ -21,7 +21,7 @@
     <item>
      <widget class="QTabWidget" name="tabWidget">
       <property name="currentIndex">
-       <number>1</number>
+       <number>2</number>
       </property>
       <widget class="QWidget" name="image_crystal_tab">
        <attribute name="title">
@@ -484,95 +484,135 @@
        <attribute name="title">
         <string>Supercell</string>
        </attribute>
-       <layout class="QGridLayout" name="gridLayout_4" columnstretch="3,8">
+       <layout class="QGridLayout" name="gridLayout_4">
         <item row="0" column="0">
-         <layout class="QVBoxLayout" name="vertical_layout_simulation_configuration_3">
-          <item>
-           <widget class="QLabel" name="qlabel_image_path_11">
-            <property name="font">
-             <font>
-              <weight>75</weight>
-              <bold>true</bold>
-             </font>
-            </property>
-            <property name="text">
-             <string>Edge detection</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QTreeView" name="qtree_view_supercell_model_edge_detection_setup"/>
-          </item>
-         </layout>
-        </item>
-        <item row="0" column="1" rowspan="3">
-         <layout class="QVBoxLayout" name="vertical_layout_TD_full_3">
-          <item>
-           <widget class="QLabel" name="qlabel_full_experimental_image_8">
-            <property name="font">
-             <font>
-              <weight>75</weight>
-              <bold>true</bold>
-             </font>
-            </property>
-            <property name="text">
-             <string>Target Region</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QGraphicsView" name="qgraphics_experimental_data_9">
-            <property name="enabled">
-             <bool>true</bool>
-            </property>
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="minimumSize">
-             <size>
-              <width>640</width>
-              <height>640</height>
-             </size>
-            </property>
-            <property name="sizeIncrement">
-             <size>
-              <width>1</width>
-              <height>1</height>
-             </size>
-            </property>
-            <property name="baseSize">
-             <size>
-              <width>320</width>
-              <height>320</height>
-             </size>
-            </property>
-            <property name="sizeAdjustPolicy">
-             <enum>QAbstractScrollArea::AdjustToContents</enum>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </item>
-        <item row="2" column="0">
-         <widget class="QPushButton" name="pushButton_2">
-          <property name="text">
-           <string>Compute Supercell from contour</string>
+         <widget class="QSplitter" name="splitter_2">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
           </property>
-         </widget>
-        </item>
-        <item row="1" column="0">
-         <widget class="QPushButton" name="pushButton_24">
-          <property name="text">
-           <string>Apply edge detection</string>
-          </property>
+          <widget class="QWidget" name="">
+           <layout class="QVBoxLayout" name="vertical_layout_simulation_configuration_3">
+            <item>
+             <widget class="QLabel" name="qlabel_image_path_11">
+              <property name="font">
+               <font>
+                <weight>75</weight>
+                <bold>true</bold>
+               </font>
+              </property>
+              <property name="text">
+               <string>Edge detection</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QTreeView" name="qtree_view_supercell_model_edge_detection_setup"/>
+            </item>
+            <item>
+             <layout class="QHBoxLayout" name="horizontalLayout_2">
+              <item>
+               <spacer name="horizontalSpacer">
+                <property name="orientation">
+                 <enum>Qt::Horizontal</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>40</width>
+                  <height>20</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+              <item>
+               <widget class="QPushButton" name="pushButton_24">
+                <property name="text">
+                 <string>Apply edge detection</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+           </layout>
+          </widget>
+          <widget class="QWidget" name="">
+           <layout class="QVBoxLayout" name="vertical_layout_TD_full_3">
+            <item>
+             <widget class="QLabel" name="qlabel_full_experimental_image_8">
+              <property name="font">
+               <font>
+                <weight>75</weight>
+                <bold>true</bold>
+               </font>
+              </property>
+              <property name="text">
+               <string>Target Region</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="CvImageFrameTableWidget" name="qgraphics_super_cell_edge_detection" native="true">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="minimumSize">
+               <size>
+                <width>320</width>
+                <height>320</height>
+               </size>
+              </property>
+              <property name="sizeIncrement">
+               <size>
+                <width>1</width>
+                <height>1</height>
+               </size>
+              </property>
+              <property name="baseSize">
+               <size>
+                <width>320</width>
+                <height>320</height>
+               </size>
+              </property>
+              <property name="autoFillBackground">
+               <bool>false</bool>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <layout class="QHBoxLayout" name="horizontalLayout">
+              <item>
+               <spacer name="horizontalSpacer_3">
+                <property name="orientation">
+                 <enum>Qt::Horizontal</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>40</width>
+                  <height>20</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+              <item>
+               <widget class="QPushButton" name="pushButton_2">
+                <property name="text">
+                 <string>Compute Supercell from contour</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+           </layout>
+          </widget>
          </widget>
         </item>
        </layout>
        <zorder>pushButton_24</zorder>
        <zorder>pushButton_2</zorder>
+       <zorder>horizontalSpacer</zorder>
+       <zorder>horizontalSpacer_3</zorder>
       </widget>
       <widget class="QWidget" name="refinement_tab">
        <attribute name="title">

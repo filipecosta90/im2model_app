@@ -33,6 +33,38 @@ Super_Cell::Super_Cell( Unit_Cell* cell ){
   update_unit_cell_parameters();
 }
 
+bool Super_Cell::set_hysteresis_threshold( int threshold ){
+ _hysteresis_threshold = threshold;
+}
+
+bool Super_Cell::set_max_contour_distance_px( int max_distance ){
+ return _max_contour_distance_px = max_distance;
+}
+
+int  Super_Cell::get_hysteresis_threshold( ){
+ return _hysteresis_threshold;
+}
+
+int  Super_Cell::get_hysteresis_threshold_range_bottom_limit( ){
+ return _hysteresis_threshold_range_bottom_limit;
+}
+
+int  Super_Cell::get_hysteresis_threshold_range_top_limit( ){
+ return _hysteresis_threshold_range_top_limit;
+}
+
+int Super_Cell::get_max_contour_distance_px( ){
+ return _max_contour_distance_px;
+}
+
+int  Super_Cell::get_max_contour_distance_px_range_bottom_limit( ){
+ return _max_contour_distance_px_range_bottom_limit;
+}
+
+int  Super_Cell::get_max_contour_distance_px_range_top_limit( ){
+ return _max_contour_distance_px_range_top_limit;
+}
+
 void Super_Cell::set_default_values(){ 
   /** supercell exclusive **/
   expand_factor_a = 1;

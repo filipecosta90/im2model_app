@@ -55,6 +55,8 @@ MainWindow::MainWindow( ApplicationLog::ApplicationLog* logger , QWidget *parent
         _sim_tdmap_wavimg_ostream_buffer,
         _sim_tdmap_simgrid_ostream_buffer,
         _core_image_crystal );
+    _core_super_cell = new Super_Cell();
+
 
     if (_flag_im2model_logger) {
       im2model_logger->logEvent(ApplicationLog::critical, "Trying to set application logger for TDMap.");
@@ -1375,6 +1377,63 @@ void MainWindow::create_box_options(){
   for (int column = 0; column < tdmap_simulation_setup_model->columnCount(); ++column){
     ui->qtree_view_tdmap_running_configuration->resizeColumnToContents(column);
   }
+
+  /*************************
+   * CRYSTALLOGRAPLY
+   *************************/
+  TreeItem* super_cell_setup_root = new TreeItem ( common_header );
+
+  ////////////////
+  // Edge detection
+  ////////////////
+  QVector<QVariant> box5_option_1 = {"Edge detection",""};
+  TreeItem* edge_detection  = new TreeItem ( box5_option_1 );
+  super_cell_setup_root->insertChildren( edge_detection );
+
+
+  QVector<QVariant> box5_option_1_data_1 = {"Hysteresis thresholding",""};
+  boost::function<int(void)> box5_option_1_check_getter ( boost::bind( &Super_Cell::get_hysteresis_threshold, _core_super_cell ) );
+  boost::function<bool(int)> box5_option_1_check_setter ( boost::bind( &Super_Cell::set_hysteresis_threshold, _core_super_cell, _1 ) );
+  QVector<bool> box5_option_1_edit = {false,true};
+  TreeItem* _hysteris_thresholding  = new TreeItem ( box5_option_1_data_1 ,box5_option_1_check_setter, box5_option_1_check_getter, box5_option_1_edit );
+  _hysteris_thresholding->set_item_delegate_type( TreeItem::_delegate_SLIDER_INT );
+  // load the preset data from core constuctor
+  _hysteris_thresholding->load_data_from_getter();
+  // set the bottom and top limits of the interval
+  int hysteresis_threshold_bottom_limit =  _core_super_cell->get_hysteresis_threshold_range_bottom_limit( );
+  int hysteresis_threshold_top_limit =  _core_super_cell->get_hysteresis_threshold_range_top_limit( );
+  _hysteris_thresholding->set_slider_int_range_min( hysteresis_threshold_bottom_limit );
+  _hysteris_thresholding->set_slider_int_range_max( hysteresis_threshold_top_limit );
+
+  edge_detection->insertChildren( _hysteris_thresholding );
+
+  QVector<QVariant> box5_option_1_data_2 = {"Max. contour distance",""};
+  boost::function<int(void)> box5_option_1_2_check_getter ( boost::bind( &Super_Cell::get_max_contour_distance_px, _core_super_cell ) );
+  boost::function<bool(int)> box5_option_1_2_check_setter ( boost::bind( &Super_Cell::set_max_contour_distance_px, _core_super_cell, _1 ) );
+  QVector<bool> box5_option_1_2_edit = {false,true};
+  TreeItem* _max_contour_distance  = new TreeItem ( box5_option_1_data_2 ,box5_option_1_2_check_setter, box5_option_1_2_check_getter, box5_option_1_2_edit );
+  _max_contour_distance->set_item_delegate_type( TreeItem::_delegate_SLIDER_INT );
+  // load the preset data from core constuctor
+  _max_contour_distance->load_data_from_getter();
+  // set the bottom and top limits of the interval
+  int max_contour_distance_bottom_limit =  _core_super_cell->get_max_contour_distance_px_range_bottom_limit( );
+  int max_contour_distance_top_limit =  _core_super_cell->get_max_contour_distance_px_range_top_limit( );
+  _max_contour_distance->set_slider_int_range_min( max_contour_distance_bottom_limit );
+  _max_contour_distance->set_slider_int_range_max( max_contour_distance_top_limit );
+
+  edge_detection->insertChildren( _max_contour_distance );
+
+  super_cell_setup_model = new TreeModel( super_cell_setup_root );
+  ui->qtree_view_supercell_model_edge_detection_setup->setModel( super_cell_setup_model );
+  ui->qtree_view_supercell_model_edge_detection_setup->setItemDelegate( _load_file_delegate );
+  //start editing after one click
+  ui->qtree_view_supercell_model_edge_detection_setup->setEditTriggers(QAbstractItemView::AllEditTriggers);
+  ui->qtree_view_supercell_model_edge_detection_setup->expandAll();
+
+  for (int column = 0; column < super_cell_setup_model->columnCount(); ++column){
+    ui->qtree_view_supercell_model_edge_detection_setup->resizeColumnToContents(column);
+  }
+
 }
 
 bool MainWindow::set_dr_probe_path( QString path ){

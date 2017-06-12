@@ -351,6 +351,26 @@ int TreeItem::get_dropdown_column(){
   return dropdown_column;
 }
 
+int TreeItem::get_slider_int_range_min(){
+    return _slider_int_range_min;
+}
+
+int TreeItem::get_slider_int_range_max(){
+    return _slider_int_range_max;
+}
+
+void TreeItem::set_slider_int_range_min( int min ){
+     _slider_int_range_min = min;
+}
+
+void TreeItem::set_slider_int_range_max( int max ){
+    _slider_int_range_max = max;
+}
+
+int TreeItem::get_slider_column(){
+  return slider_column;
+}
+
 bool TreeItem::appendData( int column, const QVariant &value){
     bool result = false;
     if  (column >= 0 && column < itemData.size() ) {

@@ -22,7 +22,6 @@ DEFINES += QT_DEPRECATED_WARNINGS
 # You can also select to disable deprecated APIs only up to a certain version of Qt.
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
-
 SOURCES +=\
         configwin.cpp \
     im2model_gui.cpp \
@@ -32,6 +31,7 @@ SOURCES +=\
     gui_tdmap_cell.cpp \
     gui_tdmap_table.cpp \
     td_map.cpp \
+    super_cell.cpp \
     image_crystal.cpp \
     celslc_prm.cpp \
     msa_prm.cpp \
@@ -45,7 +45,6 @@ SOURCES +=\
     application_log.cpp \
     custom_tool_button.cpp
 
-
 HEADERS  += configwin.h \
     treeitem.h \
     treemodel.h \
@@ -55,6 +54,7 @@ HEADERS  += configwin.h \
     gui_tdmap_cell.h \
     gui_tdmap_table.h \
     td_map.hpp \
+    super_cell.hpp \
     image_crystal.hpp \
     celslc_prm.hpp \
     msa_prm.hpp \
@@ -71,7 +71,8 @@ HEADERS  += configwin.h \
     gui_stream.hpp \
     cv_image_table_frame.h \
     application_log.hpp \
-    custom_tool_button.h
+    custom_tool_button.h \
+    cv_image_edge_frame.h
 
 RESOURCES     = ../im2model.qrc
 

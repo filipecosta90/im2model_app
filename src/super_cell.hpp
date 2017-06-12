@@ -180,6 +180,19 @@ class Super_Cell {
     cv::Rect _experimental_pos_best_match_rectangle;
 
     /***********
+      super-cell boundaries vars
+     ***********/
+
+    cv::Point2f roi_center;
+    int _hysteresis_threshold = 85;
+    int _max_contour_distance_px = 19;
+
+    int _hysteresis_threshold_range_bottom_limit = 1;
+    int _hysteresis_threshold_range_top_limit = 255;
+    int  _max_contour_distance_px_range_bottom_limit = 1;
+    int _max_contour_distance_px_range_top_limit = 255;
+
+    /***********
       image alignement vars
      ***********/
 
@@ -248,6 +261,18 @@ class Super_Cell {
     void set_super_cell_simulated_defocus_upper_bound( double super_cell_simulated_defocus_upper_bound );
     void set_super_cell_simulated_defocus_samples( int super_cell_simulated_defocus_samples );
     void set_super_cell_simulated_defocus_period( double super_cell_simulated_defocus_period );
+
+    bool set_hysteresis_threshold( int threshold );
+    bool set_max_contour_distance_px( int max_distance );
+    int  get_hysteresis_threshold( );
+    int get_max_contour_distance_px( );
+
+    // threshold limits
+    int get_hysteresis_threshold_range_bottom_limit( );
+    int get_hysteresis_threshold_range_top_limit( );
+
+    int  get_max_contour_distance_px_range_bottom_limit( );
+    int  get_max_contour_distance_px_range_top_limit( );
 
     //getters
     double get_super_cell_length_a_Angstroms();

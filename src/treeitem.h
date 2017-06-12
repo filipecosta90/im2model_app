@@ -26,7 +26,7 @@ Q_DECLARE_METATYPE(std::string)
 class TreeItem : public QObject {
   Q_OBJECT
   public:
-    enum DelegateType { _delegate_FILE, _delegate_DIR, _delegate_TEXT, _delegate_TEXT_ACTION, _delegate_TEXT_DOCUMENT, _delegate_TEXT_BROWSER, _delegate_CHECK, _delegate_DROP };
+    enum DelegateType { _delegate_FILE, _delegate_DIR, _delegate_TEXT, _delegate_TEXT_ACTION, _delegate_SLIDER_INT, _delegate_TEXT_DOCUMENT, _delegate_TEXT_BROWSER, _delegate_CHECK, _delegate_DROP };
 
     explicit TreeItem( QVector<QVariant> &data, TreeItem *parent = 0);
     explicit TreeItem( QVector<QVariant> &data, QVector<bool> editable, TreeItem *parent = 0);
@@ -82,6 +82,13 @@ class TreeItem : public QObject {
     QVector<QVariant> get_dropdown_enum();
     int get_dropdown_column();
     int get_checkbox_column();
+     /* slider */
+    int get_slider_column();
+    int get_slider_int_range_min();
+    int get_slider_int_range_max();
+
+    void set_slider_int_range_min( int min );
+    void set_slider_int_range_max( int max );
 
     void set_item_delegate_type( DelegateType _delegate_type );
     void set_dropdown_options( int column , QVector<QVariant>& drop, QVector<QVariant>& drop_enum );
@@ -106,6 +113,7 @@ signals:
     QVector<QVariant> dropdown_data;
     QVector<QVariant> dropdown_enum;
     int dropdown_column;
+    int slider_column = 1;
     bool _flag_dropdown = false;
 
     bool checked = false;
@@ -143,6 +151,10 @@ signals:
     boost::function<bool(bool)> fp_check_setter;
     bool _flag_fp_check_setter = false;
     int _fp_check_setter_col_pos = 1;
+
+    /* slider */
+    int _slider_int_range_min;
+    int _slider_int_range_max;
 
     DelegateType _item_delegate_type = _delegate_TEXT;
     QToolBar* _action_toolBar;

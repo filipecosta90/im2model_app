@@ -29,6 +29,7 @@
 
 #include "image_crystal.hpp"
 #include "td_map.hpp"
+#include "super_cell.hpp"
 #include "treemodel.h"
 #include "ui_configwin.h"
 #include "treeitem.h"
@@ -125,11 +126,18 @@ signals:
     Ui::MainWindow *ui;
     Image_Crystal *_core_image_crystal;
     TDMap *_core_td_map;
+    Super_Cell *_core_super_cell;
 
+    // tab 1
     TreeModel *project_setup_image_fields_model;
     TreeModel *project_setup_crystalographic_fields_model;
+
+    // tab 2
     TreeModel *tdmap_simulation_setup_model;
     TreeModel *tdmap_running_configuration_model;
+
+    // tab3
+    TreeModel* super_cell_setup_model;
 
     QModelIndex project_setup_image_fields_model_index;
 
