@@ -21,7 +21,7 @@
     <item>
      <widget class="QTabWidget" name="tabWidget">
       <property name="currentIndex">
-       <number>0</number>
+       <number>2</number>
       </property>
       <widget class="QWidget" name="image_crystal_tab">
        <attribute name="title">
@@ -490,7 +490,7 @@
           <property name="orientation">
            <enum>Qt::Horizontal</enum>
           </property>
-          <widget class="QWidget" name="">
+          <widget class="QWidget" name="layoutWidget">
            <layout class="QVBoxLayout" name="vertical_layout_simulation_configuration_3">
             <item>
              <widget class="QLabel" name="qlabel_image_path_11">
@@ -534,7 +534,7 @@
             </item>
            </layout>
           </widget>
-          <widget class="QWidget" name="">
+          <widget class="QWidget" name="layoutWidget">
            <layout class="QVBoxLayout" name="vertical_layout_TD_full_3">
             <item>
              <widget class="QLabel" name="qlabel_full_experimental_image_8">
@@ -550,7 +550,7 @@
              </widget>
             </item>
             <item>
-             <widget class="CvImageFrameTableWidget" name="qgraphics_super_cell_edge_detection" native="true">
+             <widget class="CvImageFrameWidget" name="qgraphics_super_cell_edge_detection" native="true">
               <property name="sizePolicy">
                <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
                 <horstretch>0</horstretch>
@@ -609,10 +609,6 @@
          </widget>
         </item>
        </layout>
-       <zorder>qpush_apply_edge_detection</zorder>
-       <zorder>pushButton_2</zorder>
-       <zorder>horizontalSpacer</zorder>
-       <zorder>horizontalSpacer_3</zorder>
       </widget>
       <widget class="QWidget" name="refinement_tab">
        <attribute name="title">

@@ -257,6 +257,13 @@ void MainWindow::update_simgrid_frame(){
 void MainWindow::update_super_cell_target_region(){
   cv::Mat target_region = _core_super_cell->get_target_region_contours_mat();
   this->ui->qgraphics_super_cell_edge_detection->setImage( target_region );
+  if( _core_super_cell->_is_experimental_image_boundary_polygon_defined() && _core_super_cell->_is_experimental_image_boundary_polygon_rect_defined() ){
+    cv::Rect _rect_boundary_polygon = _core_super_cell->get_experimental_image_boundary_polygon_rect();
+    std::vector<cv::Point2i> boundary_polygon = _core_super_cell->get_experimental_image_boundary_polygon();
+    ui->qgraphics_super_cell_edge_detection->cleanRenderAreas();
+    ui->qgraphics_super_cell_edge_detection->addShapeRect( _rect_boundary_polygon, 10 );
+    ui->qgraphics_super_cell_edge_detection->addShapePolygon( boundary_polygon, cv::Point2i(_rect_boundary_polygon.x, _rect_boundary_polygon.y ), 10 );
+  }
   this->ui->qgraphics_super_cell_edge_detection->show();
 }
 
@@ -873,7 +880,6 @@ void MainWindow::create_box_options(){
   TreeItem* experimental_roi_center_y = new TreeItem ( box1_option_3_1_2 , box1_function_3_1_2, box1_option_3_1_2_edit );
   connect( experimental_roi_center_y, SIGNAL(dataChanged( int )), this, SLOT( update_roi_experimental_image_frame() ) );
   connect( experimental_roi_center_y, SIGNAL(dataChanged( int )), this, SLOT( update_roi_full_experimental_image_frame() ) );
-
 
   experimental_roi->insertChildren( experimental_roi_center );
   experimental_roi_center->insertChildren( experimental_roi_center_x );

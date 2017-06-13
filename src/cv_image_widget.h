@@ -103,6 +103,23 @@ class CVImageWidget : public QWidget
       renderAreas_penColor.push_back( QColor(255, 0, 0) );
     }
 
+    void addShapePolygon( std::vector<cv::Point2i> polygon , cv::Point2i top_left,  int penWidth ){
+        renderAreas_top_left.push_back(top_left);
+        QPainterPath polyPath;
+        QPolygon poly;
+
+        for( int point_n = 0; point_n < polygon.size(); point_n++ ){
+            const cv::Point2i _cv_point  = polygon.at(point_n);
+            poly.push_back( QPoint(_cv_point.x, _cv_point.y) );
+        }
+
+        polyPath.addPolygon( poly );
+        renderAreas.push_back( polyPath );
+        renderAreas_penWidth.push_back( penWidth  );
+        renderAreas_penColor.push_back( QColor(255, 0, 0) );
+    }
+
+
     void cleanRenderAreas(){
       renderAreas.clear();
       renderAreas_penWidth.clear();

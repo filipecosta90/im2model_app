@@ -127,16 +127,24 @@ class Super_Cell {
     cv::Mat _experimental_image_roi_w_margin;
     cv::Mat _experimental_image_roi_mask;
     cv::Mat _experimental_image_roi_mask_w_margin;
+
     // _rectangle_cropped_experimental_image_w_margin is used for visualization ( the algorithms should use _experimental_image_roi_w_margin )
     cv::Mat _rectangle_cropped_experimental_image_w_margin;
     cv::Rect _experimental_image_boundary_rectangle; 
+    bool _flag_experimental_image_boundary_rectangle = false;
+
     cv::Rect _experimental_image_boundary_rectangle_w_margin;
+    bool _flag_experimental_image_boundary_rectangle_w_margin = false;
+
     // the next 2 vectors are position-related to the whole experimental image
-    std::vector<cv::Point> _experimental_image_boundary_polygon;
-    std::vector<cv::Point> _experimental_image_boundary_polygon_w_margin;
+    std::vector<cv::Point2i> _experimental_image_boundary_polygon;
+    bool _flag_experimental_image_boundary_polygon = false;
+    std::vector<cv::Point2i> _experimental_image_boundary_polygon_w_margin;
+    bool _flag_experimental_image_boundary_polygon_w_margin = false;
+
     // the next 2 vectors are position-related to the ROI of the experimental image
-    std::vector<cv::Point> _experimental_image_roi_boundary_polygon;
-    std::vector<cv::Point> _experimental_image_roi_boundary_polygon_w_margin;
+    std::vector<cv::Point2i> _experimental_image_roi_boundary_polygon;
+    std::vector<cv::Point2i> _experimental_image_roi_boundary_polygon_w_margin;
 
     // vars for minMaxLoc to normalize simulated crystal images
     double experimental_image_minVal;
@@ -246,9 +254,13 @@ class Super_Cell {
 
     // TDMao updaters
 
-
     bool _is_sampling_rate_super_cell_x_nm_pixel_defined();
     bool _is_sampling_rate_super_cell_y_nm_pixel_defined();
+
+    bool _is_experimental_image_boundary_polygon_defined();
+    bool _is_experimental_image_boundary_polygon_w_margin_defined();
+    bool _is_experimental_image_boundary_polygon_rect_defined();
+    bool _is_experimental_image_boundary_polygon_w_margin_rect_defined();
 
     //setters
     void set_super_cell_length_a_Angstroms( double a );
@@ -292,7 +304,7 @@ class Super_Cell {
 
     bool set_hysteresis_threshold( int threshold );
     bool set_max_contour_distance_px( int max_distance );
-    int  get_hysteresis_threshold( );
+    int get_hysteresis_threshold( );
     int get_max_contour_distance_px( );
 
     // threshold limits
@@ -310,6 +322,10 @@ class Super_Cell {
     double get_super_cell_length_a_Nanometers();
     double get_super_cell_length_b_Nanometers();
     double get_super_cell_length_c_Nanometers();
+    std::vector<cv::Point2i> get_experimental_image_boundary_polygon_w_margin();
+    std::vector<cv::Point2i> get_experimental_image_boundary_polygon();
+    cv::Rect get_experimental_image_boundary_polygon_rect();
+    cv::Rect get_experimental_image_boundary_polygon_w_margin_rect();
 
     double get_fractional_norm_a_atom_pos_Nanometers();
     double get_fractional_norm_b_atom_pos_Nanometers();

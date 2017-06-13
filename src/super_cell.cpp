@@ -72,6 +72,40 @@ int  Super_Cell::get_max_contour_distance_px_range_top_limit( ){
   return _max_contour_distance_px_range_top_limit;
 }
 
+std::vector<cv::Point2i> Super_Cell::get_experimental_image_boundary_polygon_w_margin(){
+    return  _experimental_image_boundary_polygon_w_margin;
+}
+
+std::vector<cv::Point2i> Super_Cell::get_experimental_image_boundary_polygon(){
+    return _experimental_image_boundary_polygon;
+}
+
+bool Super_Cell::_is_experimental_image_boundary_polygon_defined(){
+    return _flag_experimental_image_boundary_polygon;
+}
+
+bool Super_Cell::_is_experimental_image_boundary_polygon_w_margin_defined(){
+    return _flag_experimental_image_boundary_polygon_w_margin;
+}
+
+bool Super_Cell::_is_experimental_image_boundary_polygon_rect_defined(){
+    return _flag_experimental_image_boundary_rectangle;
+}
+
+bool Super_Cell::_is_experimental_image_boundary_polygon_w_margin_rect_defined(){
+    return _flag_experimental_image_boundary_rectangle_w_margin;
+
+}
+
+
+cv::Rect Super_Cell::get_experimental_image_boundary_polygon_rect(){
+return _experimental_image_boundary_rectangle;
+}
+
+cv::Rect Super_Cell::get_experimental_image_boundary_polygon_w_margin_rect(){
+return _experimental_image_boundary_rectangle_w_margin;
+}
+
 void Super_Cell::set_default_values(){ 
   /** supercell exclusive **/
   expand_factor_a = 1;
@@ -713,6 +747,8 @@ bool Super_Cell::calculate_supercell_boundaries_from_experimental_image(){
     cv::Mat canny_output_no_blur;
     std::vector< std::vector<cv::Point> > contours;
     std::vector<cv::Vec4i> hierarchy;
+    //clean the boundaries vec
+    _experimental_image_boundary_polygon.clear();
 
     cv::Mat blur;
     cv::GaussianBlur(_raw_experimental_image ,blur,cv::Size(3,3), 0);
@@ -802,6 +838,7 @@ bool Super_Cell::calculate_supercell_boundaries_from_experimental_image(){
      * that has O(N logN) complexity in the current implementation. See the OpenCV sample convexhull.cpp
      * that demonstrates the usage of different function variants. **/
     convexHull( cv::Mat(contours_merged), _experimental_image_boundary_polygon, false );
+    _flag_experimental_image_boundary_polygon = true;
     std::vector<std::vector<cv::Point>> hull;
     hull.push_back( _experimental_image_boundary_polygon );
 
@@ -833,14 +870,14 @@ bool Super_Cell::calculate_supercell_boundaries_from_experimental_image(){
         _exp_itt != _experimental_image_boundary_polygon.end();
         _exp_itt++
         ){
-      const cv::Point initial_point = *_exp_itt;
-      const cv::Point direction_centroid_boundary = initial_point - boundary_polygon_center;
+      const cv::Point2i initial_point = *_exp_itt;
+      const cv::Point2i direction_centroid_boundary = initial_point - boundary_polygon_center;
       const double direction_centroid_boundary_x = direction_centroid_boundary.x / cv::norm( direction_centroid_boundary );
       const double direction_centroid_boundary_y = direction_centroid_boundary.y / cv::norm( direction_centroid_boundary );
       const int direction_centroid_boundary_x_px = (int) ( direction_centroid_boundary_x * _experimental_image_boundary_polygon_margin_width_px);
       const int direction_centroid_boundary_y_px = (int) ( direction_centroid_boundary_y * _experimental_image_boundary_polygon_margin_height_px);
-      const cv::Point boundary ( direction_centroid_boundary_x_px, direction_centroid_boundary_y_px );
-      const cv::Point boundary_point = initial_point +  boundary;
+      const cv::Point2i boundary ( direction_centroid_boundary_x_px, direction_centroid_boundary_y_px );
+      const cv::Point2i boundary_point = initial_point +  boundary;
       _experimental_image_boundary_polygon_w_margin.push_back( boundary_point );
     }
 
@@ -851,7 +888,9 @@ bool Super_Cell::calculate_supercell_boundaries_from_experimental_image(){
     cv::Mat rectangle_cropped_experimental_image;
 
     _experimental_image_boundary_rectangle = boundingRect(contours_merged);
+    _flag_experimental_image_boundary_rectangle = true;
     _experimental_image_boundary_rectangle_w_margin = boundingRect( _experimental_image_boundary_polygon_w_margin );
+    _flag_experimental_image_boundary_rectangle_w_margin = true;
 
     rectangle_cropped_experimental_image = temp(_experimental_image_boundary_rectangle).clone();
     _rectangle_cropped_experimental_image_w_margin = temp(_experimental_image_boundary_rectangle_w_margin).clone();

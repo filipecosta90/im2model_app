@@ -67,6 +67,11 @@ class CvImageFrameWidget : public QWidget
       image_widget->update();
     }
 
+    void addShapePolygon( std::vector<cv::Point2i> polygon , cv::Point2i top_left,  int pen_width ){
+        image_widget->addShapePolygon( polygon, top_left, pen_width );
+        image_widget->update();
+    }
+
     void setImageWidget( CVImageWidget* widget ){
       image_widget = widget;
       image_widget->update();
