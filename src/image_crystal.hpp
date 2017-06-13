@@ -41,6 +41,7 @@ class Image_Crystal {
 
     // Experimental Image info
     cv::Mat experimental_image_full;
+    bool _flag_experimental_image_full = false;
     cv::Mat experimental_image_roi;
     cv::Mat experimental_working;
 
@@ -51,18 +52,17 @@ class Image_Crystal {
     int roi_center_y;
     int roi_pixel_size;
 
-    bool _flag_loaded_experimental_full;
-    bool _flag_roi_center_x;
-    bool _flag_roi_center_y;
-    bool _flag_roi_x_size;
-    bool _flag_roi_y_size;
-    bool _roi_defined;
+    bool _flag_roi_center_x = false;
+    bool _flag_roi_center_y = false;
+    bool _flag_roi_x_size = false;
+    bool _flag_roi_y_size = false;
+    bool _roi_defined = false;
 
     double sampling_rate_experimental_x_nm_per_pixel;
     double sampling_rate_experimental_y_nm_per_pixel;
-    bool _flag_sampling_rate_experimental_x_nm_per_pixel;
-    bool _flag_sampling_rate_experimental_y_nm_per_pixel;
-    bool _sampling_rate_experimental_defined;
+    bool _flag_sampling_rate_experimental_x_nm_per_pixel = false;
+    bool _flag_sampling_rate_experimental_y_nm_per_pixel = false;
+    bool _sampling_rate_experimental_defined = false;
 
     cv::Point3d  upward_vector_hkl;
     double projection_dir_h;
@@ -104,10 +104,13 @@ class Image_Crystal {
     bool load_full_experimental_image();
     bool _is_roi_defined();
     bool _is_sampling_rate_experimental_defined();
+    bool _is_sampling_rate_super_cell_x_nm_pixel_defined();
+    bool _is_sampling_rate_super_cell_y_nm_pixel_defined();
     bool _is_perpendicular_dir_defined();
     bool _is_projection_dir_defined();
     bool _is_unit_cell_cif_path_defined();
     bool _is_unit_cell_cel_path_defined();
+    bool _is_experimental_image_full_defined();
 
 
     /** getters **/
@@ -123,6 +126,8 @@ class Image_Crystal {
     double get_projection_dir_h();
     double get_projection_dir_k();
     double get_projection_dir_l();
+
+    cv::Point2i get_roi_center();
 
     //setters
     bool set_experimental_image_path( std::string path );

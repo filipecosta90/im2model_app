@@ -37,6 +37,8 @@
 #include <opencv2/core/types.hpp>    // for Point3d, Point, Rect, Point2d
 
 #include "unit_cell.hpp"
+#include "image_crystal.hpp"
+#include "td_map.hpp"
 
 class Super_Cell {
   private:
@@ -118,6 +120,9 @@ class Super_Cell {
 
     /** Experimental image related **/
     cv::Mat _raw_experimental_image;
+    cv::Mat _experimental_image_contours;
+    bool _flag_raw_experimental_image = false;
+
     cv::Mat _experimental_image_roi;
     cv::Mat _experimental_image_roi_w_margin;
     cv::Mat _experimental_image_roi_mask;
@@ -167,6 +172,8 @@ class Super_Cell {
     int _super_cell_height_px;
     double _sampling_rate_super_cell_x_nm_pixel;
     double _sampling_rate_super_cell_y_nm_pixel;
+    bool _flag_sampling_rate_super_cell_x_nm_pixel = false;
+    bool _flag_sampling_rate_super_cell_y_nm_pixel = false;
     double _simgrid_best_match_thickness_nm; 
 
     /** Defocus Map simulation related **/
@@ -184,6 +191,7 @@ class Super_Cell {
      ***********/
 
     cv::Point2f roi_center;
+    bool _flag_roi_center = false;
     int _hysteresis_threshold = 85;
     int _max_contour_distance_px = 19;
 
@@ -210,6 +218,13 @@ class Super_Cell {
     // Define the motion model
     int motion_euclidean_warp_mode; 
 
+    /////////////////////////
+    // Im2Model core pointers
+    /////////////////////////
+    Image_Crystal *_core_image_crystal_ptr;
+    TDMap* _core_tdmap_ptr;
+
+
     // Define the motion model
     bool debug_switch;
 
@@ -221,9 +236,21 @@ class Super_Cell {
   public:
     Super_Cell();
     Super_Cell( Unit_Cell* unit_cell );
+    Super_Cell( Image_Crystal* image_crystal_ptr, TDMap* tdmap_ptr );
+
+    // Image_Crystal updaters
+    bool update_roi_center_from_image_crystal();
+    bool update_raw_experimental_image_from_image_crystal();
+    bool update_sampling_rate_super_cell_x_nm_pixel_from_image_crystal();
+    bool update_sampling_rate_super_cell_y_nm_pixel_from_image_crystal();
+
+    // TDMao updaters
+
+
+    bool _is_sampling_rate_super_cell_x_nm_pixel_defined();
+    bool _is_sampling_rate_super_cell_y_nm_pixel_defined();
 
     //setters
-
     void set_super_cell_length_a_Angstroms( double a );
     void set_super_cell_length_b_Angstroms( double b );
     void set_super_cell_length_c_Angstroms( double c );
@@ -250,9 +277,10 @@ class Super_Cell {
     void set_experimental_min_size_nm_x( double x_min_size_nm );
     void set_experimental_min_size_nm_y( double y_min_size_nm );
     void set_experimental_min_size_nm_z( double z_min_size_nm );
+    bool set_full_raw_experimental_image( cv::Mat full_raw_image );
     void set_experimental_image( cv::Mat raw_image , double sampling_rate_exp_image_x_nm_pixel, double sampling_rate_exp_image_y_nm_pixel ); 
-    void set_sampling_rate_super_cell_x_nm_pixel( double sampling_rate );
-    void set_sampling_rate_super_cell_y_nm_pixel( double sampling_rate );
+    bool set_sampling_rate_super_cell_x_nm_pixel( double sampling_rate );
+    bool set_sampling_rate_super_cell_y_nm_pixel( double sampling_rate );
     void set_simgrid_best_match_thickness_nm( double tickness ); 
     void set_super_cell_margin_nm( double margin );
 
@@ -275,6 +303,7 @@ class Super_Cell {
     int  get_max_contour_distance_px_range_top_limit( );
 
     //getters
+    cv::Mat get_target_region_contours_mat();
     double get_super_cell_length_a_Angstroms();
     double get_super_cell_length_b_Angstroms();
     double get_super_cell_length_c_Angstroms();

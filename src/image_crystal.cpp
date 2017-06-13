@@ -2,15 +2,6 @@
 
 
 Image_Crystal::Image_Crystal(){
-  _roi_defined = false;
-  _sampling_rate_experimental_defined = false;
-  _flag_roi_center_x = false;
-  _flag_roi_center_y = false;
-  _flag_roi_x_size = false;
-  _flag_roi_y_size = false;
-  _flag_loaded_experimental_full = false;
-  _flag_sampling_rate_experimental_x_nm_per_pixel = false;
-  _flag_sampling_rate_experimental_y_nm_per_pixel = false;
   roi_rectangle = cv::Rect();
 }
 
@@ -19,10 +10,14 @@ Image_Crystal::Image_Crystal(){
 bool Image_Crystal::load_full_experimental_image(){
   if ( boost::filesystem::exists( experimental_image_path ) ){
     experimental_image_full = cv::imread( experimental_image_path, CV_LOAD_IMAGE_GRAYSCALE );
-    _flag_loaded_experimental_full = true;
+    _flag_experimental_image_full = true;
     update_roi();
   }
-  return _flag_loaded_experimental_full;
+  return _flag_experimental_image_full;
+}
+
+bool Image_Crystal::_is_experimental_image_full_defined(){
+return _flag_experimental_image_full;
 }
 
 bool Image_Crystal::_is_roi_defined(){
@@ -49,8 +44,16 @@ bool Image_Crystal::_is_unit_cell_cel_path_defined(){
   return _unit_cell_cel_path_defined;
 }
 
+bool Image_Crystal::_is_sampling_rate_super_cell_y_nm_pixel_defined(){
+  return _flag_sampling_rate_experimental_y_nm_per_pixel;
+}
+
+bool Image_Crystal::_is_sampling_rate_super_cell_x_nm_pixel_defined(){
+  return _flag_sampling_rate_experimental_x_nm_per_pixel;
+}
+
 void Image_Crystal::update_roi(){
-  if( _flag_roi_center_x && _flag_roi_center_y && _flag_roi_x_size && _flag_roi_y_size && _flag_loaded_experimental_full ){
+  if( _flag_roi_center_x && _flag_roi_center_y && _flag_roi_x_size && _flag_roi_y_size && _flag_experimental_image_full ){
     const int top_left_x = roi_center_x - ( roi_x_size_width  / 2 );
     const int top_left_y = roi_center_y - ( roi_y_size_heigth / 2 );
     roi_rectangle.x = top_left_x;
@@ -81,6 +84,10 @@ void Image_Crystal::update_sampling_rate_experimental_defined(){
     _sampling_rate_experimental_defined = true;
     std::cout << " _sampling rate experimental_defined dir defined " << std::endl;
   }
+}
+
+cv::Point2i Image_Crystal::get_roi_center(){
+    return cv::Point2i( roi_center_x, roi_center_y );
 }
 
 /** getters **/

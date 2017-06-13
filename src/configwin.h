@@ -83,10 +83,11 @@ class MainWindow : public QMainWindow {
     private slots:
 
       bool update_qline_image_path( std::string fileName );
-    void update_full_experimental_image_frame();
+    void update_full_experimental_image();
     void update_roi_experimental_image_frame();
     void on_qpush_run_tdmap_clicked();
     void update_simgrid_frame();
+    void update_super_cell_target_region();
     void update_tdmap_sim_ostream();
     void update_tdmap_best_match(int x,int y);
     void update_tdmap_current_selection(int x,int y);
@@ -105,8 +106,9 @@ class MainWindow : public QMainWindow {
     void on_qpush_apply_edge_detection_clicked();
 
 signals:
-    void experimental_image_filename_changed( );
+    void experimental_image_filename_changed();
     void simulated_grid_changed();
+    void super_cell_target_region_changed();
     void force_close();
 
   private:

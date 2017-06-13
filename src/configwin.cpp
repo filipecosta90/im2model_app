@@ -52,13 +52,15 @@ MainWindow::MainWindow( ApplicationLog::ApplicationLog* logger , QWidget *parent
   }
   else{
     _core_image_crystal = new Image_Crystal();
+
     _core_td_map = new TDMap(
         _sim_tdmap_celslc_ostream_buffer,
         _sim_tdmap_msa_ostream_buffer,
         _sim_tdmap_wavimg_ostream_buffer,
         _sim_tdmap_simgrid_ostream_buffer,
         _core_image_crystal );
-    _core_super_cell = new Super_Cell();
+
+    _core_super_cell = new Super_Cell( _core_image_crystal, _core_td_map );
 
 
     if (_flag_im2model_logger) {
@@ -100,12 +102,12 @@ MainWindow::MainWindow( ApplicationLog::ApplicationLog* logger , QWidget *parent
 
       /* Super-Cell Edge Detection  thread */
       _sim_super_cell_thread = new QThread( this );
-      sim_super_cell_worker = new GuiSimOutUpdater( _core_super_cell  );
+      sim_super_cell_worker = new GuiSimOutUpdater( _core_super_cell );
 
       sim_super_cell_worker->moveToThread( _sim_super_cell_thread );
 
       // will only start thread when needed
-      connect(sim_super_cell_worker, SIGNAL(SuperCell_edge_request()), _sim_super_cell_thread, SLOT(start()));
+      connect( sim_super_cell_worker, SIGNAL(SuperCell_edge_request()), _sim_super_cell_thread, SLOT(start()));
       //connect(_sim_super_cell_thread, SIGNAL(started()), this, SLOT(update_tdmap_sim_ostream()));
       connect(_sim_super_cell_thread, SIGNAL(started()), sim_super_cell_worker, SLOT(newSuperCellEdge()));
 
@@ -114,17 +116,17 @@ MainWindow::MainWindow( ApplicationLog::ApplicationLog* logger , QWidget *parent
       // will quit thread after work done
       connect(sim_super_cell_worker, SIGNAL(SuperCell_edge_finished()), _sim_super_cell_thread, SLOT(quit()), Qt::DirectConnection);
 
+      connect( ui->tdmap_table, SIGNAL(tdmap_best_match( int, int )), this, SLOT( update_tdmap_best_match(int,int)) );
+      connect(ui->tdmap_table, SIGNAL(cellClicked(int , int )), this, SLOT( update_tdmap_current_selection(int,int)) );
 
-      connect( ui->tdmap_table, SIGNAL(tdmap_best_match( int, int )), this, SLOT(update_tdmap_best_match(int,int)) );
-      connect(ui->tdmap_table, SIGNAL(cellClicked(int , int )), this, SLOT(update_tdmap_current_selection(int,int)) );
-
-      connect(this, SIGNAL(experimental_image_filename_changed()), this, SLOT(update_full_experimental_image_frame()));
+      connect(this, SIGNAL(experimental_image_filename_changed()), this, SLOT(update_full_experimental_image()));
       connect(this, SIGNAL(simulated_grid_changed()), this, SLOT(update_simgrid_frame()));
+
+      connect(this, SIGNAL(super_cell_target_region_changed()), this, SLOT(update_super_cell_target_region()));
 
       if( _flag_im2model_logger ){
         im2model_logger->logEvent( ApplicationLog::notification, "Finished initializing App." );
       }
-
     }
   }
 }
@@ -225,10 +227,14 @@ MainWindow::~MainWindow(){
   if( !_failed_initialization ){
     /* END TDMap simulation thread */
     sim_tdmap_worker->abort();
+    sim_super_cell_worker->abort();
     _sim_tdmap_thread->wait();
+    _sim_super_cell_thread->wait();
     ////qDebug()<<"Deleting thread and worker in Thread "<<this->QObject::thread()->currentThreadId();
     delete _sim_tdmap_thread;
+    delete _sim_super_cell_thread;
     delete sim_tdmap_worker;
+    delete sim_super_cell_worker;
   }
   /* DELETE UI */
   delete ui;
@@ -238,6 +244,8 @@ bool MainWindow::update_qline_image_path( std::string fileName ){
   _core_image_crystal->set_experimental_image_path( fileName );
   const bool load_ok = _core_image_crystal->load_full_experimental_image();
   if( load_ok ){
+     cv::Mat full_raw_experimental_image = _core_image_crystal->get_full_experimental_image_mat();
+     _core_super_cell->set_full_raw_experimental_image( full_raw_experimental_image );
     emit experimental_image_filename_changed();
   }
   return true;
@@ -248,7 +256,13 @@ void MainWindow::update_simgrid_frame(){
   this->ui->tdmap_table->set_simulated_images_grid( _simulated_images_grid );
 }
 
-void MainWindow::update_full_experimental_image_frame(){
+void MainWindow::update_super_cell_target_region(){
+    cv::Mat target_region = _core_super_cell->get_target_region_contours_mat();
+    this->ui->qgraphics_super_cell_edge_detection->setImage( target_region );
+    this->ui->qgraphics_super_cell_edge_detection->show();
+}
+
+void MainWindow::update_full_experimental_image(){
   cv::Mat full_image = _core_image_crystal->get_full_experimental_image_mat();
   ui->qgraphics_full_experimental_image->setImage( full_image );
   ui->qgraphics_full_experimental_image->show();
@@ -284,11 +298,12 @@ void MainWindow::update_from_TDMap_failure(){
 }
 
 void MainWindow::update_from_SuperCell_edge_sucess(){
-
+    ui->statusBar->showMessage(tr("Sucessfully runned edge detection"), 2000);
+    emit super_cell_target_region_changed();
 }
 
 void MainWindow::update_from_SuperCell_edge_failure(){
-
+    ui->statusBar->showMessage(tr("Error while running edge detection"), 2000);
 }
 
 void MainWindow::update_tdmap_sim_ostream(){
@@ -421,7 +436,6 @@ bool MainWindow::saveAs()
     return false;
   return saveFile(dialog.selectedFiles().first());
 }
-
 
 bool MainWindow::export_TDMap(){
   // returns false if no settings were saved
@@ -1470,5 +1484,7 @@ bool MainWindow::set_dr_probe_path( QString path ){
 }
 
 void MainWindow::on_qpush_apply_edge_detection_clicked(){
-
+    bool status = false;
+    ui->statusBar->showMessage(tr("Running edge detection"), 2000);
+    sim_super_cell_worker->requestSuperCellEdge();
 }

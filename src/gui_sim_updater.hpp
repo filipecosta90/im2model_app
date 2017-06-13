@@ -41,15 +41,18 @@ public slots:
 
         bool result = super_cell->calculate_supercell_boundaries_from_experimental_image(); //->run_tdmap();
         if ( result ){
+            std::cout << "emiting sucess" << std::endl;
                emit SuperCell_edge_sucess();
         }
         else {
+            std::cout << "emiting failure" << std::endl;
             emit SuperCell_edge_failure();
         }
         // Set _working to false, meaning the process can't be aborted anymore.
            mutex.lock();
            _working = false;
            mutex.unlock();
+           std::cout << "emiting finished" << std::endl;
            emit SuperCell_edge_finished();
 
     }
@@ -69,7 +72,7 @@ public slots:
            mutex.lock();
            _working = false;
            mutex.unlock();
-           emit TdMap_finished();
+           emit TDMap_finished();
 
     }
 
@@ -105,7 +108,7 @@ signals:
     void TDMap_request();
     void TDMap_sucess();
     void TDMap_failure();
-    void TdMap_finished();
+    void TDMap_finished();
 
     void SuperCell_edge_request();
     void SuperCell_edge_sucess();

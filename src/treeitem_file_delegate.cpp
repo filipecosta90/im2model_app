@@ -387,11 +387,8 @@ void TreeItemFileDelegate::setEditorData(QWidget *editor, const QModelIndex &ind
 }
 
 void TreeItemFileDelegate::emitCommitData(){
-    std::cout << " emited commit Data" << std::endl;
-    QLineEdit *sender_w = qobject_cast<QLineEdit *>(sender());
-    QString _text_value = sender_w->text();
-    std::cout << "text "<< _text_value.toStdString() << std::endl;
-  emit commitData(sender_w);
+  std::cout << " emited commit Data" << std::endl;
+  emit commitData(qobject_cast<QWidget *>(sender()));
 }
 
 void TreeItemFileDelegate::setModelData(QWidget *editor, QAbstractItemModel *model, const QModelIndex &index) const {
@@ -423,7 +420,7 @@ void TreeItemFileDelegate::setModelData(QWidget *editor, QAbstractItemModel *mod
           model->setData(index, value, Qt::UserRole);
         }
         else{
-            QStyledItemDelegate::setModelData(editor,model,index);
+          QStyledItemDelegate::setModelData(editor,model,index);
         }
         break;
       }
@@ -456,7 +453,7 @@ void TreeItemFileDelegate::setModelData(QWidget *editor, QAbstractItemModel *mod
       }
     case TreeItem::_delegate_TEXT_BROWSER:
       {
-      QStyledItemDelegate::setModelData(editor,model,index);
+        QStyledItemDelegate::setModelData(editor,model,index);
         break;
       }
 
@@ -503,8 +500,8 @@ QSize TreeItemFileDelegate::sizeHint ( const QStyleOptionViewItem & option, cons
       }
     case TreeItem::_delegate_TEXT_BROWSER:
       {
-       return QSize( option.rect.width(), 100 );
-       break;
+        return QSize( option.rect.width(), 100 );
+        break;
       }
     default:
       {

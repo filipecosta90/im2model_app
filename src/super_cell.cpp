@@ -22,7 +22,7 @@ Super_Cell::Super_Cell(){
   // empty
 }
 
-Super_Cell::Super_Cell( Unit_Cell* cell ){
+Super_Cell::Super_Cell( Unit_Cell* cell ) {
   /** default and sentinel values **/
   set_sentinel_values();
   set_default_values();
@@ -31,6 +31,11 @@ Super_Cell::Super_Cell( Unit_Cell* cell ){
   /** non default unitcell **/
   unit_cell = cell;
   update_unit_cell_parameters();
+}
+
+Super_Cell::Super_Cell( Image_Crystal* image_crystal_ptr, TDMap* tdmap_ptr ) : Super_Cell() {
+  _core_image_crystal_ptr = image_crystal_ptr;
+  _core_tdmap_ptr = tdmap_ptr;
 }
 
 bool Super_Cell::set_hysteresis_threshold( int threshold ){
@@ -100,7 +105,6 @@ void Super_Cell::set_default_values(){
 
   debug_switch = false;
 }
-
 
 void Super_Cell::set_sentinel_values(){
   _super_cell_length_a_Angstroms = _super_cell_length_b_Angstroms = _super_cell_length_c_Angstroms = -1.0f;
@@ -202,6 +206,18 @@ void Super_Cell::set_experimental_min_size_nm_z( double z_min_size_nm ){
   _z_supercell_min_size_nm = z_min_size_nm;
 }
 
+bool Super_Cell::set_full_raw_experimental_image( cv::Mat full_raw_image ){
+  bool result = false;
+  if( !full_raw_image.empty() ){
+    _raw_experimental_image = full_raw_image;
+    _flag_raw_experimental_image = true;
+    // get the maximum and minimum values for normalizing the simulated images
+    cv::minMaxLoc( _raw_experimental_image, &experimental_image_minVal, &experimental_image_maxVal, NULL, NULL, cv::Mat() );
+    result = true;
+  }
+  return result;
+}
+
 void Super_Cell::set_experimental_image ( cv::Mat raw_image, double sampling_rate_exp_image_x_nm_pixel, double sampling_rate_exp_image_y_nm_pixel ){
   assert( !raw_image.empty() );
   assert( sampling_rate_exp_image_x_nm_pixel > 0.0f );
@@ -215,12 +231,24 @@ void Super_Cell::set_experimental_image ( cv::Mat raw_image, double sampling_rat
   cv::minMaxLoc( _raw_experimental_image, &experimental_image_minVal, &experimental_image_maxVal, NULL, NULL, cv::Mat() );
 }
 
-void Super_Cell::set_sampling_rate_super_cell_x_nm_pixel( double sampling_rate ){
+bool Super_Cell::set_sampling_rate_super_cell_x_nm_pixel( double sampling_rate ){
   _sampling_rate_super_cell_x_nm_pixel = sampling_rate;
+  _flag_sampling_rate_super_cell_x_nm_pixel = true;
+  return true;
 }
 
-void Super_Cell::set_sampling_rate_super_cell_y_nm_pixel( double sampling_rate ){
+bool Super_Cell::_is_sampling_rate_super_cell_x_nm_pixel_defined(){
+  return _flag_sampling_rate_super_cell_x_nm_pixel;
+}
+
+bool Super_Cell::set_sampling_rate_super_cell_y_nm_pixel( double sampling_rate ){
   _sampling_rate_super_cell_y_nm_pixel = sampling_rate;
+  _flag_sampling_rate_super_cell_y_nm_pixel = true;
+  return true;
+}
+
+bool Super_Cell::_is_sampling_rate_super_cell_y_nm_pixel_defined(){
+  return _flag_sampling_rate_super_cell_y_nm_pixel;
 }
 
 void Super_Cell::set_simgrid_best_match_thickness_nm( double thickness ){ 
@@ -612,12 +640,74 @@ bool Super_Cell::update_unit_cell_parameters(){
   return true;
 }
 
+bool Super_Cell::update_roi_center_from_image_crystal(){
+  bool result = false;
+  if ( _core_image_crystal_ptr ){
+    if( _core_image_crystal_ptr->_is_roi_defined() ){
+      roi_center = _core_image_crystal_ptr->get_roi_center();
+      _flag_roi_center = true;
+      result = true;
+    }
+  }
+  return result;
+}
+
+bool Super_Cell::update_raw_experimental_image_from_image_crystal(){
+  bool result = false;
+  if ( _core_image_crystal_ptr ){
+    if( _core_image_crystal_ptr->_is_experimental_image_full_defined() ){
+      cv::Mat temp_raw = _core_image_crystal_ptr->get_full_experimental_image_mat();
+      _flag_roi_center = set_full_raw_experimental_image( temp_raw );
+      result = _flag_roi_center;
+    }
+  }
+  return result;
+}
+
+bool Super_Cell::update_sampling_rate_super_cell_x_nm_pixel_from_image_crystal(){
+  bool result = false;
+  if ( _core_image_crystal_ptr ){
+    if( _core_image_crystal_ptr->_is_sampling_rate_super_cell_x_nm_pixel_defined() ){
+      const double temp_sampling_rate = _core_image_crystal_ptr->get_sampling_rate_experimental_x_nm_per_pixel();
+      _flag_sampling_rate_super_cell_x_nm_pixel = set_sampling_rate_super_cell_x_nm_pixel( temp_sampling_rate );
+      result = _flag_sampling_rate_super_cell_x_nm_pixel;
+    }
+  }
+  return result;
+}
+
+bool Super_Cell::update_sampling_rate_super_cell_y_nm_pixel_from_image_crystal(){
+  bool result = false;
+  if ( _core_image_crystal_ptr ){
+    if( _core_image_crystal_ptr->_is_sampling_rate_super_cell_y_nm_pixel_defined() ){
+      const double temp_sampling_rate = _core_image_crystal_ptr->get_sampling_rate_experimental_y_nm_per_pixel();
+      _flag_sampling_rate_super_cell_x_nm_pixel = set_sampling_rate_super_cell_y_nm_pixel( temp_sampling_rate );
+      result = _flag_sampling_rate_super_cell_y_nm_pixel;
+    }
+  }
+  return result;
+}
+
 bool Super_Cell::calculate_supercell_boundaries_from_experimental_image(){
   bool result = false;
   /* general assertions */
-  if(!_raw_experimental_image.empty()){
+  update_raw_experimental_image_from_image_crystal();
+  update_roi_center_from_image_crystal();
+  update_sampling_rate_super_cell_x_nm_pixel_from_image_crystal();
+  update_sampling_rate_super_cell_y_nm_pixel_from_image_crystal();
+
+  if( _flag_raw_experimental_image &&
+      _flag_sampling_rate_super_cell_x_nm_pixel &&
+      _flag_sampling_rate_super_cell_y_nm_pixel && _flag_roi_center ){
 
     std::cout << "inside calculate_supercell_boundaries_from_experimental_image " << std::endl;
+    std::cout << "roi "  << roi_center << std::endl;
+    std::cout << "experimental image size " << _raw_experimental_image.size() << std::endl;
+    std::cout << "sampling rate x " << _sampling_rate_super_cell_x_nm_pixel << std::endl;
+    std::cout << "sampling rate y " << _sampling_rate_super_cell_y_nm_pixel << std::endl;
+    std::cout << "canny threshold " << _hysteresis_threshold << std::endl;
+    std::cout << "_max_contour_distance_px " << _max_contour_distance_px << std::endl;
+
     /* method */
     cv::Mat canny_output;
     cv::Mat canny_output_no_blur;
@@ -629,8 +719,6 @@ bool Super_Cell::calculate_supercell_boundaries_from_experimental_image(){
     assert(!blur.empty());
     assert(( _raw_experimental_image.cols == blur.cols  ));
     assert(( _raw_experimental_image.rows == blur.rows ));
-
-
 
     cv::Canny( blur, canny_output, _hysteresis_threshold , _hysteresis_threshold *2, 3 );
     assert(!canny_output.empty());
@@ -734,6 +822,7 @@ bool Super_Cell::calculate_supercell_boundaries_from_experimental_image(){
     cv::Scalar color = cv::Scalar( 1, 1, 1 );
 
     drawContours( temp, hull, 0, color, 3, 8, std::vector<cv::Vec4i>(), 0, cv::Point() );
+
     _experimental_image_boundary_polygon_margin_width_px = _experimental_image_boundary_polygon_margin_x_Nanometers / _sampling_rate_super_cell_x_nm_pixel;
     _experimental_image_boundary_polygon_margin_height_px = _experimental_image_boundary_polygon_margin_y_Nanometers / _sampling_rate_super_cell_y_nm_pixel;
 
@@ -777,17 +866,23 @@ bool Super_Cell::calculate_supercell_boundaries_from_experimental_image(){
       }
     }
 
+    _experimental_image_contours = temp.clone();
     _experimental_image_roi = _raw_experimental_image( _experimental_image_boundary_rectangle ).clone();
     _experimental_image_roi_w_margin = _raw_experimental_image( _experimental_image_boundary_rectangle_w_margin ).clone();
 
-    calculate_experimental_min_size_nm();
-    calculate_expand_factor();
-    update_super_cell_length_parameters();
-    update_experimental_image_size_parameters();
-    update_super_cell_boundary_polygon();
+    /*
+     * calculate_experimental_min_size_nm();
+     calculate_expand_factor();
+     update_super_cell_length_parameters();
+     update_experimental_image_size_parameters();
+     update_super_cell_boundary_polygon();*/
     result = true;
   }
   return result;
+}
+
+ cv::Mat Super_Cell::get_target_region_contours_mat(){
+    return _experimental_image_contours.clone();
 }
 
 void Super_Cell::calculate_supercell_boundaries_from_experimental_image( 
