@@ -6,7 +6,12 @@
 #include <QPainter>
 #include <opencv2/opencv.hpp>
 #include <iostream>
+#include <QtGui>
+#include <QColor>
+#include <QHash>
+#include <QWidget>
 
+#include "renderarea.h"
 
 class CVImageWidget : public QWidget
 {
@@ -95,8 +100,7 @@ class CVImageWidget : public QWidget
     }
 
 
-
-//    QList<RenderArea*> renderAreas;
+    QList<RenderArea*> renderAreas;
 
     QImage _qimage;
     cv::Mat _tmp_original, _tmp_current;

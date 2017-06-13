@@ -43,7 +43,8 @@ SOURCES +=\
     cv_tdmap_cell_image_frame.cpp \
     cv_tdmap_cell_image_frame_delegate.cpp \
     application_log.cpp \
-    custom_tool_button.cpp
+    custom_tool_button.cpp \
+    renderarea.cpp
 
 HEADERS  += configwin.h \
     treeitem.h \
@@ -72,7 +73,8 @@ HEADERS  += configwin.h \
     cv_image_table_frame.h \
     application_log.hpp \
     custom_tool_button.h \
-    cv_image_edge_frame.h
+    cv_image_edge_frame.h \
+    renderarea.h
 
 RESOURCES     = ../im2model.qrc
 

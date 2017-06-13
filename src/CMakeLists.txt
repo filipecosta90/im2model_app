@@ -105,6 +105,8 @@ if(build_gui)
   # These are stand-alone .cpp files that you usually never have to look at.
 
   set(GUI_SOURCE_FILES
+    renderarea.h
+    renderarea.cpp
     settings.h
     settings.cpp
     configwin.h
