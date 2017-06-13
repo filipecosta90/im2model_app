@@ -17,7 +17,7 @@ bool Image_Crystal::load_full_experimental_image(){
 }
 
 bool Image_Crystal::_is_experimental_image_full_defined(){
-return _flag_experimental_image_full;
+  return _flag_experimental_image_full;
 }
 
 bool Image_Crystal::_is_roi_defined(){
@@ -87,7 +87,7 @@ void Image_Crystal::update_sampling_rate_experimental_defined(){
 }
 
 cv::Point2i Image_Crystal::get_roi_center(){
-    return cv::Point2i( roi_center_x, roi_center_y );
+  return cv::Point2i( roi_center_x, roi_center_y );
 }
 
 /** getters **/
@@ -133,6 +133,10 @@ double Image_Crystal::get_projection_dir_k(){
 
 double Image_Crystal::get_projection_dir_l(){
   return projection_dir_l;
+}
+
+cv::Rect Image_Crystal::get_roi_rectangle(){
+  return roi_rectangle;
 }
 
 /** setters **/

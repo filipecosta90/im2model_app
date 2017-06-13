@@ -17,7 +17,9 @@ class CVImageWidget : public QWidget
 {
   Q_OBJECT
   public:
-    explicit CVImageWidget(QWidget *parent = 0) : QWidget(parent) , scaleFactor(1) { }
+    explicit CVImageWidget(QWidget *parent = 0) : QWidget(parent) , scaleFactor(1) {
+      //testPath();
+    }
 
     QSize sizeHint() const { return _qimage.size(); }
     QSize minimumSizeHint() const { return _qimage.size(); }
@@ -44,6 +46,7 @@ class CVImageWidget : public QWidget
     }
 
     void fitToWindow( ){
+
       int window_width = _container_window_width;
       int window_height = _container_window_height;
       float w_factor = ((float) window_width) / ((float) original_size.width );
@@ -72,7 +75,7 @@ class CVImageWidget : public QWidget
       _qimage = QImage(_tmp_original.data, _tmp_original.cols, _tmp_original.rows, _tmp_original.cols*3, QImage::Format_RGB888);
       this->setFixedSize(image.cols, image.rows);
       _image_set = true;
-      repaint();
+
     }
 
     void updateImage() {
@@ -88,19 +91,53 @@ class CVImageWidget : public QWidget
         // has three bytes.
         _qimage = QImage(_tmp_current.data, _tmp_current.cols, _tmp_current.rows, _tmp_current.cols*3, QImage::Format_RGB888);
         this->setFixedSize(_tmp_current.cols, _tmp_current.rows);
-        repaint();
       }
     }
+
+    void addRect( cv::Rect _area_rect, int penWidth ){
+      renderAreas_top_left.push_back(cv::Point2i( _area_rect.x, _area_rect.y ));
+      QPainterPath rectPath;
+      rectPath.addRect( 0, 0 , _area_rect.width, _area_rect.height );
+      renderAreas.push_back(rectPath);
+      renderAreas_penWidth.push_back( penWidth  );
+      renderAreas_penColor.push_back( QColor(255, 0, 0) );
+    }
+
+    void cleanRenderAreas(){
+      renderAreas.clear();
+      renderAreas_penWidth.clear();
+      renderAreas_penColor.clear();
+      renderAreas_top_left.clear();
+    }
+
   protected:
-    void paintEvent(QPaintEvent* /*event*/) {
+    void paintEvent(QPaintEvent* event) {
       // Display the image
       QPainter painter(this);
       painter.drawImage(QPoint(0,0), _qimage);
+
+      for( int list_position = 0; list_position < renderAreas.size() ; list_position++ ){
+        cv::Point2i _top_left = renderAreas_top_left.at( list_position );
+        _top_left *= scaleFactor;
+        std::cout << " area top left " << _top_left << std::endl;
+        QPainterPath _area = renderAreas.at(list_position);
+        const int _area_pen_width = renderAreas_penWidth.at(list_position);
+        QColor _area_pen_color = renderAreas_penColor.at(list_position);
+        painter.save();
+        painter.translate( _top_left.x, _top_left.y );
+        painter.setPen(QPen(_area_pen_color, _area_pen_width, Qt::SolidLine, Qt::FlatCap, Qt::MiterJoin));
+        painter.scale( scaleFactor, scaleFactor );
+        // painter.setBrush(QColor(122, 163, 39));
+        painter.drawPath(_area);
+        painter.restore();
+      }
       painter.end();
     }
 
-
-    QList<RenderArea*> renderAreas;
+    QList<QPainterPath> renderAreas;
+    QList<int> renderAreas_penWidth;
+    QList<QColor> renderAreas_penColor;
+    std::vector<cv::Point2i> renderAreas_top_left;
 
     QImage _qimage;
     cv::Mat _tmp_original, _tmp_current;

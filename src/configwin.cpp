@@ -62,7 +62,6 @@ MainWindow::MainWindow( ApplicationLog::ApplicationLog* logger , QWidget *parent
 
     _core_super_cell = new Super_Cell( _core_image_crystal, _core_td_map );
 
-
     if (_flag_im2model_logger) {
       im2model_logger->logEvent(ApplicationLog::critical, "Trying to set application logger for TDMap.");
       _core_td_map->set_application_logger(im2model_logger);
@@ -98,7 +97,6 @@ MainWindow::MainWindow( ApplicationLog::ApplicationLog* logger , QWidget *parent
       connect(sim_tdmap_worker, SIGNAL(TDMap_failure()), this, SLOT(update_from_TDMap_failure()));
       // will quit thread after work done
       connect(sim_tdmap_worker, SIGNAL(TDMap_finished()), _sim_tdmap_thread, SLOT(quit()), Qt::DirectConnection);
-
 
       /* Super-Cell Edge Detection  thread */
       _sim_super_cell_thread = new QThread( this );
@@ -244,8 +242,8 @@ bool MainWindow::update_qline_image_path( std::string fileName ){
   _core_image_crystal->set_experimental_image_path( fileName );
   const bool load_ok = _core_image_crystal->load_full_experimental_image();
   if( load_ok ){
-     cv::Mat full_raw_experimental_image = _core_image_crystal->get_full_experimental_image_mat();
-     _core_super_cell->set_full_raw_experimental_image( full_raw_experimental_image );
+    cv::Mat full_raw_experimental_image = _core_image_crystal->get_full_experimental_image_mat();
+    _core_super_cell->set_full_raw_experimental_image( full_raw_experimental_image );
     emit experimental_image_filename_changed();
   }
   return true;
@@ -257,9 +255,9 @@ void MainWindow::update_simgrid_frame(){
 }
 
 void MainWindow::update_super_cell_target_region(){
-    cv::Mat target_region = _core_super_cell->get_target_region_contours_mat();
-    this->ui->qgraphics_super_cell_edge_detection->setImage( target_region );
-    this->ui->qgraphics_super_cell_edge_detection->show();
+  cv::Mat target_region = _core_super_cell->get_target_region_contours_mat();
+  this->ui->qgraphics_super_cell_edge_detection->setImage( target_region );
+  this->ui->qgraphics_super_cell_edge_detection->show();
 }
 
 void MainWindow::update_full_experimental_image(){
@@ -273,6 +271,15 @@ void MainWindow::update_roi_experimental_image_frame(){
   if( _core_image_crystal->_is_roi_defined() ){
     cv::Mat roi_image = _core_image_crystal->get_roi_experimental_image_mat();
     ui->qgraphics_roi_experimental_image->setImage( roi_image );
+    ui->qgraphics_roi_experimental_image->show();
+  }
+}
+
+void MainWindow::update_roi_full_experimental_image_frame(){
+  if( _core_image_crystal->_is_roi_defined() ){
+    cv::Rect _roi_rect = _core_image_crystal->get_roi_rectangle();
+    ui->qgraphics_full_experimental_image->cleanRenderAreas();
+    ui->qgraphics_full_experimental_image->addShapeRect( _roi_rect, 10 );
     ui->qgraphics_full_experimental_image->show();
   }
 }
@@ -298,12 +305,12 @@ void MainWindow::update_from_TDMap_failure(){
 }
 
 void MainWindow::update_from_SuperCell_edge_sucess(){
-    ui->statusBar->showMessage(tr("Sucessfully runned edge detection"), 2000);
-    emit super_cell_target_region_changed();
+  ui->statusBar->showMessage(tr("Sucessfully runned edge detection"), 2000);
+  emit super_cell_target_region_changed();
 }
 
 void MainWindow::update_from_SuperCell_edge_failure(){
-    ui->statusBar->showMessage(tr("Error while running edge detection"), 2000);
+  ui->statusBar->showMessage(tr("Error while running edge detection"), 2000);
 }
 
 void MainWindow::update_tdmap_sim_ostream(){
@@ -860,9 +867,13 @@ void MainWindow::create_box_options(){
   TreeItem* experimental_roi_center = new TreeItem ( box1_option_3_1  );
   TreeItem* experimental_roi_center_x = new TreeItem ( box1_option_3_1_1 , box1_function_3_1_1, box1_option_3_1_1_edit );
   connect( experimental_roi_center_x, SIGNAL(dataChanged( int )), this, SLOT( update_roi_experimental_image_frame() ) );
+  connect( experimental_roi_center_x, SIGNAL(dataChanged( int )), this, SLOT( update_roi_full_experimental_image_frame() ) );
+
 
   TreeItem* experimental_roi_center_y = new TreeItem ( box1_option_3_1_2 , box1_function_3_1_2, box1_option_3_1_2_edit );
   connect( experimental_roi_center_y, SIGNAL(dataChanged( int )), this, SLOT( update_roi_experimental_image_frame() ) );
+  connect( experimental_roi_center_y, SIGNAL(dataChanged( int )), this, SLOT( update_roi_full_experimental_image_frame() ) );
+
 
   experimental_roi->insertChildren( experimental_roi_center );
   experimental_roi_center->insertChildren( experimental_roi_center_x );
@@ -883,9 +894,11 @@ void MainWindow::create_box_options(){
   TreeItem* experimental_roi_dimensions = new TreeItem ( box1_option_3_2  );
   TreeItem* experimental_roi_dimensions_width = new TreeItem ( box1_option_3_2_1 , box1_function_3_2_1, box1_option_3_2_1_edit );
   connect( experimental_roi_dimensions_width, SIGNAL(dataChanged( int )), this, SLOT( update_roi_experimental_image_frame() ) );
+  connect( experimental_roi_dimensions_width, SIGNAL(dataChanged( int )), this, SLOT( update_roi_full_experimental_image_frame() ) );
 
   TreeItem* experimental_roi_dimensions_height = new TreeItem ( box1_option_3_2_2 , box1_function_3_2_2, box1_option_3_2_2_edit );
   connect( experimental_roi_dimensions_height, SIGNAL(dataChanged( int )), this, SLOT( update_roi_experimental_image_frame() ) );
+  connect( experimental_roi_dimensions_height, SIGNAL(dataChanged( int )), this, SLOT( update_roi_full_experimental_image_frame() ) );
 
   experimental_roi->insertChildren( experimental_roi_dimensions );
   experimental_roi_dimensions->insertChildren( experimental_roi_dimensions_width );
@@ -1484,7 +1497,7 @@ bool MainWindow::set_dr_probe_path( QString path ){
 }
 
 void MainWindow::on_qpush_apply_edge_detection_clicked(){
-    bool status = false;
-    ui->statusBar->showMessage(tr("Running edge detection"), 2000);
-    sim_super_cell_worker->requestSuperCellEdge();
+  bool status = false;
+  ui->statusBar->showMessage(tr("Running edge detection"), 2000);
+  sim_super_cell_worker->requestSuperCellEdge();
 }

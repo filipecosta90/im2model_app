@@ -85,6 +85,7 @@ class MainWindow : public QMainWindow {
       bool update_qline_image_path( std::string fileName );
     void update_full_experimental_image();
     void update_roi_experimental_image_frame();
+    void update_roi_full_experimental_image_frame();
     void on_qpush_run_tdmap_clicked();
     void update_simgrid_frame();
     void update_super_cell_target_region();

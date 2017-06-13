@@ -128,6 +128,7 @@ class Image_Crystal {
     double get_projection_dir_l();
 
     cv::Point2i get_roi_center();
+    cv::Rect get_roi_rectangle();
 
     //setters
     bool set_experimental_image_path( std::string path );

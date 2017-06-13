@@ -39,15 +39,37 @@ class CvImageFrameWidget : public QWidget
   }
     public slots:
 
-      void setImage(const cv::Mat& image) {
-        image_widget->setImage(image);
-        scrollArea->setWidget(image_widget);
-        scrollArea->show();
-        image_widget->set_container_window_size(scrollArea->width(), scrollArea->height());
+      void cleanRenderAreas(){
+        image_widget->cleanRenderAreas();
+        image_widget->update();
       }
+
+    void setImage(const cv::Mat& image) {
+      image_widget->setImage(image);
+      scrollArea->setWidget(image_widget);
+      scrollArea->show();
+
+      int leftM,rightM,topM,bottomM;
+      this->getContentsMargins(&leftM,&topM,&rightM,&bottomM);
+
+      const int _avail_width = scrollArea->width() - leftM - rightM - 2* (scrollArea->frameWidth());
+      const int _avail_heigth = scrollArea->height() - topM - bottomM - 2* (scrollArea->frameWidth());
+
+      // std::cout << "total_width" << total_width << std::endl;
+
+      image_widget->set_container_window_size( _avail_width , _avail_heigth );
+      image_widget->update();
+
+    }
+
+    void addShapeRect( cv::Rect _rectangle, int pen_width ){
+      image_widget->addRect( _rectangle, pen_width );
+      image_widget->update();
+    }
 
     void setImageWidget( CVImageWidget* widget ){
       image_widget = widget;
+      image_widget->update();
     }
   protected:
     CVImageWidget *image_widget;

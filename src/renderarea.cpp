@@ -2,142 +2,68 @@
 
 #include <QPainter>
 
-RenderArea::RenderArea(QWidget *parent)
-    : QWidget(parent)
+  RenderArea::RenderArea(const QPainterPath &path, QWidget *parent)
+: QWidget(parent), path(path)
 {
-    shape = Polygon;
-    antialiased = false;
-    transformed = false;
-    pixmap.load(":/images/qt-logo.png");
-
-    setBackgroundRole(QPalette::Base);
-    setAutoFillBackground(true);
+  penWidth = 1;
+  rotationAngle = 0;
+  setBackgroundRole(QPalette::Base);
 }
 
 QSize RenderArea::minimumSizeHint() const
 {
-    return QSize(100, 100);
+  return QSize(50, 50);
 }
 
 QSize RenderArea::sizeHint() const
 {
-    return QSize(400, 200);
+  return QSize(100, 100);
 }
 
-void RenderArea::setShape(Shape shape)
+void RenderArea::setFillRule(Qt::FillRule rule)
 {
-    this->shape = shape;
-    update();
+  path.setFillRule(rule);
+  update();
 }
 
-void RenderArea::setPen(const QPen &pen)
+void RenderArea::setFillGradient(const QColor &color1, const QColor &color2)
 {
-    this->pen = pen;
-    update();
+  fillColor1 = color1;
+  fillColor2 = color2;
+  update();
 }
 
-void RenderArea::setBrush(const QBrush &brush)
+void RenderArea::setPenWidth(int width)
 {
-    this->brush = brush;
-    update();
+  penWidth = width;
+  update();
 }
 
-void RenderArea::setAntialiased(bool antialiased)
+void RenderArea::setPenColor(const QColor &color)
 {
-    this->antialiased = antialiased;
-    update();
+  penColor = color;
+  update();
 }
 
-void RenderArea::setTransformed(bool transformed)
+void RenderArea::setRotationAngle(int degrees)
 {
-    this->transformed = transformed;
-    update();
+  rotationAngle = degrees;
+  update();
 }
 
-void RenderArea::paintEvent(QPaintEvent * /* event */)
+void RenderArea::paintEvent(QPaintEvent *)
 {
-    static const QPoint points[4] = {
-        QPoint(10, 80),
-        QPoint(20, 10),
-        QPoint(80, 30),
-        QPoint(90, 70)
-    };
+  QPainter painter(this);
+  painter.setRenderHint(QPainter::Antialiasing);
+  painter.scale(width() / 100.0, height() / 100.0);
+  painter.translate(50.0, 50.0);
+  painter.rotate(-rotationAngle);
+  painter.translate(-50.0, -50.0);
 
-    QRect rect(10, 20, 80, 60);
-
-    QPainterPath path;
-    path.moveTo(20, 80);
-    path.lineTo(20, 30);
-    path.cubicTo(80, 0, 50, 50, 80, 80);
-
-    int startAngle = 20 * 16;
-    int arcLength = 120 * 16;
-
-    QPainter painter(this);
-    painter.setPen(pen);
-    painter.setBrush(brush);
-    if (antialiased)
-        painter.setRenderHint(QPainter::Antialiasing, true);
-
-    for (int x = 0; x < width(); x += 100) {
-        for (int y = 0; y < height(); y += 100) {
-            painter.save();
-            painter.translate(x, y);
-            if (transformed) {
-                painter.translate(50, 50);
-                painter.rotate(60.0);
-                painter.scale(0.6, 0.9);
-                painter.translate(-50, -50);
-            }
-
-            switch (shape) {
-            case Line:
-                painter.drawLine(rect.bottomLeft(), rect.topRight());
-                break;
-            case Points:
-                painter.drawPoints(points, 4);
-                break;
-            case Polyline:
-                painter.drawPolyline(points, 4);
-                break;
-            case Polygon:
-                painter.drawPolygon(points, 4);
-                break;
-            case Rect:
-                painter.drawRect(rect);
-                break;
-            case RoundedRect:
-                painter.drawRoundedRect(rect, 25, 25, Qt::RelativeSize);
-                break;
-            case Ellipse:
-                painter.drawEllipse(rect);
-                break;
-            case Arc:
-                painter.drawArc(rect, startAngle, arcLength);
-                break;
-            case Chord:
-                painter.drawChord(rect, startAngle, arcLength);
-                break;
-            case Pie:
-                painter.drawPie(rect, startAngle, arcLength);
-                break;
-            case Path:
-                painter.drawPath(path);
-                break;
-            case Text:
-                painter.drawText(rect,
-                                 Qt::AlignCenter,
-                                 tr("Qt by\nThe Qt Company"));
-                break;
-            case Pixmap:
-                painter.drawPixmap(10, 10, pixmap);
-            }
-            painter.restore();
-        }
-    }
-
-    painter.setRenderHint(QPainter::Antialiasing, false);
-    painter.setPen(palette().dark().color());
-    painter.setBrush(Qt::NoBrush);
-    painter.drawRect(QRect(0, 0, width() - 1, height() - 1));
+  painter.setPen(QPen(penColor, penWidth, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
+  QLinearGradient gradient(0, 0, 0, 100);
+  gradient.setColorAt(0.0, fillColor1);
+  gradient.setColorAt(1.0, fillColor2);
+  painter.setBrush(gradient);
+  painter.drawPath(path);
 }
