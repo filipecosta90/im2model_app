@@ -7,6 +7,7 @@
 #include <opencv2/opencv.hpp>
 #include <iostream>
 
+
 class CVImageWidget : public QWidget
 {
   Q_OBJECT
@@ -92,6 +93,10 @@ class CVImageWidget : public QWidget
       painter.drawImage(QPoint(0,0), _qimage);
       painter.end();
     }
+
+
+
+//    QList<RenderArea*> renderAreas;
 
     QImage _qimage;
     cv::Mat _tmp_original, _tmp_current;
