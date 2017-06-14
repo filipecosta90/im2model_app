@@ -118,8 +118,10 @@ if(build_gui)
     treeitem_file_delegate.hpp
     treeitem_file_delegate.cpp
     cv_image_widget.h
+    cv_image_widget.cpp
     cv_image_table_frame.h
     cv_image_frame.h
+    cv_image_frame.cpp
     cv_image_cell_widget.h
     cv_image_delegate.h
     cv_image_delegate.cpp

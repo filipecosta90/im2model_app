@@ -267,22 +267,22 @@ void MainWindow::update_super_cell_target_region_shapes(){
   // boundary rect
   if( _core_super_cell->_is_experimental_image_boundary_polygon_rect_defined() ){
     cv::Rect _rect_boundary_polygon = _core_super_cell->get_experimental_image_boundary_polygon_rect();
-    ui->qgraphics_super_cell_edge_detection->addShapeRect( _rect_boundary_polygon, 10 );
+    ui->qgraphics_super_cell_edge_detection->addShapeRect( _rect_boundary_polygon, 10 , tr("Target region bounding rectangle") );
   }
   // boundary rect  with margin
   if( _core_super_cell->_is_experimental_image_boundary_polygon_w_margin_rect_defined() ){
     cv::Rect _rect_w_margin_boundary_polygon = _core_super_cell->get_experimental_image_boundary_polygon_w_margin_rect();
-    ui->qgraphics_super_cell_edge_detection->addShapeRect( _rect_w_margin_boundary_polygon, 10, cv::Vec3b(255,0,255) );
+    ui->qgraphics_super_cell_edge_detection->addShapeRect( _rect_w_margin_boundary_polygon, 10, cv::Vec3b(255,0,255), tr("Target region with margin bounding rectangle") );
   }
   // experimental image boundary polygon
   if( _core_super_cell->_is_experimental_image_boundary_polygon_defined() ){
     std::vector<cv::Point2i> boundary_polygon = _core_super_cell->get_experimental_image_boundary_polygon();
-    ui->qgraphics_super_cell_edge_detection->addShapePolygon( boundary_polygon, cv::Point2i( 0,0 ), 10, cv::Vec3b(0,255,0) );
+    ui->qgraphics_super_cell_edge_detection->addShapePolygon( boundary_polygon, cv::Point2i( 0,0 ), 10, cv::Vec3b(0,255,0) , tr("Target region boundary") );
   }
   // experimental image boundary polygon w margin
   if( _core_super_cell->_is_experimental_image_boundary_polygon_w_margin_rect_defined() ){
     std::vector<cv::Point2i> boundary_polygon_w_margin = _core_super_cell->get_experimental_image_boundary_polygon_w_margin();
-    ui->qgraphics_super_cell_edge_detection->addShapePolygon( boundary_polygon_w_margin, cv::Point2i( 0,0 ), 10, cv::Vec3b(0,0,255) );
+    ui->qgraphics_super_cell_edge_detection->addShapePolygon( boundary_polygon_w_margin, cv::Point2i( 0,0 ), 10, cv::Vec3b(0,0,255) , tr("Target region with margin boundary") );
   }
   this->ui->qgraphics_super_cell_edge_detection->show();
 }
@@ -306,7 +306,7 @@ void MainWindow::update_roi_full_experimental_image_frame(){
   if( _core_image_crystal->_is_roi_defined() ){
     cv::Rect _roi_rect = _core_image_crystal->get_roi_rectangle();
     ui->qgraphics_full_experimental_image->cleanRenderAreas();
-    ui->qgraphics_full_experimental_image->addShapeRect( _roi_rect, 10 );
+    ui->qgraphics_full_experimental_image->addShapeRect( _roi_rect, 10 , tr("ROI boundary") );
     ui->qgraphics_full_experimental_image->show();
   }
 }

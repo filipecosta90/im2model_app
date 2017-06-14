@@ -14,78 +14,21 @@ class CvImageFrameWidget : public QWidget
 {
   Q_OBJECT
   public:
-    explicit CvImageFrameWidget(QWidget *parent = 0) : QWidget(parent)
-  {
-    parentWidget = parent;
-    image_widget = new CVImageWidget(parent);
-    scrollArea = new QScrollArea(this);
+    explicit CvImageFrameWidget(QWidget *parent = 0);
 
-    scrollArea->setSizeAdjustPolicy(QAbstractScrollArea::AdjustToContents);
-    toolsLayout = new QBoxLayout(QBoxLayout::TopToBottom,this);
-    //set margins to zero so the toolbar touches the widget's edges
-    toolsLayout->setContentsMargins(0, 0, 0, 0);
-
-    toolbar = new QToolBar;
-    toolbar->addAction("Normal size", image_widget, SLOT(normalSize()) );
-    toolbar->addAction("Fit" , image_widget, SLOT(fitToWindow()) );
-    toolbar->addAction("Zoom in" ,image_widget, SLOT(zoomIn()) );
-    toolbar->addAction("Zoom out", image_widget, SLOT(zoomOut()) );
-    toolsLayout->addWidget(toolbar);
-
-    //use a different layout for the contents so it has normal margins
-    contentsLayout = new QHBoxLayout;
-    contentsLayout->addWidget(scrollArea);
-    toolsLayout->addLayout(contentsLayout);
-  }
     public slots:
 
-      void cleanRenderAreas(){
-        image_widget->cleanRenderAreas();
-        image_widget->update();
-      }
+      /* image widget */
+      void setImage(const cv::Mat& image);
+    void setImageWidget( CVImageWidget* widget );
 
-    void setImage(const cv::Mat& image) {
-      image_widget->setImage(image);
-      scrollArea->setWidget(image_widget);
-      scrollArea->show();
+    /* shapes in image widget */
+    void cleanRenderAreas();
+    void addShapeRect( cv::Rect _rectangle, int pen_width, QString shape_description );
+    void addShapeRect( cv::Rect _rectangle, int pen_width, cv::Vec3b pen_color, QString shape_description );
+    void addShapePolygon( std::vector<cv::Point2i> polygon , cv::Point2i top_left,  int pen_width, QString shape_description );
+    void addShapePolygon( std::vector<cv::Point2i> polygon , cv::Point2i top_left,  int pen_width, cv::Vec3b pen_color, QString shape_description );
 
-      int leftM,rightM,topM,bottomM;
-      this->getContentsMargins(&leftM,&topM,&rightM,&bottomM);
-
-      const int _avail_width = scrollArea->width() - leftM - rightM - 2* (scrollArea->frameWidth());
-      const int _avail_heigth = scrollArea->height() - topM - bottomM - 2* (scrollArea->frameWidth());
-
-      // std::cout << "total_width" << total_width << std::endl;
-
-      image_widget->set_container_window_size( _avail_width , _avail_heigth );
-      image_widget->update();
-
-    }
-
-    void addShapeRect( cv::Rect _rectangle, int pen_width ){
-      image_widget->addRect( _rectangle, pen_width );
-      image_widget->update();
-    }
-
-    void addShapeRect( cv::Rect _rectangle, int pen_width, cv::Vec3b pen_color ){
-      image_widget->addRect( _rectangle, pen_width , pen_color );
-      image_widget->update();
-    }
-
-    void addShapePolygon( std::vector<cv::Point2i> polygon , cv::Point2i top_left,  int pen_width ){
-      image_widget->addShapePolygon( polygon, top_left, pen_width );
-      image_widget->update();
-    }
-
-    void addShapePolygon( std::vector<cv::Point2i> polygon , cv::Point2i top_left,  int pen_width, cv::Vec3b pen_color  ){
-      image_widget->addShapePolygon( polygon, top_left, pen_width , pen_color );
-      image_widget->update();
-    }
-
-    void setImageWidget( CVImageWidget* widget ){
-      image_widget = widget;
-      image_widget->update();
-    }
   protected:
     CVImageWidget *image_widget;
     QWidget *parentWidget;

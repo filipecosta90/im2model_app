@@ -28,6 +28,8 @@ SOURCES +=\
     treeitem.cpp \
     treemodel.cpp \
     cv_image_delegate.cpp \
+    cv_image_frame.cpp \
+    cv_image_widget.cpp \
     gui_tdmap_cell.cpp \
     gui_tdmap_table.cpp \
     td_map.cpp \
