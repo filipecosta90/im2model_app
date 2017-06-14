@@ -73,37 +73,37 @@ int  Super_Cell::get_max_contour_distance_px_range_top_limit( ){
 }
 
 std::vector<cv::Point2i> Super_Cell::get_experimental_image_boundary_polygon_w_margin(){
-    return  _experimental_image_boundary_polygon_w_margin;
+  return  _experimental_image_boundary_polygon_w_margin;
 }
 
 std::vector<cv::Point2i> Super_Cell::get_experimental_image_boundary_polygon(){
-    return _experimental_image_boundary_polygon;
+  return _experimental_image_boundary_polygon;
 }
 
 bool Super_Cell::_is_experimental_image_boundary_polygon_defined(){
-    return _flag_experimental_image_boundary_polygon;
+  return _flag_experimental_image_boundary_polygon;
 }
 
 bool Super_Cell::_is_experimental_image_boundary_polygon_w_margin_defined(){
-    return _flag_experimental_image_boundary_polygon_w_margin;
+  return _flag_experimental_image_boundary_polygon_w_margin;
 }
 
 bool Super_Cell::_is_experimental_image_boundary_polygon_rect_defined(){
-    return _flag_experimental_image_boundary_rectangle;
+  return _flag_experimental_image_boundary_rectangle;
 }
 
 bool Super_Cell::_is_experimental_image_boundary_polygon_w_margin_rect_defined(){
-    return _flag_experimental_image_boundary_rectangle_w_margin;
+  return _flag_experimental_image_boundary_rectangle_w_margin;
 
 }
 
 
 cv::Rect Super_Cell::get_experimental_image_boundary_polygon_rect(){
-return _experimental_image_boundary_rectangle;
+  return _experimental_image_boundary_rectangle;
 }
 
 cv::Rect Super_Cell::get_experimental_image_boundary_polygon_w_margin_rect(){
-return _experimental_image_boundary_rectangle_w_margin;
+  return _experimental_image_boundary_rectangle_w_margin;
 }
 
 void Super_Cell::set_default_values(){ 
@@ -749,6 +749,7 @@ bool Super_Cell::calculate_supercell_boundaries_from_experimental_image(){
     std::vector<cv::Vec4i> hierarchy;
     //clean the boundaries vec
     _experimental_image_boundary_polygon.clear();
+    _experimental_image_boundary_polygon_w_margin.clear();
 
     cv::Mat blur;
     cv::GaussianBlur(_raw_experimental_image ,blur,cv::Size(3,3), 0);
@@ -920,8 +921,8 @@ bool Super_Cell::calculate_supercell_boundaries_from_experimental_image(){
   return result;
 }
 
- cv::Mat Super_Cell::get_target_region_contours_mat(){
-    return _experimental_image_contours.clone();
+cv::Mat Super_Cell::get_target_region_contours_mat(){
+  return _experimental_image_contours.clone();
 }
 
 void Super_Cell::calculate_supercell_boundaries_from_experimental_image( 

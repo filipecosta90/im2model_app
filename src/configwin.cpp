@@ -257,12 +257,32 @@ void MainWindow::update_simgrid_frame(){
 void MainWindow::update_super_cell_target_region(){
   cv::Mat target_region = _core_super_cell->get_target_region_contours_mat();
   this->ui->qgraphics_super_cell_edge_detection->setImage( target_region );
-  if( _core_super_cell->_is_experimental_image_boundary_polygon_defined() && _core_super_cell->_is_experimental_image_boundary_polygon_rect_defined() ){
+  this->ui->qgraphics_super_cell_edge_detection->cleanRenderAreas();
+  update_super_cell_target_region_shapes();
+  this->ui->qgraphics_super_cell_edge_detection->show();
+}
+
+void MainWindow::update_super_cell_target_region_shapes(){
+  this->ui->qgraphics_super_cell_edge_detection->cleanRenderAreas();
+  // boundary rect
+  if( _core_super_cell->_is_experimental_image_boundary_polygon_rect_defined() ){
     cv::Rect _rect_boundary_polygon = _core_super_cell->get_experimental_image_boundary_polygon_rect();
-    std::vector<cv::Point2i> boundary_polygon = _core_super_cell->get_experimental_image_boundary_polygon();
-    ui->qgraphics_super_cell_edge_detection->cleanRenderAreas();
     ui->qgraphics_super_cell_edge_detection->addShapeRect( _rect_boundary_polygon, 10 );
-    ui->qgraphics_super_cell_edge_detection->addShapePolygon( boundary_polygon, cv::Point2i(_rect_boundary_polygon.x, _rect_boundary_polygon.y ), 10 );
+  }
+  // boundary rect  with margin
+  if( _core_super_cell->_is_experimental_image_boundary_polygon_w_margin_rect_defined() ){
+    cv::Rect _rect_w_margin_boundary_polygon = _core_super_cell->get_experimental_image_boundary_polygon_w_margin_rect();
+    ui->qgraphics_super_cell_edge_detection->addShapeRect( _rect_w_margin_boundary_polygon, 10, cv::Vec3b(255,0,255) );
+  }
+  // experimental image boundary polygon
+  if( _core_super_cell->_is_experimental_image_boundary_polygon_defined() ){
+    std::vector<cv::Point2i> boundary_polygon = _core_super_cell->get_experimental_image_boundary_polygon();
+    ui->qgraphics_super_cell_edge_detection->addShapePolygon( boundary_polygon, cv::Point2i( 0,0 ), 10, cv::Vec3b(0,255,0) );
+  }
+  // experimental image boundary polygon w margin
+  if( _core_super_cell->_is_experimental_image_boundary_polygon_w_margin_rect_defined() ){
+    std::vector<cv::Point2i> boundary_polygon_w_margin = _core_super_cell->get_experimental_image_boundary_polygon_w_margin();
+    ui->qgraphics_super_cell_edge_detection->addShapePolygon( boundary_polygon_w_margin, cv::Point2i( 0,0 ), 10, cv::Vec3b(0,0,255) );
   }
   this->ui->qgraphics_super_cell_edge_detection->show();
 }

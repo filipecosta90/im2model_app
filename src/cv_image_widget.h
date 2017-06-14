@@ -95,30 +95,36 @@ class CVImageWidget : public QWidget
     }
 
     void addRect( cv::Rect _area_rect, int penWidth ){
+      addRect(  _area_rect ,  penWidth, renderAreas_default_color );
+    }
+
+    void addRect( cv::Rect _area_rect, int penWidth, cv::Vec3b penColor ){
       renderAreas_top_left.push_back(cv::Point2i( _area_rect.x, _area_rect.y ));
       QPainterPath rectPath;
       rectPath.addRect( 0, 0 , _area_rect.width, _area_rect.height );
       renderAreas.push_back(rectPath);
-      renderAreas_penWidth.push_back( penWidth  );
-      renderAreas_penColor.push_back( QColor(255, 0, 0) );
+      renderAreas_penWidth.push_back( penWidth );
+      renderAreas_penColor.push_back( QColor(penColor[0], penColor[1], penColor[2]) );
     }
 
     void addShapePolygon( std::vector<cv::Point2i> polygon , cv::Point2i top_left,  int penWidth ){
-        renderAreas_top_left.push_back(top_left);
-        QPainterPath polyPath;
-        QPolygon poly;
-
-        for( int point_n = 0; point_n < polygon.size(); point_n++ ){
-            const cv::Point2i _cv_point  = polygon.at(point_n);
-            poly.push_back( QPoint(_cv_point.x, _cv_point.y) );
-        }
-
-        polyPath.addPolygon( poly );
-        renderAreas.push_back( polyPath );
-        renderAreas_penWidth.push_back( penWidth  );
-        renderAreas_penColor.push_back( QColor(255, 0, 0) );
+      addShapePolygon(  polygon , top_left,  penWidth, renderAreas_default_color );
     }
 
+    void addShapePolygon( std::vector<cv::Point2i> polygon , cv::Point2i top_left,  int penWidth, cv::Vec3b penColor ){
+      renderAreas_top_left.push_back(top_left);
+      QPainterPath polyPath;
+      QPolygon poly;
+
+      for( int point_n = 0; point_n < polygon.size(); point_n++ ){
+        const cv::Point2i _cv_point  = polygon.at(point_n);
+        poly.push_back( QPoint(_cv_point.x, _cv_point.y) );
+      }
+      polyPath.addPolygon( poly );
+      renderAreas.push_back( polyPath );
+      renderAreas_penWidth.push_back( penWidth  );
+      renderAreas_penColor.push_back( QColor(penColor[0], penColor[1], penColor[2]) );
+    }
 
     void cleanRenderAreas(){
       renderAreas.clear();
@@ -155,6 +161,7 @@ class CVImageWidget : public QWidget
     QList<int> renderAreas_penWidth;
     QList<QColor> renderAreas_penColor;
     std::vector<cv::Point2i> renderAreas_top_left;
+    cv::Vec3b renderAreas_default_color = cv::Vec3b(255,0,0);
 
     QImage _qimage;
     cv::Mat _tmp_original, _tmp_current;
