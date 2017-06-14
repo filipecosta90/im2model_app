@@ -69,10 +69,6 @@ class CELSLC_prm {
     std::string full_path_runned_bin;
 
     bool ssc_runned_bin;
-    std::string bin_path;
-    bool _flag_bin_path = false;
-    std::string bin_execname;
-    bool _flag_bin_execname = false;
     boost::filesystem::path full_bin_path_execname;
     bool _flag_full_bin_path_execname = false;
     bool dwf_switch;
@@ -168,8 +164,6 @@ class CELSLC_prm {
     void set_dwf_switch( bool dwf_switch );
 
     void set_abs_switch( bool abs_switch );
-
-    bool set_bin_path( std::string path );
 
     bool set_bin_execname ( std::string execname );
 

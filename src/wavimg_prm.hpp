@@ -101,10 +101,6 @@ class WAVIMG_prm {
     std::string prm_filename_path;
     bool _flag_prm_filename_path = false;
 
-    std::string bin_path;
-    bool _flag_bin_path = false;
-    std::string bin_execname;
-    bool _flag_bin_execname = false;
     boost::filesystem::path full_bin_path_execname;
     bool _flag_full_bin_path_execname = false;
     bool debug_switch;
@@ -130,7 +126,6 @@ class WAVIMG_prm {
 
   public:
     WAVIMG_prm( boost::process::ipstream& async_io_buffer_out );
-    WAVIMG_prm( std::string wavimg_bin_path, boost::process::ipstream& async_io_buffer_out );
     WAVIMG_prm(const WAVIMG_prm &obj);
 
     bool _is_bin_path_defined();
@@ -201,8 +196,6 @@ class WAVIMG_prm {
     void set_prm_file_name( std::string filename );
 
     void set_debug_switch(bool deb_switch);
-
-    bool set_bin_path( std::string path );
 
     bool set_bin_execname ( std::string execname );
 

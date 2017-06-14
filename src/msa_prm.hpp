@@ -65,10 +65,6 @@ class MSA_prm {
 
     std::string wave_function_name;
 
-    std::string bin_path;
-    bool _flag_bin_path = false;
-    std::string bin_execname;
-    bool _flag_bin_execname = false;
     boost::filesystem::path full_bin_path_execname;
     bool _flag_full_bin_path_execname = false;
     bool debug_switch;
@@ -80,6 +76,7 @@ class MSA_prm {
     bool _is_prm_filename_path_defined();
     bool _is_prm_produced();
     bool _is_prm_filename_defined();
+
 
     /* boost process output streams */
     boost::process::ipstream& _io_pipe_out;
@@ -98,9 +95,9 @@ class MSA_prm {
 
     void set_flag_io_ap_pipe_out( bool value );
 
-    bool get_flag_io_ap_pipe_out();
-
     bool _is_bin_path_defined();
+
+    bool get_flag_io_ap_pipe_out();
 
     void set_electron_wavelength( double energy );
 
@@ -127,8 +124,6 @@ class MSA_prm {
     void set_wave_function_name ( std::string wave_function_filename );
 
     void set_debug_switch(bool deb_switch);
-
-    bool set_bin_path( std::string path );
 
     bool set_bin_execname ( std::string execname );
 

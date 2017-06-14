@@ -22,7 +22,6 @@ CELSLC_prm::CELSLC_prm( boost::process::ipstream &async_io_buffer_out ) : _io_pi
   ht_accelaration_voltage = 0.0f;
 
   // runnable execv info
-  bin_path = "";
   dwf_switch = false;
   abs_switch = false;
   cel_format_switch = false;
@@ -40,12 +39,14 @@ CELSLC_prm::CELSLC_prm( boost::process::ipstream &async_io_buffer_out ) : _io_pi
   single_slice_calculation_enabled_switch = true;
 }
 
-bool CELSLC_prm::_is_bin_path_defined(){
-  return _flag_bin_path;
-}
 
 bool CELSLC_prm::_is_nz_simulated_partitions_defined(){
   return _flag_nz_simulated_partitions;
+}
+
+
+bool CELSLC_prm::_is_bin_path_defined(){
+  return _flag_full_bin_path_execname;
 }
 
 bool CELSLC_prm::_is_slice_params_accum_nm_slice_vec_defined(){
@@ -189,17 +190,6 @@ void CELSLC_prm::set_abs_switch( bool abs ){
   abs_switch = abs;
 }
 
-bool CELSLC_prm::set_bin_path( std::string path ){
-  boost::filesystem::path bin_dir(path);
-  bool result = false;
-  if( boost::filesystem::is_directory( bin_dir ) ){
-    bin_path = path;
-    _flag_bin_path = true;
-    result = true;
-  }
-  return result;
-}
-
 bool CELSLC_prm::set_base_dir_path( boost::filesystem::path path ){
   base_dir_path = path;
   _flag_base_dir_path = true;
@@ -217,11 +207,7 @@ bool CELSLC_prm::set_application_logger( ApplicationLog::ApplicationLog* app_log
 }
 
 bool CELSLC_prm::set_bin_execname( std::string execname ){
-  boost::filesystem::path bin_dir( bin_path );
-  if( boost::filesystem::exists(bin_dir) ) {
-    boost::filesystem::path file (execname);
-    full_bin_path_execname = boost::filesystem::canonical(bin_dir);
-    full_bin_path_execname /= file;
+     full_bin_path_execname = boost::filesystem::path (execname);
     try {
       _flag_full_bin_path_execname = boost::filesystem::exists( full_bin_path_execname );
     }
@@ -239,7 +225,6 @@ bool CELSLC_prm::set_bin_execname( std::string execname ){
       message << "checking if CELSLC exec exists. full path: " <<  full_bin_path_execname.string() << " || result: " << _flag_full_bin_path_execname << std::endl;
       logger->logEvent( ApplicationLog::notification , message.str() );
     }
-  }
   return _flag_full_bin_path_execname;
 }
 
@@ -678,7 +663,7 @@ bool CELSLC_prm::call_boost_bin(  ){
 
       std::stringstream args_stream;
       args_stream << full_bin_path_execname;
-      std::cout << args_stream.str() << "|" << bin_path << std::endl;
+      std::cout << args_stream.str() << "|" << full_bin_path_execname << std::endl;
       if( cif_format_switch  ){
         args_stream << " -cif " << super_cell_cif_file;
       }

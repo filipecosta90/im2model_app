@@ -1056,27 +1056,6 @@ bool TDMap::set_core_image_crystal_ptr( Image_Crystal* image_crystal_ptr ){
   return true;
 }
 
-bool TDMap::set_dr_probe_bin_path( std::string bin_path ){
-  bool result = true;
-  result &= _tdmap_celslc_parameters->set_bin_path(bin_path);
-  result &= _tdmap_msa_parameters->set_bin_path(bin_path);
-  result &= _tdmap_wavimg_parameters->set_bin_path(bin_path);
-  if( result ){
-    dr_probe_bin_path = bin_path;
-  }
-  _flag_dr_probe_bin_path = result;
-  if( _flag_logger ){
-    std::stringstream message;
-    message << " set_dr_probe_bin_path: " << _flag_dr_probe_bin_path << " to: " << bin_path;
-    logger->logEvent( ApplicationLog::notification , message.str() );
-  }
-  return _flag_dr_probe_bin_path;
-}
-
-bool TDMap::_is_dr_probe_bin_path_defined(){
-  return _flag_dr_probe_bin_path;
-}
-
 bool TDMap::set_dr_probe_celslc_execname( std::string celslc_execname ){
   _flag_dr_probe_celslc_execname = _tdmap_celslc_parameters->set_bin_execname(celslc_execname);
   if( _flag_dr_probe_celslc_execname ){

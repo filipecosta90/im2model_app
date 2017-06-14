@@ -93,30 +93,33 @@ void Settings::produce_settings_panel(){
   ////////////////
   // DR PROBE PATH
   ////////////////
-  QVector<QVariant> preferences_option_1_1 = {"path", _dr_probe_bin_path};
+  /*QVector<QVariant> preferences_option_1_1 = {"path", _dr_probe_bin_path};
   QVector<bool> preferences_option_1_1_edit = {false,true};
   boost::function<bool(std::string)> preferences_option_function_1_1 ( boost::bind( &Settings::set_dr_probe_bin_path, this, _1 ) );
   _preferences_dr_probe_path = new TreeItem ( preferences_option_1_1 , preferences_option_function_1_1,  preferences_option_1_1_edit  );
   _preferences_dr_probe_path->set_item_delegate_type( TreeItem::_delegate_DIR );
 
   preferences_dr_probe->insertChildren( _preferences_dr_probe_path );
-
+*/
   QVector<QVariant> preferences_option_1_2 = {"celslc execname",_dr_probe_celslc_bin};
   QVector<bool> preferences_option_1_2_edit = {false,true};
   boost::function<bool(std::string)> preferences_option_function_1_2 ( boost::bind( &Settings::set_dr_probe_celslc_bin, this, _1 ) );
   _preferences_dr_probe_celslc = new TreeItem ( preferences_option_1_2 , preferences_option_function_1_2,  preferences_option_1_2_edit  );
+  _preferences_dr_probe_celslc->set_item_delegate_type( TreeItem::_delegate_FILE );
   preferences_dr_probe->insertChildren( _preferences_dr_probe_celslc );
 
   QVector<QVariant> preferences_option_1_3 = {"msa execname",_dr_probe_msa_bin};
   QVector<bool> preferences_option_1_3_edit = {false,true};
   boost::function<bool(std::string)> preferences_option_function_1_3 ( boost::bind( &Settings::set_dr_probe_msa_bin, this, _1 ) );
   _preferences_dr_probe_msa = new TreeItem ( preferences_option_1_3 , preferences_option_function_1_3,  preferences_option_1_3_edit  );
+  _preferences_dr_probe_msa->set_item_delegate_type( TreeItem::_delegate_FILE );
   preferences_dr_probe->insertChildren( _preferences_dr_probe_msa );
 
   QVector<QVariant> preferences_option_1_4 = {"wavimg execname", _dr_probe_wavimg_bin};
   QVector<bool> preferences_option_1_4_edit = {false,true};
   boost::function<bool(std::string)> preferences_option_function_1_4 ( boost::bind( &Settings::set_dr_probe_wavimg_bin, this, _1 ) );
   _preferences_dr_probe_wavimg = new TreeItem ( preferences_option_1_4 , preferences_option_function_1_4,  preferences_option_1_4_edit  );
+  _preferences_dr_probe_wavimg->set_item_delegate_type( TreeItem::_delegate_FILE );
   preferences_dr_probe->insertChildren( _preferences_dr_probe_wavimg );
 
   project_preferences_model = new TreeModel( preferences_root );

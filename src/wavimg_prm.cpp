@@ -78,14 +78,8 @@ WAVIMG_prm::WAVIMG_prm( boost::process::ipstream &async_io_buffer_out ) : _io_pi
   // line 26 + aberration_definition_index_number
   //loop_string_indentifier = "";
   prm_filename = "";
-  bin_path = "";
   debug_switch = false;
   runned_bin = false;
-}
-
-WAVIMG_prm::WAVIMG_prm( std::string wavimg_bin_path , boost::process::ipstream &async_io_buffer_out )  : WAVIMG_prm( async_io_buffer_out ){
-  bin_path = wavimg_bin_path;
-  _flag_bin_path = true;
 }
 
 WAVIMG_prm::WAVIMG_prm(const WAVIMG_prm &obj) : _io_pipe_out(obj._io_pipe_out) {
@@ -163,7 +157,6 @@ WAVIMG_prm::WAVIMG_prm(const WAVIMG_prm &obj) : _io_pipe_out(obj._io_pipe_out) {
   // line 26 + aberration_definition_index_number
   //loop_string_indentifier = "";
   prm_filename = obj.prm_filename;
-  bin_path = obj.bin_path;
   debug_switch = obj.debug_switch;
 
   _flag_io_ap_pipe_out = obj._flag_io_ap_pipe_out;
@@ -177,31 +170,28 @@ WAVIMG_prm::WAVIMG_prm(const WAVIMG_prm &obj) : _io_pipe_out(obj._io_pipe_out) {
   _flag_base_dir_path = obj._flag_base_dir_path;
 }
 
+
 bool WAVIMG_prm::set_bin_execname( std::string execname ){
-  boost::filesystem::path bin_dir( bin_path );
-  boost::filesystem::path file (execname);
-  full_bin_path_execname = bin_dir;
-  full_bin_path_execname /= file;
-  try {
-    _flag_full_bin_path_execname = boost::filesystem::exists( full_bin_path_execname );
-  }
-  catch (const boost::filesystem::filesystem_error& ex) {
-    std::cout << ex.what() << '\n';
-    _flag_full_bin_path_execname = false;
+     full_bin_path_execname = boost::filesystem::path (execname);
+    try {
+      _flag_full_bin_path_execname = boost::filesystem::exists( full_bin_path_execname );
+    }
+    catch (const boost::filesystem::filesystem_error& ex) {
+      std::cout << ex.what() << '\n';
+      _flag_full_bin_path_execname = false;
+      if( _flag_logger ){
+        std::stringstream message;
+        message << "ERROR: " << ex.what();
+        logger->logEvent( ApplicationLog::notification , message.str() );
+      }
+    }
     if( _flag_logger ){
       std::stringstream message;
-      message << "ERROR: " << ex.what();
+      message << "checking if WAVIMG exec exists. full path: " <<  full_bin_path_execname.string() << " || result: " << _flag_full_bin_path_execname << std::endl;
       logger->logEvent( ApplicationLog::notification , message.str() );
     }
-  }
-  if( _flag_logger ){
-    std::stringstream message;
-    message << "checking if WAVIMG exec exists. full path: " <<  full_bin_path_execname.string() << " || result: " << _flag_full_bin_path_execname << std::endl;
-    logger->logEvent( ApplicationLog::notification , message.str() );
-  }
   return _flag_full_bin_path_execname;
 }
-
 
 bool WAVIMG_prm::save_prm_filename_path(){
   bool result = false;
@@ -670,10 +660,6 @@ bool WAVIMG_prm::call_bin(){
     return cleanup_bin();
   }
 
-  bool WAVIMG_prm::_is_bin_path_defined(){
-    return _flag_bin_path;
-  }
-
   void WAVIMG_prm::set_prm_file_name( std::string filename ){
     prm_filename = filename;
     _flag_prm_filename = true;
@@ -687,15 +673,8 @@ bool WAVIMG_prm::call_bin(){
     return _flag_produced_prm;
   }
 
-  bool WAVIMG_prm::set_bin_path( std::string path ){
-    boost::filesystem::path bin_dir(path);
-    bool result = false;
-    if( boost::filesystem::is_directory( bin_dir ) ){
-      bin_path = path;
-      _flag_bin_path = true;
-      result = true;
-    }
-    return result;
+  bool WAVIMG_prm::_is_bin_path_defined(){
+    return _flag_full_bin_path_execname;
   }
 
   void WAVIMG_prm::set_debug_switch(bool deb_switch){

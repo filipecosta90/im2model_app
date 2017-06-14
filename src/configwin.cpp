@@ -68,7 +68,7 @@ MainWindow::MainWindow( ApplicationLog::ApplicationLog* logger , QWidget *parent
     }
 
     bool status = true;
-    status &= _core_td_map->set_dr_probe_bin_path( _dr_probe_bin_path.toStdString() );
+  //  status &= _core_td_map->set_dr_probe_bin_path( _dr_probe_bin_path.toStdString() );
     status &= _core_td_map->set_dr_probe_celslc_execname( _dr_probe_celslc_bin.toStdString() );
     status &= _core_td_map->set_dr_probe_msa_execname( _dr_probe_msa_bin.toStdString() );
     status &= _core_td_map->set_dr_probe_wavimg_execname( _dr_probe_wavimg_bin.toStdString() );
@@ -506,7 +506,7 @@ bool MainWindow::edit_preferences(){
   dialog.setWindowTitle ( "Configurations panel" );
   _q_settings_fileName = settings.fileName();
   dialog.set_q_settings_fileName( _q_settings_fileName.toStdString() );
-  dialog.set_dr_probe_bin_path( _dr_probe_bin_path.toStdString() );
+  //dialog.set_dr_probe_bin_path( _dr_probe_bin_path.toStdString() );
   dialog.set_dr_probe_celslc_bin( _dr_probe_celslc_bin.toStdString() );
   dialog.set_dr_probe_msa_bin( _dr_probe_msa_bin.toStdString() );
   dialog.set_dr_probe_wavimg_bin( _dr_probe_wavimg_bin.toStdString() );
@@ -514,7 +514,7 @@ bool MainWindow::edit_preferences(){
   dialog.exec();
   if ( dialog._is_save_preferences() ){
     std::cout << "GOING TO SAVE PREFERENCES" << std::endl;
-    _dr_probe_bin_path = dialog.get_dr_probe_bin_path();
+   // _dr_probe_bin_path = dialog.get_dr_probe_bin_path();
     _dr_probe_celslc_bin = dialog.get_dr_probe_celslc_bin();
     _dr_probe_msa_bin = dialog.get_dr_probe_msa_bin();
     _dr_probe_wavimg_bin = dialog.get_dr_probe_wavimg_bin();
@@ -595,8 +595,6 @@ void MainWindow::updateStatusBar(){
 
 bool MainWindow::checkSettings(){
   bool status = true;
-  status &= _flag_dr_probe_bin_path;
-  bool dr_probe_path_exists = false;
   bool _temp_flag_dr_probe_celslc_bin = _flag_dr_probe_celslc_bin;
   bool _temp_flag_dr_probe_msa_bin = _flag_dr_probe_msa_bin;
   bool _temp_flag_dr_probe_wavimg_bin = _flag_dr_probe_wavimg_bin;
@@ -614,18 +612,6 @@ bool MainWindow::checkSettings(){
     message = std::stringstream();
     message << "_flag_dr_probe_wavimg_bin: " << _flag_dr_probe_wavimg_bin;
     im2model_logger->logEvent(ApplicationLog::notification, message.str());
-    message = std::stringstream();
-    message << "_flag_dr_probe_bin_path: " << _flag_dr_probe_bin_path;
-    im2model_logger->logEvent(ApplicationLog::notification, message.str());
-  }
-
-  //if its defined lets check if exists
-  if( _flag_dr_probe_bin_path ){
-    boost::filesystem::path bin_dir( _dr_probe_bin_path.toStdString() );
-    if( boost::filesystem::is_directory( bin_dir ) ){
-      dr_probe_path_exists = true;
-    }
-    status &= dr_probe_path_exists;
   }
 
   // check if the bins are not equal to ""
@@ -634,9 +620,7 @@ bool MainWindow::checkSettings(){
   _temp_flag_dr_probe_wavimg_bin &= (_dr_probe_wavimg_bin == QString("")) ? false : true;
 
   if (_temp_flag_dr_probe_celslc_bin) {
-    boost::filesystem::path bin_dir(_dr_probe_bin_path.toStdString());
-    boost::filesystem::path filename(_dr_probe_celslc_bin.toStdString());
-    boost::filesystem::path full_path_filename = bin_dir / filename; 
+    boost::filesystem::path full_path_filename(_dr_probe_celslc_bin.toStdString());
     if (boost::filesystem::exists(full_path_filename)) {
       _temp_flag_dr_probe_celslc_bin = true;
     }
@@ -645,9 +629,7 @@ bool MainWindow::checkSettings(){
     }
   }
   if (_temp_flag_dr_probe_msa_bin) {
-    boost::filesystem::path bin_dir(_dr_probe_bin_path.toStdString());
-    boost::filesystem::path filename(_dr_probe_msa_bin.toStdString());
-    boost::filesystem::path full_path_filename = bin_dir / filename;
+    boost::filesystem::path full_path_filename(_dr_probe_msa_bin.toStdString());
     if (boost::filesystem::exists(full_path_filename)) {
       _temp_flag_dr_probe_msa_bin = true;
     }
@@ -657,9 +639,7 @@ bool MainWindow::checkSettings(){
   }
 
   if (_temp_flag_dr_probe_wavimg_bin) {
-    boost::filesystem::path bin_dir(_dr_probe_bin_path.toStdString());
-    boost::filesystem::path filename(_dr_probe_celslc_bin.toStdString());
-    boost::filesystem::path full_path_filename = bin_dir / filename;
+    boost::filesystem::path full_path_filename(_dr_probe_celslc_bin.toStdString());
     if (boost::filesystem::exists(full_path_filename)) {
       _temp_flag_dr_probe_wavimg_bin = true;
     }
@@ -674,22 +654,15 @@ bool MainWindow::checkSettings(){
 
   if (_flag_im2model_logger) {
     std::stringstream message;
-    message << "_flag_dr_probe_celslc_bin: " << _temp_flag_dr_probe_celslc_bin;
+    message << "celslc path: " <<  _dr_probe_celslc_bin.toStdString() << " _flag_dr_probe_celslc_bin: " << _temp_flag_dr_probe_celslc_bin;
     im2model_logger->logEvent(ApplicationLog::notification, message.str());
     message = std::stringstream();
-    message << "_flag_dr_probe_msa_bin: " << _temp_flag_dr_probe_msa_bin;
+    message << "msa path: " <<  _dr_probe_msa_bin.toStdString() << "_flag_dr_probe_msa_bin: " << _temp_flag_dr_probe_msa_bin;
     im2model_logger->logEvent(ApplicationLog::notification, message.str());
     message = std::stringstream();
-    message << "_flag_dr_probe_wavimg_bin: " << _temp_flag_dr_probe_wavimg_bin;
-    im2model_logger->logEvent(ApplicationLog::notification, message.str());
-    message = std::stringstream();
-    message << "_flag_dr_probe_bin_path: " << _flag_dr_probe_bin_path;
-    im2model_logger->logEvent(ApplicationLog::notification, message.str());
-    message = std::stringstream();
-    message << "dr_probe_path_exists: " << dr_probe_path_exists;
+    message << "wavimg path: " <<  _dr_probe_wavimg_bin.toStdString() << "_flag_dr_probe_wavimg_bin: " << _temp_flag_dr_probe_wavimg_bin;
     im2model_logger->logEvent(ApplicationLog::notification, message.str());
   }
-
   return status;
 }
 
@@ -698,13 +671,11 @@ bool MainWindow::readSettings(){
 
   settings.beginGroup("DrProbe");
 
-  _flag_dr_probe_bin_path =  (settings.childKeys().contains("path", Qt::CaseInsensitive)) ? true : false;
   _flag_dr_probe_celslc_bin =  (settings.childKeys().contains("celslc", Qt::CaseInsensitive)) ? true : false;
   _flag_dr_probe_msa_bin =  (settings.childKeys().contains("msa", Qt::CaseInsensitive)) ? true : false;
   _flag_dr_probe_wavimg_bin =  (settings.childKeys().contains("wavimg", Qt::CaseInsensitive)) ? true : false;
 
   _q_settings_fileName = settings.fileName();
-  _dr_probe_bin_path = settings.value("path","").toString();
   _dr_probe_celslc_bin = settings.value("celslc","").toString();
   _dr_probe_msa_bin = settings.value("msa","").toString();
   _dr_probe_wavimg_bin = settings.value("wavimg","").toString();
@@ -719,7 +690,6 @@ bool MainWindow::readSettings(){
 void MainWindow::writeSettings(){
   QSettings settings;
   settings.beginGroup("DrProbe");
-  settings.setValue("path",_dr_probe_bin_path);
   settings.setValue("celslc",_dr_probe_celslc_bin);
   settings.setValue("msa",_dr_probe_msa_bin);
   settings.setValue("wavimg",_dr_probe_wavimg_bin);
@@ -778,7 +748,11 @@ void MainWindow::loadFile(const QString &fileName){
   tdmap_running_configuration_model->load_data_from_property_tree( tdmap_running_configuration_ptree );
   ui->qtree_view_tdmap_running_configuration->update();
 
-  // Write the property tree to the XML file.
+
+  boost::property_tree::ptree super_cell_setup_model_ptree = config.get_child("super_cell_setup_model_ptree");
+  super_cell_setup_model->load_data_from_property_tree( super_cell_setup_model_ptree );
+  ui->qtree_view_supercell_model_edge_detection_setup->update();
+
 
 #ifndef QT_NO_CURSOR
   QApplication::restoreOverrideCursor();
@@ -800,6 +774,7 @@ bool MainWindow::saveFile(const QString &fileName){
   boost::property_tree::ptree *project_setup_crystalographic_fields_ptree = project_setup_crystalographic_fields_model->save_data_into_property_tree();
   boost::property_tree::ptree *tdmap_simulation_setup_ptree = tdmap_simulation_setup_model->save_data_into_property_tree();
   boost::property_tree::ptree *tdmap_running_configuration_ptree = tdmap_running_configuration_model->save_data_into_property_tree();
+  boost::property_tree::ptree *super_cell_setup_model_ptree = super_cell_setup_model->save_data_into_property_tree();
 
   boost::property_tree::ptree *config = new boost::property_tree::ptree();
 
@@ -807,6 +782,7 @@ bool MainWindow::saveFile(const QString &fileName){
   config->add_child("project_setup_crystalographic_fields_ptree", *project_setup_crystalographic_fields_ptree);
   config->add_child("tdmap_simulation_setup_ptree", *tdmap_simulation_setup_ptree);
   config->add_child("tdmap_running_configuration_ptree", *tdmap_running_configuration_ptree);
+  config->add_child("super_cell_setup_model_ptree", *super_cell_setup_model_ptree);
 
   // Write the property tree to the XML file.
   boost::property_tree::write_xml( fileName.toStdString(), *config, std::locale(), pt_settings );
