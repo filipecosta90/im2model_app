@@ -175,7 +175,7 @@ cv::Point2i SIMGRID_wavimg_steplength::get_best_match_position(){
 }
 
 int SIMGRID_wavimg_steplength::get_image_correlation_matching_method(){
-       return _sim_correlation_method;
+  return _sim_correlation_method;
 }
 
 bool SIMGRID_wavimg_steplength::set_image_correlation_matching_method( int enumerator ){
@@ -729,6 +729,7 @@ void SIMGRID_wavimg_steplength::produce_png_from_dat_file(){
 }
 
 bool SIMGRID_wavimg_steplength::simulate_from_dat_file(){
+  bool result = false;
   assert ( slice_samples >= 1 );
   assert ( defocus_samples >= 1 );
   assert ( slices_lower_bound >= 1 );
@@ -745,7 +746,8 @@ bool SIMGRID_wavimg_steplength::simulate_from_dat_file(){
   // will contain regional matches
   imregionalmax_match_values_matrix = cv::Mat( slice_samples, defocus_samples , CV_32FC1);
 
-  for (int thickness = 1; thickness <= slice_samples; thickness ++ ){
+  bool error_flag = false;
+  for (int thickness = 1; thickness <= slice_samples && !error_flag ; thickness ++ ){
     const int at_slice = round( slice_period * ( thickness  - 1 ) + slices_lower_bound );
     const double slice_thickness_nm = celslc_accum_nm_slice_vec.at(at_slice-1);
 
@@ -755,7 +757,7 @@ bool SIMGRID_wavimg_steplength::simulate_from_dat_file(){
     std::vector<cv::Point> experimental_images_matchloc_row;
 
     // for the same thickness iterate through every defocus
-    for (int defocus = 1; defocus <= defocus_samples; defocus ++ ){
+    for (int defocus = 1; defocus <= defocus_samples && !error_flag ; defocus ++ ){
 
       // get the defocus value
       const int at_defocus = round( ((defocus-1) * defocus_period )+ defocus_lower_bound );
@@ -765,130 +767,111 @@ bool SIMGRID_wavimg_steplength::simulate_from_dat_file(){
       output_dat_name_stream << "image_" << std::setw(3) << std::setfill('0') << std::to_string(thickness) << "_" << std::setw(3) << std::setfill('0') << std::to_string(defocus) << ".dat";
       std::string file_name_output_dat = output_dat_name_stream.str();
 
-      if ( debug_switch == true ){
-        std::cout << "Opening " << file_name_output_dat << " to retrieve thickness " << slice_thickness_nm << " nm (sl "<< at_slice << "), defocus " << at_defocus << std::endl;
-      }
       // Load image
 
       boost::filesystem::path dir ( base_dir_path );
       boost::filesystem::path file ( output_dat_name_stream.str() );
       boost::filesystem::path full_path = dir / file;
-      // std::ofstream outfile;
 
-      boost::iostreams::mapped_file_source mmap( full_path );
+      const bool _image_file_exists = boost::filesystem::exists(full_path);
 
-      float* p;
-      std::cout << "size of file: " << mmap.size() << std::endl;
-      assert( mmap.is_open() );
-      p = (float*) mmap.data();
-
-      cv::Mat raw_simulated_image ( n_rows_simulated_image , n_cols_simulated_image , CV_32FC1);
-      double min, max;
-
-      int pos = 0;
-      for (int row = 0; row < n_rows_simulated_image; row++) {
-        for (int col = 0; col < n_cols_simulated_image; col++) {
-          const int inverse_col = n_rows_simulated_image - ( col + 1 );
-          raw_simulated_image.at<float>(row, inverse_col) = (float) p[pos] ;
-          pos++;
+      if( _flag_logger ){
+        std::stringstream message;
+        message << " Opening \"" << file_name_output_dat << "\" to retrieve thickness " << slice_thickness_nm << " nm (sl "<< at_slice
+          << "), defocus " << at_defocus
+          << ", RESULT: " << std::boolalpha << _image_file_exists;
+        if( _image_file_exists ){
+          logger->logEvent( ApplicationLog::notification , message.str() );
+        }
+        else{
+          logger->logEvent( ApplicationLog::error , message.str() );
         }
       }
+      if( _image_file_exists ) {
+        boost::iostreams::mapped_file_source mmap( full_path );
 
-      mmap.close();
-      if ( debug_switch == true ){
-        std::cout << "Finished reading file " << std::endl; 
-      }
-      cv::minMaxLoc(raw_simulated_image, &min, &max);
+        float* p;
+        std::cout << "size of file: " << mmap.size() << std::endl;
+        assert( mmap.is_open() );
+        p = (float*) mmap.data();
 
-      // Create a new matrix to hold the gray image
-      cv::Mat raw_gray_simulated_image;
-      raw_simulated_image.convertTo(raw_gray_simulated_image, CV_8UC1 , 255.0f/(max - min), -min * 255.0f/(max - min));
-      if (debug_switch == true) {
-        std::cout << "Finished converting image" << std::endl;
-      }
-      //raw_simulated_image.release();
+        cv::Mat raw_simulated_image ( n_rows_simulated_image , n_cols_simulated_image , CV_32FC1);
+        double min, max;
 
-      if ( !raw_gray_simulated_image.data ){
-        perror("ERROR: No image data");
-        return -1;
-      }
-
-      // remove the ignored edge pixels
-      // we will still save the raw grayscale simulated image in order to enable image alignement (rotation)
-      cv::Mat cleaned_simulated_image = raw_gray_simulated_image(ignore_edge_pixels_rectangle);
-      cv::Mat with_rectangle_simulated_image = raw_gray_simulated_image.clone();
-      rectangle ( with_rectangle_simulated_image, ignore_edge_pixels_rectangle, cvScalar(255,255,255), 1, 8, 0  );
-      if (debug_switch == true) {
-        std::cout << "Finished removing the ignored edge pixels" << std::endl;
-      }
-
-      // get the .dat image name
-      std::stringstream output_debug_info1;
-
-      output_debug_info1 << "with_rectangle_sim_" << std::setw(3) << std::setfill('0') << std::to_string(thickness) << "_" << std::setw(3) << std::setfill('0') << std::to_string(defocus) << ".png";
-      boost::filesystem::path full_path1(output_debug_info1.str());
-
-      std::string string_output_debug_info1 = full_path1.string(); // full_path.append(output_debug_info1.str()).string();
-      // get the .dat image name
-      std::stringstream output_debug_info2;
-      output_debug_info2 << "no_reshape_sim_raw_" << std::setw(3) << std::setfill('0') << std::to_string(thickness) << "_" << std::setw(3) << std::setfill('0') << std::to_string(defocus) << ".png";
-      std::string string_output_debug_info2 = output_debug_info2.str();
-
-      // get the .dat image name
-      std::stringstream output_debug_info3;
-      output_debug_info3 << "reshaped_sim_raw_" << std::setw(3) << std::setfill('0') << std::to_string(thickness) << "_" << std::setw(3) << std::setfill('0') << std::to_string(defocus) << ".png";
-      std::string string_output_debug_info3 = output_debug_info3.str();
-      if (debug_switch == true) {
-        try {
-          imwrite(string_output_debug_info1, with_rectangle_simulated_image);
+        int pos = 0;
+        for (int row = 0; row < n_rows_simulated_image; row++) {
+          for (int col = 0; col < n_cols_simulated_image; col++) {
+            const int inverse_col = n_rows_simulated_image - ( col + 1 );
+            raw_simulated_image.at<float>(row, inverse_col) = (float) p[pos] ;
+            pos++;
+          }
         }
-        catch (std::runtime_error& ex) {
-          fprintf(stderr, "Exception writing image: %s\n", ex.what());
-          return 1;
+        mmap.close();
+        if ( debug_switch == true ){
+          std::cout << "Finished reading file " << std::endl; 
         }
+        cv::minMaxLoc(raw_simulated_image, &min, &max);
+
+        // Create a new matrix to hold the gray image
+        cv::Mat raw_gray_simulated_image;
+        raw_simulated_image.convertTo(raw_gray_simulated_image, CV_8UC1 , 255.0f/(max - min), -min * 255.0f/(max - min));
+        if (debug_switch == true) {
+          std::cout << "Finished converting image" << std::endl;
+        }
+        //raw_simulated_image.release();
+
+        if ( !raw_gray_simulated_image.data ){
+          perror("ERROR: No image data");
+          return -1;
+        }
+
+        // remove the ignored edge pixels
+        // we will still save the raw grayscale simulated image in order to enable image alignement (rotation)
+        cv::Mat cleaned_simulated_image = raw_gray_simulated_image(ignore_edge_pixels_rectangle);
+        cv::Mat with_rectangle_simulated_image = raw_gray_simulated_image.clone();
+
+        // confirm if it needs reshaping
+        if ( simulated_image_needs_reshape ){
+          resize(cleaned_simulated_image, cleaned_simulated_image, cv::Size(0,0), reshape_factor_from_supper_cell_to_experimental_x, reshape_factor_from_supper_cell_to_experimental_y, cv::INTER_LINEAR );
+          resize(raw_gray_simulated_image, raw_gray_simulated_image, cv::Size(0,0), reshape_factor_from_supper_cell_to_experimental_x, reshape_factor_from_supper_cell_to_experimental_y, cv::INTER_LINEAR );
+        }
+
+        /// Create the result matrix
+        int result_cols =  experimental_image_roi.cols - cleaned_simulated_image.cols + 1;
+        int result_rows = experimental_image_roi.rows  - cleaned_simulated_image.rows + 1;
+        cv::Mat result( result_rows, result_cols, CV_8UC1 );
+
+        // vars for minMaxLoc
+        double minVal; double maxVal; cv::Point minLoc; cv::Point maxLoc;
+
+        cv::Point matchLoc;
+        double matchVal;
+
+        //: normalized correlation, non-normalized correlation and sum-absolute-difference
+        cv::matchTemplate( experimental_image_roi , cleaned_simulated_image, result, _sim_correlation_method  );
+        cv::minMaxLoc( result, &minVal, &maxVal, &minLoc, &maxLoc, cv::Mat() );
+        matchVal = maxVal;
+
+        double slice_match, defocus_match, match_factor;
+
+        match_factor = matchVal * 100.0;
+        slice_match = (double) at_slice;
+        defocus_match = (double) at_defocus;
+        slice_defocus_match_points.push_back (cv::Point3d ( slice_match, defocus_match, match_factor ));
+
+        defocus_values_matrix.at<float>(thickness-1, defocus-1) = defocus_match;
+        thickness_values_matrix.at<float>(thickness-1, defocus-1) = slice_match;
+        match_values_matrix.at<float>( thickness-1, defocus-1) =  match_factor ;
+
+        simulated_images_row.push_back(cleaned_simulated_image);
+        raw_simulated_images_row.push_back(raw_gray_simulated_image);
+        experimental_images_matchloc_row.push_back(maxLoc);
+
+        simulated_matches.push_back(match_factor);
       }
-
-      if (debug_switch == true) {
-        std::cout << "Finished writing image" << std::endl;
+      else{
+        error_flag = true;
       }
-      // confirm if it needs reshaping
-      if ( simulated_image_needs_reshape ){
-        resize(cleaned_simulated_image, cleaned_simulated_image, cv::Size(0,0), reshape_factor_from_supper_cell_to_experimental_x, reshape_factor_from_supper_cell_to_experimental_y, cv::INTER_LINEAR );
-        resize(raw_gray_simulated_image, raw_gray_simulated_image, cv::Size(0,0), reshape_factor_from_supper_cell_to_experimental_x, reshape_factor_from_supper_cell_to_experimental_y, cv::INTER_LINEAR );
-      }
-
-      /// Create the result matrix
-      int result_cols =  experimental_image_roi.cols - cleaned_simulated_image.cols + 1;
-      int result_rows = experimental_image_roi.rows  - cleaned_simulated_image.rows + 1;
-      cv::Mat result( result_rows, result_cols, CV_8UC1 );
-
-      // vars for minMaxLoc
-      double minVal; double maxVal; cv::Point minLoc; cv::Point maxLoc;
-
-      cv::Point matchLoc;
-      double matchVal;
-
-      //: normalized correlation, non-normalized correlation and sum-absolute-difference
-      cv::matchTemplate( experimental_image_roi , cleaned_simulated_image, result, _sim_correlation_method  );
-      cv::minMaxLoc( result, &minVal, &maxVal, &minLoc, &maxLoc, cv::Mat() );
-      matchVal = maxVal;
-
-      double slice_match, defocus_match, match_factor;
-
-      match_factor = matchVal * 100.0;
-      slice_match = (double) at_slice;
-      defocus_match = (double) at_defocus;
-      slice_defocus_match_points.push_back (cv::Point3d ( slice_match, defocus_match, match_factor ));
-
-      defocus_values_matrix.at<float>(thickness-1, defocus-1) = defocus_match;
-      thickness_values_matrix.at<float>(thickness-1, defocus-1) = slice_match;
-      match_values_matrix.at<float>( thickness-1, defocus-1) =  match_factor ;
-
-      simulated_images_row.push_back(cleaned_simulated_image);
-      raw_simulated_images_row.push_back(raw_gray_simulated_image);
-      experimental_images_matchloc_row.push_back(maxLoc);
-
-      simulated_matches.push_back(match_factor);
     }
     experimental_images_match_location_grid.push_back(experimental_images_matchloc_row);
     simulated_images_grid.push_back(simulated_images_row);

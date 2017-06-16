@@ -192,9 +192,18 @@ bool TDMap::calculate_thickness_range_upper_bound_slice_from_nm(){
 }
 
 bool TDMap::calculate_thickness_range_lower_bound_slice_from_nm(){
-
   bool result = false;
-  std::cout << " _is_nz_simulated_partitions_defined() " << _tdmap_celslc_parameters->_is_nz_simulated_partitions_defined() << std::endl;
+  if( _flag_logger ){
+    std::stringstream message;
+    message << "Inside calculate_thickness_range_lower_bound_slice_from_nm()";
+    logger->logEvent( ApplicationLog::notification , message.str() );
+    message = std::stringstream();
+    message << "_tdmap_celslc_parameters->_is_nz_simulated_partitions_defined() " << std::boolalpha << _tdmap_celslc_parameters->_is_nz_simulated_partitions_defined();
+    logger->logEvent( ApplicationLog::notification , message.str() );
+    message = std::stringstream();
+    message << "_is_thickness_range_lower_bound_defined() " << std::boolalpha << _is_thickness_range_lower_bound_defined();
+    logger->logEvent( ApplicationLog::notification , message.str() );
+  }
   if ( _is_thickness_range_lower_bound_defined() && _tdmap_celslc_parameters->_is_nz_simulated_partitions_defined()  ){
     slices_lower_bound = _tdmap_celslc_parameters->get_slice_number_from_nm_ceil( nm_lower_bound );
     std::cout << "Calculated slice # " << slices_lower_bound << " as the lower bound for the minimum thickness of: " << nm_lower_bound << " nm" << std::endl;
@@ -611,6 +620,13 @@ bool TDMap::run_tdmap( ){
     }
     _simulation_status = _celslc_stage_ok & _msa_stage_ok & _wavimg_stage_ok & _simgrid_stage_ok;
   }
+  else{
+      if( _flag_logger ){
+        std::stringstream message;
+        message << "TDMap vars are not correcly setted up. _vars_setted_up: " << std::boolalpha << _vars_setted_up ;
+          logger->logEvent( ApplicationLog::error , message.str() );
+      }
+  }
   return _simulation_status;
 }
 
@@ -831,8 +847,8 @@ bool  TDMap::prepare_simgrid_parameters(){
   _td_map_simgrid->set_slices_lower_bound( slices_lower_bound );
   _td_map_simgrid->set_slices_upper_bound( slices_upper_bound );
 
-  _td_map_simgrid->set_n_rows_simulated_image(nx_simulated_horizontal_samples);
-  _td_map_simgrid->set_n_cols_simulated_image(ny_simulated_vertical_samples);
+  _td_map_simgrid->set_n_rows_simulated_image( nx_simulated_horizontal_samples );
+  _td_map_simgrid->set_n_cols_simulated_image( ny_simulated_vertical_samples );
 
   _td_map_simgrid->set_reshaped_simulated_image_width(reshaped_simulated_image_width);
   _td_map_simgrid->set_reshaped_simulated_image_height(reshaped_simulated_image_height);

@@ -24,6 +24,7 @@ private:
     time_t _runned_time;
     bool _flag_runned_time = false;
     bool _force_update_from_group_dependency;
+    std::vector<group_options*> _groups_to_listen;
 
 private slots:
     bool update_track_var( std::string varname );

@@ -41,6 +41,7 @@ bool group_options::add_option( TreeItem* item , bool required ){
 }
 
 void group_options::listen_group_update_required( group_options* group_to_listen ){
+    _groups_to_listen.push_back( group_to_listen );
     connect( group_to_listen, SIGNAL(update_required( std::string )), this, SLOT( set_update_required_from_pipeline( std::string ) ) );
 }
 
@@ -77,7 +78,13 @@ bool group_options::update_track_var( std::string varname ){
 }
 
 bool group_options::are_group_vars_setted_up( ){
-  bool result = true;
+    bool result = true;
+    // pipeline dependecies
+    for( auto const &_group : _groups_to_listen ){
+        result &= _group->are_group_vars_setted_up();
+    }
+    if( result ){
+  // vars dependencies
   for(auto const &_full_var : _required_variables_map ) {
     const bool _required = _full_var.second;
     if( _required ){
@@ -89,6 +96,7 @@ bool group_options::are_group_vars_setted_up( ){
       result &= found;
     }
   }
+    }
   return result;
 }
 

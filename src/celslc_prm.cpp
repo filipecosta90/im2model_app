@@ -271,6 +271,15 @@ int CELSLC_prm::get_slice_number_from_nm_floor( double goal_thickness_nm ){
 
 int CELSLC_prm::get_slice_number_from_nm_ceil( double goal_thickness_nm ){
 
+    if( _flag_logger ){
+      std::stringstream message;
+      message << "Inside get_slice_number_from_nm_ceil()";
+      logger->logEvent( ApplicationLog::notification , message.str() );
+      message = std::stringstream();
+      message << "nz_simulated_partitions: " << nz_simulated_partitions << " slice_params_nm_slice_vec.size() :" << slice_params_nm_slice_vec.size();
+      logger->logEvent( ApplicationLog::notification , message.str() );
+    }
+
   assert( nz_simulated_partitions >= 1 );
   assert( slice_params_nm_slice_vec.size() == nz_simulated_partitions );
 
@@ -299,20 +308,19 @@ bool CELSLC_prm::update_nz_simulated_partitions_from_prm(){
   bool result = false;  
   if( auto_equidistant_slices_switch || auto_non_equidistant_slices_switch ){
 
-    std::stringstream input_prm_stream;
     boost::filesystem::path dir ( base_dir_path );
     boost::filesystem::path file ( slc_file_name_prefix + ".prm");
     boost::filesystem::path full_path = dir / file;
 
+    const bool _file_exists = boost::filesystem::exists( full_path.string() );
     if( _flag_logger ){
       std::stringstream message;
-      message << "checking if CELSLC prm file exists. filename: " <<  full_path.string() << " || result: " << boost::filesystem::exists( full_path.string() ) << std::endl;
+      message << "checking if CELSLC prm file exists. filename: " <<  full_path.string() << "\t| result: " << std::boolalpha << _file_exists;
       logger->logEvent( ApplicationLog::notification , message.str() );
     }
-
-    assert( boost::filesystem::exists( full_path.string() ) );
+    if( _file_exists ){
+    std::stringstream input_prm_stream;
     input_prm_stream << full_path.string() ;
-
     std::ifstream infile;
     infile.open ( input_prm_stream.str() , std::ifstream::in);
     if (infile.is_open()) {
@@ -356,7 +364,12 @@ bool CELSLC_prm::update_nz_simulated_partitions_from_prm(){
       _flag_nz_simulated_partitions = true;
     }
     else{
-      std::cout << "Warning: unable to open file \"" << input_prm_stream.str() << "\"" << std::endl;
+        if( _flag_logger ){
+          std::stringstream message;
+          message << "unable to open file \"" <<  input_prm_stream.str() << "\"";
+          logger->logEvent( ApplicationLog::error , message.str() );
+        }
+    }
     }
   }
   return result;
@@ -376,7 +389,7 @@ void CELSLC_prm::cleanup_thread(){
     status &= remove_result;
     if( _flag_logger ){
       std::stringstream message;
-      message << "removing the celslc prm file: " << full_prm_path.string() << " result: " << remove_result;
+      message << "removing the celslc prm file: " << full_prm_path.string() << " result: " << std::boolalpha << remove_result;
       logger->logEvent( ApplicationLog::notification , message.str() );
     }
   }
@@ -393,7 +406,7 @@ void CELSLC_prm::cleanup_thread(){
       status &= remove_result;
       if( _flag_logger ){
         std::stringstream message;
-        message << "removing the slice file: " << full_slice_path.string() << " result: " << remove_result;
+        message << "removing the slice file: " << full_slice_path.string() << " result: " << std::boolalpha << remove_result;
         logger->logEvent( ApplicationLog::notification , message.str() );
       }
     }
@@ -415,7 +428,7 @@ bool CELSLC_prm::check_produced_slices(){
     status &= _slice_exists;
     if( _flag_logger ){
       std::stringstream message;
-      message << "checking if the produced slice file exists: " << full_slice_path.string() << " result: " << _slice_exists;
+      message << "checking if the produced slice file \"" << full_slice_path.string() << "\" exists: " << std::boolalpha << _slice_exists;
       logger->logEvent( ApplicationLog::notification , message.str() );
     }
   }

@@ -874,6 +874,8 @@ void MainWindow::create_box_options(){
   experimental_sampling_rate_y->set_variable_name( "experimental_sampling_rate_y" );
   celslc_step_group_options->add_option( experimental_sampling_rate_x , true);
   celslc_step_group_options->add_option( experimental_sampling_rate_y , true);
+  simgrid_step_group_options->add_option( experimental_sampling_rate_x , true);
+  simgrid_step_group_options->add_option( experimental_sampling_rate_y , true);
 
   ////////////////
   // ROI
@@ -912,6 +914,8 @@ void MainWindow::create_box_options(){
   experimental_roi_center_y->set_variable_name( "experimental_roi_center_y" );
   celslc_step_group_options->add_option( experimental_roi_center_x , true);
   celslc_step_group_options->add_option( experimental_roi_center_y , true);
+  simgrid_step_group_options->add_option( experimental_roi_center_x , true);
+  simgrid_step_group_options->add_option( experimental_roi_center_y , true);
 
   ////////////////
   // ROI Dimensions
@@ -943,6 +947,8 @@ void MainWindow::create_box_options(){
   experimental_roi_dimensions_height->set_variable_name( "experimental_roi_dimensions_height" );
   celslc_step_group_options->add_option( experimental_roi_dimensions_width , true);
   celslc_step_group_options->add_option( experimental_roi_dimensions_height , true);
+  simgrid_step_group_options->add_option( experimental_roi_dimensions_width , true);
+  simgrid_step_group_options->add_option( experimental_roi_dimensions_height , true);
 
 
   project_setup_image_fields_model = new TreeModel( experimental_image_root );
@@ -1246,6 +1252,7 @@ void MainWindow::create_box_options(){
   /*group options*/
   accelaration_voltage_kv->set_variable_name( "accelaration_voltage_kv" );
   celslc_step_group_options->add_option( accelaration_voltage_kv , true);
+  msa_step_group_options->add_option( accelaration_voltage_kv , true);
 
   ////////////////
   // Simulation Refinement
