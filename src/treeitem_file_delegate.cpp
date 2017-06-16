@@ -223,7 +223,6 @@ QWidget *TreeItemFileDelegate::createEditor( QWidget *parent, const QStyleOption
     case TreeItem::_delegate_CHECK:
       {
         editor = new QWidget(parent);
-
         QHBoxLayout *editor_layout = new QHBoxLayout(editor);
         QString legend = item->get_legend( index.column() ).toString();
         QCheckBox *checkbox = new QCheckBox( legend , editor );
@@ -287,14 +286,13 @@ QWidget *TreeItemFileDelegate::createEditor( QWidget *parent, const QStyleOption
         break;
       }
     case TreeItem::_delegate_TEXT_BROWSER:
-      {
+    {
         editor = new QWidget(parent);
         QHBoxLayout* editor_layout = new QHBoxLayout( parent );
         editor_layout->setMargin(0);
         editor_layout->setContentsMargins(QMargins(0,0,0,0));
         editor_layout->setSpacing(0);
         editor_layout->setAlignment(Qt::AlignRight);
-
         QTextBrowser* browser = new QTextBrowser( editor );
         QString value  = index.model()->data(index, Qt::EditRole).toString();
         browser->setText( value );

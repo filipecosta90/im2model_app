@@ -7,6 +7,7 @@
 #include <vector>
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/xml_parser.hpp>
+#include <boost/program_options.hpp>
 
 class TreeItem;
 

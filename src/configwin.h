@@ -45,6 +45,7 @@
 #include "settings.h"
 #include "ui_settings.h"
 #include "application_log.hpp"
+#include "group_options.h"
 
 
 namespace Ui {
@@ -199,6 +200,9 @@ signals:
     QModelIndex* _index_electron_diffraction_patterns_output;
     QModelIndex* _index_image_intensity_distribuitions_output;
     QModelIndex* _index_image_correlation_output;
+
+    group_options* celslc_step_group_options;
+
 
 
 };

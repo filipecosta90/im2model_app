@@ -125,6 +125,7 @@ bool TreeItem::load_data_from_getter( ){
               value = QVariant::fromValue( fp_data_getter_double() );
           }
           emit dataChanged(column);
+          emit dataChanged( _variable_name );
           itemData[column] = value;
           result = true;
         }
@@ -298,6 +299,22 @@ bool TreeItem::insertChildren(int position, int count, int columns){
   return true;
 }
 
+std::string TreeItem::get_variable_name(){
+    return _variable_name;
+}
+
+void TreeItem::set_variable_name( std::string varname ){
+    _variable_name = varname;
+}
+
+void TreeItem::set_variable_description( std::string vardescription ){
+    _variable_description = vardescription;
+}
+
+std::string TreeItem::get_variable_description( ){
+    return _variable_description;
+}
+
 bool TreeItem::insertColumns(int position, int columns){
   if (position < 0 || position > itemData.size()){
     return false;
@@ -383,6 +400,7 @@ bool TreeItem::appendData( int column, const QVariant &value){
           std::cout << "after string "<<  before_string.size() << std::endl;
           itemData[column].setValue(QVariant::fromValue(before_string));
           emit dataChanged(column);
+          emit dataChanged( _variable_name );
           result = true;
         }
     }
@@ -422,6 +440,7 @@ bool TreeItem::setData(int column, const QVariant &value){
           fp_data_setter_double( t1 );
         }
         emit dataChanged(column);
+        emit dataChanged( _variable_name );
         itemData[column] = value;
         result = true;
       }

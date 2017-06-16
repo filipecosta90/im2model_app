@@ -16,6 +16,7 @@
 #include <boost/function.hpp>
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/xml_parser.hpp>
+#include <boost/program_options.hpp>
 /** END BOOST **/
 
 #include "custom_tool_button.h"
@@ -27,9 +28,8 @@ class TreeItem : public QObject {
   Q_OBJECT
   public:
     enum DelegateType { _delegate_FILE, _delegate_DIR, _delegate_TEXT, _delegate_TEXT_ACTION, _delegate_SLIDER_INT, _delegate_TEXT_DOCUMENT, _delegate_TEXT_BROWSER, _delegate_CHECK, _delegate_DROP };
-
-    explicit TreeItem( QVector<QVariant> &data, TreeItem *parent = 0);
-    explicit TreeItem( QVector<QVariant> &data, QVector<bool> editable, TreeItem *parent = 0);
+    explicit TreeItem( QVector<QVariant> &data, TreeItem *parent = 0 );
+    explicit TreeItem( QVector<QVariant> &data, QVector<bool> editable, TreeItem *parent = 0 );
 
     explicit TreeItem( QVector<QVariant> &data, boost::function<bool(double)> setter, TreeItem *parent = 0);
     explicit TreeItem( QVector<QVariant> &data, boost::function<bool(double)> setter, QVector<bool> editable, TreeItem *parent = 0);
@@ -100,9 +100,16 @@ class TreeItem : public QObject {
     bool _is_toolbar_defined();
     bool set_fp_checker( int col,  boost::function<bool(bool)> fp_check_setter );
 
+    void set_variable_name( std::string varname );
+    std::string get_variable_name();
+
+    void set_variable_description( std::string vardescription );
+    std::string  get_variable_description();
+
 signals:
 
     void dataChanged( int column );
+    void dataChanged( std::string varname );
 
   private:
     TreeItem *parentItem;
@@ -162,6 +169,9 @@ signals:
     QVector<QVariant> _toolbar_actions_description;
     std::vector<boost::function<bool()>> _toolbar_actions;
     bool _flag_toolbar = false;
+
+    std::string _variable_name;
+    std::string _variable_description;
 };
 
 #endif // TREEITEM_H
