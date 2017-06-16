@@ -62,13 +62,27 @@ MainWindow::MainWindow( ApplicationLog::ApplicationLog* logger , QWidget *parent
 
     _core_super_cell = new Super_Cell( _core_image_crystal, _core_td_map );
 
+    celslc_step_group_options = new group_options("celslc_step");
+    msa_step_group_options = new group_options("msa_step");
+    wavimg_step_group_options = new group_options("wavimg_step");
+    simgrid_step_group_options = new group_options("simgrid_step");
+    super_cell_target_step_group_options = new group_options("super_cell_target_step");
+
+    // dr probe pipeline dependencies
+    msa_step_group_options->listen_group_update_required( celslc_step_group_options );
+    wavimg_step_group_options->listen_group_update_required( msa_step_group_options );
+    // tdmap dependency
+    simgrid_step_group_options->listen_group_update_required( wavimg_step_group_options );
+
+    _core_td_map->set_group_options( celslc_step_group_options, msa_step_group_options, wavimg_step_group_options, simgrid_step_group_options );
+
     if (_flag_im2model_logger) {
       im2model_logger->logEvent(ApplicationLog::critical, "Trying to set application logger for TDMap.");
       _core_td_map->set_application_logger(im2model_logger);
     }
 
     bool status = true;
-  //  status &= _core_td_map->set_dr_probe_bin_path( _dr_probe_bin_path.toStdString() );
+    //  status &= _core_td_map->set_dr_probe_bin_path( _dr_probe_bin_path.toStdString() );
     status &= _core_td_map->set_dr_probe_celslc_execname( _dr_probe_celslc_bin.toStdString() );
     status &= _core_td_map->set_dr_probe_msa_execname( _dr_probe_msa_bin.toStdString() );
     status &= _core_td_map->set_dr_probe_wavimg_execname( _dr_probe_wavimg_bin.toStdString() );
@@ -80,8 +94,6 @@ MainWindow::MainWindow( ApplicationLog::ApplicationLog* logger , QWidget *parent
       }
     }
     else {
-
-      celslc_step_group_options = new group_options("celslc_step");
 
       create_box_options();
 
@@ -518,7 +530,7 @@ bool MainWindow::edit_preferences(){
   dialog.exec();
   if ( dialog._is_save_preferences() ){
     std::cout << "GOING TO SAVE PREFERENCES" << std::endl;
-   // _dr_probe_bin_path = dialog.get_dr_probe_bin_path();
+    // _dr_probe_bin_path = dialog.get_dr_probe_bin_path();
     _dr_probe_celslc_bin = dialog.get_dr_probe_celslc_bin();
     _dr_probe_msa_bin = dialog.get_dr_probe_msa_bin();
     _dr_probe_wavimg_bin = dialog.get_dr_probe_wavimg_bin();
@@ -1077,6 +1089,7 @@ void MainWindow::create_box_options(){
 
   ui->qtree_view_project_setup_crystallography->setModel(project_setup_crystalographic_fields_model);
   ui->qtree_view_project_setup_crystallography->setItemDelegate( _load_file_delegate );
+
   //start editing after one click
   ui->qtree_view_project_setup_crystallography->setEditTriggers(QAbstractItemView::AllEditTriggers);
 
@@ -1230,6 +1243,9 @@ void MainWindow::create_box_options(){
   boost::function<bool(std::string)> box3_function_3_1 ( boost::bind( &TDMap::set_accelaration_voltage_kv, _core_td_map, _1 ) );
   TreeItem* accelaration_voltage_kv = new TreeItem ( box3_option_3_1 , box3_function_3_1, box3_option_3_1_edit );
   incident_electron_beam->insertChildren( accelaration_voltage_kv );
+  /*group options*/
+  accelaration_voltage_kv->set_variable_name( "accelaration_voltage_kv" );
+  celslc_step_group_options->add_option( accelaration_voltage_kv , true);
 
   ////////////////
   // Simulation Refinement
@@ -1561,4 +1577,11 @@ void MainWindow::on_qpush_apply_edge_detection_clicked(){
   bool status = false;
   ui->statusBar->showMessage(tr("Running edge detection"), 2000);
   sim_super_cell_worker->requestSuperCellEdge();
+}
+
+void MainWindow::on_qpush_test_tdmap_clicked(){
+  bool result = false;
+  ui->statusBar->showMessage(tr("Testing TD Map variable configuration"), 2000);
+  _core_td_map->test_run_config();
+
 }

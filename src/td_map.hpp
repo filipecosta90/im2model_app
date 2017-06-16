@@ -11,6 +11,7 @@
 
 #include <vector>
 #include <string>
+#include <iostream>
 
 #include "global_def.hpp"
 #include "celslc_prm.hpp"
@@ -18,6 +19,7 @@
 #include "wavimg_prm.hpp"
 #include "simgrid_steplength.hpp"
 #include "image_crystal.hpp"
+#include "group_options.h"
 
 class TDMap {
 
@@ -236,6 +238,12 @@ class TDMap {
 
     int _exec_log_level = ExecLogMode::FULL_LOG;
 
+    /* group options */
+    group_options* celslc_step_group_options;
+    group_options* msa_step_group_options;
+    group_options* wavimg_step_group_options;
+    group_options* simgrid_step_group_options;
+
   public:
     enum RefinementPreset { NO_REFINEMENT, MICROSCOPE_CORRECTED, MICROSCOPE_NON_CORRECTED, USER_DEFINED_PRESET };
 
@@ -289,6 +297,7 @@ class TDMap {
      * RUN METHODS
      */
     bool run_tdmap();
+    bool test_run_config();
     bool set_run_celslc_switch( bool value );
     bool get_run_celslc_switch();
     bool _is_sim_tdmap_celslc_ostream_buffer_active();
@@ -437,6 +446,8 @@ class TDMap {
     int  get_image_correlation_matching_method();
 
     bool set_mtf_filename( std::string file_name );
+
+    void set_group_options( group_options* celslc_step, group_options* msa_step, group_options* wavimg_step, group_options* simgrid_step );
 
 };
 

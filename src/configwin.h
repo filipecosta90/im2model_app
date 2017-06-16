@@ -107,6 +107,7 @@ class MainWindow : public QMainWindow {
     bool export_TDMap();
 
     void on_qpush_apply_edge_detection_clicked();
+    void on_qpush_test_tdmap_clicked();
 
 signals:
     void experimental_image_filename_changed();
@@ -202,8 +203,10 @@ signals:
     QModelIndex* _index_image_correlation_output;
 
     group_options* celslc_step_group_options;
-
-
+    group_options* msa_step_group_options;
+    group_options* wavimg_step_group_options;
+    group_options* simgrid_step_group_options;
+    group_options* super_cell_target_step_group_options;
 
 };
 

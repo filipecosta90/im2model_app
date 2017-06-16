@@ -62,6 +62,13 @@ TDMap::TDMap( boost::process::ipstream& ostream_celslc_buffer,
     _tdmap_celslc_parameters->set_application_logger( app_logger );
   }
 
+void TDMap::set_group_options( group_options* celslc_step, group_options* msa_step, group_options* wavimg_step, group_options* simgrid_step ){
+  celslc_step_group_options = celslc_step;
+  msa_step_group_options = msa_step;
+  wavimg_step_group_options = wavimg_step;
+  simgrid_step_group_options = simgrid_step;
+}
+
 
 bool TDMap::set_application_logger( ApplicationLog::ApplicationLog* app_logger ){
   logger = app_logger;
@@ -296,214 +303,314 @@ bool TDMap::calculate_thickness_range_slice_period(){
   return result;
 }
 
-
-bool TDMap::run_tdmap( ){
-  bool _celslc_stage_ok = true;
-  bool _msa_stage_ok = true;
-  bool _wavimg_stage_ok = true;
-  bool _simgrid_stage_ok = true;
-  bool _simulation_status = true;
-
-  calculate_simulated_image_sampling_rate_and_size();
-
-  const bool _celslc_parameters_ok = prepare_celslc_parameters();
+bool TDMap::test_run_config(){
+  // at least one should be runned. if not return false
+  bool result = _run_celslc_switch || _run_msa_switch || _run_wavimg_switch || _run_simgrid_switch;
   if( _flag_logger ){
     std::stringstream message;
-    message << " prepare celslc parameters status " << _celslc_parameters_ok;
+    message << "Testing run configuration for steps{ CELSLC: " << std::boolalpha << _run_celslc_switch
+      << ", MSA: " << std::boolalpha << _run_msa_switch
+      << ", WAVIMG: " << std::boolalpha << _run_wavimg_switch
+      << ", SIMGRID: " << std::boolalpha << _run_simgrid_switch << " }";
     logger->logEvent( ApplicationLog::notification , message.str() );
-    message = std::stringstream();
-    message << " _run_celslc_switch " << _run_celslc_switch;
-    logger->logEvent( ApplicationLog::notification , message.str() );
-    message = std::stringstream();
-    message << " _is_bin_path_defined " << _tdmap_celslc_parameters->_is_bin_path_defined();
-    logger->logEvent( ApplicationLog::notification , message.str() );
-    message = std::stringstream();
   }
-  // check that celslc parameters are prepared and paths are defined
-  if( _celslc_parameters_ok && _tdmap_celslc_parameters->_is_bin_path_defined() ){
-    //if flag run celslc
-    if ( _run_celslc_switch ){
-      bool _clean_run_env = !_flag_runned_tdmap_celslc;
-      if( _flag_runned_tdmap_celslc ){
-        if( _flag_logger ){
-          std::stringstream message;
-          message << "Already runned celslc. going to clean vars.";
-          logger->logEvent( ApplicationLog::notification , message.str() );
-        }
-        std::cout << "Already runned celslc. going to clean vars." << std::endl;
-        _clean_run_env = _tdmap_celslc_parameters->clean_for_re_run();
-        std::cout << "clear result" << _clean_run_env << std::endl;
-        _flag_runned_tdmap_celslc = !_clean_run_env;
-      }
-      if( _clean_run_env ){
-        if( _flag_logger ){
-          std::stringstream message;
-          message << "Running ceslc";
-          logger->logEvent( ApplicationLog::notification , message.str() );
-        }
-        _flag_runned_tdmap_celslc = _tdmap_celslc_parameters->call_boost_bin();
-      }
-      if( _flag_logger ){
-        std::stringstream message;
-        message << "_flag_runned_tdmap_celslc: " << _flag_runned_tdmap_celslc;
+  if( _run_celslc_switch ){
+    const bool celslc_res = celslc_step_group_options->are_group_vars_setted_up();
+    result &= celslc_res;
+    // log it
+    if( _flag_logger ){
+      std::stringstream message;
+      message << "TEST CELSLC are_group_vars_setted_up: " << std::boolalpha << celslc_res;
+      if( celslc_res ){
         logger->logEvent( ApplicationLog::notification , message.str() );
       }
-      _celslc_stage_ok = _flag_runned_tdmap_celslc;
+      else{
+        logger->logEvent( ApplicationLog::error , message.str() );
+      }
     }
-    //if run celslc flag is false, the sli and prm files should exist and we should update from them
-    else{
-      _celslc_stage_ok = _tdmap_celslc_parameters->update_nz_simulated_partitions_from_prm();
-    }
-    // compute vars after celslc run
-    _celslc_stage_ok &= set_number_slices_to_load_from_nz_simulated_partitions();
-    _celslc_stage_ok &= set_number_slices_to_max_thickness_from_nz_simulated_partitions();
-    _celslc_stage_ok &= calculate_thickness_range_lower_bound_slice_from_nm();
-    _celslc_stage_ok &= calculate_thickness_range_upper_bound_slice_from_nm();
-    _celslc_stage_ok &= calculate_thickness_range_slice_period();
   }
-  else{
-    _celslc_stage_ok = false;
-  }
-
-  //if everything went well until here
-  if( _celslc_stage_ok ){
-    const bool _msa_parameters_ok =  prepare_msa_parameters();
+  if( _run_msa_switch ){
+    const bool msa_res = msa_step_group_options->are_group_vars_setted_up();
+    result &= msa_res;
+    // log it
     if( _flag_logger ){
       std::stringstream message;
-      message << "prepare_msa_parameters status " << _msa_parameters_ok;
-      logger->logEvent( ApplicationLog::notification , message.str() );
-      message = std::stringstream();
-      message << " _run_msa_switch " << _run_msa_switch;
-      logger->logEvent( ApplicationLog::notification , message.str() );
-      message = std::stringstream();
-      message << " _is_bin_path_defined " << _tdmap_msa_parameters->_is_bin_path_defined();
-      logger->logEvent( ApplicationLog::notification , message.str() );
-      message = std::stringstream();
-    }
-    // check that msa parameters are prepared and paths are defined
-    if( _msa_parameters_ok && _tdmap_msa_parameters->_is_bin_path_defined() ){
-      if ( _run_msa_switch ){
-        bool _clean_run_env = !_flag_runned_tdmap_msa;
-        if( _flag_runned_tdmap_msa ){
-          if( _flag_logger ){
-            std::stringstream message;
-            message << "Already runned msa. going to clean vars.";
-            logger->logEvent( ApplicationLog::notification , message.str() );
-          }
-          std::cout << "Already runned msa. going to clean vars." << std::endl;
-          _clean_run_env = _tdmap_msa_parameters->clean_for_re_run();
-          std::cout << "clear result" << _clean_run_env << std::endl;
-          _flag_runned_tdmap_msa = !_clean_run_env;
-        }
-        if( _clean_run_env ){
-          if( _flag_logger ){
-            std::stringstream message;
-            message << "Running msa";
-            logger->logEvent( ApplicationLog::notification , message.str() );
-          }
-          _flag_runned_tdmap_msa = _tdmap_msa_parameters->call_bin();
-          if( _flag_logger ){
-            std::stringstream message;
-            message << "_flag_runned_tdmap_msa: " << _flag_runned_tdmap_msa;
-            logger->logEvent( ApplicationLog::notification , message.str() );
-          }
-        }
-        _msa_stage_ok = _flag_runned_tdmap_msa;
+      message << "TEST MSA are_group_vars_setted_up: " << std::boolalpha << msa_res;
+      if( msa_res ){
+        logger->logEvent( ApplicationLog::notification , message.str() );
       }
-      //if run msa flag is false, the wav files should exist and we should update from them
       else{
-        _msa_stage_ok = _tdmap_msa_parameters->check_produced_waves();
+        logger->logEvent( ApplicationLog::error , message.str() );
       }
-    }
-    else{
-      _msa_stage_ok = false;
     }
   }
-
-  if( _celslc_stage_ok && _msa_stage_ok ){
-    const bool _wavimg_parameters_ok = prepare_wavimg_parameters();
-    // check that msa parameters are prepared and paths are defined
-    if( _wavimg_parameters_ok && _tdmap_wavimg_parameters->_is_bin_path_defined() ){
-      //if run wavimg flag is true, the dat files should be produced
-      if ( _run_wavimg_switch ){
-        bool _clean_run_env = !_flag_runned_tdmap_wavimg;
-        if( _flag_runned_tdmap_wavimg ){
-          if( _flag_logger ){
-            std::stringstream message;
-            message << "Already runned msa. going to clean vars.";
-            logger->logEvent( ApplicationLog::notification , message.str() );
-          }
-          std::cout << "Already runned wavimg. going to clean vars." << std::endl;
-          _clean_run_env = _tdmap_wavimg_parameters->clean_for_re_run();
-          std::cout << "clear result" << _clean_run_env << std::endl;
-          _flag_runned_tdmap_wavimg = !_clean_run_env;
-        }
-        if( _clean_run_env ){
-          if( _flag_logger ){
-            std::stringstream message;
-            message << "Running wavimg";
-            logger->logEvent( ApplicationLog::notification , message.str() );
-          }
-          _flag_runned_tdmap_wavimg = _tdmap_wavimg_parameters->call_bin();
-          if( _flag_logger ){
-            std::stringstream message;
-            message << "_flag_runned_tdmap_wavimg: " << _flag_runned_tdmap_wavimg;
-            logger->logEvent( ApplicationLog::notification , message.str() );
-          }
-        } 
-        _wavimg_stage_ok = _flag_runned_tdmap_wavimg;
-      }
-      //if run wavimg flag is false, the dat files should exist and we should update from them
-      else{
-        _wavimg_stage_ok = _tdmap_wavimg_parameters->check_produced_dat();
-      }
-    }
-    else {
-      _wavimg_stage_ok = false;
-    }
-  }
-  if( _celslc_stage_ok && _msa_stage_ok && _wavimg_stage_ok ){
-    const bool _simgrid_parameters_ok = prepare_simgrid_parameters();
+  if( _run_wavimg_switch ){
+    const bool wavimg_res = wavimg_step_group_options->are_group_vars_setted_up();
+    result &= wavimg_res;
+    // log it
     if( _flag_logger ){
       std::stringstream message;
-      message << " prepare_simgrid_parameters status " << _simgrid_parameters_ok;
-      logger->logEvent( ApplicationLog::notification , message.str() );
-    }
-    if( _simgrid_parameters_ok ){
-      if ( _run_simgrid_switch ){
-        bool _clean_run_env = !_flag_runned_tdmap_simgrid;
-        if( _flag_runned_tdmap_simgrid ){
-          if( _flag_logger ){
-            std::stringstream message;
-            message << "Already runned simgrid. going to clean vars.";
-            logger->logEvent( ApplicationLog::notification , message.str() );
-          }
-          std::cout << "Already runned simgrid. going to clean vars." << std::endl;
-          _clean_run_env = _td_map_simgrid->clean_for_re_run();
-          std::cout << "clear result" << _clean_run_env << std::endl;
-          _flag_runned_tdmap_simgrid = !_clean_run_env;
-        }
-        if( _clean_run_env ){
-          if( _flag_logger ){
-            std::stringstream message;
-            message << "Running simgrid";
-            logger->logEvent( ApplicationLog::notification , message.str() );
-          }
-          _flag_runned_tdmap_simgrid = _td_map_simgrid->simulate_from_dat_file();
-          if( _flag_logger ){
-            std::stringstream message;
-            message << "_flag_runned_tdmap_simgrid: " << _flag_runned_tdmap_simgrid;
-            logger->logEvent( ApplicationLog::notification , message.str() );
-          }
-        }
-        _simgrid_stage_ok = _flag_runned_tdmap_simgrid;
+      message << "TEST WAVIMG are_group_vars_setted_up: " << std::boolalpha << wavimg_res;
+      if( wavimg_res ){
+        logger->logEvent( ApplicationLog::notification , message.str() );
+      }
+      else{
+        logger->logEvent( ApplicationLog::error , message.str() );
       }
     }
-    else{
-      _simgrid_stage_ok = false;
+  }
+  if( _run_simgrid_switch ){
+    const bool simgrid_res = simgrid_step_group_options->are_group_vars_setted_up();
+    result &= simgrid_res;
+    // log it
+    if( _flag_logger ){
+      std::stringstream message;
+      message << "TEST SIMGRID are_group_vars_setted_up: " << std::boolalpha << simgrid_res;
+      if( simgrid_res ){
+        logger->logEvent( ApplicationLog::notification , message.str() );
+      }
+      else{
+        logger->logEvent( ApplicationLog::error , message.str() );
+      }
     }
   }
-  _simulation_status = _celslc_stage_ok & _msa_stage_ok & _wavimg_stage_ok & _simgrid_stage_ok;
+  return result;
+}
+
+bool TDMap::run_tdmap( ){
+  bool _simulation_status = false;
+  const bool _vars_setted_up = test_run_config();
+  if ( _vars_setted_up ){
+
+    bool _celslc_stage_ok = false;
+    bool _msa_stage_ok = false;
+    bool _wavimg_stage_ok = false;
+    bool _simgrid_stage_ok = false;
+
+    calculate_simulated_image_sampling_rate_and_size();
+
+
+    const bool _celslc_parameters_ok = prepare_celslc_parameters();
+    if( _flag_logger ){
+      std::stringstream message;
+      message << " prepare celslc parameters status " << std::boolalpha << _celslc_parameters_ok;
+      logger->logEvent( ApplicationLog::notification , message.str() );
+      message = std::stringstream();
+      message << " _run_celslc_switch " << std::boolalpha << _run_celslc_switch;
+      logger->logEvent( ApplicationLog::notification , message.str() );
+      message = std::stringstream();
+      message << " _is_bin_path_defined " << std::boolalpha << _tdmap_celslc_parameters->_is_bin_path_defined();
+      logger->logEvent( ApplicationLog::notification , message.str() );
+      message = std::stringstream();
+    }
+    // check that celslc parameters are prepared and paths are defined
+    if( _celslc_parameters_ok && _tdmap_celslc_parameters->_is_bin_path_defined() ){
+      //if flag run celslc
+      if ( _run_celslc_switch ){
+        bool _clean_run_env = !_flag_runned_tdmap_celslc;
+        if( _flag_runned_tdmap_celslc ){
+          _clean_run_env = _tdmap_celslc_parameters->clean_for_re_run();
+          _flag_runned_tdmap_celslc = !_clean_run_env;
+          if( _flag_logger ){
+            std::stringstream message;
+            message << "Already runned msa. going to clean vars. result: " << std::boolalpha << _clean_run_env ;
+            if( _clean_run_env ){
+              logger->logEvent( ApplicationLog::notification , message.str() );
+            }
+            else{
+              logger->logEvent( ApplicationLog::error , message.str() );
+            }
+          }
+        }
+        if( _clean_run_env ){
+          _flag_runned_tdmap_celslc = _tdmap_celslc_parameters->call_boost_bin();
+        }
+        _celslc_stage_ok = _flag_runned_tdmap_celslc;
+        if( _flag_logger ){
+          std::stringstream message;
+          message << "_flag_runned_tdmap_celslc: " << std::boolalpha << _flag_runned_tdmap_celslc;
+          if( _flag_runned_tdmap_celslc ){
+            logger->logEvent( ApplicationLog::notification , message.str() );
+          }
+          else{
+            logger->logEvent( ApplicationLog::error , message.str() );
+          }
+        }
+      }
+      //if run celslc flag is false, the sli and prm files should exist and we should update from them
+      else{
+        _celslc_stage_ok = _tdmap_celslc_parameters->update_nz_simulated_partitions_from_prm();
+        if( _flag_logger ){
+          std::stringstream message;
+          message << "Run celslc flag is false, the sli and prm files should exist and we should update from them. result: " << std::boolalpha << _celslc_stage_ok;
+          logger->logEvent( ApplicationLog::notification , message.str() );
+        }
+      }
+      // compute vars after celslc run
+      if( _celslc_stage_ok ){
+        _celslc_stage_ok &= set_number_slices_to_load_from_nz_simulated_partitions();
+        _celslc_stage_ok &= set_number_slices_to_max_thickness_from_nz_simulated_partitions();
+        _celslc_stage_ok &= calculate_thickness_range_lower_bound_slice_from_nm();
+        _celslc_stage_ok &= calculate_thickness_range_upper_bound_slice_from_nm();
+        _celslc_stage_ok &= calculate_thickness_range_slice_period();
+        if( _flag_logger ){
+          std::stringstream message;
+          message << "compute vars after celslc run. result: " << std::boolalpha << _celslc_stage_ok;
+          logger->logEvent( ApplicationLog::notification , message.str() );
+        }
+      }
+    }
+
+    //if everything went well until here
+    if( _celslc_stage_ok ){
+      const bool _msa_parameters_ok =  prepare_msa_parameters();
+      if( _flag_logger ){
+        std::stringstream message;
+        message << "prepare_msa_parameters status " << std::boolalpha << _msa_parameters_ok;
+        logger->logEvent( ApplicationLog::notification , message.str() );
+        message = std::stringstream();
+        message << " _run_msa_switch " << std::boolalpha << _run_msa_switch;
+        logger->logEvent( ApplicationLog::notification , message.str() );
+        message = std::stringstream();
+        message << " _is_bin_path_defined " << std::boolalpha << _tdmap_msa_parameters->_is_bin_path_defined();
+        logger->logEvent( ApplicationLog::notification , message.str() );
+        message = std::stringstream();
+      }
+      // check that msa parameters are prepared and paths are defined
+      if( _msa_parameters_ok && _tdmap_msa_parameters->_is_bin_path_defined() ){
+        if ( _run_msa_switch ){
+          bool _clean_run_env = !_flag_runned_tdmap_msa;
+          if( _flag_runned_tdmap_msa ){
+            _clean_run_env = _tdmap_msa_parameters->clean_for_re_run();
+            _flag_runned_tdmap_msa = !_clean_run_env;  
+            if( _flag_logger ){
+              std::stringstream message;
+              message << "Already runned msa. going to clean vars. result: " << std::boolalpha << _clean_run_env ;
+              if( _clean_run_env ){
+                logger->logEvent( ApplicationLog::notification , message.str() );
+              }
+              else{
+                logger->logEvent( ApplicationLog::error , message.str() );
+              }
+            }
+          }
+          if( _clean_run_env ){
+            _flag_runned_tdmap_msa = _tdmap_msa_parameters->call_bin();
+            if( _flag_logger ){
+              std::stringstream message;
+              message << "_flag_runned_tdmap_msa: " << std::boolalpha << _flag_runned_tdmap_msa;
+              if( _flag_runned_tdmap_msa ){
+                logger->logEvent( ApplicationLog::notification , message.str() );
+              }
+              else{
+                logger->logEvent( ApplicationLog::error , message.str() );
+              }
+            }
+          }
+          _msa_stage_ok = _flag_runned_tdmap_msa;
+        }
+        //if run msa flag is false, the wav files should exist and we should update from them
+        else{
+          _msa_stage_ok = _tdmap_msa_parameters->check_produced_waves();
+          if( _flag_logger ){
+            std::stringstream message;
+            message << "Run msa flag was false, the wav files should exist and we should update from them. result: " << std::boolalpha << _msa_stage_ok;
+            logger->logEvent( ApplicationLog::notification , message.str() );
+          }
+        }
+      }
+    }
+
+    if( _celslc_stage_ok && _msa_stage_ok ){
+      const bool _wavimg_parameters_ok = prepare_wavimg_parameters();
+      // check that msa parameters are prepared and paths are defined
+      if( _wavimg_parameters_ok && _tdmap_wavimg_parameters->_is_bin_path_defined() ){
+        //if run wavimg flag is true, the dat files should be produced
+        if ( _run_wavimg_switch ){
+          bool _clean_run_env = !_flag_runned_tdmap_wavimg;
+          if( _flag_runned_tdmap_wavimg ){
+            _clean_run_env = _tdmap_wavimg_parameters->clean_for_re_run();
+            _flag_runned_tdmap_wavimg = !_clean_run_env;
+            if( _flag_logger ){
+              std::stringstream message;
+              message << "Already runned wavimg. going to clean vars. result: " << std::boolalpha << _clean_run_env ;
+              if( _clean_run_env ){
+                logger->logEvent( ApplicationLog::notification , message.str() );
+              }
+              else{
+                logger->logEvent( ApplicationLog::error , message.str() );
+              }
+            }
+          }
+          if( _clean_run_env ){
+            _flag_runned_tdmap_wavimg = _tdmap_wavimg_parameters->call_bin();
+            if( _flag_logger ){
+              std::stringstream message;
+              message << "_flag_runned_tdmap_wavimg: " << std::boolalpha << _flag_runned_tdmap_wavimg;
+              if( _flag_runned_tdmap_wavimg ){
+                logger->logEvent( ApplicationLog::notification , message.str() );
+              }
+              else{
+                logger->logEvent( ApplicationLog::error , message.str() );
+              }
+            }
+          } 
+          _wavimg_stage_ok = _flag_runned_tdmap_wavimg;
+        }
+        //if run wavimg flag is false, the dat files should exist and we should update from them
+        else{
+          _wavimg_stage_ok = _tdmap_wavimg_parameters->check_produced_dat();
+          if( _flag_logger ){
+            std::stringstream message;
+            message << "Run wavimg flag is false, the dat files should exist and we should update from them. result: " << std::boolalpha << _wavimg_stage_ok;
+            logger->logEvent( ApplicationLog::notification , message.str() );
+          }
+        }
+      }
+    }
+    if( _celslc_stage_ok && _msa_stage_ok && _wavimg_stage_ok ){
+      const bool _simgrid_parameters_ok = prepare_simgrid_parameters();
+      if( _flag_logger ){
+        std::stringstream message;
+        message << " prepare_simgrid_parameters status " << std::boolalpha << _simgrid_parameters_ok;
+        logger->logEvent( ApplicationLog::notification , message.str() );
+      }
+      if( _simgrid_parameters_ok ){
+        if ( _run_simgrid_switch ){
+          bool _clean_run_env = !_flag_runned_tdmap_simgrid;
+          if( _flag_runned_tdmap_simgrid ){
+            _clean_run_env = _td_map_simgrid->clean_for_re_run();
+            _flag_runned_tdmap_simgrid = !_clean_run_env;
+            if( _flag_logger ){
+              std::stringstream message;
+              message << "Already runned simgrid. going to clean vars. result: " << std::boolalpha << _clean_run_env ;
+              if( _clean_run_env ){
+                logger->logEvent( ApplicationLog::notification , message.str() );
+              }
+              else{
+                logger->logEvent( ApplicationLog::error , message.str() );
+              }
+            }
+          }
+          if( _clean_run_env ){
+            _flag_runned_tdmap_simgrid = _td_map_simgrid->simulate_from_dat_file();
+            if( _flag_logger ){
+              std::stringstream message;
+              message << "_flag_runned_tdmap_simgrid: " << std::boolalpha << _flag_runned_tdmap_simgrid;
+              if( _flag_runned_tdmap_simgrid ){
+                logger->logEvent( ApplicationLog::notification , message.str() );
+              }
+              else{
+                logger->logEvent( ApplicationLog::error , message.str() );
+              }
+            }
+          }
+          _simgrid_stage_ok = _flag_runned_tdmap_simgrid;
+        }
+      }
+    }
+    _simulation_status = _celslc_stage_ok & _msa_stage_ok & _wavimg_stage_ok & _simgrid_stage_ok;
+  }
   return _simulation_status;
 }
 
@@ -533,12 +640,6 @@ bool TDMap::set_run_simgrid_switch( bool value ){
 
 bool  TDMap::prepare_celslc_parameters(){
   _flag_tdmap_celslc_parameters = false;
-  std::cout << "  _is_simulated_image_sampling_rate_and_size_defined " << _is_simulated_image_sampling_rate_and_size_defined() << std::endl;
-  std::cout << "  _is_unit_cell_cif_path_defined " << _core_image_crystal_ptr->_is_unit_cell_cif_path_defined() << std::endl;
-  std::cout << "  _is_perpendicular_dir_defined " << _core_image_crystal_ptr->_is_perpendicular_dir_defined() << std::endl;
-  std::cout << "  _flag_ht_accelaration_voltage " << _flag_ht_accelaration_voltage << std::endl;
-  std::cout << "  _is_slc_file_name_prefix_defined " << _is_slc_file_name_prefix_defined() << std::endl;
-
   if( _core_image_crystal_ptr->_is_unit_cell_cif_path_defined()
       && _core_image_crystal_ptr->_is_perpendicular_dir_defined()
       && _core_image_crystal_ptr->_is_projection_dir_defined()
@@ -552,7 +653,6 @@ bool  TDMap::prepare_celslc_parameters(){
     const double projection_dir_h = _core_image_crystal_ptr->get_projection_dir_h();
     const double projection_dir_k = _core_image_crystal_ptr->get_projection_dir_k();
     const double projection_dir_l = _core_image_crystal_ptr->get_projection_dir_l();
-
     _tdmap_celslc_parameters->set_prp_dir_uvw( perpendicular_dir_u, perpendicular_dir_v, perpendicular_dir_w );
     _tdmap_celslc_parameters->set_prj_dir_hkl( projection_dir_h, projection_dir_k, projection_dir_l );
     _tdmap_celslc_parameters->set_super_cell_size_abc( super_cell_size_a, super_cell_size_b, super_cell_size_c );
@@ -560,12 +660,6 @@ bool  TDMap::prepare_celslc_parameters(){
     _tdmap_celslc_parameters->set_slc_filename_prefix ( slc_file_name_prefix.c_str() );
     _tdmap_celslc_parameters->set_nx_simulated_horizontal_samples( nx_simulated_horizontal_samples );
     _tdmap_celslc_parameters->set_ny_simulated_vertical_samples( ny_simulated_vertical_samples );
-    // work here !!!! gui not available option
-    /*
-     * if( nz_switch ){
-     _tdmap_celslc_parameters->set_nz_simulated_partitions ( nz_simulated_partitions );
-     }
-     */
     _tdmap_celslc_parameters->set_ht_accelaration_voltage( ht_accelaration_voltage );
     _tdmap_celslc_parameters->set_dwf_switch( dwf_switch );
     _tdmap_celslc_parameters->set_abs_switch( abs_switch );
@@ -592,12 +686,6 @@ int TDMap::get_ny_simulated_vertical_samples(){
 
 bool  TDMap::prepare_msa_parameters(){
   _flag_tdmap_msa_parameters = false;
-  std::cout << "  _is_thickness_range_lower_bound_slice_defined " << _is_thickness_range_lower_bound_slice_defined() << std::endl;
-  std::cout << "  _is_thickness_range_upper_bound_slice_defined " << _is_thickness_range_upper_bound_slice_defined() << std::endl;
-  std::cout << "  _is_thickness_period_slice_defined " << _is_thickness_period_slice_defined() << std::endl;
-  std::cout << "  _is_ht_accelaration_voltage_defined " << _is_ht_accelaration_voltage_defined() << std::endl;
-  std::cout << "  _is_slc_file_name_prefix_defined " << _is_slc_file_name_prefix_defined() << std::endl;
-
   if( _is_thickness_range_lower_bound_slice_defined()
       && _is_thickness_range_upper_bound_slice_defined()
       && _is_thickness_period_slice_defined()
@@ -626,8 +714,6 @@ bool  TDMap::prepare_msa_parameters(){
 
 bool  TDMap::prepare_wavimg_parameters(){
   _flag_tdmap_wavimg_parameters = false;
-  std::cout << "  _is_thickness_range_lower_bound_slice_defined " << _is_thickness_range_lower_bound_slice_defined() << std::endl;
-
   if( _is_wave_function_name_defined()
       && _is_thickness_range_lower_bound_slice_defined()
       && _is_thickness_period_slice_defined()
@@ -719,12 +805,9 @@ bool  TDMap::prepare_wavimg_parameters(){
 
 bool  TDMap::prepare_simgrid_parameters(){
   _flag_tdmap_simgrid_parameters = false;
-  std::cout << "  _is_thickness_range_lower_bound_slice_defined " << _is_thickness_range_lower_bound_slice_defined() << std::endl;
-
   celslc_accum_nm_slice_vec = _tdmap_celslc_parameters->get_slice_params_accum_nm_slice_vec();
   _flag_celslc_accum_nm_slice_vec = true;
   assert( celslc_accum_nm_slice_vec.size() == number_slices_to_max_thickness );
-
   const double _sampling_rate_experimental_x_nm_per_pixel = _core_image_crystal_ptr->get_sampling_rate_experimental_x_nm_per_pixel();
   const double _sampling_rate_experimental_y_nm_per_pixel = _core_image_crystal_ptr->get_sampling_rate_experimental_y_nm_per_pixel();
   cv::Mat _experimental_image_roi = _core_image_crystal_ptr->get_roi_experimental_image_mat();
@@ -998,18 +1081,18 @@ bool TDMap::set_thickness_range_number_samples(  int samples ){
 }
 
 bool TDMap::set_thickness_user_estimated_nm_cast( std::string estimated_nm ){
-    bool set_result = false;
-    try {
-      const double casted_value = boost::lexical_cast<double>( estimated_nm );
-      set_result = set_thickness_user_estimated_nm ( casted_value );
-    }
-    catch(const boost::bad_lexical_cast &)
-    {
-      set_result = false;
-      // send exception
-      // more WORK HERE!!!!
-    }
-    return set_result;
+  bool set_result = false;
+  try {
+    const double casted_value = boost::lexical_cast<double>( estimated_nm );
+    set_result = set_thickness_user_estimated_nm ( casted_value );
+  }
+  catch(const boost::bad_lexical_cast &)
+  {
+    set_result = false;
+    // send exception
+    // more WORK HERE!!!!
+  }
+  return set_result;
 }
 
 bool TDMap::set_thickness_user_estimated_nm( double estimated_nm ){
