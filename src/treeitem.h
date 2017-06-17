@@ -28,6 +28,8 @@ class TreeItem : public QObject {
   Q_OBJECT
   public:
     enum DelegateType { _delegate_FILE, _delegate_DIR, _delegate_TEXT, _delegate_TEXT_ACTION, _delegate_SLIDER_INT, _delegate_TEXT_DOCUMENT, _delegate_TEXT_BROWSER, _delegate_CHECK, _delegate_DROP };
+    enum ActionStatusType { _status_NOT_READY, _status_READY_TO_RUN, _status_RUNNING, _status_RUNNED_OK, _status_RUNNED_ERROR };
+
     explicit TreeItem( QVector<QVariant> &data, TreeItem *parent = 0 );
     explicit TreeItem( QVector<QVariant> &data, QVector<bool> editable, TreeItem *parent = 0 );
 
@@ -105,6 +107,7 @@ class TreeItem : public QObject {
 
     void set_variable_description( std::string vardescription );
     std::string  get_variable_description();
+    void setStatusOption( int col , ActionStatusType action );
 
 signals:
 
@@ -172,6 +175,9 @@ signals:
 
     std::string _variable_name;
     std::string _variable_description;
+    bool _flag_is_action = false;
+    int _status_column = 0;
+    ActionStatusType _action_status = ActionStatusType::_status_NOT_READY;
 };
 
 #endif // TREEITEM_H

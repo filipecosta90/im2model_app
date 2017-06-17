@@ -47,7 +47,9 @@ SOURCES +=\
     application_log.cpp \
     custom_tool_button.cpp \
     renderarea.cpp \
-    group_options.cpp
+    group_options.cpp \
+    QtAwesome.cpp \
+    QtAwesomeAnim.cpp
 
 HEADERS  += configwin.h \
     treeitem.h \
@@ -78,7 +80,9 @@ HEADERS  += configwin.h \
     custom_tool_button.h \
     cv_image_edge_frame.h \
     renderarea.h \
-    group_options.h
+    group_options.h \
+    QtAwesome.h \
+    QtAwesomeAnim.h
 
 RESOURCES     = ../im2model.qrc
 
@@ -86,3 +90,4 @@ FORMS    += configwin.ui \
     settings.ui
 
 INCLUDEPATH += /usr/local/Cellar/boost/1.64.0_1/
+

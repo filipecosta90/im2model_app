@@ -1,4 +1,7 @@
 <RCC version="1.0">
+<qresource prefix="/">
+<file>src/fonts/fontawesome-4.7.0.ttf</file>
+</qresource>
 <qresource prefix="/Icons">
 <file alias="AppIcon32">src/res/AppIcon32.png</file>
 <file alias="AppIcon128">src/res/AppIcon128.png</file>

@@ -515,7 +515,9 @@ bool TDMap::run_tdmap( ){
             }
           }
           if( _clean_run_env ){
+            emit TDMap_started_msa();
             _flag_runned_tdmap_msa = _tdmap_msa_parameters->call_bin();
+            emit TDMap_ended_msa( _flag_runned_tdmap_msa );
             if( _flag_logger ){
               std::stringstream message;
               message << "_flag_runned_tdmap_msa: " << std::boolalpha << _flag_runned_tdmap_msa;
@@ -563,7 +565,9 @@ bool TDMap::run_tdmap( ){
             }
           }
           if( _clean_run_env ){
+            emit TDMap_started_wavimg();
             _flag_runned_tdmap_wavimg = _tdmap_wavimg_parameters->call_bin();
+            emit TDMap_ended_wavimg( _flag_runned_tdmap_wavimg );
             if( _flag_logger ){
               std::stringstream message;
               message << "_flag_runned_tdmap_wavimg: " << std::boolalpha << _flag_runned_tdmap_wavimg;
@@ -613,6 +617,7 @@ bool TDMap::run_tdmap( ){
             }
           }
           if( _clean_run_env ){
+            emit TDMap_started_simgrid();
             const bool _grid_ok = _td_map_simgrid->read_grid_from_dat_files();
             if( _grid_ok ){
               _flag_runned_tdmap_simgrid = _td_map_simgrid->simulate_from_grid();
@@ -620,6 +625,7 @@ bool TDMap::run_tdmap( ){
             else{
               _flag_runned_tdmap_simgrid = _grid_ok;
             }
+            emit TDMap_ended_simgrid( _flag_runned_tdmap_simgrid );
             if( _flag_logger ){
               std::stringstream message;
               message << "_flag_runned_tdmap_simgrid: " << std::boolalpha << _flag_runned_tdmap_simgrid;

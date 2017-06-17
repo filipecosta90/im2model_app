@@ -73,12 +73,18 @@ class MainWindow : public QMainWindow {
     boost::process::ipstream _sim_tdmap_simgrid_ostream_buffer;
 
     public slots:
-      void update_from_TDMap_sucess();
+    void update_from_TDMap_sucess();
     void update_from_TDMap_failure();
     bool _is_initialization_ok();
-    void update_tdmap_celslc_started( int number_steps );
-    void update_tdmap_celslc_step( int at_step );
+    void update_tdmap_celslc_started( );
     void update_tdmap_celslc_ended( bool result );
+    void update_tdmap_celslc_step( int at_step );
+    void update_tdmap_msa_started( );
+    void update_tdmap_msa_ended( bool result );
+    void update_tdmap_wavimg_started( );
+    void update_tdmap_wavimg_ended( bool result );
+    void update_tdmap_simgrid_started( );
+    void update_tdmap_simgrid_ended( bool result );
 
   protected:
     void closeEvent(QCloseEvent *event) override;

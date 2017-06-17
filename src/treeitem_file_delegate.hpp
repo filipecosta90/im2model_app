@@ -20,6 +20,7 @@
 #include "treeitem.h"
 #include "treemodel.h"
 #include "custom_tool_button.h"
+#include "QtAwesome.h"
 
 
 class TreeItemFileDelegate : public QStyledItemDelegate {

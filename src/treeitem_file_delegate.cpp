@@ -17,11 +17,9 @@ void TreeItemFileDelegate::paint(QPainter * painter, const QStyleOptionViewItem 
     case TreeItem::_delegate_DROP:
       {
         if( item->get_dropdown_column() == index.column() ){
-
           const QVector<QVariant> drop_data = item->get_dropdown_data();
           const QVector<QVariant> drop_enum = item->get_dropdown_enum();
           QVariant value = index.model()->data(index, Qt::EditRole);
-
           QString _option_text;
           for( int enum_pos = 0; enum_pos < drop_enum.size(); enum_pos++ ){
             if( drop_enum[enum_pos] == value ){
@@ -39,7 +37,6 @@ void TreeItemFileDelegate::paint(QPainter * painter, const QStyleOptionViewItem 
         }
         break;
       }
-
     case TreeItem::_delegate_SLIDER_INT:
       {
         QStyledItemDelegate::paint( painter, option,  index);
@@ -68,9 +65,8 @@ void TreeItemFileDelegate::paint(QPainter * painter, const QStyleOptionViewItem 
          break;
          }*/
   case TreeItem::_delegate_CHECK:
-      {
+  {
         if( item->get_checkbox_column() == index.column() ){
-
           QString legend = item->get_legend( index.column() ).toString();
           QCheckBox *checkbox = new QCheckBox( legend  );
           bool _is_checked = index.model()->data(index, Qt::EditRole).toBool();
@@ -80,7 +76,6 @@ void TreeItemFileDelegate::paint(QPainter * painter, const QStyleOptionViewItem 
           checkbox->render(painter);
           painter->restore();
           break;
-
         }
         else{
           QStyledItemDelegate::paint( painter, option,  index);
@@ -88,7 +83,7 @@ void TreeItemFileDelegate::paint(QPainter * painter, const QStyleOptionViewItem 
         break;
       }
   case TreeItem::_delegate_TEXT_DOCUMENT:
-      {
+  {
         QStyleOptionViewItemV4 options = option;
         initStyleOption(&options, index);
         painter->save();
@@ -104,7 +99,7 @@ void TreeItemFileDelegate::paint(QPainter * painter, const QStyleOptionViewItem 
         doc.drawContents(painter, clip);
         painter->restore();
         break;
-      }
+  }
   case TreeItem::_delegate_TEXT_BROWSER:
   case TreeItem::_delegate_TEXT_ACTION:
   case TreeItem::_delegate_FILE:
@@ -119,10 +114,8 @@ void TreeItemFileDelegate::paint(QPainter * painter, const QStyleOptionViewItem 
 }
 
 QWidget *TreeItemFileDelegate::createEditor( QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &index ) const {
-
   TreeItem *item = static_cast<TreeItem*>(index.internalPointer());
   QWidget *editor = 0;
-
   switch( item->get_item_delegate_type() )
   {
     case TreeItem::_delegate_SLIDER_INT:
@@ -160,6 +153,13 @@ QWidget *TreeItemFileDelegate::createEditor( QWidget *parent, const QStyleOption
         editor_layout->setSpacing(0);
         editor_layout->setAlignment(Qt::AlignRight);
 
+
+       /* QtAwesome* awesome = new QtAwesome(editor);
+        awesome->initFontAwesome();
+        QVariantMap optionsb;
+        optionsb.insert( "color" , QColor(255,0,0) );
+        QPushButton* beerButton = new QPushButton( awesome->icon( fa::music, optionsb ), "Music" );
+*/
         QString _button_text = "...";
         FilePushButton *button = new FilePushButton( _button_text, editor );
 
@@ -222,6 +222,7 @@ QWidget *TreeItemFileDelegate::createEditor( QWidget *parent, const QStyleOption
       }
     case TreeItem::_delegate_CHECK:
       {
+       if( item->get_checkbox_column() == index.column() ){
         editor = new QWidget(parent);
         QHBoxLayout *editor_layout = new QHBoxLayout(editor);
         QString legend = item->get_legend( index.column() ).toString();
@@ -234,6 +235,10 @@ QWidget *TreeItemFileDelegate::createEditor( QWidget *parent, const QStyleOption
         editor_layout->addWidget( checkbox );
         editor->setLayout( editor_layout );
         break;
+       }
+       else{
+           editor = QStyledItemDelegate::createEditor(parent,option,index);
+       }
       }
     case TreeItem::_delegate_TEXT_ACTION:
       {

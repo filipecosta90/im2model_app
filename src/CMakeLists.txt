@@ -105,6 +105,10 @@ if(build_gui)
   # These are stand-alone .cpp files that you usually never have to look at.
 
   set(GUI_SOURCE_FILES
+    QtAwesome.cpp
+    QtAwesome.h
+    QtAwesomeAnim.cpp 
+    QtAwesomeAnim.h 
     group_options.h
     group_options.cpp
     renderarea.h

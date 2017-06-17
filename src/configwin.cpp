@@ -146,16 +146,60 @@ MainWindow::MainWindow( ApplicationLog::ApplicationLog* logger , QWidget *parent
   }
 }
 
-void MainWindow::update_tdmap_celslc_started( int number_steps ){
-  std::cout << "update_tdmap_celslc_started" << std::endl;
+void MainWindow::update_tdmap_celslc_started( ){
+    ui->statusBar->showMessage(tr("Started multislice step"), 2000);
+}
+
+void MainWindow::update_tdmap_celslc_ended( bool result ){
+    if( result ){
+        ui->statusBar->showMessage(tr("Sucessfully ended multislice step"), 2000);
+    }
+    else{
+        ui->statusBar->showMessage(tr("Error while running multislice step"), 2000);
+    }
+}
+
+void MainWindow::update_tdmap_msa_started( ){
+    ui->statusBar->showMessage(tr("Started multislice step"), 2000);
+}
+
+void MainWindow::update_tdmap_msa_ended( bool result ){
+    if( result ){
+        ui->statusBar->showMessage(tr("Sucessfully ended multislice step"), 2000);
+    }
+    else{
+        ui->statusBar->showMessage(tr("Error while running multislice step"), 2000);
+    }
+}
+
+void MainWindow::update_tdmap_wavimg_started( ){
+    ui->statusBar->showMessage(tr("Started multislice step"), 2000);
+}
+
+void MainWindow::update_tdmap_wavimg_ended( bool result ){
+    if( result ){
+        ui->statusBar->showMessage(tr("Sucessfully ended multislice step"), 2000);
+    }
+    else{
+        ui->statusBar->showMessage(tr("Error while running multislice step"), 2000);
+    }
+}
+
+void MainWindow::update_tdmap_simgrid_started( ){
+    ui->statusBar->showMessage(tr("Started multislice step"), 2000);
+}
+
+void MainWindow::update_tdmap_simgrid_ended( bool result ){
+    if( result ){
+        ui->statusBar->showMessage(tr("Sucessfully ended multislice step"), 2000);
+    }
+    else{
+        ui->statusBar->showMessage(tr("Error while running multislice step"), 2000);
+    }
 }
 
 void MainWindow::update_tdmap_celslc_step( int at_step ){
   std::cout << "update_tdmap_celslc_step " << at_step << std::endl;
-}
-
-void MainWindow::update_tdmap_celslc_ended( bool result ){
-  std::cout << "update_tdmap_celslc_ended result: " << std::boolalpha << result << std::endl;
 }
 
 void MainWindow::set_base_dir_path( boost::filesystem::path base_dir ){
@@ -524,7 +568,6 @@ bool MainWindow::export_TDMap(){
   }
   return result;
 }
-
 
 bool MainWindow::edit_preferences(){
   // returns false if no settings were saved
@@ -1411,10 +1454,13 @@ void MainWindow::create_box_options(){
   boost::function<bool(bool)> box4_option_2_check_setter ( boost::bind( &TDMap::set_run_celslc_switch, _core_td_map, _1 ) );
   QVector<bool> box4_option_2_edit = {false,true};
   TreeItem* _multislice_phase_granting  = new TreeItem ( box4_data_2 ,box4_option_2_check_setter, box4_option_2_check_getter, box4_legend_2, box4_option_2_edit );
-  _multislice_phase_granting->set_item_delegate_type( TreeItem::_delegate_CHECK );
-  running_configuration_root->insertChildren( _multislice_phase_granting );
+ // _multislice_phase_granting->set_item_delegate_type( TreeItem::_delegate_CHECK );
+  _multislice_phase_granting->setStatusOption( 0, TreeItem::ActionStatusType::_status_NOT_READY );
   // load the preset data from core constuctor
   _multislice_phase_granting->load_data_from_getter();
+  _multislice_phase_granting->setCheckable(true);
+  running_configuration_root->insertChildren( _multislice_phase_granting );
+
 
   QVector<QVariant> box4_option_2_0 = {"", "Output"};
   TreeItem* _multislice_phase_granting_output_legend   = new TreeItem ( box4_option_2_0 );

@@ -450,8 +450,24 @@ class TDMap  : public QObject {
 
 signals:
     void TDMap_started_celslc( );
+    void TDMap_inform_celslc_n_steps( int number_steps );
     void TDMap_at_celslc_step( int step );
-    void TDMap_ended_celslc( bool _step_status );
+    void TDMap_ended_celslc( bool celslc_status );
+
+    void TDMap_started_msa( );
+    void TDMap_inform_msa_n_steps( int number_steps );
+    void TDMap_at_msa_step( int step );
+    void TDMap_ended_msa( bool msa_status );
+
+    void TDMap_started_wavimg( );
+    void TDMap_inform_wavimg_n_steps( int number_steps );
+    void TDMap_at_wavimg_step( int step );
+    void TDMap_ended_wavimg( bool wavimg_status );
+
+    void TDMap_started_simgrid( );
+    void TDMap_inform_simgrid_n_steps( int number_steps );
+    void TDMap_at_simgrid_step( int step );
+    void TDMap_ended_simgrid( bool simgrid_status );
 };
 
 #endif

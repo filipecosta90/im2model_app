@@ -35,7 +35,8 @@ QVariant TreeModel::data(const QModelIndex &index, int role) const{
     return QVariant();
   }
   TreeItem *item = getItem(index);
-  if ( role == Qt::CheckStateRole && index.column() == 0 && item->isCheckable() ){
+  const int _checkable_column = item->get_checkbox_column();
+  if ( role == Qt::CheckStateRole && index.column() == _checkable_column && item->isCheckable() ){
     return static_cast< int >( item->isChecked() ? Qt::Checked : Qt::Unchecked );
   }
 

@@ -150,6 +150,14 @@ fp_check_setter = check_setter;
 return true;
 }
 
+void TreeItem::setStatusOption( int col , ActionStatusType status ){
+    _status_column = col;
+    _action_status = status;
+    _flag_is_action = true;
+    setData( col, QVariant(status));
+}
+
+
 std::vector<boost::function<bool()>> TreeItem::get_toolbar_actions(){
   return _toolbar_actions;
 }

@@ -3,6 +3,7 @@
 #include <boost/filesystem/path.hpp>                      // for path, operator==, oper...
 /* END BOOST */
 
+
 #include "configwin.h"
 #include <iostream>
 #include <QtWidgets>
@@ -16,9 +17,12 @@
 #include <QAction>
 
 #include "application_log.hpp"
+#include "QtAwesome.h"
+
 
 int main(int argc, char *argv[]){
   std::cout <<  QDir::currentPath().toStdString() << std::endl;
+
 
   // to access resources
   Q_INIT_RESOURCE(im2model);
@@ -51,6 +55,7 @@ int main(int argc, char *argv[]){
   parser.addPositionalArgument("file", "The file to open.");
   parser.process(app);
   MainWindow window( im2model_logger );
+
   if( window._is_initialization_ok() ){
     if (!parser.positionalArguments().isEmpty()){
       window.loadFile(parser.positionalArguments().first());
