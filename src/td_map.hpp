@@ -21,8 +21,8 @@
 #include "image_crystal.hpp"
 #include "group_options.h"
 
-class TDMap {
-
+class TDMap  : public QObject {
+  Q_OBJECT
   private:
 
     /////////////////////////
@@ -346,7 +346,6 @@ class TDMap {
 
     // going to run
 
-
     // runned ?
     bool _is_simulated_images_grid_defined();
 
@@ -449,6 +448,10 @@ class TDMap {
 
     void set_group_options( group_options* celslc_step, group_options* msa_step, group_options* wavimg_step, group_options* simgrid_step );
 
+signals:
+    void TDMap_started_celslc( );
+    void TDMap_at_celslc_step( int step );
+    void TDMap_ended_celslc( bool _step_status );
 };
 
 #endif

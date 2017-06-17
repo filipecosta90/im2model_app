@@ -200,23 +200,59 @@ class SIMGRID_wavimg_steplength {
 
     SIMGRID_wavimg_steplength( boost::process::ipstream& async_io_buffer_out );
 
+    bool export_sim_grid( std::string filename );
+
     bool _is_simulated_images_grid_defined();
 
-    int imregionalmax(cv::Mat input , cv::Mat locations);
+    void produce_png_from_dat_file();
 
-    std::pair<cv::Mat,cv::Mat> gradient(cv::Mat & img, double spaceX, double spaceY);
+    bool check_produced_dat();
 
-    static cv::Mat gradientX(cv::Mat & mat, double spacing);
+    bool read_grid_from_dat_files();
 
-    static cv::Mat gradientY(cv::Mat & mat, double spacing);
+    bool simulate_from_grid();
 
-    bool set_image_correlation_matching_method( int enumerator );
+    bool clean_for_re_run();
+
+    bool get_flag_io_ap_pipe_out();
 
     int  get_image_correlation_matching_method();
 
-    void set_iteration_number ( int itt );
+    double get_motion_euclidian_rotation_angle();
 
-    void set_step_length_minimum_threshold ( double minimum_threshold );
+    double get_motion_euclidian_translation_x();
+
+    double get_motion_euclidian_translation_y();
+
+    int get_simgrid_best_match_thickness_slice();
+
+    double get_simgrid_best_match_thickness_nm();
+
+    double get_simgrid_best_match_defocus_nm();
+
+    std::vector< std::vector<cv::Mat> > get_simulated_images_grid();
+
+    cv::Mat get_defocus_values_matrix();
+
+    cv::Mat get_thickness_values_matrix();
+
+    cv::Mat get_match_values_matrix();
+
+    cv::Point2i get_best_match_position();
+
+    cv::Mat get_simulated_image_in_grid( int row, int col );
+
+    double get_simulated_image_match_in_grid( int row, int col );
+
+    int get_simulated_image_thickness_slice_in_grid( int row, int col );
+
+    double get_simulated_image_thickness_nm_in_grid( int row, int col );
+
+    double get_simulated_image_defocus_in_grid( int row, int col );
+
+    std::string get_export_sim_grid_filename_hint();
+
+    bool set_image_correlation_matching_method( int enumerator );
 
     void set_wavimg_var( WAVIMG_prm* wavimg_var );
 
@@ -294,57 +330,8 @@ class SIMGRID_wavimg_steplength {
 
     bool set_base_dir_path( boost::filesystem::path base_dir );
 
-    double get_motion_euclidian_rotation_angle();
-
-    double get_motion_euclidian_translation_x();
-
-    double get_motion_euclidian_translation_y();
-
-    int get_simgrid_best_match_thickness_slice();
-
-    double get_simgrid_best_match_thickness_nm();
-
-    double get_simgrid_best_match_defocus_nm();
-
-    std::vector< std::vector<cv::Mat> > get_simulated_images_grid();
-
-    cv::Mat get_defocus_values_matrix();
-
-    cv::Mat get_thickness_values_matrix();
-
-    cv::Mat get_match_values_matrix();
-
-    cv::Point2i get_best_match_position();
-
-    cv::Mat get_simulated_image_in_grid( int row, int col );
-
-    double get_simulated_image_match_in_grid( int row, int col );
-
-    int get_simulated_image_thickness_slice_in_grid( int row, int col );
-
-    double get_simulated_image_thickness_nm_in_grid( int row, int col );
-
-    double get_simulated_image_defocus_in_grid( int row, int col );
-
-    void calculate_motion_euclidian_matrix(  cv::Mat cropped_experimental_image_roi, cv::Mat simulated_image_roi );
-
-    cv::Mat calculate_simulated_motion_euclidean_transformed_matrix( cv::Mat raw_simulated_image_roi );
-
-    cv::Mat calculate_error_matrix( cv::Mat aligned_experimental_image_roi, cv::Mat aligned_simulated_image_roi );
-
-    bool export_sim_grid( std::string filename );
-
-    std::string get_export_sim_grid_filename_hint();
-
-    void produce_png_from_dat_file();
-
-    bool simulate_from_dat_file();
-
-    bool clean_for_re_run();
-
     void set_flag_io_ap_pipe_out( bool value );
 
-    bool get_flag_io_ap_pipe_out();
 };
 
 #endif

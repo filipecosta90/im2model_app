@@ -398,7 +398,6 @@ bool TDMap::run_tdmap( ){
 
     calculate_simulated_image_sampling_rate_and_size();
 
-
     const bool _celslc_parameters_ok = prepare_celslc_parameters();
     if( _flag_logger ){
       std::stringstream message;
@@ -422,7 +421,7 @@ bool TDMap::run_tdmap( ){
           _flag_runned_tdmap_celslc = !_clean_run_env;
           if( _flag_logger ){
             std::stringstream message;
-            message << "Already runned msa. going to clean vars. result: " << std::boolalpha << _clean_run_env ;
+            message << "Already runned celslc. going to clean vars. result: " << std::boolalpha << _clean_run_env ;
             if( _clean_run_env ){
               logger->logEvent( ApplicationLog::notification , message.str() );
             }
@@ -432,7 +431,9 @@ bool TDMap::run_tdmap( ){
           }
         }
         if( _clean_run_env ){
+          emit TDMap_started_celslc( );
           _flag_runned_tdmap_celslc = _tdmap_celslc_parameters->call_boost_bin();
+          emit TDMap_ended_celslc( _flag_runned_tdmap_celslc );
         }
         _celslc_stage_ok = _flag_runned_tdmap_celslc;
         if( _flag_logger ){
@@ -457,11 +458,21 @@ bool TDMap::run_tdmap( ){
       }
       // compute vars after celslc run
       if( _celslc_stage_ok ){
-        _celslc_stage_ok &= set_number_slices_to_load_from_nz_simulated_partitions();
-        _celslc_stage_ok &= set_number_slices_to_max_thickness_from_nz_simulated_partitions();
-        _celslc_stage_ok &= calculate_thickness_range_lower_bound_slice_from_nm();
-        _celslc_stage_ok &= calculate_thickness_range_upper_bound_slice_from_nm();
-        _celslc_stage_ok &= calculate_thickness_range_slice_period();
+        const bool _slices_load_ok = set_number_slices_to_load_from_nz_simulated_partitions();
+        std::cout << "_slices_load_ok " << std::boolalpha << _slices_load_ok << std::endl;
+        const bool _slices_max_thick_ok = set_number_slices_to_max_thickness_from_nz_simulated_partitions();
+        std::cout << "_slices_max_thick_ok " << std::boolalpha << _slices_max_thick_ok << std::endl;
+        const bool _thick_lower_bound_ok = calculate_thickness_range_lower_bound_slice_from_nm();
+        std::cout << "_thick_lower_bound_ok " << std::boolalpha << _thick_lower_bound_ok << std::endl;
+        const bool _thick_upper_bound_ok = calculate_thickness_range_upper_bound_slice_from_nm();
+        std::cout << "_thick_upper_bound_ok " << std::boolalpha << _thick_upper_bound_ok << std::endl;
+        const bool _thick_period_ok = calculate_thickness_range_slice_period();
+        std::cout << "_thick_period_ok " << std::boolalpha << _thick_period_ok << std::endl;
+        _celslc_stage_ok &= _slices_load_ok;
+        _celslc_stage_ok &= _slices_max_thick_ok;
+        _celslc_stage_ok &= _thick_lower_bound_ok;
+        _celslc_stage_ok &= _thick_upper_bound_ok;
+        _celslc_stage_ok &= _thick_period_ok;
         if( _flag_logger ){
           std::stringstream message;
           message << "compute vars after celslc run. result: " << std::boolalpha << _celslc_stage_ok;
@@ -602,7 +613,13 @@ bool TDMap::run_tdmap( ){
             }
           }
           if( _clean_run_env ){
-            _flag_runned_tdmap_simgrid = _td_map_simgrid->simulate_from_dat_file();
+            const bool _grid_ok = _td_map_simgrid->read_grid_from_dat_files();
+            if( _grid_ok ){
+              _flag_runned_tdmap_simgrid = _td_map_simgrid->simulate_from_grid();
+            }
+            else{
+              _flag_runned_tdmap_simgrid = _grid_ok;
+            }
             if( _flag_logger ){
               std::stringstream message;
               message << "_flag_runned_tdmap_simgrid: " << std::boolalpha << _flag_runned_tdmap_simgrid;
@@ -621,11 +638,11 @@ bool TDMap::run_tdmap( ){
     _simulation_status = _celslc_stage_ok & _msa_stage_ok & _wavimg_stage_ok & _simgrid_stage_ok;
   }
   else{
-      if( _flag_logger ){
-        std::stringstream message;
-        message << "TDMap vars are not correcly setted up. _vars_setted_up: " << std::boolalpha << _vars_setted_up ;
-          logger->logEvent( ApplicationLog::error , message.str() );
-      }
+    if( _flag_logger ){
+      std::stringstream message;
+      message << "TDMap vars are not correcly setted up. _vars_setted_up: " << std::boolalpha << _vars_setted_up ;
+      logger->logEvent( ApplicationLog::error , message.str() );
+    }
   }
   return _simulation_status;
 }
@@ -876,9 +893,6 @@ bool  TDMap::prepare_simgrid_parameters(){
     _td_map_simgrid->set_user_estimated_thickness_slice( user_estimated_thickness_slice );
     }*/
 
-  _td_map_simgrid->set_iteration_number(1);
-  _td_map_simgrid->set_step_length_minimum_threshold ( 87.5f );
-  _td_map_simgrid->set_step_size( defocus_period, slice_period );
   _flag_tdmap_simgrid_parameters = true;
   return  _flag_tdmap_simgrid_parameters;
 }

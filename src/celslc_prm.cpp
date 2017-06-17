@@ -207,24 +207,24 @@ bool CELSLC_prm::set_application_logger( ApplicationLog::ApplicationLog* app_log
 }
 
 bool CELSLC_prm::set_bin_execname( std::string execname ){
-     full_bin_path_execname = boost::filesystem::path (execname);
-    try {
-      _flag_full_bin_path_execname = boost::filesystem::exists( full_bin_path_execname );
-    }
-    catch (const boost::filesystem::filesystem_error& ex) {
-      std::cout << ex.what() << '\n';
-      _flag_full_bin_path_execname = false;
-      if( _flag_logger ){
-        std::stringstream message;
-        message << "ERROR: " << ex.what();
-        logger->logEvent( ApplicationLog::notification , message.str() );
-      }
-    }
+  full_bin_path_execname = boost::filesystem::path (execname);
+  try {
+    _flag_full_bin_path_execname = boost::filesystem::exists( full_bin_path_execname );
+  }
+  catch (const boost::filesystem::filesystem_error& ex) {
+    std::cout << ex.what() << '\n';
+    _flag_full_bin_path_execname = false;
     if( _flag_logger ){
       std::stringstream message;
-      message << "checking if CELSLC exec exists. full path: " <<  full_bin_path_execname.string() << " || result: " << _flag_full_bin_path_execname << std::endl;
+      message << "ERROR: " << ex.what();
       logger->logEvent( ApplicationLog::notification , message.str() );
     }
+  }
+  if( _flag_logger ){
+    std::stringstream message;
+    message << "checking if CELSLC exec exists. full path: " <<  full_bin_path_execname.string() << " || result: " << _flag_full_bin_path_execname << std::endl;
+    logger->logEvent( ApplicationLog::notification , message.str() );
+  }
   return _flag_full_bin_path_execname;
 }
 
@@ -271,14 +271,14 @@ int CELSLC_prm::get_slice_number_from_nm_floor( double goal_thickness_nm ){
 
 int CELSLC_prm::get_slice_number_from_nm_ceil( double goal_thickness_nm ){
 
-    if( _flag_logger ){
-      std::stringstream message;
-      message << "Inside get_slice_number_from_nm_ceil()";
-      logger->logEvent( ApplicationLog::notification , message.str() );
-      message = std::stringstream();
-      message << "nz_simulated_partitions: " << nz_simulated_partitions << " slice_params_nm_slice_vec.size() :" << slice_params_nm_slice_vec.size();
-      logger->logEvent( ApplicationLog::notification , message.str() );
-    }
+  if( _flag_logger ){
+    std::stringstream message;
+    message << "Inside get_slice_number_from_nm_ceil()";
+    logger->logEvent( ApplicationLog::notification , message.str() );
+    message = std::stringstream();
+    message << "nz_simulated_partitions: " << nz_simulated_partitions << " slice_params_nm_slice_vec.size() :" << slice_params_nm_slice_vec.size();
+    logger->logEvent( ApplicationLog::notification , message.str() );
+  }
 
   assert( nz_simulated_partitions >= 1 );
   assert( slice_params_nm_slice_vec.size() == nz_simulated_partitions );
@@ -319,57 +319,57 @@ bool CELSLC_prm::update_nz_simulated_partitions_from_prm(){
       logger->logEvent( ApplicationLog::notification , message.str() );
     }
     if( _file_exists ){
-    std::stringstream input_prm_stream;
-    input_prm_stream << full_path.string() ;
-    std::ifstream infile;
-    infile.open ( input_prm_stream.str() , std::ifstream::in);
-    if (infile.is_open()) {
-      std::string line;
-      std::getline(infile, line);
-      std::istringstream iss(line);
-      int nslices;
-      iss >> nz_simulated_partitions;
-      double accumulated_thickness = 0.0f;
-      for (int slice_id = 1; slice_id <= nz_simulated_partitions ; slice_id ++ ){
-        //ignore line with '[Slice Parameters]'
-        std::getline(infile, line); 
-        //ignore line with slice### 
-        std::getline(infile, line); 
-        //ignore line with slicepath 
-        std::getline(infile, line); 
-        //ignore line with nx
-        std::getline(infile, line); 
-        //ignore line with ny
-        std::getline(infile, line); 
-        //ignore line with nz
-        std::getline(infile, line); 
-        //ignore line with nm/per/px x
-        std::getline(infile, line); 
-        //ignore line with nm/per/px y
-        std::getline(infile, line); 
-        //get nz dimension of the slice
+      std::stringstream input_prm_stream;
+      input_prm_stream << full_path.string() ;
+      std::ifstream infile;
+      infile.open ( input_prm_stream.str() , std::ifstream::in);
+      if (infile.is_open()) {
+        std::string line;
         std::getline(infile, line);
         std::istringstream iss(line);
-        double slice_thickness_nm;
-        iss >> slice_thickness_nm;
-        slice_params_nm_slice.insert( std::pair<int,double> (slice_id, slice_thickness_nm));
-        accumulated_thickness += slice_thickness_nm;
-        slice_params_accum_nm_slice_vec.push_back( accumulated_thickness );
-        slice_params_nm_slice_vec.push_back(slice_thickness_nm);
+        int nslices;
+        iss >> nz_simulated_partitions;
+        double accumulated_thickness = 0.0f;
+        for (int slice_id = 1; slice_id <= nz_simulated_partitions ; slice_id ++ ){
+          //ignore line with '[Slice Parameters]'
+          std::getline(infile, line); 
+          //ignore line with slice### 
+          std::getline(infile, line); 
+          //ignore line with slicepath 
+          std::getline(infile, line); 
+          //ignore line with nx
+          std::getline(infile, line); 
+          //ignore line with ny
+          std::getline(infile, line); 
+          //ignore line with nz
+          std::getline(infile, line); 
+          //ignore line with nm/per/px x
+          std::getline(infile, line); 
+          //ignore line with nm/per/px y
+          std::getline(infile, line); 
+          //get nz dimension of the slice
+          std::getline(infile, line);
+          std::istringstream iss(line);
+          double slice_thickness_nm;
+          iss >> slice_thickness_nm;
+          slice_params_nm_slice.insert( std::pair<int,double> (slice_id, slice_thickness_nm));
+          accumulated_thickness += slice_thickness_nm;
+          slice_params_accum_nm_slice_vec.push_back( accumulated_thickness );
+          slice_params_nm_slice_vec.push_back(slice_thickness_nm);
+        }
+        infile.close();
+        result = true;
+        _flag_slice_params_accum_nm_slice_vec = true;
+        _flag_slice_params_nm_slice_vec = true;
+        _flag_nz_simulated_partitions = true;
       }
-      infile.close();
-      result = true;
-      _flag_slice_params_accum_nm_slice_vec = true;
-      _flag_slice_params_nm_slice_vec = true;
-      _flag_nz_simulated_partitions = true;
-    }
-    else{
+      else{
         if( _flag_logger ){
           std::stringstream message;
           message << "unable to open file \"" <<  input_prm_stream.str() << "\"";
           logger->logEvent( ApplicationLog::error , message.str() );
         }
-    }
+      }
     }
   }
   return result;
@@ -414,9 +414,8 @@ void CELSLC_prm::cleanup_thread(){
 }
 
 bool CELSLC_prm::check_produced_slices(){
-  bool result = false;
+  bool result = true;
   boost::filesystem::path dir ( base_dir_path );
-  bool status = true;
   for ( int slice_id = 1 ;
       slice_id <= nz_simulated_partitions;
       slice_id++){
@@ -425,14 +424,18 @@ bool CELSLC_prm::check_produced_slices(){
     boost::filesystem::path slice_file ( filename_stream.str() );
     boost::filesystem::path full_slice_path = dir / slice_file;
     const bool _slice_exists = boost::filesystem::exists( full_slice_path );
-    status &= _slice_exists;
+    result &= _slice_exists;
     if( _flag_logger ){
       std::stringstream message;
       message << "checking if the produced slice file \"" << full_slice_path.string() << "\" exists: " << std::boolalpha << _slice_exists;
       logger->logEvent( ApplicationLog::notification , message.str() );
     }
   }
-  result = status;
+  if( _flag_logger ){
+    std::stringstream message;
+    message << "check_produced_slices  END RESULT: " << std::boolalpha << result;
+    logger->logEvent( ApplicationLog::notification , message.str() );
+  }
   return result;
 }
 

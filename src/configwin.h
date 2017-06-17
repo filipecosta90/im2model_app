@@ -76,6 +76,9 @@ class MainWindow : public QMainWindow {
       void update_from_TDMap_sucess();
     void update_from_TDMap_failure();
     bool _is_initialization_ok();
+    void update_tdmap_celslc_started( int number_steps );
+    void update_tdmap_celslc_step( int at_step );
+    void update_tdmap_celslc_ended( bool result );
 
   protected:
     void closeEvent(QCloseEvent *event) override;

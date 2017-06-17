@@ -105,8 +105,8 @@ MainWindow::MainWindow( ApplicationLog::ApplicationLog* logger , QWidget *parent
 
       // will only start thread when needed
       connect(sim_tdmap_worker, SIGNAL(TDMap_request()), _sim_tdmap_thread, SLOT(start()));
-      connect(_sim_tdmap_thread, SIGNAL(started()), this, SLOT(update_tdmap_sim_ostream()));
       connect(_sim_tdmap_thread, SIGNAL(started()), sim_tdmap_worker, SLOT(newTDMapSim()));
+      connect(_sim_tdmap_thread, SIGNAL(TDMap_started()), this, SLOT(update_tdmap_sim_ostream()));
 
       connect(sim_tdmap_worker, SIGNAL(TDMap_sucess()), this, SLOT(update_from_TDMap_sucess()));
       connect(sim_tdmap_worker, SIGNAL(TDMap_failure()), this, SLOT(update_from_TDMap_failure()));
@@ -116,12 +116,10 @@ MainWindow::MainWindow( ApplicationLog::ApplicationLog* logger , QWidget *parent
       /* Super-Cell Edge Detection  thread */
       _sim_super_cell_thread = new QThread( this );
       sim_super_cell_worker = new GuiSimOutUpdater( _core_super_cell );
-
       sim_super_cell_worker->moveToThread( _sim_super_cell_thread );
 
       // will only start thread when needed
       connect( sim_super_cell_worker, SIGNAL(SuperCell_edge_request()), _sim_super_cell_thread, SLOT(start()));
-      //connect(_sim_super_cell_thread, SIGNAL(started()), this, SLOT(update_tdmap_sim_ostream()));
       connect(_sim_super_cell_thread, SIGNAL(started()), sim_super_cell_worker, SLOT(newSuperCellEdge()));
 
       connect(sim_super_cell_worker, SIGNAL(SuperCell_edge_sucess()), this, SLOT(update_from_SuperCell_edge_sucess()));
@@ -137,12 +135,27 @@ MainWindow::MainWindow( ApplicationLog::ApplicationLog* logger , QWidget *parent
 
       connect(this, SIGNAL(super_cell_target_region_changed()), this, SLOT(update_super_cell_target_region()));
 
+      connect( _core_td_map, SIGNAL(TDMap_started_celslc( int )), this, SLOT(update_tdmap_celslc_started( int ) ) );
+      connect( _core_td_map, SIGNAL(TDMap_at_celslc_step( int )), this, SLOT(update_tdmap_celslc_step( int ) ) );
+      connect( _core_td_map, SIGNAL(TDMap_ended_celslc( bool )), this, SLOT(update_tdmap_celslc_ended( bool ) ) );
 
       if( _flag_im2model_logger ){
         im2model_logger->logEvent( ApplicationLog::notification, "Finished initializing App." );
       }
     }
   }
+}
+
+void MainWindow::update_tdmap_celslc_started( int number_steps ){
+  std::cout << "update_tdmap_celslc_started" << std::endl;
+}
+
+void MainWindow::update_tdmap_celslc_step( int at_step ){
+  std::cout << "update_tdmap_celslc_step " << at_step << std::endl;
+}
+
+void MainWindow::update_tdmap_celslc_ended( bool result ){
+  std::cout << "update_tdmap_celslc_ended result: " << std::boolalpha << result << std::endl;
 }
 
 void MainWindow::set_base_dir_path( boost::filesystem::path base_dir ){
@@ -358,7 +371,6 @@ void MainWindow::update_from_SuperCell_edge_failure(){
 
 void MainWindow::update_tdmap_sim_ostream(){
   std::string line;
-
   if( _core_td_map->get_run_celslc_switch() ){
     if( _core_td_map->_is_sim_tdmap_celslc_ostream_buffer_active() ){
 
