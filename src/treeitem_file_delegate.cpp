@@ -82,6 +82,12 @@ void TreeItemFileDelegate::paint(QPainter * painter, const QStyleOptionViewItem 
         }
         break;
       }
+  case TreeItem::_delegate_ACTION_CHECK:
+{
+      std::cout << "_delegate_ACTION_CHECK" << std::endl;
+      QStyledItemDelegate::paint( painter, option,  index);
+      break;
+  }
   case TreeItem::_delegate_TEXT_DOCUMENT:
   {
         QStyleOptionViewItemV4 options = option;
@@ -306,7 +312,12 @@ QWidget *TreeItemFileDelegate::createEditor( QWidget *parent, const QStyleOption
         editor->setLayout( editor_layout );
         break;
       }
-
+  case TreeItem::_delegate_ACTION_CHECK:
+{
+      std::cout << "createEditor _delegate_ACTION_CHECK" << std::endl;
+      editor = QStyledItemDelegate::createEditor(parent,option,index);
+      break;
+  }
     default:
       {
         editor = QStyledItemDelegate::createEditor(parent,option,index);
@@ -320,6 +331,12 @@ void TreeItemFileDelegate::setEditorData(QWidget *editor, const QModelIndex &ind
   TreeItem *item = static_cast<TreeItem*>(index.internalPointer());
   switch(item->get_item_delegate_type())
   {
+  case TreeItem::_delegate_ACTION_CHECK:
+  {
+      std::cout << "setEditorData _delegate_ACTION_CHECK" << std::endl;
+      QStyledItemDelegate::setEditorData(editor,index);
+      break;
+  }
     case TreeItem::_delegate_SLIDER_INT:
       {
         if( item->get_slider_column() == index.column() ){

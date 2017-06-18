@@ -36,10 +36,18 @@ QVariant TreeModel::data(const QModelIndex &index, int role) const{
   }
   TreeItem *item = getItem(index);
   const int _checkable_column = item->get_checkbox_column();
-  if ( role == Qt::CheckStateRole && index.column() == _checkable_column && item->isCheckable() ){
-    return static_cast< int >( item->isChecked() ? Qt::Checked : Qt::Unchecked );
+  if ( role != Qt::DisplayRole ){
+      if ( role == Qt::CheckStateRole ) {
+          if ( index.column() == _checkable_column &&
+               item->get_item_delegate_type() == TreeItem::DelegateType::_delegate_ACTION_CHECK
+              && item->get_flag_fp_data_getter_bool() ){
+          std::cout << " _delegate_ACTION_CHECK data() "<< std::endl;
+          const bool _checked = item->call_fp_data_getter_bool();
+          std::cout << " checked? "<< std::boolalpha << _checked <<  std::endl;
+          return static_cast< int >( _checked ? Qt::Checked : Qt::Unchecked );
+      }
+      }
   }
-
   if (role != Qt::DisplayRole && role != Qt::EditRole){
     return QVariant();
   }
@@ -55,8 +63,8 @@ Qt::ItemFlags TreeModel::flags(const QModelIndex &index) const{
   if( item->isItemEditable( index.column() ) ){
     flags |= Qt::ItemIsEditable;
   }
-  if( index.column() == 0 ){
-    flags |= Qt::ItemIsUserCheckable;
+  if( item->isItemCheckable(index.column() ) ){
+      flags |= Qt::ItemIsUserCheckable;
   }
   return flags;
 }
@@ -177,13 +185,11 @@ bool TreeModel::setData(const QModelIndex &index, const QVariant &value, int rol
   TreeItem *item = getItem(index);
   bool result = false;
   if(role == Qt::CheckStateRole){
-    if(item->isChecked()){
-      item->setChecked(false);
-    }
-    else{
-      item->setChecked(true);
-    }
-    result = true;
+      if( item->get_checkbox_column() == index.column()
+              && item->get_flag_fp_data_setter_bool() ){
+          const bool _setting_value = ( value == Qt::Checked ) ? true : false;
+        result = item->call_fp_data_setter_bool( _setting_value );
+      }
   }
   if(role == Qt::EditRole ){
     result = item->setData(index.column(), value);

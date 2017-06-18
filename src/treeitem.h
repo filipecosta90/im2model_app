@@ -27,7 +27,7 @@ Q_DECLARE_METATYPE(std::string)
 class TreeItem : public QObject {
   Q_OBJECT
   public:
-    enum DelegateType { _delegate_FILE, _delegate_DIR, _delegate_TEXT, _delegate_TEXT_ACTION, _delegate_SLIDER_INT, _delegate_TEXT_DOCUMENT, _delegate_TEXT_BROWSER, _delegate_CHECK, _delegate_DROP };
+    enum DelegateType { _delegate_ACTION_CHECK, _delegate_FILE, _delegate_DIR, _delegate_TEXT, _delegate_TEXT_ACTION, _delegate_SLIDER_INT, _delegate_TEXT_DOCUMENT, _delegate_TEXT_BROWSER, _delegate_CHECK, _delegate_DROP };
     enum ActionStatusType { _status_NOT_READY, _status_READY_TO_RUN, _status_RUNNING, _status_RUNNED_OK, _status_RUNNED_ERROR };
 
     explicit TreeItem( QVector<QVariant> &data, TreeItem *parent = 0 );
@@ -70,6 +70,7 @@ class TreeItem : public QObject {
     void setChecked( bool set );
     bool isCheckable() const;
     bool isItemEditable( int column ) const;
+    bool isItemCheckable( int column ) const;
     void setCheckable( bool set );
     bool setData(int column, const QVariant &value);
     bool appendData( int column, const QVariant &value);
@@ -109,6 +110,10 @@ class TreeItem : public QObject {
     std::string  get_variable_description();
     void setStatusOption( int col , ActionStatusType action );
 
+    bool get_flag_fp_data_getter_bool();
+    bool call_fp_data_getter_bool();
+    bool get_flag_fp_data_setter_bool();
+    bool call_fp_data_setter_bool( bool value );
 signals:
 
     void dataChanged( int column );

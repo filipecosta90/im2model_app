@@ -133,6 +133,24 @@ bool TreeItem::load_data_from_getter( ){
     return result;
 }
 
+bool TreeItem::get_flag_fp_data_getter_bool( ){
+    return _flag_fp_data_getter_bool;
+}
+
+bool TreeItem::call_fp_data_getter_bool( ){
+    std::cout << "calling fp_data_getter_bool" << std::endl;
+    return fp_data_getter_bool();
+}
+
+bool TreeItem::get_flag_fp_data_setter_bool( ){
+    return _flag_fp_data_setter_bool;
+}
+
+bool TreeItem::call_fp_data_setter_bool( bool value ){
+    std::cout << "calling fp_data_setter_bool" << std::endl;
+    return fp_data_setter_bool( value );
+}
+
 void TreeItem::add_toolbar ( QVector<QVariant> actions_description , std::vector<boost::function<bool()>> actions ){
   _toolbar_actions_description = actions_description;
   _toolbar_actions = actions;
@@ -280,6 +298,15 @@ bool TreeItem::isItemEditable( int column ) const{
     result = itemIsEditableVec.at(column);
   }
   return result;
+}
+
+bool TreeItem::isItemCheckable( int column ) const {
+    bool result = false;
+    if ( DelegateType == TreeItem::DelegateType::_delegate_ACTION_CHEC &&
+         column == _fp_check_setter_col_pos ){
+         result = true;
+    }
+    return result;
 }
 
 int TreeItem::get_checkbox_column(){

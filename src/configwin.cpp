@@ -1448,13 +1448,13 @@ void MainWindow::create_box_options(){
   /*
    * CELSLC
    * */
-  QVector<QVariant> box4_data_2 = {"",""};
+  QVector<QVariant> box4_data_2 = {"","Multislice phase granting"};
   QVector<QVariant> box4_legend_2 = {"","Multislice phase granting" };
   boost::function<bool()> box4_option_2_check_getter ( boost::bind( &TDMap::get_run_celslc_switch, _core_td_map  ) );
   boost::function<bool(bool)> box4_option_2_check_setter ( boost::bind( &TDMap::set_run_celslc_switch, _core_td_map, _1 ) );
   QVector<bool> box4_option_2_edit = {false,true};
   TreeItem* _multislice_phase_granting  = new TreeItem ( box4_data_2 ,box4_option_2_check_setter, box4_option_2_check_getter, box4_legend_2, box4_option_2_edit );
- // _multislice_phase_granting->set_item_delegate_type( TreeItem::_delegate_CHECK );
+  _multislice_phase_granting->set_item_delegate_type( TreeItem::_delegate_ACTION_CHECK );
   _multislice_phase_granting->setStatusOption( 0, TreeItem::ActionStatusType::_status_NOT_READY );
   // load the preset data from core constuctor
   _multislice_phase_granting->load_data_from_getter();
