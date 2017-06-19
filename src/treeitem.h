@@ -21,13 +21,11 @@
 
 #include "custom_tool_button.h"
 
-Q_DECLARE_METATYPE(std::string)
-
 
 class TreeItem : public QObject {
   Q_OBJECT
   public:
-    enum DelegateType { _delegate_ACTION_CHECK, _delegate_FILE, _delegate_DIR, _delegate_TEXT, _delegate_TEXT_ACTION, _delegate_SLIDER_INT, _delegate_TEXT_DOCUMENT, _delegate_TEXT_BROWSER, _delegate_CHECK, _delegate_DROP };
+    enum DelegateType { _delegate_ACTION_CHECK, _delegate_FILE, _delegate_DIR, _delegate_TEXT, _delegate_TEXT_ACTION, _delegate_SLIDER_INT, _delegate_TEXT_DOCUMENT, _delegate_TEXT_BROWSER, _delegate_DROP };
     enum ActionStatusType { _status_NOT_READY, _status_READY_TO_RUN, _status_RUNNING, _status_RUNNED_OK, _status_RUNNED_ERROR };
 
     explicit TreeItem( QVector<QVariant> &data, TreeItem *parent = 0 );
@@ -35,7 +33,6 @@ class TreeItem : public QObject {
 
     explicit TreeItem( QVector<QVariant> &data, boost::function<bool(double)> setter, TreeItem *parent = 0);
     explicit TreeItem( QVector<QVariant> &data, boost::function<bool(double)> setter, QVector<bool> editable, TreeItem *parent = 0);
-    explicit TreeItem( QVector<QVariant> &data, boost::function<bool(double)> setter, bool checkable, boost::function<bool(bool)> check_setter, TreeItem *parent = 0);
 
     explicit TreeItem( QVector<QVariant> &data, boost::function<bool(bool)> setter, QVector<QVariant> &legend, TreeItem *parent = 0);
     explicit TreeItem( QVector<QVariant> &data, boost::function<bool(bool)> setter, QVector<QVariant> &legend, QVector<bool> editable, TreeItem *parent = 0);
@@ -46,18 +43,16 @@ class TreeItem : public QObject {
     explicit TreeItem( QVector<QVariant> &data, boost::function<bool(int)> setter, boost::function<int(void)> getter, TreeItem *parent = 0 );
     explicit TreeItem( QVector<QVariant> &data, boost::function<bool(int)> setter, QVector<bool> editable, TreeItem *parent = 0);
     explicit TreeItem( QVector<QVariant> &data, boost::function<bool(int)> setter, boost::function<int(void)> getter, QVector<bool> editable, TreeItem *parent = 0);
-    explicit TreeItem( QVector<QVariant> &data, boost::function<bool(int)> setter, bool checkable, boost::function<bool(bool)> check_setter, TreeItem *parent = 0);
 
     explicit TreeItem( QVector<QVariant> &data, boost::function<bool(std::string)> setter, TreeItem *parent = 0);
     explicit TreeItem( QVector<QVariant> &data, boost::function<bool(std::string)> setter, QVector<bool> editable, TreeItem *parent = 0);
-    explicit TreeItem( QVector<QVariant> &data, boost::function<bool(std::string)> setter, bool checkable, boost::function<bool(bool)> check_setter, TreeItem *parent = 0);
 
     ~TreeItem();
     TreeItem *parent();
     TreeItem *child(int number);
     int childCount() const;
     int columnCount() const;
-    QVariant data(int column) const;
+    QVariant data(int column , int role) const;
     QVariant get_legend(int column) const;
     bool insertChildren(int position, int count, int columns);
     bool insertChildren(TreeItem *item);
@@ -66,13 +61,9 @@ class TreeItem : public QObject {
     bool removeChildren(int position, int count);
     bool removeColumns(int position, int columns);
     int childNumber() const;
-    bool isChecked() const;
-    void setChecked( bool set );
-    bool isCheckable() const;
     bool isItemEditable( int column ) const;
     bool isItemCheckable( int column ) const;
-    void setCheckable( bool set );
-    bool setData(int column, const QVariant &value);
+    bool setData(int column, const QVariant &value , int role);
     bool appendData( int column, const QVariant &value);
     bool set_fp_data_data_appender_col_pos( int col );
     bool set_flag_fp_data_appender_string( bool set );
@@ -84,8 +75,7 @@ class TreeItem : public QObject {
     QVector<QVariant> get_dropdown_data();
     QVector<QVariant> get_dropdown_enum();
     int get_dropdown_column();
-    int get_checkbox_column();
-     /* slider */
+    /* slider */
     int get_slider_column();
     int get_slider_int_range_min();
     int get_slider_int_range_max();
@@ -101,7 +91,9 @@ class TreeItem : public QObject {
     QVector<QVariant> get_toolbar_actions_description();
     std::vector<boost::function<bool()>> get_toolbar_actions();
     bool _is_toolbar_defined();
-    bool set_fp_checker( int col,  boost::function<bool(bool)> fp_check_setter );
+    bool set_fp_check_setter( int col,  boost::function<bool(bool)> fp_check_setter );
+    bool  set_fp_check_getter( int col,  boost::function<bool()> fp_check_getter );
+    bool load_check_status_from_getter( int col );
 
     void set_variable_name( std::string varname );
     std::string get_variable_name();
@@ -125,14 +117,18 @@ signals:
     QVector<QVariant> itemData;
     QVector<QVariant> itemLegend;
     QVector<bool> itemIsEditableVec;
+
+    QVector<bool> itemIsCheckableVec;
+    QVector<bool> itemState;
+    std::vector< boost::function<bool(bool)> > fp_checkable_setters;
+    std::vector< boost::function<bool(void)> > fp_checkable_getters;
+
     QVector<QVariant> dropdown_data;
     QVector<QVariant> dropdown_enum;
     int dropdown_column;
     int slider_column = 1;
     bool _flag_dropdown = false;
 
-    bool checked = false;
-    bool is_checkable = false;
     boost::function<bool(std::string)> fp_data_setter_string;
     boost::function<bool(std::string)> fp_data_appender_string;
     boost::function<std::string(void)> fp_data_getter_string;
@@ -163,10 +159,6 @@ signals:
     int _fp_data_getter_col_pos = 1;
     int _fp_data_data_appender_col_pos = 1;
 
-    boost::function<bool(bool)> fp_check_setter;
-    bool _flag_fp_check_setter = false;
-    int _fp_check_setter_col_pos = 1;
-
     /* slider */
     int _slider_int_range_min;
     int _slider_int_range_max;
@@ -184,6 +176,9 @@ signals:
     int _status_column = 0;
     ActionStatusType _action_status = ActionStatusType::_status_NOT_READY;
 };
+
+Q_DECLARE_METATYPE(std::string)
+
 
 #endif // TREEITEM_H
 

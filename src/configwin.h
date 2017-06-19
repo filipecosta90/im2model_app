@@ -73,7 +73,7 @@ class MainWindow : public QMainWindow {
     boost::process::ipstream _sim_tdmap_simgrid_ostream_buffer;
 
     public slots:
-    void update_from_TDMap_sucess();
+      void update_from_TDMap_sucess();
     void update_from_TDMap_failure();
     bool _is_initialization_ok();
     void update_tdmap_celslc_started( );
@@ -218,5 +218,6 @@ signals:
     group_options* super_cell_target_step_group_options;
 
 };
+
 
 #endif // CONFIGWIN_H

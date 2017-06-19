@@ -31,32 +31,22 @@ int TreeModel::columnCount(const QModelIndex & /* parent */) const{
 }
 
 QVariant TreeModel::data(const QModelIndex &index, int role) const{
+  /*  std::cout << " data being called for role: "
+      << ( ( role == Qt::DisplayRole) ? "Qt::DisplayRole" : ( role == Qt::EditRole) ? "Qt::EditRole" : "" )  << role << std::endl;
+
+      if ( role != Qt::DisplayRole && role != Qt::CheckStateRole ){
+      return QVariant();
+      }*/
   if (!index.isValid()){
     return QVariant();
   }
   TreeItem *item = getItem(index);
-  const int _checkable_column = item->get_checkbox_column();
-  if ( role != Qt::DisplayRole ){
-      if ( role == Qt::CheckStateRole ) {
-          if ( index.column() == _checkable_column &&
-               item->get_item_delegate_type() == TreeItem::DelegateType::_delegate_ACTION_CHECK
-              && item->get_flag_fp_data_getter_bool() ){
-          std::cout << " _delegate_ACTION_CHECK data() "<< std::endl;
-          const bool _checked = item->call_fp_data_getter_bool();
-          std::cout << " checked? "<< std::boolalpha << _checked <<  std::endl;
-          return static_cast< int >( _checked ? Qt::Checked : Qt::Unchecked );
-      }
-      }
-  }
-  if (role != Qt::DisplayRole && role != Qt::EditRole){
-    return QVariant();
-  }
-  return item->data(index.column());
+  return item->data( index.column() , role  );
 }
 
 Qt::ItemFlags TreeModel::flags(const QModelIndex &index) const{
   if (!index.isValid()){
-    return 0;
+    return Qt::NoItemFlags;
   }
   TreeItem *item = getItem(index);
   Qt::ItemFlags flags =  QAbstractItemModel::flags(index);
@@ -64,7 +54,7 @@ Qt::ItemFlags TreeModel::flags(const QModelIndex &index) const{
     flags |= Qt::ItemIsEditable;
   }
   if( item->isItemCheckable(index.column() ) ){
-      flags |= Qt::ItemIsUserCheckable;
+    flags |= Qt::ItemIsUserCheckable;
   }
   return flags;
 }
@@ -81,9 +71,8 @@ TreeItem *TreeModel::getItem(const QModelIndex &index) const{
 
 QVariant TreeModel::headerData(int section, Qt::Orientation orientation, int role) const {
   if (orientation == Qt::Horizontal && role == Qt::DisplayRole){
-    return rootItem->data(section);
+    return rootItem->data(section,role);
   }
-
   return QVariant();
 }
 
@@ -173,27 +162,20 @@ bool TreeModel::appendData(const QModelIndex &index, const QVariant &value){
   result = item->appendData( index.column(), value);
   if (result){
     emit dataChanged(index, index);
-      emit layoutChanged();
+    emit layoutChanged();
   }
   return result;
 }
 
-bool TreeModel::setData(const QModelIndex &index, const QVariant &value, int role){
-  if ( (role != Qt::EditRole) && ( role != Qt::CheckStateRole) ){
+bool TreeModel::setData(const QModelIndex &index, const QVariant &value, int role ){
+  std::cout << "\tsetData being called for role: " << role << std::endl;
+  TreeItem *item = getItem(index);
+
+  if ( (role != Qt::EditRole) && ( role != Qt::CheckStateRole ) ){
     return false;
   }
-  TreeItem *item = getItem(index);
-  bool result = false;
-  if(role == Qt::CheckStateRole){
-      if( item->get_checkbox_column() == index.column()
-              && item->get_flag_fp_data_setter_bool() ){
-          const bool _setting_value = ( value == Qt::Checked ) ? true : false;
-        result = item->call_fp_data_setter_bool( _setting_value );
-      }
-  }
-  if(role == Qt::EditRole ){
-    result = item->setData(index.column(), value);
-  }
+
+  const bool result = item->setData(index.column(), value, role );
   if (result){
     emit dataChanged(index, index);
   }
@@ -204,8 +186,7 @@ bool TreeModel::setHeaderData(int section, Qt::Orientation orientation, const QV
   if (role != Qt::EditRole || orientation != Qt::Horizontal){
     return false;
   }
-
-  bool result = rootItem->setData(section, value);
+  bool result = rootItem->setData(section, value, role );
   if (result){
     emit headerDataChanged(orientation, section, section);
   }

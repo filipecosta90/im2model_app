@@ -64,32 +64,14 @@ void TreeItemFileDelegate::paint(QPainter * painter, const QStyleOptionViewItem 
          }
          break;
          }*/
-  case TreeItem::_delegate_CHECK:
-  {
-        if( item->get_checkbox_column() == index.column() ){
-          QString legend = item->get_legend( index.column() ).toString();
-          QCheckBox *checkbox = new QCheckBox( legend  );
-          bool _is_checked = index.model()->data(index, Qt::EditRole).toBool();
-          checkbox->setChecked(_is_checked);
-          painter->save();
-          painter->translate(option.rect.topLeft());
-          checkbox->render(painter);
-          painter->restore();
-          break;
-        }
-        else{
-          QStyledItemDelegate::paint( painter, option,  index);
-        }
+  case TreeItem::_delegate_ACTION_CHECK:
+      {
+        std::cout << "_delegate_ACTION_CHECK" << std::endl;
+        QStyledItemDelegate::paint( painter, option,  index);
         break;
       }
-  case TreeItem::_delegate_ACTION_CHECK:
-{
-      std::cout << "_delegate_ACTION_CHECK" << std::endl;
-      QStyledItemDelegate::paint( painter, option,  index);
-      break;
-  }
   case TreeItem::_delegate_TEXT_DOCUMENT:
-  {
+      {
         QStyleOptionViewItemV4 options = option;
         initStyleOption(&options, index);
         painter->save();
@@ -105,7 +87,7 @@ void TreeItemFileDelegate::paint(QPainter * painter, const QStyleOptionViewItem 
         doc.drawContents(painter, clip);
         painter->restore();
         break;
-  }
+      }
   case TreeItem::_delegate_TEXT_BROWSER:
   case TreeItem::_delegate_TEXT_ACTION:
   case TreeItem::_delegate_FILE:
@@ -160,12 +142,12 @@ QWidget *TreeItemFileDelegate::createEditor( QWidget *parent, const QStyleOption
         editor_layout->setAlignment(Qt::AlignRight);
 
 
-       /* QtAwesome* awesome = new QtAwesome(editor);
-        awesome->initFontAwesome();
-        QVariantMap optionsb;
-        optionsb.insert( "color" , QColor(255,0,0) );
-        QPushButton* beerButton = new QPushButton( awesome->icon( fa::music, optionsb ), "Music" );
-*/
+        /* QtAwesome* awesome = new QtAwesome(editor);
+           awesome->initFontAwesome();
+           QVariantMap optionsb;
+           optionsb.insert( "color" , QColor(255,0,0) );
+           QPushButton* beerButton = new QPushButton( awesome->icon( fa::music, optionsb ), "Music" );
+           */
         QString _button_text = "...";
         FilePushButton *button = new FilePushButton( _button_text, editor );
 
@@ -226,26 +208,6 @@ QWidget *TreeItemFileDelegate::createEditor( QWidget *parent, const QStyleOption
         }
         break;
       }
-    case TreeItem::_delegate_CHECK:
-      {
-       if( item->get_checkbox_column() == index.column() ){
-        editor = new QWidget(parent);
-        QHBoxLayout *editor_layout = new QHBoxLayout(editor);
-        QString legend = item->get_legend( index.column() ).toString();
-        QCheckBox *checkbox = new QCheckBox( legend , editor );
-        editor_layout->setAlignment(Qt::AlignLeft);
-
-        bool _is_checked = index.model()->data(index, Qt::EditRole).toBool();
-        checkbox->setChecked(_is_checked);
-        editor_layout->setContentsMargins( QMargins(0,0,0,0) );
-        editor_layout->addWidget( checkbox );
-        editor->setLayout( editor_layout );
-        break;
-       }
-       else{
-           editor = QStyledItemDelegate::createEditor(parent,option,index);
-       }
-      }
     case TreeItem::_delegate_TEXT_ACTION:
       {
         editor = new QWidget(parent);
@@ -297,7 +259,7 @@ QWidget *TreeItemFileDelegate::createEditor( QWidget *parent, const QStyleOption
         break;
       }
     case TreeItem::_delegate_TEXT_BROWSER:
-    {
+      {
         editor = new QWidget(parent);
         QHBoxLayout* editor_layout = new QHBoxLayout( parent );
         editor_layout->setMargin(0);
@@ -312,12 +274,12 @@ QWidget *TreeItemFileDelegate::createEditor( QWidget *parent, const QStyleOption
         editor->setLayout( editor_layout );
         break;
       }
-  case TreeItem::_delegate_ACTION_CHECK:
-{
-      std::cout << "createEditor _delegate_ACTION_CHECK" << std::endl;
-      editor = QStyledItemDelegate::createEditor(parent,option,index);
-      break;
-  }
+    case TreeItem::_delegate_ACTION_CHECK:
+      {
+        std::cout << "createEditor _delegate_ACTION_CHECK" << std::endl;
+        editor = QStyledItemDelegate::createEditor(parent,option,index);
+        break;
+      }
     default:
       {
         editor = QStyledItemDelegate::createEditor(parent,option,index);
@@ -331,12 +293,6 @@ void TreeItemFileDelegate::setEditorData(QWidget *editor, const QModelIndex &ind
   TreeItem *item = static_cast<TreeItem*>(index.internalPointer());
   switch(item->get_item_delegate_type())
   {
-  case TreeItem::_delegate_ACTION_CHECK:
-  {
-      std::cout << "setEditorData _delegate_ACTION_CHECK" << std::endl;
-      QStyledItemDelegate::setEditorData(editor,index);
-      break;
-  }
     case TreeItem::_delegate_SLIDER_INT:
       {
         if( item->get_slider_column() == index.column() ){
@@ -365,13 +321,6 @@ void TreeItemFileDelegate::setEditorData(QWidget *editor, const QModelIndex &ind
             }
           }
         }
-        break;
-      }
-    case TreeItem::_delegate_CHECK:
-      {
-        QCheckBox* checkbox = editor->findChild<QCheckBox*>();
-        bool _is_checked = index.model()->data(index, Qt::EditRole).toBool();
-        checkbox->setChecked(_is_checked);
         break;
       }
     case TreeItem::_delegate_FILE  :
@@ -442,15 +391,6 @@ void TreeItemFileDelegate::setModelData(QWidget *editor, QAbstractItemModel *mod
         else{
           QStyledItemDelegate::setModelData(editor,model,index);
         }
-        break;
-      }
-    case TreeItem::_delegate_CHECK:
-      {
-        QCheckBox* checkbox = editor->findChild<QCheckBox*>();
-        bool _is_checked = checkbox->isChecked();
-        const QVariant value = QVariant::fromValue( _is_checked );
-        model->setData(index, value , Qt::EditRole);
-        model->setData(index, value, Qt::UserRole);
         break;
       }
     case TreeItem::_delegate_FILE:

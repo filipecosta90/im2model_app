@@ -44,4 +44,6 @@ signals:
     void update_required( std::string _group_name );
 };
 
+
+
 #endif // GROUP_OPTIONS_H

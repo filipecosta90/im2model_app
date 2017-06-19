@@ -106,8 +106,8 @@ MainWindow::MainWindow( ApplicationLog::ApplicationLog* logger , QWidget *parent
       // will only start thread when needed
       connect(sim_tdmap_worker, SIGNAL(TDMap_request()), _sim_tdmap_thread, SLOT(start()));
       connect(_sim_tdmap_thread, SIGNAL(started()), sim_tdmap_worker, SLOT(newTDMapSim()));
-      connect(_sim_tdmap_thread, SIGNAL(TDMap_started()), this, SLOT(update_tdmap_sim_ostream()));
 
+      connect(sim_tdmap_worker, SIGNAL(TDMap_started()), this, SLOT(update_tdmap_sim_ostream()));
       connect(sim_tdmap_worker, SIGNAL(TDMap_sucess()), this, SLOT(update_from_TDMap_sucess()));
       connect(sim_tdmap_worker, SIGNAL(TDMap_failure()), this, SLOT(update_from_TDMap_failure()));
       // will quit thread after work done
@@ -135,7 +135,7 @@ MainWindow::MainWindow( ApplicationLog::ApplicationLog* logger , QWidget *parent
 
       connect(this, SIGNAL(super_cell_target_region_changed()), this, SLOT(update_super_cell_target_region()));
 
-      connect( _core_td_map, SIGNAL(TDMap_started_celslc( int )), this, SLOT(update_tdmap_celslc_started( int ) ) );
+      connect( _core_td_map, SIGNAL(TDMap_started_celslc( )), this, SLOT(update_tdmap_celslc_started( ) ) );
       connect( _core_td_map, SIGNAL(TDMap_at_celslc_step( int )), this, SLOT(update_tdmap_celslc_step( int ) ) );
       connect( _core_td_map, SIGNAL(TDMap_ended_celslc( bool )), this, SLOT(update_tdmap_celslc_ended( bool ) ) );
 
@@ -147,55 +147,55 @@ MainWindow::MainWindow( ApplicationLog::ApplicationLog* logger , QWidget *parent
 }
 
 void MainWindow::update_tdmap_celslc_started( ){
-    ui->statusBar->showMessage(tr("Started multislice step"), 2000);
+  ui->statusBar->showMessage(tr("Started multislice step"), 2000);
 }
 
 void MainWindow::update_tdmap_celslc_ended( bool result ){
-    if( result ){
-        ui->statusBar->showMessage(tr("Sucessfully ended multislice step"), 2000);
-    }
-    else{
-        ui->statusBar->showMessage(tr("Error while running multislice step"), 2000);
-    }
+  if( result ){
+    ui->statusBar->showMessage(tr("Sucessfully ended multislice step"), 2000);
+  }
+  else{
+    ui->statusBar->showMessage(tr("Error while running multislice step"), 2000);
+  }
 }
 
 void MainWindow::update_tdmap_msa_started( ){
-    ui->statusBar->showMessage(tr("Started multislice step"), 2000);
+  ui->statusBar->showMessage(tr("Started multislice step"), 2000);
 }
 
 void MainWindow::update_tdmap_msa_ended( bool result ){
-    if( result ){
-        ui->statusBar->showMessage(tr("Sucessfully ended multislice step"), 2000);
-    }
-    else{
-        ui->statusBar->showMessage(tr("Error while running multislice step"), 2000);
-    }
+  if( result ){
+    ui->statusBar->showMessage(tr("Sucessfully ended multislice step"), 2000);
+  }
+  else{
+    ui->statusBar->showMessage(tr("Error while running multislice step"), 2000);
+  }
 }
 
 void MainWindow::update_tdmap_wavimg_started( ){
-    ui->statusBar->showMessage(tr("Started multislice step"), 2000);
+  ui->statusBar->showMessage(tr("Started multislice step"), 2000);
 }
 
 void MainWindow::update_tdmap_wavimg_ended( bool result ){
-    if( result ){
-        ui->statusBar->showMessage(tr("Sucessfully ended multislice step"), 2000);
-    }
-    else{
-        ui->statusBar->showMessage(tr("Error while running multislice step"), 2000);
-    }
+  if( result ){
+    ui->statusBar->showMessage(tr("Sucessfully ended multislice step"), 2000);
+  }
+  else{
+    ui->statusBar->showMessage(tr("Error while running multislice step"), 2000);
+  }
 }
 
 void MainWindow::update_tdmap_simgrid_started( ){
-    ui->statusBar->showMessage(tr("Started multislice step"), 2000);
+  ui->statusBar->showMessage(tr("Started multislice step"), 2000);
 }
 
 void MainWindow::update_tdmap_simgrid_ended( bool result ){
-    if( result ){
-        ui->statusBar->showMessage(tr("Sucessfully ended multislice step"), 2000);
-    }
-    else{
-        ui->statusBar->showMessage(tr("Error while running multislice step"), 2000);
-    }
+  if( result ){
+    ui->statusBar->showMessage(tr("Sucessfully ended multislice step"), 2000);
+  }
+  else{
+    ui->statusBar->showMessage(tr("Error while running multislice step"), 2000);
+  }
 }
 
 void MainWindow::update_tdmap_celslc_step( int at_step ){
@@ -1449,16 +1449,16 @@ void MainWindow::create_box_options(){
    * CELSLC
    * */
   QVector<QVariant> box4_data_2 = {"","Multislice phase granting"};
-  QVector<QVariant> box4_legend_2 = {"","Multislice phase granting" };
-  boost::function<bool()> box4_option_2_check_getter ( boost::bind( &TDMap::get_run_celslc_switch, _core_td_map  ) );
+  boost::function<bool(void)> box4_option_2_check_getter ( boost::bind( &TDMap::get_run_celslc_switch, _core_td_map  ) );
   boost::function<bool(bool)> box4_option_2_check_setter ( boost::bind( &TDMap::set_run_celslc_switch, _core_td_map, _1 ) );
-  QVector<bool> box4_option_2_edit = {false,true};
-  TreeItem* _multislice_phase_granting  = new TreeItem ( box4_data_2 ,box4_option_2_check_setter, box4_option_2_check_getter, box4_legend_2, box4_option_2_edit );
-  _multislice_phase_granting->set_item_delegate_type( TreeItem::_delegate_ACTION_CHECK );
-  _multislice_phase_granting->setStatusOption( 0, TreeItem::ActionStatusType::_status_NOT_READY );
+  QVector<bool> box4_option_2_edit = {false,false};
+  TreeItem* _multislice_phase_granting  = new TreeItem ( box4_data_2 , box4_option_2_edit );
+  //_multislice_phase_granting->setStatusOption( 0, TreeItem::ActionStatusType::_status_NOT_READY );
   // load the preset data from core constuctor
-  _multislice_phase_granting->load_data_from_getter();
-  _multislice_phase_granting->setCheckable(true);
+  _multislice_phase_granting->set_fp_check_setter( 1, box4_option_2_check_setter );
+  _multislice_phase_granting->set_fp_check_getter( 1, box4_option_2_check_getter );
+  _multislice_phase_granting->load_check_status_from_getter( 1 );
+
   running_configuration_root->insertChildren( _multislice_phase_granting );
 
 
@@ -1481,15 +1481,18 @@ void MainWindow::create_box_options(){
   /*
    * MSA
    * */
-  QVector<QVariant> box4_data_3 = {"",""};
-  QVector<QVariant> box4_legend_3 = {"","Electron diffraction patterns" };
-  boost::function<bool(void)> box4_option_3_check_getter ( boost::bind( &TDMap::get_run_msa_switch, _core_td_map ) );
+
+  QVector<QVariant> box4_data_3 = {"","Electron diffraction patterns"};
+  boost::function<bool(void)> box4_option_3_check_getter ( boost::bind( &TDMap::get_run_msa_switch, _core_td_map  ) );
   boost::function<bool(bool)> box4_option_3_check_setter ( boost::bind( &TDMap::set_run_msa_switch, _core_td_map, _1 ) );
-  QVector<bool> box4_option_3_edit = {false,true};
-  TreeItem* _electron_diffraction_patterns  = new TreeItem ( box4_data_3 ,box4_option_3_check_setter, box4_option_3_check_getter, box4_legend_3, box4_option_3_edit );
+  QVector<bool> box4_option_3_edit = {false,false};
+  TreeItem* _electron_diffraction_patterns  = new TreeItem ( box4_data_3 , box4_option_3_edit );
+  _multislice_phase_granting->setStatusOption( 0, TreeItem::ActionStatusType::_status_NOT_READY );
   // load the preset data from core constuctor
-  _electron_diffraction_patterns->load_data_from_getter();
-  _electron_diffraction_patterns->set_item_delegate_type( TreeItem::_delegate_CHECK );
+  _electron_diffraction_patterns->set_fp_check_setter( 1, box4_option_3_check_setter );
+  _electron_diffraction_patterns->set_fp_check_getter( 1, box4_option_3_check_getter );
+  _electron_diffraction_patterns->load_check_status_from_getter( 1 );
+
   running_configuration_root->insertChildren( _electron_diffraction_patterns );
 
   QVector<QVariant> box4_option_3_0 = {"", "Output"};
@@ -1511,17 +1514,18 @@ void MainWindow::create_box_options(){
   /*
    * WAVIMG
    * */
-
-  QVector<QVariant> box4_data_4 = {"",""};
-  QVector<QVariant> box4_legend_4 = {"","Image intensity distribuitions"};
-  boost::function<bool(void)> box4_option_4_check_getter ( boost::bind( &TDMap::get_run_wavimg_switch, _core_td_map ) );
+  QVector<QVariant> box4_data_4 = {"","Image intensity distribuitions"};
+  boost::function<bool(void)> box4_option_4_check_getter ( boost::bind( &TDMap::get_run_wavimg_switch, _core_td_map  ) );
   boost::function<bool(bool)> box4_option_4_check_setter ( boost::bind( &TDMap::set_run_wavimg_switch, _core_td_map, _1 ) );
-  QVector<bool> box4_option_4_edit = {false,true};
-  TreeItem* _image_intensity_distribuitions  = new TreeItem ( box4_data_4 ,box4_option_4_check_setter, box4_option_4_check_getter, box4_legend_4, box4_option_4_edit );
-  _image_intensity_distribuitions->set_item_delegate_type( TreeItem::_delegate_CHECK );
-  running_configuration_root->insertChildren( _image_intensity_distribuitions );
+  QVector<bool> box4_option_4_edit = {false,false};
+  TreeItem* _image_intensity_distribuitions  = new TreeItem ( box4_data_4 , box4_option_4_edit );
+  _image_intensity_distribuitions->setStatusOption( 0, TreeItem::ActionStatusType::_status_NOT_READY );
   // load the preset data from core constuctor
-  _image_intensity_distribuitions->load_data_from_getter();
+  _image_intensity_distribuitions->set_fp_check_setter( 1, box4_option_4_check_setter );
+  _image_intensity_distribuitions->set_fp_check_getter( 1, box4_option_4_check_getter );
+  _image_intensity_distribuitions->load_check_status_from_getter( 1 );
+
+  running_configuration_root->insertChildren( _image_intensity_distribuitions );
 
   QVector<QVariant> box4_option_4_0 = {"","Output"};
   TreeItem* _image_intensity_distribuitions_output_legend   = new TreeItem ( box4_option_4_0 );
@@ -1542,16 +1546,19 @@ void MainWindow::create_box_options(){
   /*
    * SIMGRID
    * */
-  QVector<QVariant> box4_data_5 = {"",""};
-  QVector<QVariant> box4_legend_5 = {"","Image correlation"};
-  boost::function<bool(void)> box4_option_5_check_getter ( boost::bind( &TDMap::get_run_simgrid_switch, _core_td_map ) );
+
+  QVector<QVariant> box4_data_5 = {"","Image correlation"};
+  boost::function<bool(void)> box4_option_5_check_getter ( boost::bind( &TDMap::get_run_simgrid_switch, _core_td_map  ) );
   boost::function<bool(bool)> box4_option_5_check_setter ( boost::bind( &TDMap::set_run_simgrid_switch, _core_td_map, _1 ) );
-  QVector<bool> box4_option_5_edit = {false,true};
-  TreeItem* _image_correlation  = new TreeItem ( box4_data_5 ,box4_option_5_check_setter, box4_option_5_check_getter, box4_legend_5, box4_option_5_edit );
-  _image_correlation->set_item_delegate_type( TreeItem::_delegate_CHECK );
-  running_configuration_root->insertChildren( _image_correlation );
+  QVector<bool> box4_option_5_edit = {false,false};
+  TreeItem* _image_correlation  = new TreeItem ( box4_data_5 , box4_option_5_edit );
+  _image_correlation->setStatusOption( 0, TreeItem::ActionStatusType::_status_NOT_READY );
   // load the preset data from core constuctor
-  _image_correlation->load_data_from_getter();
+  _image_correlation->set_fp_check_setter( 1, box4_option_5_check_setter );
+  _image_correlation->set_fp_check_getter( 1, box4_option_5_check_getter );
+  _image_correlation->load_check_status_from_getter( 1 );
+  running_configuration_root->insertChildren( _image_correlation );
+
 
   QVector<QVariant> box4_option_5_0 = {"","Output"};
   TreeItem* _image_correlation_output_legend  = new TreeItem ( box4_option_5_0 );

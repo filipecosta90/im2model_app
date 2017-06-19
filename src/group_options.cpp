@@ -5,15 +5,15 @@ group_options::group_options( std::string gname ){
 }
 
 bool group_options::is_update_required(){
-    bool result = false;
-    for(auto const &_curr_var : _current_variables_map ) {
-        const time_t _curr_var_time = _curr_var.second;
-      if( _curr_var_time > _runned_time ){
-        result = true;
-        emit update_required( _group_name );
-      }
+  bool result = false;
+  for(auto const &_curr_var : _current_variables_map ) {
+    const time_t _curr_var_time = _curr_var.second;
+    if( _curr_var_time > _runned_time ){
+      result = true;
+      emit update_required( _group_name );
     }
-    return result;
+  }
+  return result;
 }
 
 bool group_options::add_option( std::string varname, std::string description, bool required ){
@@ -32,6 +32,7 @@ bool group_options::add_option( TreeItem* item , bool required ){
   bool result = false;
   if(  variables_map.find( varname ) == variables_map.end() ){
     std::cout << "tracking a new variable " << varname << " [required: " << required << " ] in group options: " << _group_name << std::endl;
+    qRegisterMetaType<std::string>("std::string");
     connect( item, SIGNAL(dataChanged( std::string )), this, SLOT( update_track_var( std::string ) ) );
     variables_map.insert(std::pair<std::string,std::string>(varname,description));
     _required_variables_map.insert(std::pair<std::string,bool>(varname,required));
@@ -41,14 +42,15 @@ bool group_options::add_option( TreeItem* item , bool required ){
 }
 
 void group_options::listen_group_update_required( group_options* group_to_listen ){
-    _groups_to_listen.push_back( group_to_listen );
-    connect( group_to_listen, SIGNAL(update_required( std::string )), this, SLOT( set_update_required_from_pipeline( std::string ) ) );
+  _groups_to_listen.push_back( group_to_listen );
+  qRegisterMetaType<std::string>("std::string");
+  connect( group_to_listen, SIGNAL(update_required( std::string )), this, SLOT( set_update_required_from_pipeline( std::string ) ) );
 }
 
 void group_options::set_update_required_from_pipeline( std::string signaling_group_name ){
-    std::cout << "group dependency from "<< signaling_group_name << " is forcing an update required on group " << _group_name << std::endl;
-    _force_update_from_group_dependency = true;
-    emit update_required( _group_name );
+  std::cout << "group dependency from "<< signaling_group_name << " is forcing an update required on group " << _group_name << std::endl;
+  _force_update_from_group_dependency = true;
+  emit update_required( _group_name );
 }
 
 bool group_options::update_track_var( std::string varname ){
@@ -61,9 +63,9 @@ bool group_options::update_track_var( std::string varname ){
     if( _current_variables_map.find( varname ) == _current_variables_map.end() ){
       _current_variables_map.insert(std::pair<std::string,time_t>(varname,TheTime));
       if( _flag_runned_time ){
-          if( TheTime  > _runned_time ){
-              emit update_required( _group_name );
-          }
+        if( TheTime  > _runned_time ){
+          emit update_required( _group_name );
+        }
       }
       std::cout << "\tnew tracking" << std::endl;
     }
@@ -78,25 +80,25 @@ bool group_options::update_track_var( std::string varname ){
 }
 
 bool group_options::are_group_vars_setted_up( ){
-    bool result = true;
-    // pipeline dependecies
-    for( auto const &_group : _groups_to_listen ){
-        result &= _group->are_group_vars_setted_up();
-    }
-    if( result ){
-  // vars dependencies
-  for(auto const &_full_var : _required_variables_map ) {
-    const bool _required = _full_var.second;
-    if( _required ){
-      const std::string varname = _full_var.first;
-      bool found = false;
-      if( _current_variables_map.find( varname ) != _current_variables_map.end() ){
-        found = true;
+  bool result = true;
+  // pipeline dependecies
+  for( auto const &_group : _groups_to_listen ){
+    result &= _group->are_group_vars_setted_up();
+  }
+  if( result ){
+    // vars dependencies
+    for(auto const &_full_var : _required_variables_map ) {
+      const bool _required = _full_var.second;
+      if( _required ){
+        const std::string varname = _full_var.first;
+        bool found = false;
+        if( _current_variables_map.find( varname ) != _current_variables_map.end() ){
+          found = true;
+        }
+        result &= found;
       }
-      result &= found;
     }
   }
-    }
   return result;
 }
 

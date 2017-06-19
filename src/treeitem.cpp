@@ -20,8 +20,15 @@ CustomToolButton* TreeItem::get_action_toolBar(){
 }
 
 TreeItem::TreeItem( QVector<QVariant> &data, TreeItem *parent){
+  qRegisterMetaType<std::string>("std::string");
   itemData = data;
   parentItem = parent;
+  for( int pos = 0; pos < data.size(); pos++ ){
+    itemIsCheckableVec.push_back(false);
+    itemState.push_back(false);
+    fp_checkable_setters.push_back(  boost::function<bool(bool)>() );
+    fp_checkable_getters.push_back(  boost::function<bool(void)>() );
+  }
 }
 
 TreeItem::TreeItem( QVector<QVariant> &data, QVector<bool> editable, TreeItem *parent  ) : TreeItem( data, parent ){
@@ -56,11 +63,6 @@ TreeItem::TreeItem( QVector<QVariant> &data, boost::function<bool(std::string)> 
   itemIsEditableVec = editable;
 }
 
-TreeItem::TreeItem( QVector<QVariant> &data, boost::function<bool(std::string)> setter, bool checkable, boost::function<bool(bool)> check_setter, TreeItem *parent) : TreeItem( data, setter, parent ){
-  is_checkable = checkable;
-  fp_check_setter =  check_setter;
-}
-
 TreeItem::TreeItem( QVector<QVariant> &data, boost::function<bool(double)> setter, TreeItem *parent) : TreeItem( data, parent ) {
   fp_data_setter_double = setter;
   _flag_fp_data_setter_double = true;
@@ -70,11 +72,6 @@ TreeItem::TreeItem( QVector<QVariant> &data, boost::function<bool(double)> sette
   itemIsEditableVec = editable;
 }
 
-TreeItem::TreeItem( QVector<QVariant> &data, boost::function<bool(double)> setter, bool checkable, boost::function<bool(bool)> check_setter, TreeItem *parent) : TreeItem( data, setter, parent ){
-  is_checkable = checkable;
-  fp_check_setter =  check_setter;
-}
-
 
 TreeItem::TreeItem( QVector<QVariant> &data, boost::function<bool(int)> setter, TreeItem *parent) : TreeItem( data, parent ) {
   fp_data_setter_int = setter;
@@ -82,8 +79,8 @@ TreeItem::TreeItem( QVector<QVariant> &data, boost::function<bool(int)> setter, 
 }
 
 TreeItem::TreeItem( QVector<QVariant> &data, boost::function<bool(int)> setter, boost::function<int(void)> getter, TreeItem *parent  ) : TreeItem( data, setter, parent ){
-    fp_data_getter_int = getter;
-    _flag_fp_data_getter_int = true;
+  fp_data_getter_int = getter;
+  _flag_fp_data_getter_int = true;
 }
 
 TreeItem::TreeItem( QVector<QVariant> &data, boost::function<bool(int)> setter, QVector<bool> editable, TreeItem *parent  ) : TreeItem( data, setter, parent ){
@@ -94,61 +91,56 @@ TreeItem::TreeItem( QVector<QVariant> &data, boost::function<bool(int)> setter, 
   itemIsEditableVec = editable;
 }
 
-TreeItem::TreeItem( QVector<QVariant> &data, boost::function<bool(int)> setter, bool checkable, boost::function<bool(bool)> check_setter, TreeItem *parent) : TreeItem( data, setter, parent ){
-  is_checkable = checkable;
-  fp_check_setter =  check_setter;
-}
-
 TreeItem::~TreeItem(){
   qDeleteAll(childItems);
 }
 
 bool TreeItem::load_data_from_getter( ){
-    bool result = false;
-    int column = _fp_data_getter_col_pos;
-    if  (column >= 0 && column < itemData.size() ) {
-        //call getter on core im2model
-        if( ( _fp_data_setter_col_pos == column )
-                && (_flag_fp_data_setter_string || _flag_fp_data_setter_bool ||
-                    _flag_fp_data_setter_int || _flag_fp_data_setter_double ) ){
-            QVariant value;
-            if( _flag_fp_data_getter_int ){
-                value = QVariant::fromValue( fp_data_getter_int() );
-            }
-            if( _flag_fp_data_getter_bool ){
-                value = QVariant::fromValue( fp_data_getter_bool() );
-          }
-          if( _flag_fp_data_getter_string ){
-              value = QVariant::fromValue( fp_data_getter_string() );
-          }
-          if( _flag_fp_data_getter_double ){
-              value = QVariant::fromValue( fp_data_getter_double() );
-          }
-          emit dataChanged(column);
-          emit dataChanged( _variable_name );
-          itemData[column] = value;
-          result = true;
-        }
+  bool result = false;
+  int column = _fp_data_getter_col_pos;
+  if  (column >= 0 && column < itemData.size() ) {
+    //call getter on core im2model
+    if( ( _fp_data_setter_col_pos == column )
+        && (_flag_fp_data_setter_string || _flag_fp_data_setter_bool ||
+          _flag_fp_data_setter_int || _flag_fp_data_setter_double ) ){
+      QVariant value;
+      if( _flag_fp_data_getter_int ){
+        value = QVariant::fromValue( fp_data_getter_int() );
+      }
+      if( _flag_fp_data_getter_bool ){
+        value = QVariant::fromValue( fp_data_getter_bool() );
+      }
+      if( _flag_fp_data_getter_string ){
+        value = QVariant::fromValue( fp_data_getter_string() );
+      }
+      if( _flag_fp_data_getter_double ){
+        value = QVariant::fromValue( fp_data_getter_double() );
+      }
+      emit dataChanged(column);
+      emit dataChanged( _variable_name );
+      itemData[column] = value;
+      result = true;
     }
-    return result;
+  }
+  return result;
 }
 
 bool TreeItem::get_flag_fp_data_getter_bool( ){
-    return _flag_fp_data_getter_bool;
+  return _flag_fp_data_getter_bool;
 }
 
 bool TreeItem::call_fp_data_getter_bool( ){
-    std::cout << "calling fp_data_getter_bool" << std::endl;
-    return fp_data_getter_bool();
+  std::cout << "calling fp_data_getter_bool" << std::endl;
+  return fp_data_getter_bool();
 }
 
 bool TreeItem::get_flag_fp_data_setter_bool( ){
-    return _flag_fp_data_setter_bool;
+  return _flag_fp_data_setter_bool;
 }
 
 bool TreeItem::call_fp_data_setter_bool( bool value ){
-    std::cout << "calling fp_data_setter_bool" << std::endl;
-    return fp_data_setter_bool( value );
+  std::cout << "calling fp_data_setter_bool" << std::endl;
+  return fp_data_setter_bool( value );
 }
 
 void TreeItem::add_toolbar ( QVector<QVariant> actions_description , std::vector<boost::function<bool()>> actions ){
@@ -161,18 +153,30 @@ QVector<QVariant> TreeItem::get_toolbar_actions_description(){
   return _toolbar_actions_description;
 }
 
-bool TreeItem::set_fp_checker( int col,  boost::function<bool(bool)> check_setter ){
-    _fp_check_setter_col_pos = col;
-    _flag_fp_check_setter = true;
-fp_check_setter = check_setter;
-return true;
+bool TreeItem::set_fp_check_setter( int col,  boost::function<bool(bool)> check_setter ){
+  itemIsCheckableVec[col] = true;
+  fp_checkable_setters[col] = check_setter;
+  return true;
+}
+
+bool TreeItem::set_fp_check_getter( int col,  boost::function<bool(void)> check_getter ){
+  itemIsCheckableVec[col] = true;
+  fp_checkable_getters[col] = check_getter;
+  std::cout << "just testing check getter " << fp_checkable_getters[col]() << std::endl;
+  return true;
+}
+
+bool TreeItem::load_check_status_from_getter( int col ){
+  bool _get_result = fp_checkable_getters[col]();
+  itemState[col] = _get_result;
+  return true;
 }
 
 void TreeItem::setStatusOption( int col , ActionStatusType status ){
-    _status_column = col;
-    _action_status = status;
-    _flag_is_action = true;
-    setData( col, QVariant(status));
+  _status_column = col;
+  _action_status = status;
+  _flag_is_action = true;
+  setData( col, QVariant(status), Qt::EditRole );
 }
 
 
@@ -186,33 +190,42 @@ bool TreeItem::_is_toolbar_defined(){
 
 bool TreeItem::load_data_from_property_tree( boost::property_tree::ptree pt_root ){
 
-  boost::property_tree::ptree pt_data = pt_root.get_child("data_vec");
-  boost::property_tree::ptree pt_editable = pt_root.get_child("editable_vec");
-  boost::property_tree::ptree pt_childs = pt_root.get_child("child_vec");
-
-  int col = 0;
-
-  for ( boost::property_tree::ptree::value_type &pt_data_node : pt_data ){
-    std::string value = pt_data_node.second.data();
-    std::cout << "LOADED value " << value << std::endl;
-    setData( col , QVariant( value.c_str() ));
-    col++;
+  try{
+    boost::property_tree::ptree pt_data = pt_root.get_child("data_vec");
+    int col = 0;
+    for ( boost::property_tree::ptree::value_type &pt_data_node : pt_data ){
+      std::string value = pt_data_node.second.data();
+      setData( col , QVariant( value.c_str() ), Qt::EditRole );
+      col++;
+    }
   }
-
-  col = 0;
-  for ( boost::property_tree::ptree::value_type &pt_editable_node : pt_editable ){
-    bool value = pt_editable_node.second.get_value<bool>();
-    std::cout << "LOADED editable " << value << std::endl;
-    itemIsEditableVec[col]=value;
-    col++;
+  catch(const boost::property_tree::ptree_error &e){
+    std::cout << e.what() << std::endl;
   }
-
-  int child_num = 0;
-  for ( boost::property_tree::ptree::value_type &pt_child_node_v : pt_childs ){
-    boost::property_tree::ptree pt_child_node = pt_child_node_v.second;
-    TreeItem* _child =  childItems.value( child_num );
-    _child->load_data_from_property_tree(pt_child_node);
-    child_num++;
+  try{
+    boost::property_tree::ptree pt_checked_state = pt_root.get_child("checked_state_vec");
+    int col = 0;
+    for ( boost::property_tree::ptree::value_type &pt_checked_state_node : pt_checked_state ){
+      bool value = pt_checked_state_node.second.get_value<bool>();
+      setData( col , QVariant( value ), Qt::CheckStateRole );
+      col++;
+    }
+  }
+  catch(const boost::property_tree::ptree_error &e) {
+    std::cout << e.what() << std::endl;
+  }
+  try{
+    boost::property_tree::ptree pt_childs = pt_root.get_child("child_vec");
+    int child_num = 0;
+    for ( boost::property_tree::ptree::value_type &pt_child_node_v : pt_childs ){
+      boost::property_tree::ptree pt_child_node = pt_child_node_v.second;
+      TreeItem* _child =  childItems.value( child_num );
+      _child->load_data_from_property_tree(pt_child_node);
+      child_num++;
+    }
+  }
+  catch(const boost::property_tree::ptree_error &e){
+    std::cout << e.what() << std::endl;
   }
 
   // more work here
@@ -222,12 +235,10 @@ bool TreeItem::load_data_from_property_tree( boost::property_tree::ptree pt_root
 boost::property_tree::ptree* TreeItem::save_data_into_property_tree( ){
   boost::property_tree::ptree* pt = new boost::property_tree::ptree( );
   boost::property_tree::ptree* pt_data = new boost::property_tree::ptree( );
-  boost::property_tree::ptree* pt_editable = new boost::property_tree::ptree( );
+  boost::property_tree::ptree* pt_checked_state = new boost::property_tree::ptree( );
   boost::property_tree::ptree* pt_childs = new boost::property_tree::ptree( );
 
-  for ( QVariant _data: itemData )
-  {
-    std::cout << "itemData " << _data.toString().toStdString() << std::endl;
+  for ( QVariant _data: itemData ){
     // Create an unnamed node containing the value
     boost::property_tree::ptree* pt_data_node = new boost::property_tree::ptree( );
     pt_data_node->put("",_data.toString().toStdString());
@@ -237,21 +248,18 @@ boost::property_tree::ptree* TreeItem::save_data_into_property_tree( ){
 
   pt->add_child("data_vec", *pt_data);
 
-  for ( bool _editable: itemIsEditableVec )
-  {
-    std::cout << "editable " << _editable << std::endl;
+  for ( bool _checked_state: itemState ){
     // Create an unnamed node containing the value
-    boost::property_tree::ptree* pt_editable_node = new boost::property_tree::ptree( );
-    pt_editable_node->put( "", _editable );
+    boost::property_tree::ptree* pt_checked_state_node = new boost::property_tree::ptree( );
+    pt_checked_state_node->put( "", _checked_state );
     // Add this node to the list.
-    pt_editable->push_back(std::make_pair("editable", *pt_editable_node));
+    pt_checked_state->push_back(std::make_pair("checkable", *pt_checked_state_node));
   }
 
-  pt->add_child("editable_vec", *pt_editable);
+  pt->add_child("checked_state_vec", *pt_checked_state);
 
   int number_childs = childCount();
   for( int n = 0; n < number_childs; n++){
-    std::cout << "child " << n << std::endl;
     TreeItem* _child =  childItems.value(n);
     boost::property_tree::ptree* pt_child_node = _child->save_data_into_property_tree( );
     // Add this node to the list.
@@ -283,8 +291,20 @@ int TreeItem::columnCount() const
   return itemData.size();
 }
 
-QVariant TreeItem::data(int column) const{
-  return itemData.value(column);
+QVariant TreeItem::data(int column, int role ) const{
+  if ( role == Qt::CheckStateRole ) {
+    if( itemIsCheckableVec.at(column) == true ){
+      const bool _checked = itemState[column];
+      return static_cast< int >( _checked ? Qt::Checked : Qt::Unchecked );
+    }
+    return QVariant();
+  }
+  else if( role == Qt::DisplayRole || role ==Qt::EditRole ){
+    return itemData.value(column);
+  }
+  else{
+    return QVariant();
+  }
 }
 
 
@@ -301,16 +321,11 @@ bool TreeItem::isItemEditable( int column ) const{
 }
 
 bool TreeItem::isItemCheckable( int column ) const {
-    bool result = false;
-    if ( DelegateType == TreeItem::DelegateType::_delegate_ACTION_CHEC &&
-         column == _fp_check_setter_col_pos ){
-         result = true;
-    }
-    return result;
-}
-
-int TreeItem::get_checkbox_column(){
-    return _fp_check_setter_col_pos;
+  bool result = false;
+  if ( column >= 0 && column < itemIsCheckableVec.size() ){
+    result = itemIsCheckableVec.at(column );
+  }
+  return result;
 }
 
 bool TreeItem::insertChildren(TreeItem *item){
@@ -335,19 +350,19 @@ bool TreeItem::insertChildren(int position, int count, int columns){
 }
 
 std::string TreeItem::get_variable_name(){
-    return _variable_name;
+  return _variable_name;
 }
 
 void TreeItem::set_variable_name( std::string varname ){
-    _variable_name = varname;
+  _variable_name = varname;
 }
 
 void TreeItem::set_variable_description( std::string vardescription ){
-    _variable_description = vardescription;
+  _variable_description = vardescription;
 }
 
 std::string TreeItem::get_variable_description( ){
-    return _variable_description;
+  return _variable_description;
 }
 
 bool TreeItem::insertColumns(int position, int columns){
@@ -404,19 +419,19 @@ int TreeItem::get_dropdown_column(){
 }
 
 int TreeItem::get_slider_int_range_min(){
-    return _slider_int_range_min;
+  return _slider_int_range_min;
 }
 
 int TreeItem::get_slider_int_range_max(){
-    return _slider_int_range_max;
+  return _slider_int_range_max;
 }
 
 void TreeItem::set_slider_int_range_min( int min ){
-     _slider_int_range_min = min;
+  _slider_int_range_min = min;
 }
 
 void TreeItem::set_slider_int_range_max( int max ){
-    _slider_int_range_max = max;
+  _slider_int_range_max = max;
 }
 
 int TreeItem::get_slider_column(){
@@ -424,82 +439,73 @@ int TreeItem::get_slider_column(){
 }
 
 bool TreeItem::appendData( int column, const QVariant &value){
-    bool result = false;
-    if  (column >= 0 && column < itemData.size() ) {
-        if( ( _fp_data_data_appender_col_pos == column ) && (_flag_fp_data_appender_string ) ){
-          std::string t1 = value.toString().toStdString();
-        //  fp_data_appender_string( t1 );
-          QString before_string = itemData[column].toString();
-          std::cout << "before string "<<  before_string.size() << std::endl;
-          before_string.append( value.toString());
-          std::cout << "after string "<<  before_string.size() << std::endl;
-          itemData[column].setValue(QVariant::fromValue(before_string));
-          emit dataChanged(column);
-          emit dataChanged( _variable_name );
-          result = true;
-        }
-    }
-    return result;
-}
-
-bool TreeItem::set_fp_data_data_appender_col_pos( int col ){
-    _fp_data_data_appender_col_pos = col;
-    return true;
-}
-
-bool TreeItem::set_flag_fp_data_appender_string( bool set ){
-    _flag_fp_data_appender_string = set;
-    return true;
-}
-
-bool TreeItem::setData(int column, const QVariant &value){
   bool result = false;
   if  (column >= 0 && column < itemData.size() ) {
-    if( itemData[column] != value ){
-      //call setter on core im2model
-      if( ( _fp_data_setter_col_pos == column ) && (_flag_fp_data_setter_string || _flag_fp_data_setter_bool || _flag_fp_data_setter_int || _flag_fp_data_setter_double ) ){
-          if( _flag_fp_data_setter_string ){
-            std::string t1 = value.toString().toStdString();
-            fp_data_setter_string( t1 );
-          }
-          if( _flag_fp_data_setter_bool ){
-          bool t1 = value.toBool();
-          fp_data_setter_bool( t1 );
-        }
-        if( _flag_fp_data_setter_int ){
-          int t1 = value.toInt();
-          fp_data_setter_int( t1 );
-        }
-        if( _flag_fp_data_setter_double ){
-          double t1 = value.toDouble();
-          fp_data_setter_double( t1 );
-        }
-        emit dataChanged(column);
-        emit dataChanged( _variable_name );
-        itemData[column] = value;
-        result = true;
-      }
+    if( ( _fp_data_data_appender_col_pos == column ) && (_flag_fp_data_appender_string ) ){
+      std::string t1 = value.toString().toStdString();
+      //  fp_data_appender_string( t1 );
+      QString before_string = itemData[column].toString();
+      std::cout << "before string "<<  before_string.size() << std::endl;
+      before_string.append( value.toString());
+      std::cout << "after string "<<  before_string.size() << std::endl;
+      itemData[column].setValue( QVariant::fromValue( before_string ));
+      emit dataChanged(column);
+      emit dataChanged( _variable_name );
+      result = true;
     }
   }
   return result;
 }
 
-bool TreeItem::isChecked() const {
-  return checked;
+bool TreeItem::set_fp_data_data_appender_col_pos( int col ){
+  _fp_data_data_appender_col_pos = col;
+  return true;
 }
 
-void TreeItem::setChecked( bool set ){
-  checked = set;
-  //call [] check setter on core im2model
-  fp_check_setter(set);
+bool TreeItem::set_flag_fp_data_appender_string( bool set ){
+  _flag_fp_data_appender_string = set;
+  return true;
 }
 
-bool TreeItem::isCheckable() const{
-  return is_checkable;
-}
-
-void TreeItem::setCheckable( bool set ){
-  is_checkable = set;
+bool TreeItem::setData(int column, const QVariant &value, int role ){
+  bool result = false;
+  if( role == Qt::CheckStateRole ){
+    if( itemIsCheckableVec.at(column) == true ){
+      const bool _boolean_value = value.toBool();
+      result = fp_checkable_setters.at(column)(_boolean_value);
+      itemState[column] = _boolean_value;
+    }
+  }
+  if( role == Qt::EditRole ){
+    if  (column >= 0 && column < itemData.size() ) {
+      if( itemData[column] != value ){
+        //call setter on core im2model
+        if( ( _fp_data_setter_col_pos == column ) && (_flag_fp_data_setter_string || _flag_fp_data_setter_bool || _flag_fp_data_setter_int || _flag_fp_data_setter_double ) ){
+          if( _flag_fp_data_setter_string ){
+            std::string t1 = value.toString().toStdString();
+            fp_data_setter_string( t1 );
+          }
+          if( _flag_fp_data_setter_bool ){
+            bool t1 = value.toBool();
+            fp_data_setter_bool( t1 );
+          }
+          if( _flag_fp_data_setter_int ){
+            int t1 = value.toInt();
+            fp_data_setter_int( t1 );
+          }
+          if( _flag_fp_data_setter_double ){
+            double t1 = value.toDouble();
+            fp_data_setter_double( t1 );
+          }
+          itemData[column] = value;
+          emit dataChanged( _variable_name );
+          emit dataChanged( column );
+          result = true;
+        }
+      }
+    }
+  }
+  return result;
 }
 
 TreeItem::DelegateType TreeItem::get_item_delegate_type(){
@@ -524,5 +530,3 @@ QVector<QVariant> TreeItem::get_dropdown_data(){
 QVector<QVariant> TreeItem::get_dropdown_enum(){
   return  dropdown_enum;
 }
-
-
