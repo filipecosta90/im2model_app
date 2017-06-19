@@ -106,11 +106,16 @@ class TreeItem : public QObject {
     bool call_fp_data_getter_bool();
     bool get_flag_fp_data_setter_bool();
     bool call_fp_data_setter_bool( bool value );
+    bool has_hightlight_error( int column );
+    bool disable_highlight_error( int column );
+    bool enable_highlight_error( int column );
+
 
 signals:
 
     void dataChanged( int column );
     void dataChanged( std::string varname );
+    void highlight_error( int column );
 
   private:
     TreeItem *parentItem;
@@ -176,6 +181,10 @@ signals:
     bool _flag_is_action = false;
     int _status_column = 0;
     ActionStatusType _action_status = ActionStatusType::_status_NOT_READY;
+
+    std::vector<bool> _flag_highlight_error;
+private slots:
+    void clean_highlight_status( int column );
 };
 
 Q_DECLARE_METATYPE(std::string)

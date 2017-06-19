@@ -14,6 +14,10 @@ class group_options : public QObject {
 private:
     // key varname, value description
     std::map<std::string,std::string> variables_map;
+    // key varname, value TreeItem*
+    std::map<std::string,TreeItem* > _items_variables_map;
+    // key varname, value column of Item
+    std::map<std::string,int> _col_variables_map;
     // key varname, value = required or no
     std::map<std::string,bool> _required_variables_map;
     // key varnname, value = time of last update
@@ -35,7 +39,7 @@ void listen_group_update_required( group_options* group_to_listen );
     group_options( std::string _group_name );
     bool is_update_required();
     bool add_option( std::string varname, std::string description, bool required );
-    bool add_option( TreeItem* item, bool required );
+    bool add_option( TreeItem* item, int column, bool required );
     bool are_group_vars_setted_up();
     void mark_runned_time();
     time_t get_runned_time();

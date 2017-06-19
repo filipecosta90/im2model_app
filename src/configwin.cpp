@@ -938,7 +938,7 @@ void MainWindow::create_box_options(){
   /*group options*/
   image_path->set_variable_name( "image_path" );
   image_path->set_variable_description( "Experimental image path" );
-  celslc_step_group_options->add_option( image_path , true);
+  celslc_step_group_options->add_option( image_path , 1, true);
 
   ////////////////
   // Sampling rate
@@ -961,10 +961,10 @@ void MainWindow::create_box_options(){
   /*group options*/
   experimental_sampling_rate_x->set_variable_name( "experimental_sampling_rate_x" );
   experimental_sampling_rate_y->set_variable_name( "experimental_sampling_rate_y" );
-  celslc_step_group_options->add_option( experimental_sampling_rate_x , true);
-  celslc_step_group_options->add_option( experimental_sampling_rate_y , true);
-  simgrid_step_group_options->add_option( experimental_sampling_rate_x , true);
-  simgrid_step_group_options->add_option( experimental_sampling_rate_y , true);
+  celslc_step_group_options->add_option( experimental_sampling_rate_x , 1, true);
+  celslc_step_group_options->add_option( experimental_sampling_rate_y , 1, true);
+  simgrid_step_group_options->add_option( experimental_sampling_rate_x , 1, true);
+  simgrid_step_group_options->add_option( experimental_sampling_rate_y , 1, true);
 
   ////////////////
   // ROI
@@ -1001,10 +1001,10 @@ void MainWindow::create_box_options(){
   /*group options*/
   experimental_roi_center_x->set_variable_name( "experimental_roi_center_x" );
   experimental_roi_center_y->set_variable_name( "experimental_roi_center_y" );
-  celslc_step_group_options->add_option( experimental_roi_center_x , true);
-  celslc_step_group_options->add_option( experimental_roi_center_y , true);
-  simgrid_step_group_options->add_option( experimental_roi_center_x , true);
-  simgrid_step_group_options->add_option( experimental_roi_center_y , true);
+  celslc_step_group_options->add_option( experimental_roi_center_x , 1, true);
+  celslc_step_group_options->add_option( experimental_roi_center_y , 1, true);
+  simgrid_step_group_options->add_option( experimental_roi_center_x , 1, true);
+  simgrid_step_group_options->add_option( experimental_roi_center_y , 1, true);
 
   ////////////////
   // ROI Dimensions
@@ -1034,10 +1034,10 @@ void MainWindow::create_box_options(){
   /*group options*/
   experimental_roi_dimensions_width->set_variable_name( "experimental_roi_dimensions_width" );
   experimental_roi_dimensions_height->set_variable_name( "experimental_roi_dimensions_height" );
-  celslc_step_group_options->add_option( experimental_roi_dimensions_width , true);
-  celslc_step_group_options->add_option( experimental_roi_dimensions_height , true);
-  simgrid_step_group_options->add_option( experimental_roi_dimensions_width , true);
-  simgrid_step_group_options->add_option( experimental_roi_dimensions_height , true);
+  celslc_step_group_options->add_option( experimental_roi_dimensions_width , 1, true);
+  celslc_step_group_options->add_option( experimental_roi_dimensions_height , 1, true);
+  simgrid_step_group_options->add_option( experimental_roi_dimensions_width , 1, true);
+  simgrid_step_group_options->add_option( experimental_roi_dimensions_height , 1, true);
 
 
   project_setup_image_fields_model = new TreeModel( experimental_image_root );
@@ -1071,7 +1071,7 @@ void MainWindow::create_box_options(){
 
   /*group options*/
   unit_cell_file_cif->set_variable_name( "unit_cell_file_cif" );
-  celslc_step_group_options->add_option( unit_cell_file_cif , false);
+  celslc_step_group_options->add_option( unit_cell_file_cif , 1, false);
 
   ////////////////
   // Unit-cell file CEL
@@ -1085,7 +1085,7 @@ void MainWindow::create_box_options(){
 
   /*group options*/
   unit_cell_file_cel->set_variable_name( "unit_cell_file_cel" );
-  celslc_step_group_options->add_option( unit_cell_file_cel , false);
+  celslc_step_group_options->add_option( unit_cell_file_cel , 1, false);
 
 
   ////////////////
@@ -1106,7 +1106,7 @@ void MainWindow::create_box_options(){
 
   /*group options*/
   projected_y_axis_u->set_variable_name( "projected_y_axis_u" );
-  celslc_step_group_options->add_option( projected_y_axis_u , true);
+  celslc_step_group_options->add_option( projected_y_axis_u , 1, true);
 
   ////////////////
   //Projected y axis v
@@ -1119,7 +1119,7 @@ void MainWindow::create_box_options(){
 
   /*group options*/
   projected_y_axis_v->set_variable_name( "projected_y_axis_v" );
-  celslc_step_group_options->add_option( projected_y_axis_v , true);
+  celslc_step_group_options->add_option( projected_y_axis_v , 1, true);
 
   ////////////////
   //Projected y axis w
@@ -1132,7 +1132,7 @@ void MainWindow::create_box_options(){
 
   /*group options*/
   projected_y_axis_w->set_variable_name( "projected_y_axis_w" );
-  celslc_step_group_options->add_option( projected_y_axis_w , true);
+  celslc_step_group_options->add_option( projected_y_axis_w , 1, true);
 
   ////////////////
   // Projection direction
@@ -1152,7 +1152,7 @@ void MainWindow::create_box_options(){
 
   /*group options*/
   projection_direction_h->set_variable_name( "projection_direction_h" );
-  celslc_step_group_options->add_option( projection_direction_h , true);
+  celslc_step_group_options->add_option( projection_direction_h , 1, true);
 
   ////////////////
   // Projection direction k
@@ -1165,7 +1165,7 @@ void MainWindow::create_box_options(){
 
   /*group options*/
   projection_direction_k->set_variable_name( "projection_direction_k" );
-  celslc_step_group_options->add_option( projection_direction_k , true);
+  celslc_step_group_options->add_option( projection_direction_k , 1, true);
 
   ////////////////
   // Projection direction l
@@ -1178,7 +1178,7 @@ void MainWindow::create_box_options(){
 
   /*group options*/
   projection_direction_l->set_variable_name( "projection_direction_l" );
-  celslc_step_group_options->add_option( projection_direction_l , true);
+  celslc_step_group_options->add_option( projection_direction_l , 1, true);
 
   project_setup_crystalographic_fields_model = new TreeModel( crystallography_root );
 
@@ -1340,8 +1340,8 @@ void MainWindow::create_box_options(){
   incident_electron_beam->insertChildren( accelaration_voltage_kv );
   /*group options*/
   accelaration_voltage_kv->set_variable_name( "accelaration_voltage_kv" );
-  celslc_step_group_options->add_option( accelaration_voltage_kv , true);
-  msa_step_group_options->add_option( accelaration_voltage_kv , true);
+  celslc_step_group_options->add_option( accelaration_voltage_kv , 1, true);
+  msa_step_group_options->add_option( accelaration_voltage_kv , 1, true);
 
   ////////////////
   // Simulation Refinement
@@ -1689,5 +1689,4 @@ void MainWindow::on_qpush_test_tdmap_clicked(){
   bool result = false;
   ui->statusBar->showMessage(tr("Testing TD Map variable configuration"), 2000);
   _core_td_map->test_run_config();
-
 }

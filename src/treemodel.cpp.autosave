@@ -7,6 +7,7 @@ TreeModel::TreeModel(TreeItem *root,  QObject *parent) : QAbstractItemModel(pare
   rootItem = root;
   // to know if data changed in model
   connect(this, SIGNAL( dataChanged(QModelIndex,QModelIndex) ) , this, SLOT( set_model_modified() ) );
+  
 }
 
 TreeModel::~TreeModel(){

@@ -19,6 +19,20 @@ CustomToolButton* TreeItem::get_action_toolBar(){
   return alignToolButton;
 }
 
+bool TreeItem::has_hightlight_error( int column ){
+    return _flag_highlight_error.at(column );
+}
+
+bool TreeItem::disable_highlight_error( int column ){
+_flag_highlight_error[column] = false;
+return true;
+}
+
+bool TreeItem::enable_highlight_error( int column ){
+    _flag_highlight_error[column] = true;
+    return true;
+}
+
 TreeItem::TreeItem( QVector<QVariant> &data, TreeItem *parent){
   qRegisterMetaType<std::string>("std::string");
   itemData = data;
@@ -28,7 +42,16 @@ TreeItem::TreeItem( QVector<QVariant> &data, TreeItem *parent){
     itemState.push_back(false);
     fp_checkable_setters.push_back(  boost::function<bool(bool)>() );
     fp_checkable_getters.push_back(  boost::function<bool(void)>() );
+    _flag_highlight_error.push_back( false );
   }
+
+  connect(this, SIGNAL( dataChanged( int ) ) , this, SLOT( clean_highlight_status( int ) ) );
+}
+
+void TreeItem::clean_highlight_status( int column ){
+    if( this->has_hightlight_error(column) ){
+    disable_highlight_error(column);
+    }
 }
 
 TreeItem::TreeItem( QVector<QVariant> &data, QVector<bool> editable, TreeItem *parent  ) : TreeItem( data, parent ){

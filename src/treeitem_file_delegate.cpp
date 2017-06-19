@@ -12,6 +12,23 @@ TreeItemFileDelegate::TreeItemFileDelegate( QObject *parent ) : QStyledItemDeleg
 // more work here!!!!
 void TreeItemFileDelegate::paint(QPainter * painter, const QStyleOptionViewItem & option, const QModelIndex & index) const{
   TreeItem *item = static_cast<TreeItem*>(index.internalPointer());
+  if( item->isItemEditable( index.column() ) ){
+    painter->save();
+    painter->setRenderHint(QPainter::Antialiasing);
+    painter->brush();
+    QPen default_pen = painter->pen();
+    QColor default_pen_color = default_pen.color();
+    //Sets the alpha of this color to alpha. Integer alpha is specified in the range 0-255
+    int pen_color_alpha = 50;
+    default_pen_color.setAlpha( pen_color_alpha );
+    default_pen.setColor( default_pen_color );
+    painter->setPen( default_pen );
+    if( item->has_hightlight_error( index.column() ) ){
+        painter->setBrush(QBrush(QColor(255, 0, 0)));
+    }
+    painter->drawRect( option.rect );
+    painter->restore();
+  }
   switch( item->get_item_delegate_type() )
   {
     case TreeItem::_delegate_DROP:
@@ -65,11 +82,6 @@ void TreeItemFileDelegate::paint(QPainter * painter, const QStyleOptionViewItem 
          break;
          }*/
   case TreeItem::_delegate_ACTION_CHECK:
-      {
-        std::cout << "_delegate_ACTION_CHECK" << std::endl;
-        QStyledItemDelegate::paint( painter, option,  index);
-        break;
-      }
   case TreeItem::_delegate_TEXT_DOCUMENT:
       {
         QStyleOptionViewItemV4 options = option;

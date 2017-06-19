@@ -26,7 +26,7 @@ bool group_options::add_option( std::string varname, std::string description, bo
   return result;
 }
 
-bool group_options::add_option( TreeItem* item , bool required ){
+bool group_options::add_option( TreeItem* item , int column, bool required ){
   std::string varname = item->get_variable_name();
   std::string description = item->get_variable_name();
   bool result = false;
@@ -35,6 +35,8 @@ bool group_options::add_option( TreeItem* item , bool required ){
     qRegisterMetaType<std::string>("std::string");
     connect( item, SIGNAL(dataChanged( std::string )), this, SLOT( update_track_var( std::string ) ) );
     variables_map.insert(std::pair<std::string,std::string>(varname,description));
+    _col_variables_map.insert(std::pair<std::string,int>(varname,column));
+    _items_variables_map.insert(std::pair<std::string,TreeItem*>(varname,item));
     _required_variables_map.insert(std::pair<std::string,bool>(varname,required));
     result = true;
   }
@@ -94,6 +96,15 @@ bool group_options::are_group_vars_setted_up( ){
         bool found = false;
         if( _current_variables_map.find( varname ) != _current_variables_map.end() ){
           found = true;
+        }
+        else{
+             std::map<std::string,TreeItem*>::iterator _item_missing_key = _items_variables_map.find(varname);
+            if( _item_missing_key != _items_variables_map.end() ){
+                TreeItem* _item_missing = _items_variables_map.find( varname )->second;
+                const int _item_missing_col = _col_variables_map.find( varname )->second;
+                std::cout << " Enabling higlight error in var " << varname << ", in col " <<  _item_missing_col << std::endl;
+                _item_missing->enable_highlight_error( _item_missing_col );
+            }
         }
         result &= found;
       }
