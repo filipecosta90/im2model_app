@@ -391,6 +391,19 @@ bool MainWindow::_was_document_modified(){
     result |= project_setup_crystalographic_fields_model->_was_model_modified();
     result |= tdmap_simulation_setup_model->_was_model_modified();
     result |= tdmap_running_configuration_model->_was_model_modified();
+    result |= super_cell_setup_model->_was_model_modified();
+  }
+  return result;
+}
+
+bool MainWindow::_reset_document_modified_flags(){
+  bool result = false;
+  if( _settings_ok ){
+    result |= project_setup_image_fields_model->_reset_model_modified();
+    result |= project_setup_crystalographic_fields_model->_reset_model_modified();
+    result |= tdmap_simulation_setup_model->_reset_model_modified();
+    result |= tdmap_running_configuration_model->_reset_model_modified();
+    result |= super_cell_setup_model->_reset_model_modified();
   }
   return result;
 }
@@ -577,15 +590,12 @@ bool MainWindow::edit_preferences(){
   dialog.setWindowTitle ( "Configurations panel" );
   _q_settings_fileName = settings.fileName();
   dialog.set_q_settings_fileName( _q_settings_fileName.toStdString() );
-  //dialog.set_dr_probe_bin_path( _dr_probe_bin_path.toStdString() );
   dialog.set_dr_probe_celslc_bin( _dr_probe_celslc_bin.toStdString() );
   dialog.set_dr_probe_msa_bin( _dr_probe_msa_bin.toStdString() );
   dialog.set_dr_probe_wavimg_bin( _dr_probe_wavimg_bin.toStdString() );
   dialog.produce_settings_panel();
   dialog.exec();
   if ( dialog._is_save_preferences() ){
-    std::cout << "GOING TO SAVE PREFERENCES" << std::endl;
-    // _dr_probe_bin_path = dialog.get_dr_probe_bin_path();
     _dr_probe_celslc_bin = dialog.get_dr_probe_celslc_bin();
     _dr_probe_msa_bin = dialog.get_dr_probe_msa_bin();
     _dr_probe_wavimg_bin = dialog.get_dr_probe_wavimg_bin();
@@ -803,27 +813,50 @@ void MainWindow::loadFile(const QString &fileName){
 
   boost::property_tree::read_xml( fileName.toStdString(), config);
 
-  boost::property_tree::ptree project_setup_image_fields_ptree = config.get_child("project_setup_image_fields_ptree");
-  project_setup_image_fields_model->load_data_from_property_tree( project_setup_image_fields_ptree );
-  ui->qtree_view_project_setup_image->update();
+  try{
+    boost::property_tree::ptree project_setup_image_fields_ptree = config.get_child("project_setup_image_fields_ptree");
+    project_setup_image_fields_model->load_data_from_property_tree( project_setup_image_fields_ptree );
+    ui->qtree_view_project_setup_image->update();
+  }
+  catch(const boost::property_tree::ptree_error &e) {
+    std::cout << e.what() << std::endl;
+  }
 
-  boost::property_tree::ptree project_setup_crystalographic_fields_ptree = config.get_child("project_setup_crystalographic_fields_ptree");
-  project_setup_crystalographic_fields_model->load_data_from_property_tree( project_setup_crystalographic_fields_ptree );
-  ui->qtree_view_project_setup_crystallography->update();
+  try{
+    boost::property_tree::ptree project_setup_crystalographic_fields_ptree = config.get_child("project_setup_crystalographic_fields_ptree");
+    project_setup_crystalographic_fields_model->load_data_from_property_tree( project_setup_crystalographic_fields_ptree );
+    ui->qtree_view_project_setup_crystallography->update();
+  }
+  catch(const boost::property_tree::ptree_error &e) {
+    std::cout << e.what() << std::endl;
+  }
 
-  boost::property_tree::ptree tdmap_simulation_setup_ptree = config.get_child("tdmap_simulation_setup_ptree");
-  tdmap_simulation_setup_model->load_data_from_property_tree( tdmap_simulation_setup_ptree );
-  ui->qtree_view_tdmap_simulation_setup->update();
+  try{
+    boost::property_tree::ptree tdmap_simulation_setup_ptree = config.get_child("tdmap_simulation_setup_ptree");
+    tdmap_simulation_setup_model->load_data_from_property_tree( tdmap_simulation_setup_ptree );
+    ui->qtree_view_tdmap_simulation_setup->update();
+  }
+  catch(const boost::property_tree::ptree_error &e) {
+    std::cout << e.what() << std::endl;
+  }
 
-  boost::property_tree::ptree tdmap_running_configuration_ptree = config.get_child("tdmap_running_configuration_ptree");
-  tdmap_running_configuration_model->load_data_from_property_tree( tdmap_running_configuration_ptree );
-  ui->qtree_view_tdmap_running_configuration->update();
+  try{
+    boost::property_tree::ptree tdmap_running_configuration_ptree = config.get_child("tdmap_running_configuration_ptree");
+    tdmap_running_configuration_model->load_data_from_property_tree( tdmap_running_configuration_ptree );
+    ui->qtree_view_tdmap_running_configuration->update();
+  }
+  catch(const boost::property_tree::ptree_error &e) {
+    std::cout << e.what() << std::endl;
+  }
 
-
-  boost::property_tree::ptree super_cell_setup_model_ptree = config.get_child("super_cell_setup_model_ptree");
-  super_cell_setup_model->load_data_from_property_tree( super_cell_setup_model_ptree );
-  ui->qtree_view_supercell_model_edge_detection_setup->update();
-
+  try{
+    boost::property_tree::ptree super_cell_setup_model_ptree = config.get_child("super_cell_setup_model_ptree");
+    super_cell_setup_model->load_data_from_property_tree( super_cell_setup_model_ptree );
+    ui->qtree_view_supercell_model_edge_detection_setup->update();
+  }
+  catch(const boost::property_tree::ptree_error &e) {
+    std::cout << e.what() << std::endl;
+  }
 
 #ifndef QT_NO_CURSOR
   QApplication::restoreOverrideCursor();
@@ -864,6 +897,7 @@ bool MainWindow::saveFile(const QString &fileName){
 
   setCurrentFile(fileName);
   ui->statusBar->showMessage(tr("File saved"), 2000);
+  _reset_document_modified_flags();
   return true;
 }
 

@@ -106,6 +106,7 @@ class TreeItem : public QObject {
     bool call_fp_data_getter_bool();
     bool get_flag_fp_data_setter_bool();
     bool call_fp_data_setter_bool( bool value );
+
 signals:
 
     void dataChanged( int column );

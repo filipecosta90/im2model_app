@@ -89,6 +89,7 @@ class MainWindow : public QMainWindow {
   protected:
     void closeEvent(QCloseEvent *event) override;
     bool _was_document_modified();
+    bool _reset_document_modified_flags();
 
     private slots:
 

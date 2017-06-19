@@ -197,6 +197,11 @@ bool TreeModel::_was_model_modified(){
   return _flag_model_modified;
 }
 
+bool TreeModel::_reset_model_modified(){
+    _flag_model_modified = false;
+    return true;
+}
+
 void TreeModel::set_model_modified(){
   _flag_model_modified = true;
 }
