@@ -139,6 +139,15 @@ MainWindow::MainWindow( ApplicationLog::ApplicationLog* logger , QWidget *parent
       connect( _core_td_map, SIGNAL(TDMap_at_celslc_step( int )), this, SLOT(update_tdmap_celslc_step( int ) ) );
       connect( _core_td_map, SIGNAL(TDMap_ended_celslc( bool )), this, SLOT(update_tdmap_celslc_ended( bool ) ) );
 
+      connect( _core_td_map, SIGNAL(TDMap_started_msa( )), this, SLOT(update_tdmap_msa_started( ) ) );
+      connect( _core_td_map, SIGNAL(TDMap_ended_msa( bool )), this, SLOT(update_tdmap_msa_ended( bool ) ) );
+
+      connect( _core_td_map, SIGNAL(TDMap_started_wavimg( )), this, SLOT(update_tdmap_wavimg_started( ) ) );
+      connect( _core_td_map, SIGNAL(TDMap_ended_wavimg( bool )), this, SLOT(update_tdmap_wavimg_ended( bool ) ) );
+
+      connect( _core_td_map, SIGNAL(TDMap_started_simgrid( )), this, SLOT(update_tdmap_simgrid_started( ) ) );
+      connect( _core_td_map, SIGNAL(TDMap_ended_simgrid( bool )), this, SLOT(update_tdmap_simgrid_ended( bool ) ) );
+
       if( _flag_im2model_logger ){
         im2model_logger->logEvent( ApplicationLog::notification, "Finished initializing App." );
       }
@@ -160,41 +169,41 @@ void MainWindow::update_tdmap_celslc_ended( bool result ){
 }
 
 void MainWindow::update_tdmap_msa_started( ){
-  ui->statusBar->showMessage(tr("Started multislice step"), 2000);
+  ui->statusBar->showMessage(tr("Started calculating electron diffraction patterns"), 2000);
 }
 
 void MainWindow::update_tdmap_msa_ended( bool result ){
   if( result ){
-    ui->statusBar->showMessage(tr("Sucessfully ended multislice step"), 2000);
+    ui->statusBar->showMessage(tr("Sucessfully ended calculating the electron diffraction patterns"), 2000);
   }
   else{
-    ui->statusBar->showMessage(tr("Error while running multislice step"), 2000);
+    ui->statusBar->showMessage(tr("Error while calculating the electron diffraction patterns"), 2000);
   }
 }
 
 void MainWindow::update_tdmap_wavimg_started( ){
-  ui->statusBar->showMessage(tr("Started multislice step"), 2000);
+  ui->statusBar->showMessage(tr("Started calculating image intensity distribuitions"), 2000);
 }
 
 void MainWindow::update_tdmap_wavimg_ended( bool result ){
   if( result ){
-    ui->statusBar->showMessage(tr("Sucessfully ended multislice step"), 2000);
+    ui->statusBar->showMessage(tr("Sucessfully ended calculating the image intensity distribuitions"), 2000);
   }
   else{
-    ui->statusBar->showMessage(tr("Error while running multislice step"), 2000);
+    ui->statusBar->showMessage(tr("Error while calculating the image intensity distribuitions"), 2000);
   }
 }
 
 void MainWindow::update_tdmap_simgrid_started( ){
-  ui->statusBar->showMessage(tr("Started multislice step"), 2000);
+  ui->statusBar->showMessage(tr("Started image correlation step"), 2000);
 }
 
 void MainWindow::update_tdmap_simgrid_ended( bool result ){
   if( result ){
-    ui->statusBar->showMessage(tr("Sucessfully ended multislice step"), 2000);
+    ui->statusBar->showMessage(tr("Sucessfully ended image correlation step"), 2000);
   }
   else{
-    ui->statusBar->showMessage(tr("Error while running multislice step"), 2000);
+    ui->statusBar->showMessage(tr("Error while running image correlation step"), 2000);
   }
 }
 
@@ -415,6 +424,16 @@ void MainWindow::update_from_TDMap_sucess(){
 
 void MainWindow::update_from_TDMap_failure(){
   ui->statusBar->showMessage(tr("Error while running TD-Map"), 2000);
+      std::vector <std::string> errors = _core_td_map->get_test_run_config_errors();
+      std::ostringstream os;
+      for( int pos = 0; pos < errors.size(); pos++ ){
+          os << errors.at(pos) << "\n";
+      }
+      QMessageBox messageBox;
+      QFont font;
+      font.setBold(false);
+      messageBox.setFont(font);
+      messageBox.critical(0,"Error",QString::fromStdString( os.str() ));
 }
 
 void MainWindow::update_from_SuperCell_edge_sucess(){
@@ -437,15 +456,11 @@ void MainWindow::update_tdmap_sim_ostream(){
       std::cout << "####celslc_out_index  VALID: " << celslc_out_index.isValid() << std::endl;
 
       while(std::getline(_sim_tdmap_celslc_ostream_buffer, line)){
-        //   ui->qtree_view_tdmap_running_configuration-
-        //ui->qTextBrowser_tdmap_simulation_output->moveCursor (QTextCursor::End);
+
         QString qt_linw =  QString::fromStdString( line );
         QVariant _new_line_var = QVariant::fromValue(qt_linw + "\n");
         bool result = tdmap_running_configuration_model->appendData( celslc_out_index, _new_line_var );
         ui->qtree_view_tdmap_simulation_setup->update();
-        std::cout << "append result " << result << std::endl;
-        //  _multislice_phase_granting_output->appendData( 1, _new_line_var );
-        //ui->qTextBrowser_tdmap_simulation_output->append( qt_linw );
         QApplication::processEvents();
       }
       // reset pipe
@@ -925,6 +940,7 @@ void MainWindow::create_box_options(){
    * EXPERIMENTAL IMAGE
    *************************/
   TreeItem* experimental_image_root = new TreeItem ( common_header );
+  project_setup_image_fields_model = new TreeModel( experimental_image_root );
 
   ////////////////
   // Image Path
@@ -938,7 +954,7 @@ void MainWindow::create_box_options(){
   /*group options*/
   image_path->set_variable_name( "image_path" );
   image_path->set_variable_description( "Experimental image path" );
-  celslc_step_group_options->add_option( image_path , 1, true);
+  celslc_step_group_options->add_option( project_setup_image_fields_model, image_path , 1, true);
 
   ////////////////
   // Sampling rate
@@ -961,10 +977,10 @@ void MainWindow::create_box_options(){
   /*group options*/
   experimental_sampling_rate_x->set_variable_name( "experimental_sampling_rate_x" );
   experimental_sampling_rate_y->set_variable_name( "experimental_sampling_rate_y" );
-  celslc_step_group_options->add_option( experimental_sampling_rate_x , 1, true);
-  celslc_step_group_options->add_option( experimental_sampling_rate_y , 1, true);
-  simgrid_step_group_options->add_option( experimental_sampling_rate_x , 1, true);
-  simgrid_step_group_options->add_option( experimental_sampling_rate_y , 1, true);
+  celslc_step_group_options->add_option( project_setup_image_fields_model, experimental_sampling_rate_x , 1, true);
+  celslc_step_group_options->add_option( project_setup_image_fields_model, experimental_sampling_rate_y , 1, true);
+  simgrid_step_group_options->add_option( project_setup_image_fields_model, experimental_sampling_rate_x , 1, true);
+  simgrid_step_group_options->add_option( project_setup_image_fields_model, experimental_sampling_rate_y , 1, true);
 
   ////////////////
   // ROI
@@ -1001,10 +1017,10 @@ void MainWindow::create_box_options(){
   /*group options*/
   experimental_roi_center_x->set_variable_name( "experimental_roi_center_x" );
   experimental_roi_center_y->set_variable_name( "experimental_roi_center_y" );
-  celslc_step_group_options->add_option( experimental_roi_center_x , 1, true);
-  celslc_step_group_options->add_option( experimental_roi_center_y , 1, true);
-  simgrid_step_group_options->add_option( experimental_roi_center_x , 1, true);
-  simgrid_step_group_options->add_option( experimental_roi_center_y , 1, true);
+  celslc_step_group_options->add_option( project_setup_image_fields_model, experimental_roi_center_x , 1, true);
+  celslc_step_group_options->add_option( project_setup_image_fields_model, experimental_roi_center_y , 1, true);
+  simgrid_step_group_options->add_option( project_setup_image_fields_model, experimental_roi_center_x , 1, true);
+  simgrid_step_group_options->add_option( project_setup_image_fields_model, experimental_roi_center_y , 1, true);
 
   ////////////////
   // ROI Dimensions
@@ -1034,13 +1050,11 @@ void MainWindow::create_box_options(){
   /*group options*/
   experimental_roi_dimensions_width->set_variable_name( "experimental_roi_dimensions_width" );
   experimental_roi_dimensions_height->set_variable_name( "experimental_roi_dimensions_height" );
-  celslc_step_group_options->add_option( experimental_roi_dimensions_width , 1, true);
-  celslc_step_group_options->add_option( experimental_roi_dimensions_height , 1, true);
-  simgrid_step_group_options->add_option( experimental_roi_dimensions_width , 1, true);
-  simgrid_step_group_options->add_option( experimental_roi_dimensions_height , 1, true);
+  celslc_step_group_options->add_option( project_setup_image_fields_model, experimental_roi_dimensions_width , 1, true);
+  celslc_step_group_options->add_option( project_setup_image_fields_model, experimental_roi_dimensions_height , 1, true);
+  simgrid_step_group_options->add_option( project_setup_image_fields_model, experimental_roi_dimensions_width , 1, true);
+  simgrid_step_group_options->add_option( project_setup_image_fields_model, experimental_roi_dimensions_height , 1, true);
 
-
-  project_setup_image_fields_model = new TreeModel( experimental_image_root );
 
   ui->qtree_view_project_setup_image->setModel(project_setup_image_fields_model);
   ui->qtree_view_project_setup_image->setItemDelegate( _load_file_delegate );
@@ -1051,6 +1065,7 @@ void MainWindow::create_box_options(){
    * CRYSTALLOGRAPLY
    *************************/
   TreeItem* crystallography_root = new TreeItem ( common_header );
+  project_setup_crystalographic_fields_model = new TreeModel( crystallography_root );
 
   ////////////////
   // Unit-cell file
@@ -1071,7 +1086,7 @@ void MainWindow::create_box_options(){
 
   /*group options*/
   unit_cell_file_cif->set_variable_name( "unit_cell_file_cif" );
-  celslc_step_group_options->add_option( unit_cell_file_cif , 1, false);
+  celslc_step_group_options->add_option( project_setup_crystalographic_fields_model, unit_cell_file_cif , 1, false);
 
   ////////////////
   // Unit-cell file CEL
@@ -1085,8 +1100,7 @@ void MainWindow::create_box_options(){
 
   /*group options*/
   unit_cell_file_cel->set_variable_name( "unit_cell_file_cel" );
-  celslc_step_group_options->add_option( unit_cell_file_cel , 1, false);
-
+  celslc_step_group_options->add_option( project_setup_crystalographic_fields_model, unit_cell_file_cel , 1, false);
 
   ////////////////
   // Projected y axis
@@ -1106,7 +1120,7 @@ void MainWindow::create_box_options(){
 
   /*group options*/
   projected_y_axis_u->set_variable_name( "projected_y_axis_u" );
-  celslc_step_group_options->add_option( projected_y_axis_u , 1, true);
+  celslc_step_group_options->add_option( project_setup_crystalographic_fields_model, projected_y_axis_u , 1, true);
 
   ////////////////
   //Projected y axis v
@@ -1119,7 +1133,7 @@ void MainWindow::create_box_options(){
 
   /*group options*/
   projected_y_axis_v->set_variable_name( "projected_y_axis_v" );
-  celslc_step_group_options->add_option( projected_y_axis_v , 1, true);
+  celslc_step_group_options->add_option( project_setup_crystalographic_fields_model, projected_y_axis_v , 1, true);
 
   ////////////////
   //Projected y axis w
@@ -1132,7 +1146,7 @@ void MainWindow::create_box_options(){
 
   /*group options*/
   projected_y_axis_w->set_variable_name( "projected_y_axis_w" );
-  celslc_step_group_options->add_option( projected_y_axis_w , 1, true);
+  celslc_step_group_options->add_option( project_setup_crystalographic_fields_model, projected_y_axis_w , 1, true);
 
   ////////////////
   // Projection direction
@@ -1152,7 +1166,7 @@ void MainWindow::create_box_options(){
 
   /*group options*/
   projection_direction_h->set_variable_name( "projection_direction_h" );
-  celslc_step_group_options->add_option( projection_direction_h , 1, true);
+  celslc_step_group_options->add_option( project_setup_crystalographic_fields_model, projection_direction_h , 1, true);
 
   ////////////////
   // Projection direction k
@@ -1165,7 +1179,7 @@ void MainWindow::create_box_options(){
 
   /*group options*/
   projection_direction_k->set_variable_name( "projection_direction_k" );
-  celslc_step_group_options->add_option( projection_direction_k , 1, true);
+  celslc_step_group_options->add_option( project_setup_crystalographic_fields_model, projection_direction_k , 1, true);
 
   ////////////////
   // Projection direction l
@@ -1178,9 +1192,8 @@ void MainWindow::create_box_options(){
 
   /*group options*/
   projection_direction_l->set_variable_name( "projection_direction_l" );
-  celslc_step_group_options->add_option( projection_direction_l , 1, true);
+  celslc_step_group_options->add_option( project_setup_crystalographic_fields_model, projection_direction_l , 1, true);
 
-  project_setup_crystalographic_fields_model = new TreeModel( crystallography_root );
 
   ui->qtree_view_project_setup_crystallography->setModel(project_setup_crystalographic_fields_model);
   ui->qtree_view_project_setup_crystallography->setItemDelegate( _load_file_delegate );
@@ -1203,6 +1216,7 @@ void MainWindow::create_box_options(){
    * TD MAP
    *************************/
   TreeItem* tdmap_root = new TreeItem ( common_header );
+  tdmap_simulation_setup_model = new TreeModel( tdmap_root );
 
   ////////////////
   // 2D variation map
@@ -1340,8 +1354,8 @@ void MainWindow::create_box_options(){
   incident_electron_beam->insertChildren( accelaration_voltage_kv );
   /*group options*/
   accelaration_voltage_kv->set_variable_name( "accelaration_voltage_kv" );
-  celslc_step_group_options->add_option( accelaration_voltage_kv , 1, true);
-  msa_step_group_options->add_option( accelaration_voltage_kv , 1, true);
+  celslc_step_group_options->add_option( tdmap_simulation_setup_model, accelaration_voltage_kv , 1, true);
+  msa_step_group_options->add_option( tdmap_simulation_setup_model, accelaration_voltage_kv , 1, true);
 
   ////////////////
   // Simulation Refinement
@@ -1370,6 +1384,24 @@ void MainWindow::create_box_options(){
   QVector<QVariant> box3_option_4_1 = {"Aberration parameters",""};
   TreeItem* _aberration_parameters = new TreeItem ( box3_option_4_1 );
   _simulation_refinement->insertChildren( _aberration_parameters );
+
+  ////////////////
+  // Aberration parameters -- Spherical aberration (a40, C3,0, C3)
+  ////////////////
+  QVector<QVariant> box3_option_4_1_1 = {"Spherical aberration (nm)",""};
+  QVector<bool> box3_option_4_1_1_edit = {false,true};
+  boost::function<bool(std::string)> box3_function_4_1_1_setter ( boost::bind( &TDMap::set_spherical_aberration, _core_td_map, _1 ) );
+  boost::function<double(void)> box3_function_4_1_1_getter ( boost::bind( &TDMap::get_spherical_aberration, _core_td_map ) );
+  boost::function<bool(void)> box3_option_4_1_1_check_getter ( boost::bind( &TDMap::get_spherical_aberration_switch, _core_td_map  ) );
+  boost::function<bool(bool)> box3_option_4_1_1_check_setter ( boost::bind( &TDMap::set_spherical_aberration_switch, _core_td_map, _1 ) );
+  TreeItem* spherical_aberration_nm = new TreeItem ( box3_option_4_1_1 , box3_function_4_1_1_setter, box3_function_4_1_1_getter, box3_option_4_1_1_edit );
+  _aberration_parameters->insertChildren( spherical_aberration_nm );
+  /*group options*/
+  spherical_aberration_nm->set_variable_name( "spherical_aberration_nm" );
+  spherical_aberration_nm->set_fp_check_setter( 1, box3_option_4_1_1_check_setter );
+  spherical_aberration_nm->set_fp_check_getter( 1, box3_option_4_1_1_check_getter );
+  spherical_aberration_nm->load_check_status_from_getter( 1 );
+
 
   ////////////////
   //Simulation Refinement -- envelope parameters
@@ -1417,7 +1449,6 @@ void MainWindow::create_box_options(){
 
   image_correlation->insertChildren( image_correlation_matching_method );
 
-  tdmap_simulation_setup_model = new TreeModel( tdmap_root );
 
   ui->qtree_view_tdmap_simulation_setup->setModel( tdmap_simulation_setup_model );
   ui->qtree_view_tdmap_simulation_setup->setItemDelegate( _load_file_delegate );
@@ -1453,6 +1484,7 @@ void MainWindow::create_box_options(){
   QVector<QVariant> running_header = {"Status","Step"};
 
   TreeItem* running_configuration_root = new TreeItem ( running_header );
+  tdmap_running_configuration_model = new TreeModel( running_configuration_root );
 
   ////////////////
   // Log level
@@ -1606,7 +1638,6 @@ void MainWindow::create_box_options(){
   _image_correlation_output->set_item_delegate_type( TreeItem::_delegate_TEXT_BROWSER );
   _image_correlation_output_legend->insertChildren( _image_correlation_output );
 
-  tdmap_running_configuration_model = new TreeModel( running_configuration_root );
   ui->qtree_view_tdmap_running_configuration->setModel( tdmap_running_configuration_model );
   ui->qtree_view_tdmap_running_configuration->setItemDelegate( _load_file_delegate );
   //start editing after one click
@@ -1619,6 +1650,7 @@ void MainWindow::create_box_options(){
    * CRYSTALLOGRAPLY
    *************************/
   TreeItem* super_cell_setup_root = new TreeItem ( common_header );
+  super_cell_setup_model = new TreeModel( super_cell_setup_root );
 
   ////////////////
   // Edge detection
@@ -1661,7 +1693,6 @@ void MainWindow::create_box_options(){
   //connect( _max_contour_distance, SIGNAL(dataChanged( int )), this, SLOT( update_supercell_model_edge_detection_setup() ) );
 
 
-  super_cell_setup_model = new TreeModel( super_cell_setup_root );
   ui->qtree_view_supercell_model_edge_detection_setup->setModel( super_cell_setup_model );
   ui->qtree_view_supercell_model_edge_detection_setup->setItemDelegate( _load_file_delegate );
   //start editing after one click
@@ -1686,7 +1717,22 @@ void MainWindow::on_qpush_apply_edge_detection_clicked(){
 }
 
 void MainWindow::on_qpush_test_tdmap_clicked(){
-  bool result = false;
   ui->statusBar->showMessage(tr("Testing TD Map variable configuration"), 2000);
-  _core_td_map->test_run_config();
+  const bool result = _core_td_map->test_run_config();
+  if( result == false){
+      std::vector <std::string> errors = _core_td_map->get_test_run_config_errors();
+      std::ostringstream os;
+      for( int pos = 0; pos < errors.size(); pos++ ){
+          os << errors.at(pos) << "\n";
+      }
+      QMessageBox messageBox;
+      QFont font;
+      font.setBold(false);
+      messageBox.setFont(font);
+      messageBox.critical(0,"Error",QString::fromStdString( os.str() ));
+  }
+  else{
+      QMessageBox messageBox;
+      messageBox.information(0,"TD Map ready to run.","The TD Map required variables are setted up. You can run the simulation.");
+  }
 }

@@ -6,6 +6,8 @@
 #include <QObject>
 
 #include "treeitem.h"
+#include "treemodel.h"
+
 #include <iostream>
 #include <ctime>
 
@@ -16,6 +18,7 @@ private:
     std::map<std::string,std::string> variables_map;
     // key varname, value TreeItem*
     std::map<std::string,TreeItem* > _items_variables_map;
+    std::map<std::string,TreeModel*> _items_model_variables_map;
     // key varname, value column of Item
     std::map<std::string,int> _col_variables_map;
     // key varname, value = required or no
@@ -29,6 +32,7 @@ private:
     bool _flag_runned_time = false;
     bool _force_update_from_group_dependency;
     std::vector<group_options*> _groups_to_listen;
+    std::vector<std::string> group_vars_error_list;
 
 private slots:
     bool update_track_var( std::string varname );
@@ -39,10 +43,13 @@ void listen_group_update_required( group_options* group_to_listen );
     group_options( std::string _group_name );
     bool is_update_required();
     bool add_option( std::string varname, std::string description, bool required );
-    bool add_option( TreeItem* item, int column, bool required );
+    bool add_option( TreeModel* model, TreeItem* item, int column, bool required );
     bool are_group_vars_setted_up();
     void mark_runned_time();
     time_t get_runned_time();
+    std::string get_group_name();
+    std::vector<std::string> get_group_vars_error_list();
+
 
 signals:
     void update_required( std::string _group_name );

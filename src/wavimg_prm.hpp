@@ -72,9 +72,10 @@ class WAVIMG_prm {
     // line 18
     int number_image_aberrations_set;
     // line 19
-    std::vector<int> aberration_definition_index_number;
-    std::vector<double>  aberration_definition_1st_coefficient_value_nm;
-    std::vector<double>  aberration_definition_2nd_coefficient_value_nm;
+    std::map<int,bool>  aberration_definition_switch;
+    std::map<int,double>  aberration_definition_1st_coefficient_value_nm;
+    std::map<int,double>  aberration_definition_2nd_coefficient_value_nm;
+
     // line 19 + aberration_definition_index_number
     double objective_aperture_radius;
     // line 20 + aberration_definition_index_number
@@ -127,6 +128,13 @@ class WAVIMG_prm {
   public:
     WAVIMG_prm( boost::process::ipstream& async_io_buffer_out );
     WAVIMG_prm(const WAVIMG_prm &obj);
+
+    enum AberrationDefinition { ImageShift = 0, Defocus = 1, TwofoldAstigmatism = 2, Coma = 3,
+                                ThreefildAstigmatism = 4, SphericalAberration = 5, StarAberration = 6,
+                              FourfoldAstigmatism = 7, Coma5thOrder = 8, ThreeLobeAberration = 9,
+                                FiveFoldAstigmatism = 10, SphericalAberration6thOrder = 11, StarAberration6thOrder = 12,
+                                RosetteAberration = 13, SixfoldAstigmatism = 14, EightfoldAstigmatism = 23
+                              };
 
     bool _is_bin_path_defined();
 
@@ -183,6 +191,12 @@ class WAVIMG_prm {
     void set_number_image_aberrations_set( int number_image_aberrations );
     // setters line 19
     void add_aberration_definition ( int index_number, double first_coefficient_value_nm, double second_coefficient_value_nm );
+
+    bool set_aberration_definition ( WAVIMG_prm::AberrationDefinition aberration_index, int coefficient , double value );
+    double get_aberration_definition( WAVIMG_prm::AberrationDefinition aberration_index, int coefficient );
+    bool get_aberration_definition_switch( WAVIMG_prm::AberrationDefinition aberration_index );
+    bool set_aberration_definition_switch(  WAVIMG_prm::AberrationDefinition aberration_index, bool value );
+
     // setters line 19 + aberration_definition_index_number
     void set_objective_aperture_radius( double radius );
     // setters line 20 + aberration_definition_index_number

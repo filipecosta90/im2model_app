@@ -171,6 +171,67 @@ WAVIMG_prm::WAVIMG_prm(const WAVIMG_prm &obj) : _io_pipe_out(obj._io_pipe_out) {
 }
 
 
+bool WAVIMG_prm::set_aberration_definition ( WAVIMG_prm::AberrationDefinition aberration_index, int coefficient , double value ){
+    bool result = false;
+    if(coefficient == 1 ){
+        if( aberration_definition_1st_coefficient_value_nm.find( aberration_index ) != aberration_definition_1st_coefficient_value_nm.end() ){
+            aberration_definition_1st_coefficient_value_nm[ aberration_index ] = value;
+            result = true;
+        }
+        else{
+            aberration_definition_1st_coefficient_value_nm.insert(std::pair<int,double>(aberration_index,value));
+            result = true;
+        }
+    }
+    if(coefficient == 2 ){
+        if( aberration_definition_2nd_coefficient_value_nm.find( aberration_index ) != aberration_definition_2nd_coefficient_value_nm.end() ){
+            aberration_definition_2nd_coefficient_value_nm[ aberration_index ] = value;
+            result = true;
+        }
+        else{
+            aberration_definition_2nd_coefficient_value_nm.insert(std::pair<int,double>(aberration_index,value));
+            result = true;
+        }
+    }
+    return result;
+}
+
+double WAVIMG_prm::get_aberration_definition( WAVIMG_prm::AberrationDefinition aberration_index, int coefficient ){
+    double value = 0.0f;
+    if(coefficient == 1 ){
+        if( aberration_definition_1st_coefficient_value_nm.find( aberration_index ) != aberration_definition_1st_coefficient_value_nm.end() ){
+            value = aberration_definition_1st_coefficient_value_nm.find( aberration_index )->second;
+        }
+    }
+    if(coefficient == 2 ){
+        if( aberration_definition_2nd_coefficient_value_nm.find( aberration_index ) != aberration_definition_2nd_coefficient_value_nm.end() ){
+            value = aberration_definition_2nd_coefficient_value_nm.find( aberration_index )->second;
+        }
+    }
+    return value;
+}
+
+bool WAVIMG_prm::get_aberration_definition_switch( WAVIMG_prm::AberrationDefinition aberration_index ){
+    bool result = false;
+    if( aberration_definition_switch.find( aberration_index ) != aberration_definition_switch.end() ){
+        result = aberration_definition_switch.find( aberration_index )->second;
+    }
+    return result;
+}
+
+bool WAVIMG_prm::set_aberration_definition_switch(  WAVIMG_prm::AberrationDefinition aberration_index, bool value ){
+bool result = false;
+if( aberration_definition_switch.find( aberration_index ) != aberration_definition_switch.end() ){
+    aberration_definition_switch[aberration_index] = value;
+    result = true;
+}
+else{
+    aberration_definition_switch.insert(std::pair<int,bool>(aberration_index,value));
+    result = true;
+}
+    return result;
+}
+
 bool WAVIMG_prm::set_bin_execname( std::string execname ){
      full_bin_path_execname = boost::filesystem::path (execname);
     try {
@@ -407,12 +468,12 @@ void WAVIMG_prm::set_number_image_aberrations_set( int number_image_aberrations 
 }
 
 // setters line 19
-
+/*
 void WAVIMG_prm::add_aberration_definition ( int index_number, double first_coefficient_value_nm, double second_coefficient_value_nm ){
   aberration_definition_index_number.push_back( index_number );
   aberration_definition_1st_coefficient_value_nm.push_back( first_coefficient_value_nm );
   aberration_definition_2nd_coefficient_value_nm.push_back( second_coefficient_value_nm );
-}
+}*/
 
 // setters line 19 + aberration_definition_index_number
 void WAVIMG_prm::set_objective_aperture_radius( double radius ){
@@ -739,12 +800,21 @@ bool WAVIMG_prm::call_bin(){
       // double anisotropic_second_rms_amplitude;
       //double azimuth_orientation_angle;
       // line 18
+      number_image_aberrations_set = 0;
+      for (auto&& _aberration : aberration_definition_switch){
+        if (_aberration.second == true)
+          ++number_image_aberrations_set;
+      }
       outfile <<  number_image_aberrations_set << " !" << std::endl;
       // line 19
-
-      for ( int pos = 0 ; pos < number_image_aberrations_set ; pos++){
-        outfile << aberration_definition_index_number.at(pos) << ", " << aberration_definition_1st_coefficient_value_nm.at(pos) << ", "<< aberration_definition_2nd_coefficient_value_nm.at(pos) << " !" << std::endl;
+      for (auto&& _aberration : aberration_definition_switch ){
+        if ( _aberration.second == true ){
+         outfile << _aberration.first << ", " << aberration_definition_1st_coefficient_value_nm.at( _aberration.first ) << ", "<< aberration_definition_2nd_coefficient_value_nm.at( _aberration.first ) << " !" << std::endl;
+        }
       }
+      //for ( int pos = 0 ; pos < number_image_aberrations_set ; pos++){
+      //  outfile << aberration_definition_index_number.at(pos) << ", " << aberration_definition_1st_coefficient_value_nm.at(pos) << ", "<< aberration_definition_2nd_coefficient_value_nm.at(pos) << " !" << std::endl;
+      //}
       // line 19 + aberration_definition_index_number
       outfile <<  objective_aperture_radius << " !" << std::endl;
       // line 20 + aberration_definition_index_number

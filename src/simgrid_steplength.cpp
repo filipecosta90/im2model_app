@@ -381,13 +381,16 @@ bool SIMGRID_wavimg_steplength::simulate_from_grid(){
         double slice_match, defocus_match, match_factor;
 
         // get the defocus value
-        const int at_defocus = round( ((defocus-1) * defocus_period )+ defocus_lower_bound );
+        const int at_defocus = round( ((defocus-1) * defocus_period ) + defocus_lower_bound );
 
         // get the matrix in the specified col of tdmap (defocus pos)
         const cv::Mat raw_simulated_image = raw_simulated_images_row.at( defocus -1 );
 
         // remove the ignored edge pixels
         // we will still save the raw grayscale simulated image in order to enable image alignement (rotation)
+        std::cout << "raw_simulated_image size" << raw_simulated_image.size() << std::endl;
+        std::cout << "ignore_edge_pixels_rectangle size" << ignore_edge_pixels_rectangle << std::endl;
+
         cv::Mat cleaned_simulated_image = raw_simulated_image(ignore_edge_pixels_rectangle);
         cleaned_edges_simulated_images_row.push_back( cleaned_simulated_image );
         /// Create the result matrix

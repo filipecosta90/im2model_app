@@ -26,7 +26,7 @@ bool group_options::add_option( std::string varname, std::string description, bo
   return result;
 }
 
-bool group_options::add_option( TreeItem* item , int column, bool required ){
+bool group_options::add_option(TreeModel* model, TreeItem* item , int column, bool required ){
   std::string varname = item->get_variable_name();
   std::string description = item->get_variable_name();
   bool result = false;
@@ -37,6 +37,7 @@ bool group_options::add_option( TreeItem* item , int column, bool required ){
     variables_map.insert(std::pair<std::string,std::string>(varname,description));
     _col_variables_map.insert(std::pair<std::string,int>(varname,column));
     _items_variables_map.insert(std::pair<std::string,TreeItem*>(varname,item));
+    _items_model_variables_map.insert(std::pair<std::string,TreeModel*>(varname,model));
     _required_variables_map.insert(std::pair<std::string,bool>(varname,required));
     result = true;
   }
@@ -81,12 +82,23 @@ bool group_options::update_track_var( std::string varname ){
   return result;
 }
 
+std::string group_options::get_group_name(){
+    return _group_name;
+}
+
 bool group_options::are_group_vars_setted_up( ){
+    group_vars_error_list.clear();
   bool result = true;
   // pipeline dependecies
   for( auto const &_group : _groups_to_listen ){
     result &= _group->are_group_vars_setted_up();
+    if( result == false ){
+    std::stringstream error_message;
+    error_message << "In \"" <<  _group_name << "\", the chainned group \"" << _group->get_group_name() << "\" is not ready.";
+    group_vars_error_list.push_back( error_message.str() );
+    }
   }
+
   if( result ){
     // vars dependencies
     for(auto const &_full_var : _required_variables_map ) {
@@ -101,9 +113,14 @@ bool group_options::are_group_vars_setted_up( ){
              std::map<std::string,TreeItem*>::iterator _item_missing_key = _items_variables_map.find(varname);
             if( _item_missing_key != _items_variables_map.end() ){
                 TreeItem* _item_missing = _items_variables_map.find( varname )->second;
+                TreeModel* _model_of_item_missing = _items_model_variables_map.find( varname )->second;
                 const int _item_missing_col = _col_variables_map.find( varname )->second;
                 std::cout << " Enabling higlight error in var " << varname << ", in col " <<  _item_missing_col << std::endl;
-                _item_missing->enable_highlight_error( _item_missing_col );
+                std::stringstream error_message;
+                error_message << "In \"" <<  _group_name << "\", the required field \"" << varname << "\" is missing.";
+                group_vars_error_list.push_back( error_message.str() );
+                const bool result = _model_of_item_missing->enable_highlight_error( varname, _item_missing_col );
+                std::cout << "result " << result << std::endl;
             }
         }
         result &= found;
@@ -111,6 +128,10 @@ bool group_options::are_group_vars_setted_up( ){
     }
   }
   return result;
+}
+
+std::vector<std::string> group_options::get_group_vars_error_list(){
+    return group_vars_error_list;
 }
 
 void group_options::mark_runned_time(){

@@ -74,8 +74,6 @@ class TDMap  : public QObject {
     double ht_accelaration_voltage;
     bool _flag_ht_accelaration_voltage = false;
 
-
-
     /////////////////////////
     // Im2Model core pointers
     /////////////////////////
@@ -244,6 +242,8 @@ class TDMap  : public QObject {
     group_options* wavimg_step_group_options;
     group_options* simgrid_step_group_options;
 
+    std::vector<std::string> test_run_config_errors;
+
   public:
     enum RefinementPreset { NO_REFINEMENT, MICROSCOPE_CORRECTED, MICROSCOPE_NON_CORRECTED, USER_DEFINED_PRESET };
 
@@ -298,6 +298,8 @@ class TDMap  : public QObject {
      */
     bool run_tdmap();
     bool test_run_config();
+    std::vector<std::string> get_test_run_config_errors();
+
     bool set_run_celslc_switch( bool value );
     bool get_run_celslc_switch();
     bool _is_sim_tdmap_celslc_ostream_buffer_active();
@@ -400,6 +402,11 @@ class TDMap  : public QObject {
     double get_simulated_image_defocus_in_grid( int row, int col );
 
     /** setters **/
+
+    bool set_spherical_aberration ( std::string cs );
+    double get_spherical_aberration();
+    bool get_spherical_aberration_switch();
+    bool set_spherical_aberration_switch( bool cs_switch );
 
     bool set_dr_probe_bin_path( std::string bin_path );
 

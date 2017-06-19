@@ -7,10 +7,18 @@ TreeModel::TreeModel(TreeItem *root,  QObject *parent) : QAbstractItemModel(pare
   rootItem = root;
   // to know if data changed in model
   connect(this, SIGNAL( dataChanged(QModelIndex,QModelIndex) ) , this, SLOT( set_model_modified() ) );
+
 }
 
 TreeModel::~TreeModel(){
   delete rootItem;
+}
+
+bool TreeModel::enable_highlight_error( std::string varname,  int _item_missing_col ){
+   emit layoutAboutToBeChanged();
+    const bool result = rootItem->enable_highlight_error(varname, _item_missing_col);
+   emit layoutChanged();
+    return result;
 }
 
 boost::property_tree::ptree* TreeModel::save_data_into_property_tree( ){
@@ -152,7 +160,6 @@ int TreeModel::rowCount(const QModelIndex &parent) const{
 bool TreeModel::appendData(const QModelIndex &index, const QVariant &value){
   bool result = false;
   TreeItem *item = getItem(index);
-  std::cout << "appending data to item in index pos: row " << index.row() << " col "<< index.column()   << std::endl;
   result = item->appendData( index.column(), value);
   if (result){
     emit dataChanged(index, index);

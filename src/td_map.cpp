@@ -43,11 +43,11 @@ TDMap::TDMap( boost::process::ipstream& ostream_celslc_buffer,
   file_name_output_image_wave_function = "image";
   _flag_file_name_output_image_wave_function = true;
 
-  cd_switch = true;
-  cs_switch = true;
-  number_image_aberrations = 2;
-  coefficient_aberration_defocus = 0.0f;
-  coefficient_aberration_spherical = 12000.f;
+  //cd_switch = true;
+  //cs_switch = true;
+  //number_image_aberrations = 2;
+  //coefficient_aberration_defocus = 0.0f;
+  //coefficient_aberration_spherical = 12000.f;
 }
 
 TDMap::TDMap( boost::process::ipstream& ostream_celslc_buffer,
@@ -157,7 +157,7 @@ bool TDMap::calculate_simulated_image_sampling_rate_and_size(){
     }
 
     initial_simulated_image_width = nx_simulated_horizontal_samples - ( 2 * _ignore_edge_pixels_sim_images );
-    initial_simulated_image_height = nx_simulated_horizontal_samples - ( 2 * _ignore_edge_pixels_sim_images );
+    initial_simulated_image_height = ny_simulated_vertical_samples   - ( 2 * _ignore_edge_pixels_sim_images );
     reshaped_simulated_image_width = initial_simulated_image_width;
     reshaped_simulated_image_height = initial_simulated_image_height;
 
@@ -215,6 +215,25 @@ bool TDMap::calculate_thickness_range_lower_bound_slice_from_nm(){
     result = true;
   }
   return result;
+}
+
+
+double TDMap::get_spherical_aberration(){
+    return _tdmap_wavimg_parameters->get_aberration_definition( WAVIMG_prm::AberrationDefinition::SphericalAberration , 1 );
+}
+
+bool TDMap::get_spherical_aberration_switch(){
+    return _tdmap_wavimg_parameters->get_aberration_definition_switch( WAVIMG_prm::AberrationDefinition::SphericalAberration );
+}
+
+bool TDMap::set_spherical_aberration ( std::string _string_cs ){
+    const double _cs = boost::lexical_cast<double>( _string_cs );
+    _tdmap_wavimg_parameters->set_aberration_definition( WAVIMG_prm::AberrationDefinition::SphericalAberration , 2 , 0.0f );
+    return _tdmap_wavimg_parameters->set_aberration_definition( WAVIMG_prm::AberrationDefinition::SphericalAberration , 1 , _cs );
+}
+
+bool TDMap::set_spherical_aberration_switch( bool cs_switch ){
+    return _tdmap_wavimg_parameters->set_aberration_definition_switch( WAVIMG_prm::AberrationDefinition::SphericalAberration, cs_switch );
 }
 
 cv::Mat TDMap::get_simulated_image_in_grid( int x, int y ){
@@ -312,9 +331,19 @@ bool TDMap::calculate_thickness_range_slice_period(){
   return result;
 }
 
+std::vector<std::string> TDMap::get_test_run_config_errors(){
+    return test_run_config_errors;
+}
+
 bool TDMap::test_run_config(){
+    test_run_config_errors.clear();
   // at least one should be runned. if not return false
   bool result = _run_celslc_switch || _run_msa_switch || _run_wavimg_switch || _run_simgrid_switch;
+  if( !result ){
+      std::stringstream error_message;
+      error_message << "To test run config, at least one runnable option should be marked.";
+      test_run_config_errors.push_back( error_message.str() );
+  }
   if( _flag_logger ){
     std::stringstream message;
     message << "Testing run configuration for steps{ CELSLC: " << std::boolalpha << _run_celslc_switch
@@ -325,6 +354,12 @@ bool TDMap::test_run_config(){
   }
   if( _run_celslc_switch ){
     const bool celslc_res = celslc_step_group_options->are_group_vars_setted_up();
+    if( celslc_res == false ){
+    const std::vector<std::string> celslc_error_list = celslc_step_group_options->get_group_vars_error_list();
+    for(size_t i=0; i < celslc_error_list.size(); i++){
+            test_run_config_errors.push_back(celslc_error_list.at(i));
+    }
+    }
     result &= celslc_res;
     // log it
     if( _flag_logger ){
@@ -340,6 +375,12 @@ bool TDMap::test_run_config(){
   }
   if( _run_msa_switch ){
     const bool msa_res = msa_step_group_options->are_group_vars_setted_up();
+    if( msa_res == false ){
+    const std::vector<std::string> msa_error_list = msa_step_group_options->get_group_vars_error_list();
+    for(size_t i=0; i < msa_error_list.size(); i++){
+            test_run_config_errors.push_back(msa_error_list.at(i));
+    }
+    }
     result &= msa_res;
     // log it
     if( _flag_logger ){
@@ -355,6 +396,12 @@ bool TDMap::test_run_config(){
   }
   if( _run_wavimg_switch ){
     const bool wavimg_res = wavimg_step_group_options->are_group_vars_setted_up();
+    if( wavimg_res == false ){
+    const std::vector<std::string> wavimg_error_list = wavimg_step_group_options->get_group_vars_error_list();
+    for(size_t i=0; i < wavimg_error_list.size(); i++){
+            test_run_config_errors.push_back(wavimg_error_list.at(i));
+    }
+    }
     result &= wavimg_res;
     // log it
     if( _flag_logger ){
@@ -370,6 +417,12 @@ bool TDMap::test_run_config(){
   }
   if( _run_simgrid_switch ){
     const bool simgrid_res = simgrid_step_group_options->are_group_vars_setted_up();
+    if( simgrid_res == false ){
+    const std::vector<std::string> simgrid_error_list = simgrid_step_group_options->get_group_vars_error_list();
+    for(size_t i=0; i < simgrid_error_list.size(); i++){
+            test_run_config_errors.push_back(simgrid_error_list.at(i));
+    }
+    }
     result &= simgrid_res;
     // log it
     if( _flag_logger ){
@@ -808,18 +861,18 @@ bool  TDMap::prepare_wavimg_parameters(){
     //  wavimg_parameters.set_anisotropic_second_rms_amplitude( 0.0f );
     // wavimg_parameters.set_azimuth_orientation_angle( 0.0f );
     // setters line 18
-    _tdmap_wavimg_parameters->set_number_image_aberrations_set( number_image_aberrations );
+    //_tdmap_wavimg_parameters->set_number_image_aberrations_set( number_image_aberrations );
     // setters line 19
     // check for wavimg defocus aberration coefficient
-    if( cd_switch == true ){
+    //if( cd_switch == true ){
       //Defocus (a20, C1,0, C1)
-      _tdmap_wavimg_parameters->add_aberration_definition ( 1, coefficient_aberration_defocus, 0.0f );
-    }
+    //  _tdmap_wavimg_parameters->add_aberration_definition ( 1, coefficient_aberration_defocus, 0.0f );
+    //}
     // check for wavimg spherical aberration coefficient
-    if( cs_switch == true ){
+    //if( cs_switch == true ){
       //Spherical aberration (a40, C3,0, C3)
-      _tdmap_wavimg_parameters->add_aberration_definition ( 5, coefficient_aberration_spherical, 0.0f );
-    }
+    //  _tdmap_wavimg_parameters->add_aberration_definition ( 5, coefficient_aberration_spherical, 0.0f );
+    //}
     // setters line 19 + aberration_definition_index_number
     _tdmap_wavimg_parameters->set_objective_aperture_radius( 5500.0f );
     // setters line 20 + aberration_definition_index_number

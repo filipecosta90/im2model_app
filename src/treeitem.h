@@ -21,7 +21,6 @@
 
 #include "custom_tool_button.h"
 
-
 class TreeItem : public QObject {
   Q_OBJECT
   public:
@@ -46,6 +45,9 @@ class TreeItem : public QObject {
 
     explicit TreeItem( QVector<QVariant> &data, boost::function<bool(std::string)> setter, TreeItem *parent = 0);
     explicit TreeItem( QVector<QVariant> &data, boost::function<bool(std::string)> setter, QVector<bool> editable, TreeItem *parent = 0);
+    explicit TreeItem( QVector<QVariant> &data, boost::function<bool(std::string)> setter, boost::function<double(void)> getter , TreeItem *parent = 0);
+    explicit TreeItem( QVector<QVariant> &data, boost::function<bool(std::string)> setter, boost::function<double(void)> getter, QVector<bool> editable, TreeItem *parent = 0);
+
 
     ~TreeItem();
     TreeItem *parent();
@@ -108,7 +110,7 @@ class TreeItem : public QObject {
     bool call_fp_data_setter_bool( bool value );
     bool has_hightlight_error( int column );
     bool disable_highlight_error( int column );
-    bool enable_highlight_error( int column );
+    bool enable_highlight_error( std::string varname , int column );
 
 
 signals:

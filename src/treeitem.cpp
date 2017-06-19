@@ -28,12 +28,26 @@ _flag_highlight_error[column] = false;
 return true;
 }
 
-bool TreeItem::enable_highlight_error( int column ){
-    _flag_highlight_error[column] = true;
-    return true;
+bool TreeItem::enable_highlight_error( std::string varname , int column ){
+    bool result = false;
+    if ( _variable_name == varname ){
+        _flag_highlight_error[column] = true;
+        result = true;
+    }
+    else{
+        int number_childs = childCount();
+        for( int n = 0; n < number_childs; n++){
+          TreeItem* _child =  childItems.value(n);
+          const bool _child_result = _child->enable_highlight_error( varname, column );
+          if( _child_result ){
+              result = true;
+          }
+        }
+    }
+    return result;
 }
 
-TreeItem::TreeItem( QVector<QVariant> &data, TreeItem *parent){
+TreeItem::TreeItem( QVector<QVariant> &data, TreeItem *parent) {
   qRegisterMetaType<std::string>("std::string");
   itemData = data;
   parentItem = parent;
@@ -82,7 +96,16 @@ TreeItem::TreeItem( QVector<QVariant> &data, boost::function<bool(std::string)> 
   _flag_fp_data_setter_string = true;
 }
 
+TreeItem::TreeItem( QVector<QVariant> &data, boost::function<bool(std::string)> setter, boost::function<double(void)> getter, TreeItem *parent) : TreeItem( data, setter, parent ) {
+  fp_data_getter_double = getter;
+  _flag_fp_data_getter_double = true;
+}
+
 TreeItem::TreeItem( QVector<QVariant> &data, boost::function<bool(std::string)> setter, QVector<bool> editable, TreeItem *parent  ) : TreeItem( data, setter, parent ){
+  itemIsEditableVec = editable;
+}
+
+TreeItem::TreeItem( QVector<QVariant> &data, boost::function<bool(std::string)> setter,  boost::function<double(void)> getter, QVector<bool> editable, TreeItem *parent  ) : TreeItem( data, setter, getter, parent ){
   itemIsEditableVec = editable;
 }
 
@@ -468,9 +491,9 @@ bool TreeItem::appendData( int column, const QVariant &value){
       std::string t1 = value.toString().toStdString();
       //  fp_data_appender_string( t1 );
       QString before_string = itemData[column].toString();
-      std::cout << "before string "<<  before_string.size() << std::endl;
+      //std::cout << "before string "<<  before_string.size() << std::endl;
       before_string.append( value.toString());
-      std::cout << "after string "<<  before_string.size() << std::endl;
+      //std::cout << "after string "<<  before_string.size() << std::endl;
       itemData[column].setValue( QVariant::fromValue( before_string ));
       emit dataChanged(column);
       emit dataChanged( _variable_name );
