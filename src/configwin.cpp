@@ -424,16 +424,16 @@ void MainWindow::update_from_TDMap_sucess(){
 
 void MainWindow::update_from_TDMap_failure(){
   ui->statusBar->showMessage(tr("Error while running TD-Map"), 2000);
-      std::vector <std::string> errors = _core_td_map->get_test_run_config_errors();
-      std::ostringstream os;
-      for( int pos = 0; pos < errors.size(); pos++ ){
-          os << errors.at(pos) << "\n";
-      }
-      QMessageBox messageBox;
-      QFont font;
-      font.setBold(false);
-      messageBox.setFont(font);
-      messageBox.critical(0,"Error",QString::fromStdString( os.str() ));
+  std::vector <std::string> errors = _core_td_map->get_test_run_config_errors();
+  std::ostringstream os;
+  for( int pos = 0; pos < errors.size(); pos++ ){
+    os << errors.at(pos) << "\n";
+  }
+  QMessageBox messageBox;
+  QFont font;
+  font.setBold(false);
+  messageBox.setFont(font);
+  messageBox.critical(0,"Error",QString::fromStdString( os.str() ));
 }
 
 void MainWindow::update_from_SuperCell_edge_sucess(){
@@ -1398,10 +1398,9 @@ void MainWindow::create_box_options(){
   _aberration_parameters->insertChildren( spherical_aberration_nm );
   /*group options*/
   spherical_aberration_nm->set_variable_name( "spherical_aberration_nm" );
-  spherical_aberration_nm->set_fp_check_setter( 1, box3_option_4_1_1_check_setter );
-  spherical_aberration_nm->set_fp_check_getter( 1, box3_option_4_1_1_check_getter );
-  spherical_aberration_nm->load_check_status_from_getter( 1 );
-
+  spherical_aberration_nm->set_fp_check_setter( 0, box3_option_4_1_1_check_setter );
+  spherical_aberration_nm->set_fp_check_getter( 0, box3_option_4_1_1_check_getter );
+  spherical_aberration_nm->load_check_status_from_getter( 0 );
 
   ////////////////
   //Simulation Refinement -- envelope parameters
@@ -1419,6 +1418,12 @@ void MainWindow::create_box_options(){
   TreeItem* _mtf_parameters = new TreeItem ( box3_option_4_3 , box3_function_4_3, box3_option_4_3_edit );
   _mtf_parameters->set_item_delegate_type( TreeItem::_delegate_FILE );
   _simulation_refinement->insertChildren( _mtf_parameters );
+
+  boost::function<bool(void)> box3_option_4_3_1_check_getter ( boost::bind( &TDMap::get_mtf_switch, _core_td_map  ) );
+  boost::function<bool(bool)> box3_option_4_3_1_check_setter ( boost::bind( &TDMap::set_mtf_switch, _core_td_map, _1 ) );
+  _mtf_parameters->set_fp_check_setter( 0, box3_option_4_3_1_check_setter );
+  _mtf_parameters->set_fp_check_getter( 0, box3_option_4_3_1_check_getter );
+  _mtf_parameters->load_check_status_from_getter( 0 );
 
   ////////////////
   // Image Correlation
@@ -1720,19 +1725,19 @@ void MainWindow::on_qpush_test_tdmap_clicked(){
   ui->statusBar->showMessage(tr("Testing TD Map variable configuration"), 2000);
   const bool result = _core_td_map->test_run_config();
   if( result == false){
-      std::vector <std::string> errors = _core_td_map->get_test_run_config_errors();
-      std::ostringstream os;
-      for( int pos = 0; pos < errors.size(); pos++ ){
-          os << errors.at(pos) << "\n";
-      }
-      QMessageBox messageBox;
-      QFont font;
-      font.setBold(false);
-      messageBox.setFont(font);
-      messageBox.critical(0,"Error",QString::fromStdString( os.str() ));
+    std::vector <std::string> errors = _core_td_map->get_test_run_config_errors();
+    std::ostringstream os;
+    for( int pos = 0; pos < errors.size(); pos++ ){
+      os << errors.at(pos) << "\n";
+    }
+    QMessageBox messageBox;
+    QFont font;
+    font.setBold(false);
+    messageBox.setFont(font);
+    messageBox.critical(0,"Error",QString::fromStdString( os.str() ));
   }
   else{
-      QMessageBox messageBox;
-      messageBox.information(0,"TD Map ready to run.","The TD Map required variables are setted up. You can run the simulation.");
+    QMessageBox messageBox;
+    messageBox.information(0,"TD Map ready to run.","The TD Map required variables are setted up. You can run the simulation.");
   }
 }

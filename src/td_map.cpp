@@ -219,21 +219,21 @@ bool TDMap::calculate_thickness_range_lower_bound_slice_from_nm(){
 
 
 double TDMap::get_spherical_aberration(){
-    return _tdmap_wavimg_parameters->get_aberration_definition( WAVIMG_prm::AberrationDefinition::SphericalAberration , 1 );
+  return _tdmap_wavimg_parameters->get_aberration_definition( WAVIMG_prm::AberrationDefinition::SphericalAberration , 1 );
 }
 
 bool TDMap::get_spherical_aberration_switch(){
-    return _tdmap_wavimg_parameters->get_aberration_definition_switch( WAVIMG_prm::AberrationDefinition::SphericalAberration );
+  return _tdmap_wavimg_parameters->get_aberration_definition_switch( WAVIMG_prm::AberrationDefinition::SphericalAberration );
 }
 
 bool TDMap::set_spherical_aberration ( std::string _string_cs ){
-    const double _cs = boost::lexical_cast<double>( _string_cs );
-    _tdmap_wavimg_parameters->set_aberration_definition( WAVIMG_prm::AberrationDefinition::SphericalAberration , 2 , 0.0f );
-    return _tdmap_wavimg_parameters->set_aberration_definition( WAVIMG_prm::AberrationDefinition::SphericalAberration , 1 , _cs );
+  const double _cs = boost::lexical_cast<double>( _string_cs );
+  _tdmap_wavimg_parameters->set_aberration_definition( WAVIMG_prm::AberrationDefinition::SphericalAberration , 2 , 0.0f );
+  return _tdmap_wavimg_parameters->set_aberration_definition( WAVIMG_prm::AberrationDefinition::SphericalAberration , 1 , _cs );
 }
 
 bool TDMap::set_spherical_aberration_switch( bool cs_switch ){
-    return _tdmap_wavimg_parameters->set_aberration_definition_switch( WAVIMG_prm::AberrationDefinition::SphericalAberration, cs_switch );
+  return _tdmap_wavimg_parameters->set_aberration_definition_switch( WAVIMG_prm::AberrationDefinition::SphericalAberration, cs_switch );
 }
 
 cv::Mat TDMap::get_simulated_image_in_grid( int x, int y ){
@@ -332,17 +332,17 @@ bool TDMap::calculate_thickness_range_slice_period(){
 }
 
 std::vector<std::string> TDMap::get_test_run_config_errors(){
-    return test_run_config_errors;
+  return test_run_config_errors;
 }
 
 bool TDMap::test_run_config(){
-    test_run_config_errors.clear();
+  test_run_config_errors.clear();
   // at least one should be runned. if not return false
   bool result = _run_celslc_switch || _run_msa_switch || _run_wavimg_switch || _run_simgrid_switch;
   if( !result ){
-      std::stringstream error_message;
-      error_message << "To test run config, at least one runnable option should be marked.";
-      test_run_config_errors.push_back( error_message.str() );
+    std::stringstream error_message;
+    error_message << "To test run config, at least one runnable option should be marked.";
+    test_run_config_errors.push_back( error_message.str() );
   }
   if( _flag_logger ){
     std::stringstream message;
@@ -355,10 +355,10 @@ bool TDMap::test_run_config(){
   if( _run_celslc_switch ){
     const bool celslc_res = celslc_step_group_options->are_group_vars_setted_up();
     if( celslc_res == false ){
-    const std::vector<std::string> celslc_error_list = celslc_step_group_options->get_group_vars_error_list();
-    for(size_t i=0; i < celslc_error_list.size(); i++){
-            test_run_config_errors.push_back(celslc_error_list.at(i));
-    }
+      const std::vector<std::string> celslc_error_list = celslc_step_group_options->get_group_vars_error_list();
+      for(size_t i=0; i < celslc_error_list.size(); i++){
+        test_run_config_errors.push_back(celslc_error_list.at(i));
+      }
     }
     result &= celslc_res;
     // log it
@@ -376,10 +376,10 @@ bool TDMap::test_run_config(){
   if( _run_msa_switch ){
     const bool msa_res = msa_step_group_options->are_group_vars_setted_up();
     if( msa_res == false ){
-    const std::vector<std::string> msa_error_list = msa_step_group_options->get_group_vars_error_list();
-    for(size_t i=0; i < msa_error_list.size(); i++){
-            test_run_config_errors.push_back(msa_error_list.at(i));
-    }
+      const std::vector<std::string> msa_error_list = msa_step_group_options->get_group_vars_error_list();
+      for(size_t i=0; i < msa_error_list.size(); i++){
+        test_run_config_errors.push_back(msa_error_list.at(i));
+      }
     }
     result &= msa_res;
     // log it
@@ -397,10 +397,10 @@ bool TDMap::test_run_config(){
   if( _run_wavimg_switch ){
     const bool wavimg_res = wavimg_step_group_options->are_group_vars_setted_up();
     if( wavimg_res == false ){
-    const std::vector<std::string> wavimg_error_list = wavimg_step_group_options->get_group_vars_error_list();
-    for(size_t i=0; i < wavimg_error_list.size(); i++){
-            test_run_config_errors.push_back(wavimg_error_list.at(i));
-    }
+      const std::vector<std::string> wavimg_error_list = wavimg_step_group_options->get_group_vars_error_list();
+      for(size_t i=0; i < wavimg_error_list.size(); i++){
+        test_run_config_errors.push_back(wavimg_error_list.at(i));
+      }
     }
     result &= wavimg_res;
     // log it
@@ -418,10 +418,10 @@ bool TDMap::test_run_config(){
   if( _run_simgrid_switch ){
     const bool simgrid_res = simgrid_step_group_options->are_group_vars_setted_up();
     if( simgrid_res == false ){
-    const std::vector<std::string> simgrid_error_list = simgrid_step_group_options->get_group_vars_error_list();
-    for(size_t i=0; i < simgrid_error_list.size(); i++){
-            test_run_config_errors.push_back(simgrid_error_list.at(i));
-    }
+      const std::vector<std::string> simgrid_error_list = simgrid_step_group_options->get_group_vars_error_list();
+      for(size_t i=0; i < simgrid_error_list.size(); i++){
+        test_run_config_errors.push_back(simgrid_error_list.at(i));
+      }
     }
     result &= simgrid_res;
     // log it
@@ -865,12 +865,12 @@ bool  TDMap::prepare_wavimg_parameters(){
     // setters line 19
     // check for wavimg defocus aberration coefficient
     //if( cd_switch == true ){
-      //Defocus (a20, C1,0, C1)
+    //Defocus (a20, C1,0, C1)
     //  _tdmap_wavimg_parameters->add_aberration_definition ( 1, coefficient_aberration_defocus, 0.0f );
     //}
     // check for wavimg spherical aberration coefficient
     //if( cs_switch == true ){
-      //Spherical aberration (a40, C3,0, C3)
+    //Spherical aberration (a40, C3,0, C3)
     //  _tdmap_wavimg_parameters->add_aberration_definition ( 5, coefficient_aberration_spherical, 0.0f );
     //}
     // setters line 19 + aberration_definition_index_number
@@ -1339,6 +1339,13 @@ bool TDMap::set_mtf_filename( std::string file_name ){
     _tdmap_wavimg_parameters->set_mtf_simulation_switch( true );
   }
   return result;
+}
+
+bool TDMap::set_mtf_switch( bool value ){
+  return _tdmap_wavimg_parameters->set_mtf_simulation_switch( value );
+}
+bool TDMap::get_mtf_switch( ){
+  return _tdmap_wavimg_parameters->get_mtf_simulation_switch();
 }
 
 bool TDMap::set_log_level( int level ){

@@ -452,6 +452,9 @@ class TDMap  : public QObject {
     int  get_image_correlation_matching_method();
 
     bool set_mtf_filename( std::string file_name );
+    bool set_mtf_switch( bool value );
+    bool get_mtf_switch( );
+
 
     void set_group_options( group_options* celslc_step, group_options* msa_step, group_options* wavimg_step, group_options* simgrid_step );
 

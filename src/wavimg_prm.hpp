@@ -23,45 +23,56 @@ class WAVIMG_prm {
     // line 1
     std::string file_name_input_wave_function;
     // line 2
+    // Dimension of the wave data in pixels, <nx> = number of horizontal wave pixels, <ny>  = number of vertical wave pixels.
     int n_columns_samples_input_wave_function_pixels;
     int n_rows_samples_input_wave_function_pixels;
     // line 3
+    // Sampling rate of the wave data (<sx> = horizontal, <sy> = vertical) [nm/pix].
     double physical_columns_sampling_rate_input_wave_function_nm_pixels;
     double physical_rows_sampling_rate_input_wave_function_nm_pixels;
     // line 4
+    // TEM high-tension as used for wave function calculation [kV]
     double primary_electron_energy;
     // line 5
-    int type_of_output;
+    // Image output type option: 0 = TEM image, 1 = complex image plane wave, 2 = wave amplitude, 3 = wave phase, 4 = wave real part, 5 = wave imaginary part, 6 = TEM image map of 2 variables
+    int type_of_output = 0;
     // line 6
     std::string file_name_output_image_wave_function;
     // line 7
+    // ! Image output size (<ix> = horizontal , <iy> = vertical) in number of pixels.
     int n_columns_samples_output_image;
     int n_rows_samples_output_image;
     // line 8
-    int image_data_type;
+    // ! Flag and parameters for creating integer images with optional noise. Flag <intflg> 0 = off (default), 1 = 32-bit, 2 = 16-bit, Parameter: <mean> = mean vacuum intensity, <conv> = electron to counts conversion rate, <rnoise> detector readout noise level.
+    int image_data_type = 0;
     double image_vacuum_mean_intensity;
     double conversion_rate;
     double readout_noise_rms_amplitude;
     // line 9
-    int switch_option_extract_particular_image_frame;
+    // ! Flag activating the extraction of a special image frame (0=OFF, 1=ON). The frame parameters are defined in the lines below.
+    int switch_option_extract_particular_image_frame = 0;
     // line 10
+    // ! Image output sampling rate [nm/pix], isotropic. The parameter is used only if the Flag in line 09 is set to 1.
     double image_sampling_rate_nm_pixel;
     // line 11
+    // ! Image frame offset in pixels of the input wave. The parameter is used only if the Flag in line 09 is set to 1.
     double image_frame_offset_x_pixels_input_wave_function;
     double image_frame_offset_y_pixels_input_wave_function;
     // line 12
+    //  ! Image frame rotation in [deg] with respect to the input wave horizontal axis. The parameter is used only if the Flag in line 09 is set to 1.
     double image_frame_rotation;
     // line 13
-    int switch_coherence_model;
+    //  ! Coherence calculation model switch: 1 = averaging of coherent sub images explicit focal variation but quasi-coherent spatial envelope, 2 = averaging of coherent sub images with explicit focal and angular variation, 3 = quasi-coherent linear envelopes, 4 = Fourier-space synthesis with partially coherent TCC, 5: averaging of coherent sub images with explicit focal, angular, and frozen lattice variation)
+    int switch_coherence_model = 1;
     // line 14
-    int partial_temporal_coherence_switch;
+    int partial_temporal_coherence_switch = 0;
     double partial_temporal_coherence_focus_spread;
     // line 15
-    int partial_spacial_coherence_switch;
+    int partial_spacial_coherence_switch = 0;
     double partial_spacial_coherence_semi_convergence_angle;
     // line 16  
-    bool mtf_simulation_switch;
-    double k_space_scaling;
+    bool mtf_simulation_switch = false;
+    double k_space_scaling = 1.0f;
     std::string mtf_filename;
     bool _flag_mtf_filename = false;
     // line 17
@@ -104,8 +115,8 @@ class WAVIMG_prm {
 
     boost::filesystem::path full_bin_path_execname;
     bool _flag_full_bin_path_execname = false;
-    bool debug_switch;
-    bool runned_bin;
+    bool debug_switch = true;
+    bool runned_bin = false;
 
     void cleanup_thread();
     bool save_prm_filename_path();
@@ -130,11 +141,11 @@ class WAVIMG_prm {
     WAVIMG_prm(const WAVIMG_prm &obj);
 
     enum AberrationDefinition { ImageShift = 0, Defocus = 1, TwofoldAstigmatism = 2, Coma = 3,
-                                ThreefildAstigmatism = 4, SphericalAberration = 5, StarAberration = 6,
-                              FourfoldAstigmatism = 7, Coma5thOrder = 8, ThreeLobeAberration = 9,
-                                FiveFoldAstigmatism = 10, SphericalAberration6thOrder = 11, StarAberration6thOrder = 12,
-                                RosetteAberration = 13, SixfoldAstigmatism = 14, EightfoldAstigmatism = 23
-                              };
+      ThreefildAstigmatism = 4, SphericalAberration = 5, StarAberration = 6,
+      FourfoldAstigmatism = 7, Coma5thOrder = 8, ThreeLobeAberration = 9,
+      FiveFoldAstigmatism = 10, SphericalAberration6thOrder = 11, StarAberration6thOrder = 12,
+      RosetteAberration = 13, SixfoldAstigmatism = 14, EightfoldAstigmatism = 23
+    };
 
     bool _is_bin_path_defined();
 
@@ -178,7 +189,7 @@ class WAVIMG_prm {
     void set_partial_spacial_coherence_switch( int coherence_switch );
     void set_partial_spacial_coherence_semi_convergence_angle( double convergence_angle );
     // setters line 16
-    void set_mtf_simulation_switch( bool simulation_switch );
+    bool set_mtf_simulation_switch( bool simulation_switch );
     bool get_mtf_simulation_switch();
     void set_k_space_scaling( double scale );
     bool set_mtf_filename( std::string file_name );
