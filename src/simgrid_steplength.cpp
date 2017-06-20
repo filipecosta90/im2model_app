@@ -276,6 +276,17 @@ bool SIMGRID_wavimg_steplength::check_produced_dat(){
       }
     }
   }
+
+  if( _flag_logger ){
+    std::stringstream message;
+    message << "Check_produced_dat global result: " << std::boolalpha << result;
+    if( result ){
+      logger->logEvent( ApplicationLog::notification , message.str() );
+    }
+    else{
+      logger->logEvent( ApplicationLog::error , message.str() );
+    }
+  }
   return result;
 }
 
@@ -342,7 +353,36 @@ bool SIMGRID_wavimg_steplength::read_grid_from_dat_files(){
         }
         result &= _mmap_ok;
       }
-      raw_simulated_images_grid.push_back(raw_simulated_images_row);
+      raw_simulated_images_grid.push_back( raw_simulated_images_row );
+      const bool _ncols_size_check = ( raw_simulated_images_row.size() == defocus_samples );
+      if(!_ncols_size_check){
+        if( _flag_logger ){
+          std::stringstream message;
+          message << " raw_simulated_images_row.size() {"<< raw_simulated_images_row.size()<< "} != defocus_samples {"<< defocus_samples << "}";
+          logger->logEvent( ApplicationLog::error , message.str() );
+        }
+      }
+      result &= _ncols_size_check;
+    }
+    const bool _nrows_size_check = ( raw_simulated_images_grid.size() == slice_samples );
+
+    if(!_nrows_size_check){
+      if( _flag_logger ){
+        std::stringstream message;
+        message << " raw_simulated_images_grid.size() {"<< raw_simulated_images_grid.size()<< "} != slice_samples {"<< slice_samples << "}";
+        logger->logEvent( ApplicationLog::error , message.str() );
+      }
+    }
+    result &= _nrows_size_check;
+  }
+  if( _flag_logger ){
+    std::stringstream message;
+    message << "Overall read_grid_from_dat_files result: " << std::boolalpha  << result;
+    if( result ){
+      logger->logEvent( ApplicationLog::notification , message.str() );
+    }
+    else{
+      logger->logEvent( ApplicationLog::error , message.str() );
     }
   }
   return result;
@@ -351,7 +391,7 @@ bool SIMGRID_wavimg_steplength::read_grid_from_dat_files(){
 bool SIMGRID_wavimg_steplength::simulate_from_grid(){
   runned_simulation = false;
   if( (slice_samples >= 1)
-      &&  (defocus_samples >= 1)
+      && (defocus_samples >= 1)
       && (slices_lower_bound >= 1)
       && ( celslc_accum_nm_slice_vec.size() == number_slices_to_max_thickness )
     ){
@@ -362,75 +402,87 @@ bool SIMGRID_wavimg_steplength::simulate_from_grid(){
     // Z
     match_values_matrix = cv::Mat( slice_samples, defocus_samples , CV_32FC1 );
 
-    for (int thickness = 1; thickness <= slice_samples; thickness++ ){
-      const int at_slice = round( slice_period * ( thickness  - 1 ) + slices_lower_bound );
-      const double slice_thickness_nm = celslc_accum_nm_slice_vec.at(at_slice-1);
+    bool _error_flag = false;
+    if( raw_simulated_images_grid.size() ==  slice_samples ){
+      for (int thickness = 1; thickness <= slice_samples && _error_flag == false; thickness++ ){
+        const int at_slice = round( slice_period * ( thickness  - 1 ) + slices_lower_bound );
+        const double slice_thickness_nm = celslc_accum_nm_slice_vec.at(at_slice-1);
 
-      // get the matrices row
-      const std::vector<cv::Mat> raw_simulated_images_row = raw_simulated_images_grid.at( thickness - 1 );
-      std::vector<cv::Point> experimental_images_matchloc_row;
-      std::vector<cv::Mat> cleaned_edges_simulated_images_row;
+        // get the matrices row
+        const std::vector<cv::Mat> raw_simulated_images_row = raw_simulated_images_grid.at( thickness - 1 );
+        std::vector<cv::Point> experimental_images_matchloc_row;
+        std::vector<cv::Mat> cleaned_edges_simulated_images_row;
 
-      // for the same thickness iterate through every defocus
-      for (int defocus = 1; defocus <= defocus_samples ; defocus ++ ){
-        // vars for minMaxLoc
-        double minVal, maxVal, matchVal;
-        cv::Point minLoc, maxLoc, matchLoc;
-        // vars to export
-        double slice_match, defocus_match, match_factor;
+        if( raw_simulated_images_row.size() ==  defocus_samples ){
+          // for the same thickness iterate through every defocus
+          for (int defocus = 1; defocus <= defocus_samples ; defocus ++ ){
+            // vars for minMaxLoc
+            double minVal, maxVal, matchVal;
+            cv::Point minLoc, maxLoc, matchLoc;
+            // vars to export
+            double slice_match, defocus_match, match_factor;
 
-        // get the defocus value
-        const int at_defocus = round( ((defocus-1) * defocus_period ) + defocus_lower_bound );
+            // get the defocus value
+            const int at_defocus = round( ((defocus-1) * defocus_period ) + defocus_lower_bound );
 
-        // get the matrix in the specified col of tdmap (defocus pos)
-        const cv::Mat raw_simulated_image = raw_simulated_images_row.at( defocus -1 );
+            // get the matrix in the specified col of tdmap (defocus pos)
+            const cv::Mat raw_simulated_image = raw_simulated_images_row.at( defocus - 1 );
 
-        // remove the ignored edge pixels
-        // we will still save the raw grayscale simulated image in order to enable image alignement (rotation)
-        std::cout << "raw_simulated_image size" << raw_simulated_image.size() << std::endl;
-        std::cout << "ignore_edge_pixels_rectangle size" << ignore_edge_pixels_rectangle << std::endl;
+            // remove the ignored edge pixels
+            // we will still save the raw grayscale simulated image in order to enable image alignement (rotation)
+            std::cout << "raw_simulated_image size" << raw_simulated_image.size() << std::endl;
+            std::cout << "ignore_edge_pixels_rectangle size" << ignore_edge_pixels_rectangle << std::endl;
 
-        cv::Mat cleaned_simulated_image = raw_simulated_image(ignore_edge_pixels_rectangle);
-        cleaned_edges_simulated_images_row.push_back( cleaned_simulated_image );
-        /// Create the result matrix
-        int result_cols =  experimental_image_roi.cols - cleaned_simulated_image.cols + 1;
-        int result_rows = experimental_image_roi.rows  - cleaned_simulated_image.rows + 1;
-        cv::Mat result( result_rows, result_cols, CV_8UC1 );
+            cv::Mat cleaned_simulated_image = raw_simulated_image(ignore_edge_pixels_rectangle);
+            cleaned_edges_simulated_images_row.push_back( cleaned_simulated_image );
+            /// Create the result matrix
+            int result_cols =  experimental_image_roi.cols - cleaned_simulated_image.cols + 1;
+            int result_rows = experimental_image_roi.rows  - cleaned_simulated_image.rows + 1;
+            cv::Mat result( result_rows, result_cols, CV_8UC1 );
 
-        //: normalized correlation, non-normalized correlation and sum-absolute-difference
-        cv::matchTemplate( experimental_image_roi , cleaned_simulated_image, result, _sim_correlation_method  );
-        cv::minMaxLoc( result, &minVal, &maxVal, &minLoc, &maxLoc, cv::Mat() );
-        matchVal = maxVal;
+            //: normalized correlation, non-normalized correlation and sum-absolute-difference
+            cv::matchTemplate( experimental_image_roi , cleaned_simulated_image, result, _sim_correlation_method  );
+            cv::minMaxLoc( result, &minVal, &maxVal, &minLoc, &maxLoc, cv::Mat() );
+            matchVal = maxVal;
 
-        match_factor = matchVal * 100.0;
-        slice_match = (double) at_slice;
-        defocus_match = (double) at_defocus;
-        slice_defocus_match_points.push_back (cv::Point3d ( slice_match, defocus_match, match_factor ));
-        defocus_values_matrix.at<float>(thickness-1, defocus-1) = defocus_match;
-        thickness_values_matrix.at<float>(thickness-1, defocus-1) = slice_match;
-        match_values_matrix.at<float>( thickness-1, defocus-1) =  match_factor ;
-        simulated_matches.push_back(match_factor);
+            match_factor = matchVal * 100.0;
+            slice_match = (double) at_slice;
+            defocus_match = (double) at_defocus;
+            slice_defocus_match_points.push_back (cv::Point3d ( slice_match, defocus_match, match_factor ));
+            defocus_values_matrix.at<float>(thickness-1, defocus-1) = defocus_match;
+            thickness_values_matrix.at<float>(thickness-1, defocus-1) = slice_match;
+            match_values_matrix.at<float>( thickness-1, defocus-1) =  match_factor ;
+            simulated_matches.push_back(match_factor);
+          }
+          simulated_images_grid.push_back(cleaned_edges_simulated_images_row);
+        }
+        else{
+          _error_flag = true;
+        }
       }
-      simulated_images_grid.push_back(cleaned_edges_simulated_images_row);
     }
-
+    else{
+      _error_flag = true;
+    }
     // now that we have the simulated images lets compare them
 
-    std::vector<double>::iterator maxElement;
-    maxElement = std::max_element(simulated_matches.begin(), simulated_matches.end());
-    int dist = distance(simulated_matches.begin(), maxElement);
+    if( _error_flag == false ){
+      std::vector<double>::iterator maxElement;
+      maxElement = std::max_element(simulated_matches.begin(), simulated_matches.end());
+      int dist = distance(simulated_matches.begin(), maxElement);
 
-    int col_defocus = dist % defocus_samples;
-    int row_thickness = (dist - col_defocus ) / defocus_samples;
-    best_match_Point2i = cv::Point2i( row_thickness, col_defocus);
+      int col_defocus = dist % defocus_samples;
+      int row_thickness = (dist - col_defocus ) / defocus_samples;
+      best_match_Point2i = cv::Point2i( row_thickness, col_defocus);
 
-    simgrid_best_match_thickness_slice = round((slice_period * row_thickness) + slices_lower_bound);
-    simgrid_best_match_thickness_nm = celslc_accum_nm_slice_vec.at(simgrid_best_match_thickness_slice-1);
-    simgrid_best_match_defocus_nm = (col_defocus * defocus_period ) + defocus_lower_bound;
+      simgrid_best_match_thickness_slice = round((slice_period * row_thickness) + slices_lower_bound);
+      simgrid_best_match_thickness_nm = celslc_accum_nm_slice_vec.at(simgrid_best_match_thickness_slice-1);
+      simgrid_best_match_defocus_nm = (col_defocus * defocus_period ) + defocus_lower_bound;
 
-    std::cout << "Max match % is " << *maxElement << " | " << simulated_matches.at(dist) << "\t at pos ["<< dist << "](" << col_defocus << "," << row_thickness  <<") slice " << simgrid_best_match_thickness_slice << " ( " << simgrid_best_match_thickness_nm << " ) , defocus " << simgrid_best_match_defocus_nm << std::endl;
+      std::cout << "Max match % is " << *maxElement << " | " << simulated_matches.at(dist) << "\t at pos ["<< dist << "](" << col_defocus << "," << row_thickness  <<") slice " << simgrid_best_match_thickness_slice << " ( " << simgrid_best_match_thickness_nm << " ) , defocus " << simgrid_best_match_defocus_nm << std::endl;
 
-    runned_simulation = true;
+      runned_simulation = true;
+    }
   }
   return runned_simulation;
 }
@@ -445,19 +497,19 @@ bool SIMGRID_wavimg_steplength::clean_for_re_run(){
     for (int thickness_row = 0; thickness_row < raw_simulated_images_grid.size(); thickness_row ++ ){
       //will contain the row of simulated images (same thickness, diferent defocus)
       std::vector<cv::Mat> raw_simulated_images_row = raw_simulated_images_grid.at(thickness_row);
-      raw_simulated_images_row.empty();
+      raw_simulated_images_row.clear();
     }
-    raw_simulated_images_grid.empty();
+    raw_simulated_images_grid.clear();
     for (int thickness_row = 0; thickness_row < simulated_images_grid.size(); thickness_row ++ ){
       std::vector<cv::Mat> simulated_images_row = simulated_images_grid.at(thickness_row);
-      simulated_images_row.empty();
+      simulated_images_row.clear();
     }
-    simulated_images_grid.empty();
+    simulated_images_grid.clear();
     for (int thickness_row = 0; thickness_row < experimental_images_match_location_grid.size(); thickness_row ++ ){
       std::vector<cv::Point> experimental_images_matchloc_row = experimental_images_match_location_grid.at(thickness_row);
-      experimental_images_matchloc_row.empty();
+      experimental_images_matchloc_row.clear();
     }
-    experimental_images_match_location_grid.empty();
+    experimental_images_match_location_grid.clear();
     runned_simulation = false;
   }
   return true;

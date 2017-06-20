@@ -441,8 +441,8 @@ void WAVIMG_prm::add_parameter_loop ( int parameter_class , int parameter_index,
 }
 
 bool WAVIMG_prm::check_clean_run_env(){
-    bool status = true;
-     boost::filesystem::path dir ( base_dir_path );
+  bool status = true;
+  boost::filesystem::path dir ( base_dir_path );
   // remove the dat files
   if( number_parameter_loops == 2 ){
     for ( int outter_loop_pos = 1; outter_loop_pos <= loop_range_n.at(1); outter_loop_pos++){
@@ -461,13 +461,13 @@ bool WAVIMG_prm::check_clean_run_env(){
         std::cout << "checking " << full_dat_path.string() << ". exists? " << std::boolalpha << _need_clean_file << std::endl;
 
         if( _need_clean_file ){
-        status = false;
-        std::stringstream message;
-        message << "The file: " << full_dat_path.string() << " should be deleted.";
-        run_env_warnings.push_back( message.str() );
-        if( _flag_logger ){
-          logger->logEvent( ApplicationLog::notification , message.str() );
-        }
+          status = false;
+          std::stringstream message;
+          message << "The file: " << full_dat_path.string() << " should be deleted.";
+          run_env_warnings.push_back( message.str() );
+          if( _flag_logger ){
+            logger->logEvent( ApplicationLog::notification , message.str() );
+          }
         }
       }
     }
@@ -476,31 +476,31 @@ bool WAVIMG_prm::check_clean_run_env(){
 }
 
 bool WAVIMG_prm::cleanup_prm(){
-    bool status = true;
-    boost::filesystem::path dir ( base_dir_path );
-    // remove prm first
-    boost::filesystem::path prm_file ( prm_filename );
-    boost::filesystem::path full_prm_path = dir / prm_file;
-    if( boost::filesystem::exists( full_prm_path ) ){
-     status = boost::filesystem::remove( full_prm_path );
-      // if the remove process was sucessfull the prm no longer exists
-      _flag_produced_prm = !status;
-      if( _flag_logger ){
-        std::stringstream message;
-        message << "removing the wavimg prm file: " << full_prm_path.string() << " result: " << std::boolalpha << status;
-        logger->logEvent( ApplicationLog::notification , message.str() );
-      }
+  bool status = true;
+  boost::filesystem::path dir ( base_dir_path );
+  // remove prm first
+  boost::filesystem::path prm_file ( prm_filename );
+  boost::filesystem::path full_prm_path = dir / prm_file;
+  if( boost::filesystem::exists( full_prm_path ) ){
+    status = boost::filesystem::remove( full_prm_path );
+    // if the remove process was sucessfull the prm no longer exists
+    _flag_produced_prm = !status;
+    if( _flag_logger ){
+      std::stringstream message;
+      message << "removing the wavimg prm file: " << full_prm_path.string() << " result: " << std::boolalpha << status;
+      logger->logEvent( ApplicationLog::notification , message.str() );
     }
-    return status;
+  }
+  return status;
 }
 
 std::vector<std::string> WAVIMG_prm::get_run_env_warnings(){
-return std::vector<std::string>();
+  return std::vector<std::string>();
 }
 
 bool WAVIMG_prm::cleanup_dat(){
-    bool status = true;
-     boost::filesystem::path dir ( base_dir_path );
+  bool status = true;
+  boost::filesystem::path dir ( base_dir_path );
   // remove the dat files
   if( number_parameter_loops == 2 ){
     for ( int outter_loop_pos = 1; outter_loop_pos <= loop_range_n.at(1); outter_loop_pos++){
@@ -531,7 +531,9 @@ bool WAVIMG_prm::cleanup_dat(){
 
 bool WAVIMG_prm::full_prm_dat_cleanup_bin(){
   boost::thread t1( &WAVIMG_prm::cleanup_prm , this );
+  t1.join();
   boost::thread t2( &WAVIMG_prm::cleanup_dat , this );
+  t2.join();
   runned_bin = false; 
   return true;
 }
@@ -694,7 +696,17 @@ bool WAVIMG_prm::call_bin(){
   }
 
   bool WAVIMG_prm::clean_for_re_run(){
-    return dat_cleanup_bin();
+    const bool cleanun_result = full_prm_dat_cleanup_bin();
+    /*clear loop range parameters */
+    loop_parameter_class.clear();
+    loop_parameter_index.clear();
+    loop_variation_form.clear();
+    loop_range_0.clear();
+    loop_range_1.clear();
+    loop_range_n.clear();
+    loop_string_indentifier.clear();
+    number_parameter_loops = 0;
+    return cleanun_result;
   }
 
   void WAVIMG_prm::set_prm_file_name( std::string filename ){
@@ -727,7 +739,7 @@ bool WAVIMG_prm::call_bin(){
       boost::filesystem::path full_path = dir / file;
       std::ofstream outfile;
 
-      outfile.open(full_path.string());
+      outfile.open( full_path.string() );
       // line 1
       boost::filesystem::path input_wave_function ( file_name_input_wave_function );
       boost::filesystem::path input_wave_function_full_path = dir / input_wave_function;

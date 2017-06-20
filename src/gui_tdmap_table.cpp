@@ -81,10 +81,8 @@ void TDMap_Table::update_RowCount_from_thickness_range_number_samples( int signa
 }
 
 void TDMap_Table::update_column_size(){
-
   int leftM,rightM,topM,bottomM;
   this->getContentsMargins(&leftM,&topM,&rightM,&bottomM);
-
   const int header_size = this->verticalHeader()->width();
   std::cout << "VerticalHeaderSize" << header_size << std::endl;
   const int total_width = this->width() -  header_size - leftM - rightM - 2* (this->frameWidth());
@@ -247,15 +245,15 @@ void TDMap_Table::update_cells(){
         }
       }
       emit tdmap_best_match( best_match_pos.x, best_match_pos.y );
-      setCurrentCell(0, 0);
-      emit cellClicked(0,0);
+      setCurrentCell( 0,0 );
+      emit cellClicked( 0,0 );
     }
     else{
       //only visualy update cells
       for (int row = 0; row < RowCount; ++row) {
         for (int col = 0; col < ColumnCount; ++col) {
           CvImageCellWidget *cell_widget  = new CvImageCellWidget(  );
-          cell_widget->setMaximumSize( QSize(ColumnSize, RowSize) );
+          cell_widget->setMaximumSize( QSize( ColumnSize, RowSize ) );
           cell_widget->set_container_size( ColumnSize, RowSize );
           cell_widget->fitToContainer();
           this->setCellWidget(row,col, cell_widget);
