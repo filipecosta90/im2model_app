@@ -243,6 +243,7 @@ class TDMap  : public QObject {
     group_options* simgrid_step_group_options;
 
     std::vector<std::string> test_run_config_errors;
+    std::vector<std::string> test_clean_run_env_warnings;
 
   public:
     enum RefinementPreset { NO_REFINEMENT, MICROSCOPE_CORRECTED, MICROSCOPE_NON_CORRECTED, USER_DEFINED_PRESET };
@@ -298,7 +299,9 @@ class TDMap  : public QObject {
      */
     bool run_tdmap();
     bool test_run_config();
+    bool test_clean_run_env();
     std::vector<std::string> get_test_run_config_errors();
+    std::vector<std::string> get_test_clean_run_env_warnings();
 
     bool set_run_celslc_switch( bool value );
     bool get_run_celslc_switch();

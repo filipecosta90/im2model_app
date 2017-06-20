@@ -182,6 +182,17 @@ bool TreeModel::setData(const QModelIndex &index, const QVariant &value, int rol
   return result;
 }
 
+bool TreeModel::clearData(const QModelIndex &index){
+  bool result = false;
+  TreeItem *item = getItem(index);
+  result = item->clearData( index.column() );
+  if (result){
+    emit dataChanged(index, index);
+    emit layoutChanged();
+  }
+  return result;
+}
+
 bool TreeModel::setHeaderData(int section, Qt::Orientation orientation, const QVariant &value, int role){
   if (role != Qt::EditRole || orientation != Qt::Horizontal){
     return false;

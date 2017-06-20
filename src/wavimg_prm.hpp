@@ -118,7 +118,8 @@ class WAVIMG_prm {
     bool debug_switch = true;
     bool runned_bin = false;
 
-    void cleanup_thread();
+    bool cleanup_prm();
+    bool cleanup_dat();
     bool save_prm_filename_path();
     bool _is_prm_filename_path_defined();
     bool _is_prm_produced();
@@ -126,7 +127,7 @@ class WAVIMG_prm {
 
     /* boost process output streams */
     boost::process::ipstream& _io_pipe_out;
-    bool _flag_io_ap_pipe_out = true;
+    bool _flag_io_ap_pipe_out = false;
 
     /* Loggers */
     ApplicationLog::ApplicationLog* logger = nullptr;
@@ -135,6 +136,8 @@ class WAVIMG_prm {
     /* Base dir path */
     boost::filesystem::path base_dir_path;
     bool _flag_base_dir_path = false;
+
+    std::vector<std::string> run_env_warnings;
 
   public:
     WAVIMG_prm( boost::process::ipstream& async_io_buffer_out );
@@ -234,7 +237,11 @@ class WAVIMG_prm {
 
     bool produce_prm();
 
-    bool cleanup_bin();
+    bool full_prm_dat_cleanup_bin();
+    bool dat_cleanup_bin();
+    bool check_clean_run_env();
+
+    std::vector<std::string> get_run_env_warnings();
 
     bool call_bin();
 

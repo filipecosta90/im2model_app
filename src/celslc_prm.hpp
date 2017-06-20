@@ -93,7 +93,7 @@ class CELSLC_prm {
     /* boost process output streams */
     // Implementation of a reading pipe stream.
     boost::process::ipstream& _io_pipe_out;
-    bool _flag_io_ap_pipe_out = true;
+    bool _flag_io_ap_pipe_out = false;
 
     /* Loggers */
     ApplicationLog::ApplicationLog* logger = nullptr;

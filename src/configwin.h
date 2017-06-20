@@ -101,7 +101,11 @@ class MainWindow : public QMainWindow {
     void update_simgrid_frame();
     void update_super_cell_target_region();
     void update_super_cell_target_region_shapes();
-    void update_tdmap_sim_ostream();
+    void update_tdmap_sim_ostream_celslc();
+    void update_tdmap_sim_ostream_msa();
+    void update_tdmap_sim_ostream_wavimg();
+    void update_tdmap_sim_ostream_simgrid();
+    void clear_tdmap_sim_ostream_containers();
     void update_tdmap_best_match(int x,int y);
     void update_tdmap_current_selection(int x,int y);
     void update_from_SuperCell_edge_sucess();
@@ -133,7 +137,10 @@ signals:
 
     // menu methods
     void createActions();
-    void updateStatusBar();
+    void updateProgressBar( int lower_range, int current_value, int upper_range );
+    void updateProgressBar( int lower_range, int current_value, int upper_range , bool error );
+    void createProgressBar();
+
     void create_box_options();
     bool readSettings();
     void writeSettings();
@@ -217,6 +224,8 @@ signals:
     group_options* wavimg_step_group_options;
     group_options* simgrid_step_group_options;
     group_options* super_cell_target_step_group_options;
+
+    QProgressBar* running_progress;
 
 };
 

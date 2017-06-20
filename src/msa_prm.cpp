@@ -123,7 +123,7 @@ void MSA_prm::cleanup_thread(){
       status &= remove_result;
       if( _flag_logger ){
         std::stringstream message;
-        message << "removing the msa prm file: " << full_prm_path.string() << " result: " << remove_result;
+        message << "removing the msa prm file: " << full_prm_path.string() << " result: " << std::boolalpha << remove_result;
         logger->logEvent( ApplicationLog::notification , message.str() );
       }
     }
@@ -166,7 +166,7 @@ bool MSA_prm::call_bin(){
     boost::filesystem::path prm_file ( prm_filename );
     boost::filesystem::path full_prm_path = dir / prm_file;
 
-    args_stream << " -prm " << "\"" << prm_file.string() << "\"";
+    args_stream << " -prm " << "\"" << full_prm_path.string() << "\"";
 
     // input -out
 

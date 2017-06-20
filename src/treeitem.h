@@ -67,6 +67,7 @@ class TreeItem : public QObject {
     bool isItemCheckable( int column ) const;
     bool setData(int column, const QVariant &value , int role);
     bool appendData( int column, const QVariant &value);
+    bool clearData( int column );
     bool set_fp_data_data_appender_col_pos( int col );
     bool set_flag_fp_data_appender_string( bool set );
 

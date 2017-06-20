@@ -280,9 +280,8 @@ bool SIMGRID_wavimg_steplength::check_produced_dat(){
 }
 
 bool SIMGRID_wavimg_steplength::read_grid_from_dat_files(){
-  bool result = true;
-  const bool _dat_files_exist = check_produced_dat();
-  if( _dat_files_exist ){
+  bool result = check_produced_dat();
+  if( result ){
     boost::filesystem::path dir ( base_dir_path );
     for (int thickness = 1; thickness <= slice_samples ; thickness++ ){
       //will contain the row of simulated images (same thickness, diferent defocus)

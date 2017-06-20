@@ -503,6 +503,17 @@ bool TreeItem::appendData( int column, const QVariant &value){
   return result;
 }
 
+bool TreeItem::clearData( int column ){
+  bool result = false;
+  if  (column >= 0 && column < itemData.size() ) {
+      itemData[column].setValue( QVariant() );
+      emit dataChanged(column);
+      emit dataChanged( _variable_name );
+      result = true;
+  }
+  return result;
+}
+
 bool TreeItem::set_fp_data_data_appender_col_pos( int col ){
   _fp_data_data_appender_col_pos = col;
   return true;
