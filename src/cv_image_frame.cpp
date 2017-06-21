@@ -18,7 +18,7 @@ CvImageFrameWidget::CvImageFrameWidget(QWidget *parent ) : QWidget(parent) {
   toolsLayout->addWidget(toolbar);
 
   //use a different layout for the contents so it has normal margins
-  contentsLayout = new QHBoxLayout;
+  contentsLayout = new QVBoxLayout;
   contentsLayout->addWidget(scrollArea);
   toolsLayout->addLayout(contentsLayout);
 }

@@ -204,7 +204,6 @@ void TDMap_Table::clear(){
   this->resizeRowsToContents();
 }
 
-
 void TDMap_Table::create_cells(){
 
   for (int row = 0; row < RowCount; ++row) {

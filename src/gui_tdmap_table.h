@@ -39,7 +39,7 @@ class TDMap_Table : public QTableWidget
     void selectCurrentColumn();
     void update_RowCount_from_thickness_range_number_samples(int signal_item_changed_column );
     void update_ColumnCount_from_defocus_range_number_samples(int signal_item_changed_column );
-     void invalidate_grid(int signal_item_changed_column );
+    void invalidate_grid(int signal_item_changed_column );
 
 signals:
     void modified();

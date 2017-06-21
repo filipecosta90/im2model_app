@@ -8,6 +8,7 @@
 #include <QFrame>
 #include <QBoxLayout>
 
+
 #include "cv_image_widget.h"
 
 class CvImageFrameWidget : public QWidget
@@ -33,7 +34,7 @@ class CvImageFrameWidget : public QWidget
     CVImageWidget *image_widget;
     QWidget *parentWidget;
     QScrollArea* scrollArea;
-    QHBoxLayout *contentsLayout;
+    QVBoxLayout *contentsLayout;
     QBoxLayout *toolsLayout;
     QToolBar *toolbar;
 };
