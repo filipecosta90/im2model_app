@@ -658,7 +658,7 @@ bool TDMap::run_tdmap( ){
             bool _clean_run_env = !_flag_runned_tdmap_msa;
             if( _flag_runned_tdmap_msa ){
               _clean_run_env = _tdmap_msa_parameters->clean_for_re_run();
-              _flag_runned_tdmap_msa = !_clean_run_env;  
+              _flag_runned_tdmap_msa = !_clean_run_env;
               if( _flag_logger ){
                 std::stringstream message;
                 message << "Already runned msa. going to clean vars. result: " << std::boolalpha << _clean_run_env ;
@@ -716,7 +716,7 @@ bool TDMap::run_tdmap( ){
           }
         }
         // check that paths are defined
-        if(  _tdmap_wavimg_parameters->_is_bin_path_defined() ){
+        if(  _tdmap_wavimg_parameters->get_flag_full_bin_path_execname() ){
           //if run wavimg flag is true, the prm and dat files should be produced
           if ( _run_wavimg_switch ){
             if( _clean_run_env ){
@@ -727,14 +727,10 @@ bool TDMap::run_tdmap( ){
               if( _flag_logger ){
                 std::stringstream message;
                 message << "_flag_runned_tdmap_wavimg: " << std::boolalpha << _flag_runned_tdmap_wavimg;
-                if( _flag_runned_tdmap_wavimg ){
-                  logger->logEvent( ApplicationLog::notification , message.str() );
-                }
-                else{
-                  logger->logEvent( ApplicationLog::error , message.str() );
-                }
+                ApplicationLog::severity_level _log_type = _flag_runned_tdmap_wavimg ? ApplicationLog::notification : ApplicationLog::error;
+                logger->logEvent( _log_type , message.str() );
               }
-            } 
+            }
             _wavimg_stage_ok = _flag_runned_tdmap_wavimg;
           }
           //if run wavimg flag is false, the dat files should exist and we should update from them
@@ -764,12 +760,8 @@ bool TDMap::run_tdmap( ){
               if( _flag_logger ){
                 std::stringstream message;
                 message << "Already runned simgrid. going to clean vars. result: " << std::boolalpha << _clean_run_env ;
-                if( _clean_run_env ){
-                  logger->logEvent( ApplicationLog::notification , message.str() );
-                }
-                else{
-                  logger->logEvent( ApplicationLog::error , message.str() );
-                }
+                ApplicationLog::severity_level _log_type = _clean_run_env ? ApplicationLog::notification : ApplicationLog::error;
+                logger->logEvent( _log_type , message.str() );
               }
             }
             if( _clean_run_env ){
@@ -785,12 +777,8 @@ bool TDMap::run_tdmap( ){
               if( _flag_logger ){
                 std::stringstream message;
                 message << "_flag_runned_tdmap_simgrid: " << std::boolalpha << _flag_runned_tdmap_simgrid;
-                if( _flag_runned_tdmap_simgrid ){
-                  logger->logEvent( ApplicationLog::notification , message.str() );
-                }
-                else{
-                  logger->logEvent( ApplicationLog::error , message.str() );
-                }
+                ApplicationLog::severity_level _log_type = _flag_runned_tdmap_simgrid ? ApplicationLog::notification : ApplicationLog::error;
+                logger->logEvent( _log_type , message.str() );
               }
             }
             _simgrid_stage_ok = _flag_runned_tdmap_simgrid;
@@ -935,10 +923,7 @@ bool  TDMap::prepare_wavimg_parameters(){
     _tdmap_wavimg_parameters->set_n_rows_samples_output_image( ny_simulated_vertical_samples );
 
     _tdmap_wavimg_parameters->set_number_parameter_loops( 2 );
-
-    std::cout << "WAVIMG: parameter loop DEFOCUS: lower bound " << defocus_lower_bound << ", upper bound " << defocus_upper_bound << ", defocus samples " << defocus_samples << std::endl;
-    std::cout << "WAVIMG: parameter loop SLICES: lower bound " << slices_lower_bound << ", upper bound " << slices_upper_bound << ", slice samples " << slice_samples << std::endl;
-
+    
     _tdmap_wavimg_parameters->add_parameter_loop ( 1 , 1 , 1, defocus_lower_bound, defocus_upper_bound, defocus_samples, "'foc'" );
     _tdmap_wavimg_parameters->add_parameter_loop ( 3 , 1 , 1, slices_lower_bound, slices_upper_bound, slice_samples, "'_sl'" );
     _tdmap_wavimg_parameters->set_prm_file_name("temporary_wavimg_im2model.prm");
@@ -1226,7 +1211,7 @@ bool TDMap::set_thickness_user_estimated_nm( double estimated_nm ){
   return _flag_user_estimated_thickness_nm;
 }
 
-bool TDMap::set_defocus_range_lower_bound( std::string lower_bound ){    
+bool TDMap::set_defocus_range_lower_bound( std::string lower_bound ){
   defocus_lower_bound = boost::lexical_cast<double>( lower_bound );
   _flag_defocus_lower_bound = true;
   calculate_simulation_defocus_period();

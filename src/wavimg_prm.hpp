@@ -28,11 +28,11 @@ class WAVIMG_prm {
     int n_rows_samples_input_wave_function_pixels;
     // line 3
     // Sampling rate of the wave data (<sx> = horizontal, <sy> = vertical) [nm/pix].
-    double physical_columns_sampling_rate_input_wave_function_nm_pixels;
-    double physical_rows_sampling_rate_input_wave_function_nm_pixels;
+    double physical_columns_sampling_rate_input_wave_function_nm_pixels = 0.0f;
+    double physical_rows_sampling_rate_input_wave_function_nm_pixels = 0.0f;
     // line 4
     // TEM high-tension as used for wave function calculation [kV]
-    double primary_electron_energy;
+    double primary_electron_energy = 0.0f;
     // line 5
     // Image output type option: 0 = TEM image, 1 = complex image plane wave, 2 = wave amplitude, 3 = wave phase, 4 = wave real part, 5 = wave imaginary part, 6 = TEM image map of 2 variables
     int type_of_output = 0;
@@ -45,22 +45,22 @@ class WAVIMG_prm {
     // line 8
     // ! Flag and parameters for creating integer images with optional noise. Flag <intflg> 0 = off (default), 1 = 32-bit, 2 = 16-bit, Parameter: <mean> = mean vacuum intensity, <conv> = electron to counts conversion rate, <rnoise> detector readout noise level.
     int image_data_type = 0;
-    double image_vacuum_mean_intensity;
-    double conversion_rate;
-    double readout_noise_rms_amplitude;
+    double image_vacuum_mean_intensity = 0.0f;
+    double conversion_rate = 0.0f;
+    double readout_noise_rms_amplitude = 0.0f;
     // line 9
     // ! Flag activating the extraction of a special image frame (0=OFF, 1=ON). The frame parameters are defined in the lines below.
     int switch_option_extract_particular_image_frame = 0;
     // line 10
     // ! Image output sampling rate [nm/pix], isotropic. The parameter is used only if the Flag in line 09 is set to 1.
-    double image_sampling_rate_nm_pixel;
+    double image_sampling_rate_nm_pixel = 0.0f;
     // line 11
     // ! Image frame offset in pixels of the input wave. The parameter is used only if the Flag in line 09 is set to 1.
-    double image_frame_offset_x_pixels_input_wave_function;
-    double image_frame_offset_y_pixels_input_wave_function;
+    double image_frame_offset_x_pixels_input_wave_function = 0.0f;
+    double image_frame_offset_y_pixels_input_wave_function = 0.0f;
     // line 12
     //  ! Image frame rotation in [deg] with respect to the input wave horizontal axis. The parameter is used only if the Flag in line 09 is set to 1.
-    double image_frame_rotation;
+    double image_frame_rotation = 0.0f;
     // line 13
     //  ! Coherence calculation model switch: 1 = averaging of coherent sub images explicit focal variation but quasi-coherent spatial envelope, 2 = averaging of coherent sub images with explicit focal and angular variation, 3 = quasi-coherent linear envelopes, 4 = Fourier-space synthesis with partially coherent TCC, 5: averaging of coherent sub images with explicit focal, angular, and frozen lattice variation)
     int switch_coherence_model = 1;
@@ -70,16 +70,16 @@ class WAVIMG_prm {
     // line 15
     int partial_spacial_coherence_switch = 0;
     double partial_spacial_coherence_semi_convergence_angle;
-    // line 16  
+    // line 16
     bool mtf_simulation_switch = false;
     double k_space_scaling = 1.0f;
     std::string mtf_filename;
     bool _flag_mtf_filename = false;
     // line 17
     int simulation_image_spread_envelope_switch;
-    double isotropic_one_rms_amplitude;
-    double anisotropic_second_rms_amplitude;
-    double azimuth_orientation_angle;
+    double isotropic_one_rms_amplitude = 0.0f;
+    double anisotropic_second_rms_amplitude = 0.0f;
+    double azimuth_orientation_angle = 0.0f;
     // line 18
     int number_image_aberrations_set;
     // line 19
@@ -88,10 +88,10 @@ class WAVIMG_prm {
     std::map<int,double>  aberration_definition_2nd_coefficient_value_nm;
 
     // line 19 + aberration_definition_index_number
-    double objective_aperture_radius;
+    double objective_aperture_radius = 0.0f;
     // line 20 + aberration_definition_index_number
-    double center_x_of_objective_aperture;
-    double center_y_of_objective_aperture;
+    double center_x_of_objective_aperture = 0.0f;
+    double center_y_of_objective_aperture = 0.0f;
     // line 21
     int number_parameter_loops;
     // line 22 + aberration_definition_index_number
@@ -121,9 +121,10 @@ class WAVIMG_prm {
     bool cleanup_prm();
     bool cleanup_dat();
     bool save_prm_filename_path();
-    bool _is_prm_filename_path_defined();
-    bool _is_prm_produced();
-    bool _is_prm_filename_defined();
+
+    bool get_flag_prm_filename_path();
+    bool get_flag_prm_filename();
+    bool get_flag_produced_prm();
 
     /* boost process output streams */
     boost::process::ipstream& _io_pipe_out;
@@ -141,16 +142,32 @@ class WAVIMG_prm {
 
   public:
     WAVIMG_prm( boost::process::ipstream& async_io_buffer_out );
-    WAVIMG_prm(const WAVIMG_prm &obj);
 
-    enum AberrationDefinition { ImageShift = 0, Defocus = 1, TwofoldAstigmatism = 2, Coma = 3,
+    enum AberrationDefinition {
+      ImageShift = 0, Defocus = 1, TwofoldAstigmatism = 2, Coma = 3,
       ThreefildAstigmatism = 4, SphericalAberration = 5, StarAberration = 6,
       FourfoldAstigmatism = 7, Coma5thOrder = 8, ThreeLobeAberration = 9,
       FiveFoldAstigmatism = 10, SphericalAberration6thOrder = 11, StarAberration6thOrder = 12,
       RosetteAberration = 13, SixfoldAstigmatism = 14, EightfoldAstigmatism = 23
     };
 
-    bool _is_bin_path_defined();
+        bool produce_prm();
+
+        bool full_prm_dat_cleanup_bin();
+
+        bool dat_cleanup_bin();
+
+        bool check_clean_run_env();
+
+        bool call_bin();
+
+        bool clean_for_re_run();
+
+        bool check_produced_dat();
+
+        /**
+        * getters
+        */
 
     // setters line 1
     void set_file_name_input_wave_function( std::string file_name );
@@ -207,8 +224,7 @@ class WAVIMG_prm {
     void add_aberration_definition ( int index_number, double first_coefficient_value_nm, double second_coefficient_value_nm );
 
     bool set_aberration_definition ( WAVIMG_prm::AberrationDefinition aberration_index, int coefficient , double value );
-    double get_aberration_definition( WAVIMG_prm::AberrationDefinition aberration_index, int coefficient );
-    bool get_aberration_definition_switch( WAVIMG_prm::AberrationDefinition aberration_index );
+
     bool set_aberration_definition_switch(  WAVIMG_prm::AberrationDefinition aberration_index, bool value );
 
     // setters line 19 + aberration_definition_index_number
@@ -233,21 +249,19 @@ class WAVIMG_prm {
 
     void set_flag_io_ap_pipe_out( bool value );
 
+    /**
+    * getters
+    */
+
     bool get_flag_io_ap_pipe_out();
 
-    bool produce_prm();
-
-    bool full_prm_dat_cleanup_bin();
-    bool dat_cleanup_bin();
-    bool check_clean_run_env();
+    bool get_flag_full_bin_path_execname();
 
     std::vector<std::string> get_run_env_warnings();
 
-    bool call_bin();
+    double get_aberration_definition( WAVIMG_prm::AberrationDefinition aberration_index, int coefficient );
 
-    bool clean_for_re_run();
-
-    bool check_produced_dat();
+    bool get_aberration_definition_switch( WAVIMG_prm::AberrationDefinition aberration_index );
 
 };
 
