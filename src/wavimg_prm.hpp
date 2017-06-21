@@ -16,9 +16,10 @@
 
 #include <stdlib.h>
 
+#include "base_crystal.hpp"
 #include "application_log.hpp"
 
-class WAVIMG_prm {
+class WAVIMG_prm : public BaseCrystal {
   private:
     // line 1
     std::string file_name_input_wave_function;
@@ -32,7 +33,7 @@ class WAVIMG_prm {
     double physical_rows_sampling_rate_input_wave_function_nm_pixels = 0.0f;
     // line 4
     // TEM high-tension as used for wave function calculation [kV]
-    double primary_electron_energy = 0.0f;
+    // INHERITS FROM BaseCrystal
     // line 5
     // Image output type option: 0 = TEM image, 1 = complex image plane wave, 2 = wave amplitude, 3 = wave phase, 4 = wave real part, 5 = wave imaginary part, 6 = TEM image map of 2 variables
     int type_of_output = 0;
@@ -113,11 +114,6 @@ class WAVIMG_prm {
     std::string prm_filename_path;
     bool _flag_prm_filename_path = false;
 
-    boost::filesystem::path full_bin_path_execname;
-    bool _flag_full_bin_path_execname = false;
-    bool debug_switch = true;
-    bool runned_bin = false;
-
     bool cleanup_prm();
     bool cleanup_dat();
     bool save_prm_filename_path();
@@ -125,20 +121,6 @@ class WAVIMG_prm {
     bool get_flag_prm_filename_path();
     bool get_flag_prm_filename();
     bool get_flag_produced_prm();
-
-    /* boost process output streams */
-    boost::process::ipstream& _io_pipe_out;
-    bool _flag_io_ap_pipe_out = false;
-
-    /* Loggers */
-    ApplicationLog::ApplicationLog* logger = nullptr;
-    bool _flag_logger = false;
-
-    /* Base dir path */
-    boost::filesystem::path base_dir_path;
-    bool _flag_base_dir_path = false;
-
-    std::vector<std::string> run_env_warnings;
 
   public:
     WAVIMG_prm( boost::process::ipstream& async_io_buffer_out );
@@ -178,7 +160,7 @@ class WAVIMG_prm {
     void set_physical_columns_sampling_rate_input_wave_function_nm_pixels( double columns_sampling_rate );
     void set_physical_rows_sampling_rate_input_wave_function_nm_pixels( double rows_sampling_rate );
     // setters line 4
-    void set_primary_electron_energy( double electron_energy );
+    // INHERITS FROM BaseCrystal
     // setters line 5
     void set_type_of_output( int type );
     // setters line 6
@@ -239,25 +221,11 @@ class WAVIMG_prm {
 
     void set_prm_file_name( std::string filename );
 
-    void set_debug_switch(bool deb_switch);
-
-    bool set_bin_execname ( std::string execname );
-
-    bool set_application_logger( ApplicationLog::ApplicationLog* logger );
-
-    bool set_base_dir_path( boost::filesystem::path base_dir );
-
     void set_flag_io_ap_pipe_out( bool value );
 
     /**
     * getters
     */
-
-    bool get_flag_io_ap_pipe_out();
-
-    bool get_flag_full_bin_path_execname();
-
-    std::vector<std::string> get_run_env_warnings();
 
     double get_aberration_definition( WAVIMG_prm::AberrationDefinition aberration_index, int coefficient );
 

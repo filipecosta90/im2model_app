@@ -63,6 +63,7 @@ class CELSLC_prm {
     int nz_simulated_partitions;
     bool _flag_nz_simulated_partitions=false;
     double ht_accelaration_voltage;
+    bool _flag_ht_accelaration_voltage = false;
 
     // runnable execv info
     bool runned_bin;
@@ -86,7 +87,7 @@ class CELSLC_prm {
     bool single_slice_calculation_nz_switch;
     bool single_slice_calculation_enabled_switch;
 
-    void cleanup_thread(); 
+    void cleanup_thread();
     bool prepare_bin_ssc();
     bool prepare_nz_simulated_partitions_from_ssc_prm();
 
@@ -159,7 +160,7 @@ class CELSLC_prm {
 
     void set_nz_simulated_partitions( int nz_simulated_partitions );
 
-    void set_ht_accelaration_voltage( double ht_accelaration_voltage );
+    bool set_ht_accelaration_voltage( double ht_accelaration_voltage );
 
     void set_dwf_switch( bool dwf_switch );
 
@@ -173,7 +174,7 @@ class CELSLC_prm {
 
     void set_flag_io_ap_pipe_out( bool value );
 
-    int get_nz_simulated_partitions(); 
+    int get_nz_simulated_partitions();
 
     int get_slice_number_from_nm_floor( double goal_thickness_nm );
 
@@ -190,6 +191,8 @@ class CELSLC_prm {
     std::vector<double> get_slice_params_accum_nm_slice_vec();
 
     boost::process::ipstream& get_io_pipe_out(){ return _io_pipe_out; }
+
+    bool get_flag_ht_accelaration_voltage();
 
     bool update_nz_simulated_partitions_from_prm();
 

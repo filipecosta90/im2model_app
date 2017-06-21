@@ -2,9 +2,8 @@
 
 static const std::string DAT_EXTENSION = ".dat";
 
-WAVIMG_prm::WAVIMG_prm( boost::process::ipstream &async_io_buffer_out ) : _io_pipe_out(async_io_buffer_out) {
+WAVIMG_prm::WAVIMG_prm( boost::process::ipstream &async_io_buffer_out ) : BaseCrystal ( async_io_buffer_out ) {
 }
-
 
 bool WAVIMG_prm::produce_prm ( ) {
   bool result = false;
@@ -27,7 +26,7 @@ bool WAVIMG_prm::produce_prm ( ) {
     // line 3
     outfile  << physical_columns_sampling_rate_input_wave_function_nm_pixels << ", " << physical_rows_sampling_rate_input_wave_function_nm_pixels << "\t\t! Sampling rate of the wave data (<sx> = horizontal, <sy> = vertical) [nm/pix]." << std::endl;
     // line 4
-    outfile <<  primary_electron_energy << "\t\t! TEM high-tension as used for wave function calculation [kV]." << std::endl;
+    outfile <<  ht_accelaration_voltage << "\t\t! TEM high-tension as used for wave function calculation [kV]." << std::endl;
     // line 5
     outfile <<  type_of_output << "\t\t! Image output type option: 0 = TEM image" << std::endl;
     // line 6
@@ -164,10 +163,6 @@ bool WAVIMG_prm::cleanup_prm(){
   return status;
 }
 
-std::vector<std::string> WAVIMG_prm::get_run_env_warnings(){
-  return run_env_warnings;
-}
-
 bool WAVIMG_prm::cleanup_dat(){
   bool status = true;
   boost::filesystem::path dir ( base_dir_path );
@@ -206,14 +201,14 @@ bool WAVIMG_prm::full_prm_dat_cleanup_bin(){
   t1.join();
   boost::thread t2( &WAVIMG_prm::cleanup_dat , this );
   t2.join();
-  runned_bin = false;
+  _flag_runned_bin = false;
   return true;
 }
 
 bool WAVIMG_prm::dat_cleanup_bin(){
   boost::thread t( &WAVIMG_prm::cleanup_dat , this );
   t.join();
-  runned_bin = false;
+  _flag_runned_bin = false;
   return true;
 }
 
@@ -232,7 +227,7 @@ bool WAVIMG_prm::call_bin(){
     args_stream << " -prm " << "\"" << full_prm_path.string() << "\"";
 
     // input debug switch
-    if ( debug_switch ){
+    if ( _flag_debug_switch ){
       args_stream << " /dbg";
     }
 
@@ -316,8 +311,8 @@ bool WAVIMG_prm::call_bin(){
     }
 
     if( _exit_sucess_flag ){
-      runned_bin = check_produced_dat();
-      result = runned_bin;
+      _flag_runned_bin = check_produced_dat();
+      result = _flag_runned_bin;
     }
   }
   return result;
@@ -396,7 +391,6 @@ bool WAVIMG_prm::set_aberration_definition ( WAVIMG_prm::AberrationDefinition ab
   return result;
 }
 
-
 bool WAVIMG_prm::set_aberration_definition_switch(  WAVIMG_prm::AberrationDefinition aberration_index, bool value ){
   bool result = false;
   if( aberration_definition_switch.find( aberration_index ) != aberration_definition_switch.end() ){
@@ -408,35 +402,6 @@ bool WAVIMG_prm::set_aberration_definition_switch(  WAVIMG_prm::AberrationDefini
     result = true;
   }
   return result;
-}
-
-bool WAVIMG_prm::set_bin_execname( std::string execname ){
-  full_bin_path_execname = boost::filesystem::path (execname);
-  try {
-    _flag_full_bin_path_execname = boost::filesystem::exists( full_bin_path_execname );
-  }
-  catch (const boost::filesystem::filesystem_error& ex) {
-    std::cout << ex.what() << '\n';
-    _flag_full_bin_path_execname = false;
-    if( _flag_logger ){
-      std::stringstream message;
-      message << "ERROR: " << ex.what();
-      logger->logEvent( ApplicationLog::notification , message.str() );
-    }
-  }
-  if( _flag_logger ){
-    std::stringstream message;
-    message << "checking if WAVIMG exec exists. full path: " <<  full_bin_path_execname.string() << " || result: " << _flag_full_bin_path_execname << std::endl;
-    logger->logEvent( ApplicationLog::notification , message.str() );
-  }
-  return _flag_full_bin_path_execname;
-}
-
-bool WAVIMG_prm::set_application_logger( ApplicationLog::ApplicationLog* app_logger ){
-  logger = app_logger;
-  _flag_logger = true;
-  logger->logEvent( ApplicationLog::notification, "Application logger setted for WAVIMG_prm class." );
-  return true;
 }
 
 // setters line 1
@@ -463,9 +428,7 @@ void WAVIMG_prm::set_physical_rows_sampling_rate_input_wave_function_nm_pixels( 
 }
 
 // setters line 4
-void WAVIMG_prm::set_primary_electron_energy( double electron_energy ){
-  primary_electron_energy = electron_energy;
-}
+// INHERITS FROM BASE CRYSTAL
 
 // setters line 5
 void WAVIMG_prm::set_type_of_output( int type ){
@@ -561,15 +524,6 @@ bool WAVIMG_prm::set_mtf_simulation_switch( bool status ){
   return result;
 }
 
-bool WAVIMG_prm::set_base_dir_path( boost::filesystem::path path ){
-  base_dir_path = path;
-  _flag_base_dir_path = true;
-  std::stringstream message;
-  message << "WAVIMG_prm baseDirPath: " << path.string();
-  logger->logEvent( ApplicationLog::notification, message.str() );
-  return true;
-}
-
 void WAVIMG_prm::set_k_space_scaling( double scale ){
   k_space_scaling = scale;
 }
@@ -645,17 +599,9 @@ void WAVIMG_prm::set_number_parameter_loops( int number_loops ){
   number_parameter_loops = number_loops;
 }
 
-void WAVIMG_prm::set_flag_io_ap_pipe_out( bool value ){
-  _flag_io_ap_pipe_out = value;
-}
-
 void WAVIMG_prm::set_prm_file_name( std::string filename ){
   prm_filename = filename;
   _flag_prm_filename = true;
-}
-
-void WAVIMG_prm::set_debug_switch(bool deb_switch){
-  debug_switch = deb_switch;
 }
 
 /* *
@@ -728,18 +674,10 @@ void WAVIMG_prm::add_parameter_loop ( int parameter_class , int parameter_index,
   loop_string_indentifier.push_back(string_identifier);
 }
 
-bool WAVIMG_prm::get_flag_io_ap_pipe_out(){
-  return _flag_io_ap_pipe_out;
-}
-
 bool WAVIMG_prm::get_flag_prm_filename(){
   return _flag_prm_filename;
 }
 
 bool WAVIMG_prm::get_flag_produced_prm(){
   return _flag_produced_prm;
-}
-
-bool WAVIMG_prm::get_flag_full_bin_path_execname(){
-  return _flag_full_bin_path_execname;
 }

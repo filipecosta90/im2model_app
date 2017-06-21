@@ -30,7 +30,7 @@ CELSLC_prm::CELSLC_prm( boost::process::ipstream &async_io_buffer_out ) : _io_pi
   projected_dir_uvw_switch = false;
   super_cell_size_switch = false;
   // default value nz:
-  auto_equidistant_slices_switch = true; 
+  auto_equidistant_slices_switch = true;
   auto_non_equidistant_slices_switch = false;
   runned_bin = false;
   ssc_runned_bin = false;
@@ -39,11 +39,9 @@ CELSLC_prm::CELSLC_prm( boost::process::ipstream &async_io_buffer_out ) : _io_pi
   single_slice_calculation_enabled_switch = true;
 }
 
-
 bool CELSLC_prm::_is_nz_simulated_partitions_defined(){
   return _flag_nz_simulated_partitions;
 }
-
 
 bool CELSLC_prm::_is_bin_path_defined(){
   return _flag_full_bin_path_execname;
@@ -61,7 +59,7 @@ void CELSLC_prm::set_prj_dir_hkl(double projection_dir_h, double projection_dir_
 }
 
 void CELSLC_prm::set_prp_dir_uvw(double perpendicular_dir_u , double perpendicular_dir_v , double perpendicular_dir_w ){
-  prp_dir_u = perpendicular_dir_u; 
+  prp_dir_u = perpendicular_dir_u;
   prp_dir_v = perpendicular_dir_v;
   prp_dir_w = perpendicular_dir_w;
   projected_dir_uvw_switch = true;
@@ -69,7 +67,7 @@ void CELSLC_prm::set_prp_dir_uvw(double perpendicular_dir_u , double perpendicul
 
 void CELSLC_prm::calc_prp_dir_uvw(){
   assert(projection_dir_hkl_switch);
-  cv::Point3d vector_z_axis_projected (prj_dir_h, prj_dir_k, prj_dir_l); 
+  cv::Point3d vector_z_axis_projected (prj_dir_h, prj_dir_k, prj_dir_l);
   cv::Mat z_axis_projected_mat ( vector_z_axis_projected , CV_64F);
   cv::Point3d vector_aux(prj_dir_h+1,prj_dir_k+1,prj_dir_l+1);
   cv::Mat aux_mat ( vector_aux , CV_64F);
@@ -82,7 +80,7 @@ void CELSLC_prm::calc_prp_dir_uvw(){
 
 void CELSLC_prm::calc_prj_dir_hkl(){
   assert(projected_dir_uvw_switch);
-  cv::Point3d vector_y_axis_projected (prp_dir_u, prp_dir_v, prp_dir_w); 
+  cv::Point3d vector_y_axis_projected (prp_dir_u, prp_dir_v, prp_dir_w);
   cv::Mat y_axis_projected_mat ( vector_y_axis_projected , CV_64F);
   cv::Point3d vector_aux(prp_dir_u+1,prp_dir_v+1,prp_dir_w+1);
   cv::Mat aux_mat ( vector_aux , CV_64F);
@@ -171,15 +169,16 @@ void CELSLC_prm::set_ny_simulated_vertical_samples( int ny ){
 
 void CELSLC_prm::set_nz_simulated_partitions( int nz ){
   nz_simulated_partitions = nz;
-  auto_equidistant_slices_switch = false; 
+  auto_equidistant_slices_switch = false;
   auto_non_equidistant_slices_switch = false;
   if( nz == 0 ){
-    auto_equidistant_slices_switch = true; 
+    auto_equidistant_slices_switch = true;
   }
 }
 
-void CELSLC_prm::set_ht_accelaration_voltage( double ht ){
+bool CELSLC_prm::set_ht_accelaration_voltage( double ht ){
   ht_accelaration_voltage = ht;
+  return true;
 }
 
 void CELSLC_prm::set_dwf_switch( bool dwf ){
@@ -248,7 +247,7 @@ int CELSLC_prm::get_nz_simulated_partitions( ){
   if (( runned_bin != true ) && ( ssc_runned_bin != true )){
     update_nz_simulated_partitions_from_prm();
   }
-  return nz_simulated_partitions; 
+  return nz_simulated_partitions;
 }
 
 int CELSLC_prm::get_slice_number_from_nm_floor( double goal_thickness_nm ){
@@ -259,13 +258,13 @@ int CELSLC_prm::get_slice_number_from_nm_floor( double goal_thickness_nm ){
   assert( slice_params_nm_slice_vec.size() == nz_simulated_partitions );
   double accumulated_thickness = 0.0f;
   int slice_pos = 1;
-  for ( 
+  for (
       std::vector<double>::iterator slice_itt = slice_params_nm_slice_vec.begin();
       slice_itt != slice_params_nm_slice_vec.end() && goal_thickness_nm > accumulated_thickness;
       slice_itt ++, slice_pos++
       ){
     accumulated_thickness +=  *slice_itt;
-  } 
+  }
   return slice_pos;
 }
 
@@ -285,13 +284,13 @@ int CELSLC_prm::get_slice_number_from_nm_ceil( double goal_thickness_nm ){
 
   double accumulated_thickness = 0.0f;
   int slice_pos = 1;
-  for ( 
+  for (
       std::vector<double>::iterator slice_itt = slice_params_nm_slice_vec.begin();
       slice_itt != slice_params_nm_slice_vec.end() && accumulated_thickness < goal_thickness_nm;
       slice_itt ++, slice_pos++
       ){
     accumulated_thickness +=  *slice_itt;
-  } 
+  }
   return slice_pos;
 }
 
@@ -305,7 +304,7 @@ std::vector<double> CELSLC_prm::get_slice_params_nm_slice_vec(){
 
 bool CELSLC_prm::update_nz_simulated_partitions_from_prm(){
   assert( slc_file_name_prefix != "" );
-  bool result = false;  
+  bool result = false;
   if( auto_equidistant_slices_switch || auto_non_equidistant_slices_switch ){
 
     boost::filesystem::path dir ( base_dir_path );
@@ -332,21 +331,21 @@ bool CELSLC_prm::update_nz_simulated_partitions_from_prm(){
         double accumulated_thickness = 0.0f;
         for (int slice_id = 1; slice_id <= nz_simulated_partitions ; slice_id ++ ){
           //ignore line with '[Slice Parameters]'
-          std::getline(infile, line); 
-          //ignore line with slice### 
-          std::getline(infile, line); 
-          //ignore line with slicepath 
-          std::getline(infile, line); 
+          std::getline(infile, line);
+          //ignore line with slice###
+          std::getline(infile, line);
+          //ignore line with slicepath
+          std::getline(infile, line);
           //ignore line with nx
-          std::getline(infile, line); 
+          std::getline(infile, line);
           //ignore line with ny
-          std::getline(infile, line); 
+          std::getline(infile, line);
           //ignore line with nz
-          std::getline(infile, line); 
+          std::getline(infile, line);
           //ignore line with nm/per/px x
-          std::getline(infile, line); 
+          std::getline(infile, line);
           //ignore line with nm/per/px y
-          std::getline(infile, line); 
+          std::getline(infile, line);
           //get nz dimension of the slice
           std::getline(infile, line);
           std::istringstream iss(line);
@@ -440,8 +439,8 @@ bool CELSLC_prm::check_produced_slices(){
 }
 
 bool CELSLC_prm::cleanup_bin( ){
-  boost::thread t( &CELSLC_prm::cleanup_thread , this ); 
-  runned_bin = false; 
+  boost::thread t( &CELSLC_prm::cleanup_thread , this );
+  runned_bin = false;
   return true;
 }
 
@@ -451,6 +450,10 @@ bool CELSLC_prm::get_flag_io_ap_pipe_out(){
 
 void CELSLC_prm::set_flag_io_ap_pipe_out( bool value ){
   _flag_io_ap_pipe_out = value;
+}
+
+bool CELSLC_prm::get_flag_ht_accelaration_voltage(){
+  return _flag_ht_accelaration_voltage;
 }
 
 bool CELSLC_prm::clean_for_re_run(){
@@ -498,22 +501,22 @@ bool CELSLC_prm::call_boost_bin(  ){
     args_stream << " -ht " << ht_accelaration_voltage;
 
     if( projection_dir_hkl_switch && projected_dir_uvw_switch && super_cell_size_switch ){
-      args_stream << " -prj " << (float) prj_dir_h  << "," << (float) prj_dir_k << "," << (float) prj_dir_l << ","  
-        <<  prp_dir_u << "," << prp_dir_v << "," << prp_dir_w << "," 
+      args_stream << " -prj " << (float) prj_dir_h  << "," << (float) prj_dir_k << "," << (float) prj_dir_l << ","
+        <<  prp_dir_u << "," << prp_dir_v << "," << prp_dir_w << ","
         << (float) super_cell_size_a << "," << (float) super_cell_size_b << "," << (float) super_cell_size_c;
     }
-    /**  
-     * Equidistant slicing of the super-cell along the c-axis. 
-     * Specify an explicit number of slices, 
-     * or use -nz 0 to let CELSLC determine the number of equidistant slices automatically. 
-     * Omitting the -nz option will lead to an automatic non-equidistant slicing. 
+    /**
+     * Equidistant slicing of the super-cell along the c-axis.
+     * Specify an explicit number of slices,
+     * or use -nz 0 to let CELSLC determine the number of equidistant slices automatically.
+     * Omitting the -nz option will lead to an automatic non-equidistant slicing.
      * **/
     if( !auto_non_equidistant_slices_switch ){
       args_stream << " -nz ";
       // input nz string
       if( auto_equidistant_slices_switch ){
         //let CELSLC determine the number of equidistant slices automatically
-        args_stream << "0"; 
+        args_stream << "0";
       }
       else{
         //Specify an explicit number of slices
@@ -618,7 +621,7 @@ bool CELSLC_prm::call_boost_bin(  ){
   }
 
   bool CELSLC_prm::prepare_nz_simulated_partitions_from_ssc_prm(){
-    bool result = false;  
+    bool result = false;
 
     std::stringstream input_prm_stream;
     boost::filesystem::path dir (full_path_runned_bin);
@@ -635,25 +638,25 @@ bool CELSLC_prm::call_boost_bin(  ){
       std::istringstream iss(line);
       int nslices;
       iss >> nz_simulated_partitions;
-      std::cout << "The file \"" << input_prm_stream.str() << "\" indicated : " <<  nz_simulated_partitions << " slices" << std::endl; 
+      std::cout << "The file \"" << input_prm_stream.str() << "\" indicated : " <<  nz_simulated_partitions << " slices" << std::endl;
       double accumulated_thickness = 0.0f;
       for (int slice_id = 1; slice_id <= nz_simulated_partitions ; slice_id ++ ){
         //ignore line with '[Slice Parameters]'
-        std::getline(infile, line); 
-        //ignore line with slice### 
-        std::getline(infile, line); 
-        //ignore line with slicepath 
-        std::getline(infile, line); 
+        std::getline(infile, line);
+        //ignore line with slice###
+        std::getline(infile, line);
+        //ignore line with slicepath
+        std::getline(infile, line);
         //ignore line with nx
-        std::getline(infile, line); 
+        std::getline(infile, line);
         //ignore line with ny
-        std::getline(infile, line); 
+        std::getline(infile, line);
         //ignore line with nz
-        std::getline(infile, line); 
+        std::getline(infile, line);
         //ignore line with nm/per/px x
-        std::getline(infile, line); 
+        std::getline(infile, line);
         //ignore line with nm/per/px y
-        std::getline(infile, line); 
+        std::getline(infile, line);
         //get nz dimension of the slice
         std::getline(infile, line);
         std::istringstream iss(line);
@@ -697,20 +700,20 @@ bool CELSLC_prm::call_boost_bin(  ){
       // input nx string
       args_stream << " -nx 32";
       // input ny string
-      args_stream << " -ny 32"; 
+      args_stream << " -ny 32";
       // input ht
       args_stream << " -ht " << ht_accelaration_voltage;
 
       if( projection_dir_hkl_switch && projected_dir_uvw_switch && super_cell_size_switch ){
-        args_stream << " -prj " << (float) prj_dir_h  << "," << (float) prj_dir_k << "," << (float) prj_dir_l << ","  
-          <<  prp_dir_u << "," << prp_dir_v << "," << prp_dir_w << "," 
+        args_stream << " -prj " << (float) prj_dir_h  << "," << (float) prj_dir_k << "," << (float) prj_dir_l << ","
+          <<  prp_dir_u << "," << prp_dir_v << "," << prp_dir_w << ","
           << (float) super_cell_size_a << "," << (float) super_cell_size_b << "," << (float) super_cell_size_c;
       }
-      /**  
-       * Equidistant slicing of the super-cell along the c-axis. 
-       * Specify an explicit number of slices, 
-       * or use -nz 0 to let CELSLC determine the number of equidistant slices automatically. 
-       * Omitting the -nz option will lead to an automatic non-equidistant slicing. 
+      /**
+       * Equidistant slicing of the super-cell along the c-axis.
+       * Specify an explicit number of slices,
+       * or use -nz 0 to let CELSLC determine the number of equidistant slices automatically.
+       * Omitting the -nz option will lead to an automatic non-equidistant slicing.
        * **/
       args_stream << " -nz 0";
 
@@ -721,7 +724,7 @@ bool CELSLC_prm::call_boost_bin(  ){
         args_stream << " -abs";
       }
       std::cout << " prep run with args  " <<  args_stream.str() << std::endl;
-      boost::process::system( args_stream.str() ); 
+      boost::process::system( args_stream.str() );
       prepare_nz_simulated_partitions_from_ssc_prm();
       single_slice_calculation_prepare_bin_runned_switch = true;
       std::cout << "ssc NZ max processes " << nz_simulated_partitions << std::endl;
@@ -762,8 +765,8 @@ bool CELSLC_prm::call_boost_bin(  ){
       args_stream << " -ht " << ht_accelaration_voltage;
 
       if( projection_dir_hkl_switch && projected_dir_uvw_switch && super_cell_size_switch ){
-        args_stream << " -prj " << (float) prj_dir_h  << "," << (float) prj_dir_k << "," << (float) prj_dir_l << ","  
-          <<  prp_dir_u << "," << prp_dir_v << "," << prp_dir_w << "," 
+        args_stream << " -prj " << (float) prj_dir_h  << "," << (float) prj_dir_k << "," << (float) prj_dir_l << ","
+          <<  prp_dir_u << "," << prp_dir_v << "," << prp_dir_w << ","
           << (float) super_cell_size_a << "," << (float) super_cell_size_b << "," << (float) super_cell_size_c;
       }
 
@@ -784,7 +787,7 @@ bool CELSLC_prm::call_boost_bin(  ){
         std::cout << "Process for slice #" << slice_id << std::endl;
         std::cout << "\tcommand: " << ssc_stream.str() << std::endl;
         std::stringstream celslc_stream;
-        celslc_stream << "log_" << slc_file_name_prefix << "_" << slice_id << ".log"; 
+        celslc_stream << "log_" << slc_file_name_prefix << "_" << slice_id << ".log";
         std::cout << "Saving log of slice #"<< slice_id << " in file: " << celslc_stream.str() << std::endl ;
 
         if ( _flag_io_ap_pipe_out == true ){
@@ -792,7 +795,7 @@ bool CELSLC_prm::call_boost_bin(  ){
               // command
               ssc_stream.str(),
               // redirecting std_out
-              boost::process::std_out > celslc_stream.str(), 
+              boost::process::std_out > celslc_stream.str(),
               // process group
               ssc_group ,
               // error control
@@ -803,7 +806,7 @@ bool CELSLC_prm::call_boost_bin(  ){
               // command
               ssc_stream.str(),
               // redirecting std_out
-              boost::process::std_out > boost::process::null, 
+              boost::process::std_out > boost::process::null,
               // process group
               ssc_group ,
               // error control
@@ -834,7 +837,7 @@ bool CELSLC_prm::call_boost_bin(  ){
         }
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
       }
-      ssc_runned_bin = true; 
+      ssc_runned_bin = true;
       result = false;
     }
     return result;

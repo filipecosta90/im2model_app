@@ -46,7 +46,21 @@ TDMap::TDMap( boost::process::ipstream& ostream_celslc_buffer,
   file_name_output_image_wave_function = "image";
   _flag_file_name_output_image_wave_function = true;
 
-
+  /* ******
+   * celslc static settings
+   */
+  /* ******
+   * msa static settings
+   */
+  _tdmap_msa_parameters->set_internal_repeat_factor_of_super_cell_along_x ( 1 );
+  _tdmap_msa_parameters->set_internal_repeat_factor_of_super_cell_along_y ( 1 );
+  _tdmap_msa_parameters->set_slice_filename_prefix ( slc_file_name_prefix );
+  _tdmap_msa_parameters->set_number_slices_to_load ( slices_load );
+  _tdmap_msa_parameters->set_number_frozen_lattice_variants_considered_per_slice( 1 );
+  _tdmap_msa_parameters->set_minimum_number_frozen_phonon_configurations_used_generate_wave_functions ( 1 );
+  _tdmap_msa_parameters->set_period_readout_or_detection_in_units_of_slices ( 1 ); // bug
+  _tdmap_msa_parameters->set_prm_file_name("temporary_msa_im2model.prm");
+  _tdmap_msa_parameters->set_wave_function_name ( wave_function_name );
   /* ******
    * wavimg static settings
    */
@@ -101,7 +115,6 @@ TDMap::TDMap( boost::process::ipstream& ostream_celslc_buffer,
   // setters line 21 + aberration_definition_index_number
   // SIMULATION DEPENDENT
   _tdmap_wavimg_parameters->set_prm_file_name("temporary_wavimg_im2model.prm");
-
 
 }
 
@@ -835,7 +848,6 @@ bool  TDMap::prepare_celslc_parameters(){
       && _core_image_crystal_ptr->_is_perpendicular_dir_defined()
       && _core_image_crystal_ptr->_is_projection_dir_defined()
       && _is_simulated_image_sampling_rate_and_size_defined()
-      && _flag_ht_accelaration_voltage
     ){
     const std::string super_cell_cif_file = _core_image_crystal_ptr->get_super_cell_cif_file_path();
     const double perpendicular_dir_u = _core_image_crystal_ptr->get_perpendicular_dir_u();
@@ -852,7 +864,6 @@ bool  TDMap::prepare_celslc_parameters(){
     _tdmap_celslc_parameters->set_slc_filename_prefix ( slc_file_name_prefix.c_str() );
     _tdmap_celslc_parameters->set_nx_simulated_horizontal_samples( nx_simulated_horizontal_samples );
     _tdmap_celslc_parameters->set_ny_simulated_vertical_samples( ny_simulated_vertical_samples );
-    _tdmap_celslc_parameters->set_ht_accelaration_voltage( ht_accelaration_voltage );
     _tdmap_celslc_parameters->set_dwf_switch( dwf_switch );
     _tdmap_celslc_parameters->set_abs_switch( abs_switch );
     _flag_tdmap_celslc_parameters = true;
@@ -881,24 +892,12 @@ bool  TDMap::prepare_msa_parameters(){
   if( _is_thickness_range_lower_bound_slice_defined()
       && _is_thickness_range_upper_bound_slice_defined()
       && _is_thickness_period_slice_defined()
-      && _is_ht_accelaration_voltage_defined()
       && _is_slc_file_name_prefix_defined()
     ){
-    _tdmap_msa_parameters->set_electron_wavelength( ht_accelaration_voltage );
-    _tdmap_msa_parameters->set_internal_repeat_factor_of_super_cell_along_x ( 1 );
-    _tdmap_msa_parameters->set_internal_repeat_factor_of_super_cell_along_y ( 1 );
-    std::stringstream input_prefix_stream;
-    _tdmap_msa_parameters->set_slice_filename_prefix ( slc_file_name_prefix );
     _tdmap_msa_parameters->set_number_slices_to_load ( slices_load );
-    _tdmap_msa_parameters->set_number_frozen_lattice_variants_considered_per_slice( 1 );
-    _tdmap_msa_parameters->set_minimum_number_frozen_phonon_configurations_used_generate_wave_functions ( 1 );
-    _tdmap_msa_parameters->set_period_readout_or_detection_in_units_of_slices ( 1 ); // bug
     _tdmap_msa_parameters->set_number_slices_used_describe_full_object_structure_up_to_its_maximum_thickness ( number_slices_to_max_thickness );
     _tdmap_msa_parameters->set_linear_slices_for_full_object_structure();
-    _tdmap_msa_parameters->set_prm_file_name("temporary_msa_im2model.prm");
-    _tdmap_msa_parameters->set_wave_function_name ( wave_function_name );
     _tdmap_msa_parameters->produce_prm();
-
     _flag_tdmap_msa_parameters = true;
   }
   return _flag_tdmap_msa_parameters;
@@ -917,13 +916,12 @@ bool  TDMap::prepare_wavimg_parameters(){
     _tdmap_wavimg_parameters->set_physical_columns_sampling_rate_input_wave_function_nm_pixels( sampling_rate_super_cell_x_nm_pixel );
     _tdmap_wavimg_parameters->set_physical_rows_sampling_rate_input_wave_function_nm_pixels( sampling_rate_super_cell_y_nm_pixel );
     // setters line 4
-    _tdmap_wavimg_parameters->set_primary_electron_energy( ht_accelaration_voltage );
     // setters line 7
     _tdmap_wavimg_parameters->set_n_columns_samples_output_image( nx_simulated_horizontal_samples );
     _tdmap_wavimg_parameters->set_n_rows_samples_output_image( ny_simulated_vertical_samples );
 
     _tdmap_wavimg_parameters->set_number_parameter_loops( 2 );
-    
+
     _tdmap_wavimg_parameters->add_parameter_loop ( 1 , 1 , 1, defocus_lower_bound, defocus_upper_bound, defocus_samples, "'foc'" );
     _tdmap_wavimg_parameters->add_parameter_loop ( 3 , 1 , 1, slices_lower_bound, slices_upper_bound, slice_samples, "'_sl'" );
     _tdmap_wavimg_parameters->set_prm_file_name("temporary_wavimg_im2model.prm");
@@ -961,7 +959,7 @@ bool  TDMap::prepare_simgrid_parameters(){
   _td_map_simgrid->set_slices_lower_bound( slices_lower_bound );
   _td_map_simgrid->set_slices_upper_bound( slices_upper_bound );
 
-  _td_map_simgrid->set_n_rows_simulated_image( nx_simulated_horizontal_samples );
+  _td_map_simgrid->set_n_rows_simulated_image(  nx_simulated_horizontal_samples );
   _td_map_simgrid->set_n_cols_simulated_image( ny_simulated_vertical_samples );
 
   _td_map_simgrid->set_reshaped_simulated_image_width(reshaped_simulated_image_width);
@@ -1016,8 +1014,13 @@ bool TDMap::_is_defocus_range_upper_bound_defined(){
   return _flag_defocus_upper_bound;
 }
 
-bool TDMap::_is_ht_accelaration_voltage_defined(){
-  return _flag_ht_accelaration_voltage;
+bool TDMap::get_flag_ht_accelaration_voltage(){
+  bool result = true;
+  const bool celslc_result = _tdmap_celslc_parameters->get_flag_ht_accelaration_voltage( );
+  const bool msa_result = _tdmap_msa_parameters->get_flag_ht_accelaration_voltage( );
+  const bool wavimg_result =  _tdmap_wavimg_parameters->get_flag_ht_accelaration_voltage( );
+  result = celslc_result & msa_result & wavimg_result;
+  return result;
 }
 
 bool TDMap::_is_slc_file_name_prefix_defined(){
@@ -1239,9 +1242,19 @@ bool TDMap::set_defocus_range_nm_interval_dimension( std::string dimension ){
 }
 
 bool TDMap::set_accelaration_voltage_kv( std::string accelaration_voltage ){
-  ht_accelaration_voltage = boost::lexical_cast<double>( accelaration_voltage );
-  _flag_ht_accelaration_voltage = true;
-  return true;
+  bool result = false;
+  try {
+    const double _ht_accelaration_voltage = boost::lexical_cast<double>( accelaration_voltage );
+    const bool celslc_result = _tdmap_celslc_parameters->set_ht_accelaration_voltage( _ht_accelaration_voltage );
+    const bool msa_result = _tdmap_msa_parameters->set_ht_accelaration_voltage( _ht_accelaration_voltage );
+    const bool wavimg_result =  _tdmap_wavimg_parameters->set_ht_accelaration_voltage( _ht_accelaration_voltage );
+    result = celslc_result & msa_result & wavimg_result;
+  }
+  catch(boost::bad_lexical_cast&  ex) {
+    // pass it up
+    boost::throw_exception( ex );
+  }
+  return result;
 }
 
 bool TDMap::set_core_image_crystal_ptr( Image_Crystal* image_crystal_ptr ){

@@ -71,9 +71,6 @@ class TDMap  : public QObject {
     bool _flag_user_estimated_defocus_nm = false;
     bool _flag_defocus_range_nm_interval_dimension = false;
 
-    double ht_accelaration_voltage;
-    bool _flag_ht_accelaration_voltage = false;
-
     /////////////////////////
     // Im2Model core pointers
     /////////////////////////
@@ -336,8 +333,7 @@ class TDMap  : public QObject {
     bool _is_defocus_range_lower_bound_defined();
     bool _is_defocus_period_defined();
     bool _is_defocus_range_upper_bound_defined();
-    // ht accelaration voltage
-    bool _is_ht_accelaration_voltage_defined();
+
     // dr probe
     bool _is_dr_probe_bin_path_defined();
     // advanced options
@@ -360,6 +356,9 @@ class TDMap  : public QObject {
 
     /** getters **/
 
+    // ht accelaration voltage
+    bool get_flag_ht_accelaration_voltage();
+    
     int get_thickness_range_number_samples( );
 
     double get_thickness_range_lower_bound( );

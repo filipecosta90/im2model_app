@@ -4,43 +4,6 @@ static const std::string WAV_EXTENSION = ".wav";
 
 MSA_prm::MSA_prm( boost::process::ipstream &async_io_buffer_out ) : _io_pipe_out(async_io_buffer_out)
 {
-  microscope_parameter_block_name = "'[Microscope Parameters]'";
-  incident_probe_convergence_half_angle = 0.0f;
-  inner_radius_default_angular_detector_diffraction_plane = 0.0f;
-  outer_radius_default_angular_detector_diffraction_plane = 0.0f;
-  multiple_detector_definition_number = 0;
-  multiple_detector_definition_extra_file = "''";
-  electron_wavelenth = 0.0f;
-  effective_source_radious = 0.0f;
-  effective_focus_spread = 0.0f;
-  relative_focus_spread_kernel_width = 0.0f;
-  number_focal_kernel_steps = 0;
-  number_aberration_coefficients = 0;
-  multislice_parameter_block_name = "'[Multislice Parameters]'";
-  object_tilt_x_component = 0.0f;
-  object_tilt_y_component = 0.0f;
-  horizontal_scan_frame_offset_super_cell = 0.0f;
-  vertical_scan_frame_offset_super_cell = 0.0f;
-  horizontal_scan_frame_size = 0.0f;
-  vertical_scan_frame_size = 0.0f;
-  scan_line_rotation = 0.0f;
-  number_scan_columns = 0;
-  number_scan_rows = 0;
-  explicit_focus_spread_convolution_switch = 0;
-  a_posteriori_convolution_by_source_distribution_function_switch = 0;
-  internal_repeat_factor_of_super_cell_along_x = 0;
-  internal_repeat_factor_of_super_cell_along_y = 0;
-  internal_repeat_factor_of_super_cell_along_z = 1;
-  slice_filename_prefix = "";
-  number_slices_to_load = 0; 
-  number_frozen_lattice_variants_considered_per_slice = 0;
-  minimum_number_frozen_phonon_configurations_used_generate_wave_functions = 0;
-  period_readout_or_detection_in_units_of_slices = 0;
-  number_slices_used_describe_full_object_structure_up_to_its_maximum_thickness = 0;
-  prm_filename = "";
-  wave_function_name = "";
-  debug_switch = false;
-  runned_bin = false;
 }
 
 bool MSA_prm::set_bin_execname( std::string execname ){
@@ -65,8 +28,9 @@ bool MSA_prm::set_bin_execname( std::string execname ){
   return _flag_full_bin_path_execname;
 }
 
-void MSA_prm::set_electron_wavelength( double energy ){
-  electron_wavelenth = energy;
+bool MSA_prm::set_ht_accelaration_voltage( double energy ){
+  ht_accelaration_voltage = energy;
+  return true;
 }
 
 void MSA_prm::set_internal_repeat_factor_of_super_cell_along_x ( int x_repeat ){
@@ -150,8 +114,8 @@ void MSA_prm::cleanup_thread(){
 }
 
 bool MSA_prm::cleanup_bin(){
-  boost::thread t( &MSA_prm::cleanup_thread , this ); 
-  runned_bin = false; 
+  boost::thread t( &MSA_prm::cleanup_thread , this );
+  runned_bin = false;
   return true;
 }
 
@@ -358,6 +322,10 @@ bool MSA_prm::call_bin(){
     debug_switch = deb_switch;
   }
 
+  bool MSA_prm::get_flag_ht_accelaration_voltage(){
+    return _flag_ht_accelaration_voltage;
+  }
+
   bool MSA_prm::_is_bin_path_defined(){
     return _flag_full_bin_path_execname;
   }
@@ -397,7 +365,7 @@ bool MSA_prm::call_bin(){
       // ! STEM only
       outfile << multiple_detector_definition_number << " " << multiple_detector_definition_extra_file << "\t\t\t! STEM only\t\t\t! Multiple detector definition" << std::endl;
 
-      outfile << electron_wavelenth << "\t\t\t! Electron wavelength [nm]" << std::endl;
+      outfile << ht_accelaration_voltage << "\t\t\t! Electron wavelength [nm]" << std::endl;
       // ! STEM only
       outfile << effective_source_radious << "\t\t\t! STEM only\t\t\t! Effective source radius (HWHM) [nm]" << std::endl;
       // ! STEM only
@@ -453,7 +421,7 @@ bool MSA_prm::call_bin(){
         message << "checking if MSA prm file was produced. filename: " <<  full_path.string() << " || result: " << boost::filesystem::exists( full_path.string() ) << std::endl;
         logger->logEvent( ApplicationLog::notification , message.str() );
       }
-      _flag_produced_prm = boost::filesystem::exists( full_path );//save_prm_filename_path();
+      _flag_produced_prm = boost::filesystem::exists( full_path );
 
       prm_filename_path = boost::filesystem::canonical( full_path ).string();
       _flag_prm_filename_path = _flag_produced_prm;

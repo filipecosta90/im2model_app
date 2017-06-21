@@ -18,6 +18,7 @@
   image_crystal.hpp 
   td_map.hpp
   global_def.hpp
+  base_crystal.hpp
   atom.cpp
   chem_database.cpp
   simgrid_steplength.cpp
@@ -32,6 +33,7 @@
   structure.cpp
   image_crystal.cpp
   td_map.cpp
+  base_crystal.cpp
   )
 
 BISON_TARGET(mc_parser mc_parser.yy ${CMAKE_CURRENT_BINARY_DIR}/mc_parser.tab.cc )
