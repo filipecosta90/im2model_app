@@ -139,10 +139,6 @@ class TDMap  : public QObject {
 
     bool calculate_simulation_defocus_period();
 
-    std::ostream* _sim_tdmap_ostream = nullptr;
-    bool _flag_sim_tdmap_ostream = false;
-    bool _flag_sim_tdmap_ostream_buffer = true;
-
     std::string wave_function_name;
     bool _flag_wave_function_name = false;
 
@@ -358,7 +354,7 @@ class TDMap  : public QObject {
 
     // ht accelaration voltage
     bool get_flag_ht_accelaration_voltage();
-    
+
     int get_thickness_range_number_samples( );
 
     double get_thickness_range_lower_bound( );

@@ -2,7 +2,31 @@
 
 
 BaseCrystal::BaseCrystal( boost::process::ipstream &async_io_buffer_out ) : _io_pipe_out(async_io_buffer_out) {
+}
 
+// calculate methods
+bool BaseCrystal::calculate_nx_from_size_and_sampling_rate(){
+  bool result = false;
+  if( _flag_auto_nx ){
+    if( _flag_super_cell_size_a && _flag_sampling_rate_experimental_x_nm_per_pixel ){
+      nx_size_height = (int) ( super_cell_size_a / sampling_rate_experimental_x_nm_per_pixel );
+      result = true;
+      _flag_nx_size_height = true;
+    }
+  }
+  return result;
+}
+
+bool BaseCrystal::calculate_ny_from_size_and_sampling_rate(){
+  bool result = false;
+  if( _flag_auto_ny ){
+    if( _flag_super_cell_size_b && _flag_sampling_rate_experimental_y_nm_per_pixel ){
+      ny_size_width = (int) ( super_cell_size_b / sampling_rate_experimental_y_nm_per_pixel );
+      result = true;
+      _flag_ny_size_width = true;
+    }
+  }
+  return result;
 }
 
 //setters
@@ -27,6 +51,8 @@ bool BaseCrystal::set_sampling_rate_experimental_x_nm_per_pixel( double rate ){
   sampling_rate_experimental_x_nm_per_pixel = rate;
   _flag_sampling_rate_experimental_x_nm_per_pixel = true;
   _flag_sampling_rate_experimental = _flag_sampling_rate_experimental_x_nm_per_pixel & _flag_sampling_rate_experimental_y_nm_per_pixel;
+  // auto calculate nx
+  calculate_nx_from_size_and_sampling_rate();
   return true;
 }
 
@@ -34,6 +60,8 @@ bool BaseCrystal::set_sampling_rate_experimental_y_nm_per_pixel( double rate ){
   sampling_rate_experimental_y_nm_per_pixel = rate;
   _flag_sampling_rate_experimental_y_nm_per_pixel = true;
   _flag_sampling_rate_experimental = _flag_sampling_rate_experimental_x_nm_per_pixel & _flag_sampling_rate_experimental_y_nm_per_pixel;
+  // auto calculate ny
+  calculate_ny_from_size_and_sampling_rate();
   return true;
 }
 
@@ -45,21 +73,21 @@ bool BaseCrystal::set_projected_y_axis_u( double u ){
   projected_y_axis_u = u;
   _flag_projected_y_axis_u = true;
   _flag_projected_y_axis = _flag_projected_y_axis_u & _flag_projected_y_axis_v & _flag_projected_y_axis_w;
-    return true;
+  return true;
 }
 
 bool BaseCrystal::set_projected_y_axis_v( double v ){
   projected_y_axis_v = v;
   _flag_projected_y_axis_v = true;
   _flag_projected_y_axis = _flag_projected_y_axis_u & _flag_projected_y_axis_v & _flag_projected_y_axis_w;
-    return true;
+  return true;
 }
 
 bool BaseCrystal::set_projected_y_axis_w( double w ){
   projected_y_axis_w = w;
   _flag_projected_y_axis_w = true;
   _flag_projected_y_axis = _flag_projected_y_axis_u & _flag_projected_y_axis_v & _flag_projected_y_axis_w;
-    return true;
+  return true;
 }
 
 bool BaseCrystal::set_zone_axis( cv::Point3d za ){
@@ -98,18 +126,22 @@ bool BaseCrystal::set_super_cell_size_a( double size_a ){
   super_cell_size_a = size_a;
   _flag_super_cell_size_a = true;
   _flag_super_cell_size = _flag_super_cell_size_a & _flag_super_cell_size_b & _flag_super_cell_size_c;
+  // auto calculate nx
+  calculate_nx_from_size_and_sampling_rate();
   return true;
 }
 
 bool BaseCrystal::set_super_cell_size_b( double size_b ){
-  super_cell_size_a = size_b;
+  super_cell_size_b = size_b;
   _flag_super_cell_size_b = true;
+  // auto calculate nx
+  calculate_ny_from_size_and_sampling_rate();
   _flag_super_cell_size = _flag_super_cell_size_a & _flag_super_cell_size_b & _flag_super_cell_size_c;
   return true;
 }
 
 bool BaseCrystal::set_super_cell_size_c( double size_c ){
-  super_cell_size_a = size_c;
+  super_cell_size_c = size_c;
   _flag_super_cell_size_c = true;
   _flag_super_cell_size = _flag_super_cell_size_a & _flag_super_cell_size_b & _flag_super_cell_size_c;
   return true;
@@ -129,9 +161,9 @@ bool BaseCrystal::set_base_dir_path( boost::filesystem::path path ){
   _flag_base_dir_path = true;
   if( _flag_logger ){
     std::stringstream message;
-  message << "CELSLC_prm baseDirPath: " << path.string();
-  logger->logEvent( ApplicationLog::notification, message.str() );
-}
+    message << "CELSLC_prm baseDirPath: " << path.string();
+    logger->logEvent( ApplicationLog::notification, message.str() );
+  }
   return true;
 }
 

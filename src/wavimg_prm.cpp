@@ -22,27 +22,28 @@ bool WAVIMG_prm::produce_prm ( ) {
     input_prefix_stream << "'" << file_name_input_wave_function << "_sl.wav"<< "'";
     outfile  << input_prefix_stream.str() << "\t\t! Wave function file name string used to locate existing wave functions. Use quotation marks to secure the input including space characters." << std::endl;
     // line 2
-    outfile <<  n_columns_samples_input_wave_function_pixels << ", " << n_rows_samples_input_wave_function_pixels << "\t\t! Dimension of the wave data in pixels, <nx> = number of horizontal wave pixels, <ny>  = number of vertical wave pixels." << std::endl;
+    outfile <<  nx_size_height << ", " <<  ny_size_width << "\t\t! Dimension of the wave data in pixels, <nx> = number of horizontal wave pixels, <ny>  = number of vertical wave pixels." << std::endl;
     // line 3
-    outfile  << physical_columns_sampling_rate_input_wave_function_nm_pixels << ", " << physical_rows_sampling_rate_input_wave_function_nm_pixels << "\t\t! Sampling rate of the wave data (<sx> = horizontal, <sy> = vertical) [nm/pix]." << std::endl;
+    outfile  << sampling_rate_experimental_x_nm_per_pixel << ", " << sampling_rate_experimental_y_nm_per_pixel << "\t\t! Sampling rate of the wave data (<sx> = horizontal, <sy> = vertical) [nm/pix]." << std::endl;
     // line 4
     outfile <<  ht_accelaration_voltage << "\t\t! TEM high-tension as used for wave function calculation [kV]." << std::endl;
     // line 5
     outfile <<  type_of_output << "\t\t! Image output type option: 0 = TEM image" << std::endl;
     // line 6
+
     boost::filesystem::path output_wave_function ( file_name_output_image_wave_function );
     boost::filesystem::path output_wave_function_full_path = dir / output_wave_function;
     std::stringstream  output_prefix_stream ;
     output_prefix_stream << "'" << file_name_output_image_wave_function << ".dat" << "'";
     outfile <<  output_prefix_stream.str() << "\t\t! Image output file name string. Use quotation marks to secure the input including space characters." << std::endl;
     // line 7
-    outfile <<  n_columns_samples_output_image << ", " << n_rows_samples_output_image << "\t\t! Image output size (<ix> = horizontal , <iy> = vertical) in number of pixels." << std::endl;
+    outfile <<  ny_size_width << ", " << nx_size_height << "\t\t! Image output size (<ix> = horizontal , <iy> = vertical) in number of pixels." << std::endl;
     // line 8
     outfile <<  image_data_type << ", " << image_vacuum_mean_intensity << ", " << conversion_rate << ", " <<  readout_noise_rms_amplitude << "\t\t! Flag and parameters for creating integer images with optional noise. Flag <intflg> 0 = off (default)" << std::endl;
     // line 9
     outfile <<  switch_option_extract_particular_image_frame << "\t! Flag activating the extraction of a special image frame (0=OFF, 1=ON)." << std::endl;
     // line 10
-    outfile <<  image_sampling_rate_nm_pixel << "\t! Image output sampling rate [nm/pix], isotropic. The parameter is used only if the Flag in line 09 is set to 1." << std::endl;
+    outfile <<  sampling_rate_experimental_x_nm_per_pixel << "\t! Image output sampling rate [nm/pix], isotropic. The parameter is used only if the Flag in line 09 is set to 1." << std::endl;
     // line 11
     outfile <<  image_frame_offset_x_pixels_input_wave_function << ", " << image_frame_offset_y_pixels_input_wave_function << " !" << std::endl;
     // line 12
@@ -99,6 +100,7 @@ bool WAVIMG_prm::produce_prm ( ) {
       message << "checking if WAVIMG prm file was produced. filename: " <<  full_path.string() << " || result: " << boost::filesystem::exists( full_path.string() ) << std::endl;
       logger->logEvent( ApplicationLog::notification , message.str() );
     }
+
     _flag_produced_prm = boost::filesystem::exists( full_path );
     prm_filename_path = boost::filesystem::canonical( full_path ).string();
     _flag_prm_filename_path = _flag_produced_prm;
@@ -410,22 +412,10 @@ void WAVIMG_prm::set_file_name_input_wave_function( std::string file_name ){
 }
 
 // setters line 2
-void WAVIMG_prm::set_n_columns_samples_input_wave_function_pixels( int n_columns ){
-  n_columns_samples_input_wave_function_pixels = n_columns;
-}
-
-void WAVIMG_prm::set_n_rows_samples_input_wave_function_pixels( int n_rows ){
-  n_rows_samples_input_wave_function_pixels = n_rows;
-}
+// INHERITS FROM BASE CRYSTAL
 
 // setters line 3
-void WAVIMG_prm::set_physical_columns_sampling_rate_input_wave_function_nm_pixels( double columns_sampling_rate ){
-  physical_columns_sampling_rate_input_wave_function_nm_pixels = columns_sampling_rate;
-}
-
-void WAVIMG_prm::set_physical_rows_sampling_rate_input_wave_function_nm_pixels( double rows_sampling_rate ){
-  physical_rows_sampling_rate_input_wave_function_nm_pixels = rows_sampling_rate;
-}
+// INHERITS FROM BASE CRYSTAL
 
 // setters line 4
 // INHERITS FROM BASE CRYSTAL
@@ -441,13 +431,7 @@ void WAVIMG_prm::set_file_name_output_image_wave_function( std::string file_name
 }
 
 // setters line 7
-void WAVIMG_prm::set_n_columns_samples_output_image( int n_columns ){
-  n_columns_samples_output_image = n_columns;
-}
-
-void WAVIMG_prm::set_n_rows_samples_output_image( int n_rows ){
-  n_rows_samples_output_image = n_rows;
-}
+// INHERITS FROM BASE CRYSTAL
 
 // setters line 8
 void WAVIMG_prm::set_image_data_type(int data_type ){
@@ -472,9 +456,7 @@ void WAVIMG_prm::set_switch_option_extract_particular_image_frame( int option ){
 }
 
 // setters line 10
-void WAVIMG_prm::set_image_sampling_rate_nm_pixel( double sampling_rate ){
-  image_sampling_rate_nm_pixel = sampling_rate;
-}
+// INHERITS FROM BASE CRYSTAL
 
 // setters line 11
 void WAVIMG_prm::set_image_frame_offset_x_pixels_input_wave_function( double offset_x ){
@@ -572,12 +554,6 @@ void WAVIMG_prm::set_number_image_aberrations_set( int number_image_aberrations 
 }
 
 // setters line 19
-/*
-   void WAVIMG_prm::add_aberration_definition ( int index_number, double first_coefficient_value_nm, double second_coefficient_value_nm ){
-   aberration_definition_index_number.push_back( index_number );
-   aberration_definition_1st_coefficient_value_nm.push_back( first_coefficient_value_nm );
-   aberration_definition_2nd_coefficient_value_nm.push_back( second_coefficient_value_nm );
-   }*/
 
 // setters line 19 + aberration_definition_index_number
 void WAVIMG_prm::set_objective_aperture_radius( double radius ){
@@ -602,6 +578,23 @@ void WAVIMG_prm::set_number_parameter_loops( int number_loops ){
 void WAVIMG_prm::set_prm_file_name( std::string filename ){
   prm_filename = filename;
   _flag_prm_filename = true;
+}
+
+
+// setters lines 22, 23, 24, 25, 26 + aberration_definition_index_number
+void WAVIMG_prm::add_parameter_loop ( int parameter_class , int parameter_index, int variation_form, double range_0, double range_1, double range_n, std::string string_identifier ){
+  // line 22 + aberration_definition_index_number
+  loop_parameter_class.push_back(parameter_class);
+  // line 23 + aberration_definition_index_number
+  loop_parameter_index.push_back(parameter_index);
+  // line 24 + aberration_definition_index_number
+  loop_variation_form.push_back(variation_form);
+  // line 25 + aberration_definition_index_number
+  loop_range_0.push_back(range_0);
+  loop_range_1.push_back(range_1);
+  loop_range_n.push_back(range_n);
+  // line 26 + aberration_definition_index_number
+  loop_string_indentifier.push_back(string_identifier);
 }
 
 /* *
@@ -656,22 +649,6 @@ bool WAVIMG_prm::get_flag_prm_filename_path(){
 
 bool WAVIMG_prm::get_mtf_simulation_switch(){
   return mtf_simulation_switch;
-}
-
-// setters lines 22, 23, 24, 25, 26 + aberration_definition_index_number
-void WAVIMG_prm::add_parameter_loop ( int parameter_class , int parameter_index, int variation_form, double range_0, double range_1, double range_n, std::string string_identifier ){
-  // line 22 + aberration_definition_index_number
-  loop_parameter_class.push_back(parameter_class);
-  // line 23 + aberration_definition_index_number
-  loop_parameter_index.push_back(parameter_index);
-  // line 24 + aberration_definition_index_number
-  loop_variation_form.push_back(variation_form);
-  // line 25 + aberration_definition_index_number
-  loop_range_0.push_back(range_0);
-  loop_range_1.push_back(range_1);
-  loop_range_n.push_back(range_n);
-  // line 26 + aberration_definition_index_number
-  loop_string_indentifier.push_back(string_identifier);
 }
 
 bool WAVIMG_prm::get_flag_prm_filename(){

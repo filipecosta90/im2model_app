@@ -25,12 +25,10 @@ class WAVIMG_prm : public BaseCrystal {
     std::string file_name_input_wave_function;
     // line 2
     // Dimension of the wave data in pixels, <nx> = number of horizontal wave pixels, <ny>  = number of vertical wave pixels.
-    int n_columns_samples_input_wave_function_pixels;
-    int n_rows_samples_input_wave_function_pixels;
+    // INHERITS FROM BaseCrystal
     // line 3
     // Sampling rate of the wave data (<sx> = horizontal, <sy> = vertical) [nm/pix].
-    double physical_columns_sampling_rate_input_wave_function_nm_pixels = 0.0f;
-    double physical_rows_sampling_rate_input_wave_function_nm_pixels = 0.0f;
+    // INHERITS FROM BaseCrystal
     // line 4
     // TEM high-tension as used for wave function calculation [kV]
     // INHERITS FROM BaseCrystal
@@ -41,9 +39,8 @@ class WAVIMG_prm : public BaseCrystal {
     std::string file_name_output_image_wave_function;
     // line 7
     // ! Image output size (<ix> = horizontal , <iy> = vertical) in number of pixels.
-    int n_columns_samples_output_image;
-    int n_rows_samples_output_image;
-    // line 8
+    // INHERITS FROM BaseCrystal
+  // line 8
     // ! Flag and parameters for creating integer images with optional noise. Flag <intflg> 0 = off (default), 1 = 32-bit, 2 = 16-bit, Parameter: <mean> = mean vacuum intensity, <conv> = electron to counts conversion rate, <rnoise> detector readout noise level.
     int image_data_type = 0;
     double image_vacuum_mean_intensity = 0.0f;
@@ -54,8 +51,8 @@ class WAVIMG_prm : public BaseCrystal {
     int switch_option_extract_particular_image_frame = 0;
     // line 10
     // ! Image output sampling rate [nm/pix], isotropic. The parameter is used only if the Flag in line 09 is set to 1.
-    double image_sampling_rate_nm_pixel = 0.0f;
-    // line 11
+    // INHERITS FROM BaseCrystal
+  // line 11
     // ! Image frame offset in pixels of the input wave. The parameter is used only if the Flag in line 09 is set to 1.
     double image_frame_offset_x_pixels_input_wave_function = 0.0f;
     double image_frame_offset_y_pixels_input_wave_function = 0.0f;
@@ -154,21 +151,18 @@ class WAVIMG_prm : public BaseCrystal {
     // setters line 1
     void set_file_name_input_wave_function( std::string file_name );
     // setters line 2
-    void set_n_columns_samples_input_wave_function_pixels( int n_columns );
-    void set_n_rows_samples_input_wave_function_pixels( int n_rows );
-    // setters line 3
-    void set_physical_columns_sampling_rate_input_wave_function_nm_pixels( double columns_sampling_rate );
-    void set_physical_rows_sampling_rate_input_wave_function_nm_pixels( double rows_sampling_rate );
-    // setters line 4
+    // INHERITS FROM BaseCrystal
+  // setters line 3
+  // INHERITS FROM BaseCrystal
+  // setters line 4
     // INHERITS FROM BaseCrystal
     // setters line 5
     void set_type_of_output( int type );
     // setters line 6
     void set_file_name_output_image_wave_function( std::string file_name );
     // setters line 7
-    void set_n_columns_samples_output_image( int n_columns );
-    void set_n_rows_samples_output_image( int n_rows );
-    // setters line 8
+    // INHERITS FROM BaseCrystal
+  // setters line 8
     void set_image_data_type(int data_type );
     void set_image_vacuum_mean_intensity( double mean_intensity );
     void set_conversion_rate( double rate );
@@ -176,8 +170,8 @@ class WAVIMG_prm : public BaseCrystal {
     // setters line 9
     void set_switch_option_extract_particular_image_frame( int option );
     // setters line 10
-    void set_image_sampling_rate_nm_pixel( double sampling_rate );
-    // setters line 11
+    // INHERITS FROM BaseCrystal
+  // setters line 11
     void set_image_frame_offset_x_pixels_input_wave_function( double offset_x );
     void set_image_frame_offset_y_pixels_input_wave_function( double offset_y );
     // setters line 12
@@ -192,7 +186,6 @@ class WAVIMG_prm : public BaseCrystal {
     void set_partial_spacial_coherence_semi_convergence_angle( double convergence_angle );
     // setters line 16
     bool set_mtf_simulation_switch( bool simulation_switch );
-    bool get_mtf_simulation_switch();
     void set_k_space_scaling( double scale );
     bool set_mtf_filename( std::string file_name );
     // setters line 17
@@ -221,8 +214,6 @@ class WAVIMG_prm : public BaseCrystal {
 
     void set_prm_file_name( std::string filename );
 
-    void set_flag_io_ap_pipe_out( bool value );
-
     /**
     * getters
     */
@@ -230,6 +221,7 @@ class WAVIMG_prm : public BaseCrystal {
     double get_aberration_definition( WAVIMG_prm::AberrationDefinition aberration_index, int coefficient );
 
     bool get_aberration_definition_switch( WAVIMG_prm::AberrationDefinition aberration_index );
+    bool get_mtf_simulation_switch();
 
 };
 

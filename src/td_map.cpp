@@ -137,7 +137,6 @@ void TDMap::set_group_options( group_options* celslc_step, group_options* msa_st
   simgrid_step_group_options = simgrid_step;
 }
 
-
 bool TDMap::set_application_logger( ApplicationLog::ApplicationLog* app_logger ){
   logger = app_logger;
   _flag_logger = true;
@@ -162,11 +161,6 @@ bool TDMap::set_base_dir_path( boost::filesystem::path path ){
   message << "TDMap baseDirPath: " << path.string();
   logger->logEvent( ApplicationLog::notification, message.str() );
   return true;
-}
-
-void  TDMap::set_sim_tdmap_ostream( std::ostream* stream ){
-  _sim_tdmap_ostream = stream;
-  _flag_sim_tdmap_ostream = true;
 }
 
 bool TDMap::set_number_slices_to_max_thickness_from_nz_simulated_partitions(){
@@ -910,16 +904,13 @@ bool  TDMap::prepare_wavimg_parameters(){
       && _is_thickness_period_slice_defined()
     ){
     // setters line 2
-    _tdmap_wavimg_parameters->set_n_columns_samples_input_wave_function_pixels( ny_simulated_vertical_samples );
-    _tdmap_wavimg_parameters->set_n_rows_samples_input_wave_function_pixels( nx_simulated_horizontal_samples );
+    _tdmap_wavimg_parameters->set_nx_size_height( nx_simulated_horizontal_samples );
+    _tdmap_wavimg_parameters->set_ny_size_width( ny_simulated_vertical_samples );
     // setters line 3
-    _tdmap_wavimg_parameters->set_physical_columns_sampling_rate_input_wave_function_nm_pixels( sampling_rate_super_cell_x_nm_pixel );
-    _tdmap_wavimg_parameters->set_physical_rows_sampling_rate_input_wave_function_nm_pixels( sampling_rate_super_cell_y_nm_pixel );
+    _tdmap_wavimg_parameters->set_sampling_rate_experimental_x_nm_per_pixel( sampling_rate_super_cell_x_nm_pixel );
+    _tdmap_wavimg_parameters->set_sampling_rate_experimental_y_nm_per_pixel( sampling_rate_super_cell_y_nm_pixel );
     // setters line 4
     // setters line 7
-    _tdmap_wavimg_parameters->set_n_columns_samples_output_image( nx_simulated_horizontal_samples );
-    _tdmap_wavimg_parameters->set_n_rows_samples_output_image( ny_simulated_vertical_samples );
-
     _tdmap_wavimg_parameters->set_number_parameter_loops( 2 );
 
     _tdmap_wavimg_parameters->add_parameter_loop ( 1 , 1 , 1, defocus_lower_bound, defocus_upper_bound, defocus_samples, "'foc'" );

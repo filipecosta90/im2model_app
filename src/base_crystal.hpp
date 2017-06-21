@@ -27,6 +27,13 @@
 #include "application_log.hpp"
 
 class BaseCrystal {
+  private:
+    bool _flag_auto_nx = true;
+    bool _flag_auto_ny = true;
+
+    bool calculate_nx_from_size_and_sampling_rate();
+    bool calculate_ny_from_size_and_sampling_rate();
+
   protected:
 
     // Specifies the input super-cell file containing the atomic structure data in CIF file format.
