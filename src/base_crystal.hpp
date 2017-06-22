@@ -33,6 +33,10 @@ class BaseCrystal {
 
     bool calculate_nx_from_size_and_sampling_rate();
     bool calculate_ny_from_size_and_sampling_rate();
+    bool calculate_defocus_period();
+    bool calculate_thickness_slice_period();
+    int get_slice_number_from_nm_floor( double goal_thickness_nm );
+    int get_slice_number_from_nm_ceil( double goal_thickness_nm  );
 
   protected:
 
@@ -44,6 +48,9 @@ class BaseCrystal {
     bool _flag_nx_size_height = false;
     int ny_size_width;
     bool _flag_ny_size_width = false;
+    int nz_simulated_partitions;
+    bool _flag_nz_simulated_partitions = false;
+    bool nz_switch = false;
 
     double sampling_rate_experimental_x_nm_per_pixel;
     double sampling_rate_experimental_y_nm_per_pixel;
@@ -82,12 +89,45 @@ class BaseCrystal {
     bool _flag_super_cell_size = false;
 
     // [Slice Parameters]
+    std::string slc_file_name_prefix;
+    bool _flag_slc_file_name_prefix = false;
     std::vector<double> slice_params_nm_slice_vec;
     bool _flag_slice_params_nm_slice_vec = false;
     std::vector<double> slice_params_accum_nm_slice_vec;
     bool _flag_slice_params_accum_nm_slice_vec = false;
     std::map<int,double> slice_params_nm_slice;
     bool _flag_slice_params_nm_slice = false;
+
+    /////////////////////////
+    // Simulated Thickness info
+    /////////////////////////
+    // user defined
+    int slice_samples;
+    bool _flag_slice_samples = false;
+    double nm_lower_bound;
+    bool _flag_nm_lower_bound = false;
+    double nm_upper_bound;
+    bool _flag_nm_upper_bound = false;
+    int slice_period;
+    bool _flag_slice_period = false;
+    //calculated
+    int slices_lower_bound;
+    int slices_upper_bound;
+    int number_slices_to_max_thickness;
+    bool _flag_number_slices_to_max_thickness = false;
+
+
+    /////////////////////////
+    // Simulated Defocus info
+    /////////////////////////
+    int defocus_samples;
+    bool _flag_defocus_samples = false;
+    double defocus_lower_bound;
+    bool _flag_defocus_lower_bound = false;
+    double defocus_upper_bound;
+    bool _flag_defocus_upper_bound = false;
+    double defocus_period;
+    bool _flag_defocus_period = false;
 
     /* boost process output streams */
     boost::process::ipstream& _io_pipe_out;
@@ -116,6 +156,7 @@ class BaseCrystal {
     bool get_flag_unit_cell_cif_path(){ return _flag_unit_cell_cif_path; };
     bool get_flag_nx_size_height(){ return _flag_nx_size_height; }
     bool get_flag_ny_size_width(){ return _flag_ny_size_width; }
+    bool get_flag_nz_simulated_partitions(){ return _flag_nz_simulated_partitions; }
     bool get_flag_sampling_rate_experimental_x_nm_per_pixel(){ return _flag_sampling_rate_experimental_x_nm_per_pixel; }
     bool get_flag_sampling_rate_experimental_y_nm_per_pixel(){ return _flag_sampling_rate_experimental_y_nm_per_pixel; }
     bool get_flag_sampling_rate_experimental(){ return _flag_sampling_rate_experimental; }
@@ -137,6 +178,20 @@ class BaseCrystal {
     bool get_flag_slice_params_nm_slice_vec(){ return _flag_slice_params_nm_slice_vec; };
     bool get_flag_slice_params_accum_nm_slice_vec(){ return _flag_slice_params_accum_nm_slice_vec; };
     bool get_flag_slice_params_nm_slice(){ return _flag_slice_params_nm_slice; };
+    /////////////////////////
+    // Simulated Thickness info
+    /////////////////////////
+    bool get_flag_slice_samples(){ return _flag_slice_samples;}
+    bool get_flag_nm_lower_bound(){ return _flag_nm_lower_bound;}
+    bool get_flag_nm_upper_bound(){ return _flag_nm_upper_bound;}
+    bool get_flag_slice_period(){ return _flag_slice_period;}
+    /////////////////////////
+    // Simulated Defocus info
+    /////////////////////////
+    bool get_flag_defocus_samples(){ return _flag_defocus_samples;}
+    bool get_flag_defocus_lower_bound(){ return _flag_defocus_lower_bound;}
+    bool get_flag_defocus_upper_bound(){ return _flag_defocus_upper_bound;}
+    bool get_flag_defocus_period(){ return _flag_defocus_period;}
     /* boost process output streams */
     bool get_flag_io_ap_pipe_out(){ return _flag_io_ap_pipe_out; };
     /* Loggers */
@@ -152,6 +207,8 @@ class BaseCrystal {
     std::string get_unit_cell_cif_path(){ return unit_cell_cif_path; }
     int get_nx_size_height(){ return nx_size_height; }
     int get_ny_size_width(){ return ny_size_width; }
+    int get_nz_simulated_partitions(){ return nz_simulated_partitions; }
+    bool get_nz_switch(){ return nz_switch; }
     double get_sampling_rate_experimental_x_nm_per_pixel(){ return sampling_rate_experimental_x_nm_per_pixel; }
     double get_sampling_rate_experimental_y_nm_per_pixel(){ return sampling_rate_experimental_y_nm_per_pixel; }
     cv::Point3d  get_projected_y_axis(){ return projected_y_axis; }
@@ -168,9 +225,30 @@ class BaseCrystal {
     double get_super_cell_size_b(){ return super_cell_size_b; }
     double get_super_cell_size_c(){ return super_cell_size_c; }
     // [Slice Parameters]
+    std::string get_slc_file_name_prefix(){ return slc_file_name_prefix; }
     std::vector<double> get_slice_params_nm_slice_vec(){ return slice_params_nm_slice_vec; }
     std::vector<double> get_slice_params_accum_nm_slice_vec(){ return slice_params_accum_nm_slice_vec; }
     std::map<int,double> get_slice_params_nm_slice(){ return slice_params_nm_slice; }
+
+    /////////////////////////
+    // Simulated Thickness info
+    /////////////////////////
+    // user defined
+    int get_slice_samples(){ return slice_samples; }
+    double get_nm_lower_bound(){ return nm_lower_bound; }
+    double get_nm_upper_bound(){ return nm_upper_bound; }
+    int get_slice_period(){ return slice_period; }
+    //calculated
+    int get_slices_lower_bound(){ return slices_lower_bound; }
+    int get_slices_upper_bound(){ return slices_upper_bound; }
+    int get_number_slices_to_max_thickness(){ return number_slices_to_max_thickness; }
+    /////////////////////////
+    // Simulated Defocus info
+    /////////////////////////
+    int get_defocus_samples(){ return defocus_samples; }
+    double get_defocus_lower_bound(){ return defocus_lower_bound; }
+    double get_defocus_upper_bound(){ return defocus_upper_bound; }
+    double get_defocus_period(){ return defocus_period; }
     /* Loggers */
     ApplicationLog::ApplicationLog* get_logger(){ return logger; }
     /* Base dir path */
@@ -184,6 +262,9 @@ class BaseCrystal {
     bool set_unit_cell_cif_path( std::string cif_path );
     bool set_nx_size_height( int );
     bool set_ny_size_width( int );
+    bool set_nz_simulated_partitions_from_prm();
+    bool set_nz_simulated_partitions( int nz_partitions );
+    bool set_nz_switch( bool value );
     bool set_sampling_rate_experimental_x_nm_per_pixel( double );
     bool set_sampling_rate_experimental_y_nm_per_pixel( double );
     bool set_projected_y_axis( cv::Point3d );
@@ -199,6 +280,25 @@ class BaseCrystal {
     bool set_super_cell_size_a( double );
     bool set_super_cell_size_b( double );
     bool set_super_cell_size_c( double );
+
+    bool set_slc_file_name_prefix( std::string slc_file_name_prefix );
+    /////////////////////////
+    // Simulated Thickness info
+    /////////////////////////
+    // user defined
+    bool set_slice_samples( int slice_samples );
+    bool set_nm_lower_bound( double nm_lower_bound );
+    bool set_nm_upper_bound( double nm_upper_bound );
+    bool set_slice_period(  int slice_period );
+
+    /////////////////////////
+    // Simulated Defocus info
+    /////////////////////////
+    bool set_defocus_samples( int defocus_samples );
+    bool set_defocus_lower_bound( double defocus_lower_bound );
+    bool set_defocus_upper_bound( double defocus_upper_bound );
+    bool set_defocus_period( double defocus_period );
+
     /* Loggers */
     bool set_application_logger( ApplicationLog::ApplicationLog* logger );
     /* Base dir path */

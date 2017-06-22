@@ -66,7 +66,7 @@ class MainWindow : public QMainWindow {
     ~MainWindow();
 
     bool checkSettings();
-
+    boost::process::ipstream _sim_image_crystal_ostream_buffer;
     boost::process::ipstream _sim_tdmap_celslc_ostream_buffer;
     boost::process::ipstream _sim_tdmap_msa_ostream_buffer;
     boost::process::ipstream _sim_tdmap_wavimg_ostream_buffer;

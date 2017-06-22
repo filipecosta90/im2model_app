@@ -23,23 +23,11 @@ class WAVIMG_prm : public BaseCrystal {
   private:
     // line 1
     std::string file_name_input_wave_function;
-    // line 2
-    // Dimension of the wave data in pixels, <nx> = number of horizontal wave pixels, <ny>  = number of vertical wave pixels.
-    // INHERITS FROM BaseCrystal
-    // line 3
-    // Sampling rate of the wave data (<sx> = horizontal, <sy> = vertical) [nm/pix].
-    // INHERITS FROM BaseCrystal
-    // line 4
-    // TEM high-tension as used for wave function calculation [kV]
-    // INHERITS FROM BaseCrystal
     // line 5
     // Image output type option: 0 = TEM image, 1 = complex image plane wave, 2 = wave amplitude, 3 = wave phase, 4 = wave real part, 5 = wave imaginary part, 6 = TEM image map of 2 variables
     int type_of_output = 0;
     // line 6
     std::string file_name_output_image_wave_function;
-    // line 7
-    // ! Image output size (<ix> = horizontal , <iy> = vertical) in number of pixels.
-    // INHERITS FROM BaseCrystal
   // line 8
     // ! Flag and parameters for creating integer images with optional noise. Flag <intflg> 0 = off (default), 1 = 32-bit, 2 = 16-bit, Parameter: <mean> = mean vacuum intensity, <conv> = electron to counts conversion rate, <rnoise> detector readout noise level.
     int image_data_type = 0;
@@ -144,24 +132,14 @@ class WAVIMG_prm : public BaseCrystal {
 
         bool check_produced_dat();
 
-        /**
-        * getters
-        */
 
     // setters line 1
-    void set_file_name_input_wave_function( std::string file_name );
-    // setters line 2
-    // INHERITS FROM BaseCrystal
-  // setters line 3
-  // INHERITS FROM BaseCrystal
-  // setters line 4
-    // INHERITS FROM BaseCrystal
+    bool set_file_name_input_wave_function( std::string file_name );
     // setters line 5
     void set_type_of_output( int type );
     // setters line 6
-    void set_file_name_output_image_wave_function( std::string file_name );
-    // setters line 7
-    // INHERITS FROM BaseCrystal
+    bool set_file_name_output_image_wave_function( std::string file_name );
+
   // setters line 8
     void set_image_data_type(int data_type );
     void set_image_vacuum_mean_intensity( double mean_intensity );
@@ -212,7 +190,7 @@ class WAVIMG_prm : public BaseCrystal {
     // setters lines 22, 23, 24, 25, 26 + aberration_definition_index_number
     void add_parameter_loop ( int parameter_class , int parameter_index, int variation_form, double range_0, double range_1, double range_n, std::string string_identifier );
 
-    void set_prm_file_name( std::string filename );
+    bool set_prm_file_name( std::string filename );
 
     /**
     * getters
@@ -221,6 +199,7 @@ class WAVIMG_prm : public BaseCrystal {
     double get_aberration_definition( WAVIMG_prm::AberrationDefinition aberration_index, int coefficient );
 
     bool get_aberration_definition_switch( WAVIMG_prm::AberrationDefinition aberration_index );
+
     bool get_mtf_simulation_switch();
 
 };

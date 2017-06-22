@@ -7,7 +7,7 @@ WAVIMG_prm::WAVIMG_prm( boost::process::ipstream &async_io_buffer_out ) : BaseCr
 
 bool WAVIMG_prm::produce_prm ( ) {
   bool result = false;
-  if ( get_flag_prm_filename() ){
+  if ( _flag_prm_filename ){
 
     boost::filesystem::path dir ( base_dir_path );
     boost::filesystem::path file ( prm_filename );
@@ -61,7 +61,7 @@ bool WAVIMG_prm::produce_prm ( ) {
     outfile <<  simulation_image_spread_envelope_switch << ", " << isotropic_one_rms_amplitude << "\t! Flag and parameters for a vibration envelope: <vibflg> = flag (0=OFF, 1=ON), <vibprm> = vibration RMS amplitude [nm]." << std::endl;
     // line 18
     number_image_aberrations_set = 0;
-    for (auto&& _aberration : aberration_definition_switch){
+    for (auto&& _aberration : aberration_definition_switch ){
       if (_aberration.second == true)
         ++number_image_aberrations_set;
     }
@@ -80,6 +80,11 @@ bool WAVIMG_prm::produce_prm ( ) {
     // line 20 + aberration_definition_index_number
     outfile <<  center_x_of_objective_aperture << ", " << center_y_of_objective_aperture << "\t\t! Center of the objective aperture with respect to the zero beam [mrad]." << std::endl;
     // line 21
+
+    set_number_parameter_loops(2);
+    add_parameter_loop ( 1 , 1 , 1, defocus_lower_bound, defocus_upper_bound, defocus_samples, "'foc'" );
+    add_parameter_loop ( 3 , 1 , 1, slices_lower_bound, slices_upper_bound, slice_samples, "'_sl'" );
+
     outfile <<  number_parameter_loops << "\t\t! Number variable of loop definitions following below." << std::endl;
     for ( int pos = 0 ; pos < number_parameter_loops ; pos++){
       // line 22 + aberration_definition_index_number
@@ -216,7 +221,7 @@ bool WAVIMG_prm::dat_cleanup_bin(){
 
 bool WAVIMG_prm::call_bin(){
   bool result = false;
-  if( get_flag_produced_prm() && get_flag_prm_filename_path() ){
+  if( _flag_produced_prm && _flag_prm_filename_path ){
 
     std::stringstream args_stream;
     args_stream << full_bin_path_execname;
@@ -407,8 +412,9 @@ bool WAVIMG_prm::set_aberration_definition_switch(  WAVIMG_prm::AberrationDefini
 }
 
 // setters line 1
-void WAVIMG_prm::set_file_name_input_wave_function( std::string file_name ){
+bool WAVIMG_prm::set_file_name_input_wave_function( std::string file_name ){
   file_name_input_wave_function = file_name;
+  return true;
 }
 
 // setters line 2
@@ -426,8 +432,9 @@ void WAVIMG_prm::set_type_of_output( int type ){
 }
 
 // setters line 6
-void WAVIMG_prm::set_file_name_output_image_wave_function( std::string file_name ){
+bool WAVIMG_prm::set_file_name_output_image_wave_function( std::string file_name ){
   file_name_output_image_wave_function = file_name;
+  return true;
 }
 
 // setters line 7
@@ -575,9 +582,10 @@ void WAVIMG_prm::set_number_parameter_loops( int number_loops ){
   number_parameter_loops = number_loops;
 }
 
-void WAVIMG_prm::set_prm_file_name( std::string filename ){
+bool WAVIMG_prm::set_prm_file_name( std::string filename ){
   prm_filename = filename;
   _flag_prm_filename = true;
+  return true;
 }
 
 

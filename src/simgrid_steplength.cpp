@@ -1,7 +1,6 @@
 #include "simgrid_steplength.hpp"
 
-SIMGRID_wavimg_steplength::SIMGRID_wavimg_steplength( boost::process::ipstream& async_io_buffer_out ) : _io_pipe_out(async_io_buffer_out)
-{
+SIMGRID_wavimg_steplength::SIMGRID_wavimg_steplength( boost::process::ipstream& async_io_buffer_out ) : BaseCrystal ( async_io_buffer_out ){
   // // // // //
   // simulation parameters
   // // // // //
@@ -15,43 +14,6 @@ SIMGRID_wavimg_steplength::SIMGRID_wavimg_steplength( boost::process::ipstream& 
   reshape_factor_from_supper_cell_to_experimental_x = 1.0f;
   reshape_factor_from_supper_cell_to_experimental_y = 1.0f;
 
-  /***********
-    step-length algorithm vars
-   ***********/
-  iteration_number = 1;
-  step_length_minimum_threshold = 0.8f; // only accept results larger than this
-
-
-  /***********
-    image alignement vars
-   ***********/
-
-  // Initialize the matrix to identity
-  motion_euclidean_warp_matrix = cv::Mat::eye(2, 3, CV_32F);
-
-  // Specify the number of iterations.
-  motion_euclidean_number_of_iterations = 5000;
-
-  // Specify the threshold of the increment
-  // in the correlation coefficient between two iterations
-  motion_euclidean_termination_eps = 1e-5;
-
-  // // // // //
-  // debug info
-  // // // // //
-
-  debug_switch = false;
-  sim_grid_switch = false;
-  runned_simulation = false;
-  user_estimated_defocus_nm_switch = false;
-  user_estimated_thickness_nm_switch = false;
-  user_estimated_thickness_slice_switch = false;
-
-  std::ofstream match_factor_file;
-  std::ofstream defocus_file_matrix;
-  std::ofstream thickness_file_matrix;
-  std::ofstream match_factor_file_matrix;
-
   match_factor_file_name = "match_factor_file.csv";
   defocus_matrix_file_name = "defocus_matrix.csv";
   thickness_matrix_file_name = "thickness_matrix.csv";
@@ -59,15 +21,12 @@ SIMGRID_wavimg_steplength::SIMGRID_wavimg_steplength( boost::process::ipstream& 
 
 }
 
-bool SIMGRID_wavimg_steplength::_is_simulated_images_grid_defined(){
+bool SIMGRID_wavimg_steplength::get_flag_simulated_images_grid(){
   return runned_simulation;
 }
 
 bool SIMGRID_wavimg_steplength::export_sim_grid( std::string sim_grid_file_name_image ){
-  assert ( slice_samples >= 1 );
-  assert ( defocus_samples >= 1 );
-  assert ( slices_lower_bound >= 1 );
-  assert ( celslc_accum_nm_slice_vec.size() == number_slices_to_max_thickness );
+
   if( runned_simulation ){
     sim_grid_width  = ( reshaped_simulated_image_width * defocus_samples );
     sim_grid_height = ( reshaped_simulated_image_height * slice_samples );
@@ -87,15 +46,13 @@ bool SIMGRID_wavimg_steplength::export_sim_grid( std::string sim_grid_file_name_
     for (int thickness = 1; thickness <= slice_samples; thickness ++ ){
 
       // the slice thickness in nanometers
-
-
       std::vector<cv::Mat> simulated_images_row = simulated_images_grid.at(thickness-1);
 
       for (int defocus = 1; defocus <= defocus_samples; defocus ++ ){
 
         const int at_defocus = defocus_values_matrix.at<float>(thickness-1, defocus-1);
         const int at_slice = thickness_values_matrix.at<float>(thickness-1, defocus-1);
-        const double slice_thickness_nm = celslc_accum_nm_slice_vec.at(at_slice-1);
+        const double slice_thickness_nm = slice_params_accum_nm_slice_vec.at(at_slice-1);
         const double match_factor = match_values_matrix.at<float>( thickness-1, defocus-1);
 
         cv::Mat cleaned_simulated_image = simulated_images_row.at(defocus-1);
@@ -154,7 +111,7 @@ bool SIMGRID_wavimg_steplength::export_sim_grid( std::string sim_grid_file_name_
 
     imwrite(sim_grid_file_name_image, sim_grid);
 
-    if (debug_switch == true) {
+    if ( _flag_debug_switch == true) {
       try {
         imwrite("exp_roi.png", experimental_image_roi);
         namedWindow("SIMGRID window", cv::WINDOW_AUTOSIZE);// Create a window for display.
@@ -175,14 +132,10 @@ bool SIMGRID_wavimg_steplength::export_sim_grid( std::string sim_grid_file_name_
 }
 
 void SIMGRID_wavimg_steplength::produce_png_from_dat_file(){
-  assert ( slice_samples >= 1 );
-  assert ( defocus_samples >= 1 );
-  assert ( slices_lower_bound >= 1 );
-  assert ( celslc_accum_nm_slice_vec.size() == number_slices_to_max_thickness );
 
   for (int thickness = 1; thickness <= slice_samples; thickness ++ ){
     const int at_slice = round( slice_period * ( thickness  - 1 ) + slices_lower_bound );
-    const double slice_thickness_nm = celslc_accum_nm_slice_vec.at(at_slice-1);
+    const double slice_thickness_nm = slice_params_accum_nm_slice_vec.at(at_slice-1);
     std::cout << "slice thickness" << slice_thickness_nm << std::endl;
 
     // for the same thickness iterate through every defocus
@@ -229,7 +182,7 @@ void SIMGRID_wavimg_steplength::produce_png_from_dat_file(){
       std::stringstream output_debug_info2;
       output_debug_info2 << "raw_simulated" << std::setw(3) << std::setfill('0') << std::to_string(thickness) << "_" << std::setw(3) << std::setfill('0') << std::to_string(defocus) << ".png";
       std::string string_output_debug_info2 = output_debug_info2.str();
-      if (debug_switch == true) {
+      if ( _flag_debug_switch == true ) {
         try {
           imwrite(string_output_debug_info2, raw_gray_simulated_image);
           std::cout << "Cycle end" << std::endl;
@@ -249,7 +202,7 @@ bool SIMGRID_wavimg_steplength::check_produced_dat(){
   boost::filesystem::path dir ( base_dir_path );
   for (int thickness = 1; thickness <= slice_samples; thickness++ ){
     const int at_slice = round( slice_period * ( thickness  - 1 ) + slices_lower_bound );
-    const double slice_thickness_nm = celslc_accum_nm_slice_vec.at(at_slice-1);
+    const double slice_thickness_nm = slice_params_accum_nm_slice_vec.at(at_slice-1);
 
     for (int defocus = 1; defocus <= defocus_samples; defocus++ ){
       // get the defocus value
@@ -393,7 +346,7 @@ bool SIMGRID_wavimg_steplength::simulate_from_grid(){
   if( (slice_samples >= 1)
       && (defocus_samples >= 1)
       && (slices_lower_bound >= 1)
-      && ( celslc_accum_nm_slice_vec.size() == number_slices_to_max_thickness )
+      && ( slice_params_accum_nm_slice_vec.size() == number_slices_to_max_thickness )
     ){
     // X
     defocus_values_matrix = cv::Mat( slice_samples, defocus_samples , CV_32FC1 );
@@ -406,7 +359,6 @@ bool SIMGRID_wavimg_steplength::simulate_from_grid(){
     if( raw_simulated_images_grid.size() ==  slice_samples ){
       for (int thickness = 1; thickness <= slice_samples && _error_flag == false; thickness++ ){
         const int at_slice = round( slice_period * ( thickness  - 1 ) + slices_lower_bound );
-        const double slice_thickness_nm = celslc_accum_nm_slice_vec.at(at_slice-1);
 
         // get the matrices row
         const std::vector<cv::Mat> raw_simulated_images_row = raw_simulated_images_grid.at( thickness - 1 );
@@ -476,8 +428,8 @@ bool SIMGRID_wavimg_steplength::simulate_from_grid(){
       best_match_Point2i = cv::Point2i( row_thickness, col_defocus);
 
       simgrid_best_match_thickness_slice = round((slice_period * row_thickness) + slices_lower_bound);
-      simgrid_best_match_thickness_nm = celslc_accum_nm_slice_vec.at(simgrid_best_match_thickness_slice-1);
-      simgrid_best_match_defocus_nm = (col_defocus * defocus_period ) + defocus_lower_bound;
+      simgrid_best_match_thickness_nm = slice_params_accum_nm_slice_vec.at(simgrid_best_match_thickness_slice-1);
+      simgrid_best_match_defocus_nm = ( col_defocus * defocus_period ) + defocus_lower_bound;
 
       std::cout << "Max match % is " << *maxElement << " | " << simulated_matches.at(dist) << "\t at pos ["<< dist << "](" << col_defocus << "," << row_thickness  <<") slice " << simgrid_best_match_thickness_slice << " ( " << simgrid_best_match_thickness_nm << " ) , defocus " << simgrid_best_match_defocus_nm << std::endl;
 
@@ -555,7 +507,7 @@ int SIMGRID_wavimg_steplength::get_simulated_image_thickness_slice_in_grid( int 
 
 double SIMGRID_wavimg_steplength::get_simulated_image_thickness_nm_in_grid( int row_thickness, int col_defocus ){
   const int at_slice = thickness_values_matrix.at<float>(row_thickness, col_defocus);
-  const double slice_thickness_nm = celslc_accum_nm_slice_vec.at(at_slice-1);
+  const double slice_thickness_nm = slice_params_accum_nm_slice_vec.at(at_slice-1);
   return slice_thickness_nm;
 }
 
@@ -583,10 +535,6 @@ int SIMGRID_wavimg_steplength::get_image_correlation_matching_method(){
   return _sim_correlation_method;
 }
 
-bool SIMGRID_wavimg_steplength::get_flag_io_ap_pipe_out(){
-  return _flag_io_ap_pipe_out;
-}
-
 bool SIMGRID_wavimg_steplength::set_image_correlation_matching_method( int enumerator ){
   bool result = false;
 
@@ -610,10 +558,6 @@ bool SIMGRID_wavimg_steplength::set_image_correlation_matching_method( int enume
   return result;
 }
 
-void SIMGRID_wavimg_steplength::set_flag_io_ap_pipe_out( bool value ){
-  _flag_io_ap_pipe_out = value;
-}
-
 void SIMGRID_wavimg_steplength::set_wavimg_var( WAVIMG_prm *wavimg_var ){
   wavimg_parameters = new WAVIMG_prm ( *wavimg_var );
 }
@@ -622,64 +566,12 @@ void SIMGRID_wavimg_steplength::set_simulated_image_needs_reshape( bool reshape 
   simulated_image_needs_reshape = reshape;
 }
 
-void SIMGRID_wavimg_steplength::set_slices_load( int slices ){
-  slices_load = slices;
-}
-
-void SIMGRID_wavimg_steplength::set_slice_samples( int samples ){
-  slice_samples = samples;
-}
-
-void SIMGRID_wavimg_steplength::set_slices_lower_bound( int lower_bound ){
-  slices_lower_bound = lower_bound;
-}
-
-void SIMGRID_wavimg_steplength::set_slices_upper_bound( int upper_bound ){
-  slices_upper_bound = upper_bound;
-}
-
-void SIMGRID_wavimg_steplength::set_number_slices_to_max_thickness( int max_thickness ){
-  number_slices_to_max_thickness = max_thickness;
-}
-
-void SIMGRID_wavimg_steplength::set_slice_period( int period ){
-  slice_period = period;
-}
-
-void SIMGRID_wavimg_steplength::set_defocus_samples( int samples ){
-  defocus_samples = samples;
-}
-
-void SIMGRID_wavimg_steplength::set_defocus_lower_bound( int lower_bound ){
-  defocus_lower_bound = lower_bound;
-}
-
-void SIMGRID_wavimg_steplength::set_defocus_upper_bound( int upper_bound ){
-  defocus_upper_bound = upper_bound;
-}
-
-void SIMGRID_wavimg_steplength::set_defocus_period( int period ){
-  defocus_period = period;
-}
-
-void SIMGRID_wavimg_steplength::set_celslc_accum_nm_slice_vec( std::vector<double> slice_params_nm_slice_vec ){
-  celslc_accum_nm_slice_vec = slice_params_nm_slice_vec;
-}
-
 void SIMGRID_wavimg_steplength::set_roi_pixel_size( int pixel_size ){
   roi_pixel_size = pixel_size;
 }
 
 void SIMGRID_wavimg_steplength::set_ignore_edge_pixels( int edge_pixels_number ){
   ignore_edge_pixels = edge_pixels_number;
-}
-
-void SIMGRID_wavimg_steplength::set_sampling_rate_super_cell_x_nm_pixel( double nm_pixel ){
-  sampling_rate_super_cell_x_nm_pixel = nm_pixel;
-}
-
-void SIMGRID_wavimg_steplength::set_sampling_rate_super_cell_y_nm_pixel( double nm_pixel ){
-  sampling_rate_super_cell_y_nm_pixel = nm_pixel;
 }
 
 void SIMGRID_wavimg_steplength::set_experimental_image_roi( cv::Mat exp_image_roi ){
@@ -714,59 +606,6 @@ void SIMGRID_wavimg_steplength::set_reshaped_simulated_image_height( int height 
   reshaped_simulated_image_height = height;
 }
 
-void SIMGRID_wavimg_steplength::set_debug_switch(bool deb_switch){
-  debug_switch = deb_switch;
-}
-
 void SIMGRID_wavimg_steplength::set_sim_grid_switch( bool sgrid_switch ){
   sim_grid_switch = sgrid_switch;
-}
-
-void SIMGRID_wavimg_steplength::set_user_estimated_defocus_nm_switch( bool estimated_defocus_nm_switch ){
-  user_estimated_defocus_nm_switch = estimated_defocus_nm_switch;
-}
-
-void SIMGRID_wavimg_steplength::set_user_estimated_defocus_nm( int estimated_defocus_nm ){
-  user_estimated_defocus_nm = estimated_defocus_nm;
-}
-
-void SIMGRID_wavimg_steplength::set_user_estimated_thickness_nm_switch( bool estimated_thickness_nm_switch ){
-  user_estimated_thickness_nm_switch = estimated_thickness_nm_switch;
-}
-
-void SIMGRID_wavimg_steplength::set_user_estimated_thickness_nm( double estimated_thickness_nm ){
-  user_estimated_thickness_nm = estimated_thickness_nm;
-}
-
-void SIMGRID_wavimg_steplength::set_user_estimated_thickness_slice_switch( bool estimated_thickness_slice_switch ){
-  user_estimated_thickness_slice_switch = estimated_thickness_slice_switch;
-}
-
-void SIMGRID_wavimg_steplength::set_user_estimated_thickness_slice( int estimated_thickness_slice ){
-  user_estimated_thickness_slice = estimated_thickness_slice;
-}
-
-void SIMGRID_wavimg_steplength::set_step_size( int defocus_step, int slice_step ){
-  step_size.x = defocus_step;
-  step_size.y = slice_step;
-}
-
-void SIMGRID_wavimg_steplength::set_step_size( cv::Point2f defocus_slice_step ){
-  step_size = defocus_slice_step;
-}
-
-bool SIMGRID_wavimg_steplength::set_base_dir_path( boost::filesystem::path path ){
-  base_dir_path = path;
-  _flag_base_dir_path = true;
-  std::stringstream message;
-  message << "SIMGRID_wavimg_steplength baseDirPath: " << path.string();
-  logger->logEvent( ApplicationLog::notification, message.str() );
-  return true;
-}
-
-bool SIMGRID_wavimg_steplength::set_application_logger( ApplicationLog::ApplicationLog* app_logger ){
-  logger = app_logger;
-  _flag_logger = true;
-  logger->logEvent( ApplicationLog::notification, "Application logger setted for SIMGRID_wavimg_steplength class." );
-  return true;
 }

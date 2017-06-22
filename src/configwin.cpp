@@ -52,7 +52,7 @@ MainWindow::MainWindow( ApplicationLog::ApplicationLog* logger , QWidget *parent
     }
   }
   else{
-    _core_image_crystal = new Image_Crystal();
+    _core_image_crystal = new Image_Crystal( _sim_image_crystal_ostream_buffer );
 
     _core_td_map = new TDMap(
         _sim_tdmap_celslc_ostream_buffer,
@@ -270,7 +270,7 @@ bool MainWindow::maybeSetPreferences(){
 }
 
 void MainWindow::update_tdmap_best_match( int x,int y ){
-  if(_core_td_map->_is_simulated_images_grid_defined()){
+  if(_core_td_map->get_flag_simulated_images_grid()){
     cv::Mat _simulated_image = _core_td_map->get_simulated_image_in_grid(x,y);
     const double _simulated_image_match = _core_td_map->get_simulated_image_match_in_grid(x,y);
     const double _simulated_image_thickness = _core_td_map->get_simulated_image_thickness_nm_in_grid(x,y);
@@ -298,7 +298,7 @@ void MainWindow::update_tdmap_best_match( int x,int y ){
 }
 
 void MainWindow::update_tdmap_current_selection(int x,int y){
-  if(_core_td_map->_is_simulated_images_grid_defined()){
+  if(_core_td_map->get_flag_simulated_images_grid()){
     cv::Mat _simulated_image = _core_td_map->get_simulated_image_in_grid(x,y);
     const double _simulated_image_match = _core_td_map->get_simulated_image_match_in_grid(x,y);
     const double _simulated_image_thickness = _core_td_map->get_simulated_image_thickness_nm_in_grid(x,y);
@@ -469,25 +469,6 @@ void MainWindow::update_from_SuperCell_edge_failure(){
   ui->statusBar->showMessage(tr("Error while running edge detection"), 2000);
 }
 
-void MainWindow::update_tdmap_sim_ostream_celslc(){
-  std::string line;
-  if( _core_td_map->get_run_celslc_switch() ){
-      QModelIndex celslc_index = tdmap_running_configuration_model->index(1,0);
-      QModelIndex celslc_out_legend_index = tdmap_running_configuration_model->index(0,0,celslc_index);
-      QModelIndex celslc_out_index = project_setup_crystalographic_fields_model->index(0,1,celslc_out_legend_index);
-
-      if( _core_td_map->_is_sim_tdmap_celslc_ostream_buffer_active() ){
-      while(std::getline(_sim_tdmap_celslc_ostream_buffer, line)){
-
-        QString qt_linw =  QString::fromStdString( line );
-        QVariant _new_line_var = QVariant::fromValue(qt_linw + "\n");
-        bool result = tdmap_running_configuration_model->appendData( celslc_out_index, _new_line_var );
-        ui->qtree_view_tdmap_simulation_setup->update();
-        QApplication::processEvents();
-      }
-    }
-  }
-}
 
 void MainWindow::clear_tdmap_sim_ostream_containers(){
 
@@ -513,6 +494,26 @@ void MainWindow::clear_tdmap_sim_ostream_containers(){
 
 }
 
+void MainWindow::update_tdmap_sim_ostream_celslc(){
+  std::string line;
+  if( _core_td_map->get_run_celslc_switch() ){
+      QModelIndex celslc_index = tdmap_running_configuration_model->index(1,0);
+      QModelIndex celslc_out_legend_index = tdmap_running_configuration_model->index(0,0,celslc_index);
+      QModelIndex celslc_out_index = project_setup_crystalographic_fields_model->index(0,1,celslc_out_legend_index);
+
+      if( _core_td_map->get_flag_celslc_io_ap_pipe_out() ){
+      while(std::getline(_sim_tdmap_celslc_ostream_buffer, line)){
+
+        QString qt_linw =  QString::fromStdString( line );
+        QVariant _new_line_var = QVariant::fromValue(qt_linw + "\n");
+        bool result = tdmap_running_configuration_model->appendData( celslc_out_index, _new_line_var );
+        ui->qtree_view_tdmap_simulation_setup->update();
+        QApplication::processEvents();
+      }
+    }
+  }
+}
+
 void MainWindow::update_tdmap_sim_ostream_msa(){
   std::string line;
   if( _core_td_map->get_run_msa_switch() ){
@@ -521,7 +522,7 @@ void MainWindow::update_tdmap_sim_ostream_msa(){
       QModelIndex msa_out_legend_index = tdmap_running_configuration_model->index(0,0,msa_index);
       QModelIndex msa_out_index = project_setup_crystalographic_fields_model->index(0,1,msa_out_legend_index);
 
-    if( _core_td_map->_is_sim_tdmap_msa_ostream_buffer_active() ){
+    if( _core_td_map->get_flag_msa_io_ap_pipe_out() ){
       while(std::getline(_sim_tdmap_msa_ostream_buffer, line)){
         QString qt_linw =  QString::fromStdString( line );
         QVariant _new_line_var = QVariant::fromValue(qt_linw + "\n");
@@ -540,7 +541,7 @@ void MainWindow::update_tdmap_sim_ostream_wavimg(){
       QModelIndex wavimg_out_legend_index = tdmap_running_configuration_model->index(0,0,wavimg_index);
       QModelIndex wavimg_out_index = project_setup_crystalographic_fields_model->index(0,1,wavimg_out_legend_index);
 
-    if( _core_td_map->_is_sim_tdmap_wavimg_ostream_buffer_active() ){
+    if( _core_td_map->get_flag_wavimg_io_ap_pipe_out() ){
 
       while(std::getline(_sim_tdmap_wavimg_ostream_buffer, line)){
         QString qt_linw =  QString::fromStdString( line );
@@ -557,7 +558,7 @@ void MainWindow::update_tdmap_sim_ostream_simgrid(){
   std::string line;
 
   if( _core_td_map->get_run_simgrid_switch() ){
-    if( _core_td_map->_is_sim_tdmap_simgrid_ostream_buffer_active() ){
+    if( _core_td_map->get_flag_simgrid_io_ap_pipe_out() ){
       QModelIndex simgrid_index = tdmap_running_configuration_model->index(2,0);
       QModelIndex simgrid_out_legend_index = tdmap_running_configuration_model->index(0,0,simgrid_index);
       QModelIndex simgrid_out_index = project_setup_crystalographic_fields_model->index(0,1,simgrid_out_legend_index);
@@ -620,7 +621,7 @@ bool MainWindow::export_TDMap(){
   // returns false if no settings were saved
   bool result = false;
   if( _core_td_map ){
-    if( _core_td_map->_is_simulated_images_grid_defined() ){
+    if( _core_td_map->get_flag_simulated_images_grid() ){
       QFileDialog dialog(this);
       dialog.setWindowModality(Qt::WindowModal);
       std::string preset_filename = _core_td_map->get_export_sim_grid_filename_hint();
@@ -1024,10 +1025,10 @@ void MainWindow::create_box_options(){
   QVector<QVariant> box1_option_2 = {"Sampling (nm/pixel)",""};
   QVector<QVariant> box1_option_2_1 = {"x",""};
   QVector<bool> box1_option_2_1_edit = {false,true};
-  boost::function<bool(std::string)> box1_function_2_1 ( boost::bind( &Image_Crystal::set_experimental_sampling_x,_core_image_crystal, _1 ) );
+  boost::function<bool(std::string)> box1_function_2_1 ( boost::bind( &TDMap::set_sampling_rate_experimental_x_nm_per_pixel,_core_td_map, _1 ) );
   QVector<QVariant> box1_option_2_2 = {"y",""};
   QVector<bool> box1_option_2_2_edit = {false,true};
-  boost::function<bool(std::string)> box1_function_2_2 ( boost::bind( &Image_Crystal::set_experimental_sampling_y,_core_image_crystal, _1 ) );
+  boost::function<bool(std::string)> box1_function_2_2 ( boost::bind( &TDMap::set_sampling_rate_experimental_y_nm_per_pixel,_core_td_map, _1 ) );
 
   TreeItem* experimental_sampling_rate = new TreeItem ( box1_option_2  );
   TreeItem* experimental_sampling_rate_x = new TreeItem ( box1_option_2_1 , box1_function_2_1, box1_option_2_1_edit );
@@ -1089,12 +1090,12 @@ void MainWindow::create_box_options(){
   ////////////////
 
   QVector<QVariant> box1_option_3_2 = {"Dimensions",""};
-  QVector<QVariant> box1_option_3_2_1 = {"width",""};
+  QVector<QVariant> box1_option_3_2_1 = {"width <ny>",""};
   QVector<bool> box1_option_3_2_1_edit = {false,true};
-  boost::function<bool(std::string)> box1_function_3_2_1 ( boost::bind( &Image_Crystal::set_experimental_roi_dimensions_width,_core_image_crystal, _1 ) );
-  QVector<QVariant> box1_option_3_2_2 = {"height",""};
+  boost::function<bool(std::string)> box1_function_3_2_1 ( boost::bind( &TDMap::set_ny_size_width,_core_td_map, _1 ) );
+  QVector<QVariant> box1_option_3_2_2 = {"height <nx>",""};
   QVector<bool> box1_option_3_2_2_edit = {false,true};
-  boost::function<bool(std::string)> box1_function_3_2_2 ( boost::bind( &Image_Crystal::set_experimental_roi_dimensions_height,_core_image_crystal, _1 ) );
+  boost::function<bool(std::string)> box1_function_3_2_2 ( boost::bind( &TDMap::set_nx_size_height,_core_td_map, _1 ) );
 
   TreeItem* experimental_roi_dimensions = new TreeItem ( box1_option_3_2  );
   TreeItem* experimental_roi_dimensions_width = new TreeItem ( box1_option_3_2_1 , box1_function_3_2_1, box1_option_3_2_1_edit );
@@ -1141,7 +1142,7 @@ void MainWindow::create_box_options(){
   ////////////////
   QVector<QVariant> box2_option_1_1 = {"CIF",""};
   QVector<bool> box2_option_1_1_edit = {false,true};
-  boost::function<bool(std::string)> box2_function_1_1 ( boost::bind( &Image_Crystal::set_unit_cell_cif_path,_core_image_crystal, _1 ) );
+  boost::function<bool(std::string)> box2_function_1_1 ( boost::bind( &TDMap::set_unit_cell_cif_path,_core_td_map, _1 ) );
   TreeItem* unit_cell_file_cif = new TreeItem ( box2_option_1_1 , box2_function_1_1, box2_option_1_1_edit );
   unit_cell_file_cif->set_item_delegate_type( TreeItem::_delegate_FILE );
   unit_cell_file->insertChildren( unit_cell_file_cif );
@@ -1151,18 +1152,50 @@ void MainWindow::create_box_options(){
   celslc_step_group_options->add_option( project_setup_crystalographic_fields_model, unit_cell_file_cif , 1, false);
 
   ////////////////
-  // Unit-cell file CEL
+  // Projection direction
   ////////////////
-  QVector<QVariant> box2_option_1_2 = {"CEL",""};
-  QVector<bool> box2_option_1_2_edit = {false,true};
-  boost::function<bool(std::string)> box2_function_1_2 ( boost::bind( &Image_Crystal::set_unit_cell_cel_path,_core_image_crystal, _1 ) );
-  TreeItem* unit_cell_file_cel = new TreeItem ( box2_option_1_2 , box2_function_1_2, box2_option_1_2_edit );
-  unit_cell_file_cel->set_item_delegate_type( TreeItem::_delegate_FILE );
-  unit_cell_file->insertChildren( unit_cell_file_cel );
+  QVector<QVariant> box2_option_3 = {"Zone axis",""};
+  TreeItem* projection_direction  = new TreeItem (  box2_option_3 );
+  crystallography_root->insertChildren( projection_direction );
+
+  ////////////////
+  // Projection direction h
+  ////////////////
+  QVector<QVariant> box2_option_3_1 = {"h",""};
+  QVector<bool> box2_option_3_1_edit = {false,true};
+  boost::function<bool(std::string)> box2_function_3_1 ( boost::bind( &TDMap::set_zone_axis_u,_core_td_map, _1 ) );
+  TreeItem* projection_direction_h = new TreeItem ( box2_option_3_1 , box2_function_3_1, box2_option_3_1_edit );
+  projection_direction->insertChildren( projection_direction_h );
 
   /*group options*/
-  unit_cell_file_cel->set_variable_name( "unit_cell_file_cel" );
-  celslc_step_group_options->add_option( project_setup_crystalographic_fields_model, unit_cell_file_cel , 1, false);
+  projection_direction_h->set_variable_name( "zone_axis_h" );
+  celslc_step_group_options->add_option( project_setup_crystalographic_fields_model, projection_direction_h , 1, true);
+
+  ////////////////
+  // Projection direction k
+  ////////////////
+  QVector<QVariant> box2_option_3_2 = {"k",""};
+  QVector<bool> box2_option_3_2_edit = {false,true};
+  boost::function<bool(std::string)> box2_function_3_2 ( boost::bind( &TDMap::set_zone_axis_v,_core_td_map, _1 ) );
+  TreeItem* projection_direction_k = new TreeItem ( box2_option_3_2 , box2_function_3_2, box2_option_3_2_edit );
+  projection_direction->insertChildren( projection_direction_k );
+
+  /*group options*/
+  projection_direction_k->set_variable_name( "zone_axis_k" );
+  celslc_step_group_options->add_option( project_setup_crystalographic_fields_model, projection_direction_k , 1, true);
+
+  ////////////////
+  // Projection direction l
+  ////////////////
+  QVector<QVariant> box2_option_3_3 = {"l",""};
+  QVector<bool> box2_option_3_3_edit = {false,true};
+  boost::function<bool(std::string)> box2_function_3_3 ( boost::bind( &TDMap::set_zone_axis_w,_core_td_map, _1 ) );
+  TreeItem* projection_direction_l = new TreeItem ( box2_option_3_3 , box2_function_3_3, box2_option_3_3_edit );
+  projection_direction->insertChildren( projection_direction_l );
+
+  /*group options*/
+  projection_direction_l->set_variable_name( "zone_axis_l" );
+  celslc_step_group_options->add_option( project_setup_crystalographic_fields_model, projection_direction_l , 1, true);
 
   ////////////////
   // Projected y axis
@@ -1176,7 +1209,7 @@ void MainWindow::create_box_options(){
   ////////////////
   QVector<QVariant> box2_option_2_1 = {"u",""};
   QVector<bool> box2_option_2_1_edit = {false,true};
-  boost::function<bool(std::string)> box2_function_2_1 ( boost::bind( &Image_Crystal::set_projected_y_axis_u,_core_image_crystal, _1 ) );
+  boost::function<bool(std::string)> box2_function_2_1 ( boost::bind( &TDMap::set_projected_y_axis_u,_core_td_map, _1 ) );
   TreeItem* projected_y_axis_u = new TreeItem ( box2_option_2_1 , box2_function_2_1, box2_option_2_1_edit );
   projected_y_axis->insertChildren( projected_y_axis_u );
 
@@ -1189,7 +1222,7 @@ void MainWindow::create_box_options(){
   ////////////////
   QVector<QVariant> box2_option_2_2 = {"v",""};
   QVector<bool> box2_option_2_2_edit = {false,true};
-  boost::function<bool(std::string)> box2_function_2_2 ( boost::bind( &Image_Crystal::set_projected_y_axis_v,_core_image_crystal, _1 ) );
+  boost::function<bool(std::string)> box2_function_2_2 ( boost::bind( &TDMap::set_projected_y_axis_v,_core_td_map, _1 ) );
   TreeItem* projected_y_axis_v = new TreeItem ( box2_option_2_2 , box2_function_2_2, box2_option_2_2_edit );
   projected_y_axis->insertChildren( projected_y_axis_v );
 
@@ -1202,60 +1235,13 @@ void MainWindow::create_box_options(){
   ////////////////
   QVector<QVariant> box2_option_2_3 = {"w",""};
   QVector<bool>  box2_option_2_3_edit = {false,true};
-  boost::function<bool(std::string)>  box2_function_2_3 ( boost::bind( &Image_Crystal::set_projected_y_axis_w,_core_image_crystal, _1 ) );
+  boost::function<bool(std::string)>  box2_function_2_3 ( boost::bind( &TDMap::set_projected_y_axis_w,_core_td_map, _1 ) );
   TreeItem* projected_y_axis_w = new TreeItem (  box2_option_2_3 ,  box2_function_2_3,  box2_option_2_3_edit );
   projected_y_axis->insertChildren( projected_y_axis_w );
 
   /*group options*/
   projected_y_axis_w->set_variable_name( "projected_y_axis_w" );
   celslc_step_group_options->add_option( project_setup_crystalographic_fields_model, projected_y_axis_w , 1, true);
-
-  ////////////////
-  // Projection direction
-  ////////////////
-  QVector<QVariant> box2_option_3 = {"Projection direction",""};
-  TreeItem* projection_direction  = new TreeItem (  box2_option_3 );
-  crystallography_root->insertChildren( projection_direction );
-
-  ////////////////
-  // Projection direction h
-  ////////////////
-  QVector<QVariant> box2_option_3_1 = {"h",""};
-  QVector<bool> box2_option_3_1_edit = {false,true};
-  boost::function<bool(std::string)> box2_function_3_1 ( boost::bind( &Image_Crystal::set_projection_direction_h,_core_image_crystal, _1 ) );
-  TreeItem* projection_direction_h = new TreeItem ( box2_option_3_1 , box2_function_3_1, box2_option_3_1_edit );
-  projection_direction->insertChildren( projection_direction_h );
-
-  /*group options*/
-  projection_direction_h->set_variable_name( "projection_direction_h" );
-  celslc_step_group_options->add_option( project_setup_crystalographic_fields_model, projection_direction_h , 1, true);
-
-  ////////////////
-  // Projection direction k
-  ////////////////
-  QVector<QVariant> box2_option_3_2 = {"k",""};
-  QVector<bool> box2_option_3_2_edit = {false,true};
-  boost::function<bool(std::string)> box2_function_3_2 ( boost::bind( &Image_Crystal::set_projection_direction_k,_core_image_crystal, _1 ) );
-  TreeItem* projection_direction_k = new TreeItem ( box2_option_3_2 , box2_function_3_2, box2_option_3_2_edit );
-  projection_direction->insertChildren( projection_direction_k );
-
-  /*group options*/
-  projection_direction_k->set_variable_name( "projection_direction_k" );
-  celslc_step_group_options->add_option( project_setup_crystalographic_fields_model, projection_direction_k , 1, true);
-
-  ////////////////
-  // Projection direction l
-  ////////////////
-  QVector<QVariant> box2_option_3_3 = {"l",""};
-  QVector<bool> box2_option_3_3_edit = {false,true};
-  boost::function<bool(std::string)> box2_function_3_3 ( boost::bind( &Image_Crystal::set_projection_direction_l,_core_image_crystal, _1 ) );
-  TreeItem* projection_direction_l = new TreeItem ( box2_option_3_3 , box2_function_3_3, box2_option_3_3_edit );
-  projection_direction->insertChildren( projection_direction_l );
-
-  /*group options*/
-  projection_direction_l->set_variable_name( "projection_direction_l" );
-  celslc_step_group_options->add_option( project_setup_crystalographic_fields_model, projection_direction_l , 1, true);
-
 
   ui->qtree_view_project_setup_crystallography->setModel(project_setup_crystalographic_fields_model);
   ui->qtree_view_project_setup_crystallography->setItemDelegate( _load_file_delegate );
@@ -1299,7 +1285,7 @@ void MainWindow::create_box_options(){
   ////////////////
   QVector<QVariant> box3_option_0_1_1 = {"Estimated nm",""};
   QVector<bool> box3_option_0_1_1_edit = {false,true};
-  boost::function<bool(double)> box3_function_0_1_1 ( boost::bind( &TDMap::set_thickness_user_estimated_nm, _core_td_map, _1 ) );
+  boost::function<bool(std::string)> box3_function_0_1_1 ( boost::bind( &TDMap::set_thickness_user_estimated_nm, _core_td_map, _1 ) );
   TreeItem* _parameter_variation_map_thickness_estimated_nm  = new TreeItem ( box3_option_0_1_1, box3_function_0_1_1, box3_option_0_1_1_edit  );
   _parameter_variation_map_thickness_estimated_nm->set_item_delegate_type( TreeItem::_delegate_TEXT_ACTION );
 
@@ -1320,7 +1306,7 @@ void MainWindow::create_box_options(){
   ////////////////
   QVector<QVariant> box3_option_1_3 = {"Samples",""};
   QVector<bool> box3_option_1_3_edit = {false,true};
-  boost::function<bool(std::string)> box3_function_1_3 ( boost::bind( &TDMap::set_thickness_range_number_samples_cast, _core_td_map, _1 ) );
+  boost::function<bool(std::string)> box3_function_1_3 ( boost::bind( &TDMap::set_slice_samples, _core_td_map, _1 ) );
   TreeItem* thickness_range_number_samples = new TreeItem ( box3_option_1_3 , box3_function_1_3, box3_option_1_3_edit );
   _parameter_variation_map_thickness->insertChildren( thickness_range_number_samples );
 
@@ -1336,7 +1322,7 @@ void MainWindow::create_box_options(){
   ////////////////
   QVector<QVariant> box3_option_1_1 = {"Lower bound",""};
   QVector<bool> box3_option_1_1_edit = {false,true};
-  boost::function<bool(std::string)> box3_function_1_1 ( boost::bind( &TDMap::set_thickness_range_lower_bound_cast, _core_td_map, _1 ) );
+  boost::function<bool(std::string)> box3_function_1_1 ( boost::bind( &TDMap::set_nm_lower_bound, _core_td_map, _1 ) );
   TreeItem* thickness_range_lower_bound = new TreeItem ( box3_option_1_1 , box3_function_1_1, box3_option_1_1_edit );
   thickness_range->insertChildren( thickness_range_lower_bound );
 
@@ -1345,7 +1331,7 @@ void MainWindow::create_box_options(){
   ////////////////
   QVector<QVariant> box3_option_1_2 = {"Upper bound",""};
   QVector<bool> box3_option_1_2_edit = {false,true};
-  boost::function<bool(std::string)> box3_function_1_2 ( boost::bind( &TDMap::set_thickness_range_upper_bound_cast, _core_td_map, _1 ) );
+  boost::function<bool(std::string)> box3_function_1_2 ( boost::bind( &TDMap::set_nm_upper_bound, _core_td_map, _1 ) );
   TreeItem* thickness_range_upper_bound = new TreeItem ( box3_option_1_2 , box3_function_1_2, box3_option_1_2_edit );
   thickness_range->insertChildren( thickness_range_upper_bound );
 
@@ -1361,7 +1347,7 @@ void MainWindow::create_box_options(){
   ////////////////
   QVector<QVariant> box3_option_0_2_1 = {"Estimated nm",""};
   QVector<bool> box3_option_0_2_1_edit = {false,true};
-  boost::function<bool(double)> box3_function_0_2_1 ( boost::bind( &TDMap::set_defocus_user_estimated_nm, _core_td_map, _1 ) );
+  boost::function<bool(std::string)> box3_function_0_2_1 ( boost::bind( &TDMap::set_defocus_user_estimated_nm, _core_td_map, _1 ) );
   TreeItem* _parameter_variation_map_defocus_estimated_nm  = new TreeItem ( box3_option_0_2_1, box3_function_0_2_1, box3_option_0_2_1_edit  );
   _parameter_variation_map_defocous->insertChildren( _parameter_variation_map_defocus_estimated_nm );
 
@@ -1370,7 +1356,7 @@ void MainWindow::create_box_options(){
   ////////////////
   QVector<QVariant> box3_option_2_3 = {"Samples",""};
   QVector<bool> box3_option_2_3_edit = {false,true};
-  boost::function<bool(std::string)> box3_function_2_3 ( boost::bind( &TDMap::set_defocus_range_number_samples, _core_td_map, _1 ) );
+  boost::function<bool(std::string)> box3_function_2_3 ( boost::bind( &TDMap::set_defocus_samples, _core_td_map, _1 ) );
   TreeItem* defocus_range_number_samples = new TreeItem ( box3_option_2_3 , box3_function_2_3, box3_option_2_3_edit );
   _parameter_variation_map_defocous->insertChildren( defocus_range_number_samples );
 
@@ -1386,7 +1372,7 @@ void MainWindow::create_box_options(){
   ////////////////
   QVector<QVariant> box3_option_2_1 = {"Lower bound",""};
   QVector<bool> box3_option_2_1_edit = {false,true};
-  boost::function<bool(std::string)> box3_function_2_1 ( boost::bind( &TDMap::set_defocus_range_lower_bound, _core_td_map, _1 ) );
+  boost::function<bool(std::string)> box3_function_2_1 ( boost::bind( &TDMap::set_defocus_lower_bound, _core_td_map, _1 ) );
   TreeItem* defocus_range_lower_bound = new TreeItem ( box3_option_2_1 , box3_function_2_1, box3_option_2_1_edit );
   defocus_range->insertChildren( defocus_range_lower_bound );
 
@@ -1395,7 +1381,7 @@ void MainWindow::create_box_options(){
   ////////////////
   QVector<QVariant> box3_option_2_2 = {"Upper bound",""};
   QVector<bool> box3_option_2_2_edit = {false,true};
-  boost::function<bool(std::string)> box3_function_2_2 ( boost::bind( &TDMap::set_defocus_range_upper_bound, _core_td_map, _1 ) );
+  boost::function<bool(std::string)> box3_function_2_2 ( boost::bind( &TDMap::set_defocus_upper_bound, _core_td_map, _1 ) );
   TreeItem* defocus_range_upper_bound = new TreeItem ( box3_option_2_2 , box3_function_2_2, box3_option_2_2_edit );
   defocus_range->insertChildren( defocus_range_upper_bound );
 
@@ -1563,8 +1549,8 @@ void MainWindow::create_box_options(){
 
   QVector<QVariant> box4_option_1 = {"", ""};
   QVector<bool> box4_option_1_edit = {false,true};
-  boost::function<int()> box4_function_1_getter ( boost::bind( &TDMap::get_log_level, _core_td_map ) );
-  boost::function<bool(int)> box4_function_1_setter ( boost::bind( &TDMap::set_log_level, _core_td_map, _1 ) );
+  boost::function<int()> box4_function_1_getter ( boost::bind( &TDMap::get_exec_log_level, _core_td_map ) );
+  boost::function<bool(int)> box4_function_1_setter ( boost::bind( &TDMap::set_exec_log_level, _core_td_map, _1 ) );
 
   TreeItem* _log_level_setter  = new TreeItem ( box4_option_1, box4_function_1_setter, box4_function_1_getter, box4_option_1_edit );
   // load the preset data from core constuctor

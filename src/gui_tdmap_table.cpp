@@ -72,11 +72,13 @@ void TDMap_Table::connect_defocus_range_number_samples_changes( const TreeItem* 
 
 void TDMap_Table::update_RowCount_from_thickness_range_number_samples( int signal_item_changed_column ){
   if ( signal_item_changed_column == _treeitem_thickness_range_number_samples_watch_col ){
-    int new_RowCount = core_tdmap->get_thickness_range_number_samples();
+    if( core_tdmap->get_flag_slice_samples() ){
+    int new_RowCount = core_tdmap->get_slice_samples();
     RowCount = new_RowCount;
     update_row_size();
     std::cout << "new_RowCount " << new_RowCount << std::endl;
     clear();
+    }
   }
 }
 
@@ -107,11 +109,13 @@ void TDMap_Table::update_row_size(){
 
 void TDMap_Table::update_ColumnCount_from_defocus_range_number_samples( int signal_item_changed_column ){
   if ( signal_item_changed_column == _treeitem_defocus_range_number_samples_watch_col ){
-    int new_ColumnCount = core_tdmap->get_defocus_range_number_samples();
+if( core_tdmap->get_flag_defocus_samples() ){
+    int new_ColumnCount = core_tdmap->get_defocus_samples();
     ColumnCount = new_ColumnCount;
     update_column_size();
     std::cout << "new_ColumnCount " << new_ColumnCount << std::endl;
     clear();
+  }
   }
 }
 
@@ -127,29 +131,24 @@ void TDMap_Table::update_headers(){
   int _thickness_lower_slice = 0;
   int _thickness_period_slice = 0;
   if( _flag_core_tdmap ){
-    if( core_tdmap->_is_defocus_range_lower_bound_defined() ){
-      _defocus_lower = core_tdmap->get_defocus_range_lower_bound();
+    if( core_tdmap->get_flag_defocus_lower_bound() ){
+      _defocus_lower = core_tdmap->get_defocus_lower_bound();
     }
-    if(  core_tdmap->_is_defocus_period_defined() ){
-      _defocus_period = core_tdmap->get_defocus_range_period();
+    if(  core_tdmap->get_flag_defocus_period() ){
+      _defocus_period = core_tdmap->get_defocus_period();
     }
 
-    if( core_tdmap->_is_thickness_range_lower_bound_slice_defined() ){
-      _thickness_lower_slice = core_tdmap->get_thickness_range_lower_bound_slice();
+    if( core_tdmap->get_flag_nm_lower_bound() ){
+      _thickness_lower_slice = core_tdmap->get_slices_lower_bound();
     }
-    if( core_tdmap->_is_thickness_period_slice_defined() ){
-      _thickness_period_slice = core_tdmap->get_thickness_range_period_slice();
+    if( core_tdmap->get_flag_slice_period() ){
+      _thickness_period_slice = core_tdmap->get_slice_period();
     }
-    std::cout << " core_tdmap->_is_nx_simulated_horizontal_samples_defined()  " << core_tdmap->_is_nx_simulated_horizontal_samples_defined()  << std::endl;
-    if( core_tdmap->_is_nx_simulated_horizontal_samples_defined() ){
-      ColumnSize = core_tdmap->get_nx_simulated_horizontal_samples();
-      std::cout << " Column size setted to " << ColumnSize << std::endl;
+    if( core_tdmap->get_flag_defocus_samples() ){
+      ColumnSize = core_tdmap->get_defocus_samples();
     }
-    std::cout << " core_tdmap->_is_ny_simulated_vertical_samples_defined()  " << core_tdmap->_is_ny_simulated_vertical_samples_defined()  << std::endl;
-
-    if( core_tdmap->_is_ny_simulated_vertical_samples_defined() ){
-      RowSize = core_tdmap->get_ny_simulated_vertical_samples();
-      std::cout << " RowSize size setted to " << RowSize << std::endl;
+    if( core_tdmap->get_flag_slice_samples() ){
+      RowSize = core_tdmap->get_slice_samples();
     }
   }
 
@@ -163,9 +162,9 @@ void TDMap_Table::update_headers(){
   std::vector <double> _local_accum_nm_slice_vec;
   bool use_accum_nm = false;
   if ( core_tdmap != nullptr ){
-    if( core_tdmap->_is_celslc_accum_nm_slice_vec_defined() ){
+    if( core_tdmap->get_flag_slice_params_accum_nm_slice_vec() ){
       use_accum_nm = true;
-      _local_accum_nm_slice_vec = core_tdmap->get_celslc_accum_nm_slice_vec();
+      _local_accum_nm_slice_vec = core_tdmap->get_slice_params_accum_nm_slice_vec();
     }
   }
   for (int i = 0; i < RowCount; ++i) {
@@ -264,8 +263,8 @@ void TDMap_Table::update_cells(){
 }
 
 /*
- * The cell() private function returns the TDMap_Cellobject for a given row and column. 
- * It is almost the same as QTableWidget::item(), 
+ * The cell() private function returns the TDMap_Cellobject for a given row and column.
+ * It is almost the same as QTableWidget::item(),
  * except that it returns a TDMap_Cellpointer instead of a QTableWidgetItem pointer.
  * */
 TDMap_Cell* TDMap_Table::cell(int row, int column) const
@@ -275,8 +274,8 @@ TDMap_Cell* TDMap_Table::cell(int row, int column) const
 
 
 /*
- * The currentLocation() function returns the current cell's location in the 
- * usual TDMap_Table format of column letter followed by row number. 
+ * The currentLocation() function returns the current cell's location in the
+ * usual TDMap_Table format of column letter followed by row number.
  * MainWindow::updateStatusBar() uses it to show the location in the status bar.
  * */
 QString TDMap_Table::currentLocation() const
@@ -286,7 +285,7 @@ QString TDMap_Table::currentLocation() const
 }
 
 /*
- * The somethingChanged() private slot recalculates the whole TDMap_Table if 
+ * The somethingChanged() private slot recalculates the whole TDMap_Table if
  * "auto-recalculate" is enabled. It also emits the modified() signal.
  */
 void TDMap_Table::somethingChanged()
