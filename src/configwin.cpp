@@ -172,7 +172,7 @@ void MainWindow::update_tdmap_celslc_ended( bool result ){
     ui->statusBar->showMessage(tr("Sucessfully ended multislice step"), 2000);
   }
   else{
-    ui->statusBar->showMessage(tr("Error while running multislice step"), 2000);
+    ui->statusBar->showMessage(tr("Error while running multislice step") );
   }
 }
 
@@ -190,7 +190,7 @@ void MainWindow::update_tdmap_msa_ended( bool result ){
   }
   else{
       updateProgressBar(0,2,4, true);
-    ui->statusBar->showMessage(tr("Error while calculating the electron diffraction patterns"), 2000);
+    ui->statusBar->showMessage(tr("Error while calculating the electron diffraction patterns") );
   }
 }
 
@@ -208,7 +208,7 @@ void MainWindow::update_tdmap_wavimg_ended( bool result ){
   }
   else{
       updateProgressBar(0,3,4, true);
-    ui->statusBar->showMessage(tr("Error while calculating the image intensity distribuitions"), 2000);
+    ui->statusBar->showMessage(tr("Error while calculating the image intensity distribuitions") );
   }
 }
 
@@ -226,7 +226,7 @@ void MainWindow::update_tdmap_simgrid_ended( bool result ){
   }
   else{
       updateProgressBar(0,4,4, true);
-    ui->statusBar->showMessage(tr("Error while running image correlation step"), 2000);
+    ui->statusBar->showMessage(tr("Error while running image correlation step") );
   }
 }
 
@@ -234,10 +234,10 @@ void MainWindow::update_tdmap_celslc_step( int at_step ){
   std::cout << "update_tdmap_celslc_step " << at_step << std::endl;
 }
 
-void MainWindow::set_base_dir_path( boost::filesystem::path base_dir ){
+bool MainWindow::set_base_dir_path( boost::filesystem::path base_dir ){
   base_dir_path = base_dir;
-  _flag_base_dir_path = true;
-  _core_td_map->set_base_dir_path( base_dir );
+  _flag_base_dir_path = _core_td_map->set_base_dir_path( base_dir );
+  return _flag_base_dir_path;
 }
 
 bool MainWindow::set_application_logger( ApplicationLog::ApplicationLog* logger ){
@@ -447,7 +447,7 @@ void MainWindow::update_from_TDMap_sucess(){
 }
 
 void MainWindow::update_from_TDMap_failure(){
-  ui->statusBar->showMessage(tr("Error while running TD-Map"), 2000);
+  ui->statusBar->showMessage(tr("Error while running TD-Map") );
   std::vector <std::string> errors = _core_td_map->get_test_run_config_errors();
   std::ostringstream os;
   for( int pos = 0; pos < errors.size(); pos++ ){
@@ -466,7 +466,7 @@ void MainWindow::update_from_SuperCell_edge_sucess(){
 }
 
 void MainWindow::update_from_SuperCell_edge_failure(){
-  ui->statusBar->showMessage(tr("Error while running edge detection"), 2000);
+  ui->statusBar->showMessage(tr("Error while running edge detection") );
 }
 
 

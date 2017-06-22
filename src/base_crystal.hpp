@@ -113,8 +113,6 @@ class BaseCrystal {
     //calculated
     int slices_lower_bound;
     int slices_upper_bound;
-    int number_slices_to_max_thickness;
-    bool _flag_number_slices_to_max_thickness = false;
 
 
     /////////////////////////
@@ -241,7 +239,7 @@ class BaseCrystal {
     //calculated
     int get_slices_lower_bound(){ return slices_lower_bound; }
     int get_slices_upper_bound(){ return slices_upper_bound; }
-    int get_number_slices_to_max_thickness(){ return number_slices_to_max_thickness; }
+    int get_number_slices_to_max_thickness(){ return nz_simulated_partitions; }
     /////////////////////////
     // Simulated Defocus info
     /////////////////////////

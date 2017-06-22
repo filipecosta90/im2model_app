@@ -197,39 +197,56 @@ void SIMGRID_wavimg_steplength::produce_png_from_dat_file(){
 }
 
 bool SIMGRID_wavimg_steplength::check_produced_dat(){
-  bool result = true;
+  bool result = false;
   // Load image
-  boost::filesystem::path dir ( base_dir_path );
-  for (int thickness = 1; thickness <= slice_samples; thickness++ ){
-    const int at_slice = round( slice_period * ( thickness  - 1 ) + slices_lower_bound );
-    const double slice_thickness_nm = slice_params_accum_nm_slice_vec.at(at_slice-1);
+  if( _flag_base_dir_path &
+      _flag_slice_samples &
+      _flag_slice_period &
+      _flag_nm_upper_bound &
+      _flag_slice_params_accum_nm_slice_vec  &
+      _flag_defocus_samples &
+      _flag_defocus_period &
+      _flag_defocus_lower_bound
+    ){
+    bool files_result = true;
+    boost::filesystem::path dir ( base_dir_path );
+    for (int thickness = 1; thickness <= slice_samples; thickness++ ){
+      const int at_slice = round( slice_period * ( thickness  - 1 ) + slices_lower_bound );
+      const double slice_thickness_nm = slice_params_accum_nm_slice_vec.at(at_slice-1);
+      for (int defocus = 1; defocus <= defocus_samples; defocus++ ){
+        // get the defocus value
+        const int at_defocus = round( ((defocus-1) * defocus_period )+ defocus_lower_bound );
+        // get the .dat image name
+        std::stringstream output_dat_name_stream;
+        output_dat_name_stream << "image_" << std::setw(3) << std::setfill('0') << std::to_string(thickness) << "_" << std::setw(3) << std::setfill('0') << std::to_string(defocus) << ".dat";
+        boost::filesystem::path dat_file ( output_dat_name_stream.str() );
+        boost::filesystem::path full_dat_path = dir / dat_file;
 
-    for (int defocus = 1; defocus <= defocus_samples; defocus++ ){
-      // get the defocus value
-      const int at_defocus = round( ((defocus-1) * defocus_period )+ defocus_lower_bound );
-      // get the .dat image name
-      std::stringstream output_dat_name_stream;
-      output_dat_name_stream << "image_" << std::setw(3) << std::setfill('0') << std::to_string(thickness) << "_" << std::setw(3) << std::setfill('0') << std::to_string(defocus) << ".dat";
-      boost::filesystem::path dat_file ( output_dat_name_stream.str() );
-      boost::filesystem::path full_dat_path = dir / dat_file;
-
-      const bool _dat_exists = boost::filesystem::exists( full_dat_path );
-      result &= _dat_exists;
-      if( _flag_logger ){
-        std::stringstream message;
-        message << " Opening \"" << full_dat_path.string() << "\" to retrieve thickness " << slice_thickness_nm << " nm (sl "<< at_slice
-          << "), defocus " << at_defocus
-          << ", RESULT: " << std::boolalpha << _dat_exists;
-        if( _dat_exists ){
-          logger->logEvent( ApplicationLog::notification , message.str() );
-        }
-        else{
-          logger->logEvent( ApplicationLog::error , message.str() );
+        const bool _dat_exists = boost::filesystem::exists( full_dat_path );
+        files_result &= _dat_exists;
+        if( _flag_logger ){
+          std::stringstream message;
+          message << " Opening \"" << full_dat_path.string() << "\" to retrieve thickness " << slice_thickness_nm << " nm (sl "<< at_slice
+            << "), defocus " << at_defocus
+            << ", RESULT: " << std::boolalpha << _dat_exists;
+          if( _dat_exists ){
+            logger->logEvent( ApplicationLog::notification , message.str() );
+          }
+          else{
+            logger->logEvent( ApplicationLog::error , message.str() );
+          }
         }
       }
     }
+    result = files_result;
   }
-
+  else {
+    if( _flag_logger ){
+      std::stringstream message;
+      message << "The required vars for check_produced_dat() are not setted up.";
+      logger->logEvent( ApplicationLog::error , message.str() );
+    }
+  }
   if( _flag_logger ){
     std::stringstream message;
     message << "Check_produced_dat global result: " << std::boolalpha << result;
@@ -346,7 +363,7 @@ bool SIMGRID_wavimg_steplength::simulate_from_grid(){
   if( (slice_samples >= 1)
       && (defocus_samples >= 1)
       && (slices_lower_bound >= 1)
-      && ( slice_params_accum_nm_slice_vec.size() == number_slices_to_max_thickness )
+      && ( slice_params_accum_nm_slice_vec.size() == nz_simulated_partitions )
     ){
     // X
     defocus_values_matrix = cv::Mat( slice_samples, defocus_samples , CV_32FC1 );

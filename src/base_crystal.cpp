@@ -40,7 +40,7 @@ bool BaseCrystal::calculate_defocus_period(){
 bool BaseCrystal::calculate_thickness_slice_period(){
   bool result = false;
   if ( _flag_nm_lower_bound && _flag_nm_upper_bound
-      && _flag_slice_samples && _flag_number_slices_to_max_thickness ){
+      && _flag_slice_samples && _flag_nz_simulated_partitions ){
     int slice_interval = slices_upper_bound - slices_lower_bound;
     std::div_t divresult;
     divresult = div (slice_interval, (slice_samples -1) );
@@ -53,7 +53,7 @@ bool BaseCrystal::calculate_thickness_slice_period(){
       const int decrease_top_range = slices_lower_bound + ((slice_samples-1) * slice_period );
       const int decrease_bot_range = slices_lower_bound-slices_to_period + (slice_samples * slice_period );
 
-      if ( increase_top_range <= number_slices_to_max_thickness ){
+      if ( increase_top_range <= nz_simulated_partitions ){
         std::cout << "Increasing top range to slice #" << increase_top_range << std::endl;
         std::cout << "Going to use one more sample than the requested " << slice_samples << " samples. Using " << (slice_samples+1) << " samples." << std::endl;
         slices_upper_bound = increase_top_range;

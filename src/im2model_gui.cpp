@@ -60,9 +60,11 @@ int main(int argc, char *argv[]){
     if (!parser.positionalArguments().isEmpty()){
       window.loadFile(parser.positionalArguments().first());
     }
-    window.set_base_dir_path( app_path );
-    window.show();
-    return app.exec();
+    const bool base_setted = window.set_base_dir_path( app_path );
+    if( base_setted ){
+      window.show();
+      return app.exec();
+    }
   }
   im2model_logger->logEvent(ApplicationLog::normal, "Application exit");
 

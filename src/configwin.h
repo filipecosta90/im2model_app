@@ -60,7 +60,7 @@ class MainWindow : public QMainWindow {
 
     bool set_dr_probe_path( QString path );
     bool set_application_logger( ApplicationLog::ApplicationLog* logger );
-    void set_base_dir_path( boost::filesystem::path base_dir );
+    bool set_base_dir_path( boost::filesystem::path base_dir );
 
     void loadFile(const QString &fileName);
     ~MainWindow();
