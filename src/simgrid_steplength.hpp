@@ -46,28 +46,33 @@ class SIMGRID_wavimg_steplength : public BaseCrystal {
     // // // // //
     // simulation parameters
     // // // // //
+    int simgrid_best_match_thickness_slice;
+    double simgrid_best_match_thickness_nm;
+    double simgrid_best_match_defocus_nm;
 
-int simgrid_best_match_thickness_slice;
-double simgrid_best_match_thickness_nm;
-double simgrid_best_match_defocus_nm;
     /***********
       roi vars
      ***********/
     int roi_pixel_size;
-    int ignore_edge_pixels;
+    int ignore_edge_pixels = 0;
+    bool _flag_ignore_edge_pixels = false;
 
     cv::Mat experimental_image_roi;
+    bool _flag_experimental_image_roi = false;
 
     /***********
       simulated image vars
      ***********/
-    bool simulated_image_needs_reshape;
-    double reshape_factor_from_supper_cell_to_experimental_x;
-    double reshape_factor_from_supper_cell_to_experimental_y;
-    int n_rows_simulated_image;
-    int n_cols_simulated_image;
+    bool simulated_image_needs_reshape = false;
+    double reshape_factor_from_supper_cell_to_experimental_x = 1.0f;
+    double reshape_factor_from_supper_cell_to_experimental_y = 1.0f;
+    int n_rows_simulated_image = 0;
+    bool _flag_n_rows_simulated_image = false;
+    int n_cols_simulated_image = 0;
+    bool _flag_n_cols_simulated_image = false;
     // rectangle without the ignored edge pixels of the simulated image
     cv::Rect ignore_edge_pixels_rectangle;
+    bool _flag_ignore_edge_pixels_rectangle = false;
     int reshaped_simulated_image_width;
     int reshaped_simulated_image_height;
 
@@ -201,6 +206,8 @@ double simgrid_best_match_defocus_nm;
     void set_reshaped_simulated_image_height( int height );
 
     void set_sim_grid_switch( bool sgrid_switch );
+
+    void print_var_state();
 
 };
 

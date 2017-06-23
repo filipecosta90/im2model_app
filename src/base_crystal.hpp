@@ -112,8 +112,9 @@ class BaseCrystal {
     bool _flag_slice_period = false;
     //calculated
     int slices_lower_bound;
+    bool _flag_slices_lower_bound = false;
     int slices_upper_bound;
-
+    bool _flag_slices_upper_bound = false;
 
     /////////////////////////
     // Simulated Defocus info
@@ -303,6 +304,8 @@ class BaseCrystal {
     bool set_base_dir_path( boost::filesystem::path base_dir );
     /* Runnable dependant binary full bin path */
     bool set_bin_execname( std::string );
+
+    void print_var_state();
 };
 
 #endif

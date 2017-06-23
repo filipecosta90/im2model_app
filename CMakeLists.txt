@@ -76,7 +76,7 @@ if (WIN32)
   set(Boost_COMPILER "-vc141")
 endif(WIN32)
 
-find_package(Boost 1.64.0 COMPONENTS system program_options filesystem thread iostreams log REQUIRED)
+find_package(Boost 1.64.0 COMPONENTS log log_setup system program_options filesystem thread iostreams REQUIRED)
 
 find_package(BISON REQUIRED)
 find_package(FLEX REQUIRED)

@@ -246,6 +246,7 @@ bool SIMGRID_wavimg_steplength::check_produced_dat(){
       message << "The required vars for check_produced_dat() are not setted up.";
       logger->logEvent( ApplicationLog::error , message.str() );
     }
+    print_var_state();
   }
   if( _flag_logger ){
     std::stringstream message;
@@ -263,6 +264,12 @@ bool SIMGRID_wavimg_steplength::check_produced_dat(){
 bool SIMGRID_wavimg_steplength::read_grid_from_dat_files(){
   bool result = check_produced_dat();
   if( result ){
+    if( _flag_base_dir_path &
+        _flag_slice_samples &
+        _flag_defocus_samples &
+        _flag_n_rows_simulated_image &
+        _flag_n_cols_simulated_image
+      ){
     boost::filesystem::path dir ( base_dir_path );
     for (int thickness = 1; thickness <= slice_samples ; thickness++ ){
       //will contain the row of simulated images (same thickness, diferent defocus)
@@ -345,6 +352,15 @@ bool SIMGRID_wavimg_steplength::read_grid_from_dat_files(){
     }
     result &= _nrows_size_check;
   }
+  else {
+    if( _flag_logger ){
+      std::stringstream message;
+      message << "The required vars for read_grid_from_dat_files() are not setted up.";
+      logger->logEvent( ApplicationLog::error , message.str() );
+    }
+    print_var_state();
+  }
+}
   if( _flag_logger ){
     std::stringstream message;
     message << "Overall read_grid_from_dat_files result: " << std::boolalpha  << result;
@@ -626,3 +642,17 @@ void SIMGRID_wavimg_steplength::set_reshaped_simulated_image_height( int height 
 void SIMGRID_wavimg_steplength::set_sim_grid_switch( bool sgrid_switch ){
   sim_grid_switch = sgrid_switch;
 }
+
+void SIMGRID_wavimg_steplength::print_var_state(){
+  if( _flag_logger ){
+    std::stringstream message;
+    message << "SIMGRID_wavimg_steplength vars:\n"
+    << "\t" << "unit_cell_cif_path : " <<  unit_cell_cif_path << "\n"
+    << "\t\t" << "_flag_unit_cell_cif_path : " << std::boolalpha << _flag_unit_cell_cif_path << "\n"
+    // running flags
+    << "\t\t" << "_flag_debug_switch : " << std::boolalpha <<  _flag_debug_switch << "\n"
+    << "\t\t" << "_flag_runned_bin : " << std::boolalpha <<  _flag_runned_bin;
+    logger->logEvent( ApplicationLog::notification , message.str() );
+  }
+  BaseCrystal::print_var_state();
+  }

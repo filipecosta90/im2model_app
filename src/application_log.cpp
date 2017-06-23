@@ -8,6 +8,7 @@ namespace ApplicationLog{
   boost::log::attributes::mutable_constant<double> attrSetPoint(0);
   boost::log::attributes::constant<int> attrID(1);
 
+
   ApplicationLog::ApplicationLog( boost::filesystem::path app_path ){
 
     // Access the core
@@ -53,6 +54,7 @@ namespace ApplicationLog{
 
     // add common attributes like date and time.
     boost::log::add_common_attributes();
+    boost::log::core::get()->add_global_attribute("Scope",  boost::log::attributes::named_scope());
 
     // add an ID attribute. This is how the core will know to write only to
     // this log file, as set by the filter
@@ -61,14 +63,21 @@ namespace ApplicationLog{
 
     sink->set_filter( expr::attr<unsigned int>("ID") == 99 );
 
+    auto fmtTimeStamp = boost::log::expressions::format_date_time<boost::posix_time::ptime>("TimeStamp", "%Y-%m-%d %H:%M:%S.%f");
 
-    // format of the log records when streamed
-    sink->set_formatter(expr::stream
-        << "[" << expr::format_date_time< boost::posix_time::ptime >("TimeStamp", "%Y.%m.%d %H:%M:%S.%f")
-        << "] |" << severity
-        << "| [" << expr::smessage
-        << "] ") ;
+    auto fmtThreadId = boost::log::expressions::attr<boost::log::attributes::current_thread_id::value_type>("ThreadID");
 
+    auto fmtScope = boost::log::expressions::format_named_scope("Scope",
+            boost::log::keywords::format = "%n(%f:%l)",
+            boost::log::keywords::iteration = boost::log::expressions::reverse,
+            boost::log::keywords::depth = 2);
+
+            boost::log::formatter logFmt =
+       boost::log::expressions::format("[%1%] (%2%) [%3%] [%4%] %5%")
+       % fmtTimeStamp % fmtThreadId % severity % fmtScope
+       % boost::log::expressions::smessage;
+
+        sink->set_formatter( logFmt );
 
     // Add the sink to the core
     core->add_sink(sink);
