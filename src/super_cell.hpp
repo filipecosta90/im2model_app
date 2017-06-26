@@ -1,5 +1,5 @@
-#ifndef _SUPER_CELL_H_
-#define _SUPER_CELL_H_
+#ifndef SRC_SUPERCELL_H__
+#define SRC_SUPERCELL_H__
 
 /* BEGIN BOOST */
 #include <boost/iostreams/device/mapped_file.hpp> // for mmap
@@ -39,8 +39,10 @@
 #include "unit_cell.hpp"
 #include "image_crystal.hpp"
 #include "td_map.hpp"
+#include "base_image.hpp"
 
 class Super_Cell {
+
   private:
     double _super_cell_length_a_Angstroms;
     double _super_cell_length_b_Angstroms;
@@ -63,9 +65,9 @@ class Super_Cell {
     cv::Point3d _a,_b,_c,_d,_e,_f,_g,_h;
     cv::Point3d _sim_a,_sim_b,_sim_c,_sim_d,_sim_e,_sim_f,_sim_g,_sim_h;
 
-    int expand_factor_a;
-    int expand_factor_b;
-    int expand_factor_c;
+    int expand_factor_a = 1;
+    int expand_factor_b = 1;
+    int expand_factor_c = 1;
 
     /** Zone Axis / Lattice vector **/
     cv::Point3d zone_axis_vector_uvw;
@@ -90,10 +92,10 @@ class Super_Cell {
     double _fractional_norm_b_atom_pos;
     double _fractional_norm_c_atom_pos;
 
-    double _cel_margin_nm;
-    double _super_cell_ab_margin;
-    int _cel_margin_a_px;
-    int _cel_margin_b_px;
+    double _cel_margin_nm = 0.0f;
+    double _super_cell_ab_margin = 0.0f;
+    int _cel_margin_a_px = 0.0f;
+    int _cel_margin_b_px = 0.0f;
 
     int _cel_nx_px;
     int _cel_ny_px;
@@ -119,6 +121,10 @@ class Super_Cell {
     std::string file_name_input_dat;
 
     /** Experimental image related **/
+
+        BaseImage exp_image_properties;
+        BaseImage sim_image_properties;
+
     cv::Mat _raw_experimental_image;
     cv::Mat _experimental_image_contours;
     bool _flag_raw_experimental_image = false;
@@ -130,7 +136,7 @@ class Super_Cell {
 
     // _rectangle_cropped_experimental_image_w_margin is used for visualization ( the algorithms should use _experimental_image_roi_w_margin )
     cv::Mat _rectangle_cropped_experimental_image_w_margin;
-    cv::Rect _experimental_image_boundary_rectangle; 
+    cv::Rect _experimental_image_boundary_rectangle;
     bool _flag_experimental_image_boundary_rectangle = false;
 
     cv::Rect _experimental_image_boundary_rectangle_w_margin;
@@ -167,14 +173,14 @@ class Super_Cell {
     int _super_cell_top_padding_px;
 
     /*
-     * _super_cell_width_px  and _super_cell_min_width_px may differ since 
+     * _super_cell_width_px  and _super_cell_min_width_px may differ since
      * _super_cell_min_width_px reffers to the minimum acceptable width based on
      * the ZA and UV directions. _super_cell_width_px reffers to the width in pixels
      * based on the expand factor.
      *
      * _super_cell_width_px is ALWAYS >= _super_cell_min_width_px
      * (same for _super_cell_height_px and _super_cell_min_height_px )
-     * 
+     *
      * */
     int _super_cell_width_px;
     int _super_cell_height_px;
@@ -182,7 +188,7 @@ class Super_Cell {
     double _sampling_rate_super_cell_y_nm_pixel;
     bool _flag_sampling_rate_super_cell_x_nm_pixel = false;
     bool _flag_sampling_rate_super_cell_y_nm_pixel = false;
-    double _simgrid_best_match_thickness_nm; 
+    double _simgrid_best_match_thickness_nm;
 
     /** Defocus Map simulation related **/
     std::vector<cv::Mat> simulated_defocus_map_raw_images;
@@ -212,29 +218,14 @@ class Super_Cell {
       image alignement vars
      ***********/
 
-    // Set a 2x3 or 3x3 warp matrix depending on the motion model.
-    // in our case we use a 2x3 (euclidean)
-    cv::Mat motion_euclidean_warp_matrix;
-
-    // Specify the number of iterations.
-    int motion_euclidean_number_of_iterations;
-
-    // Specify the threshold of the increment
-    // in the correlation coefficient between two iterations
-    double motion_euclidean_termination_eps;
-
-    // Define the motion model
-    int motion_euclidean_warp_mode; 
-
     /////////////////////////
     // Im2Model core pointers
     /////////////////////////
     Image_Crystal *_core_image_crystal_ptr;
     TDMap* _core_tdmap_ptr;
 
-
     // Define the motion model
-    bool debug_switch;
+    bool debug_switch = false;
 
     /** Private Class methods **/
     void set_default_values();
@@ -290,10 +281,11 @@ class Super_Cell {
     void set_experimental_min_size_nm_y( double y_min_size_nm );
     void set_experimental_min_size_nm_z( double z_min_size_nm );
     bool set_full_raw_experimental_image( cv::Mat full_raw_image );
-    void set_experimental_image( cv::Mat raw_image , double sampling_rate_exp_image_x_nm_pixel, double sampling_rate_exp_image_y_nm_pixel ); 
+    bool set_exp_image_properties_full_image( std::string path );
+    void set_experimental_image( cv::Mat raw_image , double sampling_rate_exp_image_x_nm_pixel, double sampling_rate_exp_image_y_nm_pixel );
     bool set_sampling_rate_super_cell_x_nm_pixel( double sampling_rate );
     bool set_sampling_rate_super_cell_y_nm_pixel( double sampling_rate );
-    void set_simgrid_best_match_thickness_nm( double tickness ); 
+    void set_simgrid_best_match_thickness_nm( double tickness );
     void set_super_cell_margin_nm( double margin );
 
     void set_file_name_input_dat( std::string file_name_input_dat );
@@ -345,8 +337,8 @@ class Super_Cell {
     void orientate_atoms_from_matrix();
 
     void set_experimental_min_size_nm_from_unit_cell();
-    void calculate_experimental_min_size_nm(); 
-    void calculate_expand_factor(); 
+    void calculate_experimental_min_size_nm();
+    void calculate_expand_factor();
     bool calculate_supercell_boundaries_from_experimental_image();
     void calculate_supercell_boundaries_from_experimental_image( cv::Point2f roi_center, int threshold, int max_contour_distance_px );
     void update_super_cell_boundary_polygon();

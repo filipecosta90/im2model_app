@@ -18,10 +18,12 @@
 
 #include <stdlib.h>
 
+#include "base_image.hpp"
 #include "base_crystal.hpp"
 #include "application_log.hpp"
 
-class MSA_prm : public BaseCrystal {
+class MSA_prm : public BaseCrystal, public BaseImage  {
+
   private:
     double object_tilt_x_component = 0.0f;
     double object_tilt_y_component = 0.0f;
@@ -42,6 +44,10 @@ class MSA_prm : public BaseCrystal {
 
     std::string wave_function_name;
 
+    /* Loggers */
+    ApplicationLog::ApplicationLog* logger = nullptr;
+    bool _flag_logger = false;
+
     void cleanup_thread();
 
     bool save_prm_filename_path();
@@ -51,6 +57,12 @@ class MSA_prm : public BaseCrystal {
 
   public:
     MSA_prm( boost::process::ipstream& async_io_buffer_out );
+
+    /** getters **/
+    // flag getters
+    bool get_flag_logger(){ return _flag_logger; }
+    /* Loggers */
+    ApplicationLog::ApplicationLog* get_logger(){ return logger; }
 
     void set_internal_repeat_factor_of_super_cell_along_x ( int x_repeat );
 
@@ -67,6 +79,9 @@ class MSA_prm : public BaseCrystal {
     bool set_prm_file_name( std::string filename );
 
     bool set_wave_function_name ( std::string wave_function_filename );
+
+    /* Loggers */
+    bool set_application_logger( ApplicationLog::ApplicationLog* logger );
 
     bool produce_prm();
 

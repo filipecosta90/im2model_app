@@ -4,31 +4,6 @@
 BaseCrystal::BaseCrystal( boost::process::ipstream &async_io_buffer_out ) : _io_pipe_out(async_io_buffer_out) {
 }
 
-// calculate methods
-bool BaseCrystal::calculate_nx_from_size_and_sampling_rate(){
-  bool result = false;
-  if( _flag_auto_nx ){
-    if( _flag_super_cell_size_a && _flag_sampling_rate_experimental_x_nm_per_pixel ){
-      nx_size_height = (int) ( super_cell_size_a / sampling_rate_experimental_x_nm_per_pixel );
-      result = true;
-      _flag_nx_size_height = true;
-    }
-  }
-  return result;
-}
-
-bool BaseCrystal::calculate_ny_from_size_and_sampling_rate(){
-  bool result = false;
-  if( _flag_auto_ny ){
-    if( _flag_super_cell_size_b && _flag_sampling_rate_experimental_y_nm_per_pixel ){
-      ny_size_width = (int) ( super_cell_size_b / sampling_rate_experimental_y_nm_per_pixel );
-      result = true;
-      _flag_ny_size_width = true;
-    }
-  }
-  return result;
-}
-
 bool BaseCrystal::calculate_defocus_period(){
   if( _flag_defocus_lower_bound && _flag_defocus_upper_bound && _flag_defocus_samples ){
     defocus_period = ( defocus_upper_bound - defocus_lower_bound) / ( defocus_samples - 1 );
@@ -111,18 +86,6 @@ int BaseCrystal::get_slice_number_from_nm_ceil( double goal_thickness_nm  ){
 bool BaseCrystal::set_unit_cell_cif_path( std::string cif_path ){
   unit_cell_cif_path = cif_path;
   _flag_unit_cell_cif_path = true;
-  return true;
-}
-
-bool BaseCrystal::set_nx_size_height( int height ){
-  nx_size_height = height;
-  _flag_nx_size_height = true;
-  return true;
-}
-
-bool BaseCrystal::set_ny_size_width( int width ){
-  ny_size_width = width;
-  _flag_ny_size_width = true;
   return true;
 }
 
@@ -215,24 +178,6 @@ bool BaseCrystal::set_nz_switch( bool value ){
   return true;
 }
 
-bool BaseCrystal::set_sampling_rate_experimental_x_nm_per_pixel( double rate ){
-  sampling_rate_experimental_x_nm_per_pixel = rate;
-  _flag_sampling_rate_experimental_x_nm_per_pixel = true;
-  _flag_sampling_rate_experimental = _flag_sampling_rate_experimental_x_nm_per_pixel & _flag_sampling_rate_experimental_y_nm_per_pixel;
-  // auto calculate nx
-  calculate_nx_from_size_and_sampling_rate();
-  return true;
-}
-
-bool BaseCrystal::set_sampling_rate_experimental_y_nm_per_pixel( double rate ){
-  sampling_rate_experimental_y_nm_per_pixel = rate;
-  _flag_sampling_rate_experimental_y_nm_per_pixel = true;
-  _flag_sampling_rate_experimental = _flag_sampling_rate_experimental_x_nm_per_pixel & _flag_sampling_rate_experimental_y_nm_per_pixel;
-  // auto calculate ny
-  calculate_ny_from_size_and_sampling_rate();
-  return true;
-}
-
 bool BaseCrystal::set_projected_y_axis( cv::Point3d ){
   return false;
 }
@@ -295,7 +240,6 @@ bool BaseCrystal::set_super_cell_size_a( double size_a ){
   _flag_super_cell_size_a = true;
   _flag_super_cell_size = _flag_super_cell_size_a & _flag_super_cell_size_b & _flag_super_cell_size_c;
   // auto calculate nx
-  calculate_nx_from_size_and_sampling_rate();
   return true;
 }
 
@@ -303,7 +247,6 @@ bool BaseCrystal::set_super_cell_size_b( double size_b ){
   super_cell_size_b = size_b;
   _flag_super_cell_size_b = true;
   // auto calculate nx
-  calculate_ny_from_size_and_sampling_rate();
   _flag_super_cell_size = _flag_super_cell_size_a & _flag_super_cell_size_b & _flag_super_cell_size_c;
   return true;
 }
@@ -370,14 +313,6 @@ bool BaseCrystal::set_defocus_upper_bound( double upper_bound ){
   return true;
 }
 
-/* Loggers */
-bool BaseCrystal::set_application_logger( ApplicationLog::ApplicationLog* app_logger ){
-  logger = app_logger;
-  _flag_logger = true;
-  logger->logEvent( ApplicationLog::notification, "Application logger setted for CELSLC_prm class." );
-  return true;
-}
-
 /* Base dir path */
 bool BaseCrystal::set_base_dir_path( boost::filesystem::path path ){
   base_dir_path = path;
@@ -411,6 +346,14 @@ bool BaseCrystal::set_bin_execname( std::string execname ){
     logger->logEvent( ApplicationLog::notification , message.str() );
   }
   return _flag_full_bin_path_execname;
+}
+
+/* Loggers */
+bool BaseCrystal::set_application_logger( ApplicationLog::ApplicationLog* app_logger ){
+  logger = app_logger;
+  _flag_logger = true;
+  logger->logEvent( ApplicationLog::notification, "Application logger setted for BaseCrystal class." );
+  return true;
 }
 
 void BaseCrystal::print_var_state(){

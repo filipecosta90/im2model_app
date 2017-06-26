@@ -34,10 +34,12 @@
 
 #include <stdlib.h>
 
+#include "base_image.hpp"
+#include "base_logger.hpp"
 #include "base_crystal.hpp"
 #include "application_log.hpp"
 
-class CELSLC_prm : public BaseCrystal {
+class CELSLC_prm : public BaseCrystal, public BaseImage {
   private:
 
     std::string super_cell_cel_file;
@@ -55,11 +57,21 @@ class CELSLC_prm : public BaseCrystal {
     bool single_slice_calculation_nz_switch = false;
     bool single_slice_calculation_enabled_switch = false;
 
+    /* Loggers */
+    ApplicationLog::ApplicationLog* logger = nullptr;
+    bool _flag_logger = false;
+
     void cleanup_thread();
     bool prepare_bin_ssc();
     bool prepare_nz_simulated_partitions_from_ssc_prm();
 
   public:
+
+    /** getters **/
+    // flag getters
+    bool get_flag_logger(){ return _flag_logger; }
+    /* Loggers */
+    ApplicationLog::ApplicationLog* get_logger(){ return logger; }
 
     CELSLC_prm( boost::process::ipstream& async_io_buffer_out );
 
@@ -82,6 +94,9 @@ class CELSLC_prm : public BaseCrystal {
     bool clean_for_re_run();
 
     bool call_bin_ssc();
+
+    /* Loggers */
+    bool set_application_logger( ApplicationLog::ApplicationLog* logger );
 
 };
 

@@ -349,3 +349,11 @@ bool MSA_prm::produce_prm () {
   }
   return result;
 }
+
+/* Loggers */
+bool MSA_prm::set_application_logger( ApplicationLog::ApplicationLog* app_logger ){
+  logger = app_logger;
+  _flag_logger = true;
+  logger->logEvent( ApplicationLog::notification, "Application logger setted for MSA_prm class." );
+  return true;
+}

@@ -38,6 +38,11 @@ Super_Cell::Super_Cell( Image_Crystal* image_crystal_ptr, TDMap* tdmap_ptr ) : S
   _core_tdmap_ptr = tdmap_ptr;
 }
 
+bool Super_Cell::set_exp_image_properties_full_image( std::string path ){
+  return exp_image_properties.set_full_image(path);
+}
+
+
 bool Super_Cell::set_hysteresis_threshold( int threshold ){
   _hysteresis_threshold = threshold;
   return true;
@@ -107,37 +112,7 @@ cv::Rect Super_Cell::get_experimental_image_boundary_polygon_w_margin_rect(){
 }
 
 void Super_Cell::set_default_values(){
-  /** supercell exclusive **/
-  expand_factor_a = 1;
-  expand_factor_b = 1;
-  expand_factor_c = 1;
-  _experimental_image_boundary_polygon_margin_x_Nanometers = 1.0f;
-  _experimental_image_boundary_polygon_margin_y_Nanometers = 1.0f;
-  _experimental_image_thickness_margin_z_Nanometers = 1.0f;
-  /** unitcell **/
-  unit_cell = NULL;
-  /** cel **/
-  _cel_margin_nm = 0.0f;
-  _super_cell_ab_margin = 0.0f;
-  _cel_margin_a_px = 0;
-  _cel_margin_b_px = 0;
 
-  /***********
-    image alignement vars
-   ***********/
-
-  // Initialize the matrix to identity
-  motion_euclidean_warp_matrix = cv::Mat::eye(2, 3, CV_32F);
-
-  // Specify the number of iterations.
-  motion_euclidean_number_of_iterations = 5000;
-
-  // Specify the threshold of the increment
-  // in the correlation coefficient between two iterations
-  motion_euclidean_termination_eps = 1e-5;
-  motion_euclidean_warp_mode = cv::MOTION_EUCLIDEAN;
-
-  debug_switch = false;
 }
 
 void Super_Cell::set_sentinel_values(){
@@ -1672,60 +1647,7 @@ void Super_Cell::match_experimental_simulated_super_cells(){
   std::cout << "simulated data: " << _best_match_simulated_image_raw.size() << std::endl;
   _best_match_simulated_image_positioned = simulated_defocus_map_raw_images.at(dist)(_experimental_pos_best_match_rectangle);
 
-  if (debug_switch == true) {
-    try {
-      std::cout << "calculated best _best_match_simulated_image_positioned: " << std::endl;
-      imwrite("_best_match_simulated_image_positioned.png", _best_match_simulated_image_positioned);
-    }
-    catch (std::runtime_error& ex) {
-      fprintf(stderr, "Exception writing image: %s\n", ex.what());
-    }
-  }
-
-  // the function findTransformECC() implements an area-based alignment
-  // that builds on intensity similarities. In essence, the function
-  //updates the initial transformation that roughly aligns the images.
-
-  motion_euclidean_warp_matrix.at<float>( 0, 2 ) = simulated_defocus_map_match_positions.at(dist).x;
-  motion_euclidean_warp_matrix.at<float>( 1, 2 ) = simulated_defocus_map_match_positions.at(dist).y;
-
-  std::cout << "WARP matrix" <<std::endl <<  motion_euclidean_warp_matrix << std::endl;
-  // Define termination criteria
-  cv::TermCriteria motion_euclidean_criteria ( cv::TermCriteria::COUNT + cv::TermCriteria::EPS, motion_euclidean_number_of_iterations, motion_euclidean_termination_eps );
-
-  // Run the ECC algorithm. The results are stored in warp_matrix.
-  try{
-    double cc =  cv::findTransformECC(
-        _best_match_simulated_image_raw,
-        _experimental_image_roi,
-        motion_euclidean_warp_matrix,
-        motion_euclidean_warp_mode,
-        motion_euclidean_criteria
-        );
-
-    std::cout << "correlation coeficient" << cc << std::endl;
-  }
-  catch(cv::Exception e){
-    if (e.code == cv::Error::StsNoConv)
-    {
-      std::cerr << "findTransformECC did not converge";
-    }
-  }
-  std::cout << "WARP matrix" <<std::endl <<  motion_euclidean_warp_matrix << std::endl;
-
-
-  motion_euclidean_warp_matrix.at<float>( 0, 2 ) -= simulated_defocus_map_match_positions.at(dist).x;
-  motion_euclidean_warp_matrix.at<float>( 1, 2 ) -= simulated_defocus_map_match_positions.at(dist).y;
-
-  cv::Mat raw_transformed_simulated_image = cv::Mat( _cel_wout_margin_ny_px, _cel_wout_margin_nx_px, CV_8UC1);
-
-  warpAffine(_best_match_simulated_image_raw, raw_transformed_simulated_image, motion_euclidean_warp_matrix, _best_match_simulated_image_raw.size(), cv::INTER_LINEAR );
-
-
-  //_experimental_pos_best_match_rectangle.x = (int) motion_euclidean_warp_matrix.at<float>( 0, 2 );
-  //_experimental_pos_best_match_rectangle.y = (int) motion_euclidean_warp_matrix.at<float>( 1, 2 );
-
-  _best_match_simulated_image_positioned = raw_transformed_simulated_image(_experimental_pos_best_match_rectangle);
+  _best_match_simulated_image_positioned = _best_match_simulated_image_raw(_experimental_pos_best_match_rectangle);
   if (debug_switch == true) {
     try {
       imwrite("_best_match_simulated_image_positioned_after_euclidean.png", _best_match_simulated_image_positioned);

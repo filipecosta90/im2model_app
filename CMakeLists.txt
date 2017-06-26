@@ -22,7 +22,27 @@ message(STATUS "Found Dr Probe Resources: ${DR_PROBE_RESOURCES}")
 # defined projects like INSTALL.vcproj and ZERO_CHECK.vcproj
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
-option(build_gui "build_gui" OFF)
+option(build_gui "Build GUI version" OFF)
+OPTION(BUILD_DOXYGEN_DOCS "Build docs" OFF)
+
+if(BUILD_DOXYGEN_DOCS)
+  find_package(Doxygen)
+
+  if(NOT DOXYGEN_FOUND)
+    message(FATAL_ERROR
+      "Doxygen is needed to build the documentation. Please make sure it is installed.")
+  endif(NOT DOXYGEN_FOUND)
+
+  configure_file(${PROJECT_PATH}/Doxyfile.in
+    ${PROJECT_BINARY_DIR}/Doxyfile @ONLY IMMEDIATE)
+
+  # Add a custom target to run Doxygen whenever the project is built.
+  # If you do NOT want the documentation to be generated EVERY time you build the project
+  # then leave out the 'ALL' keyword from the command below.
+  add_custom_target(doxygen_docs ALL COMMAND ${DOXYGEN_EXECUTABLE}
+    ${PROJECT_BINARY_DIR}/Doxyfile
+    SOURCES ${PROJECT_BINARY_DIR}/Doxyfile)
+endif(BUILD_DOXYGEN_DOCS)
 
 if(APPLE)
   message(STATUS "Adding Apple definition")

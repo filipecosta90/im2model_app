@@ -1,5 +1,5 @@
-#ifndef SRC_IMAGECRYSTAL_H__
-#define SRC_IMAGECRYSTAL_H__
+#ifndef SRC_BASEIMAGE_H__
+#define SRC_BASEIMAGE_H__
 
 /* BEGIN BOOST */
 #include <boost/process.hpp>
@@ -29,14 +29,42 @@
 class BaseImage {
   private:
 
+    bool _flag_auto_n_rows = true;
+    bool _flag_auto_n_cols = true;
+
+    bool calculate_n_rows_from_size_and_sampling_rate();
+    bool calculate_n_cols_from_size_and_sampling_rate();
+
+    /* Loggers */
+    ApplicationLog::ApplicationLog* logger = nullptr;
+    bool _flag_logger = false;
+
   protected:
     // FULL IMAGE
+    cv::Mat full_image;
+    bool _flag_full_image = false;
+
     int full_n_rows_height = 0;
     bool _flag_full_n_rows_height = false;
     int full_n_cols_width = 0;
     bool _flag_full_n_cols_width = false;
 
+        double sampling_rate_x_nm_per_pixel = 0.0f;
+        double sampling_rate_y_nm_per_pixel = 0.0f;
+        bool _flag_sampling_rate_x_nm_per_pixel = false;
+        bool _flag_sampling_rate_y_nm_per_pixel = false;
+        bool _flag_sampling_rate = false;
+
+        // [nm dimensions]
+        double nm_size_rows_a;
+        bool _flag_nm_size_rows_a = false;
+        double nm_size_cols_b;
+        bool _flag_nm_size_cols_b = false;
+
     // ROI FRAME
+    cv::Mat roi_image;
+    bool _flag_roi_image = false;
+
     cv::Rect roi_rectangle;
     bool _flag_roi_defined = false;
     int roi_n_rows_height = 0;
@@ -55,29 +83,34 @@ class BaseImage {
     int ignore_edge_pixels = 0;
     bool _flag_ignore_edge_pixels = false;
 
-    /* Loggers */
-    ApplicationLog::ApplicationLog* logger = nullptr;
-    bool _flag_logger = false;
-
   public:
-    BaseImage( );
+    BaseImage();
     /** getters **/
     // flag getters
+    bool get_flag_full_image(){ return _flag_full_image; }
     bool get_flag_full_n_rows_height (){ return _flag_full_n_rows_height; }
     bool get_flag_full_n_cols_width (){ return _flag_full_n_cols_width; }
+    bool get_flag_sampling_rate_x_nm_per_pixel(){ return _flag_sampling_rate_x_nm_per_pixel; }
+    bool get_flag_sampling_rate_y_nm_per_pixel(){ return _flag_sampling_rate_y_nm_per_pixel; }
+    bool get_flag_sampling_rate(){ return _flag_sampling_rate; }
+
     // ROI FRAME
+    bool get_flag_roi_image(){ return _flag_roi_image; }
     bool get_flag_roi_defined (){ return _flag_roi_defined; }
     bool get_flag_roi_n_rows_height (){ return _flag_roi_n_rows_height; }
     bool get_flag_roi_n_cols_width (){ return _flag_roi_n_cols_width; }
     bool get_flag_roi_center_x (){ return _flag_roi_center_x; }
     bool get_flag_roi_center_y (){ return _flag_roi_center_y; }
-    bool get_flag_ignore_edge_pixels_rectangle (){ return return _flag_ignore_edge_pixels_rectangle; }
+    bool get_flag_ignore_edge_pixels_rectangle (){ return _flag_ignore_edge_pixels_rectangle; }
     bool get_flag_ignore_edge_pixels (){ return _flag_ignore_edge_pixels; }
-    bool get_flag_logger (){ return _flag_logger; }
 
     // var getters
+    cv::Mat get_full_image(){ return full_image.clone(); }
     int get_full_n_rows_height(){ return full_n_rows_height; }
     int get_full_n_cols_width(){ return full_n_cols_width; }
+    double get_sampling_rate_x_nm_per_pixel(){ return sampling_rate_x_nm_per_pixel; }
+    double get_sampling_rate_y_nm_per_pixel(){ return sampling_rate_y_nm_per_pixel; }
+    cv::Mat get_roi_image(){ return roi_image.clone(); }
     cv::Rect get_roi_rectangle(){ return roi_rectangle; }
     int get_roi_n_rows_height(){ return roi_n_rows_height; }
     int get_roi_n_cols_width(){ return roi_n_cols_width; }
@@ -87,21 +120,32 @@ class BaseImage {
     cv::Rect get_ignore_edge_pixels_rectangle(){ return ignore_edge_pixels_rectangle; }
     int get_ignore_edge_pixels(){ return ignore_edge_pixels; }
 
+    /** getters **/
+    // flag getters
+    bool get_flag_logger(){ return _flag_logger; }
     /* Loggers */
     ApplicationLog::ApplicationLog* get_logger(){ return logger; }
 
     /** setters **/
     // full frame
+    bool set_full_image( std::string path );
     bool set_full_n_rows_height(  int full_n_rows_height );
     bool set_full_n_cols_width( int full_n_cols_width );
+    bool set_sampling_rate_x_nm_per_pixel( double );
+    bool set_sampling_rate_y_nm_per_pixel( double );
     // ROI FRAME
+    void set_roi();
     bool set_roi_n_rows_height( int roi_n_rows_height );
     bool set_roi_n_cols_width( int roi_n_cols_width );
     bool set_roi_center_x( int roi_center_x );
     bool set_roi_center_y( int roi_center_y );
-    int ignore_edge_pixels = 0;
+    bool set_ignore_edge_pixels( int ignore_edge_pixels );
+
     /* Loggers */
     bool set_application_logger( ApplicationLog::ApplicationLog* logger );
+
+    void print_var_state();
+    friend std::ostream& operator<< (std::ostream& stream, const BaseImage::BaseImage& image);
 };
 
 #endif

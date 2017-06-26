@@ -17,7 +17,7 @@
 #include "celslc_prm.hpp"
 #include "msa_prm.hpp"
 #include "wavimg_prm.hpp"
-#include "simgrid_steplength.hpp"
+#include "simgrid.hpp"
 #include "image_crystal.hpp"
 #include "group_options.h"
 
@@ -89,7 +89,7 @@ class TDMap  : public QObject {
     /* *
      * SIMGRID
      * */
-    SIMGRID_wavimg_steplength* _td_map_simgrid;
+    SimGrid* _td_map_simgrid;
     bool _flag_runned_tdmap_simgrid = false;
     bool _run_simgrid_switch = true;
 
@@ -203,6 +203,9 @@ class TDMap  : public QObject {
 
     /** setters **/
     // class setters
+    bool set_exp_image_properties_full_image( std::string path );
+    bool set_exp_image_properties_roi_center_x( std::string s_center_x );
+    bool set_exp_image_properties_roi_center_y( std::string s_center_y );
     bool set_slc_file_name_prefix( std::string );
     bool set_wave_function_name( std::string  );
     bool set_file_name_output_image_wave_function( std::string );

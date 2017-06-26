@@ -24,19 +24,20 @@
 #include <opencv2/core/types.hpp>                         // for Rect, Point3d
 #include <opencv2/imgcodecs.hpp>                          // for imread
 
+#include "base_logger.hpp"
 #include "application_log.hpp"
 
 class BaseCrystal {
   private:
-    bool _flag_auto_nx = true;
-    bool _flag_auto_ny = true;
 
-    bool calculate_nx_from_size_and_sampling_rate();
-    bool calculate_ny_from_size_and_sampling_rate();
     bool calculate_defocus_period();
     bool calculate_thickness_slice_period();
     int get_slice_number_from_nm_floor( double goal_thickness_nm );
     int get_slice_number_from_nm_ceil( double goal_thickness_nm  );
+
+    /* Loggers */
+    ApplicationLog::ApplicationLog* logger = nullptr;
+    bool _flag_logger = false;
 
   protected:
 
@@ -44,19 +45,9 @@ class BaseCrystal {
     std::string unit_cell_cif_path;
     bool _flag_unit_cell_cif_path = false;
 
-    int nx_size_height;
-    bool _flag_nx_size_height = false;
-    int ny_size_width;
-    bool _flag_ny_size_width = false;
     int nz_simulated_partitions;
     bool _flag_nz_simulated_partitions = false;
     bool nz_switch = false;
-
-    double sampling_rate_experimental_x_nm_per_pixel;
-    double sampling_rate_experimental_y_nm_per_pixel;
-    bool _flag_sampling_rate_experimental_x_nm_per_pixel = false;
-    bool _flag_sampling_rate_experimental_y_nm_per_pixel = false;
-    bool _flag_sampling_rate_experimental = false;
 
     cv::Point3d  projected_y_axis = cv::Point3d( 0.0f, 1.0f, 0.0f );
     double projected_y_axis_u = 0.0f;
@@ -132,10 +123,6 @@ class BaseCrystal {
     boost::process::ipstream& _io_pipe_out;
     bool _flag_io_ap_pipe_out = false;
 
-    /* Loggers */
-    ApplicationLog::ApplicationLog* logger = nullptr;
-    bool _flag_logger = false;
-
     /* Base dir path */
     boost::filesystem::path base_dir_path;
     bool _flag_base_dir_path = false;
@@ -153,12 +140,7 @@ class BaseCrystal {
     BaseCrystal( boost::process::ipstream& async_io_buffer_out );
 
     bool get_flag_unit_cell_cif_path(){ return _flag_unit_cell_cif_path; };
-    bool get_flag_nx_size_height(){ return _flag_nx_size_height; }
-    bool get_flag_ny_size_width(){ return _flag_ny_size_width; }
     bool get_flag_nz_simulated_partitions(){ return _flag_nz_simulated_partitions; }
-    bool get_flag_sampling_rate_experimental_x_nm_per_pixel(){ return _flag_sampling_rate_experimental_x_nm_per_pixel; }
-    bool get_flag_sampling_rate_experimental_y_nm_per_pixel(){ return _flag_sampling_rate_experimental_y_nm_per_pixel; }
-    bool get_flag_sampling_rate_experimental(){ return _flag_sampling_rate_experimental; }
     bool get_flag_projected_y_axis_u(){ return _flag_projected_y_axis_u; }
     bool get_flag_projected_y_axis_v(){ return _flag_projected_y_axis_v; }
     bool get_flag_projected_y_axis_w(){ return _flag_projected_y_axis_w; }
@@ -193,23 +175,19 @@ class BaseCrystal {
     bool get_flag_defocus_period(){ return _flag_defocus_period;}
     /* boost process output streams */
     bool get_flag_io_ap_pipe_out(){ return _flag_io_ap_pipe_out; };
-    /* Loggers */
-    bool get_flag_logger(){ return _flag_logger; }
     bool get_flag_base_dir_path(){ return _flag_base_dir_path; }
     /* Runnable dependant binary full bin path */
     bool get_flag_full_bin_path_execname(){ return _flag_full_bin_path_execname; }
     // running flags
     bool get_flag_debug_switch(){ return _flag_debug_switch; }
     bool get_flag_runned_bin(){ return _flag_runned_bin; }
+    /* Loggers */
+    bool get_flag_logger(){ return _flag_logger; }
 
     /** getters **/
     std::string get_unit_cell_cif_path(){ return unit_cell_cif_path; }
-    int get_nx_size_height(){ return nx_size_height; }
-    int get_ny_size_width(){ return ny_size_width; }
     int get_nz_simulated_partitions(){ return nz_simulated_partitions; }
     bool get_nz_switch(){ return nz_switch; }
-    double get_sampling_rate_experimental_x_nm_per_pixel(){ return sampling_rate_experimental_x_nm_per_pixel; }
-    double get_sampling_rate_experimental_y_nm_per_pixel(){ return sampling_rate_experimental_y_nm_per_pixel; }
     cv::Point3d  get_projected_y_axis(){ return projected_y_axis; }
     double get_projected_y_axis_u(){ return projected_y_axis_u; }
     double get_projected_y_axis_v(){ return projected_y_axis_v; }
@@ -248,8 +226,6 @@ class BaseCrystal {
     double get_defocus_lower_bound(){ return defocus_lower_bound; }
     double get_defocus_upper_bound(){ return defocus_upper_bound; }
     double get_defocus_period(){ return defocus_period; }
-    /* Loggers */
-    ApplicationLog::ApplicationLog* get_logger(){ return logger; }
     /* Base dir path */
     boost::filesystem::path get_base_dir_path(){ return base_dir_path; }
     /* Runnable dependant binary full bin path */
@@ -257,15 +233,14 @@ class BaseCrystal {
     //produced warnings
     std::vector<std::string> get_run_env_warnings(){ return run_env_warnings; }
 
+    /* Loggers */
+    ApplicationLog::ApplicationLog* get_logger(){ return logger; }
+
     //setters
     bool set_unit_cell_cif_path( std::string cif_path );
-    bool set_nx_size_height( int );
-    bool set_ny_size_width( int );
     bool set_nz_simulated_partitions_from_prm();
     bool set_nz_simulated_partitions( int nz_partitions );
     bool set_nz_switch( bool value );
-    bool set_sampling_rate_experimental_x_nm_per_pixel( double );
-    bool set_sampling_rate_experimental_y_nm_per_pixel( double );
     bool set_projected_y_axis( cv::Point3d );
     bool set_projected_y_axis_u( double );
     bool set_projected_y_axis_v( double );
@@ -298,12 +273,12 @@ class BaseCrystal {
     bool set_defocus_upper_bound( double defocus_upper_bound );
     bool set_defocus_period( double defocus_period );
 
-    /* Loggers */
-    bool set_application_logger( ApplicationLog::ApplicationLog* logger );
     /* Base dir path */
     bool set_base_dir_path( boost::filesystem::path base_dir );
     /* Runnable dependant binary full bin path */
     bool set_bin_execname( std::string );
+    /* Loggers */
+    bool set_application_logger( ApplicationLog::ApplicationLog* logger );
 
     void print_var_state();
 };

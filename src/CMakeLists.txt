@@ -1,4 +1,4 @@
-﻿file(GLOB im2model_core_src 
+﻿file(GLOB im2model_core_src
   application_log.cpp
   application_log.hpp
   atom.hpp
@@ -12,16 +12,18 @@
   super_cell.hpp
   wavimg_prm.hpp
   celslc_prm.hpp
-  simgrid_steplength.hpp
+  simgrid.hpp
   symbcalc.hpp
   structure.hpp
-  image_crystal.hpp 
+  image_crystal.hpp
   td_map.hpp
   global_def.hpp
   base_crystal.hpp
+  base_image.hpp
+  base_logger.hpp
   atom.cpp
   chem_database.cpp
-  simgrid_steplength.cpp
+  simgrid.cpp
   symbcalc.cpp
   atom_info.cpp
   msa_prm.cpp
@@ -34,6 +36,8 @@
   image_crystal.cpp
   td_map.cpp
   base_crystal.cpp
+  base_image.cpp
+  base_logger.cpp
   )
 
 BISON_TARGET(mc_parser mc_parser.yy ${CMAKE_CURRENT_BINARY_DIR}/mc_parser.tab.cc )
@@ -60,8 +64,8 @@ if(WIN32)
   link_directories( ${Boost_LIBRARY_PATH} )
 
   message(STATUS " Includes - ${Boost_INCLUDE_DIRS}")
-  message(STATUS " Library path  - ${Boost_LIBRARY_DIRS}") 
-  message(STATUS " Libraries : ${Boost_LIBRARIES}") 
+  message(STATUS " Library path  - ${Boost_LIBRARY_DIRS}")
+  message(STATUS " Libraries : ${Boost_LIBRARIES}")
   message(STATUS "OpenCV libs: ${OpenCV_LIBS} ")
 endif(WIN32)
 
@@ -98,19 +102,19 @@ if(build_gui)
 
   # Set PROJECT_VERSION_PATCH and PROJECT_VERSION_TWEAK to 0 if not present, needed by add_project_meta
 
-  # Running the meta-object compiler for QObject derived classes is similar to resources, 
-  # you add QT5_WRAP_CPP in your CMake file, and just add the generated files to your source files. 
-  # The input for this function is the header of your class, not the implementation — even though it’s called QT5_WRAP_CPP, 
-  # you must pass the file containing the declaration; 
-  # this is usually the header. 
-  # Those files contain a bunch of functions which are needed for the Qt meta-object system. 
+  # Running the meta-object compiler for QObject derived classes is similar to resources,
+  # you add QT5_WRAP_CPP in your CMake file, and just add the generated files to your source files.
+  # The input for this function is the header of your class, not the implementation — even though it’s called QT5_WRAP_CPP,
+  # you must pass the file containing the declaration;
+  # this is usually the header.
+  # Those files contain a bunch of functions which are needed for the Qt meta-object system.
   # These are stand-alone .cpp files that you usually never have to look at.
 
   set(GUI_SOURCE_FILES
     QtAwesome.cpp
     QtAwesome.h
-    QtAwesomeAnim.cpp 
-    QtAwesomeAnim.h 
+    QtAwesomeAnim.cpp
+    QtAwesomeAnim.h
     group_options.h
     group_options.cpp
     renderarea.h
@@ -196,7 +200,7 @@ if(APPLE)
   #  set_target_properties( app PROPERTIES  CXX_INCLUDE_WHAT_YOU_USE /Users/filipeoliveira/Downloads/include-what-you-use/bin/include-what-you-use )
 endif(APPLE)
 
-# Creates a folder "executables" and adds target 
+# Creates a folder "executables" and adds target
 # project (app.vcproj) under it
 set_property(TARGET ${PROJECT_NAME} PROPERTY FOLDER "executables")
 
@@ -210,7 +214,7 @@ set(CMAKE_INSTALL_PREFIX ${CMAKE_CURRENT_BINARY_DIR} )
 #--------------------------------------------------------------------------------
 # Install the QtTest application, on Apple, the bundle is at the root of the
 # install tree, and on other platforms it'll go into the bin directory.
-INSTALL(TARGETS ${PROJECT_NAME} 
+INSTALL(TARGETS ${PROJECT_NAME}
   BUNDLE DESTINATION . COMPONENT Runtime
   RUNTIME DESTINATION ${PROJECT_SOURCE_DIR}/bin COMPONENT Runtime
   )

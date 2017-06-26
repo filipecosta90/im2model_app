@@ -371,8 +371,8 @@ bool WAVIMG_prm::clean_for_re_run(){
 }
 
 /* *
-* setters
-*/
+ * setters
+ */
 bool WAVIMG_prm::set_aberration_definition ( WAVIMG_prm::AberrationDefinition aberration_index, int coefficient , double value ){
   bool result = false;
   if(coefficient == 1 ){
@@ -606,8 +606,8 @@ void WAVIMG_prm::add_parameter_loop ( int parameter_class , int parameter_index,
 }
 
 /* *
-* getters
-*/
+ * getters
+ */
 double WAVIMG_prm::get_aberration_definition( WAVIMG_prm::AberrationDefinition aberration_index, int coefficient ){
   double value = 0.0f;
   if(coefficient == 1 ){
@@ -665,4 +665,13 @@ bool WAVIMG_prm::get_flag_prm_filename(){
 
 bool WAVIMG_prm::get_flag_produced_prm(){
   return _flag_produced_prm;
+}
+
+
+/* Loggers */
+bool WAVIMG_prm::set_application_logger( ApplicationLog::ApplicationLog* app_logger ){
+  logger = app_logger;
+  _flag_logger = true;
+  logger->logEvent( ApplicationLog::notification, "Application logger setted for WAVIMG_prm class." );
+  return true;
 }

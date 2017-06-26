@@ -1,5 +1,5 @@
-#ifndef SRC_SIMGRIDSTEPLENGTH_H__
-#define SRC_SIMGRIDSTEPLENGTH_H__
+#ifndef SRC_SIMGRID_H__
+#define SRC_SIMGRID_H__
 
 /* BEGIN BOOST */
 #include <boost/iostreams/device/mapped_file.hpp> // for mmap
@@ -39,16 +39,22 @@
 
 #include "wavimg_prm.hpp"              // for WAVIMG_prm
 #include "base_crystal.hpp"
+#include "base_image.hpp"
 #include "application_log.hpp"
 
-class SIMGRID_wavimg_steplength : public BaseCrystal {
+class SimGrid : public BaseCrystal {
+
   private:
     // // // // //
     // simulation parameters
     // // // // //
+
     int simgrid_best_match_thickness_slice;
     double simgrid_best_match_thickness_nm;
     double simgrid_best_match_defocus_nm;
+
+    BaseImage exp_image_properties;
+    BaseImage sim_image_properties;
 
     /***********
       simulation grid vars
@@ -92,28 +98,30 @@ class SIMGRID_wavimg_steplength : public BaseCrystal {
     std::string thickness_matrix_file_name;
     std::string match_factor_matrix_file_name;
 
-    // // // // //
-    // visual info
-    // // // // //
-
-    // vars for legend positioning
-    int legend_position_x = 0;
-    const int legend_position_y_bottom_left_line_1 = 20;
-    const int legend_position_y_bottom_left_line_2 = 40;
-    const int legend_position_y_bottom_left_line_3 = 60;
-    const int legend_position_y_bottom_left_line_4 = 80;
-    const int legend_position_y_bottom_left_line_5 = 100;
-
+    /* Loggers */
+    ApplicationLog::ApplicationLog* logger = nullptr;
+    bool _flag_logger = false;
 
   public:
 
-    SIMGRID_wavimg_steplength( boost::process::ipstream& async_io_buffer_out );
-
+    SimGrid( boost::process::ipstream& async_io_buffer_out );
     bool export_sim_grid( std::string filename );
+    bool setup_image_properties();
+    bool set_exp_image_properties_full_image( std::string path );
+    bool set_exp_image_properties_roi_n_rows_height( int nrows );
+    bool set_exp_image_properties_roi_n_cols_width( int ncols );
+    bool set_exp_image_properties_roi_center_x( int center_x );
+    bool set_exp_image_properties_roi_center_y( int center_y );
+
+    /** getters **/
+    // flag getters
+    bool get_flag_logger(){ return _flag_logger; }
+    /* Loggers */
+    ApplicationLog::ApplicationLog* get_logger(){ return logger; }
 
     bool get_flag_simulated_images_grid();
 
-    void produce_png_from_dat_file();
+    bool produce_png_from_dat_file();
 
     bool check_produced_dat();
 
@@ -157,31 +165,14 @@ class SIMGRID_wavimg_steplength : public BaseCrystal {
 
     void set_wavimg_var( WAVIMG_prm* wavimg_var );
 
-    void set_simulated_image_needs_reshape( bool reshape );
-
     void set_roi_pixel_size( int pixel_size );
-
-    void set_ignore_edge_pixels( int edge_pixels_number );
-
-    void set_experimental_image_roi( cv::Mat exp_image_roi );
-
-    void set_reshape_factor_from_supper_cell_to_experimental_x( double reshape_factor );
-
-    void set_reshape_factor_from_supper_cell_to_experimental_y( double reshape_factor );
-
-    void set_n_rows_simulated_image( int n_rows );
-
-    void set_n_cols_simulated_image( int n_cols );
-
-    void set_ignore_edge_pixels_rectangle( cv::Rect ignore_rectangle );
-
-    void set_reshaped_simulated_image_width( int width );
-
-    void set_reshaped_simulated_image_height( int height );
 
     void set_sim_grid_switch( bool sgrid_switch );
 
     void print_var_state();
+
+    /* Loggers */
+    bool set_application_logger( ApplicationLog::ApplicationLog* logger );
 
 };
 

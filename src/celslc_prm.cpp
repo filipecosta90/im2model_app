@@ -120,9 +120,9 @@ bool CELSLC_prm::call_boost_bin( ){
     args_stream << " -slc \"" << full_path.string() << "\"";
 
     // input nx string
-    args_stream << " -nx " << nx_size_height;
+    args_stream << " -nx " << full_n_rows_height;
     // input ny string
-    args_stream << " -ny " << ny_size_width;
+    args_stream << " -ny " << full_n_cols_width;
     // input ht
     args_stream << " -ht " << ht_accelaration_voltage;
 
@@ -317,9 +317,9 @@ bool CELSLC_prm::call_bin_ssc(){
     args_stream << " -slc " << full_path.string();
 
     // input nx string
-    args_stream << " -nx " << nx_size_height;
+    args_stream << " -nx " << full_n_rows_height;
     // input ny string
-    args_stream << " -ny " << ny_size_width;
+    args_stream << " -ny " << full_n_cols_width;
 
     args_stream << " -nz " << nz_simulated_partitions;
     // input ht
@@ -402,4 +402,12 @@ bool CELSLC_prm::call_bin_ssc(){
     result = false;
   }
   return result;
+}
+
+/* Loggers */
+bool CELSLC_prm::set_application_logger( ApplicationLog::ApplicationLog* app_logger ){
+  logger = app_logger;
+  _flag_logger = true;
+  logger->logEvent( ApplicationLog::notification, "Application logger setted for CELSLC_prm class." );
+  return true;
 }

@@ -12,7 +12,6 @@ MainWindow::MainWindow( ApplicationLog::ApplicationLog* logger , QWidget *parent
   ui->td_map_splitter->setStretchFactor(0,3);
   ui->td_map_splitter->setStretchFactor(1,7);
   ui->td_map_splitter->setStretchFactor(2,2);
-
   ui->super_cell_splitter->setStretchFactor(0,3);
   ui->super_cell_splitter->setStretchFactor(1,7);
 
@@ -40,7 +39,7 @@ MainWindow::MainWindow( ApplicationLog::ApplicationLog* logger , QWidget *parent
   _settings_ok = readSettings();
   if( ! _settings_ok ){
     if( _flag_im2model_logger ){
-      im2model_logger->logEvent( ApplicationLog::critical, "Preferences are not setted. trying to resolve." );
+      im2model_logger->logEvent( ApplicationLog::critical, "Preferences are not setted. Trying to resolve." );
     }
     _settings_ok = maybeSetPreferences();
   }
@@ -344,14 +343,14 @@ MainWindow::~MainWindow(){
 }
 
 bool MainWindow::update_qline_image_path( std::string fileName ){
-  _core_image_crystal->set_experimental_image_path( fileName );
-  const bool load_ok = _core_image_crystal->load_full_experimental_image();
-  if( load_ok ){
-    cv::Mat full_raw_experimental_image = _core_image_crystal->get_full_experimental_image_mat();
-    _core_super_cell->set_full_raw_experimental_image( full_raw_experimental_image );
+  bool status = false;
+  const bool _td_map_load_ok = _core_td_map->set_exp_image_properties_full_image( fileName );
+  const bool _super_cell_load_ok = _core_super_cell->set_exp_image_properties_full_image( fileName );
+  if( _td_map_load_ok & _super_cell_load_ok ){
     emit experimental_image_filename_changed();
+    status = true;
   }
-  return true;
+  return status;
 }
 
 void MainWindow::update_simgrid_frame(){
@@ -1058,10 +1057,10 @@ void MainWindow::create_box_options(){
   QVector<QVariant> box1_option_3_1 = {"Center",""};
   QVector<QVariant> box1_option_3_1_1 = {"x",""};
   QVector<bool> box1_option_3_1_1_edit = {false,true};
-  boost::function<bool(std::string)> box1_function_3_1_1 ( boost::bind( &Image_Crystal::set_experimental_roi_center_x,_core_image_crystal, _1 ) );
+  boost::function<bool(std::string)> box1_function_3_1_1 ( boost::bind( &TDMap::set_exp_image_properties_roi_center_x,_core_td_map, _1 ) );
   QVector<QVariant> box1_option_3_1_2 = {"y",""};
   QVector<bool> box1_option_3_1_2_edit = {false,true};
-  boost::function<bool(std::string)> box1_function_3_1_2 ( boost::bind( &Image_Crystal::set_experimental_roi_center_y,_core_image_crystal, _1 ) );
+  boost::function<bool(std::string)> box1_function_3_1_2 ( boost::bind( &TDMap::set_exp_image_properties_roi_center_y,_core_td_map, _1 ) );
 
   TreeItem* experimental_roi_center = new TreeItem ( box1_option_3_1  );
   TreeItem* experimental_roi_center_x = new TreeItem ( box1_option_3_1_1 , box1_function_3_1_1, box1_option_3_1_1_edit );

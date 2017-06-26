@@ -1,5 +1,5 @@
-#ifndef __WAVIMG_PRM_H__
-#define __WAVIMG_PRM_H__
+#ifndef SRC_WAVIMGPRM_H__
+#define SRC_WAVIMGPRM_H__
 
 /* BEGIN BOOST */
 #include <boost/process.hpp>
@@ -16,10 +16,12 @@
 
 #include <stdlib.h>
 
+#include "base_image.hpp"
 #include "base_crystal.hpp"
 #include "application_log.hpp"
 
-class WAVIMG_prm : public BaseCrystal {
+class WAVIMG_prm : public BaseCrystal, public BaseImage {
+
   private:
     // line 1
     std::string file_name_input_wave_function;
@@ -28,7 +30,7 @@ class WAVIMG_prm : public BaseCrystal {
     int type_of_output = 0;
     // line 6
     std::string file_name_output_image_wave_function;
-  // line 8
+    // line 8
     // ! Flag and parameters for creating integer images with optional noise. Flag <intflg> 0 = off (default), 1 = 32-bit, 2 = 16-bit, Parameter: <mean> = mean vacuum intensity, <conv> = electron to counts conversion rate, <rnoise> detector readout noise level.
     int image_data_type = 0;
     double image_vacuum_mean_intensity = 0.0f;
@@ -40,7 +42,7 @@ class WAVIMG_prm : public BaseCrystal {
     // line 10
     // ! Image output sampling rate [nm/pix], isotropic. The parameter is used only if the Flag in line 09 is set to 1.
     // INHERITS FROM BaseCrystal
-  // line 11
+    // line 11
     // ! Image frame offset in pixels of the input wave. The parameter is used only if the Flag in line 09 is set to 1.
     double image_frame_offset_x_pixels_input_wave_function = 0.0f;
     double image_frame_offset_y_pixels_input_wave_function = 0.0f;
@@ -107,6 +109,10 @@ class WAVIMG_prm : public BaseCrystal {
     bool get_flag_prm_filename();
     bool get_flag_produced_prm();
 
+    /* Loggers */
+    ApplicationLog::ApplicationLog* logger = nullptr;
+    bool _flag_logger = false;
+
   public:
     WAVIMG_prm( boost::process::ipstream& async_io_buffer_out );
 
@@ -118,19 +124,25 @@ class WAVIMG_prm : public BaseCrystal {
       RosetteAberration = 13, SixfoldAstigmatism = 14, EightfoldAstigmatism = 23
     };
 
-        bool produce_prm();
+    /** getters **/
+    // flag getters
+    bool get_flag_logger(){ return _flag_logger; }
+    /* Loggers */
+    ApplicationLog::ApplicationLog* get_logger(){ return logger; }
 
-        bool full_prm_dat_cleanup_bin();
+    bool produce_prm();
 
-        bool dat_cleanup_bin();
+    bool full_prm_dat_cleanup_bin();
 
-        bool check_clean_run_env();
+    bool dat_cleanup_bin();
 
-        bool call_bin();
+    bool check_clean_run_env();
 
-        bool clean_for_re_run();
+    bool call_bin();
 
-        bool check_produced_dat();
+    bool clean_for_re_run();
+
+    bool check_produced_dat();
 
 
     // setters line 1
@@ -140,7 +152,7 @@ class WAVIMG_prm : public BaseCrystal {
     // setters line 6
     bool set_file_name_output_image_wave_function( std::string file_name );
 
-  // setters line 8
+    // setters line 8
     void set_image_data_type(int data_type );
     void set_image_vacuum_mean_intensity( double mean_intensity );
     void set_conversion_rate( double rate );
@@ -149,7 +161,7 @@ class WAVIMG_prm : public BaseCrystal {
     void set_switch_option_extract_particular_image_frame( int option );
     // setters line 10
     // INHERITS FROM BaseCrystal
-  // setters line 11
+    // setters line 11
     void set_image_frame_offset_x_pixels_input_wave_function( double offset_x );
     void set_image_frame_offset_y_pixels_input_wave_function( double offset_y );
     // setters line 12
@@ -193,14 +205,18 @@ class WAVIMG_prm : public BaseCrystal {
     bool set_prm_file_name( std::string filename );
 
     /**
-    * getters
-    */
+     * getters
+     */
+
 
     double get_aberration_definition( WAVIMG_prm::AberrationDefinition aberration_index, int coefficient );
 
     bool get_aberration_definition_switch( WAVIMG_prm::AberrationDefinition aberration_index );
 
     bool get_mtf_simulation_switch();
+
+    /* Loggers */
+    bool set_application_logger( ApplicationLog::ApplicationLog* logger );
 
 };
 
