@@ -46,14 +46,14 @@ bool SimGrid::set_exp_image_sampling_rate_y_nm_per_pixel( double sampling ){
 }
 
 bool SimGrid::set_super_cell_size_a( double size ){
-  const bool sim_result = sim_image_properties.set_nm_size_rows_a( size );
+  const bool sim_result = sim_image_properties.set_full_nm_size_rows_a( size );
   const bool crystal_result = BaseCrystal::set_super_cell_size_a( size );
   const bool result = sim_result & crystal_result;
   return result;
 }
 
 bool SimGrid::set_super_cell_size_b( double size ){
-  const bool sim_result = sim_image_properties.set_nm_size_cols_b( size );
+  const bool sim_result = sim_image_properties.set_full_nm_size_cols_b( size );
   const bool crystal_result = BaseCrystal::set_super_cell_size_b( size );
   const bool result = sim_result & crystal_result;
   return result;
@@ -395,11 +395,11 @@ bool SimGrid::read_grid_from_dat_files(){
   if( result ){
     if(
         // BaseCrystal vars
-        _flag_base_dir_path &
-        _flag_slice_samples &
-        _flag_defocus_samples &
+        _flag_base_dir_path &&
+        _flag_slice_samples &&
+        _flag_defocus_samples &&
         // BaseImage vars
-        sim_image_properties.get_flag_full_n_rows_height() &
+        sim_image_properties.get_flag_full_n_rows_height() &&
         sim_image_properties.get_flag_full_n_cols_width()
       ){
       boost::filesystem::path dir ( base_dir_path );
@@ -505,17 +505,19 @@ bool SimGrid::simulate_from_grid(){
   runned_simulation = false;
   if(
       // BaseCrystal vars
-      _flag_slice_samples &
-      _flag_slices_lower_bound &
-      _flag_defocus_samples &
-      _flag_slice_params_accum_nm_slice_vec &
-      _flag_nz_simulated_partitions &
-      ( slice_params_accum_nm_slice_vec.size() == nz_simulated_partitions ) &
+      _flag_slice_samples &&
+      raw_simulated_images_grid.size() == slice_samples &&
+      _flag_slices_lower_bound &&
+      _flag_defocus_samples &&
+      _flag_slice_params_accum_nm_slice_vec &&
+      _flag_nz_simulated_partitions &&
+      ( slice_params_accum_nm_slice_vec.size() == nz_simulated_partitions ) &&
       // Experimental image vars
-      exp_image_properties.get_flag_roi_n_rows_height() &
-      exp_image_properties.get_flag_roi_n_cols_width() &
+      exp_image_properties.get_flag_roi_n_rows_height() &&
+      exp_image_properties.get_flag_roi_n_cols_width() &&
+      exp_image_properties.get_flag_roi_image() &&
       // Simulated image vars
-      sim_image_properties.get_flag_full_n_rows_height() &
+      sim_image_properties.get_flag_full_n_rows_height() &&
       sim_image_properties.get_flag_full_n_cols_width()
     ){
     // X

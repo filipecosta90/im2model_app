@@ -45,7 +45,7 @@ class BaseCrystal {
     std::string unit_cell_cif_path;
     bool _flag_unit_cell_cif_path = false;
 
-    int nz_simulated_partitions;
+    int nz_simulated_partitions = 0;
     bool _flag_nz_simulated_partitions = false;
     bool nz_switch = false;
 
@@ -59,23 +59,23 @@ class BaseCrystal {
     bool _flag_projected_y_axis = false;
 
     cv::Point3d  zone_axis;
-    double zone_axis_u;
-    double zone_axis_v;
-    double zone_axis_w;
+    double zone_axis_u = 0.0f;
+    double zone_axis_v = 0.0f;
+    double zone_axis_w = 0.0f;
     bool _flag_zone_axis_u = false;
     bool _flag_zone_axis_v = false;
     bool _flag_zone_axis_w = false;
     bool _flag_zone_axis = false;
 
-    double ht_accelaration_voltage;
+    double ht_accelaration_voltage = 0.0f;
     bool _flag_ht_accelaration_voltage = false;
 
     // [Super-Cell dimensions]
-    double super_cell_size_a;
+    double super_cell_size_a = 0.0f;
     bool _flag_super_cell_size_a = false;
-    double super_cell_size_b;
+    double super_cell_size_b = 0.0f;
     bool _flag_super_cell_size_b = false;
-    double super_cell_size_c;
+    double super_cell_size_c = 0.0f;
     bool _flag_super_cell_size_c = false;
     bool _flag_super_cell_size = false;
 
@@ -93,30 +93,30 @@ class BaseCrystal {
     // Simulated Thickness info
     /////////////////////////
     // user defined
-    int slice_samples;
+    int slice_samples = 0;
     bool _flag_slice_samples = false;
-    double nm_lower_bound;
+    double nm_lower_bound = 0.0f;
     bool _flag_nm_lower_bound = false;
-    double nm_upper_bound;
+    double nm_upper_bound = 0.0f;
     bool _flag_nm_upper_bound = false;
-    int slice_period;
+    int slice_period = 0;
     bool _flag_slice_period = false;
     //calculated
-    int slices_lower_bound;
+    int slices_lower_bound = 0;
     bool _flag_slices_lower_bound = false;
-    int slices_upper_bound;
+    int slices_upper_bound = 0;
     bool _flag_slices_upper_bound = false;
 
     /////////////////////////
     // Simulated Defocus info
     /////////////////////////
-    int defocus_samples;
+    int defocus_samples = 0;
     bool _flag_defocus_samples = false;
-    double defocus_lower_bound;
+    double defocus_lower_bound = 0.0f;
     bool _flag_defocus_lower_bound = false;
-    double defocus_upper_bound;
+    double defocus_upper_bound = 0.0f;
     bool _flag_defocus_upper_bound = false;
-    double defocus_period;
+    double defocus_period = 0.0f;
     bool _flag_defocus_period = false;
 
     /* boost process output streams */

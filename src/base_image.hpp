@@ -62,10 +62,10 @@ bool auto_calculate_dimensions();
     bool _flag_sampling_rate = false;
 
     // [nm dimensions]
-    double nm_size_rows_a = 0.0f;
-    bool _flag_nm_size_rows_a = false;
-    double nm_size_cols_b = 0.0f;
-    bool _flag_nm_size_cols_b = false;
+    double full_nm_size_rows_a = 0.0f;
+    bool _flag_full_nm_size_rows_a = false;
+    double full_nm_size_cols_b = 0.0f;
+    bool _flag_full_nm_size_cols_b = false;
 
     // ROI FRAME
     cv::Mat roi_image;
@@ -77,6 +77,12 @@ bool auto_calculate_dimensions();
     bool _flag_roi_n_rows_height = false;
     int roi_n_cols_width = 0;
     bool _flag_roi_n_cols_width = false;
+
+    // ROI [nm dimensions]
+    double roi_nm_size_rows_a = 0.0f;
+    bool _flag_roi_nm_size_rows_a = false;
+    double roi_nm_size_cols_b = 0.0f;
+    bool _flag_roi_nm_size_cols_b = false;
 
     int roi_center_x;
     bool _flag_roi_center_x = false;
@@ -143,8 +149,8 @@ bool auto_calculate_dimensions();
     bool set_full_n_cols_width( int full_n_cols_width );
     bool set_sampling_rate_x_nm_per_pixel( double );
     bool set_sampling_rate_y_nm_per_pixel( double );
-    bool set_nm_size_rows_a( double size );
-    bool set_nm_size_cols_b( double size );
+    bool set_full_nm_size_rows_a( double size );
+    bool set_full_nm_size_cols_b( double size );
     // ROI FRAME
     void set_roi();
     bool set_roi_n_rows_height( int roi_n_rows_height );

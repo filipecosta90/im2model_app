@@ -119,13 +119,19 @@ bool CELSLC_prm::call_boost_bin( ){
 
     args_stream << " -slc \"" << full_path.string() << "\"";
 
-    // input nx string
-    args_stream << " -nx " << full_n_rows_height;
-    // input ny string
-    args_stream << " -ny " << full_n_cols_width;
-    // input ht
-    args_stream << " -ht " << ht_accelaration_voltage;
 
+    // input nx string
+    if( _flag_full_n_rows_height ){
+    args_stream << " -nx " << full_n_rows_height;
+    }
+    // input ny string
+    if( _flag_full_n_cols_width ){
+    args_stream << " -ny " << full_n_cols_width;
+  }
+    // input ht
+    if( _flag_ht_accelaration_voltage ){
+    args_stream << " -ht " << ht_accelaration_voltage;
+}
     if( _flag_zone_axis && _flag_projected_y_axis && _flag_super_cell_size ){
       args_stream << " -prj " << (float) zone_axis_u  << "," << (float) zone_axis_v << "," << (float) zone_axis_w << ","
         <<  projected_y_axis_u << "," << projected_y_axis_v << "," << projected_y_axis_w << ","
