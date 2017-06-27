@@ -362,20 +362,10 @@ void BaseCrystal::print_var_state(){
     message << "BaseCrystal vars:\n"
     << "\t" << "unit_cell_cif_path : " <<  unit_cell_cif_path << "\n"
     << "\t\t" << "_flag_unit_cell_cif_path : " << std::boolalpha << _flag_unit_cell_cif_path << "\n"
-
-    << "\t" << "nx_size_height : " <<  nx_size_height << "\n"
-    << "\t\t" << "_flag_nx_size_height : " << std::boolalpha <<  _flag_nx_size_height << "\n"
-    << "\t" << "ny_size_width : " <<  ny_size_width << "\n"
-    << "\t\t" << "_flag_ny_size_width : " << std::boolalpha <<  _flag_ny_size_width << "\n"
+    
     << "\t" << "nz_simulated_partitions : " <<  nz_simulated_partitions << "\n"
     << "\t\t" << "_flag_nz_simulated_partitions : " << std::boolalpha <<  _flag_nz_simulated_partitions << "\n"
     << "\t" << "nz_switch : " << std::boolalpha <<  nz_switch << "\n"
-
-    << "\t" << "sampling_rate_experimental_x_nm_per_pixel : " <<  sampling_rate_experimental_x_nm_per_pixel << "\n"
-    << "\t" << "sampling_rate_experimental_y_nm_per_pixel : " <<  sampling_rate_experimental_y_nm_per_pixel << "\n"
-    << "\t\t" << "_flag_sampling_rate_experimental_x_nm_per_pixel : " << std::boolalpha <<  _flag_sampling_rate_experimental_x_nm_per_pixel << "\n"
-    << "\t\t" << "_flag_sampling_rate_experimental_y_nm_per_pixel : " << std::boolalpha <<  _flag_sampling_rate_experimental_y_nm_per_pixel << "\n"
-    << "\t\t" << "_flag_sampling_rate_experimental : " << std::boolalpha <<  _flag_sampling_rate_experimental << "\n"
 
     << "\t" << "projected_y_axis : " <<   projected_y_axis << "\n"
     << "\t" << "projected_y_axis_u : " <<  projected_y_axis_u << "\n"

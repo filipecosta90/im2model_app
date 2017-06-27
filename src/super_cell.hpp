@@ -37,7 +37,6 @@
 #include <opencv2/core/types.hpp>    // for Point3d, Point, Rect, Point2d
 
 #include "unit_cell.hpp"
-#include "image_crystal.hpp"
 #include "td_map.hpp"
 #include "base_image.hpp"
 
@@ -221,7 +220,6 @@ class Super_Cell {
     /////////////////////////
     // Im2Model core pointers
     /////////////////////////
-    Image_Crystal *_core_image_crystal_ptr;
     TDMap* _core_tdmap_ptr;
 
     // Define the motion model
@@ -235,18 +233,9 @@ class Super_Cell {
   public:
     Super_Cell();
     Super_Cell( Unit_Cell* unit_cell );
-    Super_Cell( Image_Crystal* image_crystal_ptr, TDMap* tdmap_ptr );
+    Super_Cell( TDMap* tdmap_ptr );
 
-    // Image_Crystal updaters
-    bool update_roi_center_from_image_crystal();
-    bool update_raw_experimental_image_from_image_crystal();
-    bool update_sampling_rate_super_cell_x_nm_pixel_from_image_crystal();
-    bool update_sampling_rate_super_cell_y_nm_pixel_from_image_crystal();
-
-    // TDMao updaters
-
-    bool _is_sampling_rate_super_cell_x_nm_pixel_defined();
-    bool _is_sampling_rate_super_cell_y_nm_pixel_defined();
+    // TDMap updaters
 
     bool _is_experimental_image_boundary_polygon_defined();
     bool _is_experimental_image_boundary_polygon_w_margin_defined();

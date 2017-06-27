@@ -5,11 +5,9 @@ TDMap::TDMap(
     boost::process::ipstream& ostream_celslc_buffer,
     boost::process::ipstream& ostream_msa_buffer,
     boost::process::ipstream& ostream_wavimg_buffer,
-    boost::process::ipstream& ostream_simgrid_buffer,
-    Image_Crystal *image_crystal_ptr
+    boost::process::ipstream& ostream_simgrid_buffer
     )
 {
-  _core_image_crystal_ptr = image_crystal_ptr;
   _tdmap_celslc_parameters = new CELSLC_prm( ostream_celslc_buffer );
   _tdmap_msa_parameters = new MSA_prm( ostream_msa_buffer );
   _tdmap_wavimg_parameters = new WAVIMG_prm( ostream_wavimg_buffer );
@@ -95,9 +93,8 @@ TDMap::TDMap( boost::process::ipstream& ostream_celslc_buffer,
     boost::process::ipstream& ostream_msa_buffer,
     boost::process::ipstream& ostream_wavimg_buffer,
     boost::process::ipstream& ostream_simgrid_buffer,
-    Image_Crystal *image_crystal_ptr,
     ApplicationLog::ApplicationLog* app_logger ) :
-  TDMap::TDMap( ostream_celslc_buffer, ostream_msa_buffer, ostream_wavimg_buffer, ostream_simgrid_buffer,  image_crystal_ptr ) {
+  TDMap::TDMap( ostream_celslc_buffer, ostream_msa_buffer, ostream_wavimg_buffer, ostream_simgrid_buffer ) {
     set_application_logger( app_logger );
   }
 
@@ -690,12 +687,11 @@ bool TDMap::set_super_cell_size_c( std::string size_c ){
 
 bool TDMap::set_base_dir_path( boost::filesystem::path path ){
   bool result = false;
-  const bool imagecrystal_result = _core_image_crystal_ptr->set_base_dir_path( path );
   const bool celslc_result = _tdmap_celslc_parameters->set_base_dir_path( path );
   const bool msa_result = _tdmap_msa_parameters->set_base_dir_path( path );
   const bool wavimg_result = _tdmap_wavimg_parameters->set_base_dir_path( path );
   const bool simgrid_result = _td_map_simgrid->set_base_dir_path(path);
-  result = imagecrystal_result & celslc_result & msa_result & wavimg_result & simgrid_result;
+  result = celslc_result & msa_result & wavimg_result & simgrid_result;
   return result;
 }
 
@@ -710,16 +706,10 @@ bool TDMap::set_application_logger( ApplicationLog::ApplicationLog* app_logger )
   logger = app_logger;
   _flag_logger = true;
   logger->logEvent( ApplicationLog::notification, "Application logger setted for TDMap class." );
-  _core_image_crystal_ptr->set_application_logger( app_logger );
   _tdmap_celslc_parameters->set_application_logger( app_logger );
   _tdmap_msa_parameters->set_application_logger( app_logger );
   _tdmap_wavimg_parameters->set_application_logger( app_logger );
   _td_map_simgrid->set_application_logger(app_logger);
-  return true;
-}
-
-bool TDMap::set_core_image_crystal_ptr( Image_Crystal* image_crystal_ptr ){
-  _core_image_crystal_ptr = image_crystal_ptr;
   return true;
 }
 
@@ -788,16 +778,15 @@ bool TDMap::set_exp_image_properties_roi_center_y( std::string s_center_y ){
   return result;
 }
 
-bool TDMap::set_sampling_rate_experimental_x_nm_per_pixel( std::string sampling_x ){
+bool TDMap::set_exp_image_properties_sampling_rate_x_nm_per_pixel( std::string sampling_x ){
   bool result = false;
   try {
     const double s_rate_x = boost::lexical_cast<double>( sampling_x );
-    const bool imagecrystal_result =  _core_image_crystal_ptr->set_sampling_rate_experimental_x_nm_per_pixel( s_rate_x );
-    const bool celslc_result = _tdmap_celslc_parameters->set_sampling_rate_experimental_x_nm_per_pixel( s_rate_x );
-    const bool msa_result = _tdmap_msa_parameters->set_sampling_rate_experimental_x_nm_per_pixel( s_rate_x );
-    const bool wavimg_result =  _tdmap_wavimg_parameters->set_sampling_rate_experimental_x_nm_per_pixel( s_rate_x );
-    const bool simgrid_result = _td_map_simgrid->set_sampling_rate_experimental_x_nm_per_pixel( s_rate_x );
-    result = imagecrystal_result & celslc_result & msa_result & wavimg_result & simgrid_result;
+    const bool celslc_result = _tdmap_celslc_parameters->set_sampling_rate_x_nm_per_pixel( s_rate_x );
+    const bool msa_result = _tdmap_msa_parameters->set_sampling_rate_x_nm_per_pixel( s_rate_x );
+    const bool wavimg_result =  _tdmap_wavimg_parameters->set_sampling_rate_x_nm_per_pixel( s_rate_x );
+    const bool simgrid_result = _td_map_simgrid->set_sampling_rate_x_nm_per_pixel( s_rate_x );
+    result = celslc_result & msa_result & wavimg_result & simgrid_result;
   }
   catch(boost::bad_lexical_cast&  ex) {
     // pass it up
@@ -806,16 +795,15 @@ bool TDMap::set_sampling_rate_experimental_x_nm_per_pixel( std::string sampling_
   return result;
 }
 
-bool TDMap::set_sampling_rate_experimental_y_nm_per_pixel( std::string sampling_y ){
+bool TDMap::set_exp_image_properties_sampling_rate_y_nm_per_pixel( std::string sampling_y ){
   bool result = false;
   try {
     const double s_rate_y = boost::lexical_cast<double>( sampling_y );
-    const bool imagecrystal_result =  _core_image_crystal_ptr->set_sampling_rate_experimental_y_nm_per_pixel( s_rate_y );
-    const bool celslc_result = _tdmap_celslc_parameters->set_sampling_rate_experimental_y_nm_per_pixel( s_rate_y );
-    const bool msa_result = _tdmap_msa_parameters->set_sampling_rate_experimental_y_nm_per_pixel( s_rate_y );
-    const bool wavimg_result =  _tdmap_wavimg_parameters->set_sampling_rate_experimental_y_nm_per_pixel( s_rate_y );
-    const bool simgrid_result = _td_map_simgrid->set_sampling_rate_experimental_y_nm_per_pixel( s_rate_y );
-    result = imagecrystal_result & celslc_result & msa_result & wavimg_result & simgrid_result;
+    const bool celslc_result = _tdmap_celslc_parameters->set_sampling_rate_y_nm_per_pixel( s_rate_y );
+    const bool msa_result = _tdmap_msa_parameters->set_sampling_rate_y_nm_per_pixel( s_rate_y );
+    const bool wavimg_result =  _tdmap_wavimg_parameters->set_sampling_rate_y_nm_per_pixel( s_rate_y );
+    const bool simgrid_result = _td_map_simgrid->set_sampling_rate_y_nm_per_pixel( s_rate_y );
+    result =  celslc_result & msa_result & wavimg_result & simgrid_result;
   }
   catch(boost::bad_lexical_cast&  ex) {
     // pass it up
@@ -829,12 +817,11 @@ bool TDMap::set_ny_size_width( std::string s_ny ){
   bool result = false;
   try {
     const double ny = boost::lexical_cast<double>( s_ny );
-    const bool imagecrystal_result =  _core_image_crystal_ptr->set_ny_size_width( ny );
-//    const bool celslc_result = _tdmap_celslc_parameters->set_ny_size_width( ny );
-//    const bool msa_result = _tdmap_msa_parameters->set_ny_size_width( ny );
-//    const bool wavimg_result =  _tdmap_wavimg_parameters->set_ny_size_width( ny );
-    const bool simgrid_result = _td_map_simgrid->set_exp_image_properties_full_n_cols_width( ny );
-    result = imagecrystal_result & simgrid_result;
+    //    const bool celslc_result = _tdmap_celslc_parameters->set_ny_size_width( ny );
+    //    const bool msa_result = _tdmap_msa_parameters->set_ny_size_width( ny );
+    //    const bool wavimg_result =  _tdmap_wavimg_parameters->set_ny_size_width( ny );
+    const bool simgrid_result = _td_map_simgrid->set_exp_image_properties_roi_n_cols_width( ny );
+    result = simgrid_result;
   }
   catch(boost::bad_lexical_cast&  ex) {
     // pass it up
@@ -847,12 +834,8 @@ bool TDMap::set_nx_size_height( std::string s_nx ){
   bool result = false;
   try {
     const double nx = boost::lexical_cast<double>( s_nx );
-    const bool imagecrystal_result =  _core_image_crystal_ptr->set_nx_size_height( nx );
-//    const bool celslc_result = _tdmap_celslc_parameters->set_nx_size_height( nx );
-//    const bool msa_result = _tdmap_msa_parameters->set_nx_size_height( nx );
-//    const bool wavimg_result =  _tdmap_wavimg_parameters->set_nx_size_height( nx );
-    const bool simgrid_result = _td_map_simgrid->set_exp_image_properties_full_n_rows_height( nx );
-    result = imagecrystal_result  & simgrid_result;
+    const bool simgrid_result = _td_map_simgrid->set_exp_image_properties_roi_n_rows_height( nx );
+    result =  simgrid_result;
   }
   catch(boost::bad_lexical_cast&  ex) {
     // pass it up
@@ -864,12 +847,11 @@ bool TDMap::set_nx_size_height( std::string s_nx ){
 bool TDMap::set_unit_cell_cif_path( std::string cif_path ){
   bool result = false;
   try {
-    const bool imagecrystal_result =  _core_image_crystal_ptr->set_unit_cell_cif_path( cif_path );
     const bool celslc_result = _tdmap_celslc_parameters->set_unit_cell_cif_path( cif_path );
     const bool msa_result = _tdmap_msa_parameters->set_unit_cell_cif_path( cif_path );
     const bool wavimg_result =  _tdmap_wavimg_parameters->set_unit_cell_cif_path( cif_path );
     const bool simgrid_result = _td_map_simgrid->set_unit_cell_cif_path( cif_path );
-    result = imagecrystal_result & celslc_result & msa_result & wavimg_result & simgrid_result;
+    result = celslc_result & msa_result & wavimg_result & simgrid_result;
   }
   catch(boost::bad_lexical_cast&  ex) {
     // pass it up
@@ -882,12 +864,11 @@ bool TDMap::set_zone_axis_u( std::string s_za_u ){
   bool result = false;
   try {
     const double za_u = boost::lexical_cast<double>( s_za_u );
-    const bool imagecrystal_result =  _core_image_crystal_ptr->set_zone_axis_u( za_u );
     const bool celslc_result = _tdmap_celslc_parameters->set_zone_axis_u( za_u );
     const bool msa_result = _tdmap_msa_parameters->set_zone_axis_u( za_u );
     const bool wavimg_result =  _tdmap_wavimg_parameters->set_zone_axis_u( za_u );
     const bool simgrid_result = _td_map_simgrid->set_zone_axis_u( za_u );
-    result = imagecrystal_result & celslc_result & msa_result & wavimg_result & simgrid_result;
+    result =  celslc_result & msa_result & wavimg_result & simgrid_result;
   }
   catch(boost::bad_lexical_cast&  ex) {
     // pass it up
@@ -900,12 +881,11 @@ bool TDMap::set_zone_axis_v( std::string s_za_v ){
   bool result = false;
   try {
     const double za_v = boost::lexical_cast<double>( s_za_v );
-    const bool imagecrystal_result =  _core_image_crystal_ptr->set_zone_axis_v( za_v );
     const bool celslc_result = _tdmap_celslc_parameters->set_zone_axis_v( za_v );
     const bool msa_result = _tdmap_msa_parameters->set_zone_axis_v( za_v );
     const bool wavimg_result =  _tdmap_wavimg_parameters->set_zone_axis_v( za_v );
     const bool simgrid_result = _td_map_simgrid->set_zone_axis_v( za_v );
-    result = imagecrystal_result & celslc_result & msa_result & wavimg_result & simgrid_result;
+    result = celslc_result & msa_result & wavimg_result & simgrid_result;
   }
   catch(boost::bad_lexical_cast&  ex) {
     // pass it up
@@ -918,12 +898,11 @@ bool TDMap::set_zone_axis_w( std::string s_za_w ){
   bool result = false;
   try {
     const double za_w = boost::lexical_cast<double>( s_za_w );
-    const bool imagecrystal_result =  _core_image_crystal_ptr->set_zone_axis_w( za_w );
     const bool celslc_result = _tdmap_celslc_parameters->set_zone_axis_w( za_w );
     const bool msa_result = _tdmap_msa_parameters->set_zone_axis_w( za_w );
     const bool wavimg_result =  _tdmap_wavimg_parameters->set_zone_axis_w( za_w );
     const bool simgrid_result = _td_map_simgrid->set_zone_axis_w( za_w );
-    result = imagecrystal_result & celslc_result & msa_result & wavimg_result & simgrid_result;
+    result = celslc_result & msa_result & wavimg_result & simgrid_result;
   }
   catch(boost::bad_lexical_cast&  ex) {
     // pass it up
@@ -936,12 +915,11 @@ bool TDMap::set_projected_y_axis_u( std::string s_y_u ){
   bool result = false;
   try {
     const double y_u = boost::lexical_cast<double>( s_y_u );
-    const bool imagecrystal_result =  _core_image_crystal_ptr->set_projected_y_axis_u( y_u );
     const bool celslc_result = _tdmap_celslc_parameters->set_projected_y_axis_u( y_u );
     const bool msa_result = _tdmap_msa_parameters->set_projected_y_axis_u( y_u );
     const bool wavimg_result =  _tdmap_wavimg_parameters->set_projected_y_axis_u( y_u );
     const bool simgrid_result = _td_map_simgrid->set_projected_y_axis_u( y_u );
-    result = imagecrystal_result & celslc_result & msa_result & wavimg_result & simgrid_result;
+    result = celslc_result & msa_result & wavimg_result & simgrid_result;
   }
   catch(boost::bad_lexical_cast&  ex) {
     // pass it up
@@ -954,12 +932,11 @@ bool TDMap::set_projected_y_axis_v( std::string s_y_v ){
   bool result = false;
   try {
     const double y_v = boost::lexical_cast<double>( s_y_v );
-    const bool imagecrystal_result =  _core_image_crystal_ptr->set_projected_y_axis_v( y_v );
     const bool celslc_result = _tdmap_celslc_parameters->set_projected_y_axis_v( y_v );
     const bool msa_result = _tdmap_msa_parameters->set_projected_y_axis_v( y_v );
     const bool wavimg_result =  _tdmap_wavimg_parameters->set_projected_y_axis_v( y_v );
     const bool simgrid_result = _td_map_simgrid->set_projected_y_axis_v( y_v );
-    result = imagecrystal_result & celslc_result & msa_result & wavimg_result & simgrid_result;
+    result = celslc_result & msa_result & wavimg_result & simgrid_result;
   }
   catch(boost::bad_lexical_cast&  ex) {
     // pass it up
@@ -972,12 +949,11 @@ bool TDMap::set_projected_y_axis_w( std::string s_y_w ){
   bool result = false;
   try {
     const double y_w = boost::lexical_cast<double>( s_y_w );
-    const bool imagecrystal_result =  _core_image_crystal_ptr->set_projected_y_axis_w( y_w );
     const bool celslc_result = _tdmap_celslc_parameters->set_projected_y_axis_w( y_w );
     const bool msa_result = _tdmap_msa_parameters->set_projected_y_axis_w( y_w );
     const bool wavimg_result =  _tdmap_wavimg_parameters->set_projected_y_axis_w( y_w );
     const bool simgrid_result = _td_map_simgrid->set_projected_y_axis_w( y_w );
-    result = imagecrystal_result & celslc_result & msa_result & wavimg_result & simgrid_result;
+    result = celslc_result & msa_result & wavimg_result & simgrid_result;
   }
   catch(boost::bad_lexical_cast&  ex) {
     // pass it up
@@ -1039,12 +1015,11 @@ bool TDMap::set_slice_samples( std::string s_samples ){
   bool result = false;
   try {
     const double samples = boost::lexical_cast<double>( s_samples );
-    const bool imagecrystal_result =  _core_image_crystal_ptr->set_slice_samples( samples );
     const bool celslc_result = _tdmap_celslc_parameters->set_slice_samples( samples );
     const bool msa_result = _tdmap_msa_parameters->set_slice_samples( samples );
     const bool wavimg_result =  _tdmap_wavimg_parameters->set_slice_samples( samples );
     const bool simgrid_result = _td_map_simgrid->set_slice_samples( samples );
-    result = imagecrystal_result & celslc_result & msa_result & wavimg_result & simgrid_result;
+    result = celslc_result & msa_result & wavimg_result & simgrid_result;
   }
   catch(boost::bad_lexical_cast&  ex) {
     // pass it up
@@ -1057,12 +1032,11 @@ bool TDMap::set_nm_lower_bound( std::string s_l_bound ){
   bool result = false;
   try {
     const double l_bound = boost::lexical_cast<double>( s_l_bound );
-    const bool imagecrystal_result =  _core_image_crystal_ptr->set_nm_lower_bound( l_bound );
     const bool celslc_result = _tdmap_celslc_parameters->set_nm_lower_bound( l_bound );
     const bool msa_result = _tdmap_msa_parameters->set_nm_lower_bound( l_bound );
     const bool wavimg_result =  _tdmap_wavimg_parameters->set_nm_lower_bound( l_bound );
     const bool simgrid_result = _td_map_simgrid->set_nm_lower_bound( l_bound );
-    result = imagecrystal_result & celslc_result & msa_result & wavimg_result & simgrid_result;
+    result = celslc_result & msa_result & wavimg_result & simgrid_result;
   }
   catch(boost::bad_lexical_cast&  ex) {
     // pass it up
@@ -1075,12 +1049,11 @@ bool TDMap::set_nm_upper_bound( std::string s_upper_bound ){
   bool result = false;
   try {
     const double upper_bound = boost::lexical_cast<double>( s_upper_bound );
-    const bool imagecrystal_result =  _core_image_crystal_ptr->set_nm_upper_bound( upper_bound );
     const bool celslc_result = _tdmap_celslc_parameters->set_nm_upper_bound( upper_bound );
     const bool msa_result = _tdmap_msa_parameters->set_nm_upper_bound( upper_bound );
     const bool wavimg_result =  _tdmap_wavimg_parameters->set_nm_upper_bound( upper_bound );
     const bool simgrid_result = _td_map_simgrid->set_nm_upper_bound( upper_bound );
-    result = imagecrystal_result & celslc_result & msa_result & wavimg_result & simgrid_result;
+    result = celslc_result & msa_result & wavimg_result & simgrid_result;
   }
   catch(boost::bad_lexical_cast&  ex) {
     // pass it up
@@ -1110,12 +1083,11 @@ bool TDMap::set_defocus_samples( std::string s_samples ){
   bool result = false;
   try {
     const int samples = boost::lexical_cast<int>( s_samples );
-    const bool imagecrystal_result =  _core_image_crystal_ptr->set_defocus_samples( samples );
     const bool celslc_result = _tdmap_celslc_parameters->set_defocus_samples( samples );
     const bool msa_result = _tdmap_msa_parameters->set_defocus_samples( samples );
     const bool wavimg_result =  _tdmap_wavimg_parameters->set_defocus_samples( samples );
     const bool simgrid_result = _td_map_simgrid->set_defocus_samples( samples );
-    result = imagecrystal_result & celslc_result & msa_result & wavimg_result & simgrid_result;
+    result = celslc_result & msa_result & wavimg_result & simgrid_result;
   }
   catch(boost::bad_lexical_cast&  ex) {
     // pass it up
@@ -1128,12 +1100,11 @@ bool TDMap::set_defocus_lower_bound( std::string l_upper_bound ){
   bool result = false;
   try {
     const double lower_bound = boost::lexical_cast<double>( l_upper_bound );
-    const bool imagecrystal_result =  _core_image_crystal_ptr->set_defocus_lower_bound( lower_bound );
     const bool celslc_result = _tdmap_celslc_parameters->set_defocus_lower_bound( lower_bound );
     const bool msa_result = _tdmap_msa_parameters->set_defocus_lower_bound( lower_bound );
     const bool wavimg_result =  _tdmap_wavimg_parameters->set_defocus_lower_bound( lower_bound );
     const bool simgrid_result = _td_map_simgrid->set_defocus_lower_bound( lower_bound );
-    result = imagecrystal_result & celslc_result & msa_result & wavimg_result & simgrid_result;
+    result = celslc_result & msa_result & wavimg_result & simgrid_result;
   }
   catch(boost::bad_lexical_cast&  ex) {
     // pass it up
@@ -1146,12 +1117,11 @@ bool TDMap::set_defocus_upper_bound( std::string s_upper_bound ){
   bool result = false;
   try {
     const double upper_bound = boost::lexical_cast<double>( s_upper_bound );
-    const bool imagecrystal_result =  _core_image_crystal_ptr->set_defocus_upper_bound( upper_bound );
     const bool celslc_result = _tdmap_celslc_parameters->set_defocus_upper_bound( upper_bound );
     const bool msa_result = _tdmap_msa_parameters->set_defocus_upper_bound( upper_bound );
     const bool wavimg_result =  _tdmap_wavimg_parameters->set_defocus_upper_bound( upper_bound );
     const bool simgrid_result = _td_map_simgrid->set_defocus_upper_bound( upper_bound );
-    result = imagecrystal_result & celslc_result & msa_result & wavimg_result & simgrid_result;
+    result = celslc_result & msa_result & wavimg_result & simgrid_result;
   }
   catch(boost::bad_lexical_cast&  ex) {
     // pass it up
@@ -1239,4 +1209,30 @@ bool TDMap::set_run_wavimg_switch( bool value ){
 bool TDMap::set_run_simgrid_switch( bool value ){
   _run_simgrid_switch = value;
   return true;
+}
+
+/* gui flag getters */
+bool TDMap::get_exp_image_properties_flag_full_image(){
+  return  _td_map_simgrid->get_exp_image_properties_flag_full_image();
+}
+
+bool TDMap::get_exp_image_properties_flag_roi_image(){
+  return  _td_map_simgrid->get_exp_image_properties_flag_roi_image();
+}
+
+bool TDMap::get_exp_image_properties_flag_roi_rectangle(){
+  return  _td_map_simgrid->get_exp_image_properties_flag_roi_rectangle();
+}
+
+/* gui getters */
+cv::Mat TDMap::get_exp_image_properties_full_image(){
+  return _td_map_simgrid->get_exp_image_properties_full_image();
+}
+
+cv::Mat TDMap::get_exp_image_properties_roi_image(){
+  return  _td_map_simgrid->get_exp_image_properties_roi_image();
+}
+
+cv::Rect TDMap::get_exp_image_properties_roi_rectangle(){
+  return  _td_map_simgrid->get_exp_image_properties_roi_rectangle();
 }

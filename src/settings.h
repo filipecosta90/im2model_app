@@ -25,7 +25,6 @@
 #include <boost/filesystem.hpp>
 /** END BOOST **/
 
-#include "image_crystal.hpp"
 #include "td_map.hpp"
 #include "treemodel.h"
 #include "treeitem.h"
@@ -88,5 +87,3 @@ class Settings : public QDialog
 };
 
 #endif // SETTINGS_H
-
-

@@ -27,7 +27,6 @@
 
 /** END BOOST **/
 
-#include "image_crystal.hpp"
 #include "td_map.hpp"
 #include "super_cell.hpp"
 #include "treemodel.h"
@@ -66,7 +65,6 @@ class MainWindow : public QMainWindow {
     ~MainWindow();
 
     bool checkSettings();
-    boost::process::ipstream _sim_image_crystal_ostream_buffer;
     boost::process::ipstream _sim_tdmap_celslc_ostream_buffer;
     boost::process::ipstream _sim_tdmap_msa_ostream_buffer;
     boost::process::ipstream _sim_tdmap_wavimg_ostream_buffer;
@@ -151,7 +149,6 @@ signals:
 
     QString curFile;
     Ui::MainWindow *ui;
-    Image_Crystal *_core_image_crystal;
     TDMap *_core_td_map;
     Super_Cell *_core_super_cell;
 

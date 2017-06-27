@@ -14,8 +14,6 @@
   celslc_prm.hpp
   simgrid.hpp
   symbcalc.hpp
-  structure.hpp
-  image_crystal.hpp
   td_map.hpp
   global_def.hpp
   base_crystal.hpp
@@ -32,8 +30,6 @@
   celslc_prm.cpp
   super_cell.cpp
   wavimg_prm.cpp
-  structure.cpp
-  image_crystal.cpp
   td_map.cpp
   base_crystal.cpp
   base_image.cpp

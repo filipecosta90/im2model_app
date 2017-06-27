@@ -29,11 +29,16 @@
 class BaseImage {
   private:
 
-    bool _flag_auto_n_rows = true;
-    bool _flag_auto_n_cols = true;
+    bool _flag_auto_n_rows = false;
+    bool _flag_auto_n_cols = false;
+    bool _flag_auto_a_size = false;
+    bool _flag_auto_b_size = false;
 
-    bool calculate_n_rows_from_size_and_sampling_rate();
-    bool calculate_n_cols_from_size_and_sampling_rate();
+bool auto_calculate_dimensions();
+    bool calculate_n_rows_from_a_size_and_sampling_rate();
+    bool calculate_a_size_from_n_rows_and_sampling_rate();
+    bool calculate_n_cols_from_b_size_and_sampling_rate();
+    bool calculate_b_size_from_n_cols_and_sampling_rate();
 
     /* Loggers */
     ApplicationLog::ApplicationLog* logger = nullptr;
@@ -49,24 +54,25 @@ class BaseImage {
     int full_n_cols_width = 0;
     bool _flag_full_n_cols_width = false;
 
-        double sampling_rate_x_nm_per_pixel = 0.0f;
-        double sampling_rate_y_nm_per_pixel = 0.0f;
-        bool _flag_sampling_rate_x_nm_per_pixel = false;
-        bool _flag_sampling_rate_y_nm_per_pixel = false;
-        bool _flag_sampling_rate = false;
+// sampling rate and dimensioning
+    double sampling_rate_x_nm_per_pixel = 0.0f;
+    bool _flag_sampling_rate_x_nm_per_pixel = false;
+    double sampling_rate_y_nm_per_pixel = 0.0f;
+    bool _flag_sampling_rate_y_nm_per_pixel = false;
+    bool _flag_sampling_rate = false;
 
-        // [nm dimensions]
-        double nm_size_rows_a;
-        bool _flag_nm_size_rows_a = false;
-        double nm_size_cols_b;
-        bool _flag_nm_size_cols_b = false;
+    // [nm dimensions]
+    double nm_size_rows_a = 0.0f;
+    bool _flag_nm_size_rows_a = false;
+    double nm_size_cols_b = 0.0f;
+    bool _flag_nm_size_cols_b = false;
 
     // ROI FRAME
     cv::Mat roi_image;
     bool _flag_roi_image = false;
 
     cv::Rect roi_rectangle;
-    bool _flag_roi_defined = false;
+    bool _flag_roi_rectangle = false;
     int roi_n_rows_height = 0;
     bool _flag_roi_n_rows_height = false;
     int roi_n_cols_width = 0;
@@ -96,7 +102,7 @@ class BaseImage {
 
     // ROI FRAME
     bool get_flag_roi_image(){ return _flag_roi_image; }
-    bool get_flag_roi_defined (){ return _flag_roi_defined; }
+    bool get_flag_roi_rectangle (){ return _flag_roi_rectangle; }
     bool get_flag_roi_n_rows_height (){ return _flag_roi_n_rows_height; }
     bool get_flag_roi_n_cols_width (){ return _flag_roi_n_cols_width; }
     bool get_flag_roi_center_x (){ return _flag_roi_center_x; }
@@ -127,12 +133,18 @@ class BaseImage {
     ApplicationLog::ApplicationLog* get_logger(){ return logger; }
 
     /** setters **/
+    bool set_flag_auto_n_rows( bool value );
+    bool set_flag_auto_n_cols( bool value );
+    bool set_flag_auto_a_size( bool value );
+    bool set_flag_auto_b_size( bool value );
     // full frame
     bool set_full_image( std::string path );
     bool set_full_n_rows_height(  int full_n_rows_height );
     bool set_full_n_cols_width( int full_n_cols_width );
     bool set_sampling_rate_x_nm_per_pixel( double );
     bool set_sampling_rate_y_nm_per_pixel( double );
+    bool set_nm_size_rows_a( double size );
+    bool set_nm_size_cols_b( double size );
     // ROI FRAME
     void set_roi();
     bool set_roi_n_rows_height( int roi_n_rows_height );

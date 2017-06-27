@@ -22,9 +22,9 @@ bool WAVIMG_prm::produce_prm ( ) {
     input_prefix_stream << "'" << file_name_input_wave_function << "_sl.wav"<< "'";
     outfile  << input_prefix_stream.str() << "\t\t! Wave function file name string used to locate existing wave functions. Use quotation marks to secure the input including space characters." << std::endl;
     // line 2
-    outfile <<  nx_size_height << ", " <<  ny_size_width << "\t\t! Dimension of the wave data in pixels, <nx> = number of horizontal wave pixels, <ny>  = number of vertical wave pixels." << std::endl;
+    outfile <<  full_n_rows_height << ", " <<  full_n_cols_width << "\t\t! Dimension of the wave data in pixels, <nx> = number of horizontal wave pixels, <ny>  = number of vertical wave pixels." << std::endl;
     // line 3
-    outfile  << sampling_rate_experimental_x_nm_per_pixel << ", " << sampling_rate_experimental_y_nm_per_pixel << "\t\t! Sampling rate of the wave data (<sx> = horizontal, <sy> = vertical) [nm/pix]." << std::endl;
+    outfile  << sampling_rate_x_nm_per_pixel << ", " << sampling_rate_y_nm_per_pixel << "\t\t! Sampling rate of the wave data (<sx> = horizontal, <sy> = vertical) [nm/pix]." << std::endl;
     // line 4
     outfile <<  ht_accelaration_voltage << "\t\t! TEM high-tension as used for wave function calculation [kV]." << std::endl;
     // line 5
@@ -37,13 +37,13 @@ bool WAVIMG_prm::produce_prm ( ) {
     output_prefix_stream << "'" << file_name_output_image_wave_function << ".dat" << "'";
     outfile <<  output_prefix_stream.str() << "\t\t! Image output file name string. Use quotation marks to secure the input including space characters." << std::endl;
     // line 7
-    outfile <<  ny_size_width << ", " << nx_size_height << "\t\t! Image output size (<ix> = horizontal , <iy> = vertical) in number of pixels." << std::endl;
+    outfile <<  full_n_rows_height << ", " << full_n_cols_width << "\t\t! Image output size (<ix> = horizontal , <iy> = vertical) in number of pixels." << std::endl;
     // line 8
     outfile <<  image_data_type << ", " << image_vacuum_mean_intensity << ", " << conversion_rate << ", " <<  readout_noise_rms_amplitude << "\t\t! Flag and parameters for creating integer images with optional noise. Flag <intflg> 0 = off (default)" << std::endl;
     // line 9
     outfile <<  switch_option_extract_particular_image_frame << "\t! Flag activating the extraction of a special image frame (0=OFF, 1=ON)." << std::endl;
     // line 10
-    outfile <<  sampling_rate_experimental_x_nm_per_pixel << "\t! Image output sampling rate [nm/pix], isotropic. The parameter is used only if the Flag in line 09 is set to 1." << std::endl;
+    outfile <<  sampling_rate_x_nm_per_pixel << "\t! Image output sampling rate [nm/pix], isotropic. The parameter is used only if the Flag in line 09 is set to 1." << std::endl;
     // line 11
     outfile <<  image_frame_offset_x_pixels_input_wave_function << ", " << image_frame_offset_y_pixels_input_wave_function << " !" << std::endl;
     // line 12

@@ -10,6 +10,11 @@ SimGrid::SimGrid( boost::process::ipstream& async_io_buffer_out ) : BaseCrystal 
   thickness_matrix_file_name = "thickness_matrix.csv";
   match_factor_matrix_file_name = "match_factor_matrix.csv";
 
+  exp_image_properties.set_flag_auto_a_size( true );
+  exp_image_properties.set_flag_auto_b_size( true );
+  sim_image_properties.set_flag_auto_n_rows(true);
+  sim_image_properties.set_flag_auto_n_cols(true);
+
 }
 
 bool SimGrid::set_exp_image_properties_full_image( std::string path ){
@@ -30,6 +35,42 @@ bool SimGrid::set_exp_image_properties_roi_center_x( int center_x ){
 
 bool SimGrid::set_exp_image_properties_roi_center_y( int center_y ){
   return exp_image_properties.set_roi_center_y(center_y);
+}
+
+bool SimGrid::set_exp_image_sampling_rate_x_nm_per_pixel( double sampling ){
+  return exp_image_properties.set_sampling_rate_x_nm_per_pixel( sampling );
+}
+
+bool SimGrid::set_exp_image_sampling_rate_y_nm_per_pixel( double sampling ){
+  return exp_image_properties.set_sampling_rate_y_nm_per_pixel( sampling );
+}
+
+bool SimGrid::set_super_cell_size_a( double size ){
+  const bool sim_result = sim_image_properties.set_nm_size_rows_a( size );
+  const bool crystal_result = BaseCrystal::set_super_cell_size_a( size );
+  const bool result = sim_result & crystal_result;
+  return result;
+}
+
+bool SimGrid::set_super_cell_size_b( double size ){
+  const bool sim_result = sim_image_properties.set_nm_size_cols_b( size );
+  const bool crystal_result = BaseCrystal::set_super_cell_size_b( size );
+  const bool result = sim_result & crystal_result;
+  return result;
+}
+
+bool SimGrid::set_sampling_rate_x_nm_per_pixel( double rate ){
+  const bool exp_result = exp_image_properties.set_sampling_rate_x_nm_per_pixel( rate );
+  const bool sim_result = sim_image_properties.set_sampling_rate_x_nm_per_pixel( rate );
+  const bool result = exp_result & sim_result;
+  return result;
+}
+
+bool SimGrid::set_sampling_rate_y_nm_per_pixel( double rate ){
+  const bool exp_result = exp_image_properties.set_sampling_rate_y_nm_per_pixel( rate );
+  const bool sim_result = sim_image_properties.set_sampling_rate_y_nm_per_pixel( rate );
+  const bool result = exp_result & sim_result;
+  return result;
 }
 
 bool SimGrid::setup_image_properties(){
@@ -67,6 +108,30 @@ bool SimGrid::setup_image_properties(){
 
 bool SimGrid::get_flag_simulated_images_grid(){
   return runned_simulation;
+}
+
+cv::Mat SimGrid::get_exp_image_properties_full_image(){
+  return exp_image_properties.get_full_image();
+}
+
+cv::Mat SimGrid::get_exp_image_properties_roi_image(){
+  return exp_image_properties.get_roi_image();
+}
+
+cv::Rect SimGrid::get_exp_image_properties_roi_rectangle(){
+  return exp_image_properties.get_roi_rectangle();
+}
+
+bool SimGrid::get_exp_image_properties_flag_full_image(){
+  return exp_image_properties.get_flag_full_image();
+
+}
+bool SimGrid::get_exp_image_properties_flag_roi_image(){
+  return exp_image_properties.get_flag_roi_image();
+}
+
+bool SimGrid::get_exp_image_properties_flag_roi_rectangle(){
+  return exp_image_properties.get_flag_roi_rectangle();
 }
 
 bool SimGrid::export_sim_grid( std::string sim_grid_file_name_image ){
@@ -673,6 +738,7 @@ void SimGrid::set_wavimg_var( WAVIMG_prm *wavimg_var ){
 /* Loggers */
 bool SimGrid::set_application_logger( ApplicationLog::ApplicationLog* app_logger ){
   logger = app_logger;
+  BaseCrystal::set_application_logger( app_logger );
   _flag_logger = true;
   logger->logEvent( ApplicationLog::notification, "Application logger setted for SimGrid class." );
   return true;

@@ -112,6 +112,20 @@ class SimGrid : public BaseCrystal {
     bool set_exp_image_properties_roi_n_cols_width( int ncols );
     bool set_exp_image_properties_roi_center_x( int center_x );
     bool set_exp_image_properties_roi_center_y( int center_y );
+    bool set_exp_image_sampling_rate_x_nm_per_pixel( double sampling );
+    bool set_exp_image_sampling_rate_y_nm_per_pixel( double sampling );
+    bool set_super_cell_size_a( double size );
+    bool set_super_cell_size_b( double size );
+    bool set_sampling_rate_x_nm_per_pixel( double rate );
+    bool set_sampling_rate_y_nm_per_pixel( double rate );
+
+
+    cv::Mat get_exp_image_properties_full_image();
+    cv::Mat get_exp_image_properties_roi_image();
+    cv::Rect get_exp_image_properties_roi_rectangle();
+    bool get_exp_image_properties_flag_full_image();
+    bool get_exp_image_properties_flag_roi_image();
+    bool get_exp_image_properties_flag_roi_rectangle();
 
     /** getters **/
     // flag getters

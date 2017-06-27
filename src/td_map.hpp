@@ -18,35 +18,11 @@
 #include "msa_prm.hpp"
 #include "wavimg_prm.hpp"
 #include "simgrid.hpp"
-#include "image_crystal.hpp"
 #include "group_options.h"
 
 class TDMap  : public QObject {
   Q_OBJECT
   private:
-
-    /////////////////////////
-    // Im2Model core pointers
-    /////////////////////////
-    Image_Crystal *_core_image_crystal_ptr;
-
-    /////////////////////////
-    // Simulated vs Experimental Image info
-    /////////////////////////
-    bool simulated_image_needs_reshape = false;
-    double reshape_factor_from_supper_cell_to_experimental_x = 1.0f;
-    double reshape_factor_from_supper_cell_to_experimental_y = 1.0f;
-    double max_scale_diff = 0.0005f;
-    double diff_super_cell_and_simulated_x;
-    double diff_super_cell_and_simulated_y;
-    // rectangle without the ignored edge pixels of the simulated image
-    cv::Rect ignore_edge_pixels_rectangle;
-    int _ignore_edge_pixels_sim_images;
-
-    int initial_simulated_image_width;
-    int initial_simulated_image_height;
-    int reshaped_simulated_image_width;
-    int reshaped_simulated_image_height;
 
     int image_correlation_matching_method = CV_TM_CCOEFF_NORMED;
     bool _flag_image_correlation_matching_method = true;
@@ -116,15 +92,14 @@ class TDMap  : public QObject {
     TDMap( boost::process::ipstream& ostream_celslc_buffer,
         boost::process::ipstream& ostream_msa_buffer,
         boost::process::ipstream& ostream_wavimg_buffer,
-        boost::process::ipstream& ostream_simgrid_buffer,
-        Image_Crystal *image_crystal_ptr );
+        boost::process::ipstream& ostream_simgrid_buffer );
 
     /* constructor with logger */
     TDMap( boost::process::ipstream& ostream_celslc_buffer,
         boost::process::ipstream& ostream_msa_buffer,
         boost::process::ipstream& ostream_wavimg_buffer,
         boost::process::ipstream& ostream_simgrid_buffer,
-        Image_Crystal* image_crystal_ptr , ApplicationLog::ApplicationLog* app_logger );
+        ApplicationLog::ApplicationLog* app_logger );
     /** others **/
 
     bool export_sim_grid( std::string sim_grid_file_name_image );
@@ -167,7 +142,7 @@ class TDMap  : public QObject {
     bool get_spherical_aberration_switch();
     bool get_mtf_switch( );
 
-// gui flag getters
+    // gui flag getters
     bool get_flag_celslc_io_ap_pipe_out();
     bool get_flag_msa_io_ap_pipe_out();
     bool get_flag_wavimg_io_ap_pipe_out();
@@ -204,6 +179,8 @@ class TDMap  : public QObject {
     /** setters **/
     // class setters
     bool set_exp_image_properties_full_image( std::string path );
+    bool set_exp_image_properties_sampling_rate_x_nm_per_pixel( std::string sampling_x );
+    bool set_exp_image_properties_sampling_rate_y_nm_per_pixel( std::string sampling_y );
     bool set_exp_image_properties_roi_center_x( std::string s_center_x );
     bool set_exp_image_properties_roi_center_y( std::string s_center_y );
     bool set_slc_file_name_prefix( std::string );
@@ -218,14 +195,11 @@ class TDMap  : public QObject {
     bool set_base_dir_path( boost::filesystem::path path );
     bool set_application_logger( ApplicationLog::ApplicationLog* app_logger );
     void set_group_options( group_options* celslc_step, group_options* msa_step, group_options* wavimg_step, group_options* simgrid_step );
-    bool set_core_image_crystal_ptr( Image_Crystal* image_crystal_ptr );
     bool set_dr_probe_celslc_execname( std::string celslc_execname );
     bool set_dr_probe_msa_execname( std::string msa_execname );
     bool set_dr_probe_wavimg_execname( std::string wavimg_execname );
 
-// gui setters
-    bool set_sampling_rate_experimental_x_nm_per_pixel( std::string sampling_x );
-    bool set_sampling_rate_experimental_y_nm_per_pixel( std::string sampling_y );
+    // gui setters
     bool set_ny_size_width( std::string );
     bool set_nx_size_height( std::string );
     bool set_unit_cell_cif_path( std::string cif_path );
@@ -257,6 +231,15 @@ class TDMap  : public QObject {
     bool set_run_msa_switch( bool value );
     bool set_run_wavimg_switch( bool value );
     bool set_run_simgrid_switch( bool value );
+
+    /* gui flag getters */
+    bool get_exp_image_properties_flag_full_image();
+    bool get_exp_image_properties_flag_roi_image();
+    bool get_exp_image_properties_flag_roi_rectangle();
+    /* gui getters */
+    cv::Mat get_exp_image_properties_full_image();
+    cv::Mat get_exp_image_properties_roi_image();
+    cv::Rect get_exp_image_properties_roi_rectangle();
 
 signals:
     void TDMap_started_celslc( );

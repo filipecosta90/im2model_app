@@ -33,15 +33,13 @@ Super_Cell::Super_Cell( Unit_Cell* cell ) {
   update_unit_cell_parameters();
 }
 
-Super_Cell::Super_Cell( Image_Crystal* image_crystal_ptr, TDMap* tdmap_ptr ) : Super_Cell() {
-  _core_image_crystal_ptr = image_crystal_ptr;
+Super_Cell::Super_Cell( TDMap* tdmap_ptr ) : Super_Cell() {
   _core_tdmap_ptr = tdmap_ptr;
 }
 
 bool Super_Cell::set_exp_image_properties_full_image( std::string path ){
   return exp_image_properties.set_full_image(path);
 }
-
 
 bool Super_Cell::set_hysteresis_threshold( int threshold ){
   _hysteresis_threshold = threshold;
@@ -99,9 +97,7 @@ bool Super_Cell::_is_experimental_image_boundary_polygon_rect_defined(){
 
 bool Super_Cell::_is_experimental_image_boundary_polygon_w_margin_rect_defined(){
   return _flag_experimental_image_boundary_rectangle_w_margin;
-
 }
-
 
 cv::Rect Super_Cell::get_experimental_image_boundary_polygon_rect(){
   return _experimental_image_boundary_rectangle;
@@ -244,20 +240,6 @@ bool Super_Cell::set_sampling_rate_super_cell_x_nm_pixel( double sampling_rate )
   _sampling_rate_super_cell_x_nm_pixel = sampling_rate;
   _flag_sampling_rate_super_cell_x_nm_pixel = true;
   return true;
-}
-
-bool Super_Cell::_is_sampling_rate_super_cell_x_nm_pixel_defined(){
-  return _flag_sampling_rate_super_cell_x_nm_pixel;
-}
-
-bool Super_Cell::set_sampling_rate_super_cell_y_nm_pixel( double sampling_rate ){
-  _sampling_rate_super_cell_y_nm_pixel = sampling_rate;
-  _flag_sampling_rate_super_cell_y_nm_pixel = true;
-  return true;
-}
-
-bool Super_Cell::_is_sampling_rate_super_cell_y_nm_pixel_defined(){
-  return _flag_sampling_rate_super_cell_y_nm_pixel;
 }
 
 void Super_Cell::set_simgrid_best_match_thickness_nm( double thickness ){
@@ -649,61 +631,10 @@ bool Super_Cell::update_unit_cell_parameters(){
   return true;
 }
 
-bool Super_Cell::update_roi_center_from_image_crystal(){
-  bool result = false;
-  if ( _core_image_crystal_ptr ){
-    if( _core_image_crystal_ptr->_is_roi_defined() ){
-      roi_center = _core_image_crystal_ptr->get_roi_center();
-      _flag_roi_center = true;
-      result = true;
-    }
-  }
-  return result;
-}
-
-bool Super_Cell::update_raw_experimental_image_from_image_crystal(){
-  bool result = false;
-  if ( _core_image_crystal_ptr ){
-    if( _core_image_crystal_ptr->_is_experimental_image_full_defined() ){
-      cv::Mat temp_raw = _core_image_crystal_ptr->get_full_experimental_image_mat();
-      _flag_roi_center = set_full_raw_experimental_image( temp_raw );
-      result = _flag_roi_center;
-    }
-  }
-  return result;
-}
-
-bool Super_Cell::update_sampling_rate_super_cell_x_nm_pixel_from_image_crystal(){
-  bool result = false;
-  if ( _core_image_crystal_ptr ){
-    if( _core_image_crystal_ptr->get_flag_sampling_rate_experimental_x_nm_per_pixel() ){
-      const double temp_sampling_rate = _core_image_crystal_ptr->get_sampling_rate_experimental_x_nm_per_pixel();
-      _flag_sampling_rate_super_cell_x_nm_pixel = set_sampling_rate_super_cell_x_nm_pixel( temp_sampling_rate );
-      result = _flag_sampling_rate_super_cell_x_nm_pixel;
-    }
-  }
-  return result;
-}
-
-bool Super_Cell::update_sampling_rate_super_cell_y_nm_pixel_from_image_crystal(){
-  bool result = false;
-  if ( _core_image_crystal_ptr ){
-    if( _core_image_crystal_ptr->get_flag_sampling_rate_experimental_y_nm_per_pixel() ){
-      const double temp_sampling_rate = _core_image_crystal_ptr->get_sampling_rate_experimental_y_nm_per_pixel();
-      _flag_sampling_rate_super_cell_x_nm_pixel = set_sampling_rate_super_cell_y_nm_pixel( temp_sampling_rate );
-      result = _flag_sampling_rate_super_cell_y_nm_pixel;
-    }
-  }
-  return result;
-}
 
 bool Super_Cell::calculate_supercell_boundaries_from_experimental_image(){
   bool result = false;
   /* general assertions */
-  update_raw_experimental_image_from_image_crystal();
-  update_roi_center_from_image_crystal();
-  update_sampling_rate_super_cell_x_nm_pixel_from_image_crystal();
-  update_sampling_rate_super_cell_y_nm_pixel_from_image_crystal();
 
   if( _flag_raw_experimental_image &&
       _flag_sampling_rate_super_cell_x_nm_pixel &&
@@ -1351,7 +1282,6 @@ void Super_Cell::calculate_atomic_columns_position_w_boundary_polygon(){
   for( std::vector<cv::KeyPoint>::iterator _keypoint = _experimental_image_keypoints.begin(); _keypoint != _experimental_image_keypoints.end() ; _keypoint++ ){
     cv::Point2f p = _keypoint->pt;
     const double _keypoint_diameter = _keypoint->size;
-    const double _keypoint_radius_px = _keypoint_diameter * 0.5f;
     const double _keypoint_radius_nm = _keypoint_diameter * 0.5f * _sampling_rate_super_cell_x_nm_pixel;
     /*const double _keypoint_area_px = ( pow ( _keypoint_radius_px , _keypoint_radius_px ) )  * M_PI;
       const double _keypoint_area_nm = _keypoint_area_px * _sampling_rate_super_cell_x_nm_pixel;

@@ -51,16 +51,14 @@ MainWindow::MainWindow( ApplicationLog::ApplicationLog* logger , QWidget *parent
     }
   }
   else{
-    _core_image_crystal = new Image_Crystal( _sim_image_crystal_ostream_buffer );
 
     _core_td_map = new TDMap(
         _sim_tdmap_celslc_ostream_buffer,
         _sim_tdmap_msa_ostream_buffer,
         _sim_tdmap_wavimg_ostream_buffer,
-        _sim_tdmap_simgrid_ostream_buffer,
-        _core_image_crystal );
+        _sim_tdmap_simgrid_ostream_buffer );
 
-    _core_super_cell = new Super_Cell( _core_image_crystal, _core_td_map );
+    _core_super_cell = new Super_Cell( _core_td_map );
 
     celslc_step_group_options = new group_options("celslc_step");
     msa_step_group_options = new group_options("msa_step");
@@ -392,23 +390,25 @@ void MainWindow::update_super_cell_target_region_shapes(){
 }
 
 void MainWindow::update_full_experimental_image(){
-  cv::Mat full_image = _core_image_crystal->get_full_experimental_image_mat();
+  if( _core_td_map->get_exp_image_properties_flag_full_image() ){
+  cv::Mat full_image = _core_td_map->get_exp_image_properties_full_image();
   ui->qgraphics_full_experimental_image->setImage( full_image );
   ui->qgraphics_full_experimental_image->show();
   update_roi_experimental_image_frame();
 }
+}
 
 void MainWindow::update_roi_experimental_image_frame(){
-  if( _core_image_crystal->_is_roi_defined() ){
-    cv::Mat roi_image = _core_image_crystal->get_roi_experimental_image_mat();
+  if( _core_td_map->get_exp_image_properties_flag_roi_image() ){
+    cv::Mat roi_image = _core_td_map->get_exp_image_properties_roi_image();
     ui->qgraphics_roi_experimental_image->setImage( roi_image );
     ui->qgraphics_roi_experimental_image->show();
   }
 }
 
 void MainWindow::update_roi_full_experimental_image_frame(){
-  if( _core_image_crystal->_is_roi_defined() ){
-    cv::Rect _roi_rect = _core_image_crystal->get_roi_rectangle();
+  if( _core_td_map->get_exp_image_properties_flag_roi_rectangle() ){
+    cv::Rect _roi_rect = _core_td_map->get_exp_image_properties_roi_rectangle();
     ui->qgraphics_full_experimental_image->cleanRenderAreas();
     ui->qgraphics_full_experimental_image->addShapeRect( _roi_rect, 10 , tr("ROI boundary") );
     ui->qgraphics_full_experimental_image->show();
@@ -1024,10 +1024,10 @@ void MainWindow::create_box_options(){
   QVector<QVariant> box1_option_2 = {"Sampling (nm/pixel)",""};
   QVector<QVariant> box1_option_2_1 = {"x",""};
   QVector<bool> box1_option_2_1_edit = {false,true};
-  boost::function<bool(std::string)> box1_function_2_1 ( boost::bind( &TDMap::set_sampling_rate_experimental_x_nm_per_pixel,_core_td_map, _1 ) );
+  boost::function<bool(std::string)> box1_function_2_1 ( boost::bind( &TDMap::set_exp_image_properties_sampling_rate_x_nm_per_pixel,_core_td_map, _1 ) );
   QVector<QVariant> box1_option_2_2 = {"y",""};
   QVector<bool> box1_option_2_2_edit = {false,true};
-  boost::function<bool(std::string)> box1_function_2_2 ( boost::bind( &TDMap::set_sampling_rate_experimental_y_nm_per_pixel,_core_td_map, _1 ) );
+  boost::function<bool(std::string)> box1_function_2_2 ( boost::bind( &TDMap::set_exp_image_properties_sampling_rate_y_nm_per_pixel,_core_td_map, _1 ) );
 
   TreeItem* experimental_sampling_rate = new TreeItem ( box1_option_2  );
   TreeItem* experimental_sampling_rate_x = new TreeItem ( box1_option_2_1 , box1_function_2_1, box1_option_2_1_edit );
