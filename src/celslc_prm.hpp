@@ -67,6 +67,7 @@ class CELSLC_prm : public BaseCrystal, public BaseImage {
 
   public:
 
+    virtual std::ostream& create_bin_args(std::ostream& stream) const;
     /** getters **/
     // flag getters
     bool get_flag_logger(){ return _flag_logger; }
@@ -76,6 +77,7 @@ class CELSLC_prm : public BaseCrystal, public BaseImage {
     CELSLC_prm( boost::process::ipstream& async_io_buffer_out );
 
     void set_cel_file( std::string super_cell_cel_file );
+
 
     void set_dwf_switch( bool dwf_switch );
 
@@ -95,8 +97,12 @@ class CELSLC_prm : public BaseCrystal, public BaseImage {
 
     bool call_bin_ssc();
 
+    bool set_super_cell_size_a( double size );
+    bool set_super_cell_size_b( double size );
     /* Loggers */
     bool set_application_logger( ApplicationLog::ApplicationLog* logger );
+    void print_var_state();
+
 
 };
 

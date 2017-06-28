@@ -256,6 +256,11 @@ bool SimGrid::export_sim_grid( std::string sim_grid_file_name_image ){
   return result;
 }
 
+bool SimGrid::base_cystal_clean_for_re_run(){
+  const bool cleanun_result = BaseCrystal::clean_for_re_run();
+  return cleanun_result;
+}
+
 bool SimGrid::produce_png_from_dat_file(){
   /*
      for (int thickness = 1; thickness <= slice_samples; thickness ++ ){

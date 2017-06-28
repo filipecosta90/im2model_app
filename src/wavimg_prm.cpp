@@ -3,12 +3,22 @@
 static const std::string DAT_EXTENSION = ".dat";
 
 WAVIMG_prm::WAVIMG_prm( boost::process::ipstream &async_io_buffer_out ) : BaseCrystal ( async_io_buffer_out ) {
+  BaseImage::set_flag_auto_n_rows(true);
+  BaseImage::set_flag_auto_n_cols(true);
 }
 
 bool WAVIMG_prm::produce_prm ( ) {
   bool result = false;
-  if ( _flag_prm_filename ){
-
+  if(
+      // prm
+      _flag_prm_filename &&
+      // BaseCrystal vars
+      _flag_base_dir_path &&
+      _flag_full_n_rows_height  &&
+      _flag_full_n_cols_width &&
+      _flag_ht_accelaration_voltage
+    )
+  {
     boost::filesystem::path dir ( base_dir_path );
     boost::filesystem::path file ( prm_filename );
     boost::filesystem::path full_path = dir / file;
@@ -110,6 +120,14 @@ bool WAVIMG_prm::produce_prm ( ) {
     prm_filename_path = boost::filesystem::canonical( full_path ).string();
     _flag_prm_filename_path = _flag_produced_prm;
     result = _flag_produced_prm;
+  }
+  else{
+    if( _flag_logger ){
+      std::stringstream message;
+      message << "The required vars for produce_prm() are not setted up.";
+      logger->logEvent( ApplicationLog::error , message.str() );
+    }
+    print_var_state();
   }
   return result;
 }
@@ -367,6 +385,11 @@ bool WAVIMG_prm::clean_for_re_run(){
   loop_range_n.clear();
   loop_string_indentifier.clear();
   number_parameter_loops = 0;
+  return cleanun_result;
+}
+
+bool WAVIMG_prm::base_cystal_clean_for_re_run(){
+  const bool cleanun_result = BaseCrystal::clean_for_re_run();
   return cleanun_result;
 }
 
@@ -667,11 +690,52 @@ bool WAVIMG_prm::get_flag_produced_prm(){
   return _flag_produced_prm;
 }
 
+bool WAVIMG_prm::set_super_cell_size_a( double size ){
+  const bool sim_result = BaseImage::set_full_nm_size_rows_a( size );
+  const bool crystal_result = BaseCrystal::set_super_cell_size_a( size );
+  const bool result = sim_result & crystal_result;
+  return result;
+}
+
+bool WAVIMG_prm::set_super_cell_size_b( double size ){
+  const bool sim_result = BaseImage::set_full_nm_size_cols_b( size );
+  const bool crystal_result = BaseCrystal::set_super_cell_size_b( size );
+  const bool result = sim_result & crystal_result;
+  return result;
+}
 
 /* Loggers */
 bool WAVIMG_prm::set_application_logger( ApplicationLog::ApplicationLog* app_logger ){
   logger = app_logger;
   _flag_logger = true;
+  BaseCrystal::set_application_logger( app_logger );
+  BaseImage::set_application_logger( app_logger );
   logger->logEvent( ApplicationLog::notification, "Application logger setted for WAVIMG_prm class." );
   return true;
+}
+
+void WAVIMG_prm::print_var_state(){
+  if( _flag_logger ){
+    std::stringstream message;
+    output( message );
+    logger->logEvent( ApplicationLog::notification , message.str() );
+  }
+}
+
+std::ostream& operator<<(std::ostream& stream, const WAVIMG_prm::WAVIMG_prm& var) {
+  var.output(stream);
+  return stream;
+}
+
+std::ostream& WAVIMG_prm::output(std::ostream& stream) const {
+
+  stream << "WAVIMG_prm vars:\n"
+    << "\t" << "file_name_input_wave_function : " << file_name_input_wave_function << "\n"
+    // more vars here
+    // ...
+    << "\t" << "BaseCrystal Properties : " << "\n";
+  BaseCrystal::output(stream);
+  stream <<  "\t" << "BaseImage Properties : " << "\n";
+  BaseImage::output(stream);
+  return stream;
 }

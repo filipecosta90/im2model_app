@@ -79,7 +79,7 @@ class BaseCrystal {
     bool _flag_super_cell_size_c = false;
     bool _flag_super_cell_size = false;
 
-    // [Slice Parameters]
+    // [Slice Parameters] -- updated on run
     std::string slc_file_name_prefix;
     bool _flag_slc_file_name_prefix = false;
     std::vector<double> slice_params_nm_slice_vec;
@@ -138,7 +138,9 @@ class BaseCrystal {
 
   public:
     BaseCrystal( boost::process::ipstream& async_io_buffer_out );
+    virtual ~BaseCrystal() {} //Let's not forget to have destructor virtual
 
+    bool clean_for_re_run();
     bool get_flag_unit_cell_cif_path(){ return _flag_unit_cell_cif_path; };
     bool get_flag_nz_simulated_partitions(){ return _flag_nz_simulated_partitions; }
     bool get_flag_projected_y_axis_u(){ return _flag_projected_y_axis_u; }
@@ -281,6 +283,8 @@ class BaseCrystal {
     bool set_application_logger( ApplicationLog::ApplicationLog* logger );
 
     void print_var_state();
+    virtual std::ostream& output(std::ostream& stream) const;
+
 };
 
 #endif

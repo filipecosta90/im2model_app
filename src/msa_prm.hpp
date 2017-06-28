@@ -80,8 +80,12 @@ class MSA_prm : public BaseCrystal, public BaseImage  {
 
     bool set_wave_function_name ( std::string wave_function_filename );
 
+    bool set_super_cell_size_a( double size );
+    bool set_super_cell_size_b( double size );
     /* Loggers */
     bool set_application_logger( ApplicationLog::ApplicationLog* logger );
+    void print_var_state();
+
 
     bool produce_prm();
 
@@ -92,6 +96,9 @@ class MSA_prm : public BaseCrystal, public BaseImage  {
     bool check_produced_waves();
 
     bool clean_for_re_run();
+    bool base_cystal_clean_for_re_run();
+
+
 
 };
 

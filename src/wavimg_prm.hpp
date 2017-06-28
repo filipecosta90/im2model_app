@@ -141,6 +141,7 @@ class WAVIMG_prm : public BaseCrystal, public BaseImage {
     bool call_bin();
 
     bool clean_for_re_run();
+    bool base_cystal_clean_for_re_run();
 
     bool check_produced_dat();
 
@@ -215,8 +216,14 @@ class WAVIMG_prm : public BaseCrystal, public BaseImage {
 
     bool get_mtf_simulation_switch();
 
+    bool set_super_cell_size_a( double size );
+    bool set_super_cell_size_b( double size );
     /* Loggers */
     bool set_application_logger( ApplicationLog::ApplicationLog* logger );
+    void print_var_state();
+    friend std::ostream& operator<< (std::ostream& stream, const WAVIMG_prm::WAVIMG_prm& var);
+    virtual std::ostream& output(std::ostream& stream) const;
+
 
 };
 

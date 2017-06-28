@@ -264,8 +264,13 @@ bool TDMap::run_tdmap( ){
     if ( _run_celslc_switch ){
       bool _clean_run_env = !_flag_runned_tdmap_celslc;
       if( _flag_runned_tdmap_celslc ){
-        _clean_run_env = _tdmap_celslc_parameters->clean_for_re_run();
-        _flag_runned_tdmap_celslc = !_clean_run_env;
+        const bool _clean_run_env_step1_celslc_ok = _tdmap_celslc_parameters->clean_for_re_run();
+        const bool _clean_run_env_step1_msa_ok = _tdmap_msa_parameters->base_cystal_clean_for_re_run();
+        const bool _clean_run_env_step1_wavimg_ok = _tdmap_wavimg_parameters->base_cystal_clean_for_re_run();
+        const bool _clean_run_env_step1_simgrid_ok = _td_map_simgrid->base_cystal_clean_for_re_run();
+
+        _flag_runned_tdmap_celslc = ! ( _clean_run_env_step1_celslc_ok & _clean_run_env_step1_msa_ok & _clean_run_env_step1_wavimg_ok & _clean_run_env_step1_simgrid_ok );
+
         if( _flag_logger ){
           std::stringstream message;
           message << "Already runned celslc. going to clean vars. result: " << std::boolalpha << _clean_run_env ;
@@ -294,11 +299,14 @@ bool TDMap::run_tdmap( ){
         }
       }
     }
+    // if we runned and it was ok, or if we didnt runned and we want to set nz from prm
+    if ( ( _run_celslc_switch & _flag_runned_tdmap_celslc ) || !_run_celslc_switch ){
     const bool _step1_celslc_ok = _tdmap_celslc_parameters->set_nz_simulated_partitions_from_prm();
     const bool _step1_msa_ok = _tdmap_msa_parameters->set_nz_simulated_partitions_from_prm();
     const bool _step1_wavimg_ok = _tdmap_wavimg_parameters->set_nz_simulated_partitions_from_prm();
     const bool _step1_simgrid_ok = _td_map_simgrid->set_nz_simulated_partitions_from_prm();
     _celslc_stage_ok = _step1_celslc_ok & _step1_msa_ok & _step1_wavimg_ok & _step1_simgrid_ok;
+    }
     if( _flag_logger ){
       std::stringstream message;
       message << "Celslc step result: " << std::boolalpha << _celslc_stage_ok;
@@ -638,10 +646,10 @@ bool TDMap::set_super_cell_size_a( std::string size_a ){
   bool result = false;
   try {
     const double _super_cell_size_a = boost::lexical_cast<double>( size_a );
-    const bool celslc_result = _tdmap_celslc_parameters->set_super_cell_size_a( _super_cell_size_a );
-    const bool msa_result = _tdmap_msa_parameters->set_super_cell_size_a( _super_cell_size_a );
-    const bool wavimg_result =  _tdmap_wavimg_parameters->set_super_cell_size_a( _super_cell_size_a );
-    const bool simgrid_result = _td_map_simgrid->set_super_cell_size_a( _super_cell_size_a );
+    bool celslc_result = _tdmap_celslc_parameters->set_super_cell_size_a( _super_cell_size_a );
+    bool msa_result = _tdmap_msa_parameters->set_super_cell_size_a( _super_cell_size_a );
+    bool wavimg_result =  _tdmap_wavimg_parameters->set_super_cell_size_a( _super_cell_size_a );
+    bool simgrid_result = _td_map_simgrid->set_super_cell_size_a( _super_cell_size_a );
     result =  celslc_result & msa_result & wavimg_result & simgrid_result;
   }
   catch(boost::bad_lexical_cast&  ex) {

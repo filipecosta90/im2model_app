@@ -164,6 +164,8 @@ bool auto_calculate_dimensions();
 
     void print_var_state();
     friend std::ostream& operator<< (std::ostream& stream, const BaseImage::BaseImage& image);
+    virtual std::ostream& output(std::ostream& stream) const;
+
 };
 
 #endif

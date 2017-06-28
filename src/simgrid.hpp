@@ -144,6 +144,7 @@ class SimGrid : public BaseCrystal {
     bool simulate_from_grid();
 
     bool clean_for_re_run();
+    bool base_cystal_clean_for_re_run();
 
     int get_image_correlation_matching_method();
 

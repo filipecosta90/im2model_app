@@ -253,54 +253,61 @@ void BaseImage::print_var_state(){
   if( _flag_logger ){
     std::stringstream message;
     // using overloaded operator<<
-    message << this ;
+    output( message );
     logger->logEvent( ApplicationLog::notification , message.str() );
   }
 }
 
+
 std::ostream& operator<<(std::ostream& stream,
     const BaseImage::BaseImage& var) {
+      var.output(stream);
+      return stream;
+    }
+
+std::ostream& BaseImage::output(std::ostream& stream) const {
+
   stream << "BaseImage vars:\n"
-  << "\t\t" << "_flag_auto_n_rows : " << std::boolalpha << var._flag_auto_n_rows << "\n"
-  << "\t\t" << "_flag_auto_n_cols : " << std::boolalpha << var._flag_auto_n_cols << "\n"
-  << "\t\t" << "_flag_auto_a_size : " << std::boolalpha << var._flag_auto_a_size << "\n"
-  << "\t\t" << "_flag_auto_b_size : " << std::boolalpha << var._flag_auto_b_size << "\n"
+  << "\t\t" << "_flag_auto_n_rows : " << std::boolalpha << _flag_auto_n_rows << "\n"
+  << "\t\t" << "_flag_auto_n_cols : " << std::boolalpha << _flag_auto_n_cols << "\n"
+  << "\t\t" << "_flag_auto_a_size : " << std::boolalpha << _flag_auto_a_size << "\n"
+  << "\t\t" << "_flag_auto_b_size : " << std::boolalpha << _flag_auto_b_size << "\n"
     // FULL IMAGE
-    << "\t" << "full_n_rows_height : " <<  var.full_n_rows_height << "\n"
-    << "\t\t" << "_flag_full_n_rows_height : " << std::boolalpha << var._flag_full_n_rows_height << "\n"
-    << "\t" << "full_n_cols_width : " <<  var.full_n_cols_width << "\n"
-    << "\t\t" << "_flag_full_n_cols_width : " << std::boolalpha << var._flag_full_n_cols_width << "\n"
+    << "\t" << "full_n_rows_height : " <<  full_n_rows_height << "\n"
+    << "\t\t" << "_flag_full_n_rows_height : " << std::boolalpha << _flag_full_n_rows_height << "\n"
+    << "\t" << "full_n_cols_width : " <<  full_n_cols_width << "\n"
+    << "\t\t" << "_flag_full_n_cols_width : " << std::boolalpha << _flag_full_n_cols_width << "\n"
     // sampling rate and dimensioning
-    << "\t" << "sampling_rate_x_nm_per_pixel : " << var.sampling_rate_x_nm_per_pixel << "\n"
-    << "\t\t" << "_flag_sampling_rate_x_nm_per_pixel : " << std::boolalpha <<  var._flag_sampling_rate_x_nm_per_pixel << "\n"
-    << "\t" << "sampling_rate_y_nm_per_pixel : " << var.sampling_rate_y_nm_per_pixel << "\n"
-    << "\t\t" << "_flag_sampling_rate_y_nm_per_pixel : " << std::boolalpha <<  var._flag_sampling_rate_y_nm_per_pixel << "\n"
-    << "\t\t" << "_flag_sampling_rate : " << std::boolalpha <<  var._flag_sampling_rate << "\n"
+    << "\t" << "sampling_rate_x_nm_per_pixel : " << sampling_rate_x_nm_per_pixel << "\n"
+    << "\t\t" << "_flag_sampling_rate_x_nm_per_pixel : " << std::boolalpha <<  _flag_sampling_rate_x_nm_per_pixel << "\n"
+    << "\t" << "sampling_rate_y_nm_per_pixel : " << sampling_rate_y_nm_per_pixel << "\n"
+    << "\t\t" << "_flag_sampling_rate_y_nm_per_pixel : " << std::boolalpha <<  _flag_sampling_rate_y_nm_per_pixel << "\n"
+    << "\t\t" << "_flag_sampling_rate : " << std::boolalpha <<  _flag_sampling_rate << "\n"
     // [nm dimensions]
-    << "\t" << "full_nm_size_rows_a : " << var.full_nm_size_rows_a << "\n"
-    << "\t\t" << "_flag_full_nm_size_rows_a : " << std::boolalpha <<  var._flag_full_nm_size_rows_a << "\n"
-    << "\t" << "full_nm_size_cols_b : " << var.full_nm_size_cols_b << "\n"
-    << "\t\t" << "_flag_full_nm_size_cols_b : " << std::boolalpha <<  var._flag_full_nm_size_cols_b << "\n"
+    << "\t" << "full_nm_size_rows_a : " << full_nm_size_rows_a << "\n"
+    << "\t\t" << "_flag_full_nm_size_rows_a : " << std::boolalpha <<  _flag_full_nm_size_rows_a << "\n"
+    << "\t" << "full_nm_size_cols_b : " << full_nm_size_cols_b << "\n"
+    << "\t\t" << "_flag_full_nm_size_cols_b : " << std::boolalpha <<  _flag_full_nm_size_cols_b << "\n"
     // ROI FRAME
-    << "\t" << "roi_rectangle : " <<  var.roi_rectangle << "\n"
-    << "\t\t" << "_flag_roi_image : " << std::boolalpha << var._flag_roi_image << "\n"
-    << "\t" << "roi_n_rows_height : " <<  var.roi_n_rows_height << "\n"
-    << "\t\t" << "_flag_roi_n_rows_height : " << std::boolalpha << var._flag_roi_n_rows_height << "\n"
-    << "\t" << "roi_n_cols_width : " <<  var.roi_n_cols_width << "\n"
-    << "\t\t" << "_flag_roi_n_cols_width : " << std::boolalpha << var._flag_roi_n_cols_width << "\n"
+    << "\t" << "roi_rectangle : " <<  roi_rectangle << "\n"
+    << "\t\t" << "_flag_roi_image : " << std::boolalpha << _flag_roi_image << "\n"
+    << "\t" << "roi_n_rows_height : " <<  roi_n_rows_height << "\n"
+    << "\t\t" << "_flag_roi_n_rows_height : " << std::boolalpha << _flag_roi_n_rows_height << "\n"
+    << "\t" << "roi_n_cols_width : " <<  roi_n_cols_width << "\n"
+    << "\t\t" << "_flag_roi_n_cols_width : " << std::boolalpha << _flag_roi_n_cols_width << "\n"
     // ROI [nm dimensions]
-    << "\t" << "roi_nm_size_rows_a : " << var.roi_nm_size_rows_a << "\n"
-    << "\t\t" << "_flag_roi_nm_size_rows_a : " << std::boolalpha <<  var._flag_roi_nm_size_rows_a << "\n"
-    << "\t" << "roi_nm_size_cols_b : " << var.roi_nm_size_cols_b << "\n"
-    << "\t\t" << "_flag_roi_nm_size_cols_b : " << std::boolalpha <<  var._flag_roi_nm_size_cols_b << "\n"
-    << "\t" << "roi_center_x : " <<  var.roi_center_x << "\n"
-    << "\t\t" << "_flag_roi_center_x : " << std::boolalpha << var._flag_roi_center_x << "\n"
-    << "\t" << "roi_center_y : " <<  var.roi_center_y << "\n"
-    << "\t\t" << "_flag_roi_center_y : " << std::boolalpha << var._flag_roi_center_y << "\n"
+    << "\t" << "roi_nm_size_rows_a : " << roi_nm_size_rows_a << "\n"
+    << "\t\t" << "_flag_roi_nm_size_rows_a : " << std::boolalpha <<  _flag_roi_nm_size_rows_a << "\n"
+    << "\t" << "roi_nm_size_cols_b : " << roi_nm_size_cols_b << "\n"
+    << "\t\t" << "_flag_roi_nm_size_cols_b : " << std::boolalpha <<  _flag_roi_nm_size_cols_b << "\n"
+    << "\t" << "roi_center_x : " <<  roi_center_x << "\n"
+    << "\t\t" << "_flag_roi_center_x : " << std::boolalpha << _flag_roi_center_x << "\n"
+    << "\t" << "roi_center_y : " <<  roi_center_y << "\n"
+    << "\t\t" << "_flag_roi_center_y : " << std::boolalpha << _flag_roi_center_y << "\n"
     // rectangle without the ignored edge pixels of the full image
-    << "\t" << "ignore_edge_pixels_rectangle : " <<  var.ignore_edge_pixels_rectangle << "\n"
-    << "\t\t" << "_flag_ignore_edge_pixels_rectangle : " << std::boolalpha << var._flag_ignore_edge_pixels_rectangle << "\n"
-    << "\t" << "ignore_edge_pixels : " <<  var.ignore_edge_pixels << "\n"
-    << "\t\t" << "_flag_ignore_edge_pixels : " << std::boolalpha << var._flag_ignore_edge_pixels << "\n";
+    << "\t" << "ignore_edge_pixels_rectangle : " <<  ignore_edge_pixels_rectangle << "\n"
+    << "\t\t" << "_flag_ignore_edge_pixels_rectangle : " << std::boolalpha << _flag_ignore_edge_pixels_rectangle << "\n"
+    << "\t" << "ignore_edge_pixels : " <<  ignore_edge_pixels << "\n"
+    << "\t\t" << "_flag_ignore_edge_pixels : " << std::boolalpha << _flag_ignore_edge_pixels << "\n";
   return stream;
 }

@@ -3,6 +3,8 @@
 static const std::string WAV_EXTENSION = ".wav";
 
 MSA_prm::MSA_prm( boost::process::ipstream &async_io_buffer_out ) : BaseCrystal ( async_io_buffer_out ){
+  BaseImage::set_flag_auto_n_rows(true);
+  BaseImage::set_flag_auto_n_cols(true);
 }
 
 void MSA_prm::set_internal_repeat_factor_of_super_cell_along_x ( int x_repeat ){
@@ -244,6 +246,11 @@ bool MSA_prm::clean_for_re_run(){
   return cleanup_bin();
 }
 
+bool MSA_prm::base_cystal_clean_for_re_run(){
+  const bool cleanun_result = BaseCrystal::clean_for_re_run();
+  return cleanun_result;
+}
+
 bool MSA_prm::set_wave_function_name ( std::string wave_function_filename ){
   wave_function_name = wave_function_filename;
   return true;
@@ -350,10 +357,26 @@ bool MSA_prm::produce_prm () {
   return result;
 }
 
+bool MSA_prm::set_super_cell_size_a( double size ){
+  const bool sim_result = BaseImage::set_full_nm_size_rows_a( size );
+  const bool crystal_result = BaseCrystal::set_super_cell_size_a( size );
+  const bool result = sim_result & crystal_result;
+  return result;
+}
+
+bool MSA_prm::set_super_cell_size_b( double size ){
+  const bool sim_result = BaseImage::set_full_nm_size_cols_b( size );
+  const bool crystal_result = BaseCrystal::set_super_cell_size_b( size );
+  const bool result = sim_result & crystal_result;
+  return result;
+}
+
 /* Loggers */
 bool MSA_prm::set_application_logger( ApplicationLog::ApplicationLog* app_logger ){
   logger = app_logger;
   _flag_logger = true;
+  BaseCrystal::set_application_logger( app_logger );
+  BaseImage::set_application_logger( app_logger );
   logger->logEvent( ApplicationLog::notification, "Application logger setted for MSA_prm class." );
   return true;
 }

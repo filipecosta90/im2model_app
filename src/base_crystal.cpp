@@ -52,6 +52,25 @@ bool BaseCrystal::calculate_thickness_slice_period(){
   return result;
 }
 
+bool BaseCrystal::clean_for_re_run(){
+  bool result = false;
+
+  slice_params_nm_slice.clear();
+  slice_params_accum_nm_slice_vec.clear();
+  slice_params_nm_slice_vec.clear();
+  _flag_slice_params_accum_nm_slice_vec = false;
+  _flag_slice_params_nm_slice_vec = false;
+  if( slice_params_nm_slice.size() == 0 &&
+      slice_params_accum_nm_slice_vec.size() == 0 &&
+      slice_params_nm_slice_vec.size() == 0 &&
+      _flag_slice_params_accum_nm_slice_vec == false &&
+      _flag_slice_params_nm_slice_vec == false
+    ){
+    result = true;
+  }
+  return result;
+}
+
 int BaseCrystal::get_slice_number_from_nm_floor( double goal_thickness_nm ){
   assert( nz_simulated_partitions >= 1 );
   assert( slice_params_nm_slice_vec.size() == nz_simulated_partitions );
@@ -359,10 +378,17 @@ bool BaseCrystal::set_application_logger( ApplicationLog::ApplicationLog* app_lo
 void BaseCrystal::print_var_state(){
   if( _flag_logger ){
     std::stringstream message;
-    message << "BaseCrystal vars:\n"
+    // using overloaded operator<<
+    output(message);
+    logger->logEvent( ApplicationLog::notification , message.str() );
+  }
+}
+
+std::ostream& BaseCrystal::output(std::ostream& stream) const {
+  stream << "BaseCrystal vars:\n"
     << "\t" << "unit_cell_cif_path : " <<  unit_cell_cif_path << "\n"
     << "\t\t" << "_flag_unit_cell_cif_path : " << std::boolalpha << _flag_unit_cell_cif_path << "\n"
-    
+
     << "\t" << "nz_simulated_partitions : " <<  nz_simulated_partitions << "\n"
     << "\t\t" << "_flag_nz_simulated_partitions : " << std::boolalpha <<  _flag_nz_simulated_partitions << "\n"
     << "\t" << "nz_switch : " << std::boolalpha <<  nz_switch << "\n"
@@ -395,7 +421,7 @@ void BaseCrystal::print_var_state(){
     << "\t\t" << "_flag_super_cell_size_b : " << std::boolalpha <<  _flag_super_cell_size_b << "\n"
     << "\t" << "super_cell_size_c : " <<  super_cell_size_c << "\n"
     << "\t\t" << "_flag_super_cell_size_c : " << std::boolalpha <<  _flag_super_cell_size_c << "\n"
-    << "\t\t" << "_flag_super_cell_size : " << std::boolalpha <<  _flag_super_cell_size << "\n"
+    << "\t\t" << "_flag_super_cell_size : " << std::boolalpha << _flag_super_cell_size << "\n"
 
     // [Slice Parameters]
     << "\t" << "slc_file_name_prefix : " <<  slc_file_name_prefix << "\n"
@@ -418,7 +444,7 @@ void BaseCrystal::print_var_state(){
     << "\t" << "nm_upper_bound : " <<  nm_upper_bound << "\n"
     << "\t\t" << "_flag_nm_upper_bound : " << std::boolalpha <<  _flag_nm_upper_bound << "\n"
     << "\t" << "slice_period : " <<  slice_period << "\n"
-    << "\t\t" << "_flag_slice_period : " << std::boolalpha <<  _flag_slice_period << "\n"
+    << "\t\t" << "_flag_slice_period : " << std::boolalpha << _flag_slice_period << "\n"
     //calculated
     << "\t" << "slices_lower_bound : " <<  slices_lower_bound << "\n"
     << "\t\t" << "_flag_slices_lower_bound : " << std::boolalpha <<  _flag_slices_lower_bound << "\n"
@@ -452,7 +478,6 @@ void BaseCrystal::print_var_state(){
     << "\t\t" << "_flag_full_bin_path_execname : " << std::boolalpha <<  _flag_full_bin_path_execname << "\n"
     // running flags
     << "\t\t" << "_flag_debug_switch : " << std::boolalpha <<  _flag_debug_switch << "\n"
-    << "\t\t" << "_flag_runned_bin : " << std::boolalpha <<  _flag_runned_bin;
-    logger->logEvent( ApplicationLog::notification , message.str() );
-  }
+    << "\t\t" << "_flag_runned_bin : " << std::boolalpha <<  _flag_runned_bin << "\n";
+  return stream;
 }
