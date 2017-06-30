@@ -2,7 +2,7 @@
 
 static const std::string WAV_EXTENSION = ".wav";
 
-MSA_prm::MSA_prm( boost::process::ipstream &async_io_buffer_out ) : BaseCrystal ( async_io_buffer_out ){
+MSA_prm::MSA_prm( boost::process::ipstream &async_io_buffer_out ) : BaseBin ( async_io_buffer_out ){
   BaseImage::set_flag_auto_n_rows(true);
   BaseImage::set_flag_auto_n_cols(true);
 }
@@ -36,11 +36,10 @@ void MSA_prm::set_linear_slices_for_full_object_structure () {
 void MSA_prm::cleanup_thread(){
 
   bool status = true;
-  boost::filesystem::path dir ( base_dir_path );
 
   // remove prm first
   boost::filesystem::path prm_file ( prm_filename );
-  boost::filesystem::path full_prm_path = dir / prm_file;
+  boost::filesystem::path full_prm_path = base_bin_output_dir_path / prm_file;
 
   if( boost::filesystem::exists( full_prm_path ) ){
     const bool remove_result = boost::filesystem::remove( prm_file );
@@ -61,7 +60,7 @@ void MSA_prm::cleanup_thread(){
     std::stringstream filename_stream;
     filename_stream << wave_function_name << "_sl"<< std::setw(3) << std::setfill('0') << std::to_string(slice_id) << ".wav" ;
     boost::filesystem::path wav_file ( filename_stream.str() );
-    boost::filesystem::path full_wave_path = dir / wav_file;
+    boost::filesystem::path full_wave_path = base_bin_output_dir_path / wav_file;
 
     if( boost::filesystem::exists( full_wave_path ) ){
       const bool remove_result = boost::filesystem::remove( full_wave_path );
@@ -87,21 +86,21 @@ bool MSA_prm::call_bin(){
   bool result = false;
   if( _flag_produced_prm  && _flag_prm_filename_path ){
     std::stringstream args_stream;
+
     args_stream << full_bin_path_execname;
     // input -prm
 
-    boost::filesystem::path dir ( base_dir_path );
     boost::filesystem::path prm_file ( prm_filename );
-    boost::filesystem::path full_prm_path = dir / prm_file;
+    boost::filesystem::path full_prm_path = base_bin_output_dir_path / prm_file;
 
     args_stream << " -prm " << "\"" << full_prm_path.string() << "\"";
 
     // input -out
 
     boost::filesystem::path wav_file ( wave_function_name );
-    boost::filesystem::path full_wave_path = dir / wav_file;
+    boost::filesystem::path full_wave_path = base_bin_output_dir_path / wav_file;
 
-    args_stream << " -out " << "\"" << wav_file.string() << "\"";
+    args_stream << " -out " << "\"" << full_wave_path.string() << "\"";
 
     // input ctem option
     args_stream << " /ctem";
@@ -124,7 +123,7 @@ bool MSA_prm::call_bin(){
         boost::process::child c(
             // command
             args_stream.str(),
-            boost::process::start_dir= base_dir_path,
+            boost::process::start_dir= base_bin_start_dir_path,
             // redirecting std_out to async buffer
             boost::process::std_out > _io_pipe_out,
             // redirecting std_err to null
@@ -147,7 +146,7 @@ bool MSA_prm::call_bin(){
       boost::process::child c(
           // command
           args_stream.str(),
-          boost::process::start_dir= base_dir_path,
+          boost::process::start_dir= base_bin_start_dir_path,
           // redirecting std_out to null
           boost::process::std_out > boost::process::null,
           // redirecting std_err to null
@@ -201,7 +200,6 @@ bool MSA_prm::call_bin(){
 bool MSA_prm::check_produced_waves(){
   bool result = false;
 
-  boost::filesystem::path dir ( base_dir_path );
   bool status = true;
   for ( int slice_id = 1 ;
       slice_id <= nz_simulated_partitions;
@@ -209,7 +207,7 @@ bool MSA_prm::check_produced_waves(){
     std::stringstream filename_stream;
     filename_stream << wave_function_name << "_sl"<< std::setw(3) << std::setfill('0') << std::to_string(slice_id) << ".wav" ;
     boost::filesystem::path wav_file ( filename_stream.str() );
-    boost::filesystem::path full_wave_path = dir / wav_file;
+    boost::filesystem::path full_wave_path = base_bin_output_dir_path / wav_file;
     const bool _wave_exists = boost::filesystem::exists(full_wave_path );
     status &= _wave_exists;
     if( _flag_logger ){
@@ -224,10 +222,9 @@ bool MSA_prm::check_produced_waves(){
 
 bool MSA_prm::save_prm_filename_path(){
   bool result = false;
-  boost::filesystem::path bin_dir(".");
   boost::filesystem::directory_iterator end_itr;
   // cycle through the directory
-  for ( boost::filesystem::directory_iterator itr(bin_dir); itr != end_itr; ++itr){
+  for ( boost::filesystem::directory_iterator itr( base_bin_output_dir_path ); itr != end_itr; ++itr){
     // If it's not a directory, list it. If you want to list directories too, just remove this check.
     if (is_regular_file(itr->path())) {
       // assign current file name to current_file and echo it out to the console.
@@ -272,13 +269,13 @@ bool MSA_prm::_is_prm_produced(){
 bool MSA_prm::produce_prm () {
   bool result = false;
   if ( _flag_prm_filename ){
-    boost::filesystem::path dir ( base_dir_path );
     boost::filesystem::path file ( prm_filename );
-    boost::filesystem::path full_path = dir / file;
+    boost::filesystem::path full_path = base_bin_output_dir_path / file;
     std::ofstream outfile;
 
     boost::filesystem::path slc_file ( slc_file_name_prefix );
-    boost::filesystem::path slc_full_path = dir / slc_file;
+    boost::filesystem::path slc_input_dir ( slc_output_target_folder );
+    boost::filesystem::path slc_full_path = base_dir_path / slc_input_dir / slc_file;
 
     outfile.open(full_path.string());
     outfile << "'[Microscope Parameters]'" << "\t\t\t! Parameter block name, must be '[Microscope Parameters]'" << std::endl;
@@ -330,7 +327,7 @@ bool MSA_prm::produce_prm () {
     outfile << internal_repeat_factor_of_super_cell_along_z << "\t\t\t! HISTORIC NOT USED\t\t\t! Internal repeat factor of the super-cell along z" << std::endl;
     //we now use full paths
     std::stringstream  input_prefix_stream ;
-    input_prefix_stream << "'" << slc_file_name_prefix << "'";
+    input_prefix_stream << "'" << slc_full_path.string() << "'";
     outfile << input_prefix_stream.str() << "\t\t\t! Slice file name prefix" << std::endl;
     outfile << nz_simulated_partitions << "\t\t\t! Number of slice files to be loaded" << std::endl;
     outfile << number_frozen_lattice_variants_considered_per_slice << "\t\t\t! Number of frozen lattice variants considered per slice" << std::endl;
@@ -377,6 +374,7 @@ bool MSA_prm::set_application_logger( ApplicationLog::ApplicationLog* app_logger
   _flag_logger = true;
   BaseCrystal::set_application_logger( app_logger );
   BaseImage::set_application_logger( app_logger );
+  BaseBin::set_application_logger( app_logger );
   logger->logEvent( ApplicationLog::notification, "Application logger setted for MSA_prm class." );
   return true;
 }

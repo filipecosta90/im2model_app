@@ -89,6 +89,14 @@ class BaseCrystal {
     std::map<int,double> slice_params_nm_slice;
     bool _flag_slice_params_nm_slice = false;
 
+    // Intermediate files info
+    std::string slc_output_target_folder;
+    bool _flag_slc_output_target_folder = false;
+    std::string wav_output_target_folder;
+    bool _flag_wav_output_target_folder = false;
+    std::string dat_output_target_folder;
+    bool _flag_dat_output_target_folder = false;
+
     /////////////////////////
     // Simulated Thickness info
     /////////////////////////
@@ -119,25 +127,12 @@ class BaseCrystal {
     double defocus_period = 0.0f;
     bool _flag_defocus_period = false;
 
-    /* boost process output streams */
-    boost::process::ipstream& _io_pipe_out;
-    bool _flag_io_ap_pipe_out = false;
-
     /* Base dir path */
     boost::filesystem::path base_dir_path;
     bool _flag_base_dir_path = false;
 
-    /* Runnable dependant binary full bin path */
-    boost::filesystem::path full_bin_path_execname;
-    bool _flag_full_bin_path_execname = false;
-    // running flags
-    bool _flag_debug_switch = false;
-    bool _flag_runned_bin = false;
-    //produced warnings
-    std::vector<std::string> run_env_warnings;
-
   public:
-    BaseCrystal( boost::process::ipstream& async_io_buffer_out );
+    BaseCrystal();
     virtual ~BaseCrystal() {} //Let's not forget to have destructor virtual
 
     bool clean_for_re_run();
@@ -161,6 +156,10 @@ class BaseCrystal {
     bool get_flag_slice_params_nm_slice_vec(){ return _flag_slice_params_nm_slice_vec; };
     bool get_flag_slice_params_accum_nm_slice_vec(){ return _flag_slice_params_accum_nm_slice_vec; };
     bool get_flag_slice_params_nm_slice(){ return _flag_slice_params_nm_slice; };
+    // Intermediate files info
+    bool get_flag_slc_output_target_folder(){ return _flag_slc_output_target_folder; }
+    bool get_flag_wav_output_target_folder(){ return _flag_wav_output_target_folder; }
+    bool get_flag_dat_output_target_folder(){ return _flag_dat_output_target_folder; }
     /////////////////////////
     // Simulated Thickness info
     /////////////////////////
@@ -176,13 +175,7 @@ class BaseCrystal {
     bool get_flag_defocus_upper_bound(){ return _flag_defocus_upper_bound;}
     bool get_flag_defocus_period(){ return _flag_defocus_period;}
     /* boost process output streams */
-    bool get_flag_io_ap_pipe_out(){ return _flag_io_ap_pipe_out; };
     bool get_flag_base_dir_path(){ return _flag_base_dir_path; }
-    /* Runnable dependant binary full bin path */
-    bool get_flag_full_bin_path_execname(){ return _flag_full_bin_path_execname; }
-    // running flags
-    bool get_flag_debug_switch(){ return _flag_debug_switch; }
-    bool get_flag_runned_bin(){ return _flag_runned_bin; }
     /* Loggers */
     bool get_flag_logger(){ return _flag_logger; }
 
@@ -208,7 +201,10 @@ class BaseCrystal {
     std::vector<double> get_slice_params_nm_slice_vec(){ return slice_params_nm_slice_vec; }
     std::vector<double> get_slice_params_accum_nm_slice_vec(){ return slice_params_accum_nm_slice_vec; }
     std::map<int,double> get_slice_params_nm_slice(){ return slice_params_nm_slice; }
-
+    // Intermediate files info
+    std::string get_slc_output_target_folder(){ return slc_output_target_folder; }
+    std::string get_wav_output_target_folder(){ return wav_output_target_folder; }
+    std::string get_dat_output_target_folder(){ return dat_output_target_folder; }
     /////////////////////////
     // Simulated Thickness info
     /////////////////////////
@@ -230,11 +226,6 @@ class BaseCrystal {
     double get_defocus_period(){ return defocus_period; }
     /* Base dir path */
     boost::filesystem::path get_base_dir_path(){ return base_dir_path; }
-    /* Runnable dependant binary full bin path */
-    boost::filesystem::path get_full_bin_path_execname(){ return full_bin_path_execname; }
-    //produced warnings
-    std::vector<std::string> get_run_env_warnings(){ return run_env_warnings; }
-
     /* Loggers */
     ApplicationLog::ApplicationLog* get_logger(){ return logger; }
 
@@ -258,6 +249,10 @@ class BaseCrystal {
     bool set_super_cell_size_c( double );
 
     bool set_slc_file_name_prefix( std::string slc_file_name_prefix );
+    // Intermediate files info
+    bool set_slc_output_target_folder( std::string );
+    bool set_wav_output_target_folder( std::string );
+    bool set_dat_output_target_folder( std::string );
     /////////////////////////
     // Simulated Thickness info
     /////////////////////////
@@ -277,8 +272,7 @@ class BaseCrystal {
 
     /* Base dir path */
     bool set_base_dir_path( boost::filesystem::path base_dir );
-    /* Runnable dependant binary full bin path */
-    bool set_bin_execname( std::string );
+
     /* Loggers */
     bool set_application_logger( ApplicationLog::ApplicationLog* logger );
 

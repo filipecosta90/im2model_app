@@ -2,7 +2,7 @@
 
 static const std::string DAT_EXTENSION = ".dat";
 
-WAVIMG_prm::WAVIMG_prm( boost::process::ipstream &async_io_buffer_out ) : BaseCrystal ( async_io_buffer_out ) {
+WAVIMG_prm::WAVIMG_prm( boost::process::ipstream &async_io_buffer_out ) : BaseBin ( async_io_buffer_out ) {
   BaseImage::set_flag_auto_n_rows(true);
   BaseImage::set_flag_auto_n_cols(true);
 }
@@ -19,17 +19,17 @@ bool WAVIMG_prm::produce_prm ( ) {
       _flag_ht_accelaration_voltage
     )
   {
-    boost::filesystem::path dir ( base_dir_path );
     boost::filesystem::path file ( prm_filename );
-    boost::filesystem::path full_path = dir / file;
+    boost::filesystem::path full_path = base_bin_output_dir_path / file;
     std::ofstream outfile;
 
     outfile.open( full_path.string() );
     // line 1
     boost::filesystem::path input_wave_function ( file_name_input_wave_function );
-    boost::filesystem::path input_wave_function_full_path = dir / input_wave_function;
+    boost::filesystem::path wav_input_dir ( wav_output_target_folder );
+    boost::filesystem::path input_wave_function_full_path = base_dir_path / wav_input_dir / input_wave_function;
     std::stringstream  input_prefix_stream ;
-    input_prefix_stream << "'" << file_name_input_wave_function << "_sl.wav"<< "'";
+    input_prefix_stream << "'" << input_wave_function_full_path.string() << "_sl.wav"<< "'";
     outfile  << input_prefix_stream.str() << "\t\t! Wave function file name string used to locate existing wave functions. Use quotation marks to secure the input including space characters." << std::endl;
     // line 2
     outfile <<  full_n_rows_height << ", " <<  full_n_cols_width << "\t\t! Dimension of the wave data in pixels, <nx> = number of horizontal wave pixels, <ny>  = number of vertical wave pixels." << std::endl;
@@ -42,9 +42,9 @@ bool WAVIMG_prm::produce_prm ( ) {
     // line 6
 
     boost::filesystem::path output_wave_function ( file_name_output_image_wave_function );
-    boost::filesystem::path output_wave_function_full_path = dir / output_wave_function;
+    boost::filesystem::path output_wave_function_full_path = base_bin_output_dir_path / output_wave_function;
     std::stringstream  output_prefix_stream ;
-    output_prefix_stream << "'" << file_name_output_image_wave_function << ".dat" << "'";
+    output_prefix_stream << "'" << output_wave_function_full_path.string() << ".dat" << "'";
     outfile <<  output_prefix_stream.str() << "\t\t! Image output file name string. Use quotation marks to secure the input including space characters." << std::endl;
     // line 7
     outfile <<  full_n_rows_height << ", " << full_n_cols_width << "\t\t! Image output size (<ix> = horizontal , <iy> = vertical) in number of pixels." << std::endl;
@@ -134,7 +134,6 @@ bool WAVIMG_prm::produce_prm ( ) {
 
 bool WAVIMG_prm::check_clean_run_env(){
   bool status = true;
-  boost::filesystem::path dir ( base_dir_path );
   // remove the dat files
   if( number_parameter_loops == 2 && ( loop_range_n.size() == 2 ) ){
     const int outter_loop_limit = loop_range_n.at(1);
@@ -148,7 +147,7 @@ bool WAVIMG_prm::check_clean_run_env(){
           "_"<< std::setw(3) << std::setfill('0') << std::to_string(inner_loop_pos) <<
           ".dat" ;
         boost::filesystem::path dat_file ( filename_stream.str() );
-        boost::filesystem::path full_dat_path = dir / dat_file;
+        boost::filesystem::path full_dat_path = base_bin_output_dir_path / dat_file;
 
         const bool _need_clean_file = boost::filesystem::exists( full_dat_path );
 
@@ -171,10 +170,9 @@ bool WAVIMG_prm::check_clean_run_env(){
 
 bool WAVIMG_prm::cleanup_prm(){
   bool status = true;
-  boost::filesystem::path dir ( base_dir_path );
   // remove prm first
   boost::filesystem::path prm_file ( prm_filename );
-  boost::filesystem::path full_prm_path = dir / prm_file;
+  boost::filesystem::path full_prm_path = base_bin_output_dir_path / prm_file;
   if( boost::filesystem::exists( full_prm_path ) ){
     status = boost::filesystem::remove( full_prm_path );
     // if the remove process was sucessfull the prm no longer exists
@@ -190,7 +188,6 @@ bool WAVIMG_prm::cleanup_prm(){
 
 bool WAVIMG_prm::cleanup_dat(){
   bool status = true;
-  boost::filesystem::path dir ( base_dir_path );
   // remove the dat files
   if( number_parameter_loops == 2 && ( loop_range_n.size() == 2 ) ){
     const int outter_loop_limit = loop_range_n.at(1);
@@ -204,8 +201,7 @@ bool WAVIMG_prm::cleanup_dat(){
           "_"<< std::setw(3) << std::setfill('0') << std::to_string(inner_loop_pos) <<
           ".dat" ;
         boost::filesystem::path dat_file ( filename_stream.str() );
-        boost::filesystem::path full_dat_path = dir / dat_file;
-
+        boost::filesystem::path full_dat_path = base_bin_output_dir_path / dat_file;
         if( boost::filesystem::exists( full_dat_path ) ){
           const bool remove_result = boost::filesystem::remove( full_dat_path );
           status &= remove_result;
@@ -245,9 +241,8 @@ bool WAVIMG_prm::call_bin(){
     args_stream << full_bin_path_execname;
 
     // input -prm
-    boost::filesystem::path dir ( base_dir_path );
     boost::filesystem::path prm_file ( prm_filename );
-    boost::filesystem::path full_prm_path = dir / prm_file;
+    boost::filesystem::path full_prm_path = base_bin_output_dir_path / prm_file;
 
     args_stream << " -prm " << "\"" << full_prm_path.string() << "\"";
 
@@ -271,7 +266,7 @@ bool WAVIMG_prm::call_bin(){
         boost::process::child c(
             // command
             args_stream.str(),
-            boost::process::start_dir = base_dir_path,
+            boost::process::start_dir = base_bin_start_dir_path,
             // redirecting std_out to async buffer
             boost::process::std_out > _io_pipe_out,
             // redirecting std_err to null
@@ -293,7 +288,7 @@ bool WAVIMG_prm::call_bin(){
       boost::process::child c(
           // command
           args_stream.str(),
-          boost::process::start_dir = base_dir_path,
+          boost::process::start_dir = base_bin_start_dir_path,
           // redirecting std_out to null
           boost::process::std_out > boost::process::null,
           // redirecting std_err to null
@@ -345,7 +340,6 @@ bool WAVIMG_prm::call_bin(){
 
 bool WAVIMG_prm::check_produced_dat(){
   bool result = false;
-  boost::filesystem::path dir ( base_dir_path );
   bool status = true;
   if( number_parameter_loops == 2 && ( loop_range_n.size() == 2 ) ){
     const int outter_loop_limit = loop_range_n.at(1);
@@ -359,7 +353,7 @@ bool WAVIMG_prm::check_produced_dat(){
           "_"<< std::setw(3) << std::setfill('0') << std::to_string(inner_loop_pos) <<
           ".dat" ;
         boost::filesystem::path dat_file ( filename_stream.str() );
-        boost::filesystem::path full_dat_path = dir / dat_file;
+        boost::filesystem::path full_dat_path = base_bin_output_dir_path / dat_file;
         const bool _dat_exists = boost::filesystem::exists( full_dat_path );
         status &= _dat_exists;
         if( _flag_logger ){
@@ -710,6 +704,7 @@ bool WAVIMG_prm::set_application_logger( ApplicationLog::ApplicationLog* app_log
   _flag_logger = true;
   BaseCrystal::set_application_logger( app_logger );
   BaseImage::set_application_logger( app_logger );
+  BaseBin::set_application_logger( app_logger );
   logger->logEvent( ApplicationLog::notification, "Application logger setted for WAVIMG_prm class." );
   return true;
 }
@@ -737,5 +732,7 @@ std::ostream& WAVIMG_prm::output(std::ostream& stream) const {
   BaseCrystal::output(stream);
   stream <<  "\t" << "BaseImage Properties : " << "\n";
   BaseImage::output(stream);
+  stream <<  "\t" << "BaseBin Properties : " << "\n";
+  BaseBin::output(stream);
   return stream;
 }

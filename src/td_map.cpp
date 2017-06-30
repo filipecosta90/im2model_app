@@ -25,6 +25,10 @@ TDMap::TDMap(
   set_wavimg_prm_name( "temporary_wavimg_im2model.prm" );
   set_file_name_output_image_wave_function("image" );
 
+  set_slc_output_target_folder("slc");
+  set_wav_output_target_folder("wav");
+  set_dat_output_target_folder("dat");
+
   /* ******
    * celslc static settings
    */
@@ -301,11 +305,11 @@ bool TDMap::run_tdmap( ){
     }
     // if we runned and it was ok, or if we didnt runned and we want to set nz from prm
     if ( ( _run_celslc_switch & _flag_runned_tdmap_celslc ) || !_run_celslc_switch ){
-    const bool _step1_celslc_ok = _tdmap_celslc_parameters->set_nz_simulated_partitions_from_prm();
-    const bool _step1_msa_ok = _tdmap_msa_parameters->set_nz_simulated_partitions_from_prm();
-    const bool _step1_wavimg_ok = _tdmap_wavimg_parameters->set_nz_simulated_partitions_from_prm();
-    const bool _step1_simgrid_ok = _td_map_simgrid->set_nz_simulated_partitions_from_prm();
-    _celslc_stage_ok = _step1_celslc_ok & _step1_msa_ok & _step1_wavimg_ok & _step1_simgrid_ok;
+      const bool _step1_celslc_ok = _tdmap_celslc_parameters->set_nz_simulated_partitions_from_prm();
+      const bool _step1_msa_ok = _tdmap_msa_parameters->set_nz_simulated_partitions_from_prm();
+      const bool _step1_wavimg_ok = _tdmap_wavimg_parameters->set_nz_simulated_partitions_from_prm();
+      const bool _step1_simgrid_ok = _td_map_simgrid->set_nz_simulated_partitions_from_prm();
+      _celslc_stage_ok = _step1_celslc_ok & _step1_msa_ok & _step1_wavimg_ok & _step1_simgrid_ok;
     }
     if( _flag_logger ){
       std::stringstream message;
@@ -522,7 +526,8 @@ bool TDMap::get_flag_wavimg_io_ap_pipe_out(){
 }
 
 bool TDMap::get_flag_simgrid_io_ap_pipe_out(){
-  return _td_map_simgrid->get_flag_io_ap_pipe_out();
+  return false;
+  //  return _td_map_simgrid->get_flag_io_ap_pipe_out();
 }
 
 bool TDMap::get_flag_slice_samples(){
@@ -627,6 +632,48 @@ bool TDMap::set_file_name_output_image_wave_function( std::string image_wave ){
   return result;
 }
 
+bool TDMap::set_slc_output_target_folder( std::string folder ){
+  bool result = false;
+  // celslc
+  bool celslc_result = _tdmap_celslc_parameters->set_slc_output_target_folder( folder );
+  celslc_result &= _tdmap_celslc_parameters->set_base_bin_output_target_folder( folder );
+  // msa
+  const bool msa_result = _tdmap_msa_parameters->set_slc_output_target_folder( folder );
+  // wavimg
+  const bool wavimg_result =  _tdmap_wavimg_parameters->set_slc_output_target_folder( folder );
+  // simgrid
+  const bool simgrid_result = _td_map_simgrid->set_slc_output_target_folder( folder );
+  result = celslc_result & msa_result & wavimg_result & simgrid_result;
+}
+
+bool TDMap::set_wav_output_target_folder( std::string folder ){
+  bool result = false;
+  // celslc
+  const bool celslc_result = _tdmap_celslc_parameters->set_wav_output_target_folder( folder );
+  // msa
+   bool msa_result = _tdmap_msa_parameters->set_wav_output_target_folder( folder );
+  msa_result &= _tdmap_msa_parameters->set_base_bin_output_target_folder( folder );
+  // wavimg
+  const bool wavimg_result =  _tdmap_wavimg_parameters->set_wav_output_target_folder( folder );
+  // simgrid
+  const bool simgrid_result = _td_map_simgrid->set_wav_output_target_folder( folder );
+  result = celslc_result & msa_result & wavimg_result & simgrid_result;
+}
+
+bool TDMap::set_dat_output_target_folder( std::string folder ){
+  bool result = false;
+  //celslc
+  const bool celslc_result = _tdmap_celslc_parameters->set_dat_output_target_folder( folder );
+  // msa
+  const bool msa_result = _tdmap_msa_parameters->set_dat_output_target_folder( folder );
+  //wavimg
+   bool wavimg_result =  _tdmap_wavimg_parameters->set_dat_output_target_folder( folder );
+  wavimg_result &= _tdmap_wavimg_parameters->set_base_bin_output_target_folder( folder );
+  // simgrid
+  const bool simgrid_result = _td_map_simgrid->set_dat_output_target_folder( folder );
+  result = celslc_result & msa_result & wavimg_result & simgrid_result;
+}
+
 bool TDMap::set_msa_prm_name(  std::string prm_name  ){
   bool result = false;
   const bool msa_result = _tdmap_msa_parameters->set_prm_file_name( prm_name );
@@ -693,12 +740,50 @@ bool TDMap::set_super_cell_size_c( std::string size_c ){
   return result;
 }
 
+bool TDMap::set_project_dir_path( std::string name_path ){
+  bool result = false;
+  boost::filesystem::path project_path( name_path );
+  // if not, create it
+  if (!boost::filesystem::exists(project_path) || !boost::filesystem::is_directory(project_path)) {
+    boost::filesystem::create_directory(project_path);
+  }
+  if( boost::filesystem::exists( project_path ) ){
+    result = set_base_dir_path( project_path );
+    if (result){
+      project_filename = project_path.filename().string();
+      project_filename_with_path = project_path / boost::filesystem::path( project_filename );
+      project_dir_path = project_path;
+      _flag_project_dir_path = true;
+    }
+  }
+  return result;
+}
+
+bool TDMap::set_project_filename_with_path( std::string filename_with_path ){
+  bool result = false;
+  project_filename_with_path = boost::filesystem::path ( filename_with_path );
+  if( boost::filesystem::exists( project_filename_with_path ) ){
+    boost::filesystem::path project_path( project_filename_with_path.parent_path() );
+    result = set_base_dir_path( project_path );
+    if (result){
+      project_dir_path = project_path;
+      project_filename = project_filename_with_path.filename().string();
+      _flag_project_dir_path = true;
+    }
+  }
+  return result;
+}
+
 bool TDMap::set_base_dir_path( boost::filesystem::path path ){
   bool result = false;
-  const bool celslc_result = _tdmap_celslc_parameters->set_base_dir_path( path );
-  const bool msa_result = _tdmap_msa_parameters->set_base_dir_path( path );
-  const bool wavimg_result = _tdmap_wavimg_parameters->set_base_dir_path( path );
-  const bool simgrid_result = _td_map_simgrid->set_base_dir_path(path);
+  bool celslc_result = _tdmap_celslc_parameters->set_base_dir_path( path );
+  bool msa_result = _tdmap_msa_parameters->set_base_dir_path( path );
+  bool wavimg_result = _tdmap_wavimg_parameters->set_base_dir_path( path );
+  bool simgrid_result = _td_map_simgrid->set_base_dir_path(path);
+  // set bin start dir
+  celslc_result &= _tdmap_celslc_parameters->set_base_bin_start_dir_path( path );
+  msa_result &= _tdmap_msa_parameters->set_base_bin_start_dir_path( path );
+  wavimg_result &= _tdmap_wavimg_parameters->set_base_bin_start_dir_path( path );
   result = celslc_result & msa_result & wavimg_result & simgrid_result;
   return result;
 }
@@ -1217,6 +1302,10 @@ bool TDMap::set_run_wavimg_switch( bool value ){
 bool TDMap::set_run_simgrid_switch( bool value ){
   _run_simgrid_switch = value;
   return true;
+}
+
+std::string TDMap::get_project_filename_with_path(){
+  return project_filename_with_path.string();
 }
 
 /* gui flag getters */

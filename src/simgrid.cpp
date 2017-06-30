@@ -1,6 +1,6 @@
 #include "simgrid.hpp"
 
-SimGrid::SimGrid( boost::process::ipstream& async_io_buffer_out ) : BaseCrystal ( async_io_buffer_out ){
+SimGrid::SimGrid( boost::process::ipstream& async_io_buffer_out ){
   // // // // //
   // simulation parameters
   // // // // //
@@ -343,7 +343,8 @@ bool SimGrid::check_produced_dat(){
       _flag_defocus_lower_bound
     ){
     bool files_result = true;
-    boost::filesystem::path dir ( base_dir_path );
+    boost::filesystem::path dat_input_dir ( dat_output_target_folder );
+
     for (int thickness = 1; thickness <= slice_samples; thickness++ ){
       const int at_slice = round( slice_period * ( thickness  - 1 ) + slices_lower_bound );
       const double slice_thickness_nm = slice_params_accum_nm_slice_vec.at(at_slice-1);
@@ -354,8 +355,7 @@ bool SimGrid::check_produced_dat(){
         std::stringstream output_dat_name_stream;
         output_dat_name_stream << "image_" << std::setw(3) << std::setfill('0') << std::to_string(thickness) << "_" << std::setw(3) << std::setfill('0') << std::to_string(defocus) << ".dat";
         boost::filesystem::path dat_file ( output_dat_name_stream.str() );
-        boost::filesystem::path full_dat_path = dir / dat_file;
-
+        boost::filesystem::path full_dat_path = base_dir_path / dat_input_dir / dat_file;
         const bool _dat_exists = boost::filesystem::exists( full_dat_path );
         files_result &= _dat_exists;
         if( _flag_logger ){
@@ -407,7 +407,8 @@ bool SimGrid::read_grid_from_dat_files(){
         sim_image_properties.get_flag_full_n_rows_height() &&
         sim_image_properties.get_flag_full_n_cols_width()
       ){
-      boost::filesystem::path dir ( base_dir_path );
+        boost::filesystem::path dat_input_dir ( dat_output_target_folder );
+
       for (int thickness = 1; thickness <= slice_samples ; thickness++ ){
         //will contain the row of simulated images (same thickness, diferent defocus)
         std::vector<cv::Mat> raw_simulated_images_row;
@@ -416,7 +417,7 @@ bool SimGrid::read_grid_from_dat_files(){
           std::stringstream output_dat_name_stream;
           output_dat_name_stream << "image_" << std::setw(3) << std::setfill('0') << std::to_string(thickness) << "_" << std::setw(3) << std::setfill('0') << std::to_string(defocus) << ".dat";
           boost::filesystem::path dat_file ( output_dat_name_stream.str() );
-          boost::filesystem::path full_dat_path = dir / dat_file;
+          boost::filesystem::path full_dat_path = base_dir_path / dat_input_dir / dat_file;
           bool _mmap_ok = false;
           float* p;
           try {

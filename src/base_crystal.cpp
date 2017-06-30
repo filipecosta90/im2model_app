@@ -1,7 +1,6 @@
 #include "base_crystal.hpp"
 
-
-BaseCrystal::BaseCrystal( boost::process::ipstream &async_io_buffer_out ) : _io_pipe_out(async_io_buffer_out) {
+BaseCrystal::BaseCrystal( ) {
 }
 
 bool BaseCrystal::calculate_defocus_period(){
@@ -111,9 +110,15 @@ bool BaseCrystal::set_unit_cell_cif_path( std::string cif_path ){
 bool BaseCrystal::set_nz_simulated_partitions_from_prm(){
   assert( slc_file_name_prefix != "" );
   bool result = false;
-  boost::filesystem::path dir ( base_dir_path );
   boost::filesystem::path file ( slc_file_name_prefix + ".prm");
-  boost::filesystem::path full_path = dir / file;
+  boost::filesystem::path full_path;
+  if( _flag_slc_output_target_folder ){
+    boost::filesystem::path target_folder ( slc_output_target_folder );
+    full_path = base_dir_path / target_folder / file;
+  }
+  else{
+    full_path = base_dir_path / file;
+  }
 
   const bool _file_exists = boost::filesystem::exists( full_path.string() );
   if( _flag_logger ){
@@ -121,6 +126,7 @@ bool BaseCrystal::set_nz_simulated_partitions_from_prm(){
     message << "checking if CELSLC prm file exists. filename: " <<  full_path.string() << "\t| result: " << std::boolalpha << _file_exists;
     logger->logEvent( ApplicationLog::notification , message.str() );
   }
+
   if( _file_exists ){
     std::stringstream input_prm_stream;
     input_prm_stream << full_path.string() ;
@@ -287,6 +293,24 @@ bool BaseCrystal::set_slc_file_name_prefix( std::string prefix ){
   return true;
 }
 
+bool BaseCrystal::set_slc_output_target_folder( std::string folder ){
+  slc_output_target_folder = folder;
+  _flag_slc_output_target_folder = true;
+  return true;
+}
+
+bool BaseCrystal::set_wav_output_target_folder( std::string folder ){
+  wav_output_target_folder = folder;
+  _flag_wav_output_target_folder = true;
+  return true;
+}
+
+bool BaseCrystal::set_dat_output_target_folder( std::string folder ){
+  dat_output_target_folder = folder;
+  _flag_dat_output_target_folder = true;
+  return true;
+}
+
 bool BaseCrystal::set_slice_samples( int samples ){
   slice_samples = samples;
   _flag_slice_samples = true;
@@ -338,33 +362,10 @@ bool BaseCrystal::set_base_dir_path( boost::filesystem::path path ){
   _flag_base_dir_path = true;
   if( _flag_logger ){
     std::stringstream message;
-    message << "CELSLC_prm baseDirPath: " << path.string();
+    message << "BaseCrystal baseDirPath: " << path.string();
     logger->logEvent( ApplicationLog::notification, message.str() );
   }
   return true;
-}
-
-/* Runnable dependant binary full bin path */
-bool BaseCrystal::set_bin_execname( std::string execname ){
-  try {
-    full_bin_path_execname = boost::filesystem::path (execname);
-    _flag_full_bin_path_execname = boost::filesystem::exists( full_bin_path_execname );
-  }
-  catch (const boost::filesystem::filesystem_error& ex) {
-    std::cout << ex.what() << '\n';
-    _flag_full_bin_path_execname = false;
-    if( _flag_logger ){
-      std::stringstream message;
-      message << "Error: " << ex.what();
-      logger->logEvent( ApplicationLog::error , message.str() );
-    }
-  }
-  if( _flag_logger ){
-    std::stringstream message;
-    message << "Checking if exec exists. full path: " <<  full_bin_path_execname.string() << " || result: " << std::boolalpha << _flag_full_bin_path_execname;
-    logger->logEvent( ApplicationLog::notification , message.str() );
-  }
-  return _flag_full_bin_path_execname;
 }
 
 /* Loggers */
@@ -462,22 +463,10 @@ std::ostream& BaseCrystal::output(std::ostream& stream) const {
     << "\t\t" << "_flag_defocus_upper_bound : " << std::boolalpha <<  _flag_defocus_upper_bound << "\n"
     << "\t" << "defocus_period : " <<  defocus_period << "\n"
     << "\t\t" << "_flag_defocus_period : " << std::boolalpha <<  _flag_defocus_period << "\n"
-
-    /* boost process output streams */
-    << "\t\t" << "_flag_io_ap_pipe_out : " << std::boolalpha <<  _flag_io_ap_pipe_out << "\n"
-
     /* Loggers */
     << "\t\t" << "_flag_logger : " << std::boolalpha <<  _flag_logger << "\n"
-
     /* Base dir path */
     << "\t" << "base_dir_path : " << base_dir_path.string() << "\n"
-    << "\t\t" << "_flag_base_dir_path : " << std::boolalpha <<  _flag_base_dir_path << "\n"
-
-    /* Runnable dependant binary full bin path */
-    << "\t" << "full_bin_path_execname : " << full_bin_path_execname.string() << "\n"
-    << "\t\t" << "_flag_full_bin_path_execname : " << std::boolalpha <<  _flag_full_bin_path_execname << "\n"
-    // running flags
-    << "\t\t" << "_flag_debug_switch : " << std::boolalpha <<  _flag_debug_switch << "\n"
-    << "\t\t" << "_flag_runned_bin : " << std::boolalpha <<  _flag_runned_bin << "\n";
+    << "\t\t" << "_flag_base_dir_path : " << std::boolalpha <<  _flag_base_dir_path << "\n";
   return stream;
 }

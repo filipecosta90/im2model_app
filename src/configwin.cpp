@@ -230,12 +230,11 @@ void MainWindow::update_tdmap_simgrid_ended( bool result ){
 void MainWindow::update_tdmap_celslc_step( int at_step ){
   std::cout << "update_tdmap_celslc_step " << at_step << std::endl;
 }
-
-bool MainWindow::set_base_dir_path( boost::filesystem::path base_dir ){
-  base_dir_path = base_dir;
-  _flag_base_dir_path = _core_td_map->set_base_dir_path( base_dir );
+/*
+bool MainWindow::set_project_dir_path( boost::filesystem::path base_dir ){
+  _flag_base_dir_path = _core_td_map->set_project_dir_path( base_dir );
   return _flag_base_dir_path;
-}
+}*/
 
 bool MainWindow::set_application_logger( ApplicationLog::ApplicationLog* logger ){
   im2model_logger = logger;
@@ -252,7 +251,7 @@ bool MainWindow::_is_initialization_ok(){
 bool MainWindow::maybeSetPreferences(){
   const QMessageBox::StandardButton ret
     = QMessageBox::warning(this, tr("Application"),
-        tr("The saved prefences file is incomplete.\n""To use Im2Model all preferences vars must be set.\n"
+        tr("The saved prefences file is incomplete.\n""To use Im2Model all preferences vars must be setted.\n"
           "Do you want to open the preferences panel?"),
         QMessageBox::Yes | QMessageBox::Close);
   switch (ret) {
@@ -601,19 +600,28 @@ bool MainWindow::save()
 {
   if ( curFile.isEmpty() ){
     return saveAs();
-  } else {
+  }
+  else {
     return saveFile(curFile);
   }
 }
 
 bool MainWindow::saveAs()
 {
+  bool result = false;
   QFileDialog dialog(this);
   dialog.setWindowModality(Qt::WindowModal);
   dialog.setAcceptMode(QFileDialog::AcceptSave);
-  if (dialog.exec() != QDialog::Accepted)
-    return false;
-  return saveFile(dialog.selectedFiles().first());
+  if ( dialog.exec() == QDialog::Accepted ){
+    QString folder_path = dialog.selectedFiles().first();
+    result = _core_td_map->set_project_dir_path( folder_path.toStdString() );
+    if( result ){
+      std::string project_filename_with_path = _core_td_map->get_project_filename_with_path();
+      QString qt_project_filename_with_path = QString::fromStdString( project_filename_with_path );
+        result = saveFile( qt_project_filename_with_path );
+    }
+    }
+    return result;
 }
 
 bool MainWindow::export_TDMap(){
@@ -624,7 +632,7 @@ bool MainWindow::export_TDMap(){
       QFileDialog dialog(this);
       dialog.setWindowModality(Qt::WindowModal);
       std::string preset_filename = _core_td_map->get_export_sim_grid_filename_hint();
-
+      boost::filesystem::path base_dir_path = _core_td_map->get_project_dir_path();
       boost::filesystem::path filename( preset_filename );
       boost::filesystem::path full_path_filename = base_dir_path / preset_filename ;
       dialog.selectFile( QString::fromStdString(full_path_filename.string() ) );
@@ -887,6 +895,7 @@ void MainWindow::loadFile(const QString &fileName){
   // The first parameter in the constructor is the character used for indentation, whilst the second is the indentation length.
   boost::property_tree::xml_writer_settings<std::string> pt_settings( ' ', 4 );
   boost::property_tree::ptree config;
+  bool result = _core_td_map->set_project_filename_with_path( fileName.toStdString() );
 
   boost::property_tree::read_xml( fileName.toStdString(), config);
 
@@ -943,7 +952,7 @@ void MainWindow::loadFile(const QString &fileName){
   ui->statusBar->showMessage(tr("File loaded"), 2000);
 }
 
-bool MainWindow::saveFile(const QString &fileName){
+bool MainWindow::saveFile(const QString &fileName ){
 
 #ifndef QT_NO_CURSOR
   QApplication::setOverrideCursor(Qt::WaitCursor);
@@ -958,7 +967,6 @@ bool MainWindow::saveFile(const QString &fileName){
   boost::property_tree::ptree *super_cell_setup_model_ptree = super_cell_setup_model->save_data_into_property_tree();
 
   boost::property_tree::ptree *config = new boost::property_tree::ptree();
-
   config->add_child("project_setup_image_fields_ptree", *project_setup_image_fields_ptree);
   config->add_child("project_setup_crystalographic_fields_ptree", *project_setup_crystalographic_fields_ptree);
   config->add_child("tdmap_simulation_setup_ptree", *tdmap_simulation_setup_ptree);
@@ -980,14 +988,14 @@ bool MainWindow::saveFile(const QString &fileName){
 
 void MainWindow::setCurrentFile(const QString &fileName){
   curFile = fileName;
-  // textEdit->document()->setModified(false);
   setWindowModified(false);
 
   QString shownName = curFile;
   if (curFile.isEmpty()){
-    shownName = "untitled.im2model";
+    shownName = "*untitled.im2model";
   }
   this->setWindowFilePath(shownName);
+  this->setWindowTitle( shownName );
 }
 
 QString MainWindow::strippedName(const QString &fullFileName){

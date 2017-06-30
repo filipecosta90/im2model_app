@@ -59,7 +59,7 @@ class MainWindow : public QMainWindow {
 
     bool set_dr_probe_path( QString path );
     bool set_application_logger( ApplicationLog::ApplicationLog* logger );
-    bool set_base_dir_path( boost::filesystem::path base_dir );
+    bool set_project_dir_path( boost::filesystem::path base_dir );
 
     void loadFile(const QString &fileName);
     ~MainWindow();
@@ -195,10 +195,6 @@ signals:
     /* Loggers */
     ApplicationLog::ApplicationLog* im2model_logger = nullptr;
     bool _flag_im2model_logger = false;
-
-    /* Base dir path */
-    boost::filesystem::path base_dir_path;
-    bool _flag_base_dir_path = false;
 
     QMenu* alignMenu;
     QAction*  auto_range_lower_upper;

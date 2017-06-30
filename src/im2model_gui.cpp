@@ -23,7 +23,6 @@
 int main(int argc, char *argv[]){
   std::cout <<  QDir::currentPath().toStdString() << std::endl;
 
-
   // to access resources
   Q_INIT_RESOURCE(im2model);
   QCoreApplication::addLibraryPath("./");
@@ -60,11 +59,11 @@ int main(int argc, char *argv[]){
     if (!parser.positionalArguments().isEmpty()){
       window.loadFile(parser.positionalArguments().first());
     }
-    const bool base_setted = window.set_base_dir_path( app_path );
-    if( base_setted ){
+    //const bool base_setted = window.set_base_dir_path( app_path );
+    //if( base_setted ){
       window.show();
       return app.exec();
-    }
+    //}
   }
   im2model_logger->logEvent(ApplicationLog::normal, "Application exit");
 

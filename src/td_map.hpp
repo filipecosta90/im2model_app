@@ -33,6 +33,10 @@ class TDMap  : public QObject {
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     // RUNNING CONFIGS
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    boost::filesystem::path project_dir_path;
+    boost::filesystem::path project_filename_with_path;
+    std::string project_filename;
+    bool _flag_project_dir_path = false;
 
     /////////////////////////
     // Dr Probe PRM wrappers
@@ -84,6 +88,8 @@ class TDMap  : public QObject {
     std::vector<std::string> test_run_config_errors;
     std::vector<std::string> test_clean_run_env_warnings;
 
+    bool set_base_dir_path( boost::filesystem::path path );
+
   public:
     enum RefinementPreset { NO_REFINEMENT, MICROSCOPE_CORRECTED, MICROSCOPE_NON_CORRECTED, USER_DEFINED_PRESET };
     enum ExecLogMode {FULL_LOG, DEBUG_MODE, SILENT_MODE, USER_DEFINED_LOG_MODE };
@@ -112,6 +118,7 @@ class TDMap  : public QObject {
     bool test_clean_run_env();
 
     // class flag getters
+    bool get_flag_project_dir_path(){ return _flag_project_dir_path; };
     bool get_flag_image_correlation_matching_method(){ return _flag_image_correlation_matching_method; }
     bool get_flag_refinement_definition_method(){ return _flag_refinement_definition_method; }
 
@@ -175,9 +182,14 @@ class TDMap  : public QObject {
     double get_defocus_period();
     std::vector<double> get_slice_params_accum_nm_slice_vec();
 
+    boost::filesystem::path get_project_dir_path(){ return project_dir_path; }
+    std::string get_project_filename_with_path();
+
 
     /** setters **/
     // class setters
+    bool set_project_dir_path( std::string name_path );
+    bool set_project_filename_with_path( std::string filename_with_path );
     bool set_exp_image_properties_full_image( std::string path );
     bool set_exp_image_properties_sampling_rate_x_nm_per_pixel( std::string sampling_x );
     bool set_exp_image_properties_sampling_rate_y_nm_per_pixel( std::string sampling_y );
@@ -186,13 +198,17 @@ class TDMap  : public QObject {
     bool set_slc_file_name_prefix( std::string );
     bool set_wave_function_name( std::string  );
     bool set_file_name_output_image_wave_function( std::string );
+
+    bool set_slc_output_target_folder( std::string folder );
+    bool set_wav_output_target_folder( std::string folder );
+    bool set_dat_output_target_folder( std::string folder );
+    
     bool set_msa_prm_name( std::string  );
     bool set_wavimg_prm_name( std::string  );
     bool set_super_cell_size_a( std::string size_a );
     bool set_super_cell_size_b( std::string size_b );
     bool set_super_cell_size_c( std::string size_c );
 
-    bool set_base_dir_path( boost::filesystem::path path );
     bool set_application_logger( ApplicationLog::ApplicationLog* app_logger );
     void set_group_options( group_options* celslc_step, group_options* msa_step, group_options* wavimg_step, group_options* simgrid_step );
     bool set_dr_probe_celslc_execname( std::string celslc_execname );

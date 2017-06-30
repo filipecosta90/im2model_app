@@ -34,14 +34,14 @@
 
 #include <stdlib.h>
 
+#include "base_bin.hpp"
 #include "base_image.hpp"
-#include "base_logger.hpp"
 #include "base_crystal.hpp"
+#include "base_logger.hpp"
 #include "application_log.hpp"
 
-class CELSLC_prm : public BaseCrystal, public BaseImage {
+class CELSLC_prm : public BaseBin, public BaseCrystal, public BaseImage {
   private:
-
     std::string super_cell_cel_file;
     // [Slice Parameters]
 
@@ -78,14 +78,13 @@ class CELSLC_prm : public BaseCrystal, public BaseImage {
 
     void set_cel_file( std::string super_cell_cel_file );
 
-
     void set_dwf_switch( bool dwf_switch );
 
     void set_abs_switch( bool abs_switch );
 
     bool check_produced_slices();
 
-    void produce_prm( );
+    void produce_prm();
 
     bool cleanup_bin();
 
@@ -101,6 +100,7 @@ class CELSLC_prm : public BaseCrystal, public BaseImage {
     bool set_super_cell_size_b( double size );
     /* Loggers */
     bool set_application_logger( ApplicationLog::ApplicationLog* logger );
+
     void print_var_state();
 
 

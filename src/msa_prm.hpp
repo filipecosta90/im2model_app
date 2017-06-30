@@ -18,11 +18,12 @@
 
 #include <stdlib.h>
 
+#include "base_bin.hpp"
 #include "base_image.hpp"
 #include "base_crystal.hpp"
 #include "application_log.hpp"
 
-class MSA_prm : public BaseCrystal, public BaseImage  {
+class MSA_prm : public BaseBin, public BaseCrystal, public BaseImage  {
 
   private:
     double object_tilt_x_component = 0.0f;

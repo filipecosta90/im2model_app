@@ -2,9 +2,9 @@
 
 static const std::string SLI_EXTENSION = ".sli";
 
-CELSLC_prm::CELSLC_prm( boost::process::ipstream &async_io_buffer_out ) : BaseCrystal ( async_io_buffer_out ) {
-  BaseImage::set_flag_auto_n_rows(true);
-  BaseImage::set_flag_auto_n_cols(true);
+CELSLC_prm::CELSLC_prm( boost::process::ipstream &async_io_buffer_out ) : BaseBin ( async_io_buffer_out ) {
+  BaseImage::set_flag_auto_n_rows( true );
+  BaseImage::set_flag_auto_n_cols( true );
 }
 
 void CELSLC_prm::set_dwf_switch( bool dwf ){
@@ -17,12 +17,11 @@ void CELSLC_prm::set_abs_switch( bool abs ){
 
 void CELSLC_prm::cleanup_thread(){
   bool status = true;
-  boost::filesystem::path dir ( base_dir_path );
 
   // remove prm first
   std::string prm_filename = slc_file_name_prefix + ".prm";
   boost::filesystem::path prm_file ( prm_filename );
-  boost::filesystem::path full_prm_path = dir / prm_file;
+  boost::filesystem::path full_prm_path = base_bin_output_dir_path / prm_file;
 
   if( boost::filesystem::exists( full_prm_path ) ){
     const bool remove_result = boost::filesystem::remove( prm_file );
@@ -40,7 +39,7 @@ void CELSLC_prm::cleanup_thread(){
     std::stringstream filename_stream;
     filename_stream << slc_file_name_prefix << "_"<< std::setw(3) << std::setfill('0') << std::to_string(slice_id) << ".sli" ;
     boost::filesystem::path slice_file ( filename_stream.str() );
-    boost::filesystem::path full_slice_path = dir / slice_file;
+    boost::filesystem::path full_slice_path = base_bin_output_dir_path / slice_file;
     if( boost::filesystem::exists( full_slice_path ) ){
       const bool remove_result = boost::filesystem::remove( full_slice_path );
       status &= remove_result;
@@ -54,17 +53,24 @@ void CELSLC_prm::cleanup_thread(){
 }
 
 bool CELSLC_prm::check_produced_slices(){
-  bool result = true;
-  boost::filesystem::path dir ( base_dir_path );
+  bool result = false;
+  if(
+    // BaseCrystal vars
+    _flag_slc_file_name_prefix &&
+    // BaseBin vars
+    _flag_base_bin_start_dir_path &&
+    _flag_base_bin_output_dir_path
+  ){
+  bool flag_files = true;
   for ( int slice_id = 1 ;
-      slice_id <= nz_simulated_partitions;
+      slice_id <= nz_simulated_partitions && flag_files;
       slice_id++){
     std::stringstream filename_stream;
     filename_stream << slc_file_name_prefix << "_"<< std::setw(3) << std::setfill('0') << std::to_string(slice_id) << ".sli" ;
     boost::filesystem::path slice_file ( filename_stream.str() );
-    boost::filesystem::path full_slice_path = dir / slice_file;
+    boost::filesystem::path full_slice_path = base_bin_output_dir_path / slice_file;
     const bool _slice_exists = boost::filesystem::exists( full_slice_path );
-    result &= _slice_exists;
+    flag_files &= _slice_exists;
     if( _flag_logger ){
       std::stringstream message;
       message << "checking if the produced slice file \"" << full_slice_path.string() << "\" exists: " << std::boolalpha << _slice_exists;
@@ -73,9 +79,20 @@ bool CELSLC_prm::check_produced_slices(){
   }
   if( _flag_logger ){
     std::stringstream message;
-    message << "check_produced_slices  END RESULT: " << std::boolalpha << result;
+    message << "check_produced_slices  END RESULT: " << std::boolalpha << flag_files;
     logger->logEvent( ApplicationLog::notification , message.str() );
   }
+  result = flag_files;
+}
+  else{
+    if( _flag_logger ){
+      std::stringstream message;
+      message << "The required vars for call_boost_bin() are not setted up.";
+      logger->logEvent( ApplicationLog::error , message.str() );
+    }
+    print_var_state();
+
+}
   return result;
 }
 
@@ -108,9 +125,9 @@ std::ostream& CELSLC_prm::create_bin_args(std::ostream& args_stream) const {
     }
   }
 
-  boost::filesystem::path dir ( base_dir_path );
   boost::filesystem::path file ( slc_file_name_prefix );
-  boost::filesystem::path full_path = dir / file;
+  boost::filesystem::path full_path;
+  full_path = base_bin_output_dir_path / file;
 
   args_stream << " -slc \"" << full_path.string() << "\"";
 
@@ -164,11 +181,14 @@ bool CELSLC_prm::call_boost_bin( ){
     if(
         // BaseCrystal vars
         _flag_unit_cell_cif_path &&
-        _flag_base_dir_path &&
         _flag_slc_file_name_prefix &&
+        _flag_ht_accelaration_voltage &&
+        // BaseBin vars
+        _flag_base_bin_start_dir_path &&
+        _flag_base_bin_output_dir_path &&
+        // BaseImage vars
         _flag_full_n_rows_height  &&
-        _flag_full_n_cols_width &
-        _flag_ht_accelaration_voltage
+        _flag_full_n_cols_width
       )
     {
       std::stringstream args_stream;
@@ -188,7 +208,7 @@ bool CELSLC_prm::call_boost_bin( ){
           boost::process::child c(
               // command
               args_stream.str(),
-              boost::process::start_dir= base_dir_path,
+              boost::process::start_dir= base_bin_start_dir_path,
               // redirecting std_out to async buffer
               boost::process::std_out > _io_pipe_out,
               // redirecting std_err to null
@@ -211,7 +231,7 @@ bool CELSLC_prm::call_boost_bin( ){
         boost::process::child c(
             // command
             args_stream.str(),
-            boost::process::start_dir= base_dir_path,
+            boost::process::start_dir= base_bin_start_dir_path,
             // redirecting std_out to null
             boost::process::std_out > boost::process::null,
             // redirecting std_err to null
@@ -280,9 +300,8 @@ bool CELSLC_prm::prepare_bin_ssc(){
       }
     }
 
-    boost::filesystem::path dir ( base_dir_path );
     boost::filesystem::path file ( slc_file_name_prefix );
-    boost::filesystem::path full_path = dir / file;
+    boost::filesystem::path full_path = base_bin_output_dir_path / file;
 
     args_stream << " -slc " << full_path.string();
     // input nx string
@@ -336,9 +355,8 @@ bool CELSLC_prm::call_bin_ssc(){
         args_stream << " -cel " << super_cell_cel_file;
       }
     }
-    boost::filesystem::path dir ( base_dir_path );
     boost::filesystem::path file ( slc_file_name_prefix );
-    boost::filesystem::path full_path = dir / file;
+    boost::filesystem::path full_path = base_bin_output_dir_path / file;
 
     args_stream << " -slc " << full_path.string();
 
@@ -450,6 +468,7 @@ bool CELSLC_prm::set_application_logger( ApplicationLog::ApplicationLog* app_log
   _flag_logger = true;
   BaseCrystal::set_application_logger( app_logger );
   BaseImage::set_application_logger( app_logger );
+  BaseBin::set_application_logger( app_logger );
   logger->logEvent( ApplicationLog::notification, "Application logger setted for CELSLC_prm class." );
   return true;
 }
@@ -471,6 +490,8 @@ void CELSLC_prm::print_var_state(){
     BaseCrystal::output(message);
     message <<  "\t" << "BaseImage Properties : " << "\n";
     BaseImage::output(message);
+    message <<  "\t" << "BaseBin Properties : " << "\n";
+    BaseBin::output(message);
     logger->logEvent( ApplicationLog::notification , message.str() );
   }
 }

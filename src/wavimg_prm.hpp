@@ -16,11 +16,12 @@
 
 #include <stdlib.h>
 
+#include "base_bin.hpp"
 #include "base_image.hpp"
 #include "base_crystal.hpp"
 #include "application_log.hpp"
 
-class WAVIMG_prm : public BaseCrystal, public BaseImage {
+class WAVIMG_prm : public BaseBin, public BaseCrystal, public BaseImage {
 
   private:
     // line 1

@@ -16,6 +16,7 @@
   symbcalc.hpp
   td_map.hpp
   global_def.hpp
+  base_bin.hpp
   base_crystal.hpp
   base_image.hpp
   base_logger.hpp
@@ -31,6 +32,7 @@
   super_cell.cpp
   wavimg_prm.cpp
   td_map.cpp
+  base_bin.cpp
   base_crystal.cpp
   base_image.cpp
   base_logger.cpp
