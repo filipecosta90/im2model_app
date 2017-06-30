@@ -536,28 +536,34 @@ bool TreeItem::setData(int column, const QVariant &value, int role ){
   if( role == Qt::EditRole ){
     if  (column >= 0 && column < itemData.size() ) {
       if( itemData[column] != value ){
+        bool setter_result = false;
         //call setter on core im2model
         if( ( _fp_data_setter_col_pos == column ) && (_flag_fp_data_setter_string || _flag_fp_data_setter_bool || _flag_fp_data_setter_int || _flag_fp_data_setter_double ) ){
           if( _flag_fp_data_setter_string ){
             std::string t1 = value.toString().toStdString();
-            fp_data_setter_string( t1 );
+            setter_result = fp_data_setter_string( t1 );
           }
           if( _flag_fp_data_setter_bool ){
             bool t1 = value.toBool();
-            fp_data_setter_bool( t1 );
+            setter_result = fp_data_setter_bool( t1 );
           }
           if( _flag_fp_data_setter_int ){
             int t1 = value.toInt();
-            fp_data_setter_int( t1 );
+            setter_result = fp_data_setter_int( t1 );
           }
           if( _flag_fp_data_setter_double ){
             double t1 = value.toDouble();
-            fp_data_setter_double( t1 );
+            setter_result = fp_data_setter_double( t1 );
           }
+          if( setter_result ){
           itemData[column] = value;
           emit dataChanged( _variable_name );
           emit dataChanged( column );
           result = true;
+          }
+          else{
+            result = false;
+          }
         }
       }
     }
