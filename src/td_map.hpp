@@ -262,6 +262,7 @@ class TDMap  : public QObject {
     cv::Mat get_exp_image_properties_full_image();
     cv::Mat get_exp_image_properties_roi_image();
     cv::Rect get_exp_image_properties_roi_rectangle();
+    int get_exp_image_properties_full_n_cols_width();
 
 signals:
     void TDMap_started_celslc( );

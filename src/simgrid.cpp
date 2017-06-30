@@ -120,6 +120,9 @@ cv::Mat SimGrid::get_exp_image_properties_roi_image(){
 cv::Rect SimGrid::get_exp_image_properties_roi_rectangle(){
   return exp_image_properties.get_roi_rectangle();
 }
+int SimGrid::get_exp_image_properties_full_n_cols_width(){
+  return exp_image_properties.get_full_n_cols_width();
+}
 
 bool SimGrid::get_exp_image_properties_flag_full_image(){
   return exp_image_properties.get_flag_full_image();

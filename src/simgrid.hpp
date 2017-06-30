@@ -138,6 +138,7 @@ std::vector< double > get_simulated_images_horizontal_header_defocus_nm(){ retur
     bool get_exp_image_properties_flag_full_image();
     bool get_exp_image_properties_flag_roi_image();
     bool get_exp_image_properties_flag_roi_rectangle();
+    int get_exp_image_properties_full_n_cols_width();
 
     /** getters **/
     // flag getters

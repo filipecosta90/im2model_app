@@ -17,10 +17,8 @@
 #include <QAction>
 #include <QEvent>
 #include <QObject>
-
 #include "application_log.hpp"
 #include "QtAwesome.h"
-
 #include <QApplication>
 
 class Application final : public QApplication {

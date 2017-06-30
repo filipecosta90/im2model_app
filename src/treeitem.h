@@ -105,6 +105,15 @@ class TreeItem : public QObject {
     std::string  get_variable_description();
     void setStatusOption( int col , ActionStatusType action );
 
+    bool get_flag_validatable_int(int col_pos );
+    bool set_flag_validatable_int(int col_pos, bool value );
+    bool get_flag_validatable_int_top(int col_pos );
+    bool get_flag_validatable_int_bottom(int col_pos );
+    bool set_validator_int_top(int col_pos ,  boost::function<int(void)> fp_validator_max );
+    bool set_validator_int_bottom(int col_pos ,  boost::function<int(void)> fp_validator_min );
+    int get_validator_value_int_bottom( int col_pos );
+    int get_validator_value_int_top( int col_pos  );
+
     bool get_flag_fp_data_getter_bool();
     bool call_fp_data_getter_bool();
     bool get_flag_fp_data_setter_bool();
@@ -131,6 +140,12 @@ signals:
     QVector<bool> itemState;
     std::vector< boost::function<bool(bool)> > fp_checkable_setters;
     std::vector< boost::function<bool(void)> > fp_checkable_getters;
+
+    QVector<bool> itemIsValidatableIntVec;
+    QVector<bool> itemIsValidatableIntTopVec;
+    QVector<bool> itemIsValidatableIntBottomVec;
+    std::vector< boost::function<int(void)> > fp_validator_int_range_min;
+    std::vector< boost::function<int(void)> > fp_validator_int_range_max;
 
     QVector<QVariant> dropdown_data;
     QVector<QVariant> dropdown_enum;
@@ -186,12 +201,11 @@ signals:
     ActionStatusType _action_status = ActionStatusType::_status_NOT_READY;
 
     std::vector<bool> _flag_highlight_error;
-private slots:
-    void clean_highlight_status( int column );
+    private slots:
+      void clean_highlight_status( int column );
 };
 
 Q_DECLARE_METATYPE(std::string)
 
 
 #endif // TREEITEM_H
-

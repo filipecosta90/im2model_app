@@ -11,6 +11,85 @@
 #include <iostream>
 #include <boost/foreach.hpp>
 
+bool TreeItem::get_flag_validatable_int_top(int col_pos ){
+  bool result = false;
+  if  (col_pos >= 0 && col_pos < itemIsValidatableIntTopVec.size() ) {
+    //call getter on core im2model
+    result = itemIsValidatableIntTopVec.at( col_pos );
+  }
+  return result;
+}
+
+bool TreeItem::get_flag_validatable_int_bottom(int col_pos ){
+  bool result = false;
+  if  (col_pos >= 0 && col_pos < itemIsValidatableIntBottomVec.size() ) {
+    //call getter on core im2model
+    result = itemIsValidatableIntBottomVec.at( col_pos );
+  }
+  return result;
+}
+
+int TreeItem::get_validator_value_int_bottom( int col_pos ){
+  int value = 0;
+  if  (col_pos >= 0 && col_pos < fp_validator_int_range_min.size() ) {
+  value = fp_validator_int_range_min[col_pos]();
+  }
+  return value;
+}
+
+
+int TreeItem::get_validator_value_int_top( int col_pos  ){
+  int value = 1000;
+  if  (col_pos >= 0 && col_pos < fp_validator_int_range_max.size() ) {
+  value = fp_validator_int_range_max[col_pos]();
+  }
+  return value;
+}
+
+
+bool TreeItem::set_validator_int_top(int col_pos ,  boost::function<int(void)> fp_validator_max ){
+  bool result = false;
+  if  (col_pos >= 0 && col_pos < fp_validator_int_range_max.size() ) {
+    //call getter on core im2model
+    fp_validator_int_range_max[col_pos] = fp_validator_max ;
+    itemIsValidatableIntTopVec[col_pos] = true;
+    result = true;
+  }
+  return result;
+}
+
+bool TreeItem::set_validator_int_bottom(int col_pos ,  boost::function<int(void)> fp_validator_min ){
+  bool result = false;
+  if  (col_pos >= 0 && col_pos < fp_validator_int_range_min.size() ) {
+    //call getter on core im2model
+    fp_validator_int_range_min[col_pos] = fp_validator_min ;
+    itemIsValidatableIntBottomVec[col_pos] = true;
+    result = true;
+  }
+  return result;
+}
+
+
+bool TreeItem::get_flag_validatable_int(int col_pos ){
+  bool result = false;
+  if  (col_pos >= 0 && col_pos < itemIsValidatableIntVec.size() ) {
+    //call getter on core im2model
+    result = itemIsValidatableIntVec.at( col_pos );
+  }
+  return result;
+}
+
+bool TreeItem::set_flag_validatable_int(int col_pos , bool value  ){
+  bool result = false;
+  if  (col_pos >= 0 && col_pos < itemIsValidatableIntVec.size() ) {
+    //call getter on core im2model
+    itemIsValidatableIntVec[col_pos] = value ;
+    result = true;
+  }
+  return result;
+}
+
+
 void TreeItem::set_action_toolBar( CustomToolButton* tool ){
   alignToolButton = tool;
 }
@@ -20,31 +99,31 @@ CustomToolButton* TreeItem::get_action_toolBar(){
 }
 
 bool TreeItem::has_hightlight_error( int column ){
-    return _flag_highlight_error.at(column );
+  return _flag_highlight_error.at(column );
 }
 
 bool TreeItem::disable_highlight_error( int column ){
-_flag_highlight_error[column] = false;
-return true;
+  _flag_highlight_error[column] = false;
+  return true;
 }
 
 bool TreeItem::enable_highlight_error( std::string varname , int column ){
-    bool result = false;
-    if ( _variable_name == varname ){
-        _flag_highlight_error[column] = true;
+  bool result = false;
+  if ( _variable_name == varname ){
+    _flag_highlight_error[column] = true;
+    result = true;
+  }
+  else{
+    int number_childs = childCount();
+    for( int n = 0; n < number_childs; n++){
+      TreeItem* _child =  childItems.value(n);
+      const bool _child_result = _child->enable_highlight_error( varname, column );
+      if( _child_result ){
         result = true;
+      }
     }
-    else{
-        int number_childs = childCount();
-        for( int n = 0; n < number_childs; n++){
-          TreeItem* _child =  childItems.value(n);
-          const bool _child_result = _child->enable_highlight_error( varname, column );
-          if( _child_result ){
-              result = true;
-          }
-        }
-    }
-    return result;
+  }
+  return result;
 }
 
 TreeItem::TreeItem( QVector<QVariant> &data, TreeItem *parent) {
@@ -53,6 +132,11 @@ TreeItem::TreeItem( QVector<QVariant> &data, TreeItem *parent) {
   parentItem = parent;
   for( int pos = 0; pos < data.size(); pos++ ){
     itemIsCheckableVec.push_back(false);
+    itemIsValidatableIntVec.push_back(false);
+    itemIsValidatableIntTopVec.push_back(false);
+    itemIsValidatableIntBottomVec.push_back(false);
+    fp_validator_int_range_min.push_back( boost::function<int(void)>() );
+    fp_validator_int_range_max.push_back( boost::function<int(void)>() );
     itemState.push_back(false);
     fp_checkable_setters.push_back(  boost::function<bool(bool)>() );
     fp_checkable_getters.push_back(  boost::function<bool(void)>() );
@@ -63,9 +147,9 @@ TreeItem::TreeItem( QVector<QVariant> &data, TreeItem *parent) {
 }
 
 void TreeItem::clean_highlight_status( int column ){
-    if( this->has_hightlight_error(column) ){
+  if( this->has_hightlight_error(column) ){
     disable_highlight_error(column);
-    }
+  }
 }
 
 TreeItem::TreeItem( QVector<QVariant> &data, QVector<bool> editable, TreeItem *parent  ) : TreeItem( data, parent ){
@@ -506,10 +590,10 @@ bool TreeItem::appendData( int column, const QVariant &value){
 bool TreeItem::clearData( int column ){
   bool result = false;
   if  (column >= 0 && column < itemData.size() ) {
-      itemData[column].setValue( QVariant() );
-      emit dataChanged(column);
-      emit dataChanged( _variable_name );
-      result = true;
+    itemData[column].setValue( QVariant() );
+    emit dataChanged(column);
+    emit dataChanged( _variable_name );
+    result = true;
   }
   return result;
 }
@@ -556,10 +640,10 @@ bool TreeItem::setData(int column, const QVariant &value, int role ){
             setter_result = fp_data_setter_double( t1 );
           }
           if( setter_result ){
-          itemData[column] = value;
-          emit dataChanged( _variable_name );
-          emit dataChanged( column );
-          result = true;
+            itemData[column] = value;
+            emit dataChanged( _variable_name );
+            emit dataChanged( column );
+            result = true;
           }
           else{
             result = false;

@@ -1350,6 +1350,10 @@ bool TDMap::get_exp_image_properties_flag_full_image(){
   return  _td_map_simgrid->get_exp_image_properties_flag_full_image();
 }
 
+int TDMap::get_exp_image_properties_full_n_cols_width(){
+  return  _td_map_simgrid->get_exp_image_properties_full_n_cols_width();
+}
+
 bool TDMap::get_exp_image_properties_flag_roi_image(){
   return  _td_map_simgrid->get_exp_image_properties_flag_roi_image();
 }

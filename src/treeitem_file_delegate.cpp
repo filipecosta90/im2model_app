@@ -24,7 +24,7 @@ void TreeItemFileDelegate::paint(QPainter * painter, const QStyleOptionViewItem 
     default_pen.setColor( default_pen_color );
     painter->setPen( default_pen );
     if( item->has_hightlight_error( index.column() ) ){
-        painter->setBrush(QBrush(QColor(255, 0, 0)));
+      painter->setBrush(QBrush(QColor(255, 0, 0)));
     }
     painter->drawRect( option.rect );
     painter->restore();
@@ -288,8 +288,30 @@ QWidget *TreeItemFileDelegate::createEditor( QWidget *parent, const QStyleOption
       }
     case TreeItem::_delegate_ACTION_CHECK:
       {
-        std::cout << "createEditor _delegate_ACTION_CHECK" << std::endl;
         editor = QStyledItemDelegate::createEditor(parent,option,index);
+        break;
+      }
+    case TreeItem::_delegate_TEXT:
+      {
+        //  editor = QStyledItemDelegate::createEditor(parent,option,index);
+        editor = QItemEditorFactory().createEditor( QVariant::Type::String , parent);
+        if( item->get_flag_validatable_int( index.column() ) ){
+          QLineEdit* text_editor = dynamic_cast<QLineEdit*>(editor);
+          if( text_editor ){
+            QIntValidator* int_validator = new QIntValidator;
+            if( item->get_flag_validatable_int_top( index.column() ) ){
+              std::cout << " validator found on col " << index.column() << std::endl;
+              const int top_limit = item->get_validator_value_int_top( index.column() );
+              int_validator->setTop( top_limit );
+            }
+            if( item->get_flag_validatable_int_bottom( index.column() ) ){
+              const int bottom_limit = item->get_validator_value_int_bottom( index.column() );
+              int_validator->setBottom( bottom_limit );
+            }
+            text_editor->setValidator( int_validator );
+          }
+        }
+        // return text_editor;
         break;
       }
     default:

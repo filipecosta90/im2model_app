@@ -1111,6 +1111,11 @@ void MainWindow::create_box_options(){
 
 
   TreeItem* experimental_roi_center_y = new TreeItem ( box1_option_3_1_2 , box1_function_3_1_2, box1_option_3_1_2_edit );
+  experimental_roi_center_y->set_flag_validatable_int(1,true);
+  boost::function<int(void)> box1_function_3_1_2_validator_top ( boost::bind( &TDMap::get_exp_image_properties_full_n_cols_width,_core_td_map ) );
+
+  experimental_roi_center_y->set_validator_int_top(1, box1_function_3_1_2_validator_top );
+
   connect( experimental_roi_center_y, SIGNAL(dataChanged( int )), this, SLOT( update_roi_experimental_image_frame() ) );
   connect( experimental_roi_center_y, SIGNAL(dataChanged( int )), this, SLOT( update_roi_full_experimental_image_frame() ) );
 
