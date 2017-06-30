@@ -14,7 +14,6 @@ MainWindow::MainWindow( ApplicationLog::ApplicationLog* logger , QWidget *parent
   ui->td_map_splitter->setStretchFactor(2,2);
   ui->super_cell_splitter->setStretchFactor(0,3);
   ui->super_cell_splitter->setStretchFactor(1,7);
-
   if (_flag_im2model_logger) {
     im2model_logger->logEvent(ApplicationLog::normal, "Creating actions.");
   }
@@ -157,14 +156,14 @@ MainWindow::MainWindow( ApplicationLog::ApplicationLog* logger , QWidget *parent
 }
 
 void MainWindow::update_tdmap_celslc_started( ){
-    updateProgressBar(0,0,4);
+  updateProgressBar(0,0,4);
   ui->statusBar->showMessage(tr("Started multislice step"), 2000);
 
 }
 
 void MainWindow::update_tdmap_celslc_ended( bool result ){
-    // reset pipe
-    _sim_tdmap_celslc_ostream_buffer.pipe( boost::process::pipe() );
+  // reset pipe
+  _sim_tdmap_celslc_ostream_buffer.pipe( boost::process::pipe() );
   if( result ){
     ui->statusBar->showMessage(tr("Sucessfully ended multislice step"), 2000);
   }
@@ -174,55 +173,55 @@ void MainWindow::update_tdmap_celslc_ended( bool result ){
 }
 
 void MainWindow::update_tdmap_msa_started( ){
-    updateProgressBar(0,1,4);
+  updateProgressBar(0,1,4);
   ui->statusBar->showMessage(tr("Started calculating electron diffraction patterns"), 2000);
 }
 
 void MainWindow::update_tdmap_msa_ended( bool result ){
-    // reset pipe
-    _sim_tdmap_msa_ostream_buffer.pipe( boost::process::pipe() );
+  // reset pipe
+  _sim_tdmap_msa_ostream_buffer.pipe( boost::process::pipe() );
   if( result ){
-      updateProgressBar(0,2,4);
+    updateProgressBar(0,2,4);
     ui->statusBar->showMessage(tr("Sucessfully ended calculating the electron diffraction patterns"), 2000);
   }
   else{
-      updateProgressBar(0,2,4, true);
+    updateProgressBar(0,2,4, true);
     ui->statusBar->showMessage(tr("Error while calculating the electron diffraction patterns") );
   }
 }
 
 void MainWindow::update_tdmap_wavimg_started( ){
-    updateProgressBar(0,2,4);
+  updateProgressBar(0,2,4);
   ui->statusBar->showMessage(tr("Started calculating image intensity distribuitions"), 2000);
 }
 
 void MainWindow::update_tdmap_wavimg_ended( bool result ){
-    // reset pipe
-    _sim_tdmap_wavimg_ostream_buffer.pipe( boost::process::pipe() );
+  // reset pipe
+  _sim_tdmap_wavimg_ostream_buffer.pipe( boost::process::pipe() );
   if( result ){
-      updateProgressBar(0,3,4);
+    updateProgressBar(0,3,4);
     ui->statusBar->showMessage(tr("Sucessfully ended calculating the image intensity distribuitions"), 2000);
   }
   else{
-      updateProgressBar(0,3,4, true);
+    updateProgressBar(0,3,4, true);
     ui->statusBar->showMessage(tr("Error while calculating the image intensity distribuitions") );
   }
 }
 
 void MainWindow::update_tdmap_simgrid_started( ){
-    // reset pipe
-    _sim_tdmap_simgrid_ostream_buffer.pipe( boost::process::pipe() );
-    updateProgressBar(0,3,4);
+  // reset pipe
+  _sim_tdmap_simgrid_ostream_buffer.pipe( boost::process::pipe() );
+  updateProgressBar(0,3,4);
   ui->statusBar->showMessage(tr("Started image correlation step"), 2000);
 }
 
 void MainWindow::update_tdmap_simgrid_ended( bool result ){
   if( result ){
-      updateProgressBar(0,4,4);
+    updateProgressBar(0,4,4);
     ui->statusBar->showMessage(tr("Sucessfully ended image correlation step"), 2000);
   }
   else{
-      updateProgressBar(0,4,4, true);
+    updateProgressBar(0,4,4, true);
     ui->statusBar->showMessage(tr("Error while running image correlation step") );
   }
 }
@@ -231,10 +230,10 @@ void MainWindow::update_tdmap_celslc_step( int at_step ){
   std::cout << "update_tdmap_celslc_step " << at_step << std::endl;
 }
 /*
-bool MainWindow::set_project_dir_path( boost::filesystem::path base_dir ){
-  _flag_base_dir_path = _core_td_map->set_project_dir_path( base_dir );
-  return _flag_base_dir_path;
-}*/
+   bool MainWindow::set_project_dir_path( boost::filesystem::path base_dir ){
+   _flag_base_dir_path = _core_td_map->set_project_dir_path( base_dir );
+   return _flag_base_dir_path;
+   }*/
 
 bool MainWindow::set_application_logger( ApplicationLog::ApplicationLog* logger ){
   im2model_logger = logger;
@@ -390,11 +389,11 @@ void MainWindow::update_super_cell_target_region_shapes(){
 
 void MainWindow::update_full_experimental_image(){
   if( _core_td_map->get_exp_image_properties_flag_full_image() ){
-  cv::Mat full_image = _core_td_map->get_exp_image_properties_full_image();
-  ui->qgraphics_full_experimental_image->setImage( full_image );
-  ui->qgraphics_full_experimental_image->show();
-  update_roi_experimental_image_frame();
-}
+    cv::Mat full_image = _core_td_map->get_exp_image_properties_full_image();
+    ui->qgraphics_full_experimental_image->setImage( full_image );
+    ui->qgraphics_full_experimental_image->show();
+    update_roi_experimental_image_frame();
+  }
 }
 
 void MainWindow::update_roi_experimental_image_frame(){
@@ -470,36 +469,36 @@ void MainWindow::update_from_SuperCell_edge_failure(){
 
 void MainWindow::clear_tdmap_sim_ostream_containers(){
 
-    QModelIndex celslc_index = tdmap_running_configuration_model->index(1,0);
-    QModelIndex celslc_out_legend_index = tdmap_running_configuration_model->index(0,0,celslc_index);
-    QModelIndex celslc_out_index = project_setup_crystalographic_fields_model->index(0,1,celslc_out_legend_index);
-    tdmap_running_configuration_model->clearData( celslc_out_index );
+  QModelIndex celslc_index = tdmap_running_configuration_model->index(1,0);
+  QModelIndex celslc_out_legend_index = tdmap_running_configuration_model->index(0,0,celslc_index);
+  QModelIndex celslc_out_index = project_setup_crystalographic_fields_model->index(0,1,celslc_out_legend_index);
+  tdmap_running_configuration_model->clearData( celslc_out_index );
 
-    QModelIndex msa_index = tdmap_running_configuration_model->index(2,0);
-    QModelIndex msa_out_legend_index = tdmap_running_configuration_model->index(0,0,msa_index);
-    QModelIndex msa_out_index = project_setup_crystalographic_fields_model->index(0,1,msa_out_legend_index);
-    tdmap_running_configuration_model->clearData( msa_out_index );
+  QModelIndex msa_index = tdmap_running_configuration_model->index(2,0);
+  QModelIndex msa_out_legend_index = tdmap_running_configuration_model->index(0,0,msa_index);
+  QModelIndex msa_out_index = project_setup_crystalographic_fields_model->index(0,1,msa_out_legend_index);
+  tdmap_running_configuration_model->clearData( msa_out_index );
 
-    QModelIndex wavimg_index = tdmap_running_configuration_model->index(3,0);
-    QModelIndex wavimg_out_legend_index = tdmap_running_configuration_model->index(0,0,wavimg_index);
-    QModelIndex wavimg_out_index = project_setup_crystalographic_fields_model->index(0,1,wavimg_out_legend_index);
-    tdmap_running_configuration_model->clearData( wavimg_out_index );
+  QModelIndex wavimg_index = tdmap_running_configuration_model->index(3,0);
+  QModelIndex wavimg_out_legend_index = tdmap_running_configuration_model->index(0,0,wavimg_index);
+  QModelIndex wavimg_out_index = project_setup_crystalographic_fields_model->index(0,1,wavimg_out_legend_index);
+  tdmap_running_configuration_model->clearData( wavimg_out_index );
 
-    QModelIndex simgrid_index = tdmap_running_configuration_model->index(2,0);
-    QModelIndex simgrid_out_legend_index = tdmap_running_configuration_model->index(0,0,simgrid_index);
-    QModelIndex simgrid_out_index = project_setup_crystalographic_fields_model->index(0,1,simgrid_out_legend_index);
-    tdmap_running_configuration_model->clearData( simgrid_out_index );
+  QModelIndex simgrid_index = tdmap_running_configuration_model->index(2,0);
+  QModelIndex simgrid_out_legend_index = tdmap_running_configuration_model->index(0,0,simgrid_index);
+  QModelIndex simgrid_out_index = project_setup_crystalographic_fields_model->index(0,1,simgrid_out_legend_index);
+  tdmap_running_configuration_model->clearData( simgrid_out_index );
 
 }
 
 void MainWindow::update_tdmap_sim_ostream_celslc(){
   std::string line;
   if( _core_td_map->get_run_celslc_switch() ){
-      QModelIndex celslc_index = tdmap_running_configuration_model->index(1,0);
-      QModelIndex celslc_out_legend_index = tdmap_running_configuration_model->index(0,0,celslc_index);
-      QModelIndex celslc_out_index = project_setup_crystalographic_fields_model->index(0,1,celslc_out_legend_index);
+    QModelIndex celslc_index = tdmap_running_configuration_model->index(1,0);
+    QModelIndex celslc_out_legend_index = tdmap_running_configuration_model->index(0,0,celslc_index);
+    QModelIndex celslc_out_index = project_setup_crystalographic_fields_model->index(0,1,celslc_out_legend_index);
 
-      if( _core_td_map->get_flag_celslc_io_ap_pipe_out() ){
+    if( _core_td_map->get_flag_celslc_io_ap_pipe_out() ){
       while(std::getline(_sim_tdmap_celslc_ostream_buffer, line)){
 
         QString qt_linw =  QString::fromStdString( line );
@@ -516,9 +515,9 @@ void MainWindow::update_tdmap_sim_ostream_msa(){
   std::string line;
   if( _core_td_map->get_run_msa_switch() ){
 
-      QModelIndex msa_index = tdmap_running_configuration_model->index(2,0);
-      QModelIndex msa_out_legend_index = tdmap_running_configuration_model->index(0,0,msa_index);
-      QModelIndex msa_out_index = project_setup_crystalographic_fields_model->index(0,1,msa_out_legend_index);
+    QModelIndex msa_index = tdmap_running_configuration_model->index(2,0);
+    QModelIndex msa_out_legend_index = tdmap_running_configuration_model->index(0,0,msa_index);
+    QModelIndex msa_out_index = project_setup_crystalographic_fields_model->index(0,1,msa_out_legend_index);
 
     if( _core_td_map->get_flag_msa_io_ap_pipe_out() ){
       while(std::getline(_sim_tdmap_msa_ostream_buffer, line)){
@@ -535,9 +534,9 @@ void MainWindow::update_tdmap_sim_ostream_msa(){
 void MainWindow::update_tdmap_sim_ostream_wavimg(){
   std::string line;
   if( _core_td_map->get_run_wavimg_switch() ){
-      QModelIndex wavimg_index = tdmap_running_configuration_model->index(3,0);
-      QModelIndex wavimg_out_legend_index = tdmap_running_configuration_model->index(0,0,wavimg_index);
-      QModelIndex wavimg_out_index = project_setup_crystalographic_fields_model->index(0,1,wavimg_out_legend_index);
+    QModelIndex wavimg_index = tdmap_running_configuration_model->index(3,0);
+    QModelIndex wavimg_out_legend_index = tdmap_running_configuration_model->index(0,0,wavimg_index);
+    QModelIndex wavimg_out_index = project_setup_crystalographic_fields_model->index(0,1,wavimg_out_legend_index);
 
     if( _core_td_map->get_flag_wavimg_io_ap_pipe_out() ){
 
@@ -564,15 +563,6 @@ void MainWindow::update_tdmap_sim_ostream_simgrid(){
   }
 }
 
-void MainWindow::on_qpush_run_tdmap_clicked(){
-  bool status = false;
-  updateProgressBar(0,0,4);
-  ui->statusBar->showMessage(tr("Requesting a TD-Map worker thread"), 2000);
-  clear_tdmap_sim_ostream_containers();
-  sim_tdmap_worker->requestTDMap();
-
-}
-
 void MainWindow::closeEvent(QCloseEvent *event){
   if (maybeSave()) {
     writeSettings();
@@ -596,14 +586,19 @@ void MainWindow::open(){
   }
 }
 
-bool MainWindow::save()
-{
+bool MainWindow::save(){
+  bool result = false;
   if ( curFile.isEmpty() ){
-    return saveAs();
+    result = saveAs();
   }
   else {
-    return saveFile(curFile);
+    result = saveFile(curFile);
   }
+  // if the saving was ok, then we are in a project
+  if( result ){
+    _flag_project_setted = true;
+  }
+  return result;
 }
 
 bool MainWindow::saveAs()
@@ -618,10 +613,10 @@ bool MainWindow::saveAs()
     if( result ){
       std::string project_filename_with_path = _core_td_map->get_project_filename_with_path();
       QString qt_project_filename_with_path = QString::fromStdString( project_filename_with_path );
-        result = saveFile( qt_project_filename_with_path );
+      result = saveFile( qt_project_filename_with_path );
     }
-    }
-    return result;
+  }
+  return result;
 }
 
 bool MainWindow::export_TDMap(){
@@ -739,24 +734,24 @@ void MainWindow::createActions(){
 }
 
 void MainWindow::createProgressBar(){
-    running_progress = new QProgressBar(this);
-    running_progress->setVisible(false);
-    ui->statusBar->addPermanentWidget(running_progress);
+  running_progress = new QProgressBar(this);
+  running_progress->setVisible(false);
+  ui->statusBar->addPermanentWidget(running_progress);
 }
 
 void MainWindow::updateProgressBar( int lower_range, int current_value, int upper_range ){
-    running_progress->setRange( lower_range, upper_range );
-    running_progress->setValue( current_value );
-    running_progress->setVisible(true);
+  running_progress->setRange( lower_range, upper_range );
+  running_progress->setValue( current_value );
+  running_progress->setVisible(true);
 }
 
 void MainWindow::updateProgressBar( int lower_range, int current_value, int upper_range, bool error ){
-    updateProgressBar( lower_range, current_value, upper_range);
-    if( error ){
+  updateProgressBar( lower_range, current_value, upper_range);
+  if( error ){
     QPalette p = palette();
     p.setColor(QPalette::Highlight, Qt::red);
     running_progress->setPalette(p);
-    }
+  }
 }
 
 bool MainWindow::checkSettings(){
@@ -867,8 +862,9 @@ void MainWindow::writeSettings(){
 }
 
 bool MainWindow::maybeSave(){
+  bool result = false;
   if ( ! _was_document_modified() ){
-    return true;
+    return  true;
   }
   const QMessageBox::StandardButton ret
     = QMessageBox::warning(this, tr("Application"),
@@ -877,13 +873,50 @@ bool MainWindow::maybeSave(){
         QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
   switch (ret) {
     case QMessageBox::Save:
-      return save();
+      {
+        return save();
+      }
     case QMessageBox::Cancel:
-      return false;
+      {
+        return false;
+      }
     default:
       break;
   }
   return true;
+}
+
+
+bool MainWindow::maybeSetProject(){
+  bool result = false;
+  if ( _flag_project_setted ){
+    result =  true;
+  }
+  else{
+    const QMessageBox::StandardButton ret
+      = QMessageBox::warning(this, tr("Application"),
+          tr("In order to Run Im2Model you need to set the project.\n"
+            "Do you want to set the project?"),
+          QMessageBox::Yes  | QMessageBox::Cancel);
+    switch (ret) {
+      case QMessageBox::Yes:
+        {
+          result = save();
+          break;
+        }
+      case QMessageBox::Cancel:
+        {
+          result = false;
+          break;
+        }
+      default:
+        {
+          result = false;
+          break;
+        }
+    }
+  }
+  return result;
 }
 
 void MainWindow::loadFile(const QString &fileName){
@@ -1777,37 +1810,57 @@ void MainWindow::on_qpush_apply_edge_detection_clicked(){
 }
 
 void MainWindow::on_qpush_test_tdmap_clicked(){
+  const bool project_ok = maybeSetProject();
+  if ( project_ok ){
     ui->statusBar->showMessage(tr("Testing if TD Map has a clean run environment"), 2000);
     const bool _warnings_clean = _core_td_map->test_clean_run_env();
     if( _warnings_clean == false ){
-        std::vector <std::string> warnings = _core_td_map->get_test_clean_run_env_warnings();
-        std::ostringstream os;
-        for( int pos = 0; pos < warnings.size(); pos++ ){
-          os << warnings.at(pos) << "\n";
-        }
-        QMessageBox messageBox;
-        QFont font;
-        font.setBold(false);
-        messageBox.setFont(font);
-        messageBox.warning(0,"Warning",QString::fromStdString( os.str() ));
+      std::vector <std::string> warnings = _core_td_map->get_test_clean_run_env_warnings();
+      std::ostringstream os;
+      for( int pos = 0; pos < warnings.size(); pos++ ){
+        os << warnings.at(pos) << "\n";
+      }
+      QMessageBox messageBox;
+      QFont font;
+      font.setBold(false);
+      messageBox.setFont(font);
+      messageBox.warning(0,"Warning",QString::fromStdString( os.str() ));
     }
 
-  ui->statusBar->showMessage(tr("Testing TD Map variable configuration"), 2000);
-  const bool _errors_clean = _core_td_map->test_run_config();
-  if( _errors_clean == false ){
-    std::vector <std::string> errors = _core_td_map->get_test_run_config_errors();
-    std::ostringstream os;
-    for( int pos = 0; pos < errors.size(); pos++ ){
-      os << errors.at(pos) << "\n";
+    ui->statusBar->showMessage(tr("Testing TD Map variable configuration"), 2000);
+    const bool _errors_clean = _core_td_map->test_run_config();
+    if( _errors_clean == false ){
+      std::vector <std::string> errors = _core_td_map->get_test_run_config_errors();
+      std::ostringstream os;
+      for( int pos = 0; pos < errors.size(); pos++ ){
+        os << errors.at(pos) << "\n";
+      }
+      QMessageBox messageBox;
+      QFont font;
+      font.setBold(false);
+      messageBox.setFont(font);
+      messageBox.critical(0,"Error",QString::fromStdString( os.str() ));
     }
-    QMessageBox messageBox;
-    QFont font;
-    font.setBold(false);
-    messageBox.setFont(font);
-    messageBox.critical(0,"Error",QString::fromStdString( os.str() ));
+    else{
+      QMessageBox messageBox;
+      messageBox.information(0,"TD Map ready to run.","The TD Map required variables are setted up. You can run the simulation.");
+    }
   }
   else{
-    QMessageBox messageBox;
-    messageBox.information(0,"TD Map ready to run.","The TD Map required variables are setted up. You can run the simulation.");
+    ui->statusBar->showMessage(tr("Error while checking project configurations."), 2000);
+  }
+}
+
+void MainWindow::on_qpush_run_tdmap_clicked(){
+  const bool project_ok = maybeSetProject();
+  if ( project_ok ){
+    bool status = false;
+    updateProgressBar(0,0,4);
+    ui->statusBar->showMessage(tr("Requesting a TD-Map worker thread"), 2000);
+    clear_tdmap_sim_ostream_containers();
+    sim_tdmap_worker->requestTDMap();
+  }
+  else{
+    ui->statusBar->showMessage(tr("Error while checking project configurations."), 2000);
   }
 }

@@ -131,6 +131,7 @@ signals:
 
     // preferences methods
     bool maybeSetPreferences();
+    bool maybeSetProject();
     bool edit_preferences();
 
     // menu methods
@@ -148,6 +149,7 @@ signals:
     QString strippedName(const QString &fullFileName);
 
     QString curFile;
+    bool _flag_project_setted = false;
     Ui::MainWindow *ui;
     TDMap *_core_td_map;
     Super_Cell *_core_super_cell;

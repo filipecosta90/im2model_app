@@ -9,12 +9,11 @@ SimGrid::SimGrid( boost::process::ipstream& async_io_buffer_out ){
   defocus_matrix_file_name = "defocus_matrix.csv";
   thickness_matrix_file_name = "thickness_matrix.csv";
   match_factor_matrix_file_name = "match_factor_matrix.csv";
-
+  
   exp_image_properties.set_flag_auto_a_size( true );
   exp_image_properties.set_flag_auto_b_size( true );
   sim_image_properties.set_flag_auto_n_rows(true);
   sim_image_properties.set_flag_auto_n_cols(true);
-
 }
 
 bool SimGrid::set_exp_image_properties_full_image( std::string path ){
