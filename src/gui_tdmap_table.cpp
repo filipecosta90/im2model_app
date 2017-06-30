@@ -73,11 +73,11 @@ void TDMap_Table::connect_defocus_range_number_samples_changes( const TreeItem* 
 void TDMap_Table::update_RowCount_from_thickness_range_number_samples( int signal_item_changed_column ){
   if ( signal_item_changed_column == _treeitem_thickness_range_number_samples_watch_col ){
     if( core_tdmap->get_flag_slice_samples() ){
-    int new_RowCount = core_tdmap->get_slice_samples();
-    RowCount = new_RowCount;
-    update_row_size();
-    std::cout << "new_RowCount " << new_RowCount << std::endl;
-    clear();
+      int new_RowCount = core_tdmap->get_slice_samples();
+      RowCount = new_RowCount;
+      update_row_size();
+      std::cout << "new_RowCount " << new_RowCount << std::endl;
+      clear();
     }
   }
 }
@@ -86,36 +86,27 @@ void TDMap_Table::update_column_size(){
   int leftM,rightM,topM,bottomM;
   this->getContentsMargins(&leftM,&topM,&rightM,&bottomM);
   const int header_size = this->verticalHeader()->width();
-  std::cout << "VerticalHeaderSize" << header_size << std::endl;
   const int total_width = this->width() -  header_size - leftM - rightM - 2* (this->frameWidth());
-  std::cout << "total_width" << total_width << std::endl;
   ColumnSize = ColumnCount > 0 ? ( total_width / ColumnCount ) : total_width;
-  std::cout << "adjusting tdmap cell width to << " << ColumnSize <<  "px to  fill a total of " << total_width << std::endl;
 }
 
 void TDMap_Table::update_row_size(){
-
   int leftM,rightM,topM,bottomM;
   this->getContentsMargins(&leftM,&topM,&rightM,&bottomM);
-
   const int header_size = this->horizontalHeader()->height();
-  std::cout << "HorizontalHeaderSize" << header_size << std::endl;
   const int total_height = this->height() - header_size - topM - bottomM - 2* (this->frameWidth());
-  std::cout << "total_height" << total_height << std::endl;
-
   RowSize = RowCount > 0 ? ( total_height / RowCount ) : total_height;
-  std::cout << "adjusting tdmap cell height to << " << RowSize <<  "px to  fill a total of " << total_height << std::endl;
 }
 
 void TDMap_Table::update_ColumnCount_from_defocus_range_number_samples( int signal_item_changed_column ){
   if ( signal_item_changed_column == _treeitem_defocus_range_number_samples_watch_col ){
-if( core_tdmap->get_flag_defocus_samples() ){
-    int new_ColumnCount = core_tdmap->get_defocus_samples();
-    ColumnCount = new_ColumnCount;
-    update_column_size();
-    std::cout << "new_ColumnCount " << new_ColumnCount << std::endl;
-    clear();
-  }
+    if( core_tdmap->get_flag_defocus_samples() ){
+      int new_ColumnCount = core_tdmap->get_defocus_samples();
+      ColumnCount = new_ColumnCount;
+      update_column_size();
+      std::cout << "new_ColumnCount " << new_ColumnCount << std::endl;
+      clear();
+    }
   }
 }
 
@@ -126,61 +117,39 @@ void TDMap_Table::set_simulated_images_grid( std::vector< std::vector<cv::Mat> >
 }
 
 void TDMap_Table::update_headers(){
-  double _defocus_lower = 0.0f;
-  double _defocus_period = 0.0f;
-  int _thickness_lower_slice = 0;
-  int _thickness_period_slice = 0;
   if( _flag_core_tdmap ){
-    if( core_tdmap->get_flag_defocus_lower_bound() ){
-      _defocus_lower = core_tdmap->get_defocus_lower_bound();
-    }
-    if(  core_tdmap->get_flag_defocus_period() ){
-      _defocus_period = core_tdmap->get_defocus_period();
-    }
-
-    if( core_tdmap->get_flag_nm_lower_bound() ){
-      _thickness_lower_slice = core_tdmap->get_slices_lower_bound();
-    }
-    if( core_tdmap->get_flag_slice_period() ){
-      _thickness_period_slice = core_tdmap->get_slice_period();
-    }
     if( core_tdmap->get_flag_defocus_samples() ){
-      ColumnSize = core_tdmap->get_defocus_samples();
+      ColumnCount = core_tdmap->get_defocus_samples();
+      if( core_tdmap->get_flag_simulated_images_horizontal_header_defocus_nm() ){
+        std::vector <double> _local_simulated_images_horizontal_header_defocus_nm = core_tdmap->get_simulated_images_horizontal_header_defocus_nm();
+        if( ColumnCount == _local_simulated_images_horizontal_header_defocus_nm.size() ){
+          for (int i = 0; i < ColumnCount; ++i) {
+            setItemDelegateForColumn(i, image_delegate);
+            QTableWidgetItem *item = new QTableWidgetItem;
+            const double defocus_nm = _local_simulated_images_horizontal_header_defocus_nm.at(i);
+            item->setText( QString::number( defocus_nm ) + QString( " nm" )  );
+            setHorizontalHeaderItem(i, item);
+          }
+        }
+      }
     }
     if( core_tdmap->get_flag_slice_samples() ){
-      RowSize = core_tdmap->get_slice_samples();
+      RowCount = core_tdmap->get_slice_samples();
+      if( core_tdmap->get_flag_simulated_images_vertical_header_slice_nm() ){
+        std::vector <double> _local_simulated_images_vertical_header_slice_nm = core_tdmap->get_simulated_images_vertical_header_slice_nm();
+        if( RowCount == _local_simulated_images_vertical_header_slice_nm.size() ){
+        for (int i = 0; i < RowCount; ++i) {
+          setItemDelegateForRow(i, image_delegate);
+          QTableWidgetItem *item = new QTableWidgetItem;
+          QString legend;
+          const double slice_thickness_nm = _local_simulated_images_vertical_header_slice_nm.at(i);
+          legend = QString::number( slice_thickness_nm ) + QString( "nm" );
+          item->setText( legend );
+          setVerticalHeaderItem(i, item);
+        }
+        }
+      }
     }
-  }
-
-  for (int i = 0; i < ColumnCount; ++i) {
-    setItemDelegateForColumn(i, image_delegate);
-    QTableWidgetItem *item = new QTableWidgetItem;
-    double _at_defocus = _defocus_lower + ( _defocus_period * i );
-    item->setText( QString::number( _at_defocus ) + QString( " nm" )  );
-    setHorizontalHeaderItem(i, item);
-  }
-  std::vector <double> _local_accum_nm_slice_vec;
-  bool use_accum_nm = false;
-  if ( core_tdmap != nullptr ){
-    if( core_tdmap->get_flag_slice_params_accum_nm_slice_vec() ){
-      use_accum_nm = true;
-      _local_accum_nm_slice_vec = core_tdmap->get_slice_params_accum_nm_slice_vec();
-    }
-  }
-  for (int i = 0; i < RowCount; ++i) {
-    setItemDelegateForRow(i, image_delegate);
-    QTableWidgetItem *item = new QTableWidgetItem;
-    const int at_slice = round( _thickness_lower_slice + _thickness_period_slice * ( i )  );
-    QString legend;
-    if( use_accum_nm ){
-      const double slice_thickness_nm = _local_accum_nm_slice_vec.at(at_slice-1);
-      legend = QString::number( slice_thickness_nm ) + QString( "nm  #" ) + QString::number( at_slice );
-    }
-    else {
-      legend = QString::number( at_slice );
-    }
-    item->setText( legend );
-    setVerticalHeaderItem(i, item);
   }
   this->resizeColumnsToContents();
   this->resizeRowsToContents();
@@ -227,7 +196,6 @@ void TDMap_Table::update_cells(){
       for (int row = 0; row < RowCount; ++row) {
         std::vector<cv::Mat> simulated_image_row = simulated_image_grid.at(row);
         for (int col = 0; col < ColumnCount; ++col) {
-
           CvImageCellWidget *cell_widget  = new CvImageCellWidget(  );
           cell_widget->setMaximumSize( QSize(ColumnSize, RowSize) );
           cell_widget->set_container_size( ColumnSize, RowSize );

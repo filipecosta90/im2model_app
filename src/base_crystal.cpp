@@ -379,7 +379,6 @@ bool BaseCrystal::set_application_logger( ApplicationLog::ApplicationLog* app_lo
 void BaseCrystal::print_var_state(){
   if( _flag_logger ){
     std::stringstream message;
-    // using overloaded operator<<
     output(message);
     logger->logEvent( ApplicationLog::notification , message.str() );
   }

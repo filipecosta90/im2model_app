@@ -9,7 +9,7 @@ SimGrid::SimGrid( boost::process::ipstream& async_io_buffer_out ){
   defocus_matrix_file_name = "defocus_matrix.csv";
   thickness_matrix_file_name = "thickness_matrix.csv";
   match_factor_matrix_file_name = "match_factor_matrix.csv";
-  
+
   exp_image_properties.set_flag_auto_a_size( true );
   exp_image_properties.set_flag_auto_b_size( true );
   sim_image_properties.set_flag_auto_n_rows(true);
@@ -267,10 +267,10 @@ bool SimGrid::produce_png_from_dat_file(){
      const double slice_thickness_nm = slice_params_accum_nm_slice_vec.at(at_slice-1);
      std::cout << "slice thickness" << slice_thickness_nm << std::endl;
 
-// for the same thickness iterate through every defocus
-for (int defocus = 1; defocus <= defocus_samples; defocus ++ ){
-const int at_defocus = round( ((defocus-1) * defocus_period )+ defocus_lower_bound );
-std::cout << "at defocus" << at_defocus << std::endl;
+  // for the same thickness iterate through every defocus
+  for (int defocus = 1; defocus <= defocus_samples; defocus ++ ){
+  const int at_defocus = round( ((defocus-1) * defocus_period )+ defocus_lower_bound );
+  std::cout << "at defocus" << at_defocus << std::endl;
   // get the .dat image name
   std::stringstream output_dat_name_stream;
   output_dat_name_stream << "image_" << std::setw(3) << std::setfill('0') << std::to_string(thickness) << "_" << std::setw(3) << std::setfill('0') << std::to_string(defocus) << ".dat";
@@ -406,7 +406,7 @@ bool SimGrid::read_grid_from_dat_files(){
         sim_image_properties.get_flag_full_n_rows_height() &&
         sim_image_properties.get_flag_full_n_cols_width()
       ){
-        boost::filesystem::path dat_input_dir ( dat_output_target_folder );
+      boost::filesystem::path dat_input_dir ( dat_output_target_folder );
 
       for (int thickness = 1; thickness <= slice_samples ; thickness++ ){
         //will contain the row of simulated images (same thickness, diferent defocus)
@@ -436,7 +436,6 @@ bool SimGrid::read_grid_from_dat_files(){
 
             double min, max;
             cv::minMaxLoc(raw_simulated_image, &min, &max);
-
             // Create a new matrix to hold the gray image
             cv::Mat raw_gray_simulated_image;
             raw_simulated_image.convertTo(raw_gray_simulated_image, CV_8UC1 , 255.0f/(max - min), -min * 255.0f/(max - min));
@@ -535,7 +534,11 @@ bool SimGrid::simulate_from_grid(){
     bool _error_flag = false;
     if( raw_simulated_images_grid.size() ==  slice_samples ){
       for (int thickness = 1; thickness <= slice_samples && _error_flag == false; thickness++ ){
+
         const int at_slice = round( slice_period * ( thickness  - 1 ) + slices_lower_bound );
+        const double at_slice_nm = simgrid_best_match_thickness_nm = slice_params_accum_nm_slice_vec.at(at_slice-1);
+        std::cout << "at slice" << at_slice_nm << std::endl;
+        simulated_images_vertical_header_slice_nm.push_back( at_slice_nm );
 
         // get the matrices row
         const std::vector<cv::Mat> raw_simulated_images_row = raw_simulated_images_grid.at( thickness - 1 );
@@ -553,6 +556,9 @@ bool SimGrid::simulate_from_grid(){
 
             // get the defocus value
             const int at_defocus = round( ((defocus-1) * defocus_period ) + defocus_lower_bound );
+            if( thickness == 1 ){
+              simulated_images_horizontal_header_defocus_nm.push_back( at_defocus );
+            }
 
             // get the matrix in the specified col of tdmap (defocus pos)
             const cv::Mat raw_simulated_image = raw_simulated_images_row.at( defocus - 1 );
@@ -588,6 +594,20 @@ bool SimGrid::simulate_from_grid(){
         else{
           _error_flag = true;
         }
+      }
+      /* check if header vars complie with sizes */
+      if ( ( simulated_images_horizontal_header_defocus_nm.size()  == defocus_samples ) && ( simulated_images_vertical_header_slice_nm.size() == slice_samples ) ) {
+        _flag_simulated_images_horizontal_header_defocus_nm = true;
+        _flag_simulated_images_vertical_header_slice_nm = true;
+      }
+      else{
+        _error_flag = true;
+        if( _flag_logger ){
+          std::stringstream message;
+          message << "Error while setting simulation headers.";
+          logger->logEvent( ApplicationLog::error , message.str() );
+        }
+        print_var_state();
       }
       if( _error_flag == false ){
         std::vector<double>::iterator maxElement;
@@ -625,6 +645,10 @@ bool SimGrid::clean_for_re_run(){
     defocus_values_matrix.release();
     thickness_values_matrix.release();
     match_values_matrix.release();
+    simulated_images_vertical_header_slice_nm.clear();
+    _flag_simulated_images_vertical_header_slice_nm = false;
+    simulated_images_horizontal_header_defocus_nm.clear();
+    _flag_simulated_images_horizontal_header_defocus_nm = false;
 
     for (int thickness_row = 0; thickness_row < raw_simulated_images_grid.size(); thickness_row ++ ){
       //will contain the row of simulated images (same thickness, diferent defocus)
@@ -754,16 +778,30 @@ bool SimGrid::set_application_logger( ApplicationLog::ApplicationLog* app_logger
 void SimGrid::print_var_state(){
   if( _flag_logger ){
     std::stringstream message;
-    message << "SimGrid vars:\n"
-      << "\t" << "Experimental Image Properties : " << "\n"
-      << exp_image_properties << "\n"
-      << "\t" << "Simulated Images Properties : " << "\n"
-      << sim_image_properties << "\n"
-      << "\t\t" << "_flag_unit_cell_cif_path : " << std::boolalpha << _flag_unit_cell_cif_path << "\n"
-      // running flags
-      //(...)
-      ;
+    output(message);
     logger->logEvent( ApplicationLog::notification , message.str() );
   }
-  BaseCrystal::print_var_state();
+}
+
+std::ostream& SimGrid::output(std::ostream& stream) const {
+  stream << "SimGrid vars:\n"
+    // header info for td map
+    << "\t" << "simulated_images_vertical_header_slice_nm.size() : " << simulated_images_vertical_header_slice_nm.size() << "\n"
+    << "\t\t" << "_flag_simulated_images_vertical_header_slice_nm : " << std::boolalpha << _flag_simulated_images_vertical_header_slice_nm << "\n"
+    << "\t" << "simulated_images_horizontal_header_defocus_nm.size() : " << simulated_images_horizontal_header_defocus_nm.size() << "\n"
+    << "\t\t" << "_flag_simulated_images_horizontal_header_defocus_nm : " << std::boolalpha << _flag_simulated_images_vertical_header_slice_nm << "\n"
+    // simulated images
+    << "\t" << "simulated_images_grid.size() : " << simulated_images_grid.size() << "\n"
+    << "\t" << "raw_simulated_images_grid.size() : " << raw_simulated_images_grid.size() << "\n"
+    << "\t" << "experimental_images_match_location_grid.size() : " << experimental_images_match_location_grid.size() << "\n"
+    //will contain the all the simulated images match percentage
+    << "\t" << "simulated_matches.size() : " << simulated_matches.size() << "\n"
+    << "\t" << "slice_defocus_match_points.size() : " << slice_defocus_match_points.size() << "\n"
+    << "\t" << "BaseCrystal Properties : " << "\n";
+  BaseCrystal::output( stream );
+  stream << "\t" << "Experimental Image Properties : " << "\n"
+    << exp_image_properties << "\n"
+    << "\t" << "Simulated Images Properties : " << "\n"
+    << sim_image_properties << "\n";
+  return stream;
 }

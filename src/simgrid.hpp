@@ -62,6 +62,12 @@ class SimGrid : public BaseCrystal {
     int sim_grid_width;
     int sim_grid_height;
     cv::Mat sim_grid;
+    // header info for td map
+    std::vector< double > simulated_images_vertical_header_slice_nm;
+    bool _flag_simulated_images_vertical_header_slice_nm = false;
+    std::vector< double > simulated_images_horizontal_header_defocus_nm;
+    bool _flag_simulated_images_horizontal_header_defocus_nm = false;
+    // simulated images
     std::vector< std::vector<cv::Mat> > simulated_images_grid;
     std::vector< std::vector<cv::Mat> > raw_simulated_images_grid;
     std::vector< std::vector<cv::Point> > experimental_images_match_location_grid;
@@ -119,6 +125,12 @@ class SimGrid : public BaseCrystal {
     bool set_sampling_rate_x_nm_per_pixel( double rate );
     bool set_sampling_rate_y_nm_per_pixel( double rate );
 
+/* flag getters */
+bool get_flag_simulated_images_vertical_header_slice_nm(){ return _flag_simulated_images_vertical_header_slice_nm; }
+bool get_flag_simulated_images_horizontal_header_defocus_nm(){ return _flag_simulated_images_horizontal_header_defocus_nm; }
+/* getters */
+std::vector< double > get_simulated_images_vertical_header_slice_nm(){ return simulated_images_vertical_header_slice_nm; }
+std::vector< double > get_simulated_images_horizontal_header_defocus_nm(){ return simulated_images_horizontal_header_defocus_nm; }
 
     cv::Mat get_exp_image_properties_full_image();
     cv::Mat get_exp_image_properties_roi_image();
@@ -188,6 +200,8 @@ class SimGrid : public BaseCrystal {
 
     /* Loggers */
     bool set_application_logger( ApplicationLog::ApplicationLog* logger );
+    virtual std::ostream& output(std::ostream& stream) const;
+
 
 };
 

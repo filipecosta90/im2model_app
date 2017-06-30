@@ -272,9 +272,8 @@ bool TDMap::run_tdmap( ){
         const bool _clean_run_env_step1_msa_ok = _tdmap_msa_parameters->base_cystal_clean_for_re_run();
         const bool _clean_run_env_step1_wavimg_ok = _tdmap_wavimg_parameters->base_cystal_clean_for_re_run();
         const bool _clean_run_env_step1_simgrid_ok = _td_map_simgrid->base_cystal_clean_for_re_run();
-
-        _flag_runned_tdmap_celslc = ! ( _clean_run_env_step1_celslc_ok & _clean_run_env_step1_msa_ok & _clean_run_env_step1_wavimg_ok & _clean_run_env_step1_simgrid_ok );
-
+        _clean_run_env = ( _clean_run_env_step1_celslc_ok & _clean_run_env_step1_msa_ok & _clean_run_env_step1_wavimg_ok & _clean_run_env_step1_simgrid_ok );
+        _flag_runned_tdmap_celslc = ! _clean_run_env;
         if( _flag_logger ){
           std::stringstream message;
           message << "Already runned celslc. going to clean vars. result: " << std::boolalpha << _clean_run_env ;
@@ -464,6 +463,24 @@ bool TDMap::export_sim_grid( std::string sim_grid_file_name_image ){
 
 // gui getters
 
+/* flag getters */
+bool TDMap::get_flag_simulated_images_vertical_header_slice_nm(){
+  return _td_map_simgrid->get_flag_simulated_images_vertical_header_slice_nm();
+}
+
+bool TDMap::get_flag_simulated_images_horizontal_header_defocus_nm(){
+  return _td_map_simgrid->get_flag_simulated_images_horizontal_header_defocus_nm();
+}
+
+/* getters */
+std::vector< double > TDMap::get_simulated_images_vertical_header_slice_nm(){
+  return _td_map_simgrid->get_simulated_images_vertical_header_slice_nm();
+}
+
+std::vector< double > TDMap::get_simulated_images_horizontal_header_defocus_nm(){
+  return _td_map_simgrid->get_simulated_images_horizontal_header_defocus_nm();
+}
+
 // more work here. asserts, etc
 std::vector< std::vector<cv::Mat> > TDMap::get_simulated_images_grid(){
   return _td_map_simgrid->get_simulated_images_grid();
@@ -651,7 +668,7 @@ bool TDMap::set_wav_output_target_folder( std::string folder ){
   // celslc
   const bool celslc_result = _tdmap_celslc_parameters->set_wav_output_target_folder( folder );
   // msa
-   bool msa_result = _tdmap_msa_parameters->set_wav_output_target_folder( folder );
+  bool msa_result = _tdmap_msa_parameters->set_wav_output_target_folder( folder );
   msa_result &= _tdmap_msa_parameters->set_base_bin_output_target_folder( folder );
   // wavimg
   const bool wavimg_result =  _tdmap_wavimg_parameters->set_wav_output_target_folder( folder );
@@ -667,7 +684,7 @@ bool TDMap::set_dat_output_target_folder( std::string folder ){
   // msa
   const bool msa_result = _tdmap_msa_parameters->set_dat_output_target_folder( folder );
   //wavimg
-   bool wavimg_result =  _tdmap_wavimg_parameters->set_dat_output_target_folder( folder );
+  bool wavimg_result =  _tdmap_wavimg_parameters->set_dat_output_target_folder( folder );
   wavimg_result &= _tdmap_wavimg_parameters->set_base_bin_output_target_folder( folder );
   // simgrid
   const bool simgrid_result = _td_map_simgrid->set_dat_output_target_folder( folder );

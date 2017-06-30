@@ -24,7 +24,6 @@ MainWindow::MainWindow( ApplicationLog::ApplicationLog* logger , QWidget *parent
   }
   createProgressBar();
 
-  setCurrentFile(QString());
   setUnifiedTitleAndToolBarOnMac(true);
 
   if (_flag_im2model_logger) {
@@ -91,6 +90,7 @@ MainWindow::MainWindow( ApplicationLog::ApplicationLog* logger , QWidget *parent
       }
     }
     else {
+      setCurrentFile(QString());
 
       create_box_options();
 
@@ -924,7 +924,6 @@ void MainWindow::loadFile(const QString &fileName){
 #ifndef QT_NO_CURSOR
   QApplication::setOverrideCursor(Qt::WaitCursor);
 #endif
-
   // The first parameter in the constructor is the character used for indentation, whilst the second is the indentation length.
   boost::property_tree::xml_writer_settings<std::string> pt_settings( ' ', 4 );
   boost::property_tree::ptree config;
@@ -980,9 +979,10 @@ void MainWindow::loadFile(const QString &fileName){
 #ifndef QT_NO_CURSOR
   QApplication::restoreOverrideCursor();
 #endif
+_flag_project_setted = true;
 
   this->setCurrentFile(fileName);
-  ui->statusBar->showMessage(tr("File loaded"), 2000);
+  ui->statusBar->showMessage(tr("Project loaded"), 2000);
 }
 
 bool MainWindow::saveFile(const QString &fileName ){
@@ -1014,7 +1014,7 @@ bool MainWindow::saveFile(const QString &fileName ){
 #endif
 
   setCurrentFile(fileName);
-  ui->statusBar->showMessage(tr("File saved"), 2000);
+  ui->statusBar->showMessage(tr("Project saved"), 2000);
   _reset_document_modified_flags();
   return true;
 }
@@ -1024,9 +1024,10 @@ void MainWindow::setCurrentFile(const QString &fileName){
   setWindowModified(false);
 
   QString shownName = curFile;
-  if (curFile.isEmpty()){
+  if ( !_flag_project_setted ){
     shownName = "*untitled.im2model";
   }
+
   this->setWindowFilePath(shownName);
   this->setWindowTitle( shownName );
 }

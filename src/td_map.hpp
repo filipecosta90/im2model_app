@@ -137,6 +137,12 @@ class TDMap  : public QObject {
     std::vector<std::string> get_test_clean_run_env_warnings(){ return test_clean_run_env_warnings; };
 
     // gui getters
+    /* flag getters */
+    bool get_flag_simulated_images_vertical_header_slice_nm();
+    bool get_flag_simulated_images_horizontal_header_defocus_nm();
+    /* getters */
+    std::vector< double > get_simulated_images_vertical_header_slice_nm();
+    std::vector< double > get_simulated_images_horizontal_header_defocus_nm();
     std::vector< std::vector<cv::Mat> > get_simulated_images_grid();
     std::string get_export_sim_grid_filename_hint();
     cv::Point2i get_simgrid_best_match_position();
@@ -202,7 +208,7 @@ class TDMap  : public QObject {
     bool set_slc_output_target_folder( std::string folder );
     bool set_wav_output_target_folder( std::string folder );
     bool set_dat_output_target_folder( std::string folder );
-    
+
     bool set_msa_prm_name( std::string  );
     bool set_wavimg_prm_name( std::string  );
     bool set_super_cell_size_a( std::string size_a );

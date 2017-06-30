@@ -24,13 +24,22 @@ void CELSLC_prm::cleanup_thread(){
   boost::filesystem::path full_prm_path = base_bin_output_dir_path / prm_file;
 
   if( boost::filesystem::exists( full_prm_path ) ){
-    const bool remove_result = boost::filesystem::remove( prm_file );
-    status &= remove_result;
-    if( _flag_logger ){
-      std::stringstream message;
-      message << "removing the celslc prm file: " << full_prm_path.string() << " result: " << std::boolalpha << remove_result;
-      logger->logEvent( ApplicationLog::notification , message.str() );
-    }
+    try {
+      const bool remove_result = boost::filesystem::remove( full_prm_path );
+      status &= remove_result;
+      if( _flag_logger ){
+        std::stringstream message;
+        message << "removing the celslc prm file: " << full_prm_path.string() << " result: " << std::boolalpha << remove_result;
+        logger->logEvent( ApplicationLog::notification , message.str() );
+      }
+   }
+   catch(boost::filesystem::filesystem_error &ex) {
+     if( _flag_logger ){
+       std::stringstream message;
+       message << "boost::filesystem::filesystem_error: " << typeid(ex).name();
+       logger->logEvent( ApplicationLog::error , message.str() );
+     }
+   }
   }
 
   for ( int slice_id = 1 ;
