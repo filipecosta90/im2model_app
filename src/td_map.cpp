@@ -424,15 +424,35 @@ bool TDMap::run_tdmap( ){
         }
         if( _clean_run_env ){
           emit TDMap_started_simgrid();
-          const bool _base_image_properties_setup_ok = _td_map_simgrid->setup_image_properties();
-          if(_base_image_properties_setup_ok){
-            const bool _grid_ok = _td_map_simgrid->read_grid_from_dat_files();
-            if( _grid_ok ){
+          // 1st step in simgrid
+          bool _grid_ok = false;
+          try {
+            _grid_ok = _td_map_simgrid->read_grid_from_dat_files();
+          } catch ( const std::exception& e ){
+            _grid_ok = false;
+            if( _flag_logger ){
+              std::stringstream message;
+              message << "A standard exception was caught, while running _td_map_simgrid->read_grid_from_dat_files(): " << e.what();
+              ApplicationLog::severity_level _log_type = ApplicationLog::error;
+              logger->logEvent( _log_type , message.str() );
+            }
+          }
+          // 2nd step in simgrid
+          if( _grid_ok ){
+            try {
               _flag_runned_tdmap_simgrid = _td_map_simgrid->simulate_from_grid();
+            } catch ( const std::exception& e ){
+              _flag_runned_tdmap_simgrid = false;
+              if( _flag_logger ){
+                std::stringstream message;
+                message << "A standard exception was caught, while running _td_map_simgrid->simulate_from_grid(): " << e.what();
+                ApplicationLog::severity_level _log_type = ApplicationLog::error;
+                logger->logEvent( _log_type , message.str() );
+              }
             }
-            else{
-              _flag_runned_tdmap_simgrid = _grid_ok;
-            }
+          }
+          else{
+            _flag_runned_tdmap_simgrid = _grid_ok;
           }
           emit TDMap_ended_simgrid( _flag_runned_tdmap_simgrid );
           if( _flag_logger ){

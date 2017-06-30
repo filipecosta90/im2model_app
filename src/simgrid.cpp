@@ -553,41 +553,52 @@ bool SimGrid::simulate_from_grid(){
             cv::Point minLoc, maxLoc, matchLoc;
             // vars to export
             double slice_match, defocus_match, match_factor;
+            try{
+              // get the defocus value
+              const int at_defocus = round( ((defocus-1) * defocus_period ) + defocus_lower_bound );
+              if( thickness == 1 ){
+                simulated_images_horizontal_header_defocus_nm.push_back( at_defocus );
+              }
 
-            // get the defocus value
-            const int at_defocus = round( ((defocus-1) * defocus_period ) + defocus_lower_bound );
-            if( thickness == 1 ){
-              simulated_images_horizontal_header_defocus_nm.push_back( at_defocus );
+              // get the matrix in the specified col of tdmap (defocus pos)
+              const cv::Mat raw_simulated_image = raw_simulated_images_row.at( defocus - 1 );
+              cv::Mat cleaned_simulated_image;
+              if( sim_image_properties.get_flag_ignore_edge_pixels_rectangle() ){
+                cleaned_simulated_image = raw_simulated_image( sim_image_properties.get_ignore_edge_pixels_rectangle() );
+              }
+              else{
+                cleaned_simulated_image = raw_simulated_image;
+              }
+              cleaned_edges_simulated_images_row.push_back( cleaned_simulated_image );
+              /// Create the result matrix
+              int result_cols =  exp_image_properties.get_roi_n_cols_width() - cleaned_simulated_image.cols + 1;
+              int result_rows = exp_image_properties.get_roi_n_rows_height() - cleaned_simulated_image.rows + 1;
+              cv::Mat result( result_rows, result_cols, CV_8UC1 );
+
+              //: normalized correlation, non-normalized correlation and sum-absolute-difference
+              cv::matchTemplate( exp_image_properties.get_roi_image() , cleaned_simulated_image, result, _sim_correlation_method  );
+              cv::minMaxLoc( result, &minVal, &maxVal, &minLoc, &maxLoc, cv::Mat() );
+              matchVal = maxVal;
+
+              match_factor = matchVal * 100.0;
+              slice_match = (double) at_slice;
+              defocus_match = (double) at_defocus;
+              slice_defocus_match_points.push_back (cv::Point3d ( slice_match, defocus_match, match_factor ));
+              defocus_values_matrix.at<float>(thickness-1, defocus-1) = defocus_match;
+              thickness_values_matrix.at<float>(thickness-1, defocus-1) = slice_match;
+              match_values_matrix.at<float>( thickness-1, defocus-1) =  match_factor ;
+              simulated_matches.push_back(match_factor);
+              std::cout << "at image: row,col[<<" << thickness-1 <<" , " << defocus-1<<  " ]"  << std::endl;
+
+            } catch ( const std::exception& e ){
+              _error_flag = true;
+              if( _flag_logger ){
+                std::stringstream message;
+                message << "A standard exception was caught, while running _td_map_simgrid->read_grid_from_dat_files(): \"" << e.what() <<  "\" while processing image: row,col[<<" << thickness-1 <<" , " << defocus-1<<  " ]"  ;
+                ApplicationLog::severity_level _log_type = ApplicationLog::error;
+                logger->logEvent( _log_type , message.str() );
+              }
             }
-
-            // get the matrix in the specified col of tdmap (defocus pos)
-            const cv::Mat raw_simulated_image = raw_simulated_images_row.at( defocus - 1 );
-            cv::Mat cleaned_simulated_image;
-            if( sim_image_properties.get_flag_ignore_edge_pixels_rectangle() ){
-              cleaned_simulated_image = raw_simulated_image( sim_image_properties.get_ignore_edge_pixels_rectangle() );
-            }
-            else{
-              cleaned_simulated_image = raw_simulated_image;
-            }
-            cleaned_edges_simulated_images_row.push_back( cleaned_simulated_image );
-            /// Create the result matrix
-            int result_cols =  exp_image_properties.get_roi_n_cols_width() - cleaned_simulated_image.cols + 1;
-            int result_rows = exp_image_properties.get_roi_n_rows_height() - cleaned_simulated_image.rows + 1;
-            cv::Mat result( result_rows, result_cols, CV_8UC1 );
-
-            //: normalized correlation, non-normalized correlation and sum-absolute-difference
-            cv::matchTemplate( exp_image_properties.get_roi_image() , cleaned_simulated_image, result, _sim_correlation_method  );
-            cv::minMaxLoc( result, &minVal, &maxVal, &minLoc, &maxLoc, cv::Mat() );
-            matchVal = maxVal;
-
-            match_factor = matchVal * 100.0;
-            slice_match = (double) at_slice;
-            defocus_match = (double) at_defocus;
-            slice_defocus_match_points.push_back (cv::Point3d ( slice_match, defocus_match, match_factor ));
-            defocus_values_matrix.at<float>(thickness-1, defocus-1) = defocus_match;
-            thickness_values_matrix.at<float>(thickness-1, defocus-1) = slice_match;
-            match_values_matrix.at<float>( thickness-1, defocus-1) =  match_factor ;
-            simulated_matches.push_back(match_factor);
           }
           simulated_images_grid.push_back(cleaned_edges_simulated_images_row);
         }
@@ -611,11 +622,15 @@ bool SimGrid::simulate_from_grid(){
       }
       if( _error_flag == false ){
         std::vector<double>::iterator maxElement;
+        std::cout << "calculating max "  << std::endl;
         maxElement = std::max_element(simulated_matches.begin(), simulated_matches.end());
         int dist = distance(simulated_matches.begin(), maxElement);
+        std::cout << "calculating max "  << std::endl;
 
         int col_defocus = dist % defocus_samples;
         int row_thickness = (dist - col_defocus ) / defocus_samples;
+        std::cout << "calculated max : row,col[<<" << row_thickness <<" , " << col_defocus<<  " ]"  << std::endl;
+
         best_match_Point2i = cv::Point2i( row_thickness, col_defocus);
 
         simgrid_best_match_thickness_slice = round((slice_period * row_thickness) + slices_lower_bound);
@@ -641,14 +656,13 @@ bool SimGrid::simulate_from_grid(){
 
 bool SimGrid::clean_for_re_run(){
   if( runned_simulation ){
-    slice_defocus_match_points.clear();
-    defocus_values_matrix.release();
-    thickness_values_matrix.release();
-    match_values_matrix.release();
+    sim_grid.release();
+
     simulated_images_vertical_header_slice_nm.clear();
     _flag_simulated_images_vertical_header_slice_nm = false;
     simulated_images_horizontal_header_defocus_nm.clear();
     _flag_simulated_images_horizontal_header_defocus_nm = false;
+    // simulated images
 
     for (int thickness_row = 0; thickness_row < raw_simulated_images_grid.size(); thickness_row ++ ){
       //will contain the row of simulated images (same thickness, diferent defocus)
@@ -666,6 +680,15 @@ bool SimGrid::clean_for_re_run(){
       experimental_images_matchloc_row.clear();
     }
     experimental_images_match_location_grid.clear();
+
+simulated_matches.clear();
+slice_defocus_match_points.clear();
+
+    defocus_values_matrix.release();
+    thickness_values_matrix.release();
+    match_values_matrix.release();
+    imregionalmax_match_values_matrix.release();
+
     runned_simulation = false;
   }
   return true;
