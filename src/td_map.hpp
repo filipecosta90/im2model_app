@@ -270,9 +270,14 @@ class TDMap  : public QObject {
 
     int get_experimental_roi_dimensions_width_bottom_limit();
     int get_experimental_roi_dimensions_width_top_limit();
-    
+
     int get_experimental_roi_dimensions_height_bottom_limit();
     int get_experimental_roi_dimensions_height_top_limit();
+
+    int get_slice_samples_bottom_limit();
+    int get_slice_samples_top_limit();
+    int get_defocus_samples_bottom_limit();
+    int get_defocus_samples_top_limit();
 
 signals:
     void TDMap_started_celslc( );

@@ -1386,6 +1386,24 @@ int TDMap::get_experimental_roi_dimensions_height_top_limit(){
   return ( limit_top >= 0 ? limit_top : 0 );
 }
 
+int TDMap::get_slice_samples_bottom_limit(){
+  return 2;
+}
+
+int TDMap::get_slice_samples_top_limit(){
+  const int top_limit = _tdmap_celslc_parameters->get_flag_nz_simulated_partitions() ? _tdmap_celslc_parameters->get_nz_simulated_partitions() : 20;
+  return top_limit;
+}
+
+int TDMap::get_defocus_samples_bottom_limit(){
+  return 2;
+}
+
+int TDMap::get_defocus_samples_top_limit(){
+  const int top_limit = 20;
+  return top_limit;
+}
+
 bool TDMap::get_exp_image_properties_flag_roi_image(){
   return  _td_map_simgrid->get_exp_image_properties_flag_roi_image();
 }
