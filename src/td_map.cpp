@@ -1354,6 +1354,38 @@ int TDMap::get_exp_image_properties_full_n_cols_width(){
   return  _td_map_simgrid->get_exp_image_properties_full_n_cols_width();
 }
 
+int TDMap::get_exp_image_properties_full_n_rows_height(){
+  return  _td_map_simgrid->get_exp_image_properties_full_n_rows_height();
+}
+
+int TDMap::get_experimental_roi_dimensions_width_bottom_limit(){
+ return 0;
+}
+
+int TDMap::get_experimental_roi_dimensions_width_top_limit(){
+  const int _center_y = _td_map_simgrid->get_exp_image_properties_roi_center_y();
+  const int _dim_y = _td_map_simgrid->get_exp_image_properties_full_n_cols_width();
+  const int top_half = _dim_y - _center_y;
+  const int bot_half = _center_y - 0; // just to explain the tought
+  // use the smaller half
+  const int limit_top = 2 * ( top_half < bot_half ? top_half : bot_half );
+  return ( limit_top >= 0 ? limit_top : 0 );
+}
+
+int TDMap::get_experimental_roi_dimensions_height_bottom_limit(){
+  return 0;
+}
+
+int TDMap::get_experimental_roi_dimensions_height_top_limit(){
+  const int _center_x = _td_map_simgrid->get_exp_image_properties_roi_center_x();
+  const int _dim_x = _td_map_simgrid->get_exp_image_properties_full_n_rows_height();
+  const int top_half = _dim_x - _center_x;
+  const int bot_half = _center_x - 0; // just to explain the tought
+  // use the smaller half
+  const int limit_top = 2 * ( top_half < bot_half ? top_half : bot_half );
+  return ( limit_top >= 0 ? limit_top : 0 );
+}
+
 bool TDMap::get_exp_image_properties_flag_roi_image(){
   return  _td_map_simgrid->get_exp_image_properties_flag_roi_image();
 }
@@ -1363,6 +1395,11 @@ bool TDMap::get_exp_image_properties_flag_roi_rectangle(){
 }
 
 /* gui getters */
+
+int TDMap::get_experimental_roi_center_bottom_limit(){
+  return 0;
+}
+
 cv::Mat TDMap::get_exp_image_properties_full_image(){
   return _td_map_simgrid->get_exp_image_properties_full_image();
 }

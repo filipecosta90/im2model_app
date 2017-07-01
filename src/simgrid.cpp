@@ -120,8 +120,21 @@ cv::Mat SimGrid::get_exp_image_properties_roi_image(){
 cv::Rect SimGrid::get_exp_image_properties_roi_rectangle(){
   return exp_image_properties.get_roi_rectangle();
 }
+
 int SimGrid::get_exp_image_properties_full_n_cols_width(){
   return exp_image_properties.get_full_n_cols_width();
+}
+
+int SimGrid::get_exp_image_properties_full_n_rows_height(){
+  return exp_image_properties.get_full_n_rows_height();
+}
+
+int SimGrid::get_exp_image_properties_roi_center_x(){
+  return exp_image_properties.get_roi_center_x();
+}
+
+int SimGrid::get_exp_image_properties_roi_center_y(){
+  return exp_image_properties.get_roi_center_y();
 }
 
 bool SimGrid::get_exp_image_properties_flag_full_image(){

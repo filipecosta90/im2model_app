@@ -262,7 +262,17 @@ class TDMap  : public QObject {
     cv::Mat get_exp_image_properties_full_image();
     cv::Mat get_exp_image_properties_roi_image();
     cv::Rect get_exp_image_properties_roi_rectangle();
+
+    /* gui validator limits getters */
     int get_exp_image_properties_full_n_cols_width();
+    int get_exp_image_properties_full_n_rows_height();
+    int get_experimental_roi_center_bottom_limit();
+
+    int get_experimental_roi_dimensions_width_bottom_limit();
+    int get_experimental_roi_dimensions_width_top_limit();
+    
+    int get_experimental_roi_dimensions_height_bottom_limit();
+    int get_experimental_roi_dimensions_height_top_limit();
 
 signals:
     void TDMap_started_celslc( );
