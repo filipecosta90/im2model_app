@@ -1,5 +1,5 @@
-#ifndef FILEDELEGATE_H
-#define FILEDELEGATE_H
+#ifndef SRC_FILEDELEGATE_H__
+#define SRC_FILEDELEGATE_H__
 
 #include <QItemDelegate>
 #include <QStyledItemDelegate>
@@ -21,6 +21,8 @@
 #include "treemodel.h"
 #include "custom_tool_button.h"
 #include "QtAwesome.h"
+#include "qint_validator.h"
+#include "qline_edit_tooltip.h"
 
 
 class TreeItemFileDelegate : public QStyledItemDelegate {
@@ -53,6 +55,7 @@ private slots:
       void get_filename_slot( QWidget *editor ) const;
     void get_dirname_slot( QWidget *editor );
     void commit_and_call(  QWidget * editor, boost::function<bool()> _action  ) ;
+    void showToolTipText( QWidget *editor ) const;
 
   private:
     QToolBar* _editor_toolbar;

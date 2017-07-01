@@ -49,7 +49,9 @@ SOURCES +=\
     renderarea.cpp \
     group_options.cpp \
     QtAwesome.cpp \
-    QtAwesomeAnim.cpp
+    QtAwesomeAnim.cpp \
+    qint_validator.cpp
+
 
 HEADERS  += configwin.h \
     treeitem.h \
@@ -82,7 +84,9 @@ HEADERS  += configwin.h \
     renderarea.h \
     group_options.h \
     QtAwesome.h \
-    QtAwesomeAnim.h
+    QtAwesomeAnim.h \
+    qint_validator.h
+
 
 RESOURCES     = ../im2model.qrc
 

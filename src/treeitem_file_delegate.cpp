@@ -9,7 +9,6 @@ TreeItemFileDelegate::TreeItemFileDelegate( QObject *parent ) : QStyledItemDeleg
 
 }
 
-// more work here!!!!
 void TreeItemFileDelegate::paint(QPainter * painter, const QStyleOptionViewItem & option, const QModelIndex & index) const{
   TreeItem *item = static_cast<TreeItem*>(index.internalPointer());
   if( item->isItemEditable( index.column() ) ){
@@ -59,30 +58,8 @@ void TreeItemFileDelegate::paint(QPainter * painter, const QStyleOptionViewItem 
         QStyledItemDelegate::paint( painter, option,  index);
         break;
       }
-      /*
-         if( item->get_slider_column() == index.column() ){
-         int _slider_value = index.model()->data(index, Qt::EditRole).toInt();
-         int _range_min = item->get_slider_int_range_min();
-         int _range_max = item->get_slider_int_range_max();
-         QSlider *slider = new QSlider(Qt::Horizontal);
-         slider->setContentsMargins(0,0,0,0);
-         slider->setRange(_range_min, _range_max);
-         slider->setValue(_slider_value);
-
-         painter->save();
-         painter->translate(option.rect.topLeft());
-         slider->render(painter);
-         painter->restore();
-
-         }
-         else{
-
-         QStyledItemDelegate::paint( painter, option,  index);
-         }
-         break;
-         }*/
-  case TreeItem::_delegate_ACTION_CHECK:
-  case TreeItem::_delegate_TEXT_DOCUMENT:
+    case TreeItem::_delegate_ACTION_CHECK:
+    case TreeItem::_delegate_TEXT_DOCUMENT:
       {
         QStyleOptionViewItemV4 options = option;
         initStyleOption(&options, index);
@@ -100,17 +77,16 @@ void TreeItemFileDelegate::paint(QPainter * painter, const QStyleOptionViewItem 
         painter->restore();
         break;
       }
-  case TreeItem::_delegate_TEXT_BROWSER:
-  case TreeItem::_delegate_TEXT_ACTION:
-  case TreeItem::_delegate_FILE:
-  case TreeItem::_delegate_DIR:
-  case TreeItem::_delegate_TEXT:
-      // case TreeItem::_delegate_SLIDER_INT:
+    case TreeItem::_delegate_TEXT_BROWSER:
+    case TreeItem::_delegate_TEXT_ACTION:
+    case TreeItem::_delegate_FILE:
+    case TreeItem::_delegate_DIR:
+    case TreeItem::_delegate_TEXT:
       {
         QStyledItemDelegate::paint( painter, option,  index);
         break;
       }
-}
+  }
 }
 
 QWidget *TreeItemFileDelegate::createEditor( QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &index ) const {
@@ -120,9 +96,7 @@ QWidget *TreeItemFileDelegate::createEditor( QWidget *parent, const QStyleOption
   {
     case TreeItem::_delegate_SLIDER_INT:
       {
-
         if( item->get_slider_column() == index.column() ){
-
           int _slider_value = index.model()->data(index, Qt::EditRole).toInt();
           int _range_min = item->get_slider_int_range_min();
           int _range_max = item->get_slider_int_range_max();
@@ -145,21 +119,11 @@ QWidget *TreeItemFileDelegate::createEditor( QWidget *parent, const QStyleOption
         editor = new QWidget(parent);
         QVariant::Type t = static_cast<QVariant::Type>(index.data(Qt::EditRole).userType());
         QWidget* text_editor = QItemEditorFactory().createEditor(t,parent);
-
-        std::cout << "create editor" << std::endl;
         QHBoxLayout* editor_layout = new QHBoxLayout( editor );
         editor_layout->setMargin(0);
         editor_layout->setContentsMargins(QMargins(0,0,0,0));
         editor_layout->setSpacing(0);
         editor_layout->setAlignment(Qt::AlignRight);
-
-
-        /* QtAwesome* awesome = new QtAwesome(editor);
-           awesome->initFontAwesome();
-           QVariantMap optionsb;
-           optionsb.insert( "color" , QColor(255,0,0) );
-           QPushButton* beerButton = new QPushButton( awesome->icon( fa::music, optionsb ), "Music" );
-           */
         QString _button_text = "...";
         FilePushButton *button = new FilePushButton( _button_text, editor );
 
@@ -169,12 +133,10 @@ QWidget *TreeItemFileDelegate::createEditor( QWidget *parent, const QStyleOption
         else{
           connect(button, SIGNAL(onClick(QWidget*)), this, SLOT(get_dirname_slot(QWidget*)));
         }
-
         QSizePolicy spLeft(QSizePolicy::Expanding, QSizePolicy::Expanding);
         spLeft.setHorizontalStretch(3);
         text_editor->setSizePolicy(spLeft);
         editor_layout->addWidget(text_editor);
-
         QSizePolicy spRight(QSizePolicy::Preferred, QSizePolicy::Preferred);
         spRight.setHorizontalStretch(1);
         button->setFixedWidth( button->fontMetrics().width( " ... " ) );
@@ -293,14 +255,13 @@ QWidget *TreeItemFileDelegate::createEditor( QWidget *parent, const QStyleOption
       }
     case TreeItem::_delegate_TEXT:
       {
-        //  editor = QStyledItemDelegate::createEditor(parent,option,index);
-        editor = QItemEditorFactory().createEditor( QVariant::Type::String , parent);
+        QLineEditToolTip* text_editor = new QLineEditToolTip( parent );
         if( item->get_flag_validatable_int( index.column() ) ){
-          QLineEdit* text_editor = dynamic_cast<QLineEdit*>(editor);
           if( text_editor ){
-            QIntValidator* int_validator = new QIntValidator;
+            QIntValidatorReporter * int_validator = new QIntValidatorReporter;
+            //  QObject::connect(int_validator,  SIGNAL(setError(const QString&)), item, SLOT(setToolTipText(const QString&)));
+            QObject::connect(int_validator,  SIGNAL(setError(const QString&) ),text_editor, SLOT(setToolTipText(const QString&)) );
             if( item->get_flag_validatable_int_top( index.column() ) ){
-              std::cout << " validator found on col " << index.column() << std::endl;
               const int top_limit = item->get_validator_value_int_top( index.column() );
               int_validator->setTop( top_limit );
             }
@@ -311,7 +272,7 @@ QWidget *TreeItemFileDelegate::createEditor( QWidget *parent, const QStyleOption
             text_editor->setValidator( int_validator );
           }
         }
-        // return text_editor;
+        return text_editor;
         break;
       }
     default:
@@ -516,6 +477,10 @@ void TreeItemFileDelegate::get_filename_slot( QWidget *editor ) const {
   if( ! (fileName.isNull()) ){
     line->setText(fileName);
   }
+}
+
+void TreeItemFileDelegate::showToolTipText( QWidget *editor ) const {
+  QToolTip::showText( editor->mapToGlobal( QPoint( 0, 0 ) ), "errorString" );
 }
 
 void TreeItemFileDelegate::get_dirname_slot( QWidget *editor ) {

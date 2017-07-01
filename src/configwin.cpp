@@ -1175,12 +1175,15 @@ void MainWindow::create_box_options(){
     //boost::function<int(void)> box1_function_3_1_1_validator_top ( boost::bind( &TDMap::get_exp_image_properties_full_n_rows_height,_core_td_map ) );
     //boost::function<int(void)> box1_function_3_1_2_validator_top ( boost::bind( &TDMap::get_exp_image_properties_full_n_cols_width,_core_td_map ) );
     boost::function<int(void)> box1_function_3_2_1_validator_bot ( boost::bind( &TDMap::get_experimental_roi_dimensions_width_bottom_limit,_core_td_map ) );
+    boost::function<int(void)> box1_function_3_2_1_validator_top ( boost::bind( &TDMap::get_experimental_roi_dimensions_width_top_limit,_core_td_map ) );
+    boost::function<int(void)> box1_function_3_2_2_validator_bot ( boost::bind( &TDMap::get_experimental_roi_dimensions_height_bottom_limit,_core_td_map ) );
+    boost::function<int(void)> box1_function_3_2_2_validator_top ( boost::bind( &TDMap::get_experimental_roi_dimensions_height_top_limit,_core_td_map ) );
+
     experimental_roi_dimensions_width->set_validator_int_bottom(1, box1_function_3_2_1_validator_bot );
-    experimental_roi_dimensions_height->set_validator_int_bottom(1, box1_function_3_1_2_validator_bot );
+    experimental_roi_dimensions_height->set_validator_int_bottom(1, box1_function_3_2_2_validator_bot );
 
-    experimental_roi_dimensions_width->set_validator_int_top(1, box1_function_3_1_1_validator_top );
-    experimental_roi_dimensions_height->set_validator_int_top(1, box1_function_3_1_2_validator_top );
-
+    experimental_roi_dimensions_width->set_validator_int_top(1, box1_function_3_2_1_validator_top );
+    experimental_roi_dimensions_height->set_validator_int_top(1, box1_function_3_2_2_validator_top );
 
   ui->qtree_view_project_setup_image->setModel(project_setup_image_fields_model);
   ui->qtree_view_project_setup_image->setItemDelegate( _load_file_delegate );

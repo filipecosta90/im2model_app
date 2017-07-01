@@ -48,7 +48,6 @@ class TreeItem : public QObject {
     explicit TreeItem( QVector<QVariant> &data, boost::function<bool(std::string)> setter, boost::function<double(void)> getter , TreeItem *parent = 0);
     explicit TreeItem( QVector<QVariant> &data, boost::function<bool(std::string)> setter, boost::function<double(void)> getter, QVector<bool> editable, TreeItem *parent = 0);
 
-
     ~TreeItem();
     TreeItem *parent();
     TreeItem *child(int number);
@@ -121,6 +120,8 @@ class TreeItem : public QObject {
     bool has_hightlight_error( int column );
     bool disable_highlight_error( int column );
     bool enable_highlight_error( std::string varname , int column );
+    public slots:
+    void setToolTipText(const QString&);
 
 
 signals:
@@ -135,6 +136,8 @@ signals:
     QVector<QVariant> itemData;
     QVector<QVariant> itemLegend;
     QVector<bool> itemIsEditableVec;
+    QVector<QVariant> itemToolTip;
+    QVector<bool> _flag_itemToolTip;
 
     QVector<bool> itemIsCheckableVec;
     QVector<bool> itemState;

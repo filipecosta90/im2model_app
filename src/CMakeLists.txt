@@ -147,6 +147,10 @@ if(build_gui)
     gui_stream.hpp
     qt_file_push_button.h
     qt_file_push_button.cpp
+    qint_validator.h
+    qint_validator.cpp
+    qline_edit_tooltip.cpp
+    qline_edit_tooltip.h
     gui_sim_updater.hpp
     gui_stream.hpp
     custom_tool_button.h

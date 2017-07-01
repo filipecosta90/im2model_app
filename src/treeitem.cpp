@@ -90,6 +90,11 @@ bool TreeItem::set_flag_validatable_int(int col_pos , bool value  ){
 }
 
 
+void TreeItem::setToolTipText(const QString& text ){
+  std::cout << "called setToolTipText with text " << text.toStdString() << std::endl;
+}
+
+
 void TreeItem::set_action_toolBar( CustomToolButton* tool ){
   alignToolButton = tool;
 }
@@ -141,6 +146,8 @@ TreeItem::TreeItem( QVector<QVariant> &data, TreeItem *parent) {
     fp_checkable_setters.push_back(  boost::function<bool(bool)>() );
     fp_checkable_getters.push_back(  boost::function<bool(void)>() );
     _flag_highlight_error.push_back( false );
+    itemToolTip.push_back(QVariant());
+    _flag_itemToolTip.push_back( false );
   }
 
   connect(this, SIGNAL( dataChanged( int ) ) , this, SLOT( clean_highlight_status( int ) ) );
@@ -431,6 +438,14 @@ QVariant TreeItem::data(int column, int role ) const{
   }
   else if( role == Qt::DisplayRole || role ==Qt::EditRole ){
     return itemData.value(column);
+  }
+  else if( role == Qt::ToolTipRole ){
+    std::cout << "data with Qt::ToolTipRole" << std::endl;
+    if( _flag_itemToolTip.at(column) == true ) {
+      itemToolTip.value(column);
+    }else{
+    return QVariant();
+    }
   }
   else{
     return QVariant();
