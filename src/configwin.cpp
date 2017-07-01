@@ -1086,6 +1086,18 @@ void MainWindow::create_box_options(){
   simgrid_step_group_options->add_option( project_setup_image_fields_model, experimental_sampling_rate_x , 1, true);
   simgrid_step_group_options->add_option( project_setup_image_fields_model, experimental_sampling_rate_y , 1, true);
 
+  /* validators */
+  experimental_sampling_rate_x->set_flag_validatable_double(1,true);
+  boost::function<double(void)> box1_function_2_1_validator_bot ( boost::bind( &TDMap::get_exp_image_properties_sampling_rate_nm_per_pixel_bottom_limit, _core_td_map ) );
+  boost::function<double(void)> box1_function_2_1_validator_top ( boost::bind( &TDMap::get_exp_image_properties_sampling_rate_nm_per_pixel_top_limit, _core_td_map ) );
+  experimental_sampling_rate_x->set_validator_double_bottom(1, box1_function_2_1_validator_bot );
+  experimental_sampling_rate_x->set_validator_double_top(1, box1_function_2_1_validator_top );
+
+  experimental_sampling_rate_y->set_flag_validatable_double(1,true);
+  // same validator as experimental sampling rate x
+  experimental_sampling_rate_y->set_validator_double_bottom(1, box1_function_2_1_validator_bot );
+  experimental_sampling_rate_y->set_validator_double_top(1, box1_function_2_1_validator_top );
+
   ////////////////
   // ROI
   ////////////////
@@ -1172,8 +1184,6 @@ void MainWindow::create_box_options(){
   /* validators */
   experimental_roi_dimensions_width->set_flag_validatable_int(1,true);
   experimental_roi_dimensions_height->set_flag_validatable_int(1,true);
-  //boost::function<int(void)> box1_function_3_1_1_validator_top ( boost::bind( &TDMap::get_exp_image_properties_full_n_rows_height,_core_td_map ) );
-  //boost::function<int(void)> box1_function_3_1_2_validator_top ( boost::bind( &TDMap::get_exp_image_properties_full_n_cols_width,_core_td_map ) );
   boost::function<int(void)> box1_function_3_2_1_validator_bot ( boost::bind( &TDMap::get_experimental_roi_dimensions_width_bottom_limit,_core_td_map ) );
   boost::function<int(void)> box1_function_3_2_1_validator_top ( boost::bind( &TDMap::get_experimental_roi_dimensions_width_top_limit,_core_td_map ) );
   boost::function<int(void)> box1_function_3_2_2_validator_bot ( boost::bind( &TDMap::get_experimental_roi_dimensions_height_bottom_limit,_core_td_map ) );
@@ -1237,6 +1247,8 @@ void MainWindow::create_box_options(){
   projection_direction_h->set_variable_name( "zone_axis_h" );
   celslc_step_group_options->add_option( project_setup_crystalographic_fields_model, projection_direction_h , 1, true);
 
+  /* validators */
+  projection_direction_h->set_flag_validatable_double(1,true);
   ////////////////
   // Projection direction k
   ////////////////
@@ -1250,6 +1262,9 @@ void MainWindow::create_box_options(){
   projection_direction_k->set_variable_name( "zone_axis_k" );
   celslc_step_group_options->add_option( project_setup_crystalographic_fields_model, projection_direction_k , 1, true);
 
+  /* validators */
+  projection_direction_k->set_flag_validatable_double(1,true);
+
   ////////////////
   // Projection direction l
   ////////////////
@@ -1262,6 +1277,9 @@ void MainWindow::create_box_options(){
   /*group options*/
   projection_direction_l->set_variable_name( "zone_axis_l" );
   celslc_step_group_options->add_option( project_setup_crystalographic_fields_model, projection_direction_l , 1, true);
+
+  /* validators */
+  projection_direction_l->set_flag_validatable_double(1,true);
 
   ////////////////
   // Projected y axis
@@ -1283,6 +1301,9 @@ void MainWindow::create_box_options(){
   projected_y_axis_u->set_variable_name( "projected_y_axis_u" );
   celslc_step_group_options->add_option( project_setup_crystalographic_fields_model, projected_y_axis_u , 1, true);
 
+  /* validators */
+  projected_y_axis_u->set_flag_validatable_double(1,true);
+
   ////////////////
   //Projected y axis v
   ////////////////
@@ -1296,6 +1317,9 @@ void MainWindow::create_box_options(){
   projected_y_axis_v->set_variable_name( "projected_y_axis_v" );
   celslc_step_group_options->add_option( project_setup_crystalographic_fields_model, projected_y_axis_v , 1, true);
 
+  /* validators */
+  projected_y_axis_v->set_flag_validatable_double(1,true);
+
   ////////////////
   //Projected y axis w
   ////////////////
@@ -1308,6 +1332,9 @@ void MainWindow::create_box_options(){
   /*group options*/
   projected_y_axis_w->set_variable_name( "projected_y_axis_w" );
   celslc_step_group_options->add_option( project_setup_crystalographic_fields_model, projected_y_axis_w , 1, true);
+
+  /* validators */
+  projected_y_axis_w->set_flag_validatable_double(1,true);
 
   ui->qtree_view_project_setup_crystallography->setModel(project_setup_crystalographic_fields_model);
   ui->qtree_view_project_setup_crystallography->setItemDelegate( _load_file_delegate );
@@ -1365,6 +1392,9 @@ void MainWindow::create_box_options(){
 
   _parameter_variation_map_thickness_estimated_nm->add_toolbar( box3_function_0_1_1_action_description, box3_function_0_1_1_actions );
 
+  /* validators */
+  _parameter_variation_map_thickness_estimated_nm->set_flag_validatable_double(1,true);
+
   _parameter_variation_map_thickness->insertChildren( _parameter_variation_map_thickness_estimated_nm );
 
   ////////////////
@@ -1399,6 +1429,13 @@ void MainWindow::create_box_options(){
   TreeItem* thickness_range_lower_bound = new TreeItem ( box3_option_1_1 , box3_function_1_1, box3_option_1_1_edit );
   thickness_range->insertChildren( thickness_range_lower_bound );
 
+  /* validators */
+  thickness_range_lower_bound->set_flag_validatable_double(1,true);
+  boost::function<double(void)> box3_function_1_1_validator_bot ( boost::bind( &TDMap::get_nm_lower_bound_bottom_limit, _core_td_map ) );
+  boost::function<double(void)> box3_function_1_1_validator_top ( boost::bind( &TDMap::get_nm_lower_bound_top_limit, _core_td_map ) );
+  thickness_range_lower_bound->set_validator_double_bottom(1, box3_function_1_1_validator_bot );
+  thickness_range_lower_bound->set_validator_double_top(1, box3_function_1_1_validator_top );
+
   ////////////////
   //Thickness range -- upper bound
   ////////////////
@@ -1407,6 +1444,13 @@ void MainWindow::create_box_options(){
   boost::function<bool(std::string)> box3_function_1_2 ( boost::bind( &TDMap::set_nm_upper_bound, _core_td_map, _1 ) );
   TreeItem* thickness_range_upper_bound = new TreeItem ( box3_option_1_2 , box3_function_1_2, box3_option_1_2_edit );
   thickness_range->insertChildren( thickness_range_upper_bound );
+
+  /* validators */
+  thickness_range_upper_bound->set_flag_validatable_double(1,true);
+  boost::function<double(void)> box3_function_1_2_validator_bot ( boost::bind( &TDMap::get_nm_upper_bound_bottom_limit, _core_td_map ) );
+  boost::function<double(void)> box3_function_1_2_validator_top ( boost::bind( &TDMap::get_nm_upper_bound_top_limit, _core_td_map ) );
+  thickness_range_upper_bound->set_validator_double_bottom(1, box3_function_1_2_validator_bot );
+  thickness_range_upper_bound->set_validator_double_top(1, box3_function_1_2_validator_top );
 
   ////////////////
   // 2D variation map - defocus
@@ -1423,6 +1467,9 @@ void MainWindow::create_box_options(){
   boost::function<bool(std::string)> box3_function_0_2_1 ( boost::bind( &TDMap::set_defocus_user_estimated_nm, _core_td_map, _1 ) );
   TreeItem* _parameter_variation_map_defocus_estimated_nm  = new TreeItem ( box3_option_0_2_1, box3_function_0_2_1, box3_option_0_2_1_edit  );
   _parameter_variation_map_defocous->insertChildren( _parameter_variation_map_defocus_estimated_nm );
+
+    /* validators */
+    _parameter_variation_map_defocus_estimated_nm->set_flag_validatable_double(1,true);
 
   ////////////////
   //Defocus range -- Samples
@@ -1456,6 +1503,13 @@ void MainWindow::create_box_options(){
   TreeItem* defocus_range_lower_bound = new TreeItem ( box3_option_2_1 , box3_function_2_1, box3_option_2_1_edit );
   defocus_range->insertChildren( defocus_range_lower_bound );
 
+  /* validators */
+  defocus_range_lower_bound->set_flag_validatable_double(1,true);
+  boost::function<double(void)> box3_function_2_1_validator_bot ( boost::bind( &TDMap::get_defocus_lower_bound_bottom_limit, _core_td_map ) );
+  boost::function<double(void)> box3_function_2_1_validator_top ( boost::bind( &TDMap::get_defocus_lower_bound_top_limit, _core_td_map ) );
+  defocus_range_lower_bound->set_validator_double_bottom(1, box3_function_2_1_validator_bot );
+  defocus_range_lower_bound->set_validator_double_top(1, box3_function_2_1_validator_top );
+
   ////////////////
   //Defocus range -- upper bound
   ////////////////
@@ -1464,6 +1518,13 @@ void MainWindow::create_box_options(){
   boost::function<bool(std::string)> box3_function_2_2 ( boost::bind( &TDMap::set_defocus_upper_bound, _core_td_map, _1 ) );
   TreeItem* defocus_range_upper_bound = new TreeItem ( box3_option_2_2 , box3_function_2_2, box3_option_2_2_edit );
   defocus_range->insertChildren( defocus_range_upper_bound );
+
+  /* validators */
+  defocus_range_upper_bound->set_flag_validatable_double(1,true);
+  boost::function<double(void)> box3_function_2_2_validator_bot ( boost::bind( &TDMap::get_defocus_upper_bound_bottom_limit, _core_td_map ) );
+  boost::function<double(void)> box3_function_2_2_validator_top ( boost::bind( &TDMap::get_defocus_upper_bound_top_limit, _core_td_map ) );
+  defocus_range_upper_bound->set_validator_double_bottom(1, box3_function_2_2_validator_bot );
+  defocus_range_upper_bound->set_validator_double_top(1, box3_function_2_2_validator_top );
 
   ////////////////
   // Incident electron beam
@@ -1484,6 +1545,13 @@ void MainWindow::create_box_options(){
   accelaration_voltage_kv->set_variable_name( "accelaration_voltage_kv" );
   celslc_step_group_options->add_option( tdmap_simulation_setup_model, accelaration_voltage_kv , 1, true);
   msa_step_group_options->add_option( tdmap_simulation_setup_model, accelaration_voltage_kv , 1, true);
+
+  /* validators */
+  accelaration_voltage_kv->set_flag_validatable_double(1,true);
+  boost::function<double(void)> box3_function_3_1_validator_bot ( boost::bind( &TDMap::get_accelaration_voltage_kv_bottom_limit, _core_td_map ) );
+  boost::function<double(void)> box3_function_3_1_validator_top ( boost::bind( &TDMap::get_accelaration_voltage_kv_top_limit, _core_td_map ) );
+  accelaration_voltage_kv->set_validator_double_bottom(1, box3_function_3_1_validator_bot );
+  accelaration_voltage_kv->set_validator_double_top(1, box3_function_3_1_validator_top );
 
   ////////////////
   // Simulation Refinement
@@ -1757,7 +1825,6 @@ void MainWindow::create_box_options(){
   _image_correlation->set_fp_check_getter( 1, box4_option_5_check_getter );
   _image_correlation->load_check_status_from_getter( 1 );
   running_configuration_root->insertChildren( _image_correlation );
-
 
   QVector<QVariant> box4_option_5_0 = {"","Output"};
   TreeItem* _image_correlation_output_legend  = new TreeItem ( box4_option_5_0 );

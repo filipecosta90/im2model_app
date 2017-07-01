@@ -22,8 +22,8 @@
 #include "custom_tool_button.h"
 #include "QtAwesome.h"
 #include "qint_validator.h"
+#include "qdouble_validator.h"
 #include "qline_edit_tooltip.h"
-
 
 class TreeItemFileDelegate : public QStyledItemDelegate {
   Q_OBJECT

@@ -11,90 +11,6 @@
 #include <iostream>
 #include <boost/foreach.hpp>
 
-bool TreeItem::get_flag_validatable_int_top(int col_pos ){
-  bool result = false;
-  if  (col_pos >= 0 && col_pos < itemIsValidatableIntTopVec.size() ) {
-    //call getter on core im2model
-    result = itemIsValidatableIntTopVec.at( col_pos );
-  }
-  return result;
-}
-
-bool TreeItem::get_flag_validatable_int_bottom(int col_pos ){
-  bool result = false;
-  if  (col_pos >= 0 && col_pos < itemIsValidatableIntBottomVec.size() ) {
-    //call getter on core im2model
-    result = itemIsValidatableIntBottomVec.at( col_pos );
-  }
-  return result;
-}
-
-int TreeItem::get_validator_value_int_bottom( int col_pos ){
-  int value = 0;
-  if  (col_pos >= 0 && col_pos < fp_validator_int_range_min.size() ) {
-  value = fp_validator_int_range_min[col_pos]();
-  }
-  return value;
-}
-
-
-int TreeItem::get_validator_value_int_top( int col_pos  ){
-  int value = 1000;
-  if  (col_pos >= 0 && col_pos < fp_validator_int_range_max.size() ) {
-  value = fp_validator_int_range_max[col_pos]();
-  }
-  return value;
-}
-
-
-bool TreeItem::set_validator_int_top(int col_pos ,  boost::function<int(void)> fp_validator_max ){
-  bool result = false;
-  if  (col_pos >= 0 && col_pos < fp_validator_int_range_max.size() ) {
-    //call getter on core im2model
-    fp_validator_int_range_max[col_pos] = fp_validator_max ;
-    itemIsValidatableIntTopVec[col_pos] = true;
-    result = true;
-  }
-  return result;
-}
-
-bool TreeItem::set_validator_int_bottom(int col_pos ,  boost::function<int(void)> fp_validator_min ){
-  bool result = false;
-  if  (col_pos >= 0 && col_pos < fp_validator_int_range_min.size() ) {
-    //call getter on core im2model
-    fp_validator_int_range_min[col_pos] = fp_validator_min ;
-    itemIsValidatableIntBottomVec[col_pos] = true;
-    result = true;
-  }
-  return result;
-}
-
-
-bool TreeItem::get_flag_validatable_int(int col_pos ){
-  bool result = false;
-  if  (col_pos >= 0 && col_pos < itemIsValidatableIntVec.size() ) {
-    //call getter on core im2model
-    result = itemIsValidatableIntVec.at( col_pos );
-  }
-  return result;
-}
-
-bool TreeItem::set_flag_validatable_int(int col_pos , bool value  ){
-  bool result = false;
-  if  (col_pos >= 0 && col_pos < itemIsValidatableIntVec.size() ) {
-    //call getter on core im2model
-    itemIsValidatableIntVec[col_pos] = value ;
-    result = true;
-  }
-  return result;
-}
-
-
-void TreeItem::setToolTipText(const QString& text ){
-  std::cout << "called setToolTipText with text " << text.toStdString() << std::endl;
-}
-
-
 void TreeItem::set_action_toolBar( CustomToolButton* tool ){
   alignToolButton = tool;
 }
@@ -136,20 +52,29 @@ TreeItem::TreeItem( QVector<QVariant> &data, TreeItem *parent) {
   itemData = data;
   parentItem = parent;
   for( int pos = 0; pos < data.size(); pos++ ){
+    /* checkable */
     itemIsCheckableVec.push_back(false);
+    /* validatable int */
     itemIsValidatableIntVec.push_back(false);
     itemIsValidatableIntTopVec.push_back(false);
     itemIsValidatableIntBottomVec.push_back(false);
     fp_validator_int_range_min.push_back( boost::function<int(void)>() );
     fp_validator_int_range_max.push_back( boost::function<int(void)>() );
+    /* validatable double */
+    itemIsValidatableDoubleVec.push_back(false);
+    itemIsValidatableDoubleTopVec.push_back(false);
+    itemIsValidatableDoubleBottomVec.push_back(false);
+    fp_validator_double_range_min.push_back( boost::function<double(void)>() );
+    fp_validator_double_range_max.push_back( boost::function<double(void)>() );
+/* checkable */
+fp_checkable_setters.push_back(  boost::function<bool(bool)>() );
+fp_checkable_getters.push_back(  boost::function<bool(void)>() );
+/* tooltip */
+itemToolTip.push_back(QVariant());
+_flag_itemToolTip.push_back( false );
     itemState.push_back(false);
-    fp_checkable_setters.push_back(  boost::function<bool(bool)>() );
-    fp_checkable_getters.push_back(  boost::function<bool(void)>() );
     _flag_highlight_error.push_back( false );
-    itemToolTip.push_back(QVariant());
-    _flag_itemToolTip.push_back( false );
   }
-
   connect(this, SIGNAL( dataChanged( int ) ) , this, SLOT( clean_highlight_status( int ) ) );
 }
 
@@ -444,7 +369,7 @@ QVariant TreeItem::data(int column, int role ) const{
     if( _flag_itemToolTip.at(column) == true ) {
       itemToolTip.value(column);
     }else{
-    return QVariant();
+      return QVariant();
     }
   }
   else{
@@ -691,4 +616,164 @@ QVector<QVariant> TreeItem::get_dropdown_data(){
 
 QVector<QVariant> TreeItem::get_dropdown_enum(){
   return  dropdown_enum;
+}
+
+
+/* field validation int */
+
+bool TreeItem::get_flag_validatable_int(int col_pos ){
+  bool result = false;
+  if  (col_pos >= 0 && col_pos < itemIsValidatableIntVec.size() ) {
+    //call getter on core im2model
+    result = itemIsValidatableIntVec.at( col_pos );
+  }
+  return result;
+}
+
+bool TreeItem::set_flag_validatable_int(int col_pos , bool value  ){
+  bool result = false;
+  if  (col_pos >= 0 && col_pos < itemIsValidatableIntVec.size() ) {
+    //call getter on core im2model
+    itemIsValidatableIntVec[col_pos] = value ;
+    result = true;
+  }
+  return result;
+}
+
+bool TreeItem::get_flag_validatable_int_top(int col_pos ){
+  bool result = false;
+  if  (col_pos >= 0 && col_pos < itemIsValidatableIntTopVec.size() ) {
+    //call getter on core im2model
+    result = itemIsValidatableIntTopVec.at( col_pos );
+  }
+  return result;
+}
+
+bool TreeItem::get_flag_validatable_int_bottom(int col_pos ){
+  bool result = false;
+  if  (col_pos >= 0 && col_pos < itemIsValidatableIntBottomVec.size() ) {
+    //call getter on core im2model
+    result = itemIsValidatableIntBottomVec.at( col_pos );
+  }
+  return result;
+}
+
+bool TreeItem::set_validator_int_top(int col_pos ,  boost::function<int(void)> fp_validator_max ){
+  bool result = false;
+  if  (col_pos >= 0 && col_pos < fp_validator_int_range_max.size() ) {
+    //call getter on core im2model
+    fp_validator_int_range_max[col_pos] = fp_validator_max ;
+    itemIsValidatableIntTopVec[col_pos] = true;
+    result = true;
+  }
+  return result;
+}
+
+bool TreeItem::set_validator_int_bottom(int col_pos ,  boost::function<int(void)> fp_validator_min ){
+  bool result = false;
+  if  (col_pos >= 0 && col_pos < fp_validator_int_range_min.size() ) {
+    //call getter on core im2model
+    fp_validator_int_range_min[col_pos] = fp_validator_min ;
+    itemIsValidatableIntBottomVec[col_pos] = true;
+    result = true;
+  }
+  return result;
+}
+
+int TreeItem::get_validator_value_int_bottom( int col_pos ){
+  int value = 0;
+  if  (col_pos >= 0 && col_pos < fp_validator_int_range_min.size() ) {
+    value = fp_validator_int_range_min[col_pos]();
+  }
+  return value;
+}
+
+
+int TreeItem::get_validator_value_int_top( int col_pos  ){
+  int value = 1000;
+  if  (col_pos >= 0 && col_pos < fp_validator_int_range_max.size() ) {
+    value = fp_validator_int_range_max[col_pos]();
+  }
+  return value;
+}
+
+/* field validation double */
+
+bool TreeItem::get_flag_validatable_double(int col_pos ){
+  bool result = false;
+  if  (col_pos >= 0 && col_pos < itemIsValidatableDoubleVec.size() ) {
+    //call getter on core im2model
+    result = itemIsValidatableDoubleVec.at( col_pos );
+  }
+  return result;
+}
+
+bool TreeItem::set_flag_validatable_double(int col_pos , bool value  ){
+  bool result = false;
+  if  (col_pos >= 0 && col_pos < itemIsValidatableDoubleVec.size() ) {
+    //call getter on core im2model
+    itemIsValidatableDoubleVec[col_pos] = value ;
+    result = true;
+  }
+  return result;
+}
+
+bool TreeItem::get_flag_validatable_double_top(int col_pos ){
+  bool result = false;
+  if  (col_pos >= 0 && col_pos < itemIsValidatableDoubleTopVec.size() ) {
+    //call getter on core im2model
+    result = itemIsValidatableDoubleTopVec.at( col_pos );
+  }
+  return result;
+}
+
+bool TreeItem::get_flag_validatable_double_bottom(int col_pos ){
+  bool result = false;
+  if  (col_pos >= 0 && col_pos < itemIsValidatableDoubleBottomVec.size() ) {
+    //call getter on core im2model
+    result = itemIsValidatableDoubleBottomVec.at( col_pos );
+  }
+  return result;
+}
+
+bool TreeItem::set_validator_double_top(int col_pos ,  boost::function<double(void)> fp_validator_max ){
+  bool result = false;
+  if  (col_pos >= 0 && col_pos < fp_validator_double_range_max.size() ) {
+    //call getter on core im2model
+    fp_validator_double_range_max[col_pos] = fp_validator_max ;
+    itemIsValidatableDoubleTopVec[col_pos] = true;
+    result = true;
+  }
+  return result;
+}
+
+bool TreeItem::set_validator_double_bottom(int col_pos ,  boost::function<double(void)> fp_validator_min ){
+  bool result = false;
+  if  (col_pos >= 0 && col_pos < fp_validator_double_range_min.size() ) {
+    //call getter on core im2model
+    fp_validator_double_range_min[col_pos] = fp_validator_min ;
+    itemIsValidatableDoubleBottomVec[col_pos] = true;
+    result = true;
+  }
+  return result;
+}
+
+double TreeItem::get_validator_value_double_bottom( int col_pos ){
+  double value = 0.0f;
+  if  (col_pos >= 0 && col_pos < fp_validator_double_range_min.size() ) {
+    value = fp_validator_double_range_min[col_pos]();
+  }
+  return value;
+}
+
+double TreeItem::get_validator_value_double_top( int col_pos  ){
+  double value = 1000.0f;
+  if  (col_pos >= 0 && col_pos < fp_validator_double_range_max.size() ) {
+    value = fp_validator_double_range_max[col_pos]();
+  }
+  return value;
+}
+
+void TreeItem::setToolTipText(const QString& text ){
+  std::cout << "called setToolTipText with text " << text.toStdString() << std::endl;
 }

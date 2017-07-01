@@ -264,6 +264,10 @@ class TDMap  : public QObject {
     cv::Rect get_exp_image_properties_roi_rectangle();
 
     /* gui validator limits getters */
+
+    double get_exp_image_properties_sampling_rate_nm_per_pixel_bottom_limit();
+    double get_exp_image_properties_sampling_rate_nm_per_pixel_top_limit();
+
     int get_exp_image_properties_full_n_cols_width();
     int get_exp_image_properties_full_n_rows_height();
     int get_experimental_roi_center_bottom_limit();
@@ -276,8 +280,20 @@ class TDMap  : public QObject {
 
     int get_slice_samples_bottom_limit();
     int get_slice_samples_top_limit();
+    double get_nm_lower_bound_bottom_limit();
+    double get_nm_lower_bound_top_limit();
+    double get_nm_upper_bound_bottom_limit();
+    double get_nm_upper_bound_top_limit();
+
     int get_defocus_samples_bottom_limit();
     int get_defocus_samples_top_limit();
+    double get_defocus_lower_bound_bottom_limit();
+    double get_defocus_lower_bound_top_limit();
+    double get_defocus_upper_bound_bottom_limit();
+    double get_defocus_upper_bound_top_limit();
+
+    double get_accelaration_voltage_kv_bottom_limit();
+    double get_accelaration_voltage_kv_top_limit();
 
 signals:
     void TDMap_started_celslc( );

@@ -256,10 +256,9 @@ QWidget *TreeItemFileDelegate::createEditor( QWidget *parent, const QStyleOption
     case TreeItem::_delegate_TEXT:
       {
         QLineEditToolTip* text_editor = new QLineEditToolTip( parent );
+        if( text_editor ){
         if( item->get_flag_validatable_int( index.column() ) ){
-          if( text_editor ){
             QIntValidatorReporter * int_validator = new QIntValidatorReporter;
-            //  QObject::connect(int_validator,  SIGNAL(setError(const QString&)), item, SLOT(setToolTipText(const QString&)));
             QObject::connect(int_validator,  SIGNAL(setError(const QString&) ),text_editor, SLOT(setToolTipText(const QString&)) );
             if( item->get_flag_validatable_int_top( index.column() ) ){
               const int top_limit = item->get_validator_value_int_top( index.column() );
@@ -271,6 +270,19 @@ QWidget *TreeItemFileDelegate::createEditor( QWidget *parent, const QStyleOption
             }
             text_editor->setValidator( int_validator );
           }
+        else if( item->get_flag_validatable_double( index.column() ) ){
+          QDoubleValidatorReporter * double_validator = new QDoubleValidatorReporter;
+          QObject::connect(double_validator,  SIGNAL(setError(const QString&) ),text_editor, SLOT(setToolTipText(const QString&)) );
+          if( item->get_flag_validatable_double_top( index.column() ) ){
+            const double top_limit = item->get_validator_value_double_top( index.column() );
+            double_validator->setTop( top_limit );
+          }
+          if( item->get_flag_validatable_double_bottom( index.column() ) ){
+            const double bottom_limit = item->get_validator_value_double_bottom( index.column() );
+            double_validator->setBottom( bottom_limit );
+          }
+          text_editor->setValidator( double_validator );
+        }
         }
         return text_editor;
         break;

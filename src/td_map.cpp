@@ -1346,6 +1346,7 @@ std::string TDMap::get_project_filename_with_path(){
 }
 
 /* gui flag getters */
+
 bool TDMap::get_exp_image_properties_flag_full_image(){
   return  _td_map_simgrid->get_exp_image_properties_flag_full_image();
 }
@@ -1356,6 +1357,14 @@ int TDMap::get_exp_image_properties_full_n_cols_width(){
 
 int TDMap::get_exp_image_properties_full_n_rows_height(){
   return  _td_map_simgrid->get_exp_image_properties_full_n_rows_height();
+}
+
+double TDMap::get_exp_image_properties_sampling_rate_nm_per_pixel_bottom_limit(){
+    return 1.e-10;
+}
+
+double TDMap::get_exp_image_properties_sampling_rate_nm_per_pixel_top_limit(){
+    return 1.0f;
 }
 
 int TDMap::get_experimental_roi_dimensions_width_bottom_limit(){
@@ -1395,6 +1404,33 @@ int TDMap::get_slice_samples_top_limit(){
   return top_limit;
 }
 
+double TDMap::get_nm_lower_bound_bottom_limit(){
+  return 0.0f;
+}
+
+double TDMap::get_nm_lower_bound_top_limit(){
+  double top_standard = 100.0f;
+  if( _tdmap_celslc_parameters->get_flag_nm_upper_bound() ){
+    double _current_upper_bound = _tdmap_celslc_parameters->get_nm_upper_bound();
+    top_standard = _current_upper_bound  < top_standard ? _current_upper_bound : top_standard;
+  }
+  return top_standard;
+}
+
+double TDMap::get_nm_upper_bound_bottom_limit(){
+  double bot_standard = 0.0f;
+  if( _tdmap_celslc_parameters->get_flag_nm_lower_bound() ){
+    double _current_lower_bound = _tdmap_celslc_parameters->get_nm_lower_bound();
+    bot_standard = _current_lower_bound  > bot_standard ? _current_lower_bound : bot_standard;
+  }
+  return bot_standard;
+}
+
+double TDMap::get_nm_upper_bound_top_limit(){
+  double top_standard = 100.0f;
+  return top_standard;
+}
+
 int TDMap::get_defocus_samples_bottom_limit(){
   return 2;
 }
@@ -1402,6 +1438,42 @@ int TDMap::get_defocus_samples_bottom_limit(){
 int TDMap::get_defocus_samples_top_limit(){
   const int top_limit = 20;
   return top_limit;
+}
+
+double TDMap::get_defocus_lower_bound_bottom_limit(){
+  double bot_standard = -100.0f;
+  return bot_standard;
+}
+
+double TDMap::get_defocus_lower_bound_top_limit(){
+  double top_standard = 100.0f;
+  if( _tdmap_celslc_parameters->get_flag_defocus_upper_bound() ){
+    double _current_upper_bound = _tdmap_celslc_parameters->get_defocus_upper_bound();
+    top_standard = _current_upper_bound  < top_standard ? _current_upper_bound : top_standard;
+  }
+  return top_standard;
+}
+
+double TDMap::get_defocus_upper_bound_bottom_limit(){
+  double bot_standard = -100.0f;
+  if( _tdmap_celslc_parameters->get_flag_defocus_lower_bound() ){
+    double _current_lower_bound = _tdmap_celslc_parameters->get_defocus_lower_bound();
+    bot_standard = _current_lower_bound  > bot_standard ? _current_lower_bound : bot_standard;
+  }
+  return bot_standard;
+}
+
+double TDMap::get_defocus_upper_bound_top_limit(){
+  double top_standard = 100.0f;
+  return top_standard;
+}
+
+double TDMap::get_accelaration_voltage_kv_bottom_limit(){
+  return 0.0f;
+}
+
+double TDMap::get_accelaration_voltage_kv_top_limit(){
+  return 1000.0f;
 }
 
 bool TDMap::get_exp_image_properties_flag_roi_image(){

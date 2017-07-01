@@ -104,15 +104,6 @@ class TreeItem : public QObject {
     std::string  get_variable_description();
     void setStatusOption( int col , ActionStatusType action );
 
-    bool get_flag_validatable_int(int col_pos );
-    bool set_flag_validatable_int(int col_pos, bool value );
-    bool get_flag_validatable_int_top(int col_pos );
-    bool get_flag_validatable_int_bottom(int col_pos );
-    bool set_validator_int_top(int col_pos ,  boost::function<int(void)> fp_validator_max );
-    bool set_validator_int_bottom(int col_pos ,  boost::function<int(void)> fp_validator_min );
-    int get_validator_value_int_bottom( int col_pos );
-    int get_validator_value_int_top( int col_pos  );
-
     bool get_flag_fp_data_getter_bool();
     bool call_fp_data_getter_bool();
     bool get_flag_fp_data_setter_bool();
@@ -120,8 +111,28 @@ class TreeItem : public QObject {
     bool has_hightlight_error( int column );
     bool disable_highlight_error( int column );
     bool enable_highlight_error( std::string varname , int column );
+
+    /* field validation int */
+    bool get_flag_validatable_int(int col_pos );
+    bool set_flag_validatable_int(int col_pos, bool value );
+    bool get_flag_validatable_int_top(int col_pos );
+    bool get_flag_validatable_int_bottom(int col_pos );
+    bool set_validator_int_top(int col_pos ,  boost::function<int(void)> fp_validator_max );
+    bool set_validator_int_bottom(int col_pos ,  boost::function<int(void)> fp_validator_min );
+    int get_validator_value_int_bottom( int col_pos );
+    int get_validator_value_int_top( int col_pos );
+    /* field validation double */
+    bool get_flag_validatable_double(int col_pos );
+    bool set_flag_validatable_double(int col_pos, bool value );
+    bool get_flag_validatable_double_top(int col_pos );
+    bool get_flag_validatable_double_bottom(int col_pos );
+    bool set_validator_double_top(int col_pos ,  boost::function<double(void)> fp_validator_max );
+    bool set_validator_double_bottom(int col_pos ,  boost::function<double(void)> fp_validator_min );
+    double get_validator_value_double_bottom( int col_pos );
+    double get_validator_value_double_top( int col_pos );
+
     public slots:
-    void setToolTipText(const QString&);
+      void setToolTipText(const QString&);
 
 
 signals:
@@ -133,22 +144,37 @@ signals:
   private:
     TreeItem *parentItem;
     QList<TreeItem*> childItems;
+
+    /* item data */
     QVector<QVariant> itemData;
     QVector<QVariant> itemLegend;
-    QVector<bool> itemIsEditableVec;
-    QVector<QVariant> itemToolTip;
-    QVector<bool> _flag_itemToolTip;
 
+    /* editable */
+    QVector<bool> itemIsEditableVec;
+
+    /* checkable */
     QVector<bool> itemIsCheckableVec;
     QVector<bool> itemState;
     std::vector< boost::function<bool(bool)> > fp_checkable_setters;
     std::vector< boost::function<bool(void)> > fp_checkable_getters;
 
+    /* field validation int */
     QVector<bool> itemIsValidatableIntVec;
     QVector<bool> itemIsValidatableIntTopVec;
     QVector<bool> itemIsValidatableIntBottomVec;
     std::vector< boost::function<int(void)> > fp_validator_int_range_min;
     std::vector< boost::function<int(void)> > fp_validator_int_range_max;
+
+    /* field validation double */
+    QVector<bool> itemIsValidatableDoubleVec;
+    QVector<bool> itemIsValidatableDoubleTopVec;
+    QVector<bool> itemIsValidatableDoubleBottomVec;
+    std::vector< boost::function<double(void)> > fp_validator_double_range_min;
+    std::vector< boost::function<double(void)> > fp_validator_double_range_max;
+
+    /* item tooltip */
+    QVector<QVariant> itemToolTip;
+    QVector<bool> _flag_itemToolTip;
 
     QVector<QVariant> dropdown_data;
     QVector<QVariant> dropdown_enum;
