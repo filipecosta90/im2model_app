@@ -225,10 +225,12 @@ _flag_roi_boundary_polygon = true;
 
 bool ImageBounds::set_hysteresis_threshold( int threshold ){
   hysteresis_threshold = threshold;
+  return true;
 }
 
 bool ImageBounds::set_max_contour_distance_px( int max_distance ){
   max_contour_distance_px = max_distance;
+  return true;
 }
 
 /* Loggers */

@@ -1892,8 +1892,8 @@ void MainWindow::create_box_options(){
   // load the preset data from core constuctor
   _hysteris_thresholding->load_data_from_getter();
   // set the bottom and top limits of the interval
-  int hysteresis_threshold_bottom_limit =  _core_td_map->get_exp_image_bounds_hysteresis_threshold_range_bottom_limit( );
-  int hysteresis_threshold_top_limit =  _core_td_map->get_exp_image_bounds_hysteresis_threshold_range_top_limit( );
+  int hysteresis_threshold_bottom_limit = _core_td_map->get_exp_image_bounds_hysteresis_threshold_range_bottom_limit( );
+  int hysteresis_threshold_top_limit = _core_td_map->get_exp_image_bounds_hysteresis_threshold_range_top_limit( );
   _hysteris_thresholding->set_slider_int_range_min( hysteresis_threshold_bottom_limit );
   _hysteris_thresholding->set_slider_int_range_max( hysteresis_threshold_top_limit );
 
