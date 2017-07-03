@@ -232,6 +232,15 @@ bool ImageBounds::set_max_contour_distance_px( int max_distance ){
   return true;
 }
 
+bool ImageBounds::set_full_boundary_polygon_margin_x_nm( double value ){
+  full_boundary_polygon_margin_x_nm = value;
+return true;
+}
+bool ImageBounds::set_full_boundary_polygon_margin_y_nm( double value ){
+  full_boundary_polygon_margin_y_nm = value;
+return true;
+}
+
 /* Loggers */
 bool ImageBounds::set_application_logger( ApplicationLog::ApplicationLog* app_logger ){
   logger = app_logger;

@@ -1348,6 +1348,21 @@ bool TDMap::set_run_simgrid_switch( bool value ){
   return true;
 }
 
+bool TDMap::set_full_boundary_polygon_margin_nm( std::string s_margin ){
+  bool result = false;
+  try {
+    const double margin = boost::lexical_cast<double>( s_margin );
+    result =  _super_cell->set_full_boundary_polygon_margin_x_nm( margin );
+    result &=  _super_cell->set_full_boundary_polygon_margin_y_nm( margin );
+
+  }
+  catch(boost::bad_lexical_cast&  ex) {
+    // pass it up
+    boost::throw_exception( ex );
+  }
+  return result;
+}
+
 std::string TDMap::get_project_filename_with_path(){
   return project_filename_with_path.string();
 }
@@ -1364,6 +1379,10 @@ int TDMap::get_exp_image_properties_full_n_cols_width(){
 
 int TDMap::get_exp_image_properties_full_n_rows_height(){
   return  _td_map_simgrid->get_exp_image_properties_full_n_rows_height();
+}
+
+double TDMap::get_full_boundary_polygon_margin_nm(){
+  return _super_cell->get_full_boundary_polygon_margin_x_nm();
 }
 
 double TDMap::get_exp_image_properties_sampling_rate_nm_per_pixel_bottom_limit(){
@@ -1489,6 +1508,14 @@ double TDMap::get_accelaration_voltage_kv_bottom_limit(){
 
 double TDMap::get_accelaration_voltage_kv_top_limit(){
   return 1000.0f;
+}
+
+double TDMap::get_full_boundary_polygon_margin_nm_bottom_limit(){
+  return 0.0f;
+}
+
+double TDMap::get_full_boundary_polygon_margin_nm_top_limit(){
+  return 3.0f;
 }
 
 bool TDMap::get_exp_image_properties_flag_roi_image(){

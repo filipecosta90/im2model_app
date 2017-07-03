@@ -50,6 +50,7 @@ class SuperCell : public ImageBounds , public BaseCell {
   public:
     SuperCell();
 
+
     /* Loggers */
     bool set_application_logger( ApplicationLog::ApplicationLog* logger );
     void print_var_state();

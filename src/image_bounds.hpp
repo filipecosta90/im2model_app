@@ -153,6 +153,10 @@ class ImageBounds : public BaseImage {
     /** setters **/
     bool set_hysteresis_threshold( int threshold );
     bool set_max_contour_distance_px( int max_distance );
+    
+    bool set_full_boundary_polygon_margin_x_nm( double value );
+    bool set_full_boundary_polygon_margin_y_nm( double value );
+
     /* Loggers */
     bool set_application_logger( ApplicationLog::ApplicationLog* logger );
 

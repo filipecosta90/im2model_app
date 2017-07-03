@@ -1917,6 +1917,24 @@ void MainWindow::create_box_options(){
   edge_detection->insertChildren( _max_contour_distance );
   //connect( _max_contour_distance, SIGNAL(dataChanged( int )), this, SLOT( update_supercell_model_edge_detection_setup() ) );
 
+  ////////////////
+  // Super-Cell margin -nm
+  ////////////////
+  QVector<QVariant> box5_option_1_data_3 = {"Super-cell margin (nm)",""};
+  QVector<bool> box5_option_1_3_edit = {false,true};
+  boost::function<bool(std::string)> box5_option_1_3_setter ( boost::bind( &TDMap::set_full_boundary_polygon_margin_nm, _core_td_map, _1 ) );
+  boost::function<double(void)> box5_option_1_3_getter ( boost::bind( &TDMap::get_full_boundary_polygon_margin_nm, _core_td_map ) );
+  TreeItem* super_cell_margin_nm = new TreeItem ( box5_option_1_data_3 , box5_option_1_3_setter, box5_option_1_3_getter, box5_option_1_3_edit );
+  edge_detection->insertChildren( super_cell_margin_nm );
+  /*group options*/
+  super_cell_margin_nm->load_data_from_getter();
+
+  /* validators */
+  super_cell_margin_nm->set_flag_validatable_double(1,true);
+  boost::function<double(void)> box5_function_1_3_validator_bot ( boost::bind( &TDMap::get_full_boundary_polygon_margin_nm_bottom_limit, _core_td_map ) );
+  boost::function<double(void)> box5_function_1_3_validator_top ( boost::bind( &TDMap::get_full_boundary_polygon_margin_nm_top_limit, _core_td_map ) );
+  super_cell_margin_nm->set_validator_double_bottom(1, box5_function_1_3_validator_bot );
+  super_cell_margin_nm->set_validator_double_top(1, box5_function_1_3_validator_top );
 
   ui->qtree_view_supercell_model_edge_detection_setup->setModel( super_cell_setup_model );
   ui->qtree_view_supercell_model_edge_detection_setup->setItemDelegate( _load_file_delegate );

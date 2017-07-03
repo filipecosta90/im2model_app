@@ -263,6 +263,7 @@ class TDMap  : public QObject {
     bool set_run_simgrid_switch( bool value );
     bool set_exp_image_bounds_hysteresis_threshold( int value );
     bool set_exp_image_bounds_max_contour_distance_px( int value );
+    bool set_full_boundary_polygon_margin_nm( std::string );
 
     /* gui flag getters */
     bool get_exp_image_properties_flag_full_image();
@@ -307,6 +308,8 @@ class TDMap  : public QObject {
     double get_exp_image_properties_full_ny_size_width_nm();
     double get_exp_image_properties_roi_nx_size_height_nm();
     double get_exp_image_properties_roi_ny_size_width_nm();
+    double get_full_boundary_polygon_margin_nm( );
+
 
     /* gui validator limits getters */
 
@@ -342,6 +345,9 @@ class TDMap  : public QObject {
 
     double get_accelaration_voltage_kv_bottom_limit();
     double get_accelaration_voltage_kv_top_limit();
+
+    double get_full_boundary_polygon_margin_nm_bottom_limit();
+    double get_full_boundary_polygon_margin_nm_top_limit();
 
 signals:
     void TDMap_started_celslc( );

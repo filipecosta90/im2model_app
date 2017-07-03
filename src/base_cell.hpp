@@ -129,7 +129,10 @@ protected:
 
     // TDMap updaters
 
+
     //setters
+
+    bool set_cel_margin_nm( double margin );
   /*  void set_length_a_Angstroms( double a );
     void set_length_b_Angstroms( double b );
     void set_length_c_Angstroms( double c );
@@ -169,6 +172,8 @@ protected:
     double get_fractional_norm_a_atom_pos_Nanometers(){ return fractional_norm_a_atom_pos; }
     double get_fractional_norm_b_atom_pos_Nanometers(){ return fractional_norm_b_atom_pos; }
     double get_fractional_norm_c_atom_pos_Nanometers(){ return fractional_norm_c_atom_pos; }
+
+    double get_cel_margin_nm(){ return cel_margin_nm; }
 
     std::vector<cv::Point3d> get_atom_positions_vec( ){ return atom_positions; }
     std::vector<cv::Vec4d> get_atom_cpk_rgba_colors_vec( ){ return atom_cpk_rgba_colors; }
