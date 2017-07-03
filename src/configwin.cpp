@@ -374,13 +374,13 @@ void MainWindow::update_super_cell_target_region_shapes(){
     ui->qgraphics_super_cell_edge_detection->addShapeRect( _rect_w_margin_boundary_polygon, 10, cv::Vec3b(255,0,255), tr("Target region with margin bounding rectangle") );
   }
   // experimental image boundary polygon
-  if( _core_td_map->get_exp_image_bounds_flag_roi_boundary_polygon() ){
-    std::vector<cv::Point2i> boundary_polygon = _core_td_map->get_exp_image_bounds_roi_boundary_polygon();
+  if( _core_td_map->get_exp_image_bounds_flag_full_boundary_polygon() ){
+    std::vector<cv::Point2i> boundary_polygon = _core_td_map->get_exp_image_bounds_full_boundary_polygon();
     ui->qgraphics_super_cell_edge_detection->addShapePolygon( boundary_polygon, cv::Point2i( 0,0 ), 10, cv::Vec3b(0,255,0) , tr("Target region boundary") );
   }
   // experimental image boundary polygon w margin
-  if( _core_td_map->get_exp_image_bounds_flag_roi_boundary_polygon_w_margin() ){
-    std::vector<cv::Point2i> boundary_polygon_w_margin = _core_td_map->get_exp_image_bounds_roi_boundary_polygon_w_margin();
+  if( _core_td_map->get_exp_image_bounds_flag_full_boundary_polygon_w_margin() ){
+    std::vector<cv::Point2i> boundary_polygon_w_margin = _core_td_map->get_exp_image_bounds_full_boundary_polygon_w_margin();
     ui->qgraphics_super_cell_edge_detection->addShapePolygon( boundary_polygon_w_margin, cv::Point2i( 0,0 ), 10, cv::Vec3b(0,0,255) , tr("Target region with margin boundary") );
   }
   this->ui->qgraphics_super_cell_edge_detection->show();

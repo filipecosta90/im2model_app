@@ -97,6 +97,7 @@ bool ImageBounds::calculate_boundaries_from_full_image(){
      * that demonstrates the usage of different function variants. **/
     convexHull( cv::Mat(contours_merged), full_boundary_polygon, false );
     _flag_full_boundary_polygon = true;
+
     std::vector<std::vector<cv::Point>> hull;
     hull.push_back( full_boundary_polygon );
 
@@ -136,6 +137,8 @@ bool ImageBounds::calculate_boundaries_from_full_image(){
       full_boundary_polygon_w_margin.push_back( boundary_point );
     }
 
+    _flag_full_boundary_polygon_w_margin = true;
+
     std::vector<std::vector<cv::Point>> hull1;
     hull1.push_back( full_boundary_polygon_w_margin );
     drawContours( temp, hull1, 0, color, 3, 8, std::vector<cv::Vec4i>(), 0, cv::Point() );
@@ -149,7 +152,9 @@ bool ImageBounds::calculate_boundaries_from_full_image(){
 
     experimental_image_contours = temp.clone();
     roi_boundary_image = full_image( roi_boundary_rect ).clone();
+    _flag_roi_boundary_image = true;
     roi_boundary_image_w_margin = full_image( roi_boundary_rect_w_margin ).clone();
+    _flag_roi_boundary_image_w_margin = true;
 
     update_roi_boundary_polygon_from_full_boundaries();
     result = true;
@@ -191,6 +196,7 @@ bool ImageBounds::update_roi_boundary_polygon_from_full_boundaries(){
       super_cell_boundary_point.y -= roi_top_padding_px;
       roi_boundary_polygon.push_back( super_cell_boundary_point );
     }
+_flag_roi_boundary_polygon = true;
 
     for (
         std::vector<cv::Point>::iterator experimental_bound_it = full_boundary_polygon_w_margin.begin();
@@ -202,6 +208,8 @@ bool ImageBounds::update_roi_boundary_polygon_from_full_boundaries(){
       super_cell_boundary_point.y -= roi_top_padding_px_w_margin;
       roi_boundary_polygon_w_margin.push_back( super_cell_boundary_point );
     }
+    _flag_roi_boundary_polygon_w_margin = true;
+
   }
   else{
     if( _flag_logger ){
@@ -245,7 +253,36 @@ std::ostream& operator<<(std::ostream& stream, const ImageBounds::ImageBounds& v
 }
 
 std::ostream& ImageBounds::output(std::ostream& stream) const {
-  stream << "ImageBounds vars:\n" <<
+  stream << "ImageBounds vars:\n"
+  << "\t" << "hysteresis_threshold : " <<  hysteresis_threshold << "\n"
+  << "\t" << "max_contour_distance_px : " <<  max_contour_distance_px << "\n"
+  /***************************/
+  /* image boundary analysis */
+  /***************************/
+  // the next 2 vectors are position-related to the whole image
+  << "\t" << "full_boundary_polygon.size() : " <<  full_boundary_polygon.size() << "\n"
+  << "\t\t" << "_flag_full_boundary_polygon : " << std::boolalpha << _flag_full_boundary_polygon << "\n"
+  << "\t" << "full_boundary_polygon_w_margin.size() : " <<  full_boundary_polygon_w_margin.size() << "\n"
+  << "\t\t" << "_flag_full_boundary_polygon_w_margin : " << std::boolalpha << _flag_full_boundary_polygon_w_margin << "\n"
+  // the next 2 vectors are position-related to the ROI of the experimental image
+  << "\t" << "roi_boundary_polygon.size() : " <<  roi_boundary_polygon.size() << "\n"
+  << "\t\t" << "_flag_roi_boundary_polygon : " << std::boolalpha << _flag_roi_boundary_polygon << "\n"
+  << "\t" << "roi_boundary_rect : " <<  roi_boundary_rect << "\n"
+  << "\t\t" << "_flag_roi_boundary_rect : " << std::boolalpha << _flag_roi_boundary_rect << "\n"
+  << "\t" << "roi_boundary_image.size() : " <<  roi_boundary_image.size() << "\n"
+  << "\t\t" << "_flag_roi_boundary_image : " << std::boolalpha << _flag_roi_boundary_image << "\n"
+  << "\t" << "roi_left_padding_px : " <<  roi_left_padding_px << "\n"
+  << "\t" << "roi_top_padding_px : " <<  roi_top_padding_px << "\n"
+  << "\t" << "roi_left_padding_px_w_margin : " <<  roi_left_padding_px_w_margin << "\n"
+  << "\t" << "roi_top_padding_px_w_margin : " <<  roi_top_padding_px_w_margin << "\n"
+  << "\t" << "roi_boundary_polygon_w_margin.size() : " <<  roi_boundary_polygon_w_margin.size() << "\n"
+  << "\t\t" << "_flag_roi_boundary_polygon_w_margin : " << std::boolalpha << _flag_roi_boundary_polygon_w_margin << "\n"
+  << "\t" << "roi_boundary_rect_w_margin : " <<  roi_boundary_rect_w_margin << "\n"
+  << "\t\t" << "_flag_roi_boundary_rect_w_margin : " << std::boolalpha << _flag_roi_boundary_rect_w_margin << "\n"
+  << "\t" << "full_boundary_polygon_margin_x_nm : " <<  full_boundary_polygon_margin_x_nm << "\n"
+  << "\t" << "full_boundary_polygon_margin_x_px : " <<  full_boundary_polygon_margin_x_px << "\n"
+  << "\t" << "full_boundary_polygon_margin_y_nm : " <<  full_boundary_polygon_margin_y_nm << "\n"
+  << "\t" << "full_boundary_polygon_margin_y_px : " <<  full_boundary_polygon_margin_y_px << "\n"
     "\t" << "BaseImage Properties : " << "\n";
   BaseImage::output(stream);
   return stream;
