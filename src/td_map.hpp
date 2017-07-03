@@ -268,6 +268,7 @@ class TDMap  : public QObject {
     bool get_exp_image_properties_flag_full_image();
     bool get_exp_image_properties_flag_roi_image();
     bool get_exp_image_properties_flag_roi_rectangle();
+    // var getters
     /* experimantal image boundaries */
     bool get_exp_image_bounds_flag_full_boundary_polygon();
     bool get_exp_image_bounds_flag_full_boundary_polygon_w_margin();
@@ -277,7 +278,6 @@ class TDMap  : public QObject {
     bool get_exp_image_bounds_flag_roi_boundary_polygon_w_margin();
     bool get_exp_image_bounds_flag_roi_boundary_rect_w_margin();
     bool get_exp_image_bounds_flag_roi_boundary_image_w_margin();
-    // var getters
     int get_exp_image_bounds_hysteresis_threshold();
     int get_exp_image_bounds_max_contour_distance_px();
     // threshold limits
@@ -303,6 +303,10 @@ class TDMap  : public QObject {
     cv::Mat get_exp_image_properties_full_image();
     cv::Mat get_exp_image_properties_roi_image();
     cv::Rect get_exp_image_properties_roi_rectangle();
+    double get_exp_image_properties_full_nx_size_height_nm();
+    double get_exp_image_properties_full_ny_size_width_nm();
+    double get_exp_image_properties_roi_nx_size_height_nm();
+    double get_exp_image_properties_roi_ny_size_width_nm();
 
     /* gui validator limits getters */
 

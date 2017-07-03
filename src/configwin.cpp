@@ -56,7 +56,6 @@ MainWindow::MainWindow( ApplicationLog::ApplicationLog* logger , QWidget *parent
         _sim_tdmap_wavimg_ostream_buffer,
         _sim_tdmap_simgrid_ostream_buffer );
 
-
     celslc_step_group_options = new group_options("celslc_step");
     msa_step_group_options = new group_options("msa_step");
     wavimg_step_group_options = new group_options("wavimg_step");
@@ -157,7 +156,6 @@ MainWindow::MainWindow( ApplicationLog::ApplicationLog* logger , QWidget *parent
 void MainWindow::update_tdmap_celslc_started( ){
   updateProgressBar(0,0,4);
   ui->statusBar->showMessage(tr("Started multislice step"), 2000);
-
 }
 
 void MainWindow::update_tdmap_celslc_ended( bool result ){
@@ -228,11 +226,6 @@ void MainWindow::update_tdmap_simgrid_ended( bool result ){
 void MainWindow::update_tdmap_celslc_step( int at_step ){
   std::cout << "update_tdmap_celslc_step " << at_step << std::endl;
 }
-/*
-   bool MainWindow::set_project_dir_path( boost::filesystem::path base_dir ){
-   _flag_base_dir_path = _core_td_map->set_project_dir_path( base_dir );
-   return _flag_base_dir_path;
-   }*/
 
 bool MainWindow::set_application_logger( ApplicationLog::ApplicationLog* logger ){
   im2model_logger = logger;
@@ -491,7 +484,6 @@ void MainWindow::clear_tdmap_sim_ostream_containers(){
   QModelIndex simgrid_out_legend_index = tdmap_running_configuration_model->index(0,0,simgrid_index);
   QModelIndex simgrid_out_index = project_setup_crystalographic_fields_model->index(0,1,simgrid_out_legend_index);
   tdmap_running_configuration_model->clearData( simgrid_out_index );
-
 }
 
 void MainWindow::update_tdmap_sim_ostream_celslc(){
@@ -1156,47 +1148,76 @@ void MainWindow::create_box_options(){
   ////////////////
 
   QVector<QVariant> box1_option_3_2 = {"Dimensions",""};
-  QVector<QVariant> box1_option_3_2_1 = {"width <ny>",""};
-  QVector<bool> box1_option_3_2_1_edit = {false,true};
-  boost::function<bool(std::string)> box1_function_3_2_1 ( boost::bind( &TDMap::set_ny_size_width,_core_td_map, _1 ) );
-  QVector<QVariant> box1_option_3_2_2 = {"height <nx>",""};
-  QVector<bool> box1_option_3_2_2_edit = {false,true};
-  boost::function<bool(std::string)> box1_function_3_2_2 ( boost::bind( &TDMap::set_nx_size_height,_core_td_map, _1 ) );
-
   TreeItem* experimental_roi_dimensions = new TreeItem ( box1_option_3_2  );
-  TreeItem* experimental_roi_dimensions_width = new TreeItem ( box1_option_3_2_1 , box1_function_3_2_1, box1_option_3_2_1_edit );
-  connect( experimental_roi_dimensions_width, SIGNAL(dataChanged( int )), this, SLOT( update_roi_experimental_image_frame() ) );
-  connect( experimental_roi_dimensions_width, SIGNAL(dataChanged( int )), this, SLOT( update_roi_full_experimental_image_frame() ) );
-
-  TreeItem* experimental_roi_dimensions_height = new TreeItem ( box1_option_3_2_2 , box1_function_3_2_2, box1_option_3_2_2_edit );
-  connect( experimental_roi_dimensions_height, SIGNAL(dataChanged( int )), this, SLOT( update_roi_experimental_image_frame() ) );
-  connect( experimental_roi_dimensions_height, SIGNAL(dataChanged( int )), this, SLOT( update_roi_full_experimental_image_frame() ) );
-
   experimental_roi->insertChildren( experimental_roi_dimensions );
+
+  ////////////////
+  // Width
+  ////////////////
+  QVector<QVariant> box1_option_3_2_1 = {"Width",""};
+  TreeItem* experimental_roi_dimensions_width  = new TreeItem ( box1_option_3_2_1 );
   experimental_roi_dimensions->insertChildren( experimental_roi_dimensions_width );
+
+  QVector<QVariant> box1_option_3_2_1_1 = {"<ny>",""};
+  QVector<bool> box1_option_3_2_1_1_edit = {false,true};
+  boost::function<bool(std::string)> box1_function_3_2_1_1 ( boost::bind( &TDMap::set_ny_size_width,_core_td_map, _1 ) );
+  TreeItem* experimental_roi_dimensions_width_px = new TreeItem ( box1_option_3_2_1_1 , box1_function_3_2_1_1 , box1_option_3_2_1_1_edit );
+  connect( experimental_roi_dimensions_width_px, SIGNAL(dataChanged( int )), this, SLOT( update_roi_experimental_image_frame() ) );
+  connect( experimental_roi_dimensions_width_px, SIGNAL(dataChanged( int )), this, SLOT( update_roi_full_experimental_image_frame() ) );
+  experimental_roi_dimensions_width->insertChildren( experimental_roi_dimensions_width_px );
+
+  QVector<QVariant> box1_option_3_2_1_2 = {"nm",""};
+  QVector<bool> box1_option_3_2_1_2_edit = {false,false};
+  boost::function<double(void)> box1_function_3_2_1_2 ( boost::bind( &TDMap::get_exp_image_properties_roi_ny_size_width_nm,_core_td_map ) );
+  TreeItem* experimental_roi_dimensions_width_nm = new TreeItem ( box1_option_3_2_1_2  );
+  experimental_roi_dimensions_width_nm->set_fp_data_getter_double_vec( 1, box1_function_3_2_1_2 );
+  experimental_roi_dimensions_width->insertChildren( experimental_roi_dimensions_width_nm );
+  connect( experimental_roi_dimensions_width_px, SIGNAL(dataChanged( int )), experimental_roi_dimensions_width_nm, SLOT( load_data_from_getter( int ) ) );
+
+  ////////////////
+  // Heigth
+  ////////////////
+  QVector<QVariant> box1_option_3_2_2 = {"Heigth",""};
+  TreeItem* experimental_roi_dimensions_height  = new TreeItem ( box1_option_3_2_2 );
   experimental_roi_dimensions->insertChildren( experimental_roi_dimensions_height );
 
+    QVector<QVariant> box1_option_3_2_2_1 = {"<nx>",""};
+    QVector<bool> box1_option_3_2_2_1_edit = {false,true};
+    boost::function<bool(std::string)> box1_function_3_2_2_1 ( boost::bind( &TDMap::set_nx_size_height,_core_td_map, _1 ) );
+  TreeItem* experimental_roi_dimensions_height_px = new TreeItem ( box1_option_3_2_2_1 , box1_function_3_2_2_1, box1_option_3_2_2_1_edit );
+  connect( experimental_roi_dimensions_height_px, SIGNAL(dataChanged( int )), this, SLOT( update_roi_experimental_image_frame() ) );
+  connect( experimental_roi_dimensions_height_px, SIGNAL(dataChanged( int )), this, SLOT( update_roi_full_experimental_image_frame() ) );
+  experimental_roi_dimensions_height->insertChildren( experimental_roi_dimensions_height_px );
+
+  QVector<QVariant> box1_option_3_2_2_2 = {"nm",""};
+  QVector<bool> box1_option_3_2_2_2_edit = {false,false};
+  boost::function<double(void)> box1_function_3_2_2_2 ( boost::bind( &TDMap::get_exp_image_properties_roi_nx_size_height_nm,_core_td_map ) );
+  TreeItem* experimental_roi_dimensions_height_nm = new TreeItem ( box1_option_3_2_2_2 );
+  experimental_roi_dimensions_height_nm->set_fp_data_getter_double_vec( 1, box1_function_3_2_2_2 );
+  experimental_roi_dimensions_height->insertChildren( experimental_roi_dimensions_height_nm );
+  connect( experimental_roi_dimensions_height_px, SIGNAL(dataChanged( int )), experimental_roi_dimensions_height_nm, SLOT( load_data_from_getter( int ) ) );
+
   /*group options*/
-  experimental_roi_dimensions_width->set_variable_name( "experimental_roi_dimensions_width" );
-  experimental_roi_dimensions_height->set_variable_name( "experimental_roi_dimensions_height" );
-  celslc_step_group_options->add_option( project_setup_image_fields_model, experimental_roi_dimensions_width , 1, true);
-  celslc_step_group_options->add_option( project_setup_image_fields_model, experimental_roi_dimensions_height , 1, true);
-  simgrid_step_group_options->add_option( project_setup_image_fields_model, experimental_roi_dimensions_width , 1, true);
-  simgrid_step_group_options->add_option( project_setup_image_fields_model, experimental_roi_dimensions_height , 1, true);
+  experimental_roi_dimensions_width_px->set_variable_name( "experimental_roi_dimensions_width" );
+  experimental_roi_dimensions_height_px->set_variable_name( "experimental_roi_dimensions_height" );
+  celslc_step_group_options->add_option( project_setup_image_fields_model, experimental_roi_dimensions_width_px , 1, true);
+  celslc_step_group_options->add_option( project_setup_image_fields_model, experimental_roi_dimensions_height_px , 1, true);
+  simgrid_step_group_options->add_option( project_setup_image_fields_model, experimental_roi_dimensions_width_px , 1, true);
+  simgrid_step_group_options->add_option( project_setup_image_fields_model, experimental_roi_dimensions_height_px , 1, true);
 
   /* validators */
-  experimental_roi_dimensions_width->set_flag_validatable_int(1,true);
-  experimental_roi_dimensions_height->set_flag_validatable_int(1,true);
+  experimental_roi_dimensions_width_px->set_flag_validatable_int(1,true);
+  experimental_roi_dimensions_height_px->set_flag_validatable_int(1,true);
   boost::function<int(void)> box1_function_3_2_1_validator_bot ( boost::bind( &TDMap::get_experimental_roi_dimensions_width_bottom_limit,_core_td_map ) );
   boost::function<int(void)> box1_function_3_2_1_validator_top ( boost::bind( &TDMap::get_experimental_roi_dimensions_width_top_limit,_core_td_map ) );
   boost::function<int(void)> box1_function_3_2_2_validator_bot ( boost::bind( &TDMap::get_experimental_roi_dimensions_height_bottom_limit,_core_td_map ) );
   boost::function<int(void)> box1_function_3_2_2_validator_top ( boost::bind( &TDMap::get_experimental_roi_dimensions_height_top_limit,_core_td_map ) );
 
-  experimental_roi_dimensions_width->set_validator_int_bottom(1, box1_function_3_2_1_validator_bot );
-  experimental_roi_dimensions_height->set_validator_int_bottom(1, box1_function_3_2_2_validator_bot );
+  experimental_roi_dimensions_width_px->set_validator_int_bottom(1, box1_function_3_2_1_validator_bot );
+  experimental_roi_dimensions_height_px->set_validator_int_bottom(1, box1_function_3_2_2_validator_bot );
 
-  experimental_roi_dimensions_width->set_validator_int_top(1, box1_function_3_2_1_validator_top );
-  experimental_roi_dimensions_height->set_validator_int_top(1, box1_function_3_2_2_validator_top );
+  experimental_roi_dimensions_width_px->set_validator_int_top(1, box1_function_3_2_1_validator_top );
+  experimental_roi_dimensions_height_px->set_validator_int_top(1, box1_function_3_2_2_validator_top );
 
   ui->qtree_view_project_setup_image->setModel(project_setup_image_fields_model);
   ui->qtree_view_project_setup_image->setItemDelegate( _load_file_delegate );

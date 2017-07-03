@@ -31,6 +31,7 @@ class TreeItem : public QObject {
     explicit TreeItem( QVector<QVariant> &data, QVector<bool> editable, TreeItem *parent = 0 );
 
     explicit TreeItem( QVector<QVariant> &data, boost::function<bool(double)> setter, TreeItem *parent = 0);
+    explicit TreeItem( QVector<QVariant> &data, boost::function<double(void)> getter, TreeItem *parent = 0);
     explicit TreeItem( QVector<QVariant> &data, boost::function<bool(double)> setter, QVector<bool> editable, TreeItem *parent = 0);
 
     explicit TreeItem( QVector<QVariant> &data, boost::function<bool(bool)> setter, QVector<QVariant> &legend, TreeItem *parent = 0);
@@ -130,9 +131,13 @@ class TreeItem : public QObject {
     bool set_validator_double_bottom(int col_pos ,  boost::function<double(void)> fp_validator_min );
     double get_validator_value_double_bottom( int col_pos );
     double get_validator_value_double_top( int col_pos );
+    
+    bool set_fp_data_getter_double_vec( int col_pos ,  boost::function<double(void)> fp );
+
 
     public slots:
       void setToolTipText(const QString&);
+      void load_data_from_getter( int column );
 
 
 signals:
@@ -169,8 +174,11 @@ signals:
     QVector<bool> itemIsValidatableDoubleVec;
     QVector<bool> itemIsValidatableDoubleTopVec;
     QVector<bool> itemIsValidatableDoubleBottomVec;
+    QVector<bool> _flag_fp_data_getter_double_vec;
+
     std::vector< boost::function<double(void)> > fp_validator_double_range_min;
     std::vector< boost::function<double(void)> > fp_validator_double_range_max;
+    std::vector< boost::function<double(void)> > fp_data_getter_double_vec;
 
     /* item tooltip */
     QVector<QVariant> itemToolTip;

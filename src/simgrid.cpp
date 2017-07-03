@@ -125,8 +125,24 @@ int SimGrid::get_exp_image_properties_full_n_cols_width(){
   return exp_image_properties.get_full_n_cols_width();
 }
 
+double SimGrid::get_exp_image_properties_full_nx_size_height_nm(){
+  return exp_image_properties.get_full_n_rows_height_nm();
+}
+
+double SimGrid::get_exp_image_properties_roi_nx_size_height_nm(){
+  return exp_image_properties.get_roi_n_rows_height_nm();
+}
+
 int SimGrid::get_exp_image_properties_full_n_rows_height(){
   return exp_image_properties.get_full_n_rows_height();
+}
+
+double SimGrid::get_exp_image_properties_full_ny_size_width_nm(){
+  return exp_image_properties.get_full_n_cols_width_nm();
+}
+
+double SimGrid::get_exp_image_properties_roi_ny_size_width_nm(){
+  return exp_image_properties.get_roi_n_cols_width_nm();
 }
 
 int SimGrid::get_exp_image_properties_roi_center_x(){

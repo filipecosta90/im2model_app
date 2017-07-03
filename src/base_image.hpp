@@ -50,8 +50,10 @@ bool auto_calculate_dimensions();
     bool _flag_full_image = false;
 
     int full_n_rows_height = 0;
+    double full_n_rows_height_nm = 0.0f;
     bool _flag_full_n_rows_height = false;
     int full_n_cols_width = 0;
+    double full_n_cols_width_nm = 0;
     bool _flag_full_n_cols_width = false;
 
 // sampling rate and dimensioning
@@ -120,13 +122,17 @@ bool auto_calculate_dimensions();
     // var getters
     cv::Mat get_full_image(){ return full_image.clone(); }
     int get_full_n_rows_height(){ return full_n_rows_height; }
+    double get_full_n_rows_height_nm(){ return full_n_rows_height_nm; }
     int get_full_n_cols_width(){ return full_n_cols_width; }
+    double get_full_n_cols_width_nm(){ return full_n_cols_width_nm; }
     double get_sampling_rate_x_nm_per_pixel(){ return sampling_rate_x_nm_per_pixel; }
     double get_sampling_rate_y_nm_per_pixel(){ return sampling_rate_y_nm_per_pixel; }
     cv::Mat get_roi_image(){ return roi_image.clone(); }
     cv::Rect get_roi_rectangle(){ return roi_rectangle; }
     int get_roi_n_rows_height(){ return roi_n_rows_height; }
+    double get_roi_n_rows_height_nm(){ return roi_nm_size_rows_a; }
     int get_roi_n_cols_width(){ return roi_n_cols_width; }
+    double get_roi_n_cols_width_nm(){ return roi_nm_size_cols_b; }
     int get_roi_center_x(){ return roi_center_x; }
     int get_roi_center_y(){ return roi_center_y; }
     // rectangle without the ignored edge pixels of the full image

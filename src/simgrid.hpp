@@ -139,7 +139,11 @@ std::vector< double > get_simulated_images_horizontal_header_defocus_nm(){ retur
     bool get_exp_image_properties_flag_roi_image();
     bool get_exp_image_properties_flag_roi_rectangle();
     int get_exp_image_properties_full_n_cols_width();
+    double get_exp_image_properties_full_ny_size_width_nm();
     int get_exp_image_properties_full_n_rows_height();
+    double get_exp_image_properties_full_nx_size_height_nm();
+    double get_exp_image_properties_roi_ny_size_width_nm();
+    double get_exp_image_properties_roi_nx_size_height_nm();
     int get_exp_image_properties_roi_center_x();
     int get_exp_image_properties_roi_center_y();
 

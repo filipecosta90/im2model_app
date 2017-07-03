@@ -88,7 +88,7 @@ bool BaseImage::calculate_b_size_from_n_cols_and_sampling_rate(){
       result = true;
     }
     if( _flag_roi_n_cols_width && _flag_sampling_rate_y_nm_per_pixel ){
-      roi_nm_size_cols_b = ( (double) roi_n_cols_width ) * sampling_rate_y_nm_per_pixel;
+      roi_nm_size_cols_b = (double) ( roi_n_cols_width ) * sampling_rate_y_nm_per_pixel;
       _flag_roi_nm_size_cols_b = true;
       result = true;
     }

@@ -1509,6 +1509,22 @@ cv::Rect TDMap::get_exp_image_properties_roi_rectangle(){
   return  _td_map_simgrid->get_exp_image_properties_roi_rectangle();
 }
 
+double TDMap::get_exp_image_properties_full_nx_size_height_nm(){
+  return  _td_map_simgrid->get_exp_image_properties_full_nx_size_height_nm();
+}
+
+double TDMap::get_exp_image_properties_full_ny_size_width_nm(){
+  return  _td_map_simgrid->get_exp_image_properties_full_ny_size_width_nm();
+}
+
+double TDMap::get_exp_image_properties_roi_nx_size_height_nm(){
+  return  _td_map_simgrid->get_exp_image_properties_roi_nx_size_height_nm();
+}
+
+double TDMap::get_exp_image_properties_roi_ny_size_width_nm(){
+  return  _td_map_simgrid->get_exp_image_properties_roi_ny_size_width_nm();
+}
+
 bool TDMap::calculate_exp_image_boundaries_from_full_image(){
   return _super_cell->calculate_boundaries_from_full_image();
 }

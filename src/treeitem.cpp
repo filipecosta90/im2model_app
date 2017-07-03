@@ -69,6 +69,10 @@ TreeItem::TreeItem( QVector<QVariant> &data, TreeItem *parent) {
 /* checkable */
 fp_checkable_setters.push_back(  boost::function<bool(bool)>() );
 fp_checkable_getters.push_back(  boost::function<bool(void)>() );
+/* fp data getters */
+ _flag_fp_data_getter_double_vec.push_back(false);
+ fp_data_getter_double_vec.push_back( boost::function<double(void)>() );
+
 /* tooltip */
 itemToolTip.push_back(QVariant());
 _flag_itemToolTip.push_back( false );
@@ -130,6 +134,11 @@ TreeItem::TreeItem( QVector<QVariant> &data, boost::function<bool(double)> sette
   _flag_fp_data_setter_double = true;
 }
 
+TreeItem::TreeItem( QVector<QVariant> &data, boost::function<double(void)> getter, TreeItem *parent) : TreeItem( data, parent ) {
+  fp_data_getter_double = getter;
+  _flag_fp_data_getter_double = true;
+}
+
 TreeItem::TreeItem( QVector<QVariant> &data, boost::function<bool(double)> setter, QVector<bool> editable, TreeItem *parent  ) : TreeItem( data, setter, parent ){
   itemIsEditableVec = editable;
 }
@@ -185,6 +194,24 @@ bool TreeItem::load_data_from_getter( ){
     }
   }
   return result;
+}
+
+void TreeItem::load_data_from_getter( int column ){
+  if  (column >= 0 && column < itemData.size() ) {
+    //call getter on core im2model
+    if ( _flag_fp_data_getter_double_vec.at(column) == true )
+      {
+      QVariant value;
+      if( _flag_fp_data_getter_double_vec[column] == true  ){
+        const double _double_value = fp_data_getter_double_vec[column]();
+        std::cout << "_double_value " << _double_value << std::endl;
+        value = QVariant::fromValue( _double_value );
+      }
+      emit dataChanged( column );
+      emit dataChanged( _variable_name );
+      itemData[column] = value;
+    }
+  }
 }
 
 bool TreeItem::get_flag_fp_data_getter_bool( ){
@@ -688,6 +715,16 @@ int TreeItem::get_validator_value_int_bottom( int col_pos ){
   return value;
 }
 
+bool TreeItem::set_fp_data_getter_double_vec(int col_pos ,  boost::function<double(void)> fp ){
+  bool result = false;
+  if  (col_pos >= 0 && col_pos < fp_data_getter_double_vec.size() ) {
+    //call getter on core im2model
+    fp_data_getter_double_vec[col_pos] = fp ;
+    _flag_fp_data_getter_double_vec[col_pos] = true;
+    result = true;
+  }
+  return result;
+}
 
 int TreeItem::get_validator_value_int_top( int col_pos  ){
   int value = 1000;
