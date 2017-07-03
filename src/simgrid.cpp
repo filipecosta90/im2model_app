@@ -237,9 +237,6 @@ bool SimGrid::export_sim_grid( std::string sim_grid_file_name_image ){
       sim_grid.create ( sim_grid_height, sim_grid_width , CV_8UC1 );
       sim_grid = cv::Mat::zeros(sim_grid_height, sim_grid_width, CV_8UC1);
 
-      std::cout << "Simulated grid size: " << sim_grid.cols << " x " << sim_grid.rows << std::endl;
-      std::cout << "Defocus step (nm): " << defocus_period << std::endl;
-
       match_factor_file.open (match_factor_file_name.c_str() , std::ofstream::out );
       match_factor_file << "defocus_nm,thickness_slices,match_val" << std::endl;
       defocus_file_matrix.open( defocus_matrix_file_name.c_str(), std::ofstream::out );
@@ -609,7 +606,6 @@ bool SimGrid::simulate_from_grid(){
 
         const int at_slice = round( slice_period * ( thickness  - 1 ) + slices_lower_bound );
         const double at_slice_nm = simgrid_best_match_thickness_nm = slice_params_accum_nm_slice_vec.at(at_slice-1);
-        std::cout << "at slice" << at_slice_nm << std::endl;
         simulated_images_vertical_header_slice_nm.push_back( at_slice_nm );
 
         // get the matrices row
@@ -660,7 +656,6 @@ bool SimGrid::simulate_from_grid(){
               thickness_values_matrix.at<float>(thickness-1, defocus-1) = slice_match;
               match_values_matrix.at<float>( thickness-1, defocus-1) =  match_factor ;
               simulated_matches.push_back(match_factor);
-              std::cout << "at image: row,col[<<" << thickness-1 <<" , " << defocus-1<<  " ]"  << std::endl;
 
             } catch ( const std::exception& e ){
               _error_flag = true;
@@ -694,23 +689,17 @@ bool SimGrid::simulate_from_grid(){
       }
       if( _error_flag == false ){
         std::vector<double>::iterator maxElement;
-        std::cout << "calculating max "  << std::endl;
         maxElement = std::max_element(simulated_matches.begin(), simulated_matches.end());
         int dist = distance(simulated_matches.begin(), maxElement);
-        std::cout << "calculating max "  << std::endl;
 
         int col_defocus = dist % defocus_samples;
         int row_thickness = (dist - col_defocus ) / defocus_samples;
-        std::cout << "calculated max : row,col[<<" << row_thickness <<" , " << col_defocus<<  " ]"  << std::endl;
 
         best_match_Point2i = cv::Point2i( row_thickness, col_defocus);
 
         simgrid_best_match_thickness_slice = round((slice_period * row_thickness) + slices_lower_bound);
         simgrid_best_match_thickness_nm = slice_params_accum_nm_slice_vec.at(simgrid_best_match_thickness_slice-1);
         simgrid_best_match_defocus_nm = ( col_defocus * defocus_period ) + defocus_lower_bound;
-
-        std::cout << "Max match % is " << *maxElement << " | " << simulated_matches.at(dist) << "\t at pos ["<< dist << "](" << col_defocus << "," << row_thickness  <<") slice " << simgrid_best_match_thickness_slice << " ( " << simgrid_best_match_thickness_nm << " ) , defocus " << simgrid_best_match_defocus_nm << std::endl;
-
         runned_simulation = true;
       }
     }

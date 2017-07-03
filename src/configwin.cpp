@@ -224,7 +224,7 @@ void MainWindow::update_tdmap_simgrid_ended( bool result ){
 }
 
 void MainWindow::update_tdmap_celslc_step( int at_step ){
-  std::cout << "update_tdmap_celslc_step " << at_step << std::endl;
+
 }
 
 bool MainWindow::set_application_logger( ApplicationLog::ApplicationLog* logger ){

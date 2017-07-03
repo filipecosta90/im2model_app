@@ -256,6 +256,7 @@ bool MSA_prm::set_wave_function_name ( std::string wave_function_filename ){
 bool MSA_prm::set_prm_file_name( std::string filename ){
   prm_filename = filename;
   _flag_prm_filename = true;
+  return true;
 }
 
 bool MSA_prm::get_flag_prm_filename(){

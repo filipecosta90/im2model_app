@@ -170,7 +170,7 @@ bool auto_calculate_dimensions();
     bool set_application_logger( ApplicationLog::ApplicationLog* logger );
 
     void print_var_state();
-    friend std::ostream& operator<< (std::ostream& stream, const BaseImage::BaseImage& image);
+    friend std::ostream& operator<< (std::ostream& stream, const BaseImage& image);
     virtual std::ostream& output(std::ostream& stream) const;
 
 };

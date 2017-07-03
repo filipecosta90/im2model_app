@@ -161,7 +161,7 @@ class ImageBounds : public BaseImage {
     bool set_application_logger( ApplicationLog::ApplicationLog* logger );
 
     void print_var_state();
-    friend std::ostream& operator<< (std::ostream& stream, const ImageBounds::ImageBounds& image);
+    friend std::ostream& operator<< (std::ostream& stream, const ImageBounds& image);
     virtual std::ostream& output(std::ostream& stream) const;
 
 };

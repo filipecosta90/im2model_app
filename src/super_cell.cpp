@@ -31,7 +31,7 @@ void SuperCell::print_var_state(){
   }
 }
 
-std::ostream& operator<<(std::ostream& stream, const SuperCell::SuperCell& var) {
+std::ostream& operator<<(std::ostream& stream, const SuperCell& var) {
   var.output(stream);
   return stream;
 }

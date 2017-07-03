@@ -682,6 +682,7 @@ bool TDMap::set_slc_output_target_folder( std::string folder ){
   // simgrid
   const bool simgrid_result = _td_map_simgrid->set_slc_output_target_folder( folder );
   result = celslc_result & msa_result & wavimg_result & simgrid_result;
+  return result;
 }
 
 bool TDMap::set_wav_output_target_folder( std::string folder ){
@@ -696,6 +697,7 @@ bool TDMap::set_wav_output_target_folder( std::string folder ){
   // simgrid
   const bool simgrid_result = _td_map_simgrid->set_wav_output_target_folder( folder );
   result = celslc_result & msa_result & wavimg_result & simgrid_result;
+  return result;
 }
 
 bool TDMap::set_dat_output_target_folder( std::string folder ){
@@ -710,6 +712,7 @@ bool TDMap::set_dat_output_target_folder( std::string folder ){
   // simgrid
   const bool simgrid_result = _td_map_simgrid->set_dat_output_target_folder( folder );
   result = celslc_result & msa_result & wavimg_result & simgrid_result;
+  return result;
 }
 
 bool TDMap::set_msa_prm_name(  std::string prm_name  ){

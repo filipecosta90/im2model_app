@@ -257,7 +257,7 @@ void ImageBounds::print_var_state(){
   }
 }
 
-std::ostream& operator<<(std::ostream& stream, const ImageBounds::ImageBounds& var) {
+std::ostream& operator<<(std::ostream& stream, const ImageBounds& var) {
   var.output(stream);
   return stream;
 }

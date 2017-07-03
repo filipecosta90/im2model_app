@@ -260,7 +260,7 @@ void BaseImage::print_var_state(){
 }
 
 std::ostream& operator<<(std::ostream& stream,
-    const BaseImage::BaseImage& var) {
+    const BaseImage& var) {
   var.output(stream);
   return stream;
 }

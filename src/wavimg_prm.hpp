@@ -222,7 +222,7 @@ class WAVIMG_prm : public BaseBin, public BaseCrystal, public BaseImage {
     /* Loggers */
     bool set_application_logger( ApplicationLog::ApplicationLog* logger );
     void print_var_state();
-    friend std::ostream& operator<< (std::ostream& stream, const WAVIMG_prm::WAVIMG_prm& var);
+    friend std::ostream& operator<< (std::ostream& stream, const WAVIMG_prm& var);
     virtual std::ostream& output(std::ostream& stream) const;
 
 

@@ -717,7 +717,7 @@ void WAVIMG_prm::print_var_state(){
   }
 }
 
-std::ostream& operator<<(std::ostream& stream, const WAVIMG_prm::WAVIMG_prm& var) {
+std::ostream& operator<<(std::ostream& stream, const WAVIMG_prm& var) {
   var.output(stream);
   return stream;
 }

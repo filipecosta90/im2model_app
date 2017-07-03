@@ -47,7 +47,6 @@ void TDMap_Table::connect_item_changes_to_invalidate_grid( const TreeItem* item,
 void TDMap_Table::invalidate_grid( int signal_item_changed_column ){
   if ( signal_item_changed_column == _treeitem_changes_to_invalidate_grid_watch_col ){
     if( _flag_simulated_image_grid ){
-      std::cout << "cleaned grid due to data change in connected TreeItems" << std::endl;
       _flag_simulated_image_grid = false;
       for( int row = 0; row < simulated_image_grid.size() ; row++ ){
         std::vector<cv::Mat> row_image_grid = simulated_image_grid.at(row);
@@ -76,7 +75,6 @@ void TDMap_Table::update_RowCount_from_thickness_range_number_samples( int signa
       int new_RowCount = core_tdmap->get_slice_samples();
       RowCount = new_RowCount;
       update_row_size();
-      std::cout << "new_RowCount " << new_RowCount << std::endl;
       clear();
     }
   }
@@ -104,7 +102,6 @@ void TDMap_Table::update_ColumnCount_from_defocus_range_number_samples( int sign
       int new_ColumnCount = core_tdmap->get_defocus_samples();
       ColumnCount = new_ColumnCount;
       update_column_size();
-      std::cout << "new_ColumnCount " << new_ColumnCount << std::endl;
       clear();
     }
   }
@@ -163,10 +160,8 @@ void TDMap_Table::clear(){
   _number_calculated_cells = RowCount * ColumnCount;
   update_headers();
   if( ( _number_drawed_cells != _number_calculated_cells ) || ( ! _flag_created_cells ) ){
-    std::cout << " creating cells " << std::endl;
     create_cells();
   }
-  std::cout << " updating cells " << std::endl;
   update_cells();
   this->resizeColumnsToContents();
   this->resizeRowsToContents();
