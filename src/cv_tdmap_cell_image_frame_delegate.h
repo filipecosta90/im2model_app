@@ -17,6 +17,8 @@
 
 #include "cv_tdmap_cell_image_frame.h"
 #include "cv_image_frame.h"
+#include "cv_image_cell_widget.h"
+
 
 class QAbstractItemModel;
 class QObject;
@@ -42,4 +44,3 @@ class CvTDMapImageFrameDelegate : public QStyledItemDelegate
 };
 
 #endif //CELL_DELEGATE_HPP
-

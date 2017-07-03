@@ -1,5 +1,4 @@
 #include "cv_image_delegate.h"
-#include "cv_image_widget.h"
 
 CvImageDelegate::CvImageDelegate(QObject *parent) :
   QItemDelegate(parent)
@@ -48,4 +47,3 @@ void CvImageDelegate::updateEditorGeometry(QWidget *editor,
 {
   editor->setGeometry(option.rect);
 }
-

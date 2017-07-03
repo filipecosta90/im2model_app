@@ -20,6 +20,7 @@
   base_crystal.hpp
   base_image.hpp
   base_logger.hpp
+  base_cell.hpp
   atom.cpp
   chem_database.cpp
   simgrid.cpp
@@ -36,6 +37,9 @@
   base_crystal.cpp
   base_image.cpp
   base_logger.cpp
+  base_cell.cpp
+  image_bounds.cpp
+  image_bounds.hpp
   )
 
 BISON_TARGET(mc_parser mc_parser.yy ${CMAKE_CURRENT_BINARY_DIR}/mc_parser.tab.cc )

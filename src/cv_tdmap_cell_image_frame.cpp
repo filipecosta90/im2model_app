@@ -1,7 +1,5 @@
 #include "cv_tdmap_cell_image_frame.h"
 
-#include "cv_image_widget.h"
-
 CvTDMapImageFrame::CvTDMapImageFrame( ) {
     image_widget = new CVImageWidget();
     scrollArea = new QScrollArea();

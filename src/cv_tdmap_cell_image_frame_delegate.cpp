@@ -1,7 +1,5 @@
 #include "cv_tdmap_cell_image_frame_delegate.h"
-#include "cv_tdmap_cell_image_frame.h"
-#include "cv_image_frame.h"
-#include "cv_image_cell_widget.h"
+
 
 void CvTDMapImageFrameDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const {
   // save the painter's state

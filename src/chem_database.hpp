@@ -35,6 +35,12 @@
 #include <iosfwd>         // for string
 #include <map>            // for map
 #include "atom_info.hpp"  // for Atom_Info
+#include <cctype>         // for isalpha
+#include <iostream>       // for string, operator<<, basic_ostream, cout, endl
+#include <boost/assign.hpp>
+#include <map>            // for map, map<>::iterator, __map_iterator, opera...
+#include <string>         // for operator<, allocator, basic_string<>::iterator
+#include <utility>        // for pair
 
 class Chem_Database{
   private:

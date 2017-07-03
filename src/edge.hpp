@@ -1,5 +1,5 @@
-#ifndef _EDGE_HPP_
-#define _EDGE_HPP_
+#ifndef SRC_EDGE_H__
+#define SRC_EDGE_H__
 
 #include <algorithm>
 #include <cstdlib>
@@ -11,7 +11,7 @@
 #include <opencv2/opencv.hpp>
 #include "opencv2/highgui/highgui.hpp"
 #include "opencv2/imgproc/imgproc.hpp"
-#include "opencv2/opencv_modules.hpp" 
+#include "opencv2/opencv_modules.hpp"
 #include "opencv2/core/core.hpp"
 #include "opencv2/features2d/features2d.hpp"
 
@@ -32,15 +32,15 @@ struct Edge {
 
 bool inpolygon_double(const cv::Point3d& p, std::vector<Edge> edges){
   auto c = 0;
-  for (auto e : edges) { 
-    if ( e.ray_cast(p) ) c++; 
+  for (auto e : edges) {
+    if ( e.ray_cast(p) ) c++;
   }
   return c % 2 != 0;
 }
 
 bool inpolygon( cv::Point3d p, std::vector<cv::Point2d> polygon_points ){
   std::vector<Edge> edges( polygon_points.size() );
-  std::vector<cv::Point2d>::iterator point_itt, next_point_itt, first_point_itt; 
+  std::vector<cv::Point2d>::iterator point_itt, next_point_itt, first_point_itt;
   first_point_itt = polygon_points.begin();
   for ( point_itt = polygon_points.begin(); point_itt != polygon_points.end(); point_itt++ ){
     next_point_itt = point_itt + 1;
@@ -50,9 +50,10 @@ bool inpolygon( cv::Point3d p, std::vector<cv::Point2d> polygon_points ){
     edges.push_back(Edge{ *point_itt, *next_point_itt });
   }
   auto c = 0;
-  for (auto e : edges) { 
-    if ( e.ray_cast(p) ) c++; 
+  for (auto e : edges) {
+    if ( e.ray_cast(p) ) c++;
   }
   return c % 2 != 0;
 }
+
 #endif

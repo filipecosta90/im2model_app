@@ -24,7 +24,6 @@
 #include <opencv2/core/types.hpp>                         // for Rect, Point3d
 #include <opencv2/imgcodecs.hpp>                          // for imread
 
-#include "base_logger.hpp"
 #include "application_log.hpp"
 
 class BaseCrystal {

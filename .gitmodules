@@ -1,0 +1,3 @@
+[submodule "external/emdlib"]
+	path = external/emdlib
+	url = git@github.com:filipecosta90/emdlib.git

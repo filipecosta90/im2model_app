@@ -39,7 +39,7 @@ class GuiSimOutUpdater : public QObject {
         std::cout << "Slave thread " << QThread::currentThreadId() << std::endl;
         qDebug()<<"Starting worker process in Thread "<<thread()->currentThreadId();
 
-        bool result = super_cell->calculate_supercell_boundaries_from_experimental_image();
+        bool result = super_cell->calculate_boundaries_from_full_image();
         if ( result ){
           std::cout << "emiting sucess" << std::endl;
           emit SuperCell_edge_sucess();

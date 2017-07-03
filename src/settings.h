@@ -1,5 +1,5 @@
-#ifndef SETTINGS_H
-#define SETTINGS_H
+#ifndef SRC_SETTINGS_H__
+#define SRC_SETTINGS_H__
 
 /** START QT **/
 #include <QDialog>
@@ -86,4 +86,4 @@ class Settings : public QDialog
 
 };
 
-#endif // SETTINGS_H
+#endif // SRC_SETTINGS_H__

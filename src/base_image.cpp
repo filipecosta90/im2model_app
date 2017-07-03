@@ -98,7 +98,7 @@ bool BaseImage::calculate_b_size_from_n_cols_and_sampling_rate(){
 
 bool BaseImage::set_flag_auto_n_rows( bool value ){
   _flag_auto_n_rows = value;
-return true;
+  return true;
 }
 
 bool BaseImage::set_flag_auto_n_cols( bool value ){
@@ -149,6 +149,7 @@ void BaseImage::set_roi(){
     roi_rectangle.height = roi_n_rows_height;
     roi_image = full_image( roi_rectangle );
     _flag_roi_image = true;
+    _flag_roi_rectangle = true;
   }
 }
 
@@ -258,20 +259,19 @@ void BaseImage::print_var_state(){
   }
 }
 
-
 std::ostream& operator<<(std::ostream& stream,
     const BaseImage::BaseImage& var) {
-      var.output(stream);
-      return stream;
-    }
+  var.output(stream);
+  return stream;
+}
 
 std::ostream& BaseImage::output(std::ostream& stream) const {
 
   stream << "BaseImage vars:\n"
-  << "\t\t" << "_flag_auto_n_rows : " << std::boolalpha << _flag_auto_n_rows << "\n"
-  << "\t\t" << "_flag_auto_n_cols : " << std::boolalpha << _flag_auto_n_cols << "\n"
-  << "\t\t" << "_flag_auto_a_size : " << std::boolalpha << _flag_auto_a_size << "\n"
-  << "\t\t" << "_flag_auto_b_size : " << std::boolalpha << _flag_auto_b_size << "\n"
+    << "\t\t" << "_flag_auto_n_rows : " << std::boolalpha << _flag_auto_n_rows << "\n"
+    << "\t\t" << "_flag_auto_n_cols : " << std::boolalpha << _flag_auto_n_cols << "\n"
+    << "\t\t" << "_flag_auto_a_size : " << std::boolalpha << _flag_auto_a_size << "\n"
+    << "\t\t" << "_flag_auto_b_size : " << std::boolalpha << _flag_auto_b_size << "\n"
     // FULL IMAGE
     << "\t" << "full_n_rows_height : " <<  full_n_rows_height << "\n"
     << "\t\t" << "_flag_full_n_rows_height : " << std::boolalpha << _flag_full_n_rows_height << "\n"
@@ -289,8 +289,9 @@ std::ostream& BaseImage::output(std::ostream& stream) const {
     << "\t" << "full_nm_size_cols_b : " << full_nm_size_cols_b << "\n"
     << "\t\t" << "_flag_full_nm_size_cols_b : " << std::boolalpha <<  _flag_full_nm_size_cols_b << "\n"
     // ROI FRAME
-    << "\t" << "roi_rectangle : " <<  roi_rectangle << "\n"
     << "\t\t" << "_flag_roi_image : " << std::boolalpha << _flag_roi_image << "\n"
+    << "\t" << "roi_rectangle : " <<  roi_rectangle << "\n"
+    << "\t\t" << "_flag_roi_rectangle : " << std::boolalpha << _flag_roi_rectangle << "\n"
     << "\t" << "roi_n_rows_height : " <<  roi_n_rows_height << "\n"
     << "\t\t" << "_flag_roi_n_rows_height : " << std::boolalpha << _flag_roi_n_rows_height << "\n"
     << "\t" << "roi_n_cols_width : " <<  roi_n_cols_width << "\n"

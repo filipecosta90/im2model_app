@@ -56,7 +56,7 @@ MainWindow::MainWindow( ApplicationLog::ApplicationLog* logger , QWidget *parent
         _sim_tdmap_wavimg_ostream_buffer,
         _sim_tdmap_simgrid_ostream_buffer );
 
-    _core_super_cell = new Super_Cell( _core_td_map );
+    _core_super_cell = new Super_Cell( );
 
     celslc_step_group_options = new group_options("celslc_step");
     msa_step_group_options = new group_options("msa_step");
@@ -341,7 +341,7 @@ MainWindow::~MainWindow(){
 bool MainWindow::update_qline_image_path( std::string fileName ){
   bool status = false;
   const bool _td_map_load_ok = _core_td_map->set_exp_image_properties_full_image( fileName );
-  const bool _super_cell_load_ok = _core_super_cell->set_exp_image_properties_full_image( fileName );
+  const bool _super_cell_load_ok = _core_super_cell->set_full_image( fileName );
   if( _td_map_load_ok & _super_cell_load_ok ){
     emit experimental_image_filename_changed();
     status = true;
@@ -355,7 +355,7 @@ void MainWindow::update_simgrid_frame(){
 }
 
 void MainWindow::update_super_cell_target_region(){
-  cv::Mat target_region = _core_super_cell->get_target_region_contours_mat();
+  cv::Mat target_region = _core_super_cell->get_full_image();
   this->ui->qgraphics_super_cell_edge_detection->setImage( target_region );
   this->ui->qgraphics_super_cell_edge_detection->cleanRenderAreas();
   update_super_cell_target_region_shapes();
@@ -365,23 +365,23 @@ void MainWindow::update_super_cell_target_region(){
 void MainWindow::update_super_cell_target_region_shapes(){
   this->ui->qgraphics_super_cell_edge_detection->cleanRenderAreas();
   // boundary rect
-  if( _core_super_cell->_is_experimental_image_boundary_polygon_rect_defined() ){
-    cv::Rect _rect_boundary_polygon = _core_super_cell->get_experimental_image_boundary_polygon_rect();
+  if( _core_super_cell->get_flag_roi_boundary_rect() ){
+    cv::Rect _rect_boundary_polygon = _core_super_cell->get_roi_boundary_rect();
     ui->qgraphics_super_cell_edge_detection->addShapeRect( _rect_boundary_polygon, 10 , tr("Target region bounding rectangle") );
   }
   // boundary rect  with margin
-  if( _core_super_cell->_is_experimental_image_boundary_polygon_w_margin_rect_defined() ){
-    cv::Rect _rect_w_margin_boundary_polygon = _core_super_cell->get_experimental_image_boundary_polygon_w_margin_rect();
+  if( _core_super_cell->get_flag_roi_boundary_rect_w_margin() ){
+    cv::Rect _rect_w_margin_boundary_polygon = _core_super_cell->get_roi_boundary_rect_w_margin();
     ui->qgraphics_super_cell_edge_detection->addShapeRect( _rect_w_margin_boundary_polygon, 10, cv::Vec3b(255,0,255), tr("Target region with margin bounding rectangle") );
   }
   // experimental image boundary polygon
-  if( _core_super_cell->_is_experimental_image_boundary_polygon_defined() ){
-    std::vector<cv::Point2i> boundary_polygon = _core_super_cell->get_experimental_image_boundary_polygon();
+  if( _core_super_cell->get_flag_roi_boundary_polygon() ){
+    std::vector<cv::Point2i> boundary_polygon = _core_super_cell->get_roi_boundary_polygon();
     ui->qgraphics_super_cell_edge_detection->addShapePolygon( boundary_polygon, cv::Point2i( 0,0 ), 10, cv::Vec3b(0,255,0) , tr("Target region boundary") );
   }
   // experimental image boundary polygon w margin
-  if( _core_super_cell->_is_experimental_image_boundary_polygon_w_margin_rect_defined() ){
-    std::vector<cv::Point2i> boundary_polygon_w_margin = _core_super_cell->get_experimental_image_boundary_polygon_w_margin();
+  if( _core_super_cell->get_flag_roi_boundary_polygon_w_margin() ){
+    std::vector<cv::Point2i> boundary_polygon_w_margin = _core_super_cell->get_roi_boundary_polygon_w_margin();
     ui->qgraphics_super_cell_edge_detection->addShapePolygon( boundary_polygon_w_margin, cv::Point2i( 0,0 ), 10, cv::Vec3b(0,0,255) , tr("Target region with margin boundary") );
   }
   this->ui->qgraphics_super_cell_edge_detection->show();

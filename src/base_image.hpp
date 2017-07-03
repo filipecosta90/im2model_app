@@ -95,6 +95,7 @@ bool auto_calculate_dimensions();
     int ignore_edge_pixels = 0;
     bool _flag_ignore_edge_pixels = false;
 
+
   public:
     BaseImage();
     /** getters **/

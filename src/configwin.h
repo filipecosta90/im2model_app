@@ -1,5 +1,5 @@
-#ifndef CONFIGWIN_H
-#define CONFIGWIN_H
+#ifndef SRC_CONFIGWIN_H__
+#define SRC_CONFIGWIN_H__
 
 #include <QMainWindow>
 #include <QtWidgets>
@@ -36,13 +36,14 @@
 #include <QToolBar>
 #include <QMenu>
 #include <QAction>
+#include "settings.h"
+#include "ui_settings.h"
 
 #include "treeitem_file_delegate.hpp"
 #include "gui_sim_updater.hpp"
 #include "gui_stream.hpp"
 #include "cv_image_table_frame.h"
-#include "settings.h"
-#include "ui_settings.h"
+
 #include "application_log.hpp"
 #include "group_options.h"
 

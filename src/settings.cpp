@@ -3,16 +3,12 @@
 
 #include <iostream>
 
-Settings::Settings(QWidget *parent) :
-  QDialog(parent),
-  ui(new Ui::Settings)
-{
+Settings::Settings(QWidget *parent) :  QDialog(parent), ui(new Ui::Settings) {
   ui->setupUi(this);
   _tree_delegate = new TreeItemFileDelegate(this);
 }
 
-Settings::~Settings()
-{
+Settings::~Settings(){
   delete ui;
 }
 

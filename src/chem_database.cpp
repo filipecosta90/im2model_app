@@ -1,11 +1,5 @@
+
 #include "chem_database.hpp"
-#include <cctype>         // for isalpha
-#include <iostream>       // for string, operator<<, basic_ostream, cout, endl
-#include <boost/assign.hpp>
-#include <map>            // for map, map<>::iterator, __map_iterator, opera...
-#include <string>         // for operator<, allocator, basic_string<>::iterator
-#include <utility>        // for pair
-#include "atom_info.hpp"  // for Atom_Info
 
 Chem_Database::Chem_Database(){
 }
@@ -35,4 +29,3 @@ Atom_Info Chem_Database::get_atom_info( std::string type_symbol ){
 int Chem_Database::size(){
   return elements_database.size();
 }
-

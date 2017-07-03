@@ -3,8 +3,10 @@
 #include <boost/filesystem/path.hpp>                      // for path, operator==, oper...
 /* END BOOST */
 
-
+#include "application_log.hpp"
 #include "configwin.h"
+#include "QtAwesome.h"
+
 #include <iostream>
 #include <QtWidgets>
 #include <QTreeView>
@@ -17,8 +19,6 @@
 #include <QAction>
 #include <QEvent>
 #include <QObject>
-#include "application_log.hpp"
-#include "QtAwesome.h"
 #include <QApplication>
 
 class Application final : public QApplication {

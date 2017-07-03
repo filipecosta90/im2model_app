@@ -37,7 +37,6 @@
 #include "base_bin.hpp"
 #include "base_image.hpp"
 #include "base_crystal.hpp"
-#include "base_logger.hpp"
 #include "application_log.hpp"
 
 class CELSLC_prm : public BaseBin, public BaseCrystal, public BaseImage {
