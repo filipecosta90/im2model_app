@@ -39,11 +39,22 @@
 #include "image_bounds.hpp"
 #include "base_cell.hpp"
 
-class Super_Cell : public ImageBounds , public BaseCell {
+class SuperCell : public ImageBounds , public BaseCell {
   private:
     /** Private Class methods **/
+
+    /* Loggers */
+    ApplicationLog::ApplicationLog* logger = nullptr;
+    bool _flag_logger = false;
+
   public:
-    Super_Cell();
+    SuperCell();
+
+    /* Loggers */
+    bool set_application_logger( ApplicationLog::ApplicationLog* logger );
+    void print_var_state();
+    friend std::ostream& operator<< (std::ostream& stream, const SuperCell::SuperCell& image);
+    virtual std::ostream& output(std::ostream& stream) const;
 };
 
 #endif

@@ -12,6 +12,7 @@ TDMap::TDMap(
   _tdmap_msa_parameters = new MSA_prm( ostream_msa_buffer );
   _tdmap_wavimg_parameters = new WAVIMG_prm( ostream_wavimg_buffer );
   _td_map_simgrid = new SimGrid( ostream_simgrid_buffer );
+  _super_cell = new SuperCell( );
 
   /////////////
   // only for debug. need to add this options like in im2model command line
@@ -840,6 +841,7 @@ bool TDMap::set_application_logger( ApplicationLog::ApplicationLog* app_logger )
   _tdmap_msa_parameters->set_application_logger( app_logger );
   _tdmap_wavimg_parameters->set_application_logger( app_logger );
   _td_map_simgrid->set_application_logger(app_logger);
+  _super_cell->set_application_logger(app_logger);
   return true;
 }
 
@@ -876,7 +878,8 @@ bool TDMap::set_dr_probe_wavimg_execname( std::string wavimg_execname ){
 bool TDMap::set_exp_image_properties_full_image( std::string path ){
   bool result = false;
   const bool simgrid_result = _td_map_simgrid->set_exp_image_properties_full_image( path );
-  result = simgrid_result;
+  const bool super_cell_result = _super_cell->set_full_image( path );
+  result = simgrid_result && super_cell_result;
   return result;
 }
 
@@ -885,7 +888,8 @@ bool TDMap::set_exp_image_properties_roi_center_x( std::string s_center_x ){
   try {
     const int center_x = boost::lexical_cast<int>( s_center_x );
     const bool simgrid_result = _td_map_simgrid->set_exp_image_properties_roi_center_x( center_x );
-    result = simgrid_result;
+    const bool super_cell_result = _super_cell->set_roi_center_x( center_x );
+    result = simgrid_result && super_cell_result;
   }
   catch(boost::bad_lexical_cast&  ex) {
     // pass it up
@@ -899,7 +903,8 @@ bool TDMap::set_exp_image_properties_roi_center_y( std::string s_center_y ){
   try {
     const int center_y = boost::lexical_cast<int>( s_center_y );
     const bool simgrid_result = _td_map_simgrid->set_exp_image_properties_roi_center_y( center_y );
-    result = simgrid_result;
+    const bool super_cell_result = _super_cell->set_roi_center_y( center_y );
+    result = simgrid_result && super_cell_result;
   }
   catch(boost::bad_lexical_cast&  ex) {
     // pass it up
@@ -916,7 +921,8 @@ bool TDMap::set_exp_image_properties_sampling_rate_x_nm_per_pixel( std::string s
     const bool msa_result = _tdmap_msa_parameters->set_sampling_rate_x_nm_per_pixel( s_rate_x );
     const bool wavimg_result =  _tdmap_wavimg_parameters->set_sampling_rate_x_nm_per_pixel( s_rate_x );
     const bool simgrid_result = _td_map_simgrid->set_sampling_rate_x_nm_per_pixel( s_rate_x );
-    result = celslc_result & msa_result & wavimg_result & simgrid_result;
+    const bool super_cell_result = _super_cell->set_sampling_rate_x_nm_per_pixel( s_rate_x );
+    result = celslc_result & msa_result & wavimg_result & simgrid_result && super_cell_result;
   }
   catch(boost::bad_lexical_cast&  ex) {
     // pass it up
@@ -933,7 +939,8 @@ bool TDMap::set_exp_image_properties_sampling_rate_y_nm_per_pixel( std::string s
     const bool msa_result = _tdmap_msa_parameters->set_sampling_rate_y_nm_per_pixel( s_rate_y );
     const bool wavimg_result =  _tdmap_wavimg_parameters->set_sampling_rate_y_nm_per_pixel( s_rate_y );
     const bool simgrid_result = _td_map_simgrid->set_sampling_rate_y_nm_per_pixel( s_rate_y );
-    result =  celslc_result & msa_result & wavimg_result & simgrid_result;
+    const bool super_cell_result = _super_cell->set_sampling_rate_y_nm_per_pixel( s_rate_y );
+    result = celslc_result & msa_result & wavimg_result & simgrid_result && super_cell_result;
   }
   catch(boost::bad_lexical_cast&  ex) {
     // pass it up
@@ -1360,15 +1367,15 @@ int TDMap::get_exp_image_properties_full_n_rows_height(){
 }
 
 double TDMap::get_exp_image_properties_sampling_rate_nm_per_pixel_bottom_limit(){
-    return 1.e-10;
+  return 1.e-10;
 }
 
 double TDMap::get_exp_image_properties_sampling_rate_nm_per_pixel_top_limit(){
-    return 1.0f;
+  return 1.0f;
 }
 
 int TDMap::get_experimental_roi_dimensions_width_bottom_limit(){
- return 0;
+  return 0;
 }
 
 int TDMap::get_experimental_roi_dimensions_width_top_limit(){
@@ -1501,3 +1508,41 @@ cv::Mat TDMap::get_exp_image_properties_roi_image(){
 cv::Rect TDMap::get_exp_image_properties_roi_rectangle(){
   return  _td_map_simgrid->get_exp_image_properties_roi_rectangle();
 }
+
+bool TDMap::calculate_exp_image_boundaries_from_full_image(){
+  return _super_cell->calculate_boundaries_from_full_image();
+}
+
+bool TDMap::set_exp_image_bounds_hysteresis_threshold( int value ){ return _super_cell->set_hysteresis_threshold(value); }
+bool TDMap::set_exp_image_bounds_max_contour_distance_px( int value ){ return _super_cell->set_max_contour_distance_px(value);  }
+
+/* experimantal image boundaries */
+bool TDMap::get_exp_image_bounds_flag_full_boundary_polygon(){ return _super_cell->get_flag_full_boundary_polygon(); }
+bool TDMap::get_exp_image_bounds_flag_full_boundary_polygon_w_margin(){ return _super_cell->get_flag_full_boundary_polygon_w_margin(); }
+bool TDMap::get_exp_image_bounds_flag_roi_boundary_polygon(){ return _super_cell->get_flag_roi_boundary_polygon(); }
+bool TDMap::get_exp_image_bounds_flag_roi_boundary_rect(){ return _super_cell->get_flag_roi_boundary_rect(); }
+bool TDMap::get_exp_image_bounds_flag_roi_boundary_image(){ return _super_cell->get_flag_roi_boundary_image(); }
+bool TDMap::get_exp_image_bounds_flag_roi_boundary_polygon_w_margin(){ return _super_cell->get_flag_roi_boundary_polygon_w_margin(); }
+bool TDMap::get_exp_image_bounds_flag_roi_boundary_rect_w_margin(){ return _super_cell->get_flag_roi_boundary_rect_w_margin(); }
+bool TDMap::get_exp_image_bounds_flag_roi_boundary_image_w_margin(){ return _super_cell->get_flag_roi_boundary_image_w_margin(); }
+// var getters
+int TDMap::get_exp_image_bounds_hysteresis_threshold(){ return _super_cell->get_hysteresis_threshold(); }
+int TDMap::get_exp_image_bounds_max_contour_distance_px(){ return _super_cell->get_max_contour_distance_px(); }
+// threshold limits
+int TDMap::get_exp_image_bounds_hysteresis_threshold_range_bottom_limit(){ return _super_cell->get_hysteresis_threshold_range_bottom_limit(); }
+int TDMap::get_exp_image_bounds_hysteresis_threshold_range_top_limit(){ return _super_cell->get_hysteresis_threshold_range_top_limit(); }
+int TDMap::get_exp_image_bounds_max_contour_distance_px_range_bottom_limit(){ return _super_cell->get_max_contour_distance_px_range_bottom_limit(); }
+int TDMap::get_exp_image_bounds_max_contour_distance_px_range_top_limit(){ return _super_cell->get_max_contour_distance_px_range_top_limit(); }
+std::vector<cv::Point2i> TDMap::get_exp_image_bounds_full_boundary_polygon(){ return _super_cell->get_full_boundary_polygon(); }
+std::vector<cv::Point2i> TDMap::get_exp_image_bounds_full_boundary_polygon_w_margin(){ return _super_cell->get_full_boundary_polygon_w_margin(); }
+// the next 2 vectors are position-related to the ROI of the experimental image
+std::vector<cv::Point2i> TDMap::get_exp_image_bounds_roi_boundary_polygon(){ return _super_cell->get_roi_boundary_polygon(); }
+cv::Rect TDMap::get_exp_image_bounds_roi_boundary_rect(){ return _super_cell->get_roi_boundary_rect(); }
+cv::Mat TDMap::get_exp_image_bounds_roi_boundary_image(){ return _super_cell->get_roi_boundary_image(); }
+std::vector<cv::Point2i> TDMap::get_exp_image_bounds_roi_boundary_polygon_w_margin(){ return _super_cell->get_roi_boundary_polygon_w_margin(); }
+cv::Rect TDMap::get_exp_image_bounds_roi_boundary_rect_w_margin(){ return _super_cell->get_roi_boundary_rect_w_margin(); }
+cv::Mat TDMap::get_exp_image_bounds_roi_boundary_image_w_margin(){ return _super_cell->get_roi_boundary_image_w_margin(); }
+double TDMap::get_exp_image_bounds_full_boundary_polygon_margin_x_nm(){ return _super_cell->get_full_boundary_polygon_margin_x_nm(); }
+int TDMap::get_exp_image_bounds_full_boundary_polygon_margin_x_px(){ return _super_cell->get_full_boundary_polygon_margin_x_px(); }
+double TDMap::get_exp_image_bounds_full_boundary_polygon_margin_y_nm(){ return _super_cell->get_full_boundary_polygon_margin_y_nm(); }
+int TDMap::get_exp_image_bounds_full_boundary_polygon_margin_y_px(){ return _super_cell->get_full_boundary_polygon_margin_y_px(); }

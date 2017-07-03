@@ -19,6 +19,7 @@
 #include "wavimg_prm.hpp"
 #include "simgrid.hpp"
 #include "group_options.h"
+#include "super_cell.hpp"
 
 class TDMap  : public QObject {
   Q_OBJECT
@@ -73,6 +74,12 @@ class TDMap  : public QObject {
     bool _flag_runned_tdmap_simgrid = false;
     bool _run_simgrid_switch = true;
 
+    /* *
+     * SuperCell
+     * */
+    SuperCell* _super_cell;
+
+
     /* Loggers */
     ApplicationLog::ApplicationLog* logger = nullptr;
     bool _flag_logger = false;
@@ -116,6 +123,7 @@ class TDMap  : public QObject {
     bool run_tdmap();
     bool test_run_config();
     bool test_clean_run_env();
+    bool calculate_exp_image_boundaries_from_full_image();
 
     // class flag getters
     bool get_flag_project_dir_path(){ return _flag_project_dir_path; };
@@ -253,11 +261,44 @@ class TDMap  : public QObject {
     bool set_run_msa_switch( bool value );
     bool set_run_wavimg_switch( bool value );
     bool set_run_simgrid_switch( bool value );
+    bool set_exp_image_bounds_hysteresis_threshold( int value );
+    bool set_exp_image_bounds_max_contour_distance_px( int value );
 
     /* gui flag getters */
     bool get_exp_image_properties_flag_full_image();
     bool get_exp_image_properties_flag_roi_image();
     bool get_exp_image_properties_flag_roi_rectangle();
+    /* experimantal image boundaries */
+    bool get_exp_image_bounds_flag_full_boundary_polygon();
+    bool get_exp_image_bounds_flag_full_boundary_polygon_w_margin();
+    bool get_exp_image_bounds_flag_roi_boundary_polygon();
+    bool get_exp_image_bounds_flag_roi_boundary_rect();
+    bool get_exp_image_bounds_flag_roi_boundary_image();
+    bool get_exp_image_bounds_flag_roi_boundary_polygon_w_margin();
+    bool get_exp_image_bounds_flag_roi_boundary_rect_w_margin();
+    bool get_exp_image_bounds_flag_roi_boundary_image_w_margin();
+    // var getters
+    int get_exp_image_bounds_hysteresis_threshold();
+    int get_exp_image_bounds_max_contour_distance_px();
+    // threshold limits
+    int get_exp_image_bounds_hysteresis_threshold_range_bottom_limit();
+    int get_exp_image_bounds_hysteresis_threshold_range_top_limit();
+    int get_exp_image_bounds_max_contour_distance_px_range_bottom_limit();
+    int get_exp_image_bounds_max_contour_distance_px_range_top_limit();
+    std::vector<cv::Point2i> get_exp_image_bounds_full_boundary_polygon();
+    std::vector<cv::Point2i> get_exp_image_bounds_full_boundary_polygon_w_margin();
+    // the next 2 vectors are position-related to the ROI of the experimental image
+    std::vector<cv::Point2i> get_exp_image_bounds_roi_boundary_polygon();
+    cv::Rect get_exp_image_bounds_roi_boundary_rect();
+    cv::Mat get_exp_image_bounds_roi_boundary_image();
+    std::vector<cv::Point2i> get_exp_image_bounds_roi_boundary_polygon_w_margin();
+    cv::Rect get_exp_image_bounds_roi_boundary_rect_w_margin();
+    cv::Mat get_exp_image_bounds_roi_boundary_image_w_margin();
+    double get_exp_image_bounds_full_boundary_polygon_margin_x_nm();
+    int get_exp_image_bounds_full_boundary_polygon_margin_x_px();
+    double get_exp_image_bounds_full_boundary_polygon_margin_y_nm();
+    int get_exp_image_bounds_full_boundary_polygon_margin_y_px();
+
     /* gui getters */
     cv::Mat get_exp_image_properties_full_image();
     cv::Mat get_exp_image_properties_roi_image();

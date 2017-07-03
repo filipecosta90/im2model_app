@@ -56,7 +56,6 @@ MainWindow::MainWindow( ApplicationLog::ApplicationLog* logger , QWidget *parent
         _sim_tdmap_wavimg_ostream_buffer,
         _sim_tdmap_simgrid_ostream_buffer );
 
-    _core_super_cell = new Super_Cell( );
 
     celslc_step_group_options = new group_options("celslc_step");
     msa_step_group_options = new group_options("msa_step");
@@ -73,7 +72,7 @@ MainWindow::MainWindow( ApplicationLog::ApplicationLog* logger , QWidget *parent
     _core_td_map->set_group_options( celslc_step_group_options, msa_step_group_options, wavimg_step_group_options, simgrid_step_group_options );
 
     if (_flag_im2model_logger) {
-      im2model_logger->logEvent(ApplicationLog::critical, "Trying to set application logger for TDMap.");
+      im2model_logger->logEvent(ApplicationLog::critical, "Trying to set application logger for TDMap and SuperCell.");
       _core_td_map->set_application_logger(im2model_logger);
     }
 
@@ -111,7 +110,7 @@ MainWindow::MainWindow( ApplicationLog::ApplicationLog* logger , QWidget *parent
 
       /* Super-Cell Edge Detection  thread */
       _sim_super_cell_thread = new QThread( this );
-      sim_super_cell_worker = new GuiSimOutUpdater( _core_super_cell );
+      sim_super_cell_worker = new GuiSimOutUpdater( _core_td_map );
       sim_super_cell_worker->moveToThread( _sim_super_cell_thread );
 
       // will only start thread when needed
@@ -341,8 +340,7 @@ MainWindow::~MainWindow(){
 bool MainWindow::update_qline_image_path( std::string fileName ){
   bool status = false;
   const bool _td_map_load_ok = _core_td_map->set_exp_image_properties_full_image( fileName );
-  const bool _super_cell_load_ok = _core_super_cell->set_full_image( fileName );
-  if( _td_map_load_ok & _super_cell_load_ok ){
+  if( _td_map_load_ok ){
     emit experimental_image_filename_changed();
     status = true;
   }
@@ -355,33 +353,34 @@ void MainWindow::update_simgrid_frame(){
 }
 
 void MainWindow::update_super_cell_target_region(){
-  cv::Mat target_region = _core_super_cell->get_full_image();
+/*  cv::Mat target_region = _core_super_cell->get_full_image();
   this->ui->qgraphics_super_cell_edge_detection->setImage( target_region );
-  this->ui->qgraphics_super_cell_edge_detection->cleanRenderAreas();
-  update_super_cell_target_region_shapes();
-  this->ui->qgraphics_super_cell_edge_detection->show();
+*/
+this->ui->qgraphics_super_cell_edge_detection->cleanRenderAreas();
+update_super_cell_target_region_shapes();
+this->ui->qgraphics_super_cell_edge_detection->show();
 }
 
 void MainWindow::update_super_cell_target_region_shapes(){
   this->ui->qgraphics_super_cell_edge_detection->cleanRenderAreas();
   // boundary rect
-  if( _core_super_cell->get_flag_roi_boundary_rect() ){
-    cv::Rect _rect_boundary_polygon = _core_super_cell->get_roi_boundary_rect();
+  if( _core_td_map->get_exp_image_bounds_flag_roi_boundary_rect() ){
+    cv::Rect _rect_boundary_polygon = _core_td_map->get_exp_image_bounds_roi_boundary_rect();
     ui->qgraphics_super_cell_edge_detection->addShapeRect( _rect_boundary_polygon, 10 , tr("Target region bounding rectangle") );
   }
   // boundary rect  with margin
-  if( _core_super_cell->get_flag_roi_boundary_rect_w_margin() ){
-    cv::Rect _rect_w_margin_boundary_polygon = _core_super_cell->get_roi_boundary_rect_w_margin();
+  if( _core_td_map->get_exp_image_bounds_flag_roi_boundary_rect_w_margin() ){
+    cv::Rect _rect_w_margin_boundary_polygon = _core_td_map->get_exp_image_bounds_roi_boundary_rect_w_margin();
     ui->qgraphics_super_cell_edge_detection->addShapeRect( _rect_w_margin_boundary_polygon, 10, cv::Vec3b(255,0,255), tr("Target region with margin bounding rectangle") );
   }
   // experimental image boundary polygon
-  if( _core_super_cell->get_flag_roi_boundary_polygon() ){
-    std::vector<cv::Point2i> boundary_polygon = _core_super_cell->get_roi_boundary_polygon();
+  if( _core_td_map->get_exp_image_bounds_flag_roi_boundary_polygon() ){
+    std::vector<cv::Point2i> boundary_polygon = _core_td_map->get_exp_image_bounds_roi_boundary_polygon();
     ui->qgraphics_super_cell_edge_detection->addShapePolygon( boundary_polygon, cv::Point2i( 0,0 ), 10, cv::Vec3b(0,255,0) , tr("Target region boundary") );
   }
   // experimental image boundary polygon w margin
-  if( _core_super_cell->get_flag_roi_boundary_polygon_w_margin() ){
-    std::vector<cv::Point2i> boundary_polygon_w_margin = _core_super_cell->get_roi_boundary_polygon_w_margin();
+  if( _core_td_map->get_exp_image_bounds_flag_roi_boundary_polygon_w_margin() ){
+    std::vector<cv::Point2i> boundary_polygon_w_margin = _core_td_map->get_exp_image_bounds_roi_boundary_polygon_w_margin();
     ui->qgraphics_super_cell_edge_detection->addShapePolygon( boundary_polygon_w_margin, cv::Point2i( 0,0 ), 10, cv::Vec3b(0,0,255) , tr("Target region with margin boundary") );
   }
   this->ui->qgraphics_super_cell_edge_detection->show();
@@ -390,8 +389,12 @@ void MainWindow::update_super_cell_target_region_shapes(){
 void MainWindow::update_full_experimental_image(){
   if( _core_td_map->get_exp_image_properties_flag_full_image() ){
     cv::Mat full_image = _core_td_map->get_exp_image_properties_full_image();
+    // update tab 1
     ui->qgraphics_full_experimental_image->setImage( full_image );
     ui->qgraphics_full_experimental_image->show();
+    // update tab 3
+    this->ui->qgraphics_super_cell_edge_detection->setImage( full_image );
+      this->ui->qgraphics_super_cell_edge_detection->show();
     update_roi_experimental_image_frame();
   }
 }
@@ -1860,32 +1863,32 @@ void MainWindow::create_box_options(){
   super_cell_setup_root->insertChildren( edge_detection );
 
   QVector<QVariant> box5_option_1_data_1 = {"Hysteresis thresholding",""};
-  boost::function<int(void)> box5_option_1_check_getter ( boost::bind( &Super_Cell::get_hysteresis_threshold, _core_super_cell ) );
-  boost::function<bool(int)> box5_option_1_check_setter ( boost::bind( &Super_Cell::set_hysteresis_threshold, _core_super_cell, _1 ) );
+  boost::function<int(void)> box5_option_1_check_getter ( boost::bind( &TDMap::get_exp_image_bounds_hysteresis_threshold, _core_td_map ) );
+  boost::function<bool(int)> box5_option_1_check_setter ( boost::bind( &TDMap::set_exp_image_bounds_hysteresis_threshold, _core_td_map, _1 ) );
   QVector<bool> box5_option_1_edit = {false,true};
   TreeItem* _hysteris_thresholding  = new TreeItem ( box5_option_1_data_1 ,box5_option_1_check_setter, box5_option_1_check_getter, box5_option_1_edit );
   _hysteris_thresholding->set_item_delegate_type( TreeItem::_delegate_SLIDER_INT );
   // load the preset data from core constuctor
   _hysteris_thresholding->load_data_from_getter();
   // set the bottom and top limits of the interval
-  int hysteresis_threshold_bottom_limit =  _core_super_cell->get_hysteresis_threshold_range_bottom_limit( );
-  int hysteresis_threshold_top_limit =  _core_super_cell->get_hysteresis_threshold_range_top_limit( );
+  int hysteresis_threshold_bottom_limit =  _core_td_map->get_exp_image_bounds_hysteresis_threshold_range_bottom_limit( );
+  int hysteresis_threshold_top_limit =  _core_td_map->get_exp_image_bounds_hysteresis_threshold_range_top_limit( );
   _hysteris_thresholding->set_slider_int_range_min( hysteresis_threshold_bottom_limit );
   _hysteris_thresholding->set_slider_int_range_max( hysteresis_threshold_top_limit );
 
   edge_detection->insertChildren( _hysteris_thresholding );
 
   QVector<QVariant> box5_option_1_data_2 = {"Max. contour distance",""};
-  boost::function<int(void)> box5_option_1_2_check_getter ( boost::bind( &Super_Cell::get_max_contour_distance_px, _core_super_cell ) );
-  boost::function<bool(int)> box5_option_1_2_check_setter ( boost::bind( &Super_Cell::set_max_contour_distance_px, _core_super_cell, _1 ) );
+  boost::function<int(void)> box5_option_1_2_check_getter ( boost::bind( &TDMap::get_exp_image_bounds_max_contour_distance_px, _core_td_map ) );
+  boost::function<bool(int)> box5_option_1_2_check_setter ( boost::bind( &TDMap::set_exp_image_bounds_max_contour_distance_px, _core_td_map, _1 ) );
   QVector<bool> box5_option_1_2_edit = {false,true};
   TreeItem* _max_contour_distance  = new TreeItem ( box5_option_1_data_2 ,box5_option_1_2_check_setter, box5_option_1_2_check_getter, box5_option_1_2_edit );
   _max_contour_distance->set_item_delegate_type( TreeItem::_delegate_SLIDER_INT );
   // load the preset data from core constuctor
   _max_contour_distance->load_data_from_getter();
   // set the bottom and top limits of the interval
-  int max_contour_distance_bottom_limit =  _core_super_cell->get_max_contour_distance_px_range_bottom_limit( );
-  int max_contour_distance_top_limit =  _core_super_cell->get_max_contour_distance_px_range_top_limit( );
+  int max_contour_distance_bottom_limit =  _core_td_map->get_exp_image_bounds_max_contour_distance_px_range_bottom_limit( );
+  int max_contour_distance_top_limit =  _core_td_map->get_exp_image_bounds_max_contour_distance_px_range_top_limit( );
   _max_contour_distance->set_slider_int_range_min( max_contour_distance_bottom_limit );
   _max_contour_distance->set_slider_int_range_max( max_contour_distance_top_limit );
 

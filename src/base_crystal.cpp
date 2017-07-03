@@ -4,7 +4,11 @@ BaseCrystal::BaseCrystal( ) {
 }
 
 bool BaseCrystal::calculate_defocus_period(){
-  if( _flag_defocus_lower_bound && _flag_defocus_upper_bound && _flag_defocus_samples ){
+  if(
+    _flag_defocus_lower_bound &&
+    _flag_defocus_upper_bound &&
+    _flag_defocus_samples
+  ){
     defocus_period = ( defocus_upper_bound - defocus_lower_bound) / ( defocus_samples - 1 );
     _flag_defocus_period = true;
   }

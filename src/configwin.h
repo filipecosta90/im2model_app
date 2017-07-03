@@ -28,7 +28,6 @@
 /** END BOOST **/
 
 #include "td_map.hpp"
-#include "super_cell.hpp"
 #include "treemodel.h"
 #include "ui_configwin.h"
 #include "treeitem.h"
@@ -153,7 +152,6 @@ signals:
     bool _flag_project_setted = false;
     Ui::MainWindow *ui;
     TDMap *_core_td_map;
-    Super_Cell *_core_super_cell;
 
     // tab 1
     TreeModel *project_setup_image_fields_model;

@@ -47,6 +47,9 @@
 
 class ImageBounds : public BaseImage {
   private:
+
+    bool update_roi_boundary_polygon_from_full_boundaries();
+
     /* Loggers */
     ApplicationLog::ApplicationLog* logger = nullptr;
     bool _flag_logger = false;
@@ -82,6 +85,11 @@ class ImageBounds : public BaseImage {
     cv::Mat roi_boundary_image;
     bool _flag_roi_boundary_image = false;
 
+    int roi_left_padding_px = 0;
+    int roi_top_padding_px = 0;
+    int roi_left_padding_px_w_margin = 0;
+    int roi_top_padding_px_w_margin = 0;
+
     std::vector<cv::Point2i> roi_boundary_polygon_w_margin;
     bool _flag_roi_boundary_polygon_w_margin = false;
     cv::Rect roi_boundary_rect_w_margin;
@@ -106,7 +114,6 @@ class ImageBounds : public BaseImage {
     // flag getters
     bool get_flag_full_boundary_polygon(){ return _flag_full_boundary_polygon; }
     bool get_flag_full_boundary_polygon_w_margin(){ return _flag_full_boundary_polygon_w_margin; }
-
     bool get_flag_roi_boundary_polygon(){ return _flag_roi_boundary_polygon; }
     bool get_flag_roi_boundary_rect(){ return _flag_roi_boundary_rect; }
     bool get_flag_roi_boundary_image(){ return _flag_roi_boundary_image; }

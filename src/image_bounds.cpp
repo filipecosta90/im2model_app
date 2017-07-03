@@ -3,9 +3,15 @@
 ImageBounds::ImageBounds(){
 
 }
+
 bool ImageBounds::calculate_boundaries_from_full_image(){
   bool result = false;
-  if( true ){
+  if(
+      // BaseImage vars
+      _flag_full_image &&
+      _flag_sampling_rate_x_nm_per_pixel &&
+      _flag_sampling_rate_y_nm_per_pixel
+    ){
 
     full_boundary_polygon_margin_x_px = full_boundary_polygon_margin_x_nm / sampling_rate_x_nm_per_pixel;
     full_boundary_polygon_margin_y_px = full_boundary_polygon_margin_y_nm / sampling_rate_y_nm_per_pixel;
@@ -21,7 +27,7 @@ bool ImageBounds::calculate_boundaries_from_full_image(){
     full_boundary_polygon_w_margin.clear();
 
     cv::Mat blur;
-    cv::GaussianBlur(full_image , blur, cv::Size(3,3), 0);
+    cv::GaussianBlur( full_image , blur, cv::Size(3,3), 0);
     cv::Canny( blur, canny_output, hysteresis_threshold , hysteresis_threshold *2, 3 );
 
     cv::findContours( canny_output, contours, hierarchy, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE, cv::Point(0, 0) );
@@ -144,13 +150,73 @@ bool ImageBounds::calculate_boundaries_from_full_image(){
     experimental_image_contours = temp.clone();
     roi_boundary_image = full_image( roi_boundary_rect ).clone();
     roi_boundary_image_w_margin = full_image( roi_boundary_rect_w_margin ).clone();
+
+    update_roi_boundary_polygon_from_full_boundaries();
     result = true;
+  }
+  else{
+    if( _flag_logger ){
+      std::stringstream message;
+      message << "The required vars for calculate_boundaries_from_full_image() are not setted up.";
+      logger->logEvent( ApplicationLog::error , message.str() );
+    }
+    print_var_state();
   }
   return result;
 }
 
+bool ImageBounds::update_roi_boundary_polygon_from_full_boundaries(){
+  bool result = false;
+  if( _flag_roi_boundary_rect &&
+      _flag_roi_boundary_rect_w_margin &&
+      _flag_full_boundary_polygon &&
+      _flag_full_boundary_polygon_w_margin
+    ){
+    //clean the roi boundaries vec
+    roi_boundary_polygon.clear();
+    roi_boundary_polygon_w_margin.clear();
+
+    roi_left_padding_px = roi_boundary_rect.x;
+    roi_top_padding_px = roi_boundary_rect.y;
+    roi_left_padding_px_w_margin = roi_boundary_rect_w_margin.x;
+    roi_top_padding_px_w_margin = roi_boundary_rect_w_margin.y;
+
+    for (
+        std::vector<cv::Point>::iterator experimental_bound_it = full_boundary_polygon.begin();
+        experimental_bound_it != full_boundary_polygon.end();
+        experimental_bound_it++
+        ){
+      cv::Point super_cell_boundary_point = *experimental_bound_it;
+      super_cell_boundary_point.x -= roi_left_padding_px;
+      super_cell_boundary_point.y -= roi_top_padding_px;
+      roi_boundary_polygon.push_back( super_cell_boundary_point );
+    }
+
+    for (
+        std::vector<cv::Point>::iterator experimental_bound_it = full_boundary_polygon_w_margin.begin();
+        experimental_bound_it != full_boundary_polygon_w_margin.end();
+        experimental_bound_it++
+        ){
+      cv::Point super_cell_boundary_point = *experimental_bound_it;
+      super_cell_boundary_point.x -= roi_left_padding_px_w_margin;
+      super_cell_boundary_point.y -= roi_top_padding_px_w_margin;
+      roi_boundary_polygon_w_margin.push_back( super_cell_boundary_point );
+    }
+  }
+  else{
+    if( _flag_logger ){
+      std::stringstream message;
+      message << "The required vars for update_roi_boundary_polygon_from_full_boundaries() are not setted up.";
+      logger->logEvent( ApplicationLog::error , message.str() );
+    }
+    print_var_state();
+  }
+  return result;
+}
+
+
 bool ImageBounds::set_hysteresis_threshold( int threshold ){
-    hysteresis_threshold = threshold;
+  hysteresis_threshold = threshold;
 }
 
 bool ImageBounds::set_max_contour_distance_px( int max_distance ){
@@ -179,7 +245,8 @@ std::ostream& operator<<(std::ostream& stream, const ImageBounds::ImageBounds& v
 }
 
 std::ostream& ImageBounds::output(std::ostream& stream) const {
-  stream << "ImageBounds vars:\n"
-    ;
+  stream << "ImageBounds vars:\n" <<
+    "\t" << "BaseImage Properties : " << "\n";
+  BaseImage::output(stream);
   return stream;
 }

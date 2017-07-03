@@ -22,15 +22,6 @@ class GuiSimOutUpdater : public QObject {
       _working =false;
       _abort = false;
       tdmap = core_tdmap;
-      super_cell = nullptr;
-
-    }
-
-    explicit GuiSimOutUpdater(Super_Cell* core_super_cell ,  QObject *parent = 0 ) : QObject(parent) {
-      _working =false;
-      _abort = false;
-      tdmap = nullptr;
-      super_cell = core_super_cell;
     }
 
     public slots:
@@ -39,7 +30,7 @@ class GuiSimOutUpdater : public QObject {
         std::cout << "Slave thread " << QThread::currentThreadId() << std::endl;
         qDebug()<<"Starting worker process in Thread "<<thread()->currentThreadId();
 
-        bool result = super_cell->calculate_boundaries_from_full_image();
+        bool result = tdmap->calculate_exp_image_boundaries_from_full_image();
         if ( result ){
           std::cout << "emiting sucess" << std::endl;
           emit SuperCell_edge_sucess();
@@ -139,10 +130,5 @@ signals:
      * @brief TDMap var
      */
     TDMap* tdmap;
-
-    /**
-     * @brief Super_Cell var
-     */
-    Super_Cell* super_cell;
 
 };

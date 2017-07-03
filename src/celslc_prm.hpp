@@ -99,7 +99,6 @@ class CELSLC_prm : public BaseBin, public BaseCrystal, public BaseImage {
     bool set_super_cell_size_b( double size );
     /* Loggers */
     bool set_application_logger( ApplicationLog::ApplicationLog* logger );
-
     void print_var_state();
 
 
