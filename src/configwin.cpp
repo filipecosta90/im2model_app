@@ -1134,13 +1134,15 @@ void MainWindow::create_box_options(){
 
   /* validators */
   experimental_roi_center_x->set_flag_validatable_int(1,true);
-  experimental_roi_center_y->set_flag_validatable_int(1,true);
-  boost::function<int(void)> box1_function_3_1_1_validator_top ( boost::bind( &TDMap::get_exp_image_properties_full_n_rows_height,_core_td_map ) );
-  boost::function<int(void)> box1_function_3_1_2_validator_top ( boost::bind( &TDMap::get_exp_image_properties_full_n_cols_width,_core_td_map ) );
-  boost::function<int(void)> box1_function_3_1_2_validator_bot ( boost::bind( &TDMap::get_experimental_roi_center_bottom_limit,_core_td_map ) );
+  boost::function<int(void)> box1_function_3_1_1_validator_bot ( boost::bind( &TDMap::get_experimental_roi_center_x_bottom_limit,_core_td_map ) );
+  boost::function<int(void)> box1_function_3_1_1_validator_top ( boost::bind( &TDMap::get_experimental_roi_center_x_top_limit,_core_td_map ) );
+  experimental_roi_center_x->set_validator_int_bottom(1, box1_function_3_1_1_validator_bot );
   experimental_roi_center_x->set_validator_int_top(1, box1_function_3_1_1_validator_top );
+
+  experimental_roi_center_y->set_flag_validatable_int(1,true);
+    boost::function<int(void)> box1_function_3_1_2_validator_bot ( boost::bind( &TDMap::get_experimental_roi_center_y_bottom_limit,_core_td_map ) );
+  boost::function<int(void)> box1_function_3_1_2_validator_top ( boost::bind( &TDMap::get_experimental_roi_center_y_top_limit,_core_td_map ) );
   experimental_roi_center_y->set_validator_int_top(1, box1_function_3_1_2_validator_top );
-  experimental_roi_center_x->set_validator_int_bottom(1, box1_function_3_1_2_validator_bot );
   experimental_roi_center_y->set_validator_int_bottom(1, box1_function_3_1_2_validator_bot );
 
   ////////////////
@@ -1837,7 +1839,6 @@ void MainWindow::create_box_options(){
   /*
    * SIMGRID
    * */
-
   QVector<QVariant> box4_data_5 = {"","Image correlation"};
   boost::function<bool(void)> box4_option_5_check_getter ( boost::bind( &TDMap::get_run_simgrid_switch, _core_td_map  ) );
   boost::function<bool(bool)> box4_option_5_check_setter ( boost::bind( &TDMap::set_run_simgrid_switch, _core_td_map, _1 ) );

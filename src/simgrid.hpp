@@ -138,15 +138,24 @@ std::vector< double > get_simulated_images_horizontal_header_defocus_nm(){ retur
     bool get_exp_image_properties_flag_full_image();
     bool get_exp_image_properties_flag_roi_image();
     bool get_exp_image_properties_flag_roi_rectangle();
+    bool get_exp_image_properties_flag_full_n_cols_width();
     int get_exp_image_properties_full_n_cols_width();
     double get_exp_image_properties_full_ny_size_width_nm();
+    bool get_exp_image_properties_flag_full_n_rows_height();
     int get_exp_image_properties_full_n_rows_height();
     double get_exp_image_properties_full_nx_size_height_nm();
     double get_exp_image_properties_roi_ny_size_width_nm();
     double get_exp_image_properties_roi_nx_size_height_nm();
+    int get_exp_image_properties_roi_ny_size_width();
+    int get_exp_image_properties_roi_nx_size_height();
+    bool get_exp_image_properties_flag_roi_ny_size_width();
+    bool get_exp_image_properties_flag_roi_nx_size_height();
     int get_exp_image_properties_roi_center_x();
     int get_exp_image_properties_roi_center_y();
-
+    int get_sim_image_properties_full_n_cols_width();
+    int get_sim_image_properties_full_n_rows_height();
+    bool get_sim_image_properties_flag_full_n_cols_width();
+    bool get_sim_image_properties_flag_full_n_rows_height();
 
     /** getters **/
     // flag getters

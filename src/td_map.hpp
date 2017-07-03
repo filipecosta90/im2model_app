@@ -315,7 +315,10 @@ class TDMap  : public QObject {
 
     int get_exp_image_properties_full_n_cols_width();
     int get_exp_image_properties_full_n_rows_height();
-    int get_experimental_roi_center_bottom_limit();
+    int get_experimental_roi_center_x_bottom_limit();
+    int get_experimental_roi_center_x_top_limit();
+    int get_experimental_roi_center_y_bottom_limit();
+    int get_experimental_roi_center_y_top_limit();
 
     int get_experimental_roi_dimensions_width_bottom_limit();
     int get_experimental_roi_dimensions_width_top_limit();

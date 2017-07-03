@@ -1375,7 +1375,11 @@ double TDMap::get_exp_image_properties_sampling_rate_nm_per_pixel_top_limit(){
 }
 
 int TDMap::get_experimental_roi_dimensions_width_bottom_limit(){
-  return 0;
+  int bot_limit = 0;
+  if( _td_map_simgrid->get_sim_image_properties_flag_full_n_cols_width() ){
+bot_limit = _td_map_simgrid->get_sim_image_properties_full_n_cols_width();
+  }
+  return bot_limit;
 }
 
 int TDMap::get_experimental_roi_dimensions_width_top_limit(){
@@ -1389,7 +1393,11 @@ int TDMap::get_experimental_roi_dimensions_width_top_limit(){
 }
 
 int TDMap::get_experimental_roi_dimensions_height_bottom_limit(){
-  return 0;
+  int bot_limit = 0;
+  if( _td_map_simgrid->get_sim_image_properties_flag_full_n_rows_height() ){
+bot_limit = _td_map_simgrid->get_sim_image_properties_full_n_rows_height();
+  }
+  return bot_limit;
 }
 
 int TDMap::get_experimental_roi_dimensions_height_top_limit(){
@@ -1492,9 +1500,46 @@ bool TDMap::get_exp_image_properties_flag_roi_rectangle(){
 }
 
 /* gui getters */
+int TDMap::get_experimental_roi_center_x_bottom_limit(){
+  int bot_limit = 0;
+  if( _td_map_simgrid->get_exp_image_properties_flag_full_n_rows_height() ){
+    if( _td_map_simgrid->get_exp_image_properties_flag_roi_nx_size_height() ){
+    bot_limit = bot_limit + ( _td_map_simgrid->get_exp_image_properties_roi_nx_size_height() / 2.0f );
+    }
+  }
+  return bot_limit;
+}
 
-int TDMap::get_experimental_roi_center_bottom_limit(){
-  return 0;
+int TDMap::get_experimental_roi_center_y_bottom_limit(){
+  int bot_limit = 0;
+  if( _td_map_simgrid->get_exp_image_properties_flag_full_n_cols_width() ){
+    if( _td_map_simgrid->get_exp_image_properties_flag_roi_ny_size_width() ){
+    bot_limit = bot_limit + ( _td_map_simgrid->get_exp_image_properties_roi_ny_size_width() / 2.0f );
+    }
+  }
+  return bot_limit;
+}
+
+int TDMap::get_experimental_roi_center_x_top_limit(){
+  int top_limit = 0;
+  if( _td_map_simgrid->get_exp_image_properties_flag_full_n_rows_height() ){
+    top_limit = get_exp_image_properties_full_n_rows_height();
+    if( _td_map_simgrid->get_exp_image_properties_flag_roi_nx_size_height() ){
+    top_limit -= ( _td_map_simgrid->get_exp_image_properties_roi_nx_size_height() / 2.0f );
+    }
+  }
+  return top_limit;
+}
+
+int TDMap::get_experimental_roi_center_y_top_limit(){
+  int top_limit = 0;
+  if( _td_map_simgrid->get_exp_image_properties_flag_full_n_cols_width() ){
+    top_limit = get_exp_image_properties_full_n_cols_width();
+    if( _td_map_simgrid->get_exp_image_properties_flag_roi_ny_size_width() ){
+    top_limit -= ( _td_map_simgrid->get_exp_image_properties_roi_ny_size_width() / 2.0f );
+    }
+  }
+  return top_limit;
 }
 
 cv::Mat TDMap::get_exp_image_properties_full_image(){

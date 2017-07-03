@@ -222,7 +222,6 @@ _flag_roi_boundary_polygon = true;
   return result;
 }
 
-
 bool ImageBounds::set_hysteresis_threshold( int threshold ){
   hysteresis_threshold = threshold;
   return true;

@@ -109,6 +109,14 @@ bool SimGrid::get_flag_simulated_images_grid(){
   return runned_simulation;
 }
 
+bool SimGrid::get_exp_image_properties_flag_full_n_cols_width(){
+  return exp_image_properties.get_flag_full_n_cols_width();
+}
+
+bool SimGrid::get_exp_image_properties_flag_full_n_rows_height(){
+  return exp_image_properties.get_flag_full_n_rows_height();
+}
+
 cv::Mat SimGrid::get_exp_image_properties_full_image(){
   return exp_image_properties.get_full_image();
 }
@@ -145,6 +153,22 @@ double SimGrid::get_exp_image_properties_roi_ny_size_width_nm(){
   return exp_image_properties.get_roi_n_cols_width_nm();
 }
 
+int SimGrid::get_exp_image_properties_roi_ny_size_width(){
+  return exp_image_properties.get_roi_n_cols_width();
+}
+
+int SimGrid::get_exp_image_properties_roi_nx_size_height(){
+  return exp_image_properties.get_roi_n_rows_height();
+}
+
+bool SimGrid::get_exp_image_properties_flag_roi_ny_size_width(){
+  return exp_image_properties.get_flag_roi_n_cols_width();
+}
+
+bool SimGrid::get_exp_image_properties_flag_roi_nx_size_height(){
+  return exp_image_properties.get_flag_roi_n_rows_height();
+}
+
 int SimGrid::get_exp_image_properties_roi_center_x(){
   return exp_image_properties.get_roi_center_x();
 }
@@ -163,6 +187,22 @@ bool SimGrid::get_exp_image_properties_flag_roi_image(){
 
 bool SimGrid::get_exp_image_properties_flag_roi_rectangle(){
   return exp_image_properties.get_flag_roi_rectangle();
+}
+
+int SimGrid::get_sim_image_properties_full_n_cols_width(){
+  return sim_image_properties.get_full_n_cols_width();
+}
+
+bool SimGrid::get_sim_image_properties_flag_full_n_cols_width(){
+  return sim_image_properties.get_flag_full_n_cols_width();
+}
+
+int SimGrid::get_sim_image_properties_full_n_rows_height(){
+  return sim_image_properties.get_full_n_rows_height();
+}
+
+bool SimGrid::get_sim_image_properties_flag_full_n_rows_height(){
+  return sim_image_properties.get_flag_full_n_rows_height();
 }
 
 bool SimGrid::export_sim_grid( std::string sim_grid_file_name_image ){
