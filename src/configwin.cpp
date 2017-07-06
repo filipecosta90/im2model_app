@@ -1058,7 +1058,7 @@ void MainWindow::create_box_options(){
   ////////////////
   // Sampling rate
   ////////////////
-  QVector<QVariant> box1_option_2 = {"Sampling (nm/pixel)",""};
+  QVector<QVariant> box1_option_2 = {"Pixel size (nm/pixel)",""};
   QVector<QVariant> box1_option_2_1 = {"x",""};
   QVector<bool> box1_option_2_1_edit = {false,true};
   boost::function<bool(std::string)> box1_function_2_1 ( boost::bind( &TDMap::set_exp_image_properties_sampling_rate_x_nm_per_pixel,_core_td_map, _1 ) );
@@ -1555,14 +1555,14 @@ void MainWindow::create_box_options(){
   ////////////////
   // Incident electron beam
   ////////////////
-  QVector<QVariant> box3_option_3 = {"Incident electron beam",""};
+  QVector<QVariant> box3_option_3 = {"Optics",""};
   TreeItem* incident_electron_beam  = new TreeItem ( box3_option_3 );
   _parameter_variation_map->insertChildren( incident_electron_beam );
 
   ////////////////
   // Incident electron beam -- Accelaration voltage (kV)
   ////////////////
-  QVector<QVariant> box3_option_3_1 = {"Accelaration voltage (kV)",""};
+  QVector<QVariant> box3_option_3_1 = {"Acceleration voltage (kV)",""};
   QVector<bool> box3_option_3_1_edit = {false,true};
   boost::function<bool(std::string)> box3_function_3_1 ( boost::bind( &TDMap::set_accelaration_voltage_kv, _core_td_map, _1 ) );
   TreeItem* accelaration_voltage_kv = new TreeItem ( box3_option_3_1 , box3_function_3_1, box3_option_3_1_edit );

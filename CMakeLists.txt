@@ -5,9 +5,9 @@ set (CMAKE_CXX_COMPILER "clang++" )
 set (CMAKE_CXX_STANDARD 14)
 
 project( Im2Model VERSION 0.1 LANGUAGES CXX )
+ENABLE_LANGUAGE(C)
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
-
 
 set(BUILD_SHARED_LIBS ON CACHE BOOL "" FORCE)
 ADD_DEFINITIONS(-DOpenCV_STATIC=OFF )
@@ -27,7 +27,6 @@ OPTION(BUILD_DOXYGEN_DOCS "Build docs" OFF)
 
 if(BUILD_DOXYGEN_DOCS)
   find_package(Doxygen)
-
   if(NOT DOXYGEN_FOUND)
     message(FATAL_ERROR
       "Doxygen is needed to build the documentation. Please make sure it is installed.")
@@ -100,6 +99,9 @@ find_package(Boost 1.64.0 COMPONENTS log log_setup system program_options filesy
 
 find_package(BISON REQUIRED)
 find_package(FLEX REQUIRED)
+
+find_package(HDF5 COMPONENTS C CXX HL REQUIRED)
+find_package( RapidJSON REQUIRED )
 
 # we add the sub-directories that we want CMake to scan
 add_subdirectory(src)

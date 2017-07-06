@@ -40,6 +40,17 @@
   base_cell.cpp
   image_bounds.cpp
   image_bounds.hpp
+  ## FEI EMD
+  emd_object.h
+  emd_object.cpp
+  emd_attribute.h
+  emd_attribute.cpp
+  emd_dataset.h
+  emd_dataset.cpp
+  emd_group.h
+  emd_group.cpp
+  emd_wrapper.h
+  emd_wrapper.cpp
   )
 
 BISON_TARGET(mc_parser mc_parser.yy ${CMAKE_CURRENT_BINARY_DIR}/mc_parser.tab.cc )
@@ -59,6 +70,10 @@ include_directories( ${OpenCV_INCLUDE_DIRS} )
 include_directories( ${Boost_INCLUDE_DIRS} )
 link_directories( ${Boost_LIBRARY_PATH} )
 
+
+link_directories( ${HDF5_LIBRARY_DIRS} )
+include_directories( ${HDF5_INCLUDE_DIRS} )
+include_directories( ${RAPID_JSON_INCLUDE_DIR} )
 
 if(WIN32)
   include_directories( ${OpenCV_INCLUDE_DIRS} )
@@ -178,8 +193,6 @@ if(build_gui)
   message("META FILES TO INCLUDE: ${META_FILES_TO_INCLUDE}")
   message(" OS BUNDLE: ${OS_BUNDLE}")
 
-
-
   add_executable( ${PROJECT_NAME}
     ${OS_BUNDLE}
     im2model_gui.cpp
@@ -202,7 +215,7 @@ endif(build_gui)
 
 
 # Properties->Linker->Input->Additional Dependencies
-target_link_libraries( ${PROJECT_NAME} ${OpenCV_LIBS} ${Boost_LIBRARIES} )
+target_link_libraries( ${PROJECT_NAME} ${OpenCV_LIBS} ${Boost_LIBRARIES} ${HDF5_CXX_LIBRARIES} )
 
 if(APPLE)
   #  set_target_properties( app PROPERTIES  CXX_INCLUDE_WHAT_YOU_USE /Users/filipeoliveira/Downloads/include-what-you-use/bin/include-what-you-use )
