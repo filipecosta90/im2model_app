@@ -180,6 +180,7 @@ class TDMap  : public QObject {
     bool get_flag_ht_accelaration_voltage();
     bool get_flag_slice_params_accum_nm_slice_vec();
     bool get_flag_simulated_images_grid();
+    bool get_flag_raw_simulated_images_grid();
 
     // gui var getters
     /////////////////////////
@@ -348,7 +349,7 @@ class TDMap  : public QObject {
 
     double get_tdmap_cell_dimensions_a_bottom_limit();
     double get_tdmap_cell_dimensions_a_top_limit();
-    
+
     double get_tdmap_cell_dimensions_b_bottom_limit();
     double get_tdmap_cell_dimensions_b_top_limit();
 
@@ -371,6 +372,7 @@ signals:
     void TDMap_at_wavimg_step( int step );
     void TDMap_ended_wavimg( bool wavimg_status );
 
+    void TDMap_no_simgrid( bool result );
     void TDMap_started_simgrid( );
     void TDMap_inform_simgrid_n_steps( int number_steps );
     void TDMap_at_simgrid_step( int step );

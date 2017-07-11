@@ -15,6 +15,8 @@
 #include <QToolBar>
 #include <QMenu>
 #include <QAction>
+#include <QLocale>
+
 
 #include "qt_file_push_button.h"
 #include "treeitem.h"

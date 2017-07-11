@@ -29,9 +29,12 @@ bool BaseCrystal::calculate_thickness_slice_period(){
       std::cout << "WARNING: an adjustment needs to be made in the slices lower or upper bound." << std::endl;
       const int increase_top_range = slices_lower_bound + (slice_samples * slice_period );
       const int decrease_top_range = slices_lower_bound + ((slice_samples-1) * slice_period );
-      const int decrease_bot_range = slices_lower_bound-slices_to_period + (slice_samples * slice_period );
+      const int decrease_bot_range = slices_lower_bound - slices_to_period + (slice_samples * slice_period );
+      
+      std::cout << "Decreasing top range to slice #" << decrease_top_range << std::endl;
+      slices_upper_bound = decrease_top_range;
 
-      if ( increase_top_range <= nz_simulated_partitions ){
+    /*  if ( increase_top_range <= nz_simulated_partitions ){
         std::cout << "Increasing top range to slice #" << increase_top_range << std::endl;
         std::cout << "Going to use one more sample than the requested " << slice_samples << " samples. Using " << (slice_samples+1) << " samples." << std::endl;
         slices_upper_bound = increase_top_range;
@@ -48,6 +51,7 @@ bool BaseCrystal::calculate_thickness_slice_period(){
           slices_upper_bound = decrease_top_range;
         }
       }
+      */
     }
     _flag_slice_period = true;
     result = true;

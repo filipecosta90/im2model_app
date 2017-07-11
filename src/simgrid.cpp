@@ -105,8 +105,13 @@ bool SimGrid::setup_image_properties(){
   return result;
 }
 
+
+bool SimGrid::get_flag_raw_simulated_images_grid(){
+  return _flag_raw_simulated_images_grid;
+}
+
 bool SimGrid::get_flag_simulated_images_grid(){
-  return runned_simulation;
+  return _flag_simulated_images_grid;
 }
 
 bool SimGrid::get_exp_image_properties_flag_full_n_cols_width(){
@@ -218,7 +223,7 @@ bool SimGrid::export_sim_grid( std::string sim_grid_file_name_image ){
   const int legend_position_y_bottom_left_line_3 = 60;
 
   bool result = false;
-  if( runned_simulation ){
+  if( _flag_raw_simulated_images_grid ){
     if(
         // BaseCrystal vars
         _flag_slice_samples &
@@ -467,6 +472,8 @@ bool SimGrid::read_grid_from_dat_files(){
   bool result = check_produced_dat();
   if( result ){
     if(
+      //
+      raw_simulated_images_grid.size() == 0 &&
         // BaseCrystal vars
         _flag_base_dir_path &&
         _flag_slice_samples &&
@@ -532,7 +539,7 @@ bool SimGrid::read_grid_from_dat_files(){
         }
         raw_simulated_images_grid.push_back( raw_simulated_images_row );
         const bool _ncols_size_check = ( raw_simulated_images_row.size() == defocus_samples );
-        if(!_ncols_size_check){
+        if( !_ncols_size_check ){
           if( _flag_logger ){
             std::stringstream message;
             message << " raw_simulated_images_row.size() {"<< raw_simulated_images_row.size()<< "} != defocus_samples {"<< defocus_samples << "}";
@@ -542,7 +549,6 @@ bool SimGrid::read_grid_from_dat_files(){
         result &= _ncols_size_check;
       }
       const bool _nrows_size_check = ( raw_simulated_images_grid.size() == slice_samples );
-
       if(!_nrows_size_check){
         if( _flag_logger ){
           std::stringstream message;
@@ -571,6 +577,7 @@ bool SimGrid::read_grid_from_dat_files(){
       logger->logEvent( ApplicationLog::error , message.str() );
     }
   }
+  _flag_raw_simulated_images_grid = result;
   return result;
 }
 
@@ -627,7 +634,7 @@ bool SimGrid::simulate_from_grid(){
               if( thickness == 1 ){
                 simulated_images_horizontal_header_defocus_nm.push_back( at_defocus );
               }
-
+              
               // get the matrix in the specified col of tdmap (defocus pos)
               const cv::Mat raw_simulated_image = raw_simulated_images_row.at( defocus - 1 );
               cv::Mat cleaned_simulated_image;
@@ -731,11 +738,14 @@ bool SimGrid::clean_for_re_run(){
       raw_simulated_images_row.clear();
     }
     raw_simulated_images_grid.clear();
+
     for (int thickness_row = 0; thickness_row < simulated_images_grid.size(); thickness_row ++ ){
       std::vector<cv::Mat> simulated_images_row = simulated_images_grid.at(thickness_row);
       simulated_images_row.clear();
     }
+
     simulated_images_grid.clear();
+
     for (int thickness_row = 0; thickness_row < experimental_images_match_location_grid.size(); thickness_row ++ ){
       std::vector<cv::Point> experimental_images_matchloc_row = experimental_images_match_location_grid.at(thickness_row);
       experimental_images_matchloc_row.clear();
@@ -775,7 +785,7 @@ std::string SimGrid::get_export_sim_grid_filename_hint(){
 }
 
 std::vector< std::vector<cv::Mat> > SimGrid::get_simulated_images_grid(){
-  return simulated_images_grid;
+  return raw_simulated_images_grid;
 }
 
 cv::Mat SimGrid::get_simulated_image_in_grid( int row_thickness, int col_defocus ){

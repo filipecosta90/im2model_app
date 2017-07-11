@@ -83,6 +83,7 @@ class MainWindow : public QMainWindow {
     void update_tdmap_wavimg_ended( bool result );
     void update_tdmap_simgrid_started( );
     void update_tdmap_simgrid_ended( bool result );
+    void update_tdmap_no_simgrid_ended( bool result );
 
   protected:
     void closeEvent(QCloseEvent *event) override;
@@ -96,7 +97,7 @@ class MainWindow : public QMainWindow {
     void update_roi_experimental_image_frame();
     void update_roi_full_experimental_image_frame();
     void on_qpush_run_tdmap_clicked();
-    void update_simgrid_frame();
+    void update_simgrid_frame( );
     void update_super_cell_target_region();
     void update_super_cell_target_region_shapes();
     void update_tdmap_sim_ostream_celslc();
@@ -123,7 +124,7 @@ class MainWindow : public QMainWindow {
 
 signals:
     void experimental_image_filename_changed();
-    void simulated_grid_changed();
+    void simulated_grid_changed( );
     void super_cell_target_region_changed();
     void force_close();
 

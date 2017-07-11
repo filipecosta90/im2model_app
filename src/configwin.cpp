@@ -101,8 +101,8 @@ MainWindow::MainWindow( ApplicationLog::ApplicationLog* logger , QWidget *parent
       // will only start thread when needed
       connect(sim_tdmap_worker, SIGNAL(TDMap_request()), _sim_tdmap_thread, SLOT(start()));
       connect(_sim_tdmap_thread, SIGNAL(started()), sim_tdmap_worker, SLOT(newTDMapSim()));
-
-      connect(sim_tdmap_worker, SIGNAL(TDMap_sucess()), this, SLOT(update_from_TDMap_sucess()));
+      connect(sim_tdmap_worker, SIGNAL(TDMap_sucess()), this, SLOT(update_from_TDMap_sucess( )));
+      connect(sim_tdmap_worker, SIGNAL(TDMap_sucess_no_correlation()), this, SLOT(update_from_TDMap_sucess( )));
       connect(sim_tdmap_worker, SIGNAL(TDMap_failure()), this, SLOT(update_from_TDMap_failure()));
       // will quit thread after work done
       connect(sim_tdmap_worker, SIGNAL(TDMap_finished()), _sim_tdmap_thread, SLOT(quit()), Qt::DirectConnection);
@@ -125,7 +125,7 @@ MainWindow::MainWindow( ApplicationLog::ApplicationLog* logger , QWidget *parent
       connect(ui->tdmap_table, SIGNAL(cellClicked(int , int )), this, SLOT( update_tdmap_current_selection(int,int)) );
 
       connect(this, SIGNAL(experimental_image_filename_changed()), this, SLOT(update_full_experimental_image()));
-      connect(this, SIGNAL(simulated_grid_changed()), this, SLOT(update_simgrid_frame()));
+      connect(this, SIGNAL(simulated_grid_changed( )), this, SLOT(update_simgrid_frame( )));
 
       connect(this, SIGNAL(super_cell_target_region_changed()), this, SLOT(update_super_cell_target_region()));
 
@@ -145,6 +145,8 @@ MainWindow::MainWindow( ApplicationLog::ApplicationLog* logger , QWidget *parent
       connect( _core_td_map, SIGNAL(TDMap_started_simgrid( )), this, SLOT(update_tdmap_simgrid_started( ) ) );
       connect(_core_td_map, SIGNAL(TDMap_started_simgrid()), this, SLOT(update_tdmap_sim_ostream_simgrid()));
       connect( _core_td_map, SIGNAL(TDMap_ended_simgrid( bool )), this, SLOT(update_tdmap_simgrid_ended( bool ) ) );
+      connect( _core_td_map, SIGNAL(TDMap_no_simgrid( bool )), this, SLOT(update_tdmap_no_simgrid_ended( bool ) ) );
+
 
       if( _flag_im2model_logger ){
         im2model_logger->logEvent( ApplicationLog::notification, "Finished initializing App." );
@@ -223,6 +225,17 @@ void MainWindow::update_tdmap_simgrid_ended( bool result ){
   }
 }
 
+void MainWindow::update_tdmap_no_simgrid_ended( bool result ){
+  if( result ){
+    updateProgressBar(0,4,4);
+    ui->statusBar->showMessage(tr("Sucessfully ended creating TDMap without image correlation step"), 2000);
+  }
+  else{
+    updateProgressBar(0,4,4, true);
+    ui->statusBar->showMessage(tr("Error while creating TDMap without image correlation step") );
+  }
+}
+
 void MainWindow::update_tdmap_celslc_step( int at_step ){
 
 }
@@ -259,8 +272,17 @@ bool MainWindow::maybeSetPreferences(){
 void MainWindow::update_tdmap_best_match( int x,int y ){
   if(_core_td_map->get_flag_simulated_images_grid()){
     cv::Mat _simulated_image = _core_td_map->get_simulated_image_in_grid(x,y);
-    const double _simulated_image_match = _core_td_map->get_simulated_image_match_in_grid(x,y);
-    const double _simulated_image_thickness = _core_td_map->get_simulated_image_thickness_nm_in_grid(x,y);
+    double _simulated_image_match = 0.0f;
+    const bool correlation_active = _core_td_map->get_run_simgrid_switch();
+    QStandardItem *match_item;
+    if( correlation_active ){
+      _simulated_image_match = _core_td_map->get_simulated_image_match_in_grid(x,y);
+      match_item = new QStandardItem( QString::number( _simulated_image_match ) );
+    }
+    else{
+      match_item = new QStandardItem(tr("N/A"));
+    }
+        const double _simulated_image_thickness = _core_td_map->get_simulated_image_thickness_nm_in_grid(x,y);
     const double _simulated_image_defocus = _core_td_map->get_simulated_image_defocus_in_grid(x,y);
 
     QStandardItemModel* model = new QStandardItemModel(3, 2,this);
@@ -269,7 +291,6 @@ void MainWindow::update_tdmap_best_match( int x,int y ){
     QStandardItem *label_match_item = new QStandardItem(tr("Match %"));
     QStandardItem *label_defocus_item = new QStandardItem(tr("Defocus"));
     QStandardItem *label_thickness_item = new QStandardItem(tr("Thickness"));
-    QStandardItem *match_item = new QStandardItem( QString::number( _simulated_image_match ) );
     QStandardItem *defocus_item = new QStandardItem( QString::number( _simulated_image_defocus  ) );
     QStandardItem *thickness_item = new QStandardItem( QString::number( _simulated_image_thickness ) );
     model->setItem(0, 0, label_match_item);
@@ -287,7 +308,17 @@ void MainWindow::update_tdmap_best_match( int x,int y ){
 void MainWindow::update_tdmap_current_selection(int x,int y){
   if(_core_td_map->get_flag_simulated_images_grid()){
     cv::Mat _simulated_image = _core_td_map->get_simulated_image_in_grid(x,y);
-    const double _simulated_image_match = _core_td_map->get_simulated_image_match_in_grid(x,y);
+    double _simulated_image_match = 0.0f;
+    const bool correlation_active = _core_td_map->get_run_simgrid_switch();
+    QStandardItem *match_item;
+    if( correlation_active ){
+      _simulated_image_match = _core_td_map->get_simulated_image_match_in_grid(x,y);
+      match_item = new QStandardItem( QString::number( _simulated_image_match ) );
+    }
+    else{
+      match_item = new QStandardItem(tr("N/A"));
+    }
+
     const double _simulated_image_thickness = _core_td_map->get_simulated_image_thickness_nm_in_grid(x,y);
     const double _simulated_image_defocus = _core_td_map->get_simulated_image_defocus_in_grid(x,y);
 
@@ -298,9 +329,8 @@ void MainWindow::update_tdmap_current_selection(int x,int y){
     QStandardItem *label_match_item = new QStandardItem(tr("Match %"));
     QStandardItem *label_defocus_item = new QStandardItem(tr("Defocus"));
     QStandardItem *label_thickness_item = new QStandardItem(tr("Thickness"));
-    QStandardItem *match_item = new QStandardItem( QString::number( _simulated_image_match ) );
-    QStandardItem *defocus_item = new QStandardItem( QString::number( _simulated_image_defocus  ) );
     QStandardItem *thickness_item = new QStandardItem( QString::number( _simulated_image_thickness ) );
+    QStandardItem *defocus_item = new QStandardItem( QString::number( _simulated_image_defocus  ) );
     model->setItem(0, 0, label_match_item);
     model->setItem(1, 0, label_thickness_item);
     model->setItem(2, 0, label_defocus_item);
@@ -433,10 +463,10 @@ bool MainWindow::_reset_document_modified_flags(){
   return result;
 }
 
-void MainWindow::update_from_TDMap_sucess(){
+void MainWindow::update_from_TDMap_sucess( ){
   ui->statusBar->showMessage(tr("Sucessfully runned TD-Map"), 2000);
   updateProgressBar(0,4,4);
-  emit simulated_grid_changed();
+  emit simulated_grid_changed( );
 }
 
 void MainWindow::update_from_TDMap_failure(){
@@ -618,7 +648,7 @@ bool MainWindow::export_TDMap(){
   // returns false if no settings were saved
   bool result = false;
   if( _core_td_map ){
-    if( _core_td_map->get_flag_simulated_images_grid() ){
+    if( _core_td_map->get_flag_raw_simulated_images_grid() ){
       QFileDialog dialog(this);
       dialog.setWindowModality(Qt::WindowModal);
       std::string preset_filename = _core_td_map->get_export_sim_grid_filename_hint();
@@ -1053,7 +1083,7 @@ void MainWindow::create_box_options(){
   /*group options*/
   image_path->set_variable_name( "image_path" );
   image_path->set_variable_description( "Experimental image path" );
-  celslc_step_group_options->add_option( project_setup_image_fields_model, image_path , 1, true);
+  simgrid_step_group_options->add_option( project_setup_image_fields_model, image_path , 1, true);
 
   ////////////////
   // Sampling rate
@@ -1127,8 +1157,6 @@ void MainWindow::create_box_options(){
   /*group options*/
   experimental_roi_center_x->set_variable_name( "experimental_roi_center_x" );
   experimental_roi_center_y->set_variable_name( "experimental_roi_center_y" );
-  celslc_step_group_options->add_option( project_setup_image_fields_model, experimental_roi_center_x , 1, true);
-  celslc_step_group_options->add_option( project_setup_image_fields_model, experimental_roi_center_y , 1, true);
   simgrid_step_group_options->add_option( project_setup_image_fields_model, experimental_roi_center_x , 1, true);
   simgrid_step_group_options->add_option( project_setup_image_fields_model, experimental_roi_center_y , 1, true);
 
@@ -1202,8 +1230,6 @@ experimental_roi_dimensions = new TreeItem ( box1_option_3_2  );
   /*group options*/
   experimental_roi_dimensions_width_px->set_variable_name( "experimental_roi_dimensions_width" );
   experimental_roi_dimensions_height_px->set_variable_name( "experimental_roi_dimensions_height" );
-  celslc_step_group_options->add_option( project_setup_image_fields_model, experimental_roi_dimensions_width_px , 1, true);
-  celslc_step_group_options->add_option( project_setup_image_fields_model, experimental_roi_dimensions_height_px , 1, true);
   simgrid_step_group_options->add_option( project_setup_image_fields_model, experimental_roi_dimensions_width_px , 1, true);
   simgrid_step_group_options->add_option( project_setup_image_fields_model, experimental_roi_dimensions_height_px , 1, true);
 

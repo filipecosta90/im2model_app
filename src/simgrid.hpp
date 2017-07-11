@@ -69,7 +69,9 @@ class SimGrid : public BaseCrystal {
     bool _flag_simulated_images_horizontal_header_defocus_nm = false;
     // simulated images
     std::vector< std::vector<cv::Mat> > simulated_images_grid;
+    bool _flag_simulated_images_grid = false;
     std::vector< std::vector<cv::Mat> > raw_simulated_images_grid;
+    bool _flag_raw_simulated_images_grid = false;
     std::vector< std::vector<cv::Point> > experimental_images_match_location_grid;
 
     //will contain the all the simulated images match percentage
@@ -164,6 +166,7 @@ std::vector< double > get_simulated_images_horizontal_header_defocus_nm(){ retur
     ApplicationLog::ApplicationLog* get_logger(){ return logger; }
 
     bool get_flag_simulated_images_grid();
+    bool get_flag_raw_simulated_images_grid();
 
     bool produce_png_from_dat_file();
 

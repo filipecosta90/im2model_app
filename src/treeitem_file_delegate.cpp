@@ -281,7 +281,11 @@ QWidget *TreeItemFileDelegate::createEditor( QWidget *parent, const QStyleOption
             const double bottom_limit = item->get_validator_value_double_bottom( index.column() );
             double_validator->setBottom( bottom_limit );
           }
+          //double_validator->setNotation(QDoubleValidator::StandardNotation);
+          double_validator->setLocale(QLocale::C);
+
           text_editor->setValidator( double_validator );
+
         }
         }
         return text_editor;

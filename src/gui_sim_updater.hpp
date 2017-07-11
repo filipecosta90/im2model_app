@@ -57,7 +57,12 @@ class GuiSimOutUpdater : public QObject {
         emit  TDMap_started();
         bool result = tdmap->run_tdmap();
         if ( result ){
-          emit TDMap_sucess();
+          if( tdmap->get_run_simgrid_switch() ){
+            emit TDMap_sucess();
+          }
+          else{
+            emit TDMap_sucess_no_correlation();
+          }
         }
       }
       else {
@@ -104,6 +109,7 @@ signals:
     void TDMap_request();
     void TDMap_started();
     void TDMap_sucess();
+    void TDMap_sucess_no_correlation();
     void TDMap_failure();
     void TDMap_finished();
 

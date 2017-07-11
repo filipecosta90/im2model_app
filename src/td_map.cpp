@@ -411,7 +411,6 @@ bool TDMap::run_tdmap( ){
     }
     //SIMGRID
     if( _celslc_stage_ok && _msa_stage_ok && _wavimg_stage_ok ){
-      if ( _run_simgrid_switch ){
         bool _clean_run_env = !_flag_runned_tdmap_simgrid;
         if( _flag_runned_tdmap_simgrid ){
           _clean_run_env = _td_map_simgrid->clean_for_re_run();
@@ -438,6 +437,7 @@ bool TDMap::run_tdmap( ){
               logger->logEvent( _log_type , message.str() );
             }
           }
+          if ( _run_simgrid_switch ){
           // 2nd step in simgrid
           if( _grid_ok ){
             try {
@@ -456,6 +456,7 @@ bool TDMap::run_tdmap( ){
             _flag_runned_tdmap_simgrid = _grid_ok;
           }
           emit TDMap_ended_simgrid( _flag_runned_tdmap_simgrid );
+          _simgrid_stage_ok = _flag_runned_tdmap_simgrid;
           if( _flag_logger ){
             std::stringstream message;
             message << "_flag_runned_tdmap_simgrid: " << std::boolalpha << _flag_runned_tdmap_simgrid;
@@ -463,7 +464,16 @@ bool TDMap::run_tdmap( ){
             logger->logEvent( _log_type , message.str() );
           }
         }
-        _simgrid_stage_ok = _flag_runned_tdmap_simgrid;
+        else{
+          emit TDMap_no_simgrid( true );
+          _simgrid_stage_ok = true;
+          if( _flag_logger ){
+            std::stringstream message;
+            message << "emiting TDMap_no_simgrid( true ) ";
+            ApplicationLog::severity_level _log_type = ApplicationLog::notification;
+            logger->logEvent( _log_type , message.str() );
+          }
+        }
       }
     }
     _simulation_status = _celslc_stage_ok & _msa_stage_ok & _wavimg_stage_ok & _simgrid_stage_ok;
@@ -474,6 +484,12 @@ bool TDMap::run_tdmap( ){
       message << "TDMap vars are not correcly setted up. _vars_setted_up: " << std::boolalpha << _vars_setted_up ;
       logger->logEvent( ApplicationLog::error , message.str() );
     }
+  }
+  if( _flag_logger ){
+    std::stringstream message;
+    message << "final TDMap::run_tdmap( ) result: " << std::boolalpha << _simulation_status;
+    ApplicationLog::severity_level _log_type = _simulation_status ? ApplicationLog::notification : ApplicationLog::error;
+    logger->logEvent( _log_type , message.str() );
   }
   return _simulation_status;
 }
@@ -607,6 +623,10 @@ bool TDMap::get_flag_slice_params_accum_nm_slice_vec(){
 
 bool TDMap::get_flag_simulated_images_grid(){
   return _td_map_simgrid->get_flag_simulated_images_grid();
+}
+
+bool TDMap::get_flag_raw_simulated_images_grid(){
+  return _td_map_simgrid->get_flag_raw_simulated_images_grid();
 }
 
 // gui var getters
