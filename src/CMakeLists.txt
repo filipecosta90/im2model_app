@@ -66,7 +66,10 @@ endif(WIN32)
 # Properties->C/C++->General->Additional Include Directories
 include_directories( ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR} )
 
-include_directories(../include/rapidjson)
+#include_directories(${PROJECT_SOURCE_DIR}/include/rapidjson)
+
+#file(GLOB SRCS *.cpp *.hpp *.h)
+
 include_directories( ${OpenCV_INCLUDE_DIRS} )
 include_directories( ${Boost_INCLUDE_DIRS} )
 link_directories( ${Boost_LIBRARY_PATH} )
@@ -230,6 +233,11 @@ set_property(TARGET ${PROJECT_NAME} PROPERTY FOLDER "executables")
 
 # Properties->General->Output Directory
 set_target_properties( ${PROJECT_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR})
+
+target_include_directories(
+    ${PROJECT_NAME}
+    PUBLIC ${PROJECT_SOURCE_DIR}/include/rapidjson
+)
 
 set(CMAKE_INSTALL_PREFIX ${CMAKE_CURRENT_BINARY_DIR} )
 
