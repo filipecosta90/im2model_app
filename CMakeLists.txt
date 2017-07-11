@@ -104,7 +104,6 @@ find_package(FLEX REQUIRED)
 
 find_package(HDF5 COMPONENTS C CXX HL REQUIRED)
 
-include_directories(include/rapidjson)
 #find_package( RapidJSON REQUIRED )
 
 # we add the sub-directories that we want CMake to scan
