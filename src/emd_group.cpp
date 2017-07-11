@@ -1,7 +1,6 @@
 #include "emd_group.h"
 
-EMDGroup::EMDGroup( hid_t id ){
-  gid = id;
+EMDGroup::EMDGroup( ){
 }
 
 bool EMDGroup::get_flag_contains_group( std::string name ){
@@ -80,8 +79,8 @@ void EMDGroup::scan_attrs(hid_t oid) {
  *   This can be used as a model to implement different actions and
  *   searches.
  */
-void EMDGroup::scan_group(hid_t gid) {
-
+void EMDGroup::scan_group(hid_t grp_id ) {
+gid = grp_id;
   /*
    * Information about the group:
    *  Name and attributes
@@ -121,7 +120,7 @@ void EMDGroup::scan_group(hid_t gid) {
       case H5G_GROUP:
         {
           grpid = H5Gopen(gid,memb_name, H5P_DEFAULT);
-          EMDGroup* new_group = new EMDGroup( grpid );
+          EMDGroup* new_group = new EMDGroup( );
           new_group->scan_group( grpid );
           std::string g_name = new_group->get_name();
           std::map<std::string,EMDGroup*>::iterator it = _map_groups.begin();

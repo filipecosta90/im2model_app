@@ -387,7 +387,7 @@ void MainWindow::update_full_experimental_image(){
     ui->qgraphics_full_experimental_image->show();
     // update tab 3
     this->ui->qgraphics_super_cell_edge_detection->setImage( full_image );
-      this->ui->qgraphics_super_cell_edge_detection->show();
+    this->ui->qgraphics_super_cell_edge_detection->show();
     update_roi_experimental_image_frame();
   }
 }
@@ -1038,7 +1038,7 @@ void MainWindow::create_box_options(){
   /*************************
    * EXPERIMENTAL IMAGE
    *************************/
-  TreeItem* experimental_image_root = new TreeItem ( common_header );
+  experimental_image_root = new TreeItem ( common_header );
   project_setup_image_fields_model = new TreeModel( experimental_image_root );
 
   ////////////////
@@ -1047,7 +1047,7 @@ void MainWindow::create_box_options(){
   QVector<QVariant> box1_option_1 = {"Image path",""};
   QVector<bool> box1_option_1_edit = {false,true};
   boost::function<bool(std::string)> box1_function_1( boost::bind( &MainWindow::update_qline_image_path, this, _1 ) );
-  TreeItem* image_path  = new TreeItem (  box1_option_1 , box1_function_1, box1_option_1_edit );
+  image_path  = new TreeItem (  box1_option_1 , box1_function_1, box1_option_1_edit );
   image_path->set_item_delegate_type( TreeItem::_delegate_FILE );
   experimental_image_root->insertChildren( image_path );
   /*group options*/
@@ -1066,9 +1066,9 @@ void MainWindow::create_box_options(){
   QVector<bool> box1_option_2_2_edit = {false,true};
   boost::function<bool(std::string)> box1_function_2_2 ( boost::bind( &TDMap::set_exp_image_properties_sampling_rate_y_nm_per_pixel,_core_td_map, _1 ) );
 
-  TreeItem* experimental_sampling_rate = new TreeItem ( box1_option_2  );
-  TreeItem* experimental_sampling_rate_x = new TreeItem ( box1_option_2_1 , box1_function_2_1, box1_option_2_1_edit );
-  TreeItem* experimental_sampling_rate_y = new TreeItem ( box1_option_2_2 , box1_function_2_2, box1_option_2_2_edit );
+  experimental_sampling_rate = new TreeItem ( box1_option_2  );
+   experimental_sampling_rate_x = new TreeItem ( box1_option_2_1 , box1_function_2_1, box1_option_2_1_edit );
+  experimental_sampling_rate_y = new TreeItem ( box1_option_2_2 , box1_function_2_2, box1_option_2_2_edit );
   experimental_image_root->insertChildren( experimental_sampling_rate );
   experimental_sampling_rate->insertChildren( experimental_sampling_rate_x );
   experimental_sampling_rate->insertChildren( experimental_sampling_rate_y );
@@ -1097,7 +1097,7 @@ void MainWindow::create_box_options(){
   // ROI
   ////////////////
   QVector<QVariant> box1_option_3 = {"ROI",""};
-  TreeItem* experimental_roi = new TreeItem ( box1_option_3  );
+  experimental_roi = new TreeItem ( box1_option_3  );
   experimental_image_root->insertChildren( experimental_roi );
 
   ////////////////
@@ -1111,12 +1111,12 @@ void MainWindow::create_box_options(){
   QVector<bool> box1_option_3_1_2_edit = {false,true};
   boost::function<bool(std::string)> box1_function_3_1_2 ( boost::bind( &TDMap::set_exp_image_properties_roi_center_y,_core_td_map, _1 ) );
 
-  TreeItem* experimental_roi_center = new TreeItem ( box1_option_3_1  );
-  TreeItem* experimental_roi_center_x = new TreeItem ( box1_option_3_1_1 , box1_function_3_1_1, box1_option_3_1_1_edit );
+ experimental_roi_center = new TreeItem ( box1_option_3_1  );
+  experimental_roi_center_x = new TreeItem ( box1_option_3_1_1 , box1_function_3_1_1, box1_option_3_1_1_edit );
   connect( experimental_roi_center_x, SIGNAL(dataChanged( int )), this, SLOT( update_roi_experimental_image_frame() ) );
   connect( experimental_roi_center_x, SIGNAL(dataChanged( int )), this, SLOT( update_roi_full_experimental_image_frame() ) );
 
-  TreeItem* experimental_roi_center_y = new TreeItem ( box1_option_3_1_2 , box1_function_3_1_2, box1_option_3_1_2_edit );
+  experimental_roi_center_y = new TreeItem ( box1_option_3_1_2 , box1_function_3_1_2, box1_option_3_1_2_edit );
   connect( experimental_roi_center_y, SIGNAL(dataChanged( int )), this, SLOT( update_roi_experimental_image_frame() ) );
   connect( experimental_roi_center_y, SIGNAL(dataChanged( int )), this, SLOT( update_roi_full_experimental_image_frame() ) );
 
@@ -1150,20 +1150,20 @@ void MainWindow::create_box_options(){
   ////////////////
 
   QVector<QVariant> box1_option_3_2 = {"Dimensions",""};
-  TreeItem* experimental_roi_dimensions = new TreeItem ( box1_option_3_2  );
+experimental_roi_dimensions = new TreeItem ( box1_option_3_2  );
   experimental_roi->insertChildren( experimental_roi_dimensions );
 
   ////////////////
   // Width
   ////////////////
   QVector<QVariant> box1_option_3_2_1 = {"Width",""};
-  TreeItem* experimental_roi_dimensions_width  = new TreeItem ( box1_option_3_2_1 );
+  experimental_roi_dimensions_width  = new TreeItem ( box1_option_3_2_1 );
   experimental_roi_dimensions->insertChildren( experimental_roi_dimensions_width );
 
   QVector<QVariant> box1_option_3_2_1_1 = {"<ny>",""};
   QVector<bool> box1_option_3_2_1_1_edit = {false,true};
   boost::function<bool(std::string)> box1_function_3_2_1_1 ( boost::bind( &TDMap::set_ny_size_width,_core_td_map, _1 ) );
-  TreeItem* experimental_roi_dimensions_width_px = new TreeItem ( box1_option_3_2_1_1 , box1_function_3_2_1_1 , box1_option_3_2_1_1_edit );
+  experimental_roi_dimensions_width_px = new TreeItem ( box1_option_3_2_1_1 , box1_function_3_2_1_1 , box1_option_3_2_1_1_edit );
   connect( experimental_roi_dimensions_width_px, SIGNAL(dataChanged( int )), this, SLOT( update_roi_experimental_image_frame() ) );
   connect( experimental_roi_dimensions_width_px, SIGNAL(dataChanged( int )), this, SLOT( update_roi_full_experimental_image_frame() ) );
   experimental_roi_dimensions_width->insertChildren( experimental_roi_dimensions_width_px );
@@ -1171,7 +1171,7 @@ void MainWindow::create_box_options(){
   QVector<QVariant> box1_option_3_2_1_2 = {"nm",""};
   QVector<bool> box1_option_3_2_1_2_edit = {false,false};
   boost::function<double(void)> box1_function_3_2_1_2 ( boost::bind( &TDMap::get_exp_image_properties_roi_ny_size_width_nm,_core_td_map ) );
-  TreeItem* experimental_roi_dimensions_width_nm = new TreeItem ( box1_option_3_2_1_2  );
+  experimental_roi_dimensions_width_nm = new TreeItem ( box1_option_3_2_1_2  );
   experimental_roi_dimensions_width_nm->set_fp_data_getter_double_vec( 1, box1_function_3_2_1_2 );
   experimental_roi_dimensions_width->insertChildren( experimental_roi_dimensions_width_nm );
   connect( experimental_roi_dimensions_width_px, SIGNAL(dataChanged( int )), experimental_roi_dimensions_width_nm, SLOT( load_data_from_getter( int ) ) );
@@ -1180,13 +1180,13 @@ void MainWindow::create_box_options(){
   // Heigth
   ////////////////
   QVector<QVariant> box1_option_3_2_2 = {"Heigth",""};
-  TreeItem* experimental_roi_dimensions_height  = new TreeItem ( box1_option_3_2_2 );
+  experimental_roi_dimensions_height  = new TreeItem ( box1_option_3_2_2 );
   experimental_roi_dimensions->insertChildren( experimental_roi_dimensions_height );
 
     QVector<QVariant> box1_option_3_2_2_1 = {"<nx>",""};
     QVector<bool> box1_option_3_2_2_1_edit = {false,true};
     boost::function<bool(std::string)> box1_function_3_2_2_1 ( boost::bind( &TDMap::set_nx_size_height,_core_td_map, _1 ) );
-  TreeItem* experimental_roi_dimensions_height_px = new TreeItem ( box1_option_3_2_2_1 , box1_function_3_2_2_1, box1_option_3_2_2_1_edit );
+  experimental_roi_dimensions_height_px = new TreeItem ( box1_option_3_2_2_1 , box1_function_3_2_2_1, box1_option_3_2_2_1_edit );
   connect( experimental_roi_dimensions_height_px, SIGNAL(dataChanged( int )), this, SLOT( update_roi_experimental_image_frame() ) );
   connect( experimental_roi_dimensions_height_px, SIGNAL(dataChanged( int )), this, SLOT( update_roi_full_experimental_image_frame() ) );
   experimental_roi_dimensions_height->insertChildren( experimental_roi_dimensions_height_px );
@@ -1194,7 +1194,7 @@ void MainWindow::create_box_options(){
   QVector<QVariant> box1_option_3_2_2_2 = {"nm",""};
   QVector<bool> box1_option_3_2_2_2_edit = {false,false};
   boost::function<double(void)> box1_function_3_2_2_2 ( boost::bind( &TDMap::get_exp_image_properties_roi_nx_size_height_nm,_core_td_map ) );
-  TreeItem* experimental_roi_dimensions_height_nm = new TreeItem ( box1_option_3_2_2_2 );
+  experimental_roi_dimensions_height_nm = new TreeItem ( box1_option_3_2_2_2 );
   experimental_roi_dimensions_height_nm->set_fp_data_getter_double_vec( 1, box1_function_3_2_2_2 );
   experimental_roi_dimensions_height->insertChildren( experimental_roi_dimensions_height_nm );
   connect( experimental_roi_dimensions_height_px, SIGNAL(dataChanged( int )), experimental_roi_dimensions_height_nm, SLOT( load_data_from_getter( int ) ) );
@@ -1229,14 +1229,14 @@ void MainWindow::create_box_options(){
   /*************************
    * CRYSTALLOGRAPLY
    *************************/
-  TreeItem* crystallography_root = new TreeItem ( common_header );
+  crystallography_root = new TreeItem ( common_header );
   project_setup_crystalographic_fields_model = new TreeModel( crystallography_root );
 
   ////////////////
   // Unit-cell file
   ////////////////
   QVector<QVariant> box2_option_1 = {"Unit-cell file",""};
-  TreeItem* unit_cell_file  = new TreeItem ( box2_option_1 );
+  unit_cell_file  = new TreeItem ( box2_option_1 );
   crystallography_root->insertChildren( unit_cell_file );
 
   ////////////////
@@ -1245,7 +1245,7 @@ void MainWindow::create_box_options(){
   QVector<QVariant> box2_option_1_1 = {"CIF",""};
   QVector<bool> box2_option_1_1_edit = {false,true};
   boost::function<bool(std::string)> box2_function_1_1 ( boost::bind( &TDMap::set_unit_cell_cif_path,_core_td_map, _1 ) );
-  TreeItem* unit_cell_file_cif = new TreeItem ( box2_option_1_1 , box2_function_1_1, box2_option_1_1_edit );
+  unit_cell_file_cif = new TreeItem ( box2_option_1_1 , box2_function_1_1, box2_option_1_1_edit );
   unit_cell_file_cif->set_item_delegate_type( TreeItem::_delegate_FILE );
   unit_cell_file->insertChildren( unit_cell_file_cif );
 
@@ -1257,7 +1257,7 @@ void MainWindow::create_box_options(){
   // Projection direction
   ////////////////
   QVector<QVariant> box2_option_3 = {"Zone axis",""};
-  TreeItem* projection_direction  = new TreeItem (  box2_option_3 );
+  projection_direction  = new TreeItem (  box2_option_3 );
   crystallography_root->insertChildren( projection_direction );
 
   ////////////////
@@ -1266,7 +1266,7 @@ void MainWindow::create_box_options(){
   QVector<QVariant> box2_option_3_1 = {"h",""};
   QVector<bool> box2_option_3_1_edit = {false,true};
   boost::function<bool(std::string)> box2_function_3_1 ( boost::bind( &TDMap::set_zone_axis_u,_core_td_map, _1 ) );
-  TreeItem* projection_direction_h = new TreeItem ( box2_option_3_1 , box2_function_3_1, box2_option_3_1_edit );
+  projection_direction_h = new TreeItem ( box2_option_3_1 , box2_function_3_1, box2_option_3_1_edit );
   projection_direction->insertChildren( projection_direction_h );
 
   /*group options*/
@@ -1281,7 +1281,7 @@ void MainWindow::create_box_options(){
   QVector<QVariant> box2_option_3_2 = {"k",""};
   QVector<bool> box2_option_3_2_edit = {false,true};
   boost::function<bool(std::string)> box2_function_3_2 ( boost::bind( &TDMap::set_zone_axis_v,_core_td_map, _1 ) );
-  TreeItem* projection_direction_k = new TreeItem ( box2_option_3_2 , box2_function_3_2, box2_option_3_2_edit );
+  projection_direction_k = new TreeItem ( box2_option_3_2 , box2_function_3_2, box2_option_3_2_edit );
   projection_direction->insertChildren( projection_direction_k );
 
   /*group options*/
@@ -1297,7 +1297,7 @@ void MainWindow::create_box_options(){
   QVector<QVariant> box2_option_3_3 = {"l",""};
   QVector<bool> box2_option_3_3_edit = {false,true};
   boost::function<bool(std::string)> box2_function_3_3 ( boost::bind( &TDMap::set_zone_axis_w,_core_td_map, _1 ) );
-  TreeItem* projection_direction_l = new TreeItem ( box2_option_3_3 , box2_function_3_3, box2_option_3_3_edit );
+  projection_direction_l = new TreeItem ( box2_option_3_3 , box2_function_3_3, box2_option_3_3_edit );
   projection_direction->insertChildren( projection_direction_l );
 
   /*group options*/
@@ -1311,7 +1311,7 @@ void MainWindow::create_box_options(){
   // Projected y axis
   ////////////////
   QVector<QVariant> box2_option_2 = {"Projected y axis",""};
-  TreeItem* projected_y_axis  = new TreeItem (  box2_option_2 );
+  projected_y_axis  = new TreeItem (  box2_option_2 );
   crystallography_root->insertChildren( projected_y_axis );
 
   ////////////////
@@ -1320,7 +1320,7 @@ void MainWindow::create_box_options(){
   QVector<QVariant> box2_option_2_1 = {"u",""};
   QVector<bool> box2_option_2_1_edit = {false,true};
   boost::function<bool(std::string)> box2_function_2_1 ( boost::bind( &TDMap::set_projected_y_axis_u,_core_td_map, _1 ) );
-  TreeItem* projected_y_axis_u = new TreeItem ( box2_option_2_1 , box2_function_2_1, box2_option_2_1_edit );
+  projected_y_axis_u = new TreeItem ( box2_option_2_1 , box2_function_2_1, box2_option_2_1_edit );
   projected_y_axis->insertChildren( projected_y_axis_u );
 
   /*group options*/
@@ -1336,7 +1336,7 @@ void MainWindow::create_box_options(){
   QVector<QVariant> box2_option_2_2 = {"v",""};
   QVector<bool> box2_option_2_2_edit = {false,true};
   boost::function<bool(std::string)> box2_function_2_2 ( boost::bind( &TDMap::set_projected_y_axis_v,_core_td_map, _1 ) );
-  TreeItem* projected_y_axis_v = new TreeItem ( box2_option_2_2 , box2_function_2_2, box2_option_2_2_edit );
+  projected_y_axis_v = new TreeItem ( box2_option_2_2 , box2_function_2_2, box2_option_2_2_edit );
   projected_y_axis->insertChildren( projected_y_axis_v );
 
   /*group options*/
@@ -1352,7 +1352,7 @@ void MainWindow::create_box_options(){
   QVector<QVariant> box2_option_2_3 = {"w",""};
   QVector<bool>  box2_option_2_3_edit = {false,true};
   boost::function<bool(std::string)>  box2_function_2_3 ( boost::bind( &TDMap::set_projected_y_axis_w,_core_td_map, _1 ) );
-  TreeItem* projected_y_axis_w = new TreeItem (  box2_option_2_3 ,  box2_function_2_3,  box2_option_2_3_edit );
+  projected_y_axis_w = new TreeItem (  box2_option_2_3 ,  box2_function_2_3,  box2_option_2_3_edit );
   projected_y_axis->insertChildren( projected_y_axis_w );
 
   /*group options*/
@@ -1382,21 +1382,21 @@ void MainWindow::create_box_options(){
   /*************************
    * TD MAP
    *************************/
-  TreeItem* tdmap_root = new TreeItem ( common_header );
+  tdmap_root = new TreeItem ( common_header );
   tdmap_simulation_setup_model = new TreeModel( tdmap_root );
 
   ////////////////
   // 2D variation map
   ////////////////
   QVector<QVariant> box3_option_0 = {"Parameter variation map",""};
-  TreeItem* _parameter_variation_map  = new TreeItem ( box3_option_0 );
+  _parameter_variation_map  = new TreeItem ( box3_option_0 );
   tdmap_root->insertChildren( _parameter_variation_map );
 
   ////////////////
   // 2D variation map - thickness
   ////////////////
   QVector<QVariant> box3_option_0_1 = {"Thickness",""};
-  TreeItem* _parameter_variation_map_thickness  = new TreeItem ( box3_option_0_1 );
+  _parameter_variation_map_thickness  = new TreeItem ( box3_option_0_1 );
   _parameter_variation_map->insertChildren( _parameter_variation_map_thickness );
 
   ////////////////
@@ -1405,7 +1405,7 @@ void MainWindow::create_box_options(){
   QVector<QVariant> box3_option_0_1_1 = {"Estimated nm",""};
   QVector<bool> box3_option_0_1_1_edit = {false,true};
   boost::function<bool(std::string)> box3_function_0_1_1 ( boost::bind( &TDMap::set_thickness_user_estimated_nm, _core_td_map, _1 ) );
-  TreeItem* _parameter_variation_map_thickness_estimated_nm  = new TreeItem ( box3_option_0_1_1, box3_function_0_1_1, box3_option_0_1_1_edit  );
+  _parameter_variation_map_thickness_estimated_nm  = new TreeItem ( box3_option_0_1_1, box3_function_0_1_1, box3_option_0_1_1_edit  );
   _parameter_variation_map_thickness_estimated_nm->set_item_delegate_type( TreeItem::_delegate_TEXT_ACTION );
 
   QVector<QVariant> box3_function_0_1_1_action_description = {"Auto range","Auto lower/upper"};
@@ -1429,7 +1429,7 @@ void MainWindow::create_box_options(){
   QVector<QVariant> box3_option_1_3 = {"Samples",""};
   QVector<bool> box3_option_1_3_edit = {false,true};
   boost::function<bool(std::string)> box3_function_1_3 ( boost::bind( &TDMap::set_slice_samples, _core_td_map, _1 ) );
-  TreeItem* thickness_range_number_samples = new TreeItem ( box3_option_1_3 , box3_function_1_3, box3_option_1_3_edit );
+  thickness_range_number_samples = new TreeItem ( box3_option_1_3 , box3_function_1_3, box3_option_1_3_edit );
   _parameter_variation_map_thickness->insertChildren( thickness_range_number_samples );
 
   /* validators */
@@ -1443,7 +1443,7 @@ void MainWindow::create_box_options(){
   // Thickness range
   ////////////////
   QVector<QVariant> box3_option_1 = {"Thickness range",""};
-  TreeItem* thickness_range  = new TreeItem ( box3_option_1 );
+  thickness_range  = new TreeItem ( box3_option_1 );
   _parameter_variation_map_thickness->insertChildren( thickness_range );
 
   ////////////////
@@ -1452,7 +1452,7 @@ void MainWindow::create_box_options(){
   QVector<QVariant> box3_option_1_1 = {"Lower bound",""};
   QVector<bool> box3_option_1_1_edit = {false,true};
   boost::function<bool(std::string)> box3_function_1_1 ( boost::bind( &TDMap::set_nm_lower_bound, _core_td_map, _1 ) );
-  TreeItem* thickness_range_lower_bound = new TreeItem ( box3_option_1_1 , box3_function_1_1, box3_option_1_1_edit );
+  thickness_range_lower_bound = new TreeItem ( box3_option_1_1 , box3_function_1_1, box3_option_1_1_edit );
   thickness_range->insertChildren( thickness_range_lower_bound );
 
   /* validators */
@@ -1468,7 +1468,7 @@ void MainWindow::create_box_options(){
   QVector<QVariant> box3_option_1_2 = {"Upper bound",""};
   QVector<bool> box3_option_1_2_edit = {false,true};
   boost::function<bool(std::string)> box3_function_1_2 ( boost::bind( &TDMap::set_nm_upper_bound, _core_td_map, _1 ) );
-  TreeItem* thickness_range_upper_bound = new TreeItem ( box3_option_1_2 , box3_function_1_2, box3_option_1_2_edit );
+  thickness_range_upper_bound = new TreeItem ( box3_option_1_2 , box3_function_1_2, box3_option_1_2_edit );
   thickness_range->insertChildren( thickness_range_upper_bound );
 
   /* validators */
@@ -1482,7 +1482,7 @@ void MainWindow::create_box_options(){
   // 2D variation map - defocus
   ////////////////
   QVector<QVariant> box3_option_0_2 = {"Defocus",""};
-  TreeItem* _parameter_variation_map_defocous  = new TreeItem ( box3_option_0_2 );
+  _parameter_variation_map_defocous  = new TreeItem ( box3_option_0_2 );
   _parameter_variation_map->insertChildren( _parameter_variation_map_defocous );
 
   ////////////////
@@ -1491,7 +1491,7 @@ void MainWindow::create_box_options(){
   QVector<QVariant> box3_option_0_2_1 = {"Estimated nm",""};
   QVector<bool> box3_option_0_2_1_edit = {false,true};
   boost::function<bool(std::string)> box3_function_0_2_1 ( boost::bind( &TDMap::set_defocus_user_estimated_nm, _core_td_map, _1 ) );
-  TreeItem* _parameter_variation_map_defocus_estimated_nm  = new TreeItem ( box3_option_0_2_1, box3_function_0_2_1, box3_option_0_2_1_edit  );
+  _parameter_variation_map_defocus_estimated_nm  = new TreeItem ( box3_option_0_2_1, box3_function_0_2_1, box3_option_0_2_1_edit  );
   _parameter_variation_map_defocous->insertChildren( _parameter_variation_map_defocus_estimated_nm );
 
     /* validators */
@@ -1503,7 +1503,7 @@ void MainWindow::create_box_options(){
   QVector<QVariant> box3_option_2_3 = {"Samples",""};
   QVector<bool> box3_option_2_3_edit = {false,true};
   boost::function<bool(std::string)> box3_function_2_3 ( boost::bind( &TDMap::set_defocus_samples, _core_td_map, _1 ) );
-  TreeItem* defocus_range_number_samples = new TreeItem ( box3_option_2_3 , box3_function_2_3, box3_option_2_3_edit );
+  defocus_range_number_samples = new TreeItem ( box3_option_2_3 , box3_function_2_3, box3_option_2_3_edit );
   _parameter_variation_map_defocous->insertChildren( defocus_range_number_samples );
 
   /* validators */
@@ -1517,7 +1517,7 @@ void MainWindow::create_box_options(){
   // Defocus range
   ////////////////
   QVector<QVariant> box3_option_2 = {"Defocus range",""};
-  TreeItem* defocus_range  = new TreeItem ( box3_option_2 );
+  defocus_range = new TreeItem ( box3_option_2 );
   _parameter_variation_map_defocous->insertChildren( defocus_range );
 
   ////////////////
@@ -1526,7 +1526,7 @@ void MainWindow::create_box_options(){
   QVector<QVariant> box3_option_2_1 = {"Lower bound",""};
   QVector<bool> box3_option_2_1_edit = {false,true};
   boost::function<bool(std::string)> box3_function_2_1 ( boost::bind( &TDMap::set_defocus_lower_bound, _core_td_map, _1 ) );
-  TreeItem* defocus_range_lower_bound = new TreeItem ( box3_option_2_1 , box3_function_2_1, box3_option_2_1_edit );
+  defocus_range_lower_bound = new TreeItem ( box3_option_2_1 , box3_function_2_1, box3_option_2_1_edit );
   defocus_range->insertChildren( defocus_range_lower_bound );
 
   /* validators */
@@ -1542,7 +1542,7 @@ void MainWindow::create_box_options(){
   QVector<QVariant> box3_option_2_2 = {"Upper bound",""};
   QVector<bool> box3_option_2_2_edit = {false,true};
   boost::function<bool(std::string)> box3_function_2_2 ( boost::bind( &TDMap::set_defocus_upper_bound, _core_td_map, _1 ) );
-  TreeItem* defocus_range_upper_bound = new TreeItem ( box3_option_2_2 , box3_function_2_2, box3_option_2_2_edit );
+  defocus_range_upper_bound = new TreeItem ( box3_option_2_2 , box3_function_2_2, box3_option_2_2_edit );
   defocus_range->insertChildren( defocus_range_upper_bound );
 
   /* validators */
@@ -1556,7 +1556,7 @@ void MainWindow::create_box_options(){
   // Incident electron beam
   ////////////////
   QVector<QVariant> box3_option_3 = {"Optics",""};
-  TreeItem* incident_electron_beam  = new TreeItem ( box3_option_3 );
+  incident_electron_beam = new TreeItem ( box3_option_3 );
   _parameter_variation_map->insertChildren( incident_electron_beam );
 
   ////////////////
@@ -1565,7 +1565,7 @@ void MainWindow::create_box_options(){
   QVector<QVariant> box3_option_3_1 = {"Acceleration voltage (kV)",""};
   QVector<bool> box3_option_3_1_edit = {false,true};
   boost::function<bool(std::string)> box3_function_3_1 ( boost::bind( &TDMap::set_accelaration_voltage_kv, _core_td_map, _1 ) );
-  TreeItem* accelaration_voltage_kv = new TreeItem ( box3_option_3_1 , box3_function_3_1, box3_option_3_1_edit );
+  accelaration_voltage_kv = new TreeItem ( box3_option_3_1 , box3_function_3_1, box3_option_3_1_edit );
   incident_electron_beam->insertChildren( accelaration_voltage_kv );
   /*group options*/
   accelaration_voltage_kv->set_variable_name( "accelaration_voltage_kv" );
@@ -1580,78 +1580,125 @@ void MainWindow::create_box_options(){
   accelaration_voltage_kv->set_validator_double_top(1, box3_function_3_1_validator_top );
 
   ////////////////
+  // Cell Dimensions
+  ////////////////
+  QVector<QVariant> box3_option_4 = {"Cell Dimensions",""};
+  tdmap_cell_dimensions = new TreeItem ( box3_option_4 );
+  _parameter_variation_map->insertChildren( tdmap_cell_dimensions );
+
+  ////////////////
+  // Cell Dimensions -- a
+  ////////////////
+  QVector<QVariant> box3_option_4_1 = {"a (nm)",""};
+  QVector<bool> box3_option_4_1_edit = {false,true};
+  boost::function<bool(std::string)> box3_function_4_1 ( boost::bind( &TDMap::set_super_cell_size_a, _core_td_map, _1 ) );
+  tdmap_cell_dimensions_a = new TreeItem ( box3_option_4_1 , box3_function_4_1, box3_option_4_1_edit );
+  tdmap_cell_dimensions->insertChildren( tdmap_cell_dimensions_a );
+
+  /*group options*/
+  tdmap_cell_dimensions_a->set_variable_name( "tdmap_cell_dimensions_a" );
+  celslc_step_group_options->add_option( tdmap_simulation_setup_model, tdmap_cell_dimensions_a , 1, true);
+
+  /* validators */
+  tdmap_cell_dimensions_a->set_flag_validatable_double(1,true);
+  boost::function<double(void)> box3_function_4_1_validator_bot ( boost::bind( &TDMap::get_tdmap_cell_dimensions_a_bottom_limit, _core_td_map ) );
+  boost::function<double(void)> box3_function_4_1_validator_top ( boost::bind( &TDMap::get_tdmap_cell_dimensions_a_top_limit, _core_td_map ) );
+  tdmap_cell_dimensions_a->set_validator_double_bottom(1, box3_function_4_1_validator_bot );
+  tdmap_cell_dimensions_a->set_validator_double_top(1, box3_function_4_1_validator_top );
+
+  ////////////////
+  // Cell Dimensions -- a
+  ////////////////
+  QVector<QVariant> box3_option_4_2 = {"b (nm)",""};
+  QVector<bool> box3_option_4_2_edit = {false,true};
+  boost::function<bool(std::string)> box3_function_4_2 ( boost::bind( &TDMap::set_super_cell_size_b, _core_td_map, _1 ) );
+  tdmap_cell_dimensions_b = new TreeItem ( box3_option_4_2 , box3_function_4_2, box3_option_4_2_edit );
+  tdmap_cell_dimensions->insertChildren( tdmap_cell_dimensions_b );
+
+  /*group options*/
+  tdmap_cell_dimensions_b->set_variable_name( "tdmap_cell_dimensions_b" );
+  celslc_step_group_options->add_option( tdmap_simulation_setup_model, tdmap_cell_dimensions_b , 1, true);
+
+  /* validators */
+  tdmap_cell_dimensions_b->set_flag_validatable_double(1,true);
+  boost::function<double(void)> box3_function_4_2_validator_bot ( boost::bind( &TDMap::get_tdmap_cell_dimensions_b_bottom_limit, _core_td_map ) );
+  boost::function<double(void)> box3_function_4_2_validator_top ( boost::bind( &TDMap::get_tdmap_cell_dimensions_b_top_limit, _core_td_map ) );
+  tdmap_cell_dimensions_b->set_validator_double_bottom(1, box3_function_4_2_validator_bot );
+  tdmap_cell_dimensions_b->set_validator_double_top(1, box3_function_4_2_validator_top );
+
+  ////////////////
   // Simulation Refinement
   ////////////////
-  QVector<QVariant> box3_option_4 = {"Refinement",""};
-  QVector<bool> box3_option_4_edit = {false,true};
+  QVector<QVariant> box3_option_5 = {"Refinement",""};
+  QVector<bool> box3_option_5_edit = {false,true};
 
-  boost::function<int(void)> box3_function_4_getter ( boost::bind( &TDMap::get_refinement_definition_method, _core_td_map ) );
-  boost::function<bool(int)> box3_function_4_setter ( boost::bind( &TDMap::set_refinement_definition_method, _core_td_map, _1 ) );
+  boost::function<int(void)> box3_function_5_getter ( boost::bind( &TDMap::get_refinement_definition_method, _core_td_map ) );
+  boost::function<bool(int)> box3_function_5_setter ( boost::bind( &TDMap::set_refinement_definition_method, _core_td_map, _1 ) );
 
-  TreeItem* _simulation_refinement  = new TreeItem ( box3_option_4, box3_function_4_setter, box3_function_4_getter, box3_option_4_edit );
+  _simulation_refinement = new TreeItem ( box3_option_5, box3_function_5_setter, box3_function_5_getter, box3_option_5_edit );
   // load the preset data from core constuctor
   _simulation_refinement->load_data_from_getter();
-  QVector<QVariant> box3_option_4_drop = {"No refinement","Corrected","Non-Corrected", "User defined"};
+  QVector<QVariant> box3_option_5_drop = {"No refinement","Corrected","Non-Corrected", "User defined"};
 
-  QVector<QVariant> box3_option_4_drop_enum( { TDMap::RefinementPreset::NO_REFINEMENT, TDMap::RefinementPreset::MICROSCOPE_CORRECTED, TDMap::RefinementPreset::MICROSCOPE_NON_CORRECTED, TDMap::RefinementPreset::USER_DEFINED_PRESET } );
+  QVector<QVariant> box3_option_5_drop_enum( { TDMap::RefinementPreset::NO_REFINEMENT, TDMap::RefinementPreset::MICROSCOPE_CORRECTED, TDMap::RefinementPreset::MICROSCOPE_NON_CORRECTED, TDMap::RefinementPreset::USER_DEFINED_PRESET } );
 
   _simulation_refinement->set_item_delegate_type( TreeItem::_delegate_DROP );
-  _simulation_refinement->set_dropdown_options( 1, box3_option_4_drop, box3_option_4_drop_enum  );
+  _simulation_refinement->set_dropdown_options( 1, box3_option_5_drop, box3_option_5_drop_enum  );
 
   tdmap_root->insertChildren( _simulation_refinement );
 
   ////////////////
   //Simulation Refinement -- Aberration parameters
   ////////////////
-  QVector<QVariant> box3_option_4_1 = {"Aberration parameters",""};
-  TreeItem* _aberration_parameters = new TreeItem ( box3_option_4_1 );
+  QVector<QVariant> box3_option_5_1 = {"Aberration parameters",""};
+  TreeItem* _aberration_parameters = new TreeItem ( box3_option_5_1 );
   _simulation_refinement->insertChildren( _aberration_parameters );
 
   ////////////////
   // Aberration parameters -- Spherical aberration (a40, C3,0, C3)
   ////////////////
-  QVector<QVariant> box3_option_4_1_1 = {"Spherical aberration (nm)",""};
-  QVector<bool> box3_option_4_1_1_edit = {false,true};
-  boost::function<bool(std::string)> box3_function_4_1_1_setter ( boost::bind( &TDMap::set_spherical_aberration, _core_td_map, _1 ) );
-  boost::function<double(void)> box3_function_4_1_1_getter ( boost::bind( &TDMap::get_spherical_aberration, _core_td_map ) );
-  boost::function<bool(void)> box3_option_4_1_1_check_getter ( boost::bind( &TDMap::get_spherical_aberration_switch, _core_td_map  ) );
-  boost::function<bool(bool)> box3_option_4_1_1_check_setter ( boost::bind( &TDMap::set_spherical_aberration_switch, _core_td_map, _1 ) );
-  TreeItem* spherical_aberration_nm = new TreeItem ( box3_option_4_1_1 , box3_function_4_1_1_setter, box3_function_4_1_1_getter, box3_option_4_1_1_edit );
+  QVector<QVariant> box3_option_5_1_1 = {"Spherical aberration (nm)",""};
+  QVector<bool> box3_option_5_1_1_edit = {false,true};
+  boost::function<bool(std::string)> box3_function_5_1_1_setter ( boost::bind( &TDMap::set_spherical_aberration, _core_td_map, _1 ) );
+  boost::function<double(void)> box3_function_5_1_1_getter ( boost::bind( &TDMap::get_spherical_aberration, _core_td_map ) );
+  boost::function<bool(void)> box3_option_5_1_1_check_getter ( boost::bind( &TDMap::get_spherical_aberration_switch, _core_td_map  ) );
+  boost::function<bool(bool)> box3_option_5_1_1_check_setter ( boost::bind( &TDMap::set_spherical_aberration_switch, _core_td_map, _1 ) );
+  TreeItem* spherical_aberration_nm = new TreeItem ( box3_option_5_1_1 , box3_function_5_1_1_setter, box3_function_5_1_1_getter, box3_option_5_1_1_edit );
   _aberration_parameters->insertChildren( spherical_aberration_nm );
   /*group options*/
   spherical_aberration_nm->set_variable_name( "spherical_aberration_nm" );
-  spherical_aberration_nm->set_fp_check_setter( 0, box3_option_4_1_1_check_setter );
-  spherical_aberration_nm->set_fp_check_getter( 0, box3_option_4_1_1_check_getter );
+  spherical_aberration_nm->set_fp_check_setter( 0, box3_option_5_1_1_check_setter );
+  spherical_aberration_nm->set_fp_check_getter( 0, box3_option_5_1_1_check_getter );
   spherical_aberration_nm->load_check_status_from_getter( 0 );
 
   ////////////////
   //Simulation Refinement -- envelope parameters
   ////////////////
-  QVector<QVariant> box3_option_4_2 = {"Envelope parameters",""};
-  TreeItem* _envelope_parameters = new TreeItem ( box3_option_4_2 );
+  QVector<QVariant> box3_option_5_2 = {"Envelope parameters",""};
+  TreeItem* _envelope_parameters = new TreeItem ( box3_option_5_2 );
   _simulation_refinement->insertChildren( _envelope_parameters );
 
   ////////////////
   //Simulation Refinement -- MTF
   ////////////////
-  QVector<QVariant> box3_option_4_3 = {"MTF",""};
-  QVector<bool> box3_option_4_3_edit = {false,true};
-  boost::function<bool(std::string)> box3_function_4_3 ( boost::bind( &TDMap::set_mtf_filename,_core_td_map, _1 ) );
-  TreeItem* _mtf_parameters = new TreeItem ( box3_option_4_3 , box3_function_4_3, box3_option_4_3_edit );
+  QVector<QVariant> box3_option_5_3 = {"MTF",""};
+  QVector<bool> box3_option_5_3_edit = {false,true};
+  boost::function<bool(std::string)> box3_function_5_3 ( boost::bind( &TDMap::set_mtf_filename,_core_td_map, _1 ) );
+  TreeItem* _mtf_parameters = new TreeItem ( box3_option_5_3 , box3_function_5_3, box3_option_5_3_edit );
   _mtf_parameters->set_item_delegate_type( TreeItem::_delegate_FILE );
   _simulation_refinement->insertChildren( _mtf_parameters );
 
-  boost::function<bool(void)> box3_option_4_3_1_check_getter ( boost::bind( &TDMap::get_mtf_switch, _core_td_map  ) );
-  boost::function<bool(bool)> box3_option_4_3_1_check_setter ( boost::bind( &TDMap::set_mtf_switch, _core_td_map, _1 ) );
-  _mtf_parameters->set_fp_check_setter( 0, box3_option_4_3_1_check_setter );
-  _mtf_parameters->set_fp_check_getter( 0, box3_option_4_3_1_check_getter );
+  boost::function<bool(void)> box3_option_5_3_1_check_getter ( boost::bind( &TDMap::get_mtf_switch, _core_td_map  ) );
+  boost::function<bool(bool)> box3_option_5_3_1_check_setter ( boost::bind( &TDMap::set_mtf_switch, _core_td_map, _1 ) );
+  _mtf_parameters->set_fp_check_setter( 0, box3_option_5_3_1_check_setter );
+  _mtf_parameters->set_fp_check_getter( 0, box3_option_5_3_1_check_getter );
   _mtf_parameters->load_check_status_from_getter( 0 );
 
   ////////////////
   // Image Correlation
   ////////////////
-  QVector<QVariant> box3_option_5 = {"Image correlation",""};
-  TreeItem* image_correlation  = new TreeItem ( box3_option_5 );
+  QVector<QVariant> box3_option_6 = {"Image correlation",""};
+  TreeItem* image_correlation  = new TreeItem ( box3_option_6 );
   tdmap_root->insertChildren( image_correlation );
 
   ////////////////
@@ -1659,20 +1706,20 @@ void MainWindow::create_box_options(){
   ////////////////
   //: , non-normalized correlation and sum-absolute-difference
 
-  QVector<QVariant> box3_option_5_1 = {"Match method",""};
-  QVector<bool> box3_option_5_1_edit = {false,true};
+  QVector<QVariant> box3_option_6_1 = {"Match method",""};
+  QVector<bool> box3_option_6_1_edit = {false,true};
 
-  boost::function<int(void)> box3_function_5_1_getter ( boost::bind( &TDMap::get_image_correlation_matching_method, _core_td_map ) );
-  boost::function<bool(int)> box3_function_5_1_setter ( boost::bind( &TDMap::set_image_correlation_matching_method, _core_td_map, _1 ) );
-  TreeItem* image_correlation_matching_method = new TreeItem ( box3_option_5_1 , box3_function_5_1_setter, box3_function_5_1_getter,  box3_option_5_1_edit );
+  boost::function<int(void)> box3_function_6_1_getter ( boost::bind( &TDMap::get_image_correlation_matching_method, _core_td_map ) );
+  boost::function<bool(int)> box3_function_6_1_setter ( boost::bind( &TDMap::set_image_correlation_matching_method, _core_td_map, _1 ) );
+  TreeItem* image_correlation_matching_method = new TreeItem ( box3_option_6_1 , box3_function_6_1_setter, box3_function_6_1_getter,  box3_option_6_1_edit );
   // load the preset data from core constuctor
   image_correlation_matching_method->load_data_from_getter();
 
-  QVector<QVariant> box3_option_5_1_drop = {"Normalized squared difference","Normalized cross correlation","Normalized correlation coefficient"};
-  QVector<QVariant> box3_option_5_1_drop_enum( { CV_TM_SQDIFF_NORMED, CV_TM_CCORR_NORMED, CV_TM_CCOEFF_NORMED} );
+  QVector<QVariant> box3_option_6_1_drop = {"Normalized squared difference","Normalized cross correlation","Normalized correlation coefficient"};
+  QVector<QVariant> box3_option_6_1_drop_enum( { CV_TM_SQDIFF_NORMED, CV_TM_CCORR_NORMED, CV_TM_CCOEFF_NORMED} );
 
   image_correlation_matching_method->set_item_delegate_type( TreeItem::_delegate_DROP );
-  image_correlation_matching_method->set_dropdown_options( 1, box3_option_5_1_drop, box3_option_5_1_drop_enum  );
+  image_correlation_matching_method->set_dropdown_options( 1, box3_option_6_1_drop, box3_option_6_1_drop_enum  );
 
   image_correlation->insertChildren( image_correlation_matching_method );
 

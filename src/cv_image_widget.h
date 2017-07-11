@@ -60,7 +60,7 @@ signals:
     QList<QColor> renderAreas_penColor;
     std::vector<cv::Point2i> renderAreas_top_left;
     cv::Vec3b renderAreas_default_color = cv::Vec3b(255,0,0);
-
+    
     QImage _qimage;
     cv::Mat _tmp_original, _tmp_current;
     float scaleFactor = 1.0f;
@@ -69,5 +69,3 @@ signals:
     int _container_window_width = 0;
     int _container_window_height = 0;
 };
-
-

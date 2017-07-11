@@ -2,10 +2,12 @@
 cmake_minimum_required(VERSION 3.6.2)
 
 set (CMAKE_CXX_COMPILER "clang++" )
+set (CMAKE_C_COMPILER "clang" )
 set (CMAKE_CXX_STANDARD 14)
 
-project( Im2Model VERSION 0.1 LANGUAGES CXX )
-ENABLE_LANGUAGE(C)
+project( Im2Model VERSION 0.1 LANGUAGES CXX C )
+
+include (CTest)
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
@@ -97,7 +99,7 @@ endif(WIN32)
 
 find_package(Boost 1.64.0 COMPONENTS log log_setup system program_options filesystem thread iostreams REQUIRED)
 
-find_package(BISON REQUIRED)
+find_package(BISON 3.0 REQUIRED)
 find_package(FLEX REQUIRED)
 
 find_package(HDF5 COMPONENTS C CXX HL REQUIRED)

@@ -118,18 +118,46 @@ bool BaseImage::set_flag_auto_b_size( bool value ){
 
 bool BaseImage::set_full_image( std::string image_path ){
   if ( boost::filesystem::exists( image_path ) ){
-    try{
-      full_image = cv::imread( image_path, CV_LOAD_IMAGE_GRAYSCALE );
-      full_n_rows_height = full_image.rows;
-      _flag_full_n_rows_height = true;
-      full_n_cols_width = full_image.cols;
-      _flag_full_n_cols_width = true;
-      _flag_full_image = true;
-      set_roi();
+    std::string extension = boost::filesystem::extension( image_path );
+    if( extension == ".emd" ){
+      emd_wrapper = new EMDWrapper();
+      const bool emd_result = emd_wrapper->read_emd(image_path);
+      if( emd_result ){
+        full_image = emd_wrapper->get_full_image();
+        _flag_full_image = true;
+        full_n_rows_height = emd_wrapper->get_full_n_rows_height();
+        _flag_full_n_rows_height = true;
+        full_n_cols_width = emd_wrapper->get_full_n_cols_width();
+        _flag_full_n_cols_width = true;
+        if( emd_wrapper->get_flag_pixel_size_width() ){
+          set_pixel_size_width_y_m( emd_wrapper->get_pixel_size_width() );
+        }
+        if( emd_wrapper->get_flag_pixel_size_height() ){
+          set_pixel_size_height_x_m( emd_wrapper->get_pixel_size_height() );
+        }
+      }
     }
-    catch(std::exception e)
-    {
-      //printf("Exception: [%s]\n", e.what());
+    else{
+      try{
+        full_image = cv::imread( image_path, CV_LOAD_IMAGE_GRAYSCALE );
+        if( ! full_image.empty() ){
+          full_n_rows_height = full_image.rows;
+          _flag_full_n_rows_height = true;
+          full_n_cols_width = full_image.cols;
+          _flag_full_n_cols_width = true;
+          _flag_full_image = true;
+          set_roi();
+        }
+      }
+      catch( cv::Exception& e ){
+        std::cout << "Exception: " << e.what() << std::endl;
+      }
+      catch ( std::runtime_error& ex ) {
+        std::cout << "Runtime error reading image" << ex.what() << std::endl;
+      }
+      catch(std::exception e){
+        std::cout << "Exception: " << e.what() << std::endl;
+      }
     }
   }
   return _flag_full_image;
@@ -167,8 +195,18 @@ bool BaseImage::set_full_n_cols_width( int witdth ){
   return true;
 }
 
-bool BaseImage::set_sampling_rate_x_nm_per_pixel( double rate ){
-  sampling_rate_x_nm_per_pixel = rate;
+bool BaseImage::set_sampling_rate_x_nm_per_pixel( double rate_nm ){
+  sampling_rate_x_nm_per_pixel = rate_nm;
+  _flag_sampling_rate_x_nm_per_pixel = true;
+  _flag_sampling_rate = _flag_sampling_rate_x_nm_per_pixel & _flag_sampling_rate_y_nm_per_pixel;
+  // auto calculate nx
+  auto_calculate_dimensions();
+  set_roi();
+  return true;
+}
+
+bool BaseImage::set_pixel_size_height_x_m( double rate_m ){
+  sampling_rate_x_nm_per_pixel = rate_m * 1e9;
   _flag_sampling_rate_x_nm_per_pixel = true;
   _flag_sampling_rate = _flag_sampling_rate_x_nm_per_pixel & _flag_sampling_rate_y_nm_per_pixel;
   // auto calculate nx
@@ -179,6 +217,16 @@ bool BaseImage::set_sampling_rate_x_nm_per_pixel( double rate ){
 
 bool BaseImage::set_sampling_rate_y_nm_per_pixel( double rate ){
   sampling_rate_y_nm_per_pixel = rate;
+  _flag_sampling_rate_y_nm_per_pixel = true;
+  _flag_sampling_rate = _flag_sampling_rate_x_nm_per_pixel & _flag_sampling_rate_y_nm_per_pixel;
+  // auto calculate ny
+  auto_calculate_dimensions();
+  set_roi();
+  return true;
+}
+
+bool BaseImage::set_pixel_size_width_y_m( double rate_m ){
+  sampling_rate_y_nm_per_pixel = rate_m * 1e9;
   _flag_sampling_rate_y_nm_per_pixel = true;
   _flag_sampling_rate = _flag_sampling_rate_x_nm_per_pixel & _flag_sampling_rate_y_nm_per_pixel;
   // auto calculate ny
@@ -273,6 +321,7 @@ std::ostream& BaseImage::output(std::ostream& stream) const {
     << "\t\t" << "_flag_auto_a_size : " << std::boolalpha << _flag_auto_a_size << "\n"
     << "\t\t" << "_flag_auto_b_size : " << std::boolalpha << _flag_auto_b_size << "\n"
     // FULL IMAGE
+    << "\t\t" << "_flag_full_image : " <<  std::boolalpha << _flag_full_image << "\n"
     << "\t" << "full_n_rows_height : " <<  full_n_rows_height << "\n"
     << "\t\t" << "_flag_full_n_rows_height : " << std::boolalpha << _flag_full_n_rows_height << "\n"
     << "\t" << "full_n_cols_width : " <<  full_n_cols_width << "\n"

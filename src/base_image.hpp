@@ -25,6 +25,7 @@
 #include <opencv2/imgcodecs.hpp>                          // for imread
 
 #include "application_log.hpp"
+#include "emd_wrapper.h"
 
 class BaseImage {
   private:
@@ -34,7 +35,7 @@ class BaseImage {
     bool _flag_auto_a_size = false;
     bool _flag_auto_b_size = false;
 
-bool auto_calculate_dimensions();
+    bool auto_calculate_dimensions();
     bool calculate_n_rows_from_a_size_and_sampling_rate();
     bool calculate_a_size_from_n_rows_and_sampling_rate();
     bool calculate_n_cols_from_b_size_and_sampling_rate();
@@ -43,6 +44,8 @@ bool auto_calculate_dimensions();
     /* Loggers */
     ApplicationLog::ApplicationLog* logger = nullptr;
     bool _flag_logger = false;
+
+    EMDWrapper* emd_wrapper;
 
   protected:
     // FULL IMAGE
@@ -56,7 +59,7 @@ bool auto_calculate_dimensions();
     double full_n_cols_width_nm = 0;
     bool _flag_full_n_cols_width = false;
 
-// sampling rate and dimensioning
+    // sampling rate and dimensioning
     double sampling_rate_x_nm_per_pixel = 0.0f;
     bool _flag_sampling_rate_x_nm_per_pixel = false;
     double sampling_rate_y_nm_per_pixel = 0.0f;
@@ -155,7 +158,9 @@ bool auto_calculate_dimensions();
     bool set_full_n_rows_height(  int full_n_rows_height );
     bool set_full_n_cols_width( int full_n_cols_width );
     bool set_sampling_rate_x_nm_per_pixel( double );
+    bool set_pixel_size_height_x_m( double );
     bool set_sampling_rate_y_nm_per_pixel( double );
+    bool set_pixel_size_width_y_m( double );
     bool set_full_nm_size_rows_a( double size );
     bool set_full_nm_size_cols_b( double size );
     // ROI FRAME

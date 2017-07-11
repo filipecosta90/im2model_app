@@ -12,6 +12,8 @@
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/json_parser.hpp>
 #include <boost/foreach.hpp>
+#include <boost/lexical_cast.hpp>
+
 
 #include <opencv2/opencv.hpp>           //
 #include <opencv2/core/hal/interface.h>  // for CV_32FC1, CV_8UC1, CV_32F
@@ -65,12 +67,34 @@ using namespace rapidjson;
 class EMDWrapper {
 
   private:
+cv::Mat full_image;
+EMDGroup grp;
 
   protected:
 
+    double Optics_AccelerationVoltage = 0.0f;
+    double BinaryResult_PixelSize_width = 0.0f;
+    bool _flag_BinaryResult_PixelSize_width = false;
+    double BinaryResult_PixelSize_height  = 0.0f;
+    bool _flag_BinaryResult_PixelSize_height = false;
+
   public:
+  EMDWrapper();
+  ~EMDWrapper();
+
     bool read_emd( std::string filename );
 
+    cv::Mat get_full_image();
+
+    //dimensions
+    int get_full_n_rows_height();
+    int get_full_n_cols_width();
+
+    // sampling rate
+    bool get_flag_pixel_size_width(){ return BinaryResult_PixelSize_height; }
+    double get_pixel_size_width(){ return _flag_BinaryResult_PixelSize_height; }
+    bool get_flag_pixel_size_height(){ return _flag_BinaryResult_PixelSize_height; }
+    int get_pixel_size_height(){ return BinaryResult_PixelSize_height; }
 };
 
 #endif

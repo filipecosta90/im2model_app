@@ -1,16 +1,16 @@
-#include "cv_image_widget.h" 
+#include "cv_image_widget.h"
 
-CVImageWidget::CVImageWidget(QWidget *parent ) : QWidget(parent) , scaleFactor(1) {
+CVImageWidget::CVImageWidget(QWidget *parent ) : QWidget(parent) , scaleFactor(1), _tmp_original(cv::Mat()), _tmp_current(cv::Mat()) {
   this->setContextMenuPolicy(Qt::CustomContextMenu);
   connect(this, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(ShowContextMenu(const QPoint &)));
-
 }
 
-QSize CVImageWidget::sizeHint() const { 
-  return _qimage.size(); 
+
+QSize CVImageWidget::sizeHint() const {
+  return _qimage.size();
 }
-QSize CVImageWidget::minimumSizeHint() const { 
-  return _qimage.size(); 
+QSize CVImageWidget::minimumSizeHint() const {
+  return _qimage.size();
 }
 
 void CVImageWidget::set_container_window_size( const int width , const int height ){
@@ -41,12 +41,21 @@ void CVImageWidget::fitToWindow( ){
   updateImage();
 }
 
-void CVImageWidget::setImage(const cv::Mat& image) {
+void CVImageWidget::setImage( const cv::Mat& image ){
   // Convert the image to the RGB888 format
+  std::cout << "image.type() " << image.type() << std::endl;
   switch (image.type()) {
     case CV_8UC1:
       cvtColor(image, _tmp_original, CV_GRAY2RGB);
       break;
+    case cv::DataType<unsigned short>::type:
+      {
+        std::cout << "cv::DataType<unsigned short>::type" << std::endl;
+        cv::Mat temp;
+        image.convertTo(temp, CV_8UC1, 1.0f/255.0f);
+        cvtColor(temp, _tmp_original, CV_GRAY2RGB );
+        break;
+      }
     case CV_8UC3:
       cvtColor(image, _tmp_original, CV_BGR2RGB);
       break;
@@ -55,6 +64,7 @@ void CVImageWidget::setImage(const cv::Mat& image) {
   // QImage needs the data to be stored continuously in memory
   assert( _tmp_original.isContinuous() );
   original_size = _tmp_original.size();
+  std::cout << " original size " << original_size << std::endl;
   // Assign OpenCV's image buffer to the QImage. Note that the bytesPerLine parameter
   // (http://qt-project.org/doc/qt-4.8/qimage.html#QImage-6) is 3*width because each pixel
   // has three bytes.
@@ -176,4 +186,3 @@ void CVImageWidget::paintEvent(QPaintEvent* event) {
   }
   painter.end();
 }
-

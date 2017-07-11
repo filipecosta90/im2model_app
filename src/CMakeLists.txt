@@ -86,129 +86,132 @@ if(WIN32)
   message(STATUS "OpenCV libs: ${OpenCV_LIBS} ")
 endif(WIN32)
 
-if(build_gui)
+if(build_cli)
+
+add_executable( ${PROJECT_NAME} im2model.cpp ${im2model_core_src} mc_driver.cpp ${FLEX_mc_lexer_OUTPUTS} ${BISON_mc_parser_OUTPUTS} ${DR_PROBE_RESOURCES} )
+
+else(build_cli)
+    message(STATUS " GUI enabled. building command-line im2model, and gui_im2model" )
+    # Add folder where are supportive functions
+    set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake" )
+    message(STATUS "module path ${CMAKE_MODULE_PATH} " )
+
+    if (WIN32)
+      set (CMAKE_PREFIX_PATH "W:/ExtraSpaceInstall/Qt/5.9/msvc2017_64//")
+      Set (QT_MAKE_EXECUTABLE "W:/ExtraSpaceInstall/Qt/5.9/msvc2017_64/bin/qmake.exe")
+      Set (QT_QPA_PLATFORM_PLUGIN_PATH "W:/ExtraSpaceInstall/Qt/5.9/msvc2017_64/plugins/platforms")
+      Set (CMAKE_BUILD_TYPE "Release")
+      Set (Qt5Core_DIR "W:/ExtraSpaceInstall/Qt/5.9/msvc2017_64/lib/cmake/Qt5Core")
+      Set (Qt5Concurrent_DIR "W:/ExtraSpaceInstall/Qt/5.9/msvc2017_64/lib/cmake/Qt5Concurrent")
+      Set (Qt5Core_DIR "W:/ExtraSpaceInstall/Qt/5.9/msvc2017_64/lib/cmake/Qt5Core")
+      Set (Qt5Gui_DIR "W:/ExtraSpaceInstall/Qt/5.9/msvc2017_64/lib/cmake/Qt5Gui")
+      Set (Qt5Test_DIR "W:/ExtraSpaceInstall/Qt/5.9/msvc2017_64/lib/cmake/Qt5Test")
+      Set (Qt5Widgets_DIR "W:/ExtraSpaceInstall/Qt/5.9/msvc2017_64/lib/cmake/Qt5Widgets")
+      Set (Qt5OpenGL_DIR "W:/ExtraSpaceInstall/Qt/5.9/msvc2017_64/lib/cmake/Qt5OpenGL")
+    endif (WIN32)
+
+    # Include Qt basic functions
+    include(QtCommon)
+
+    # Find the QtWidgets library
+    message(STATUS "Building the Qt5 version")
+    find_package(Qt5Core 5.2 REQUIRED)
+    find_package(Qt5Gui REQUIRED)
+    find_package(Qt5Widgets REQUIRED)
+
+    # Set PROJECT_VERSION_PATCH and PROJECT_VERSION_TWEAK to 0 if not present, needed by add_project_meta
+
+    # Running the meta-object compiler for QObject derived classes is similar to resources,
+    # you add QT5_WRAP_CPP in your CMake file, and just add the generated files to your source files.
+    # The input for this function is the header of your class, not the implementation — even though it’s called QT5_WRAP_CPP,
+    # you must pass the file containing the declaration;
+    # this is usually the header.
+    # Those files contain a bunch of functions which are needed for the Qt meta-object system.
+    # These are stand-alone .cpp files that you usually never have to look at.
+
+    set(GUI_SOURCE_FILES
+      QtAwesome.cpp
+      QtAwesome.h
+      QtAwesomeAnim.cpp
+      QtAwesomeAnim.h
+      group_options.h
+      group_options.cpp
+      renderarea.h
+      renderarea.cpp
+      settings.h
+      settings.cpp
+      configwin.h
+      configwin.cpp
+      treeitem.h
+      treeitem.cpp
+      treemodel.h
+      treemodel.cpp
+      treeitem_file_delegate.hpp
+      treeitem_file_delegate.cpp
+      cv_image_widget.h
+      cv_image_widget.cpp
+      cv_image_table_frame.h
+      cv_image_frame.h
+      cv_image_frame.cpp
+      cv_image_cell_widget.h
+      cv_image_delegate.h
+      cv_image_delegate.cpp
+      cv_tdmap_cell_image_frame.h
+      cv_tdmap_cell_image_frame.cpp
+      cv_tdmap_cell_image_frame_delegate.h
+      cv_tdmap_cell_image_frame_delegate.cpp
+      gui_tdmap_cell.h
+      gui_tdmap_cell.cpp
+      gui_tdmap_table.h
+      gui_tdmap_table.cpp
+      gui_sim_updater.hpp
+      gui_stream.hpp
+      qt_file_push_button.h
+      qt_file_push_button.cpp
+      qint_validator.h
+      qdouble_validator.h
+      qint_validator.cpp
+      qdouble_validator.cpp
+      qline_edit_tooltip.cpp
+      qline_edit_tooltip.h
+      gui_sim_updater.hpp
+      gui_stream.hpp
+      custom_tool_button.h
+      custom_tool_button.cpp
+      )
+
+    # Set PROJECT_VERSION_PATCH and PROJECT_VERSION_TWEAK to 0 if not present, needed by add_project_meta
+    fix_project_version()
+
+    # Set additional project information
+    set(COMPANY "uminho")
+    set(COPYRIGHT "Copyright (c) 2017 Dr. Alberto José Proença, Dr. Daniel G. Stroppa, Filipe Oliveira. All rights reserved.")
+    set(IDENTIFIER "com.uminho.Im2Model")
+
+    add_project_meta(META_FILES_TO_INCLUDE)
+
+    set(RESOURCE_FILES ../im2model.qrc)
+
+    message("META FILES TO INCLUDE: ${META_FILES_TO_INCLUDE}")
+    message(" OS BUNDLE: ${OS_BUNDLE}")
+
+    add_executable( ${PROJECT_NAME}
+      ${OS_BUNDLE}
+      im2model_gui.cpp
+      ${GUI_SOURCE_FILES}
+      ${META_FILES_TO_INCLUDE}
+      ${RESOURCE_FILES}  ${im2model_core_src} mc_driver.cpp ${FLEX_mc_lexer_OUTPUTS} ${BISON_mc_parser_OUTPUTS} ${DR_PROBE_RESOURCES}
+      )
+    # Use the Widgets module from Qt 5.
+    qt5_use_modules( ${PROJECT_NAME} Core Gui Widgets )
+    SET_SOURCE_FILES_PROPERTIES(${DR_PROBE_RESOURCES} PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
+
+    fix_win_compiler()
+endif(build_cli)
 
 
-  message(STATUS " GUI enabled. building command-line im2model, and gui_im2model" )
-  # Add folder where are supportive functions
-  set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake" )
-  message(STATUS "module path ${CMAKE_MODULE_PATH} " )
+add_test(example_test ${PROJECT_NAME})
 
-  if (WIN32)
-    set (CMAKE_PREFIX_PATH "W:/ExtraSpaceInstall/Qt/5.9/msvc2017_64//")
-    Set (QT_MAKE_EXECUTABLE "W:/ExtraSpaceInstall/Qt/5.9/msvc2017_64/bin/qmake.exe")
-    Set (QT_QPA_PLATFORM_PLUGIN_PATH "W:/ExtraSpaceInstall/Qt/5.9/msvc2017_64/plugins/platforms")
-    Set (CMAKE_BUILD_TYPE "Release")
-    Set (Qt5Core_DIR "W:/ExtraSpaceInstall/Qt/5.9/msvc2017_64/lib/cmake/Qt5Core")
-    Set (Qt5Concurrent_DIR "W:/ExtraSpaceInstall/Qt/5.9/msvc2017_64/lib/cmake/Qt5Concurrent")
-    Set (Qt5Core_DIR "W:/ExtraSpaceInstall/Qt/5.9/msvc2017_64/lib/cmake/Qt5Core")
-    Set (Qt5Gui_DIR "W:/ExtraSpaceInstall/Qt/5.9/msvc2017_64/lib/cmake/Qt5Gui")
-    Set (Qt5Test_DIR "W:/ExtraSpaceInstall/Qt/5.9/msvc2017_64/lib/cmake/Qt5Test")
-    Set (Qt5Widgets_DIR "W:/ExtraSpaceInstall/Qt/5.9/msvc2017_64/lib/cmake/Qt5Widgets")
-    Set (Qt5OpenGL_DIR "W:/ExtraSpaceInstall/Qt/5.9/msvc2017_64/lib/cmake/Qt5OpenGL")
-  endif (WIN32)
-
-  # Include Qt basic functions
-  include(QtCommon)
-
-  # Find the QtWidgets library
-  message(STATUS "Building the Qt5 version")
-  find_package(Qt5Core 5.2 REQUIRED)
-  find_package(Qt5Gui REQUIRED)
-  find_package(Qt5Widgets REQUIRED)
-
-  # Set PROJECT_VERSION_PATCH and PROJECT_VERSION_TWEAK to 0 if not present, needed by add_project_meta
-
-  # Running the meta-object compiler for QObject derived classes is similar to resources,
-  # you add QT5_WRAP_CPP in your CMake file, and just add the generated files to your source files.
-  # The input for this function is the header of your class, not the implementation — even though it’s called QT5_WRAP_CPP,
-  # you must pass the file containing the declaration;
-  # this is usually the header.
-  # Those files contain a bunch of functions which are needed for the Qt meta-object system.
-  # These are stand-alone .cpp files that you usually never have to look at.
-
-  set(GUI_SOURCE_FILES
-    QtAwesome.cpp
-    QtAwesome.h
-    QtAwesomeAnim.cpp
-    QtAwesomeAnim.h
-    group_options.h
-    group_options.cpp
-    renderarea.h
-    renderarea.cpp
-    settings.h
-    settings.cpp
-    configwin.h
-    configwin.cpp
-    treeitem.h
-    treeitem.cpp
-    treemodel.h
-    treemodel.cpp
-    treeitem_file_delegate.hpp
-    treeitem_file_delegate.cpp
-    cv_image_widget.h
-    cv_image_widget.cpp
-    cv_image_table_frame.h
-    cv_image_frame.h
-    cv_image_frame.cpp
-    cv_image_cell_widget.h
-    cv_image_delegate.h
-    cv_image_delegate.cpp
-    cv_tdmap_cell_image_frame.h
-    cv_tdmap_cell_image_frame.cpp
-    cv_tdmap_cell_image_frame_delegate.h
-    cv_tdmap_cell_image_frame_delegate.cpp
-    gui_tdmap_cell.h
-    gui_tdmap_cell.cpp
-    gui_tdmap_table.h
-    gui_tdmap_table.cpp
-    gui_sim_updater.hpp
-    gui_stream.hpp
-    qt_file_push_button.h
-    qt_file_push_button.cpp
-    qint_validator.h
-    qdouble_validator.h
-    qint_validator.cpp
-    qdouble_validator.cpp
-    qline_edit_tooltip.cpp
-    qline_edit_tooltip.h
-    gui_sim_updater.hpp
-    gui_stream.hpp
-    custom_tool_button.h
-    custom_tool_button.cpp
-    )
-
-  # Set PROJECT_VERSION_PATCH and PROJECT_VERSION_TWEAK to 0 if not present, needed by add_project_meta
-  fix_project_version()
-
-  # Set additional project information
-  set(COMPANY "uminho")
-  set(COPYRIGHT "Copyright (c) 2017 Dr. Alberto José Proença, Dr. Daniel G. Stroppa, Filipe Oliveira. All rights reserved.")
-  set(IDENTIFIER "com.uminho.Im2Model")
-
-  add_project_meta(META_FILES_TO_INCLUDE)
-
-  set(RESOURCE_FILES ../im2model.qrc)
-
-  message("META FILES TO INCLUDE: ${META_FILES_TO_INCLUDE}")
-  message(" OS BUNDLE: ${OS_BUNDLE}")
-
-  add_executable( ${PROJECT_NAME}
-    ${OS_BUNDLE}
-    im2model_gui.cpp
-    ${GUI_SOURCE_FILES}
-    ${META_FILES_TO_INCLUDE}
-    ${RESOURCE_FILES}  ${im2model_core_src} mc_driver.cpp ${FLEX_mc_lexer_OUTPUTS} ${BISON_mc_parser_OUTPUTS} ${DR_PROBE_RESOURCES}
-    )
-  # Use the Widgets module from Qt 5.
-  qt5_use_modules( ${PROJECT_NAME} Core Gui Widgets )
-  SET_SOURCE_FILES_PROPERTIES(${DR_PROBE_RESOURCES} PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
-
-  fix_win_compiler()
-
-else(build_gui)
-  add_executable( ${PROJECT_NAME} im2model.cpp ${im2model_core_src} mc_driver.cpp ${FLEX_mc_lexer_OUTPUTS} ${BISON_mc_parser_OUTPUTS} ${DR_PROBE_RESOURCES} )
-endif(build_gui)
 
 # Creates app.exe with the listed sources (main.cxx)
 # Adds sources to the Solution Explorer

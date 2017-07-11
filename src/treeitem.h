@@ -131,7 +131,7 @@ class TreeItem : public QObject {
     bool set_validator_double_bottom(int col_pos ,  boost::function<double(void)> fp_validator_min );
     double get_validator_value_double_bottom( int col_pos );
     double get_validator_value_double_top( int col_pos );
-    
+
     bool set_fp_data_getter_double_vec( int col_pos ,  boost::function<double(void)> fp );
 
 
@@ -149,6 +149,9 @@ signals:
   private:
     TreeItem *parentItem;
     QList<TreeItem*> childItems;
+
+    /* vector of items that should update themselfs from getters when this item updates */
+    std::vector<TreeItem*> pipeline_update_dependent_items;
 
     /* item data */
     QVector<QVariant> itemData;

@@ -202,6 +202,57 @@ signals:
     QAction*  auto_lower_upper;
     CustomToolButton* alignToolButton;
 
+/* GUI options */
+  TreeItem* experimental_image_root = nullptr;
+  TreeItem* image_path = nullptr;
+TreeItem* experimental_sampling_rate = nullptr;
+TreeItem* experimental_sampling_rate_x = nullptr;
+TreeItem* experimental_sampling_rate_y = nullptr;
+TreeItem* experimental_roi = nullptr;
+
+  TreeItem* experimental_roi_center = nullptr;
+  TreeItem* experimental_roi_center_x = nullptr;
+  TreeItem* experimental_roi_center_y = nullptr;
+
+  TreeItem* experimental_roi_dimensions = nullptr;
+  TreeItem* experimental_roi_dimensions_width = nullptr;
+  TreeItem* experimental_roi_dimensions_width_px = nullptr;
+  TreeItem* experimental_roi_dimensions_width_nm = nullptr;
+  TreeItem* experimental_roi_dimensions_height = nullptr;
+  TreeItem* experimental_roi_dimensions_height_px = nullptr;
+  TreeItem* experimental_roi_dimensions_height_nm = nullptr;
+  TreeItem* crystallography_root = nullptr;
+  TreeItem* unit_cell_file = nullptr;
+  TreeItem* unit_cell_file_cif = nullptr;
+  TreeItem* projection_direction = nullptr;
+  TreeItem* projection_direction_h = nullptr;
+  TreeItem* projection_direction_k = nullptr;
+  TreeItem* projection_direction_l = nullptr;
+  TreeItem* projected_y_axis = nullptr;
+  TreeItem* projected_y_axis_u = nullptr;
+  TreeItem* projected_y_axis_v = nullptr;
+  TreeItem* projected_y_axis_w = nullptr;
+  TreeItem* tdmap_root = nullptr;
+  TreeItem* _parameter_variation_map = nullptr;
+  TreeItem* _parameter_variation_map_thickness = nullptr;
+  TreeItem* _parameter_variation_map_thickness_estimated_nm = nullptr;
+  TreeItem* thickness_range_number_samples = nullptr;
+  TreeItem* thickness_range = nullptr;
+  TreeItem* thickness_range_lower_bound = nullptr;
+  TreeItem* thickness_range_upper_bound = nullptr;
+  TreeItem* _parameter_variation_map_defocous = nullptr;
+  TreeItem* _parameter_variation_map_defocus_estimated_nm = nullptr;
+  TreeItem* defocus_range_number_samples = nullptr;
+  TreeItem* defocus_range = nullptr;
+  TreeItem* defocus_range_lower_bound = nullptr;
+  TreeItem* defocus_range_upper_bound = nullptr;
+  TreeItem* incident_electron_beam = nullptr;
+  TreeItem* accelaration_voltage_kv = nullptr;
+  TreeItem* tdmap_cell_dimensions = nullptr;
+  TreeItem* tdmap_cell_dimensions_a = nullptr;
+  TreeItem* tdmap_cell_dimensions_b = nullptr;
+  TreeItem* _simulation_refinement = nullptr;
+
     /* simulation outputs */
     TreeItem* _multislice_phase_granting_output;
     TreeItem* _electron_diffraction_patterns_output;

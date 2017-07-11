@@ -77,7 +77,7 @@ class EMDGroup : public EMDObject {
   protected:
 
   public:
-    EMDGroup( hid_t id );
+    EMDGroup( );
 
     bool get_flag_contains_group( std::string name );
 

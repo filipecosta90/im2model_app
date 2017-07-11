@@ -4,7 +4,7 @@ EMDDataSet::EMDDataSet( hid_t id ){
   dsid = id;
 }
 
-std::vector<unsigned char> EMDDataSet::get_raw_data(){
+const std::vector<unsigned char>& EMDDataSet::get_raw_data() const {
   return raw_data;
 }
 

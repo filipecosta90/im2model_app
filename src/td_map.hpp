@@ -346,6 +346,12 @@ class TDMap  : public QObject {
     double get_accelaration_voltage_kv_bottom_limit();
     double get_accelaration_voltage_kv_top_limit();
 
+    double get_tdmap_cell_dimensions_a_bottom_limit();
+    double get_tdmap_cell_dimensions_a_top_limit();
+    
+    double get_tdmap_cell_dimensions_b_bottom_limit();
+    double get_tdmap_cell_dimensions_b_top_limit();
+
     double get_full_boundary_polygon_margin_nm_bottom_limit();
     double get_full_boundary_polygon_margin_nm_top_limit();
 

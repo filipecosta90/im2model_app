@@ -17,9 +17,9 @@ TDMap::TDMap(
   /////////////
   // only for debug. need to add this options like in im2model command line
   /////////////
-  set_super_cell_size_a( "2.0" );
-  set_super_cell_size_b( "2.0" );
-  set_super_cell_size_c( "16.0" );
+  //set_super_cell_size_a( "2.0" );
+  //set_super_cell_size_b( "2.0" );
+  //set_super_cell_size_c( "16.0" );
   set_slc_file_name_prefix( "test" );
   set_wave_function_name( "wave" );
   set_msa_prm_name( "temporary_msa_im2model.prm" );
@@ -1194,6 +1194,9 @@ bool TDMap::set_nm_upper_bound( std::string s_upper_bound ){
     const bool wavimg_result =  _tdmap_wavimg_parameters->set_nm_upper_bound( upper_bound );
     const bool simgrid_result = _td_map_simgrid->set_nm_upper_bound( upper_bound );
     result = celslc_result & msa_result & wavimg_result & simgrid_result;
+    if( result ){
+      result &= set_super_cell_size_c( s_upper_bound );
+    }
   }
   catch(boost::bad_lexical_cast&  ex) {
     // pass it up
@@ -1512,6 +1515,23 @@ double TDMap::get_accelaration_voltage_kv_bottom_limit(){
 double TDMap::get_accelaration_voltage_kv_top_limit(){
   return 1000.0f;
 }
+
+double TDMap::get_tdmap_cell_dimensions_a_bottom_limit(){
+  return 0.0f;
+}
+
+double TDMap::get_tdmap_cell_dimensions_a_top_limit(){
+  return 1000.0f;
+}
+
+double TDMap::get_tdmap_cell_dimensions_b_bottom_limit(){
+  return 0.0f;
+}
+
+double TDMap::get_tdmap_cell_dimensions_b_top_limit(){
+  return 1000.0f;
+}
+
 
 double TDMap::get_full_boundary_polygon_margin_nm_bottom_limit(){
   return 0.0f;
