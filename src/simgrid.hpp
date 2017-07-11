@@ -173,7 +173,7 @@ std::vector< double > get_simulated_images_horizontal_header_defocus_nm(){ retur
     bool check_produced_dat();
 
     bool read_grid_from_dat_files();
-
+bool apply_margin_to_grid();
     bool simulate_from_grid();
 
     bool clean_for_re_run();

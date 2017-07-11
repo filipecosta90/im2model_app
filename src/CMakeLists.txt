@@ -94,7 +94,7 @@ if(build_cli)
 add_executable( ${PROJECT_NAME} im2model.cpp ${im2model_core_src} mc_driver.cpp ${FLEX_mc_lexer_OUTPUTS} ${BISON_mc_parser_OUTPUTS} ${DR_PROBE_RESOURCES} )
 
 else(build_cli)
-    message(STATUS " GUI enabled. building command-line im2model, and gui_im2model" )
+    message(STATUS " GUI enabled. building GUI version."  )
     # Add folder where are supportive functions
     set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake" )
     message(STATUS "module path ${CMAKE_MODULE_PATH} " )
@@ -212,9 +212,7 @@ else(build_cli)
     fix_win_compiler()
 endif(build_cli)
 
-
-add_test(example_test ${PROJECT_NAME})
-
+add_sanitizers(${PROJECT_NAME})
 
 # Creates app.exe with the listed sources (main.cxx)
 # Adds sources to the Solution Explorer

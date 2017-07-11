@@ -437,9 +437,14 @@ bool TDMap::run_tdmap( ){
               logger->logEvent( _log_type , message.str() );
             }
           }
-          if ( _run_simgrid_switch ){
           // 2nd step in simgrid
+          bool _margin_ok = false;
           if( _grid_ok ){
+            _margin_ok = _td_map_simgrid->apply_margin_to_grid();
+          }
+          if ( _run_simgrid_switch ){
+          // 3rd step in simgrid
+          if( _grid_ok && _margin_ok ){
             try {
               _flag_runned_tdmap_simgrid = _td_map_simgrid->simulate_from_grid();
             } catch ( const std::exception& e ){
@@ -453,7 +458,7 @@ bool TDMap::run_tdmap( ){
             }
           }
           else{
-            _flag_runned_tdmap_simgrid = _grid_ok;
+            _flag_runned_tdmap_simgrid = _grid_ok && _margin_ok;
           }
           emit TDMap_ended_simgrid( _flag_runned_tdmap_simgrid );
           _simgrid_stage_ok = _flag_runned_tdmap_simgrid;

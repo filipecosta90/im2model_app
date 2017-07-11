@@ -24,7 +24,7 @@ EMDGroup* EMDGroup::get_group( std::string name ){
 }
 
 EMDGroup* EMDGroup::get_child_group( int child_pos  ){
-  EMDGroup* ret_group;
+  EMDGroup* ret_group = nullptr;
   if(_groups.size() > child_pos ){
     ret_group = _groups.at(child_pos);
   }
@@ -43,7 +43,7 @@ bool EMDGroup::get_flag_contains_dataset( std::string dataset_name ){
 }
 
 EMDDataSet* EMDGroup::get_dataset( std::string dataset_name ){
-  EMDDataSet* ret_dataset;
+  EMDDataSet* ret_dataset = nullptr;
   std::map<std::string,EMDDataSet*>::iterator it;
   it = _map_datasets.find( dataset_name );
   if (it != _map_datasets.end()){
