@@ -414,41 +414,42 @@ bool TDMap::run_tdmap( ){
     }
     //SIMGRID
     if( _celslc_stage_ok && _msa_stage_ok && _wavimg_stage_ok ){
-        bool _clean_run_env = !_flag_runned_tdmap_simgrid_read || !_flag_runned_tdmap_simgrid_correlate;
-        if( !_clean_run_env ){
-          _clean_run_env = _td_map_simgrid->clean_for_re_run();
-          _flag_runned_tdmap_simgrid_read = !_clean_run_env;
-          _flag_runned_tdmap_simgrid_correlate = !_clean_run_env;
+      bool _clean_run_env = !_flag_runned_tdmap_simgrid_read || !_flag_runned_tdmap_simgrid_correlate;
+      if( _flag_runned_tdmap_simgrid_read || _flag_runned_tdmap_simgrid_correlate ){
+        _clean_run_env = _td_map_simgrid->clean_for_re_run();
+        _flag_runned_tdmap_simgrid_read = !_clean_run_env;
+        _flag_runned_tdmap_simgrid_correlate = !_clean_run_env;
+        if( _flag_logger ){
+          std::stringstream message;
+          message << "Already runned simgrid. going to clean vars. result: " << std::boolalpha << _clean_run_env ;
+          ApplicationLog::severity_level _log_type = _clean_run_env ? ApplicationLog::notification : ApplicationLog::error;
+          logger->logEvent( _log_type , message.str() );
+        }
+      }
+      if( _clean_run_env ){
+        emit TDMap_started_simgrid();
+        // 1st step in simgrid
+        bool _grid_ok = false;
+        try {
+          _grid_ok = _td_map_simgrid->read_grid_from_dat_files();
+        } catch ( const std::exception& e ){
+          _grid_ok = false;
           if( _flag_logger ){
             std::stringstream message;
-            message << "Already runned simgrid. going to clean vars. result: " << std::boolalpha << _clean_run_env ;
-            ApplicationLog::severity_level _log_type = _clean_run_env ? ApplicationLog::notification : ApplicationLog::error;
+            message << "A standard exception was caught, while running _td_map_simgrid->read_grid_from_dat_files(): " << e.what();
+            ApplicationLog::severity_level _log_type = ApplicationLog::error;
             logger->logEvent( _log_type , message.str() );
           }
         }
-        if( _clean_run_env ){
-          emit TDMap_started_simgrid();
-          // 1st step in simgrid
-          bool _grid_ok = false;
-          try {
-            _grid_ok = _td_map_simgrid->read_grid_from_dat_files();
-          } catch ( const std::exception& e ){
-            _grid_ok = false;
-            if( _flag_logger ){
-              std::stringstream message;
-              message << "A standard exception was caught, while running _td_map_simgrid->read_grid_from_dat_files(): " << e.what();
-              ApplicationLog::severity_level _log_type = ApplicationLog::error;
-              logger->logEvent( _log_type , message.str() );
-            }
-          }
-          // 2nd step in simgrid
-          bool _margin_ok = false;
-          if( _grid_ok ){
-            _flag_runned_tdmap_simgrid_read = _td_map_simgrid->apply_margin_to_grid();
-          }
-          if ( _run_simgrid_switch ){
+        // 2nd step in simgrid
+        bool _margin_ok = false;
+        if( _grid_ok ){
+          _margin_ok = _td_map_simgrid->apply_margin_to_grid();
+        }
+        _flag_runned_tdmap_simgrid_read = _margin_ok & _grid_ok;
+        if ( _run_simgrid_switch ){
           // 3rd step in simgrid
-          if( _grid_ok && _margin_ok ){
+          if( _flag_runned_tdmap_simgrid_read ){
             try {
               _flag_runned_tdmap_simgrid_correlate = _td_map_simgrid->simulate_from_grid();
             } catch ( const std::exception& e ){
@@ -461,15 +462,12 @@ bool TDMap::run_tdmap( ){
               }
             }
           }
-          else{
-            _flag_runned_tdmap_simgrid_correlate = _grid_ok && _margin_ok;
-          }
-          emit TDMap_ended_simgrid( _flag_runned_tdmap_simgrid_correlate );
-          _simgrid_stage_ok = _flag_runned_tdmap_simgrid_correlate;
+          _simgrid_stage_ok = _flag_runned_tdmap_simgrid_read & _flag_runned_tdmap_simgrid_correlate;
+          emit TDMap_ended_simgrid( _simgrid_stage_ok );
           if( _flag_logger ){
             std::stringstream message;
-            message << "_flag_runned_tdmap_simgrid_correlate: " << std::boolalpha << _flag_runned_tdmap_simgrid_correlate;
-            ApplicationLog::severity_level _log_type = _flag_runned_tdmap_simgrid_correlate ? ApplicationLog::notification : ApplicationLog::error;
+            message << "_simgrid_stage_ok: " << std::boolalpha << _simgrid_stage_ok;
+            ApplicationLog::severity_level _log_type = _simgrid_stage_ok ? ApplicationLog::notification : ApplicationLog::error;
             logger->logEvent( _log_type , message.str() );
           }
         }
@@ -511,11 +509,11 @@ bool TDMap::export_sim_grid( std::string sim_grid_file_name_image ){
 
 /* flag getters */
 bool TDMap::get_flag_simulated_images_vertical_header_slice_nm(){
-  return _td_map_simgrid->get_flag_simulated_images_vertical_header_slice_nm();
+  return _td_map_simgrid->get_flag_simulated_params_nm_slice_vec();
 }
 
 bool TDMap::get_flag_simulated_images_horizontal_header_defocus_nm(){
-  return _td_map_simgrid->get_flag_simulated_images_horizontal_header_defocus_nm();
+  return _td_map_simgrid->get_flag_simulated_params_nm_defocus_vec();
 }
 
 bool TDMap::get_flag_simgrid_best_match_position(){
@@ -528,11 +526,11 @@ bool TDMap::get_flag_simulated_images_grid(){
 
 /* getters */
 std::vector< double > TDMap::get_simulated_images_vertical_header_slice_nm(){
-  return _td_map_simgrid->get_simulated_images_vertical_header_slice_nm();
+  return _td_map_simgrid->get_simulated_params_nm_slice_vec();
 }
 
 std::vector< double > TDMap::get_simulated_images_horizontal_header_defocus_nm(){
-  return _td_map_simgrid->get_simulated_images_horizontal_header_defocus_nm();
+  return _td_map_simgrid->get_simulated_params_nm_defocus_vec();
 }
 
 // more work here. asserts, etc
@@ -1435,7 +1433,7 @@ double TDMap::get_exp_image_properties_sampling_rate_nm_per_pixel_top_limit(){
 int TDMap::get_experimental_roi_dimensions_width_bottom_limit(){
   int bot_limit = 0;
   if( _td_map_simgrid->get_sim_image_properties_flag_full_n_cols_width() ){
-bot_limit = _td_map_simgrid->get_sim_image_properties_full_n_cols_width();
+    bot_limit = _td_map_simgrid->get_sim_image_properties_full_n_cols_width();
   }
   return bot_limit;
 }
@@ -1453,7 +1451,7 @@ int TDMap::get_experimental_roi_dimensions_width_top_limit(){
 int TDMap::get_experimental_roi_dimensions_height_bottom_limit(){
   int bot_limit = 0;
   if( _td_map_simgrid->get_sim_image_properties_flag_full_n_rows_height() ){
-bot_limit = _td_map_simgrid->get_sim_image_properties_full_n_rows_height();
+    bot_limit = _td_map_simgrid->get_sim_image_properties_full_n_rows_height();
   }
   return bot_limit;
 }
@@ -1587,7 +1585,7 @@ int TDMap::get_experimental_roi_center_x_bottom_limit(){
   int bot_limit = 0;
   if( _td_map_simgrid->get_exp_image_properties_flag_full_n_rows_height() ){
     if( _td_map_simgrid->get_exp_image_properties_flag_roi_nx_size_height() ){
-    bot_limit = bot_limit + ( _td_map_simgrid->get_exp_image_properties_roi_nx_size_height() / 2.0f );
+      bot_limit = bot_limit + ( _td_map_simgrid->get_exp_image_properties_roi_nx_size_height() / 2.0f );
     }
   }
   return bot_limit;
@@ -1597,7 +1595,7 @@ int TDMap::get_experimental_roi_center_y_bottom_limit(){
   int bot_limit = 0;
   if( _td_map_simgrid->get_exp_image_properties_flag_full_n_cols_width() ){
     if( _td_map_simgrid->get_exp_image_properties_flag_roi_ny_size_width() ){
-    bot_limit = bot_limit + ( _td_map_simgrid->get_exp_image_properties_roi_ny_size_width() / 2.0f );
+      bot_limit = bot_limit + ( _td_map_simgrid->get_exp_image_properties_roi_ny_size_width() / 2.0f );
     }
   }
   return bot_limit;
@@ -1608,7 +1606,7 @@ int TDMap::get_experimental_roi_center_x_top_limit(){
   if( _td_map_simgrid->get_exp_image_properties_flag_full_n_rows_height() ){
     top_limit = get_exp_image_properties_full_n_rows_height();
     if( _td_map_simgrid->get_exp_image_properties_flag_roi_nx_size_height() ){
-    top_limit -= ( _td_map_simgrid->get_exp_image_properties_roi_nx_size_height() / 2.0f );
+      top_limit -= ( _td_map_simgrid->get_exp_image_properties_roi_nx_size_height() / 2.0f );
     }
   }
   return top_limit;
@@ -1619,7 +1617,7 @@ int TDMap::get_experimental_roi_center_y_top_limit(){
   if( _td_map_simgrid->get_exp_image_properties_flag_full_n_cols_width() ){
     top_limit = get_exp_image_properties_full_n_cols_width();
     if( _td_map_simgrid->get_exp_image_properties_flag_roi_ny_size_width() ){
-    top_limit -= ( _td_map_simgrid->get_exp_image_properties_roi_ny_size_width() / 2.0f );
+      top_limit -= ( _td_map_simgrid->get_exp_image_properties_roi_ny_size_width() / 2.0f );
     }
   }
   return top_limit;

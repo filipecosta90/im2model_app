@@ -5,10 +5,6 @@ SimGrid::SimGrid( boost::process::ipstream& async_io_buffer_out ){
   // simulation parameters
   // // // // //
   wavimg_parameters = nullptr;
-  match_factor_file_name = "match_factor_file.csv";
-  defocus_matrix_file_name = "defocus_matrix.csv";
-  thickness_matrix_file_name = "thickness_matrix.csv";
-  match_factor_matrix_file_name = "match_factor_matrix.csv";
 
   exp_image_properties.set_flag_auto_a_size( true );
   exp_image_properties.set_flag_auto_b_size( true );
@@ -195,82 +191,80 @@ bool SimGrid::export_sim_grid( std::string sim_grid_file_name_image ){
   const int legend_position_y_bottom_left_line_3 = 60;
 
   bool result = false;
-    if(
+  if(
       _flag_raw_simulated_images_grid &&
-        // BaseCrystal vars
-        _flag_slice_samples &&
-        _flag_slice_period &&
-        _flag_nm_upper_bound &&
-        _flag_slice_params_accum_nm_slice_vec  &&
-        _flag_defocus_samples &&
-        _flag_defocus_period &&
-        _flag_defocus_lower_bound &&
-        // Simulate Image BaseImage vars
-        sim_image_properties.get_flag_full_n_cols_width() &&
-        sim_image_properties.get_flag_full_n_rows_height()
-      ){
-      sim_grid_width  = ( sim_image_properties.get_full_n_cols_width() * defocus_samples );
-      sim_grid_height = ( sim_image_properties.get_full_n_rows_height() * slice_samples );
-      sim_grid.create ( sim_grid_height, sim_grid_width , CV_8UC1 );
-      sim_grid = cv::Mat::zeros(sim_grid_height, sim_grid_width, CV_8UC1);
+      // BaseCrystal vars
+      _flag_slice_samples &&
+      _flag_simulated_params_slice_vec  &&
+      _flag_simulated_params_nm_slice_vec  &&
+      _flag_defocus_samples &&
+      _flag_simulated_params_nm_defocus_vec  &&
+      // Simulate Image BaseImage vars
+      sim_image_properties.get_flag_full_n_cols_width() &&
+      sim_image_properties.get_flag_full_n_rows_height()
+    ){
+    sim_grid_width  = ( sim_image_properties.get_full_n_cols_width() * defocus_samples );
+    sim_grid_height = ( sim_image_properties.get_full_n_rows_height() * slice_samples );
+    sim_grid.create ( sim_grid_height, sim_grid_width , CV_8UC1 );
+    sim_grid = cv::Mat::zeros(sim_grid_height, sim_grid_width, CV_8UC1);
 
-      int vector_position = 0;
-      for (int thickness = 1; thickness <= slice_samples; thickness ++ ){
+    int vector_position = 0;
+    for (int thickness = 1; thickness <= slice_samples; thickness ++ ){
+      const double slice_thickness_nm = simulated_params_nm_slice_vec.at(thickness-1);
+      const int at_slice = simulated_params_slice_vec.at(thickness-1);
 
-        // the slice thickness in nanometers
-        std::vector<cv::Mat> simulated_images_row = raw_simulated_images_grid.at(thickness-1);
+      // the slice thickness in nanometers
+      std::vector<cv::Mat> simulated_images_row = raw_simulated_images_grid.at(thickness-1);
 
-        for (int defocus = 1; defocus <= defocus_samples; defocus ++ ){
+      for (int defocus = 1; defocus <= defocus_samples; defocus ++ ){
 
-          const int at_defocus = defocus_values_matrix.at<float>(thickness-1, defocus-1);
-          const int at_slice = thickness_values_matrix.at<float>(thickness-1, defocus-1);
-          const double slice_thickness_nm = slice_params_accum_nm_slice_vec.at(at_slice-1);
+        const double at_defocus = simulated_params_nm_defocus_vec.at(defocus-1);
 
-          cv::Mat cleaned_simulated_image = simulated_images_row.at(defocus-1);
+        cv::Mat cleaned_simulated_image = simulated_images_row.at(defocus-1);
 
-          cv::Rect r1 = cv::Rect ( sim_image_properties.get_full_n_cols_width()*(defocus-1),sim_image_properties.get_full_n_rows_height()*(slice_samples-thickness),sim_image_properties.get_full_n_cols_width(),sim_image_properties.get_full_n_rows_height());
+        cv::Rect r1 = cv::Rect ( sim_image_properties.get_full_n_cols_width()*(defocus-1),sim_image_properties.get_full_n_rows_height()*(slice_samples-thickness),sim_image_properties.get_full_n_cols_width(),sim_image_properties.get_full_n_rows_height());
 
-          cleaned_simulated_image.copyTo(sim_grid( r1 ));
+        cleaned_simulated_image.copyTo(sim_grid( r1 ));
 
-          std::stringstream output_legend_line2;
-          output_legend_line2 <<  "T: " << std::fixed << std::setw( 2 ) << std::setprecision( 2 ) << slice_thickness_nm << "nm, slc " << at_slice ;
-          std::string line2_simulated_info = output_legend_line2.str();
-          // line 3
-          std::stringstream output_legend_line3;
-          output_legend_line3 <<  "D: " << at_defocus ;
-          std::string line3_simulated_info = output_legend_line3.str();
+        std::stringstream output_legend_line2;
+        output_legend_line2 <<  "T: " << std::fixed << std::setw( 2 ) << std::setprecision( 2 ) << slice_thickness_nm << "nm, slc " << at_slice ;
+        std::string line2_simulated_info = output_legend_line2.str();
+        // line 3
+        std::stringstream output_legend_line3;
+        output_legend_line3 <<  "D: " << at_defocus ;
+        std::string line3_simulated_info = output_legend_line3.str();
 
 
-          // calculate the legend position on the grid
-          legend_position_x = sim_image_properties.get_full_n_cols_width()*(defocus-1) + 10;
-          int legend_position_y_bottom_left = sim_image_properties.get_full_n_rows_height()*(slice_samples-thickness);
+        // calculate the legend position on the grid
+        legend_position_x = sim_image_properties.get_full_n_cols_width()*(defocus-1) + 10;
+        int legend_position_y_bottom_left = sim_image_properties.get_full_n_rows_height()*(slice_samples-thickness);
 
-          putText(sim_grid, line2_simulated_info , cvPoint(legend_position_x , legend_position_y_bottom_left + legend_position_y_bottom_left_line_1), cv::FONT_HERSHEY_PLAIN, 1, cvScalar(255,255,255), 1, CV_AA);
-          putText(sim_grid, line3_simulated_info , cvPoint(legend_position_x , legend_position_y_bottom_left + legend_position_y_bottom_left_line_2), cv::FONT_HERSHEY_PLAIN, 1, cvScalar(255,255,255), 1, CV_AA);
+        putText(sim_grid, line2_simulated_info , cvPoint(legend_position_x , legend_position_y_bottom_left + legend_position_y_bottom_left_line_1), cv::FONT_HERSHEY_PLAIN, 1, cvScalar(255,255,255), 1, CV_AA);
+        putText(sim_grid, line3_simulated_info , cvPoint(legend_position_x , legend_position_y_bottom_left + legend_position_y_bottom_left_line_2), cv::FONT_HERSHEY_PLAIN, 1, cvScalar(255,255,255), 1, CV_AA);
 
-          if( sim_grid_switch ){
-            const double match_factor = match_values_matrix.at<float>( thickness-1, defocus-1);
+        if( sim_grid_switch ){
+          const double match_factor = match_values_matrix.at<float>( thickness-1, defocus-1);
           std::stringstream matchfactor_output;
           matchfactor_output <<  "Match % " << std::fixed << std::setw( 2 ) << std::setprecision( 2 ) <<  match_factor ;
           std::string line5_matchfactor_info = matchfactor_output.str();
           putText(sim_grid, line5_matchfactor_info , cvPoint(legend_position_x , legend_position_y_bottom_left + legend_position_y_bottom_left_line_3), cv::FONT_HERSHEY_PLAIN, 1, cvScalar(255,255,255), 1, CV_AA);
-          }
-
-          vector_position++;
         }
-      }
 
-      imwrite(sim_grid_file_name_image, sim_grid);
-      result = true;
-    }
-    else {
-      if( _flag_logger ){
-        std::stringstream message;
-        message << "The required vars for export_sim_grid() are not setted up.";
-        logger->logEvent( ApplicationLog::error , message.str() );
+        vector_position++;
       }
-      print_var_state();
     }
+
+    imwrite(sim_grid_file_name_image, sim_grid);
+    result = true;
+  }
+  else {
+    if( _flag_logger ){
+      std::stringstream message;
+      message << "The required vars for export_sim_grid() are not setted up.";
+      logger->logEvent( ApplicationLog::error , message.str() );
+    }
+    print_var_state();
+  }
   return result;
 }
 
@@ -284,24 +278,17 @@ bool SimGrid::check_produced_dat(){
   // Load image
   if(
       // BaseCrystal vars
-      _flag_base_dir_path &
-      _flag_slice_samples &
-      _flag_slice_period &
-      _flag_nm_upper_bound &
-      _flag_slice_params_accum_nm_slice_vec  &
-      _flag_defocus_samples &
-      _flag_defocus_period &
-      _flag_defocus_lower_bound
+      _flag_base_dir_path &&
+      _flag_slice_samples &&
+      _flag_defocus_samples
     ){
     bool files_result = true;
     boost::filesystem::path dat_input_dir ( dat_output_target_folder );
 
     for (int thickness = 1; thickness <= slice_samples; thickness++ ){
-      const int at_slice = round( slice_period * ( thickness  - 1 ) + slices_lower_bound );
-      const double slice_thickness_nm = slice_params_accum_nm_slice_vec.at(at_slice-1);
+
       for (int defocus = 1; defocus <= defocus_samples; defocus++ ){
         // get the defocus value
-        const int at_defocus = round( ((defocus-1) * defocus_period )+ defocus_lower_bound );
         // get the .dat image name
         std::stringstream output_dat_name_stream;
         output_dat_name_stream << "image_" << std::setw(3) << std::setfill('0') << std::to_string(thickness) << "_" << std::setw(3) << std::setfill('0') << std::to_string(defocus) << ".dat";
@@ -311,9 +298,7 @@ bool SimGrid::check_produced_dat(){
         files_result &= _dat_exists;
         if( _flag_logger ){
           std::stringstream message;
-          message << " Opening \"" << full_dat_path.string() << "\" to retrieve thickness " << slice_thickness_nm << " nm (sl "<< at_slice
-            << "), defocus " << at_defocus
-            << ", RESULT: " << std::boolalpha << _dat_exists;
+          message << " Opening \"" << full_dat_path.string() << "\" to retrieve [thickness,defocus] grid pos: [ " << thickness-1 << " , " << " ] RESULT: " << std::boolalpha << _dat_exists;
           if( _dat_exists ){
             logger->logEvent( ApplicationLog::notification , message.str() );
           }
@@ -361,12 +346,9 @@ bool SimGrid::read_grid_from_dat_files(){
         sim_image_properties.get_flag_full_n_cols_width()
       ){
       boost::filesystem::path dat_input_dir ( dat_output_target_folder );
-      // X
-      defocus_values_matrix = cv::Mat( slice_samples, defocus_samples , CV_32FC1 );
-      // Y
-      thickness_values_matrix = cv::Mat( slice_samples, defocus_samples , CV_32FC1 );
 
       for (int thickness = 1; thickness <= slice_samples ; thickness++ ){
+
         //will contain the row of simulated images (same thickness, diferent defocus)
         std::vector<cv::Mat> raw_simulated_images_row;
         for (int defocus = 1; defocus <= defocus_samples ; defocus ++ ){
@@ -420,27 +402,10 @@ bool SimGrid::read_grid_from_dat_files(){
           result &= _mmap_ok;
         }
         raw_simulated_images_grid.push_back( raw_simulated_images_row );
-        const bool _ncols_size_check = ( raw_simulated_images_row.size() == defocus_samples );
-        if( !_ncols_size_check ){
-          if( _flag_logger ){
-            std::stringstream message;
-            message << " raw_simulated_images_row.size() {"<< raw_simulated_images_row.size()<< "} != defocus_samples {"<< defocus_samples << "}";
-            logger->logEvent( ApplicationLog::error , message.str() );
-          }
-        }
-        result &= _ncols_size_check;
       }
-      const bool _nrows_size_check = ( raw_simulated_images_grid.size() == slice_samples );
-      if(!_nrows_size_check){
-        if( _flag_logger ){
-          std::stringstream message;
-          message << " raw_simulated_images_grid.size() {"<< raw_simulated_images_grid.size()<< "} != slice_samples {"<< slice_samples << "}";
-          logger->logEvent( ApplicationLog::error , message.str() );
-        }
-      }
-      result &= _nrows_size_check;
     }
     else {
+      result = false;
       if( _flag_logger ){
         std::stringstream message;
         message << "The required vars for read_grid_from_dat_files() are not setted up.";
@@ -469,93 +434,41 @@ bool SimGrid::apply_margin_to_grid(){
       _flag_slice_samples &&
       _flag_raw_simulated_images_grid &&
       _flag_defocus_samples &&
-      raw_simulated_images_grid.size() == slice_samples &&
-      _flag_slices_lower_bound &&
-      _flag_slice_params_accum_nm_slice_vec &&
-      _flag_nz_simulated_partitions &&
-      ( slice_params_accum_nm_slice_vec.size() == nz_simulated_partitions )
+      raw_simulated_images_grid.size() == slice_samples
     ){
     bool _error_flag = false;
 
-    for (int defocus = 0; defocus < defocus_samples ; defocus ++ ){
-        const int at_defocus = round( ((defocus) * defocus_period ) + defocus_lower_bound );
-          simulated_images_horizontal_header_defocus_nm.push_back( at_defocus );
-      }
-
-    for (int thickness = 0; thickness < slice_samples && _error_flag == false; thickness++ ){
-      const int at_slice = round( slice_period * ( thickness ) + slices_lower_bound );
-      try{
-        const double at_slice_nm = slice_params_accum_nm_slice_vec.at(at_slice-1);
-        simulated_images_vertical_header_slice_nm.push_back( at_slice_nm );
-
-      } catch ( const std::exception& e ){
-        if( _flag_logger ){
-          std::stringstream message;
-          message << "A standard exception was caught, while running apply_margin_to_grid(): \"" << e.what();
-          ApplicationLog::severity_level _log_type = ApplicationLog::error;
-          logger->logEvent( _log_type , message.str() );
-        }
-        print_var_state();
-        _error_flag = true;
-      }
+    for (int thickness = 0; thickness < slice_samples; thickness ++ ){
       // get the matrices row
       const std::vector<cv::Mat> raw_simulated_images_row = raw_simulated_images_grid.at( thickness );
       std::vector<cv::Mat> cleaned_edges_simulated_images_row;
-      if( raw_simulated_images_row.size() ==  defocus_samples ){
-        // for the same thickness iterate through every defocus
-        for (int defocus = 0; defocus < defocus_samples ; defocus ++ ){
-          try{
-            // get the defocus value
-            const double at_defocus =  ( (defocus) * defocus_period ) + defocus_lower_bound ;
-            const double at_slice_nm = slice_params_accum_nm_slice_vec.at(at_slice-1);
-
-            // get the matrix in the specified col of tdmap (defocus pos)
-            const cv::Mat raw_simulated_image = raw_simulated_images_row.at( defocus );
-            cv::Mat cleaned_simulated_image;
-            if( sim_image_properties.get_flag_ignore_edge_pixels_rectangle() ){
-              cleaned_simulated_image = raw_simulated_image( sim_image_properties.get_ignore_edge_pixels_rectangle() );
-            }
-            else{
-              cleaned_simulated_image = raw_simulated_image;
-            }
-            cleaned_edges_simulated_images_row.push_back( cleaned_simulated_image );
-
-            defocus_values_matrix.at<float>( thickness, defocus ) = at_defocus;
-            thickness_values_matrix.at<float>( thickness, defocus ) = (double) at_slice_nm;
-
-          } catch ( const std::exception& e ){
-            _error_flag = true;
-            if( _flag_logger ){
-              std::stringstream message;
-              message << "A standard exception was caught, while running apply_margin_to_grid(): \"" << e.what() <<  "\" while processing image: row,col[<<" << thickness <<" , " << defocus <<  " ]"  ;
-              ApplicationLog::severity_level _log_type = ApplicationLog::error;
-              logger->logEvent( _log_type , message.str() );
-            }
+      // for the same thickness iterate through every defocus
+      for (int defocus = 0; defocus < defocus_samples ; defocus ++ ){
+        try{
+          // get the matrix in the specified col of tdmap (defocus pos)
+          const cv::Mat raw_simulated_image = raw_simulated_images_row.at( defocus );
+          cv::Mat cleaned_simulated_image;
+          if( sim_image_properties.get_flag_ignore_edge_pixels_rectangle() ){
+            cleaned_simulated_image = raw_simulated_image( sim_image_properties.get_ignore_edge_pixels_rectangle() );
+          }
+          else{
+            cleaned_simulated_image = raw_simulated_image;
+          }
+          cleaned_edges_simulated_images_row.push_back( cleaned_simulated_image );
+        } catch ( const std::exception& e ){
+          _error_flag = true;
+          if( _flag_logger ){
+            std::stringstream message;
+            message << "A standard exception was caught, while running apply_margin_to_grid(): \"" << e.what() <<  "\" while processing image: row,col[<<" << thickness <<" , " << defocus <<  " ]"  ;
+            ApplicationLog::severity_level _log_type = ApplicationLog::error;
+            logger->logEvent( _log_type , message.str() );
           }
         }
-        simulated_images_grid.push_back(cleaned_edges_simulated_images_row);
       }
-      else{
-        _error_flag = true;
-      }
-    }
-    /* check if header vars complie with sizes */
-    if ( ( simulated_images_horizontal_header_defocus_nm.size()  == defocus_samples ) && ( simulated_images_vertical_header_slice_nm.size() == slice_samples ) ) {
-      _flag_simulated_images_horizontal_header_defocus_nm = true;
-      _flag_simulated_images_vertical_header_slice_nm = true;
-    }
-    else{
-      _error_flag = true;
-      if( _flag_logger ){
-        std::stringstream message;
-        message << "Error while setting simulation headers.";
-        logger->logEvent( ApplicationLog::error , message.str() );
-      }
-      print_var_state();
+      simulated_images_grid.push_back(cleaned_edges_simulated_images_row);
     }
     status = ! _error_flag;
     _flag_simulated_images_grid = status;
-
   }
   else {
     if( _flag_logger ){
@@ -589,49 +502,43 @@ bool SimGrid::simulate_from_grid(){
 
     for (int thickness = 0; thickness < slice_samples; thickness++ ){
       // get the matrices row
-      std::vector<cv::Point> experimental_images_matchloc_row;
-      std::vector<cv::Mat> cleaned_edges_simulated_images_row = simulated_images_grid.at( thickness - 1 );
+      std::vector< cv::Point > experimental_images_matchloc_row;
+      std::vector< cv::Mat > cleaned_edges_simulated_images_row = simulated_images_grid.at( thickness );
 
-      if( cleaned_edges_simulated_images_row.size() ==  defocus_samples ){
-        // for the same thickness iterate through every defocus
-        for (int defocus = 0; defocus < defocus_samples ; defocus ++ ){
-          // vars for minMaxLoc
-          double minVal, maxVal, matchVal;
-          cv::Point minLoc, maxLoc, matchLoc;
-          // vars to export
-          double match_factor;
-          try{
-            // get the matrix in the specified col of tdmap (defocus pos)
-            const cv::Mat cleaned_simulated_image = cleaned_edges_simulated_images_row.at( defocus );
+      for (int defocus = 0; defocus < defocus_samples ; defocus ++ ){
+        // vars for minMaxLoc
+        double minVal, maxVal, matchVal;
+        cv::Point minLoc, maxLoc, matchLoc;
+        // vars to export
+        double match_factor;
+        try{
+          // get the matrix in the specified col of tdmap (defocus pos)
+          const cv::Mat cleaned_simulated_image = cleaned_edges_simulated_images_row.at( defocus );
 
-            /// Create the result matrix
-            int result_cols =  exp_image_properties.get_roi_n_cols_width() - cleaned_simulated_image.cols + 1;
-            int result_rows = exp_image_properties.get_roi_n_rows_height() - cleaned_simulated_image.rows + 1;
-            cv::Mat result( result_rows, result_cols, CV_8UC1 );
+          /// Create the result matrix
+          int result_cols =  exp_image_properties.get_roi_n_cols_width() - cleaned_simulated_image.cols + 1;
+          int result_rows = exp_image_properties.get_roi_n_rows_height() - cleaned_simulated_image.rows + 1;
+          cv::Mat result( result_rows, result_cols, CV_8UC1 );
 
-            //: normalized correlation, non-normalized correlation and sum-absolute-difference
-            cv::matchTemplate( exp_image_properties.get_roi_image() , cleaned_simulated_image, result, _sim_correlation_method  );
-            cv::minMaxLoc( result, &minVal, &maxVal, &minLoc, &maxLoc, cv::Mat() );
-            matchVal = maxVal;
+          //: normalized correlation, non-normalized correlation and sum-absolute-difference
+          cv::matchTemplate( exp_image_properties.get_roi_image() , cleaned_simulated_image, result, _sim_correlation_method  );
+          cv::minMaxLoc( result, &minVal, &maxVal, &minLoc, &maxLoc, cv::Mat() );
+          matchVal = maxVal;
 
-            match_factor = matchVal * 100.0;
-            //slice_defocus_match_points.push_back (cv::Point3d ( slice_match, defocus_match, match_factor ));
-            match_values_matrix.at<float>( thickness, defocus ) =  match_factor ;
-            simulated_matches.push_back(match_factor);
+          match_factor = matchVal * 100.0;
+          //slice_defocus_match_points.push_back (cv::Point3d ( slice_match, defocus_match, match_factor ));
+          match_values_matrix.at<float>( thickness, defocus ) =  match_factor ;
+          simulated_matches.push_back(match_factor);
 
-          } catch ( const std::exception& e ){
-            _error_flag = true;
-            if( _flag_logger ){
-              std::stringstream message;
-              message << "A standard exception was caught, while running _td_map_simgrid->read_grid_from_dat_files(): \"" << e.what() <<  "\" while processing image: row,col[<<" << thickness-1 <<" , " << defocus-1<<  " ]"  ;
-              ApplicationLog::severity_level _log_type = ApplicationLog::error;
-              logger->logEvent( _log_type , message.str() );
-            }
+        } catch ( const std::exception& e ){
+          _error_flag = true;
+          if( _flag_logger ){
+            std::stringstream message;
+            message << "A standard exception was caught, while running _td_map_simgrid->read_grid_from_dat_files(): \"" << e.what() <<  "\" while processing image: row,col[<<" << thickness-1 <<" , " << defocus-1<<  " ]"  ;
+            ApplicationLog::severity_level _log_type = ApplicationLog::error;
+            logger->logEvent( _log_type , message.str() );
           }
         }
-      }
-      else{
-        _error_flag = true;
       }
     }
     if( _error_flag == false ){
@@ -645,10 +552,11 @@ bool SimGrid::simulate_from_grid(){
       best_match_Point2i = cv::Point2i( row_thickness, col_defocus);
       _flag_best_match_Point2i = true;
 
-      simgrid_best_match_thickness_slice = round((slice_period * row_thickness) + slices_lower_bound);
-      simgrid_best_match_thickness_nm = slice_params_accum_nm_slice_vec.at(simgrid_best_match_thickness_slice-1);
-      simgrid_best_match_defocus_nm = ( col_defocus * defocus_period ) + defocus_lower_bound;
+      simgrid_best_match_thickness_slice = simulated_params_slice_vec.at(row_thickness);
+      simgrid_best_match_thickness_nm = simulated_params_nm_slice_vec.at(row_thickness);
+      simgrid_best_match_defocus_nm = simulated_params_nm_defocus_vec.at(col_defocus);
       runned_simulation = true;
+      _flag_match_values_matrix = true;
     }
   }
   else {
@@ -663,46 +571,46 @@ bool SimGrid::simulate_from_grid(){
 }
 
 bool SimGrid::clean_for_re_run(){
-  if( runned_simulation ){
-    sim_grid.release();
+  bool result = false;
+  sim_grid.release();
+  // simulated images
 
-    simulated_images_vertical_header_slice_nm.clear();
-    _flag_simulated_images_vertical_header_slice_nm = false;
-    simulated_images_horizontal_header_defocus_nm.clear();
-    _flag_simulated_images_horizontal_header_defocus_nm = false;
-    // simulated images
-
-    for (int thickness_row = 0; thickness_row < raw_simulated_images_grid.size(); thickness_row ++ ){
-      //will contain the row of simulated images (same thickness, diferent defocus)
-      std::vector<cv::Mat> raw_simulated_images_row = raw_simulated_images_grid.at(thickness_row);
-      raw_simulated_images_row.clear();
-    }
-    raw_simulated_images_grid.clear();
-
-    for (int thickness_row = 0; thickness_row < simulated_images_grid.size(); thickness_row ++ ){
-      std::vector<cv::Mat> simulated_images_row = simulated_images_grid.at(thickness_row);
-      simulated_images_row.clear();
-    }
-
-    simulated_images_grid.clear();
-
-    for (int thickness_row = 0; thickness_row < experimental_images_match_location_grid.size(); thickness_row ++ ){
-      std::vector<cv::Point> experimental_images_matchloc_row = experimental_images_match_location_grid.at(thickness_row);
-      experimental_images_matchloc_row.clear();
-    }
-    experimental_images_match_location_grid.clear();
-
-    simulated_matches.clear();
-    slice_defocus_match_points.clear();
-
-    defocus_values_matrix.release();
-    thickness_values_matrix.release();
-    match_values_matrix.release();
-    imregionalmax_match_values_matrix.release();
-
-    runned_simulation = false;
+  for (int thickness_row = 0; thickness_row < raw_simulated_images_grid.size(); thickness_row ++ ){
+    //will contain the row of simulated images (same thickness, diferent defocus)
+    std::vector<cv::Mat> raw_simulated_images_row = raw_simulated_images_grid.at(thickness_row);
+    raw_simulated_images_row.clear();
   }
-  return true;
+  raw_simulated_images_grid.clear();
+
+  for (int thickness_row = 0; thickness_row < simulated_images_grid.size(); thickness_row ++ ){
+    std::vector<cv::Mat> simulated_images_row = simulated_images_grid.at(thickness_row);
+    simulated_images_row.clear();
+  }
+  simulated_images_grid.clear();
+
+  for (int thickness_row = 0; thickness_row < experimental_images_match_location_grid.size(); thickness_row ++ ){
+    std::vector<cv::Point> experimental_images_matchloc_row = experimental_images_match_location_grid.at(thickness_row);
+    experimental_images_matchloc_row.clear();
+  }
+  experimental_images_match_location_grid.clear();
+
+  simulated_matches.clear();
+  slice_defocus_match_points.clear();
+
+  match_values_matrix.release();
+  imregionalmax_match_values_matrix.release();
+
+  if(
+      ( simulated_images_grid.size() == 0 ) &&
+      ( raw_simulated_images_grid.size() == 0 ) &&
+      ( experimental_images_match_location_grid.size() == 0 ) &&
+      ( simulated_matches.size() == 0 ) &&
+      ( slice_defocus_match_points.size() == 0 )
+    ){
+    runned_simulation = false;
+    result = true;
+  }
+  return result;
 }
 
 int SimGrid::get_simgrid_best_match_thickness_slice(){
@@ -739,26 +647,15 @@ double SimGrid::get_simulated_image_match_in_grid( int row_thickness, int col_de
 }
 
 int SimGrid::get_simulated_image_thickness_slice_in_grid( int row_thickness, int col_defocus ){
-  const int at_slice = thickness_values_matrix.at<float>(row_thickness, col_defocus);
-  return at_slice;
+  return simulated_params_slice_vec.at(row_thickness);
 }
 
 double SimGrid::get_simulated_image_thickness_nm_in_grid( int row_thickness, int col_defocus ){
-  const int at_slice = thickness_values_matrix.at<float>(row_thickness, col_defocus);
-  const double slice_thickness_nm = slice_params_accum_nm_slice_vec.at(at_slice-1);
-  return slice_thickness_nm;
+  return simulated_params_nm_slice_vec.at(row_thickness);
 }
 
 double SimGrid::get_simulated_image_defocus_in_grid( int row_thickness, int col_defocus ){
-  return (double) defocus_values_matrix.at<float>( row_thickness, col_defocus );
-}
-
-cv::Mat SimGrid::get_defocus_values_matrix(){
-  return defocus_values_matrix;
-}
-
-cv::Mat SimGrid::get_thickness_values_matrix(){
-  return thickness_values_matrix;
+  return simulated_params_nm_defocus_vec.at(col_defocus);
 }
 
 cv::Mat SimGrid::get_match_values_matrix(){
@@ -819,11 +716,6 @@ void SimGrid::print_var_state(){
 
 std::ostream& SimGrid::output(std::ostream& stream) const {
   stream << "SimGrid vars:\n"
-    // header info for td map
-    << "\t" << "simulated_images_vertical_header_slice_nm.size() : " << simulated_images_vertical_header_slice_nm.size() << "\n"
-    << "\t\t" << "_flag_simulated_images_vertical_header_slice_nm : " << std::boolalpha << _flag_simulated_images_vertical_header_slice_nm << "\n"
-    << "\t" << "simulated_images_horizontal_header_defocus_nm.size() : " << simulated_images_horizontal_header_defocus_nm.size() << "\n"
-    << "\t\t" << "_flag_simulated_images_horizontal_header_defocus_nm : " << std::boolalpha << _flag_simulated_images_vertical_header_slice_nm << "\n"
     // simulated images
     << "\t" << "simulated_images_grid.size() : " << simulated_images_grid.size() << "\n"
     << "\t" << "raw_simulated_images_grid.size() : " << raw_simulated_images_grid.size() << "\n"

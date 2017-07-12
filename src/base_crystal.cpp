@@ -5,12 +5,25 @@ BaseCrystal::BaseCrystal( ) {
 
 bool BaseCrystal::calculate_defocus_period(){
   if(
-    _flag_defocus_lower_bound &&
-    _flag_defocus_upper_bound &&
-    _flag_defocus_samples
-  ){
+      _flag_defocus_lower_bound &&
+      _flag_defocus_upper_bound &&
+      _flag_defocus_samples
+    ){
     defocus_period = ( defocus_upper_bound - defocus_lower_bound) / ( defocus_samples - 1 );
     _flag_defocus_period = true;
+
+    /////////////////////////
+    // Simulation Points for Defocus
+    /////////////////////////
+    if( !_flag_simulated_params_nm_defocus_vec ){
+      simulated_params_nm_defocus_vec.reserve(defocus_samples);
+      for( int defocus_pos = 0; defocus_pos < defocus_samples; defocus_pos++ ){
+        const double at_defocus = defocus_lower_bound + (defocus_pos * defocus_period);
+        simulated_params_nm_defocus_vec.push_back( at_defocus );
+      }
+      _flag_simulated_params_nm_defocus_vec = true;
+    }
+
   }
   return _flag_defocus_period;
 }
@@ -18,47 +31,38 @@ bool BaseCrystal::calculate_defocus_period(){
 bool BaseCrystal::calculate_thickness_slice_period(){
   bool result = false;
   if ( _flag_slices_lower_bound &&
-    _flag_slices_upper_bound  &&
-    _flag_slice_samples &&
-    _flag_nz_simulated_partitions
-  ){
+      _flag_slices_upper_bound  &&
+      _flag_slice_samples &&
+      _flag_nz_simulated_partitions &&
+      _flag_slice_params_accum_nm_slice_vec &&
+      ( slice_params_accum_nm_slice_vec.size() == nz_simulated_partitions )
+     ){
     int slice_interval = slices_upper_bound - slices_lower_bound;
     std::div_t divresult;
     divresult = div (slice_interval, (slice_samples -1) );
     slice_period = divresult.quot;
-
-  /*  const int remainder_slices = divresult.rem;
-    const int slices_to_period = (slice_samples -1) - remainder_slices;
-    if ( remainder_slices > 0 ){
-      std::cout << "WARNING: an adjustment needs to be made in the slices lower or upper bound." << std::endl;
-      const int increase_top_range = slices_lower_bound + (slice_samples * slice_period );
-      const int decrease_top_range = slices_lower_bound + ((slice_samples-1) * slice_period );
-      const int decrease_bot_range = slices_lower_bound - slices_to_period + (slice_samples * slice_period );
-
-      std::cout << "Decreasing top range to slice #" << decrease_top_range << std::endl;
-      slices_upper_bound = decrease_top_range;
-
-    /*  if ( increase_top_range <= nz_simulated_partitions ){
-        std::cout << "Increasing top range to slice #" << increase_top_range << std::endl;
-        std::cout << "Going to use one more sample than the requested " << slice_samples << " samples. Using " << (slice_samples+1) << " samples." << std::endl;
-        slices_upper_bound = increase_top_range;
-        slice_samples++;
-      }
-      else{
-        if( decrease_bot_range >= 1 ){
-          std::cout << "Decreasing bot range to slice #" << decrease_bot_range << std::endl;
-          slices_lower_bound -= slices_to_period;
-          slice_samples++;
-        }
-        else{
-          std::cout << "Decreasing top range to slice #" << decrease_top_range << std::endl;
-          slices_upper_bound = decrease_top_range;
-        }
-      }
-      */
-      _flag_slice_period = true;
-      result = true;
+    _flag_slice_period = true;
+    /////////////////////////
+    // Simulation Points for Thickness ( Slice# and Thickness)
+    /////////////////////////
+    if( !_flag_simulated_params_nm_slice_vec ){
+      simulated_params_slice_vec.reserve( slice_samples );
+      simulated_params_nm_slice_vec.reserve( slice_samples );
+    for( int slice_pos = 0; slice_pos < (slice_samples-1); slice_pos++ ){
+      const int at_slice = slices_lower_bound + (slice_pos * slice_period);
+      simulated_params_slice_vec.push_back( at_slice );
+      const double at_thickness = slice_params_accum_nm_slice_vec.at( at_slice - 1 );
+      simulated_params_nm_slice_vec.push_back( at_thickness );
     }
+    const double top_thickness = slice_params_accum_nm_slice_vec.at( slices_upper_bound - 1);
+    simulated_params_slice_vec.push_back( slices_upper_bound );
+    simulated_params_nm_slice_vec.push_back( top_thickness );
+    _flag_simulated_params_slice_vec = true;
+    _flag_simulated_params_nm_slice_vec = true;
+  }
+
+    result = true;
+  }
   return result;
 }
 
@@ -68,8 +72,21 @@ bool BaseCrystal::clean_for_re_run(){
   slice_params_nm_slice.clear();
   slice_params_accum_nm_slice_vec.clear();
   slice_params_nm_slice_vec.clear();
+
+  /////////////////////////
+  // Simulation Points for Thickness and Defocus
+  /////////////////////////
+  simulated_params_slice_vec.clear();
+  simulated_params_nm_slice_vec.clear();
+  simulated_params_nm_defocus_vec.clear();
+
+_flag_slice_params_nm_slice = false;
   _flag_slice_params_accum_nm_slice_vec = false;
   _flag_slice_params_nm_slice_vec = false;
+  _flag_simulated_params_slice_vec = false;
+  _flag_simulated_params_nm_slice_vec = false;
+  _flag_simulated_params_nm_defocus_vec = false;
+
   if( slice_params_nm_slice.size() == 0 &&
       slice_params_accum_nm_slice_vec.size() == 0 &&
       slice_params_nm_slice_vec.size() == 0 &&
@@ -187,9 +204,10 @@ bool BaseCrystal::set_nz_simulated_partitions_from_prm(){
       if (slices_lower_bound == 0){
         slices_lower_bound = 1;
       }
-      slices_upper_bound = get_slice_number_from_nm_floor( nm_upper_bound );
+      slices_upper_bound = nz_simulated_partitions; //get_slice_number_from_nm_floor( nm_upper_bound );
       _flag_slices_upper_bound = true;
       calculate_thickness_slice_period();
+      calculate_defocus_period();
 
     }
     else{
@@ -473,6 +491,17 @@ std::ostream& BaseCrystal::output(std::ostream& stream) const {
     << "\t\t" << "_flag_defocus_upper_bound : " << std::boolalpha <<  _flag_defocus_upper_bound << "\n"
     << "\t" << "defocus_period : " <<  defocus_period << "\n"
     << "\t\t" << "_flag_defocus_period : " << std::boolalpha <<  _flag_defocus_period << "\n"
+
+    /////////////////////////
+    // Simulation Points for Defocus
+    /////////////////////////
+    << "\t" << "simulated_params_slice_vec.size() : " <<  simulated_params_slice_vec.size() << "\n"
+    << "\t\t" << "_flag_simulated_params_slice_vec : " << std::boolalpha <<  _flag_simulated_params_slice_vec << "\n"
+    << "\t" << "simulated_params_nm_slice_vec.size() : " <<  simulated_params_nm_slice_vec.size() << "\n"
+    << "\t\t" << "_flag_simulated_params_nm_slice_vec : " << std::boolalpha <<  _flag_simulated_params_nm_slice_vec << "\n"
+    << "\t" << "simulated_params_nm_defocus_vec.size() : " <<  simulated_params_nm_defocus_vec.size() << "\n"
+    << "\t\t" << "_flag_simulated_params_nm_defocus_vec : " << std::boolalpha <<  _flag_simulated_params_nm_defocus_vec << "\n"
+
     /* Loggers */
     << "\t\t" << "_flag_logger : " << std::boolalpha <<  _flag_logger << "\n"
     /* Base dir path */

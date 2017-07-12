@@ -81,6 +81,8 @@ class BaseCrystal {
     // [Slice Parameters] -- updated on run
     std::string slc_file_name_prefix;
     bool _flag_slc_file_name_prefix = false;
+
+
     std::vector<double> slice_params_nm_slice_vec;
     bool _flag_slice_params_nm_slice_vec = false;
     std::vector<double> slice_params_accum_nm_slice_vec;
@@ -125,6 +127,16 @@ class BaseCrystal {
     bool _flag_defocus_upper_bound = false;
     double defocus_period = 0.0f;
     bool _flag_defocus_period = false;
+
+    /////////////////////////
+    // Simulation Points for Thickness and Defocus
+    /////////////////////////
+    std::vector<int> simulated_params_slice_vec;
+    bool _flag_simulated_params_slice_vec = false;
+    std::vector<double> simulated_params_nm_slice_vec;
+    bool _flag_simulated_params_nm_slice_vec = false;
+    std::vector<double> simulated_params_nm_defocus_vec;
+    bool _flag_simulated_params_nm_defocus_vec = false;
 
     /* Base dir path */
     boost::filesystem::path base_dir_path;
@@ -173,6 +185,16 @@ class BaseCrystal {
     bool get_flag_defocus_lower_bound(){ return _flag_defocus_lower_bound;}
     bool get_flag_defocus_upper_bound(){ return _flag_defocus_upper_bound;}
     bool get_flag_defocus_period(){ return _flag_defocus_period;}
+    /////////////////////////
+    // Simulation Points for Thickness and Defocus
+    /////////////////////////
+    std::vector<int> get_simulated_params_slice_vec(){ return simulated_params_slice_vec; }
+    bool get_flag_simulated_params_slice_vec(){ return _flag_simulated_params_slice_vec; }
+    std::vector<double> get_simulated_params_nm_slice_vec(){ return simulated_params_nm_slice_vec; }
+    bool get_flag_simulated_params_nm_slice_vec(){ return _flag_simulated_params_nm_slice_vec; }
+    std::vector<double> get_simulated_params_nm_defocus_vec(){ return simulated_params_nm_defocus_vec; }
+    bool get_flag_simulated_params_nm_defocus_vec(){ return _flag_simulated_params_nm_defocus_vec; }
+
     /* boost process output streams */
     bool get_flag_base_dir_path(){ return _flag_base_dir_path; }
     /* Loggers */

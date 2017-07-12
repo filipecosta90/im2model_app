@@ -62,11 +62,7 @@ class SimGrid : public BaseCrystal {
     int sim_grid_width;
     int sim_grid_height;
     cv::Mat sim_grid;
-    // header info for td map
-    std::vector< double > simulated_images_vertical_header_slice_nm;
-    bool _flag_simulated_images_vertical_header_slice_nm = false;
-    std::vector< double > simulated_images_horizontal_header_defocus_nm;
-    bool _flag_simulated_images_horizontal_header_defocus_nm = false;
+
     // simulated images
     std::vector< std::vector<cv::Mat> > simulated_images_grid;
     bool _flag_simulated_images_grid = false;
@@ -81,9 +77,8 @@ class SimGrid : public BaseCrystal {
     //: normalized correlation, non-normalized correlation and sum-absolute-difference
     int _sim_correlation_method = CV_TM_CCOEFF_NORMED;
 
-    cv::Mat defocus_values_matrix;
-    cv::Mat thickness_values_matrix;
     cv::Mat match_values_matrix;
+    bool _flag_match_values_matrix = false;
     cv::Mat imregionalmax_match_values_matrix;
     cv::Point2i best_match_Point2i;
     bool _flag_best_match_Point2i = false;
@@ -96,16 +91,6 @@ class SimGrid : public BaseCrystal {
 
     bool sim_grid_switch = false;
     bool runned_simulation = false;
-
-    std::ofstream match_factor_file;
-    std::ofstream defocus_file_matrix;
-    std::ofstream thickness_file_matrix;
-    std::ofstream match_factor_file_matrix;
-
-    std::string match_factor_file_name;
-    std::string defocus_matrix_file_name;
-    std::string thickness_matrix_file_name;
-    std::string match_factor_matrix_file_name;
 
     /* Loggers */
     ApplicationLog::ApplicationLog* logger = nullptr;
@@ -128,12 +113,9 @@ class SimGrid : public BaseCrystal {
     bool set_sampling_rate_x_nm_per_pixel( double rate );
     bool set_sampling_rate_y_nm_per_pixel( double rate );
 
-/* flag getters */
-bool get_flag_simulated_images_vertical_header_slice_nm(){ return _flag_simulated_images_vertical_header_slice_nm; }
-bool get_flag_simulated_images_horizontal_header_defocus_nm(){ return _flag_simulated_images_horizontal_header_defocus_nm; }
-/* getters */
-std::vector< double > get_simulated_images_vertical_header_slice_nm(){ return simulated_images_vertical_header_slice_nm; }
-std::vector< double > get_simulated_images_horizontal_header_defocus_nm(){ return simulated_images_horizontal_header_defocus_nm; }
+    /* flag getters */
+
+    /* getters */
 
     cv::Mat get_exp_image_properties_full_image();
     cv::Mat get_exp_image_properties_roi_image();
@@ -175,7 +157,7 @@ std::vector< double > get_simulated_images_horizontal_header_defocus_nm(){ retur
     bool check_produced_dat();
 
     bool read_grid_from_dat_files();
-bool apply_margin_to_grid();
+    bool apply_margin_to_grid();
     bool simulate_from_grid();
 
     bool clean_for_re_run();
@@ -190,10 +172,6 @@ bool apply_margin_to_grid();
     double get_simgrid_best_match_defocus_nm();
 
     std::vector< std::vector<cv::Mat> > get_simulated_images_grid();
-
-    cv::Mat get_defocus_values_matrix();
-
-    cv::Mat get_thickness_values_matrix();
 
     cv::Mat get_match_values_matrix();
 
