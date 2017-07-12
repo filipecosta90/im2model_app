@@ -54,7 +54,7 @@ class SuperCell : public ImageBounds , public BaseCell {
     /* Loggers */
     bool set_application_logger( ApplicationLog::ApplicationLog* logger );
     void print_var_state();
-    friend std::ostream& operator<< (std::ostream& stream, const SuperCell::SuperCell& image);
+   // friend std::ostream& operator<< (std::ostream& stream, const SuperCell::SuperCell& image);
     virtual std::ostream& output(std::ostream& stream) const;
 };
 
