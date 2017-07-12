@@ -86,6 +86,7 @@ class SimGrid : public BaseCrystal {
     cv::Mat match_values_matrix;
     cv::Mat imregionalmax_match_values_matrix;
     cv::Point2i best_match_Point2i;
+    bool _flag_best_match_Point2i = false;
 
     WAVIMG_prm* wavimg_parameters = nullptr;
 
@@ -167,6 +168,7 @@ std::vector< double > get_simulated_images_horizontal_header_defocus_nm(){ retur
 
     bool get_flag_simulated_images_grid();
     bool get_flag_raw_simulated_images_grid();
+    bool get_flag_simgrid_best_match_position(){ return _flag_best_match_Point2i; }
 
     bool produce_png_from_dat_file();
 

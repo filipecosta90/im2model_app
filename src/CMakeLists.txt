@@ -212,7 +212,6 @@ else(build_cli)
     fix_win_compiler()
 endif(build_cli)
 
-add_sanitizers(${PROJECT_NAME})
 
 # Creates app.exe with the listed sources (main.cxx)
 # Adds sources to the Solution Explorer
@@ -222,6 +221,7 @@ add_sanitizers(${PROJECT_NAME})
 target_link_libraries( ${PROJECT_NAME} ${OpenCV_LIBS} ${Boost_LIBRARIES} ${HDF5_CXX_LIBRARIES} )
 
 if(APPLE)
+  add_sanitizers(${PROJECT_NAME})
   #  set_target_properties( app PROPERTIES  CXX_INCLUDE_WHAT_YOU_USE /Users/filipeoliveira/Downloads/include-what-you-use/bin/include-what-you-use )
 endif(APPLE)
 

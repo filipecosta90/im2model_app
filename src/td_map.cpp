@@ -390,6 +390,9 @@ bool TDMap::run_tdmap( ){
             _flag_runned_tdmap_wavimg = _tdmap_wavimg_parameters->call_bin();
           }
           emit TDMap_ended_wavimg( _flag_runned_tdmap_wavimg );
+          if( !_flag_runned_tdmap_wavimg ){
+            _tdmap_wavimg_parameters->print_var_state();
+          }
           if( _flag_logger ){
             std::stringstream message;
             message << "_flag_runned_tdmap_wavimg: " << std::boolalpha << _flag_runned_tdmap_wavimg;
@@ -411,10 +414,11 @@ bool TDMap::run_tdmap( ){
     }
     //SIMGRID
     if( _celslc_stage_ok && _msa_stage_ok && _wavimg_stage_ok ){
-        bool _clean_run_env = !_flag_runned_tdmap_simgrid;
-        if( _flag_runned_tdmap_simgrid ){
+        bool _clean_run_env = !_flag_runned_tdmap_simgrid_read || !_flag_runned_tdmap_simgrid_correlate;
+        if( !_clean_run_env ){
           _clean_run_env = _td_map_simgrid->clean_for_re_run();
-          _flag_runned_tdmap_simgrid = !_clean_run_env;
+          _flag_runned_tdmap_simgrid_read = !_clean_run_env;
+          _flag_runned_tdmap_simgrid_correlate = !_clean_run_env;
           if( _flag_logger ){
             std::stringstream message;
             message << "Already runned simgrid. going to clean vars. result: " << std::boolalpha << _clean_run_env ;
@@ -440,15 +444,15 @@ bool TDMap::run_tdmap( ){
           // 2nd step in simgrid
           bool _margin_ok = false;
           if( _grid_ok ){
-            _margin_ok = _td_map_simgrid->apply_margin_to_grid();
+            _flag_runned_tdmap_simgrid_read = _td_map_simgrid->apply_margin_to_grid();
           }
           if ( _run_simgrid_switch ){
           // 3rd step in simgrid
           if( _grid_ok && _margin_ok ){
             try {
-              _flag_runned_tdmap_simgrid = _td_map_simgrid->simulate_from_grid();
+              _flag_runned_tdmap_simgrid_correlate = _td_map_simgrid->simulate_from_grid();
             } catch ( const std::exception& e ){
-              _flag_runned_tdmap_simgrid = false;
+              _flag_runned_tdmap_simgrid_correlate = false;
               if( _flag_logger ){
                 std::stringstream message;
                 message << "A standard exception was caught, while running _td_map_simgrid->simulate_from_grid(): " << e.what();
@@ -458,23 +462,23 @@ bool TDMap::run_tdmap( ){
             }
           }
           else{
-            _flag_runned_tdmap_simgrid = _grid_ok && _margin_ok;
+            _flag_runned_tdmap_simgrid_correlate = _grid_ok && _margin_ok;
           }
-          emit TDMap_ended_simgrid( _flag_runned_tdmap_simgrid );
-          _simgrid_stage_ok = _flag_runned_tdmap_simgrid;
+          emit TDMap_ended_simgrid( _flag_runned_tdmap_simgrid_correlate );
+          _simgrid_stage_ok = _flag_runned_tdmap_simgrid_correlate;
           if( _flag_logger ){
             std::stringstream message;
-            message << "_flag_runned_tdmap_simgrid: " << std::boolalpha << _flag_runned_tdmap_simgrid;
-            ApplicationLog::severity_level _log_type = _flag_runned_tdmap_simgrid ? ApplicationLog::notification : ApplicationLog::error;
+            message << "_flag_runned_tdmap_simgrid_correlate: " << std::boolalpha << _flag_runned_tdmap_simgrid_correlate;
+            ApplicationLog::severity_level _log_type = _flag_runned_tdmap_simgrid_correlate ? ApplicationLog::notification : ApplicationLog::error;
             logger->logEvent( _log_type , message.str() );
           }
         }
         else{
-          emit TDMap_no_simgrid( true );
-          _simgrid_stage_ok = true;
+          emit TDMap_no_simgrid( _flag_runned_tdmap_simgrid_read );
+          _simgrid_stage_ok = _flag_runned_tdmap_simgrid_read;
           if( _flag_logger ){
             std::stringstream message;
-            message << "emiting TDMap_no_simgrid( true ) ";
+            message << "emiting TDMap_no_simgrid( _flag_runned_tdmap_simgrid_read ) ";
             ApplicationLog::severity_level _log_type = ApplicationLog::notification;
             logger->logEvent( _log_type , message.str() );
           }
@@ -512,6 +516,14 @@ bool TDMap::get_flag_simulated_images_vertical_header_slice_nm(){
 
 bool TDMap::get_flag_simulated_images_horizontal_header_defocus_nm(){
   return _td_map_simgrid->get_flag_simulated_images_horizontal_header_defocus_nm();
+}
+
+bool TDMap::get_flag_simgrid_best_match_position(){
+  return _td_map_simgrid->get_flag_simgrid_best_match_position();
+}
+
+bool TDMap::get_flag_simulated_images_grid(){
+  return _td_map_simgrid->get_flag_simulated_images_grid();
 }
 
 /* getters */
@@ -624,10 +636,6 @@ bool TDMap::get_flag_ht_accelaration_voltage(){
 
 bool TDMap::get_flag_slice_params_accum_nm_slice_vec(){
   return _tdmap_celslc_parameters->get_flag_slice_params_accum_nm_slice_vec();
-}
-
-bool TDMap::get_flag_simulated_images_grid(){
-  return _td_map_simgrid->get_flag_simulated_images_grid();
 }
 
 bool TDMap::get_flag_raw_simulated_images_grid(){

@@ -71,7 +71,8 @@ class TDMap  : public QObject {
      * SIMGRID
      * */
     SimGrid* _td_map_simgrid;
-    bool _flag_runned_tdmap_simgrid = false;
+    bool _flag_runned_tdmap_simgrid_read = false;
+    bool _flag_runned_tdmap_simgrid_correlate = false;
     bool _run_simgrid_switch = true;
 
     /* *
@@ -148,6 +149,7 @@ class TDMap  : public QObject {
     /* flag getters */
     bool get_flag_simulated_images_vertical_header_slice_nm();
     bool get_flag_simulated_images_horizontal_header_defocus_nm();
+    bool get_flag_simgrid_best_match_position();
     /* getters */
     std::vector< double > get_simulated_images_vertical_header_slice_nm();
     std::vector< double > get_simulated_images_horizontal_header_defocus_nm();

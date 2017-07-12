@@ -11,7 +11,7 @@ CvImageFrameWidget::CvImageFrameWidget(QWidget *parent ) : QWidget(parent) {
   toolsLayout->setContentsMargins(0, 0, 0, 0);
 
   toolbar = new QToolBar;
-  toolbar->addAction("Normal size", image_widget, SLOT(normalSize()) );
+  toolbar->addAction("Actual size", image_widget, SLOT(normalSize()) );
   toolbar->addAction("Fit" , image_widget, SLOT(fitToWindow()) );
   toolbar->addAction("Zoom in" ,image_widget, SLOT(zoomIn()) );
   toolbar->addAction("Zoom out", image_widget, SLOT(zoomOut()) );
@@ -66,4 +66,3 @@ void CvImageFrameWidget::setImageWidget( CVImageWidget* widget ){
   image_widget = widget;
   image_widget->update();
 }
-

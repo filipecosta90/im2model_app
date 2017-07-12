@@ -14,7 +14,7 @@ bool EMDGroup::get_flag_contains_group( std::string name ){
 }
 
 EMDGroup* EMDGroup::get_group( std::string name ){
-  EMDGroup* ret_group;
+  EMDGroup* ret_group = nullptr;
   std::map<std::string,EMDGroup*>::iterator it;
   it = _map_groups.find( name );
   if (it != _map_groups.end()){

@@ -52,8 +52,6 @@ endif(BUILD_DOXYGEN_DOCS)
 if(APPLE)
   message(STATUS "Adding Apple definition")
   add_definitions(-DAPPLE)
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=address")
-
 endif(APPLE)
 
 if (WIN32)
@@ -75,7 +73,8 @@ if (WIN32)
 
 else()
   message(status "Setting GCC flags")
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fexceptions -g -Wall -std=c++14")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}  -fexceptions -g -fno-omit-frame-pointer -fsanitize=address -fsanitize=undefined -fsanitize=integer")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -std=c++14")
 endif(WIN32)
 
 find_package(OpenCV  3.0.0 REQUIRED)

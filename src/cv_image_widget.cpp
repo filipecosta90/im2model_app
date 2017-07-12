@@ -32,11 +32,12 @@ void CVImageWidget::normalSize(){
   updateImage();
 }
 
-void CVImageWidget::fitToWindow( ){
+void CVImageWidget::fitToWindow(){
   int window_width = _container_window_width;
   int window_height = _container_window_height;
-  float w_factor = ((float) window_width) / ((float) original_size.width );
-  float h_factor = ((float) window_height) / ((float) original_size.height );
+  // prevent division by zero
+  float w_factor = original_size.width > 0 ? ((float) window_width) / ((float) original_size.width ) : 0.0f;
+  float h_factor = original_size.height > 0 ? ((float) window_height) / ((float) original_size.height ) : 0.0f;
   scaleFactor = std::min(w_factor,h_factor);
   updateImage();
 }

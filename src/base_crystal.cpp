@@ -17,20 +17,24 @@ bool BaseCrystal::calculate_defocus_period(){
 
 bool BaseCrystal::calculate_thickness_slice_period(){
   bool result = false;
-  if ( _flag_slices_lower_bound && _flag_slices_upper_bound
-      && _flag_slice_samples && _flag_nz_simulated_partitions ){
+  if ( _flag_slices_lower_bound &&
+    _flag_slices_upper_bound  &&
+    _flag_slice_samples &&
+    _flag_nz_simulated_partitions
+  ){
     int slice_interval = slices_upper_bound - slices_lower_bound;
     std::div_t divresult;
     divresult = div (slice_interval, (slice_samples -1) );
     slice_period = divresult.quot;
-    const int remainder_slices = divresult.rem;
+
+  /*  const int remainder_slices = divresult.rem;
     const int slices_to_period = (slice_samples -1) - remainder_slices;
     if ( remainder_slices > 0 ){
       std::cout << "WARNING: an adjustment needs to be made in the slices lower or upper bound." << std::endl;
       const int increase_top_range = slices_lower_bound + (slice_samples * slice_period );
       const int decrease_top_range = slices_lower_bound + ((slice_samples-1) * slice_period );
       const int decrease_bot_range = slices_lower_bound - slices_to_period + (slice_samples * slice_period );
-      
+
       std::cout << "Decreasing top range to slice #" << decrease_top_range << std::endl;
       slices_upper_bound = decrease_top_range;
 
@@ -52,10 +56,9 @@ bool BaseCrystal::calculate_thickness_slice_period(){
         }
       }
       */
+      _flag_slice_period = true;
+      result = true;
     }
-    _flag_slice_period = true;
-    result = true;
-  }
   return result;
 }
 

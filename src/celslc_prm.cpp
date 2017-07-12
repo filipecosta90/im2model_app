@@ -182,6 +182,7 @@ std::ostream& CELSLC_prm::create_bin_args(std::ostream& args_stream) const {
   if ( abs_switch ){
     args_stream << " -abs";
   }
+  return args_stream;
 }
 
 bool CELSLC_prm::call_boost_bin( ){
