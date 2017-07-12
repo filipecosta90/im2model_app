@@ -47,8 +47,10 @@
 #include <opencv2/core/matx.hpp>     // for Vec4d
 #include <opencv2/core/types.hpp>    // for Point3d, Point, Rect, Point2d
 
-#include "H5Cpp.h"
-#include "hdf5.h"
+
+#define H5_BUILT_AS_DYNAMIC_LIB
+#include <H5Cpp.h>
+
 #include "rapidjson/reader.h"
 #include "rapidjson/stream.h"
 #include "rapidjson/document.h"

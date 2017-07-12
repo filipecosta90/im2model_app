@@ -14,8 +14,12 @@
 #include <opencv2/core/types.hpp>                         // for Rect, Point3d
 #include <opencv2/imgcodecs.hpp>                          // for imread
 
-#include "H5Cpp.h"
-#include "hdf5.h"
+
+#define H5_BUILT_AS_DYNAMIC_LIB
+#include <H5Cpp.h>
+
+//#include "H5Cpp.h"
+//#include "hdf5.h"
 
 #include "rapidjson/reader.h"
 #include "rapidjson/stream.h"

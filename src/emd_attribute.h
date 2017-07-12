@@ -4,8 +4,8 @@
 #include <iosfwd>                    // for string
 #include <iostream>
 
-#include "H5Cpp.h"
-#include "hdf5.h"
+#define H5_BUILT_AS_DYNAMIC_LIB
+#include <H5Cpp.h>
 
 #include "emd_object.h"
 
