@@ -66,7 +66,12 @@ endif(WIN32)
 # Properties->C/C++->General->Additional Include Directories
 include_directories( ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR} )
 
-#include_directories(${PROJECT_SOURCE_DIR}/include/rapidjson)
+add_library(rapidjson INTERFACE)
+#target_sources(rapidjson INTERFACE lib2.h)
+
+target_include_directories(rapidjson INTERFACE
+    "${PROJECT_SOURCE_DIR}/include/rapidjson"
+)
 
 #file(GLOB SRCS *.cpp *.hpp *.h)
 
@@ -218,7 +223,7 @@ endif(build_cli)
 
 
 # Properties->Linker->Input->Additional Dependencies
-target_link_libraries( ${PROJECT_NAME} ${OpenCV_LIBS} ${Boost_LIBRARIES} ${HDF5_CXX_LIBRARIES} )
+target_link_libraries( ${PROJECT_NAME} rapidjson ${OpenCV_LIBS} ${Boost_LIBRARIES} ${HDF5_CXX_LIBRARIES} )
 
 if(APPLE)
   add_sanitizers(${PROJECT_NAME})
@@ -232,10 +237,6 @@ set_property(TARGET ${PROJECT_NAME} PROPERTY FOLDER "executables")
 # Properties->General->Output Directory
 set_target_properties( ${PROJECT_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR})
 
-target_include_directories(
-    ${PROJECT_NAME}
-    PUBLIC ${PROJECT_SOURCE_DIR}/include/rapidjson
-)
 
 set(CMAKE_INSTALL_PREFIX ${CMAKE_CURRENT_BINARY_DIR} )
 
