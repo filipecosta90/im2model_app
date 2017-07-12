@@ -21,9 +21,9 @@
 //#include "H5Cpp.h"
 //#include "hdf5.h"
 
-#include "rapidjson/reader.h"
-#include "rapidjson/stream.h"
-#include "rapidjson/document.h"
+#include "../include/rapidjson/reader.h"
+#include "../include/rapidjson/stream.h"
+#include "../include/rapidjson/document.h"
 
 #include "emd_object.h"
 #include "emd_attribute.h"
