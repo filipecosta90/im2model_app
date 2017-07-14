@@ -25,6 +25,9 @@
 #include <opencv2/imgcodecs.hpp>                          // for imread
 
 #include "application_log.hpp"
+#include "mc_driver.hpp"
+#include "unit_cell.hpp"
+#include "super_cell.hpp"
 
 class BaseCrystal {
   private:
@@ -43,6 +46,13 @@ class BaseCrystal {
     // Specifies the input super-cell file containing the atomic structure data in CIF file format.
     std::string unit_cell_cif_path;
     bool _flag_unit_cell_cif_path = false;
+
+    MC::MC_Driver cif_driver;
+    Unit_Cell* unit_cell = nullptr;
+    bool _flag_unit_cell = false;
+
+    SuperCell* super_cell = nullptr;
+    bool _flag_super_cell = false;
 
     int nz_simulated_partitions = 0;
     bool _flag_nz_simulated_partitions = false;
@@ -81,7 +91,6 @@ class BaseCrystal {
     // [Slice Parameters] -- updated on run
     std::string slc_file_name_prefix;
     bool _flag_slc_file_name_prefix = false;
-
 
     std::vector<double> slice_params_nm_slice_vec;
     bool _flag_slice_params_nm_slice_vec = false;

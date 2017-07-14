@@ -2,12 +2,16 @@
 #include <stdlib.h>              // for exit, EXIT_FAILURE
 #include <cassert>               // for assert
 #include <iostream>              // for cerr
-#include <fstream>              // for ifstream 
+#include <fstream>              // for ifstream
 #include <new>                   // for bad_alloc
 #include "mc_parser.tab.hh"      // for MC_Parser
 #include "mc_scanner.hpp"        // for MC_Scanner
 #include "string_additions.hpp"  // for convert_to_double
 #include "unit_cell.hpp"         // for Unit_Cell
+
+MC::MC_Driver::MC_Driver(){
+  unit_cell = new Unit_Cell();
+}
 
 MC::MC_Driver::~MC_Driver(){
   delete(scanner);
@@ -33,7 +37,7 @@ void MC::MC_Driver::parse( std::istream &stream ){
     return;
   }
   //else
-  parse_helper( stream ); 
+  parse_helper( stream );
   return;
 }
 
@@ -51,15 +55,15 @@ void MC::MC_Driver::parse_helper( std::istream &stream ){
     exit( EXIT_FAILURE );
   }
 
-  delete(parser); 
+  delete(parser);
   try
   {
-    parser = new MC::MC_Parser( (*scanner) /* scanner */, 
+    parser = new MC::MC_Parser( (*scanner) /* scanner */,
         (*this) /* driver */ );
   }
   catch( std::bad_alloc &ba )
   {
-    std::cerr << "Failed to allocate parser: (" << 
+    std::cerr << "Failed to allocate parser: (" <<
       ba.what() << "), exiting!!\n";
     exit( EXIT_FAILURE );
   }
@@ -124,7 +128,7 @@ bool MC::MC_Driver::populate_unit_cell(){
   if (it != non_looped_items.end()){
     const std::string item_value = it->second;
     const double d_item_value = convert_to_double( item_value );
-    unit_cell.set_cell_length_a( d_item_value ); 
+    unit_cell->set_cell_length_a( d_item_value );
   }
   else{
     parse_error = true;
@@ -133,7 +137,7 @@ bool MC::MC_Driver::populate_unit_cell(){
   if (it != non_looped_items.end()){
     const std::string item_value = it->second;
     const double d_item_value = convert_to_double( item_value );
-    unit_cell.set_cell_length_b( d_item_value ); 
+    unit_cell->set_cell_length_b( d_item_value );
   }
   else{
     parse_error = true;
@@ -142,7 +146,7 @@ bool MC::MC_Driver::populate_unit_cell(){
   if (it != non_looped_items.end()){
     const std::string item_value = it->second;
     const double d_item_value = convert_to_double( item_value );
-    unit_cell.set_cell_length_c( d_item_value ); 
+    unit_cell->set_cell_length_c( d_item_value );
   }
   else{
     parse_error = true;
@@ -151,7 +155,7 @@ bool MC::MC_Driver::populate_unit_cell(){
   if (it != non_looped_items.end()){
     const std::string item_value = it->second;
     const double d_item_value = convert_to_double( item_value );
-    unit_cell.set_cell_angle_alpha( d_item_value ); 
+    unit_cell->set_cell_angle_alpha( d_item_value );
   }
   else{
     parse_error = true;
@@ -160,7 +164,7 @@ bool MC::MC_Driver::populate_unit_cell(){
   if (it != non_looped_items.end()){
     const std::string item_value = it->second;
     const double d_item_value = convert_to_double( item_value );
-    unit_cell.set_cell_angle_beta( d_item_value ); 
+    unit_cell->set_cell_angle_beta( d_item_value );
   }
   else{
     parse_error = true;
@@ -169,7 +173,7 @@ bool MC::MC_Driver::populate_unit_cell(){
   if (it != non_looped_items.end()){
     const std::string item_value = it->second;
     const double d_item_value = convert_to_double( item_value );
-    unit_cell.set_cell_angle_gamma( d_item_value ); 
+    unit_cell->set_cell_angle_gamma( d_item_value );
   }
   else{
     parse_error = true;
@@ -178,7 +182,7 @@ bool MC::MC_Driver::populate_unit_cell(){
   if (it != non_looped_items.end()){
     const std::string item_value = it->second;
     const double d_item_value = convert_to_double( item_value );
-    unit_cell.set_cell_volume( d_item_value ); 
+    unit_cell->set_cell_volume( d_item_value );
   }
   else{
     parse_error = true;
@@ -191,13 +195,13 @@ bool MC::MC_Driver::populate_atom_site_unit_cell(){
   std::map<std::string,std::vector<std::string>>::iterator ItemList_itt;
   ItemList_itt = looped_items.find("_atom_site_fract_x");
   if (ItemList_itt != looped_items.end()){
-    std::vector<std::string> ValueList;  
-    std::vector<std::string>::iterator value_list_it; 
+    std::vector<std::string> ValueList;
+    std::vector<std::string>::iterator value_list_it;
     ValueList = ItemList_itt->second;
     for(value_list_it = ValueList.begin() ; value_list_it < ValueList.end(); value_list_it++ ) {
       std::string _atom_site_fract_x = *value_list_it;
       const double d_item_value = convert_to_double( _atom_site_fract_x );
-      unit_cell.add_atom_site_fract_x( d_item_value );
+      unit_cell->add_atom_site_fract_x( d_item_value );
     }
   }
   else{
@@ -205,13 +209,13 @@ bool MC::MC_Driver::populate_atom_site_unit_cell(){
   }
   ItemList_itt = looped_items.find("_atom_site_fract_y");
   if (ItemList_itt != looped_items.end()){
-    std::vector<std::string> ValueList;  
-    std::vector<std::string>::iterator value_list_it; 
+    std::vector<std::string> ValueList;
+    std::vector<std::string>::iterator value_list_it;
     ValueList = ItemList_itt->second;
     for(value_list_it = ValueList.begin() ; value_list_it < ValueList.end(); value_list_it++ ) {
       std::string _atom_site_fract_y = *value_list_it;
       const double d_item_value = convert_to_double( _atom_site_fract_y );
-      unit_cell.add_atom_site_fract_y( d_item_value );
+      unit_cell->add_atom_site_fract_y( d_item_value );
     }
   }
   else{
@@ -219,13 +223,13 @@ bool MC::MC_Driver::populate_atom_site_unit_cell(){
   }
   ItemList_itt = looped_items.find("_atom_site_fract_z");
   if (ItemList_itt != looped_items.end()){
-    std::vector<std::string> ValueList;  
-    std::vector<std::string>::iterator value_list_it; 
+    std::vector<std::string> ValueList;
+    std::vector<std::string>::iterator value_list_it;
     ValueList = ItemList_itt->second;
     for(value_list_it = ValueList.begin() ; value_list_it < ValueList.end(); value_list_it++ ) {
       std::string _atom_site_fract_z = *value_list_it;
       const double d_item_value = convert_to_double( _atom_site_fract_z );
-      unit_cell.add_atom_site_fract_z( d_item_value );
+      unit_cell->add_atom_site_fract_z( d_item_value );
     }
   }
   else{
@@ -233,12 +237,12 @@ bool MC::MC_Driver::populate_atom_site_unit_cell(){
   }
   ItemList_itt = looped_items.find("_atom_site_type_symbol");
   if (ItemList_itt != looped_items.end()){
-    std::vector<std::string> ValueList;  
-    std::vector<std::string>::iterator value_list_it; 
+    std::vector<std::string> ValueList;
+    std::vector<std::string>::iterator value_list_it;
     ValueList = ItemList_itt->second;
     for(value_list_it = ValueList.begin() ; value_list_it < ValueList.end(); value_list_it++ ) {
       std::string _atom_site_type_symbol = *value_list_it;
-      unit_cell.add_atom_site_type_symbol ( _atom_site_type_symbol );
+      unit_cell->add_atom_site_type_symbol ( _atom_site_type_symbol );
     }
   }
   else{
@@ -246,13 +250,13 @@ bool MC::MC_Driver::populate_atom_site_unit_cell(){
   }
   ItemList_itt = looped_items.find("_atom_site_occupancy");
   if (ItemList_itt != looped_items.end()){
-    std::vector<std::string> ValueList;  
-    std::vector<std::string>::iterator value_list_it; 
+    std::vector<std::string> ValueList;
+    std::vector<std::string>::iterator value_list_it;
     ValueList = ItemList_itt->second;
     for(value_list_it = ValueList.begin() ; value_list_it < ValueList.end(); value_list_it++ ) {
       std::string _atom_site_occupancy = *value_list_it;
       const double d_item_value = convert_to_double( _atom_site_occupancy );
-      unit_cell.add_atom_site_occupancy( d_item_value );
+      unit_cell->add_atom_site_occupancy( d_item_value );
     }
   }
   else{
@@ -268,28 +272,27 @@ bool MC::MC_Driver::populate_symetry_equiv_pos_as_xyz_unit_cell(){
   std::map<std::string,std::vector<std::string>>::iterator ItemList_itt;
   ItemList_itt = looped_items.find("_symmetry_equiv_pos_as_xyz");
   if (ItemList_itt != looped_items.end()){
-    std::vector<std::string> ValueList;  
-    std::vector<std::string>::iterator value_list_it; 
+    std::vector<std::string> ValueList;
+    std::vector<std::string>::iterator value_list_it;
     ValueList = ItemList_itt->second;
     for(value_list_it = ValueList.begin() ; value_list_it < ValueList.end(); value_list_it++ ) {
       std::string symetry_xyz = *value_list_it;
       //remove white spaces
       symetry_xyz.erase(std::remove_if(
-            symetry_xyz.begin(), 
+            symetry_xyz.begin(),
             symetry_xyz.end(),
             [](char x){return std::isspace(x);}
             ),
           symetry_xyz.end());
       std::vector<std::string> symetry_vec = split( symetry_xyz, ",");
-      unit_cell.add_symmetry_equiv_pos_as_x( symetry_vec[0]);
-      unit_cell.add_symmetry_equiv_pos_as_y( symetry_vec[1]);
-      unit_cell.add_symmetry_equiv_pos_as_z( symetry_vec[2]);
+      unit_cell->add_symmetry_equiv_pos_as_x( symetry_vec[0]);
+      unit_cell->add_symmetry_equiv_pos_as_y( symetry_vec[1]);
+      unit_cell->add_symmetry_equiv_pos_as_z( symetry_vec[2]);
     }
   }
   return true;
 }
 
-Unit_Cell MC::MC_Driver::get_unit_cell(){
+Unit_Cell* MC::MC_Driver::get_unit_cell(){
   return unit_cell;
 }
-

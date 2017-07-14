@@ -16,16 +16,16 @@ namespace MC{
 
   class MC_Driver{
     public:
-      MC_Driver() = default;
+      MC_Driver();
 
       virtual ~MC_Driver();
 
-      /** 
+      /**
        * parse - parse from a file
        * @param filename - valid string with input file
        */
       void parse( const char * const filename );
-      /** 
+      /**
        * parse - parse from a c++ input stream
        * @param is - std::istream&, valid input stream
        */
@@ -39,8 +39,8 @@ namespace MC{
       bool populate_symetry_equiv_pos_as_xyz_unit_cell();
       bool populate_atom_site_unit_cell();
       std::ostream& print(std::ostream &stream);
-      Unit_Cell get_unit_cell();
-    private:
+      Unit_Cell* get_unit_cell();
+    protected:
 
       void parse_helper( std::istream &stream );
 
@@ -50,7 +50,9 @@ namespace MC{
       std::map<int,std::vector<std::string>> loop_tables;
       std::map<std::string,std::vector<std::string>> looped_items;
 
-      Unit_Cell unit_cell; 
+      Unit_Cell* unit_cell;
+    private:
+
       const std::string red   = "\033[1;31m";
       const std::string blue  = "\033[1;36m";
       const std::string norm  = "\033[0m";

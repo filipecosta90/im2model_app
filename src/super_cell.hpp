@@ -38,6 +38,7 @@
 
 #include "image_bounds.hpp"
 #include "base_cell.hpp"
+#include "unit_cell.hpp"
 
 class SuperCell : public ImageBounds , public BaseCell {
   private:
@@ -47,10 +48,13 @@ class SuperCell : public ImageBounds , public BaseCell {
     ApplicationLog::ApplicationLog* logger = nullptr;
     bool _flag_logger = false;
 
+protected:
+
+
   public:
     SuperCell();
 
-    
+
     /* Loggers */
     bool set_application_logger( ApplicationLog::ApplicationLog* logger );
     void print_var_state();

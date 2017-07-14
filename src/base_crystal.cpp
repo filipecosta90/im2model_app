@@ -48,18 +48,18 @@ bool BaseCrystal::calculate_thickness_slice_period(){
     if( !_flag_simulated_params_nm_slice_vec ){
       simulated_params_slice_vec.reserve( slice_samples );
       simulated_params_nm_slice_vec.reserve( slice_samples );
-    for( int slice_pos = 0; slice_pos < (slice_samples-1); slice_pos++ ){
-      const int at_slice = slices_lower_bound + (slice_pos * slice_period);
-      simulated_params_slice_vec.push_back( at_slice );
-      const double at_thickness = slice_params_accum_nm_slice_vec.at( at_slice - 1 );
-      simulated_params_nm_slice_vec.push_back( at_thickness );
+      for( int slice_pos = 0; slice_pos < (slice_samples-1); slice_pos++ ){
+        const int at_slice = slices_lower_bound + (slice_pos * slice_period);
+        simulated_params_slice_vec.push_back( at_slice );
+        const double at_thickness = slice_params_accum_nm_slice_vec.at( at_slice - 1 );
+        simulated_params_nm_slice_vec.push_back( at_thickness );
+      }
+      const double top_thickness = slice_params_accum_nm_slice_vec.at( slices_upper_bound - 1);
+      simulated_params_slice_vec.push_back( slices_upper_bound );
+      simulated_params_nm_slice_vec.push_back( top_thickness );
+      _flag_simulated_params_slice_vec = true;
+      _flag_simulated_params_nm_slice_vec = true;
     }
-    const double top_thickness = slice_params_accum_nm_slice_vec.at( slices_upper_bound - 1);
-    simulated_params_slice_vec.push_back( slices_upper_bound );
-    simulated_params_nm_slice_vec.push_back( top_thickness );
-    _flag_simulated_params_slice_vec = true;
-    _flag_simulated_params_nm_slice_vec = true;
-  }
 
     result = true;
   }
@@ -80,7 +80,7 @@ bool BaseCrystal::clean_for_re_run(){
   simulated_params_nm_slice_vec.clear();
   simulated_params_nm_defocus_vec.clear();
 
-_flag_slice_params_nm_slice = false;
+  _flag_slice_params_nm_slice = false;
   _flag_slice_params_accum_nm_slice_vec = false;
   _flag_slice_params_nm_slice_vec = false;
   _flag_simulated_params_slice_vec = false;
@@ -131,8 +131,18 @@ int BaseCrystal::get_slice_number_from_nm_ceil( double goal_thickness_nm  ){
 //setters
 bool BaseCrystal::set_unit_cell_cif_path( std::string cif_path ){
   unit_cell_cif_path = cif_path;
-  _flag_unit_cell_cif_path = true;
-  return true;
+  bool result = true;
+   cif_driver.parse( cif_path.c_str() );
+  result &= cif_driver.populate_unit_cell();
+  result &= cif_driver.populate_atom_site_unit_cell();
+  result &= cif_driver.populate_symetry_equiv_pos_as_xyz_unit_cell();
+  if( result ){
+    unit_cell = cif_driver.get_unit_cell();
+    result &= unit_cell->create_atoms_from_site_and_symetry();
+    _flag_unit_cell = result;
+  }
+  _flag_unit_cell_cif_path = result;
+  return result;
 }
 
 bool BaseCrystal::set_nz_simulated_partitions_from_prm(){
@@ -417,6 +427,7 @@ std::ostream& BaseCrystal::output(std::ostream& stream) const {
   stream << "BaseCrystal vars:\n"
     << "\t" << "unit_cell_cif_path : " <<  unit_cell_cif_path << "\n"
     << "\t\t" << "_flag_unit_cell_cif_path : " << std::boolalpha << _flag_unit_cell_cif_path << "\n"
+    << "\t" << "_flag_unit_cell : " <<  _flag_unit_cell << "\n"
 
     << "\t" << "nz_simulated_partitions : " <<  nz_simulated_partitions << "\n"
     << "\t\t" << "_flag_nz_simulated_partitions : " << std::boolalpha <<  _flag_nz_simulated_partitions << "\n"
