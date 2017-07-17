@@ -125,7 +125,7 @@ class BaseCrystal {
     bool clean_for_re_run();
     bool get_flag_nz_simulated_partitions(){ return _flag_nz_simulated_partitions; }
     bool get_flag_ht_accelaration_voltage(){ return _flag_ht_accelaration_voltage; }
-    bool get_flag_flag_slc_file_name_prefix(){ return _flag_slc_file_name_prefix; }
+    bool get_flag_slc_file_name_prefix(){ return _flag_slc_file_name_prefix; }
     // [Slice Parameters]
     bool get_flag_slice_params_nm_slice_vec(){ return _flag_slice_params_nm_slice_vec; };
     bool get_flag_slice_params_accum_nm_slice_vec(){ return _flag_slice_params_accum_nm_slice_vec; };

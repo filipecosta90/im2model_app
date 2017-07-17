@@ -20,10 +20,23 @@
 #include "base_image.hpp"
 #include "base_crystal.hpp"
 #include "application_log.hpp"
+#include "unit_cell.hpp"
+#include "super_cell.hpp"
 
-class WAVIMG_prm : public BaseBin, public BaseCrystal, public BaseImage {
-
+class WAVIMG_prm : public BaseBin {
   private:
+    /* Classes with sim properties */
+    UnitCell* unit_cell = nullptr;
+    bool _flag_unit_cell = false;
+    BaseCrystal* sim_crystal_properties = nullptr;
+    bool _flag_sim_crystal_properties = false;
+    SuperCell* sim_super_cell = nullptr;
+    bool _flag_sim_super_cell = false;
+    BaseImage* sim_image_properties = nullptr;
+    bool _flag_sim_image_properties = false;
+
+    /* vars */
+
     // line 1
     std::string file_name_input_wave_function;
     // line 5
@@ -95,6 +108,7 @@ class WAVIMG_prm : public BaseBin, public BaseCrystal, public BaseImage {
     std::vector<int> loop_range_n;
     // line 26 + aberration_definition_index_number
     std::vector<std::string> loop_string_indentifier;
+
     // runnable execv info
     std::string prm_filename;
     bool _flag_prm_filename;
@@ -116,6 +130,11 @@ class WAVIMG_prm : public BaseBin, public BaseCrystal, public BaseImage {
 
   public:
     WAVIMG_prm( boost::process::ipstream& async_io_buffer_out );
+
+    bool set_unit_cell( UnitCell* unit_cell );
+    bool set_sim_crystal_properties ( BaseCrystal* crystal_prop );
+    bool set_sim_super_cell ( SuperCell* sim_super_cell );
+    bool set_sim_image_properties ( BaseImage* sim_image_properties );
 
     enum AberrationDefinition {
       ImageShift = 0, Defocus = 1, TwofoldAstigmatism = 2, Coma = 3,
@@ -145,6 +164,7 @@ class WAVIMG_prm : public BaseBin, public BaseCrystal, public BaseImage {
     bool base_cystal_clean_for_re_run();
 
     bool check_produced_dat();
+
 
 
     // setters line 1
@@ -210,19 +230,19 @@ class WAVIMG_prm : public BaseBin, public BaseCrystal, public BaseImage {
      * getters
      */
 
-
     double get_aberration_definition( WAVIMG_prm::AberrationDefinition aberration_index, int coefficient );
 
     bool get_aberration_definition_switch( WAVIMG_prm::AberrationDefinition aberration_index );
 
     bool get_mtf_simulation_switch();
 
-    bool set_super_cell_size_a( double size );
-    bool set_super_cell_size_b( double size );
     /* Loggers */
     bool set_application_logger( ApplicationLog::ApplicationLog* logger );
+
     void print_var_state();
+
     friend std::ostream& operator<< (std::ostream& stream, const WAVIMG_prm& var);
+
     virtual std::ostream& output(std::ostream& stream) const;
 
 

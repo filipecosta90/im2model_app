@@ -16,75 +16,86 @@ bool BaseCell::set_cel_margin_nm( double margin ){
   return true;
 }
 
-void BaseCell::set_length_a_Angstroms( double a ){
+bool BaseCell::set_length_a_Angstroms( double a ){
   length_a_Angstroms = a;
   length_a_Nanometers = a / 10.0f;
   _flag_length_a = true;
   update_length_flag();
+  return true;
 }
 
-void BaseCell::set_length_b_Angstroms( double b ){
+bool BaseCell::set_length_b_Angstroms( double b ){
   length_b_Angstroms = b;
   length_b_Nanometers = b / 10.0f;
   _flag_length_b = true;
   update_length_flag();
-
+  return true;
 }
 
-void BaseCell::set_length_c_Angstroms( double c ){
+bool BaseCell::set_length_c_Angstroms( double c ){
   length_c_Angstroms = c;
   length_c_Nanometers = c / 10.0f;
   _flag_length_c = true;
   update_length_flag();
+  return true;
 }
 
-void BaseCell::set_length_a_Nanometers( double a ){
+bool BaseCell::set_length_a_Nanometers( double a ){
   length_a_Angstroms = a * 10.0f;
   length_a_Nanometers = a;
   _flag_length_a = true;
   update_length_flag();
+  return true;
 }
 
-void BaseCell::set_length_b_Nanometers( double b ){
+bool BaseCell::set_length_b_Nanometers( double b ){
   length_b_Angstroms = b * 10.0f;
   length_b_Nanometers = b;
   _flag_length_b = true;
   update_length_flag();
+  return true;
 }
 
-void BaseCell::set_length_c_Nanometers( double c ){
+bool BaseCell::set_length_c_Nanometers( double c ){
   length_c_Angstroms = c * 10.0f;
   length_c_Nanometers = c;
   _flag_length_c = true;
   update_length_flag();
+  return true;
 }
 
 void BaseCell::update_length_flag(){
   _flag_length = _flag_length_a && _flag_length_b && _flag_length_c;
 }
 
-void BaseCell::set_angle_alpha( double alpha ){
+bool BaseCell::set_angle_alpha( double alpha ){
   angle_alpha = alpha;
+  return true;
 }
 
-void BaseCell::set_angle_beta( double beta ){
+bool BaseCell::set_angle_beta( double beta ){
   angle_beta = beta;
+  return true;
 }
 
-void BaseCell::set_angle_gamma( double gamma ){
+bool BaseCell::set_angle_gamma( double gamma ){
   angle_gamma = gamma;
+  return true;
 }
 
-void BaseCell::set_cell_volume( double volume ){
+bool BaseCell::set_cell_volume( double volume ){
   cell_volume = volume;
+  return true;
 }
 
-void BaseCell::set_zone_axis_vector ( cv::Point3d uvw ){
+bool BaseCell::set_zone_axis_vector ( cv::Point3d uvw ){
   zone_axis_vector_uvw = uvw;
+  return true;
 }
 
-void BaseCell::set_upward_vector ( cv::Point3d hkl ){
+bool BaseCell::set_upward_vector ( cv::Point3d hkl ){
   upward_vector_hkl = hkl;
+  return true;
 }
 
 bool BaseCell::set_projected_y_axis_u( double u ){

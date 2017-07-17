@@ -45,6 +45,7 @@
 class SimGrid {
 
   private:
+
     // // // // //
     // simulation parameters
     // // // // //

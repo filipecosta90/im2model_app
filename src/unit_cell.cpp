@@ -8,6 +8,10 @@
 #include "chem_database.hpp"             // for Chem_Database
 #include "symbcalc.hpp"                  // for symbCalc
 
+UnitCell::UnitCell() {
+  
+}
+
 void UnitCell::add_symmetry_equiv_pos_as_xyz(std::string xyz){
   symmetry_equiv_pos_as_xyz.push_back(xyz);
 }

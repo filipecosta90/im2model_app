@@ -20,6 +20,7 @@
 #include "simgrid.hpp"
 #include "group_options.h"
 #include "super_cell.hpp"
+#include "unit_cell.hpp"
 
 class TDMap  : public QObject {
   Q_OBJECT
@@ -78,7 +79,7 @@ class TDMap  : public QObject {
     /* *
      * UnitCell
      * */
-    UnitCell unit_cell = nullptr;
+    UnitCell* unit_cell = nullptr;
 
     /* *
      * SuperCell
@@ -125,6 +126,7 @@ class TDMap  : public QObject {
         boost::process::ipstream& ostream_wavimg_buffer,
         boost::process::ipstream& ostream_simgrid_buffer,
         ApplicationLog::ApplicationLog* app_logger );
+
     /** others **/
 
     bool export_sim_grid( std::string sim_grid_file_name_image );
@@ -326,7 +328,6 @@ class TDMap  : public QObject {
 
 
     /* gui validator limits getters */
-
     double get_exp_image_properties_sampling_rate_nm_per_pixel_bottom_limit();
     double get_exp_image_properties_sampling_rate_nm_per_pixel_top_limit();
 

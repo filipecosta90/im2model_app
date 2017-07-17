@@ -42,19 +42,18 @@
 #include "application_log.hpp"
 
 class CELSLC_prm : public BaseBin {
-private:
-  /* Classes with sim properties */
-  UnitCell* unit_cell = nullptr;
-  bool _flag_unit_cell = false;
-BaseCrystal* sim_crystal_properties = nullptr;
-bool _flag_sim_crystal_properties = false;
-SuperCell* sim_super_cell = nullptr;
-bool _flag_sim_super_cell = false;
-BaseImage* sim_image_properties = nullptr;
-bool _flag_sim_image_properties = false;
+  private:
+    /* Classes with sim properties */
+    UnitCell* unit_cell = nullptr;
+    bool _flag_unit_cell = false;
+    BaseCrystal* sim_crystal_properties = nullptr;
+    bool _flag_sim_crystal_properties = false;
+    SuperCell* sim_super_cell = nullptr;
+    bool _flag_sim_super_cell = false;
+    BaseImage* sim_image_properties = nullptr;
+    bool _flag_sim_image_properties = false;
 
-/* vars */
-
+    /* vars */
     bool ssc_runned_bin = false;
     bool dwf_switch = false;
     bool abs_switch = false;
@@ -111,10 +110,12 @@ bool _flag_sim_image_properties = false;
 
     bool call_bin_ssc();
 
+
     /* Loggers */
     bool set_application_logger( ApplicationLog::ApplicationLog* logger );
-
+    virtual std::ostream& output(std::ostream& stream) const;
     void print_var_state();
+
 
 
 };

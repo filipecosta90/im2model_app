@@ -9,19 +9,18 @@ TDMap::TDMap(
     )
 {
 
-/* base unit cell info */
+  /* base unit cell info */
   unit_cell = new UnitCell();
 
   /* *
    * SuperCell
    * */
-tdmap_roi_sim_super_cell = new SuperCell( unit_cell );
+  tdmap_roi_sim_super_cell = new SuperCell( unit_cell );
   tdmap_full_sim_super_cell = new SuperCell( unit_cell );
   final_full_sim_super_cell = new SuperCell( unit_cell );
 
   sim_image_properties = new BaseImage();
-  roi_exp_image_properties = new BaseImage();
-  full_exp_image_properties = new BaseImage();
+  exp_image_properties = new BaseImage();
 
   sim_crystal_properties = new BaseCrystal();
 
@@ -30,10 +29,8 @@ tdmap_roi_sim_super_cell = new SuperCell( unit_cell );
   _tdmap_wavimg_parameters = new WAVIMG_prm( ostream_wavimg_buffer );
   _td_map_simgrid = new SimGrid( ostream_simgrid_buffer );
 
-roi_exp_image_properties->set_flag_auto_a_size( true );
-full_exp_image_properties->set_flag_auto_a_size( true );
-roi_exp_image_properties->set_flag_auto_b_size( true );
-full_exp_image_properties->set_flag_auto_b_size( true );
+  exp_image_properties->set_flag_auto_a_size( true );
+  exp_image_properties->set_flag_auto_b_size( true );
 
   sim_image_properties->set_flag_auto_n_rows(true);
   sim_image_properties->set_flag_auto_n_cols(true);
@@ -45,13 +42,22 @@ full_exp_image_properties->set_flag_auto_b_size( true );
   _tdmap_celslc_parameters->set_sim_image_properties ( sim_image_properties );
 
   // set pointers for msa
-  // set pointers for wavimg
+  _tdmap_msa_parameters->set_unit_cell ( unit_cell );
+  _tdmap_msa_parameters->set_sim_crystal_properties ( sim_crystal_properties );
+  _tdmap_msa_parameters->set_sim_super_cell ( tdmap_roi_sim_super_cell );
+  _tdmap_msa_parameters->set_sim_image_properties ( sim_image_properties );
 
-// set pointers for simgrid
+  // set pointers for wavimg
+  _tdmap_wavimg_parameters->set_unit_cell ( unit_cell );
+  _tdmap_wavimg_parameters->set_sim_crystal_properties ( sim_crystal_properties );
+  _tdmap_wavimg_parameters->set_sim_super_cell ( tdmap_roi_sim_super_cell );
+  _tdmap_wavimg_parameters->set_sim_image_properties ( sim_image_properties );
+
+  // set pointers for simgrid
   _td_map_simgrid->set_wavimg_var( _tdmap_wavimg_parameters );
   _td_map_simgrid->set_sim_crystal_properties ( sim_crystal_properties );
-_td_map_simgrid->set_exp_image_properties ( roi_exp_image_properties );
-_td_map_simgrid->set_sim_image_properties ( sim_image_properties );
+  _td_map_simgrid->set_exp_image_properties ( exp_image_properties );
+  _td_map_simgrid->set_sim_image_properties ( sim_image_properties );
 
   /////////////
   // only for debug. need to add this options like in im2model command line
@@ -541,11 +547,11 @@ bool TDMap::export_sim_grid( std::string sim_grid_file_name_image ){
 
 /* flag getters */
 bool TDMap::get_flag_simulated_images_vertical_header_slice_nm(){
-  return _td_map_simgrid->get_flag_simulated_params_nm_slice_vec();
+  return sim_crystal_properties->get_flag_simulated_params_nm_slice_vec();
 }
 
 bool TDMap::get_flag_simulated_images_horizontal_header_defocus_nm(){
-  return _td_map_simgrid->get_flag_simulated_params_nm_defocus_vec();
+  return sim_crystal_properties->get_flag_simulated_params_nm_defocus_vec();
 }
 
 bool TDMap::get_flag_simgrid_best_match_position(){
@@ -558,11 +564,11 @@ bool TDMap::get_flag_simulated_images_grid(){
 
 /* getters */
 std::vector< double > TDMap::get_simulated_images_vertical_header_slice_nm(){
-  return _td_map_simgrid->get_simulated_params_nm_slice_vec();
+  return sim_crystal_properties->get_simulated_params_nm_slice_vec();
 }
 
 std::vector< double > TDMap::get_simulated_images_horizontal_header_defocus_nm(){
-  return _td_map_simgrid->get_simulated_params_nm_defocus_vec();
+  return sim_crystal_properties->get_simulated_params_nm_defocus_vec();
 }
 
 // more work here. asserts, etc
@@ -705,7 +711,7 @@ std::vector<double> TDMap::get_slice_params_accum_nm_slice_vec(){
 /** setters **/
 // class setters
 bool TDMap::set_slc_file_name_prefix( std::string prefix ){
-  return sim_crystal_properties->set_slc_file_name_prefix();
+  return sim_crystal_properties->set_slc_file_name_prefix( prefix );
 }
 
 bool TDMap::set_wave_function_name( std::string name ){
@@ -724,48 +730,15 @@ bool TDMap::set_file_name_output_image_wave_function( std::string image_wave ){
 }
 
 bool TDMap::set_slc_output_target_folder( std::string folder ){
-  bool result = false;
-  // celslc
-  bool celslc_result = _tdmap_celslc_parameters->set_slc_output_target_folder( folder );
-  celslc_result &= _tdmap_celslc_parameters->set_base_bin_output_target_folder( folder );
-  // msa
-  const bool msa_result = _tdmap_msa_parameters->set_slc_output_target_folder( folder );
-  // wavimg
-  const bool wavimg_result =  _tdmap_wavimg_parameters->set_slc_output_target_folder( folder );
-  // simgrid
-  const bool simgrid_result = _td_map_simgrid->set_slc_output_target_folder( folder );
-  result = celslc_result & msa_result & wavimg_result & simgrid_result;
-  return result;
+  return sim_crystal_properties->set_slc_output_target_folder( folder );
 }
 
 bool TDMap::set_wav_output_target_folder( std::string folder ){
-  bool result = false;
-  // celslc
-  const bool celslc_result = _tdmap_celslc_parameters->set_wav_output_target_folder( folder );
-  // msa
-  bool msa_result = _tdmap_msa_parameters->set_wav_output_target_folder( folder );
-  msa_result &= _tdmap_msa_parameters->set_base_bin_output_target_folder( folder );
-  // wavimg
-  const bool wavimg_result =  _tdmap_wavimg_parameters->set_wav_output_target_folder( folder );
-  // simgrid
-  const bool simgrid_result = _td_map_simgrid->set_wav_output_target_folder( folder );
-  result = celslc_result & msa_result & wavimg_result & simgrid_result;
-  return result;
+  return sim_crystal_properties->set_wav_output_target_folder( folder );
 }
 
 bool TDMap::set_dat_output_target_folder( std::string folder ){
-  bool result = false;
-  //celslc
-  const bool celslc_result = _tdmap_celslc_parameters->set_dat_output_target_folder( folder );
-  // msa
-  const bool msa_result = _tdmap_msa_parameters->set_dat_output_target_folder( folder );
-  //wavimg
-  bool wavimg_result =  _tdmap_wavimg_parameters->set_dat_output_target_folder( folder );
-  wavimg_result &= _tdmap_wavimg_parameters->set_base_bin_output_target_folder( folder );
-  // simgrid
-  const bool simgrid_result = _td_map_simgrid->set_dat_output_target_folder( folder );
-  result = celslc_result & msa_result & wavimg_result & simgrid_result;
-  return result;
+  return sim_crystal_properties->set_dat_output_target_folder( folder );
 }
 
 bool TDMap::set_msa_prm_name(  std::string prm_name  ){
@@ -803,7 +776,7 @@ bool TDMap::set_super_cell_size_b( std::string size_b ){
   try {
     const double _super_cell_size_b = boost::lexical_cast<double>( size_b );
     const bool cell_result = tdmap_roi_sim_super_cell->set_length_b_Nanometers( _super_cell_size_b );
-    const bool image_result = sim_image_properties->set_full_nm_size_rows_b( _super_cell_size_b );
+    const bool image_result = sim_image_properties->set_full_nm_size_cols_b( _super_cell_size_b );
     result = cell_result & image_result;
   }
   catch(boost::bad_lexical_cast&  ex) {
@@ -818,8 +791,7 @@ bool TDMap::set_super_cell_size_c( std::string size_c ){
   try {
     const double _super_cell_size_c = boost::lexical_cast<double>( size_c );
     const bool cell_result = tdmap_roi_sim_super_cell->set_length_c_Nanometers( _super_cell_size_c );
-    const bool image_result = sim_image_properties->set_full_nm_size_rows_c( _super_cell_size_c );
-    result = cell_result & image_result;
+    result = cell_result;
   }
   catch(boost::bad_lexical_cast&  ex) {
     // pass it up
@@ -863,16 +835,11 @@ bool TDMap::set_project_filename_with_path( std::string filename_with_path ){
 }
 
 bool TDMap::set_base_dir_path( boost::filesystem::path path ){
-  bool result = false;
-  bool celslc_result = _tdmap_celslc_parameters->set_base_dir_path( path );
-  bool msa_result = _tdmap_msa_parameters->set_base_dir_path( path );
-  bool wavimg_result = _tdmap_wavimg_parameters->set_base_dir_path( path );
-  bool simgrid_result = _td_map_simgrid->set_base_dir_path(path);
-  // set bin start dir
-  celslc_result &= _tdmap_celslc_parameters->set_base_bin_start_dir_path( path );
-  msa_result &= _tdmap_msa_parameters->set_base_bin_start_dir_path( path );
-  wavimg_result &= _tdmap_wavimg_parameters->set_base_bin_start_dir_path( path );
-  result = celslc_result & msa_result & wavimg_result & simgrid_result;
+  bool result = true;
+  result &= sim_crystal_properties->set_base_dir_path( path );
+  result &= _tdmap_celslc_parameters->set_base_bin_start_dir_path( path );
+  result &= _tdmap_msa_parameters->set_base_bin_start_dir_path( path );
+  result &= _tdmap_wavimg_parameters->set_base_bin_start_dir_path( path );
   return result;
 }
 
@@ -891,7 +858,14 @@ bool TDMap::set_application_logger( ApplicationLog::ApplicationLog* app_logger )
   _tdmap_msa_parameters->set_application_logger( app_logger );
   _tdmap_wavimg_parameters->set_application_logger( app_logger );
   _td_map_simgrid->set_application_logger(app_logger);
-  _super_cell->set_application_logger(app_logger);
+  /* Classes with sim properties */
+  //unit_cell->set_application_logger(app_logger);
+  tdmap_roi_sim_super_cell->set_application_logger(app_logger);
+  tdmap_full_sim_super_cell->set_application_logger(app_logger);
+  final_full_sim_super_cell->set_application_logger(app_logger);
+  sim_image_properties->set_application_logger(app_logger);
+  exp_image_properties->set_application_logger(app_logger);
+  sim_crystal_properties->set_application_logger(app_logger);
   return true;
 }
 
@@ -926,20 +900,14 @@ bool TDMap::set_dr_probe_wavimg_execname( std::string wavimg_execname ){
 }
 
 bool TDMap::set_exp_image_properties_full_image( std::string path ){
-  bool result = false;
-  const bool simgrid_result = _td_map_simgrid->set_exp_image_properties_full_image( path );
-  const bool super_cell_result = tdmap_full_sim_super_cell->set_full_image( path );
-  result = simgrid_result && super_cell_result;
-  return result;
+  return exp_image_properties->set_full_image( path );
 }
 
 bool TDMap::set_exp_image_properties_roi_center_x( std::string s_center_x ){
   bool result = false;
   try {
     const int center_x = boost::lexical_cast<int>( s_center_x );
-    const bool simgrid_result = _td_map_simgrid->set_exp_image_properties_roi_center_x( center_x );
-    const bool super_cell_result = tdmap_full_sim_super_cell->set_roi_center_x( center_x );
-    result = simgrid_result && super_cell_result;
+    result = exp_image_properties->set_roi_center_x( center_x );
   }
   catch(boost::bad_lexical_cast&  ex) {
     // pass it up
@@ -952,9 +920,7 @@ bool TDMap::set_exp_image_properties_roi_center_y( std::string s_center_y ){
   bool result = false;
   try {
     const int center_y = boost::lexical_cast<int>( s_center_y );
-    const bool simgrid_result = _td_map_simgrid->set_exp_image_properties_roi_center_y( center_y );
-    const bool super_cell_result = tdmap_full_sim_super_cell->set_roi_center_y( center_y );
-    result = simgrid_result && super_cell_result;
+    result = exp_image_properties->set_roi_center_y( center_y );
   }
   catch(boost::bad_lexical_cast&  ex) {
     // pass it up
@@ -984,10 +950,10 @@ bool TDMap::set_exp_image_properties_sampling_rate_y_nm_per_pixel( std::string s
   bool result = false;
   try {
     const double s_rate_y = boost::lexical_cast<double>( sampling_y );
-    const bool exp_result = exp_image_properties->set_sampling_rate_y_nm_per_pixel( s_rate_x );
-    const bool sim_result = sim_image_properties->set_sampling_rate_y_nm_per_pixel( s_rate_x );
-    const bool roi_result = tdmap_roi_sim_super_cell->set_sampling_rate_y_nm_per_pixel( s_rate_x );
-    const bool full_result = tdmap_full_sim_super_cell->set_sampling_rate_y_nm_per_pixel( s_rate_x );
+    const bool exp_result = exp_image_properties->set_sampling_rate_y_nm_per_pixel( s_rate_y );
+    const bool sim_result = sim_image_properties->set_sampling_rate_y_nm_per_pixel( s_rate_y );
+    const bool roi_result = tdmap_roi_sim_super_cell->set_sampling_rate_y_nm_per_pixel( s_rate_y );
+    const bool full_result = tdmap_full_sim_super_cell->set_sampling_rate_y_nm_per_pixel( s_rate_y );
     result = exp_result & sim_result & roi_result & full_result;
   }
   catch(boost::bad_lexical_cast&  ex) {
@@ -1001,8 +967,7 @@ bool TDMap::set_ny_size_width( std::string s_ny ){
   bool result = false;
   try {
     const double ny = boost::lexical_cast<double>( s_ny );
-    const bool simgrid_result = _td_map_simgrid->set_exp_image_properties_roi_n_cols_width( ny );
-    result = simgrid_result;
+    result = exp_image_properties->set_roi_n_cols_width( ny );
   }
   catch(boost::bad_lexical_cast&  ex) {
     // pass it up
@@ -1015,8 +980,7 @@ bool TDMap::set_nx_size_height( std::string s_nx ){
   bool result = false;
   try {
     const double nx = boost::lexical_cast<double>( s_nx );
-    const bool simgrid_result = _td_map_simgrid->set_exp_image_properties_roi_n_rows_height( nx );
-    result =  simgrid_result;
+    result = exp_image_properties->set_roi_n_rows_height( nx );
   }
   catch(boost::bad_lexical_cast&  ex) {
     // pass it up
@@ -1267,7 +1231,7 @@ bool TDMap::set_accelaration_voltage_kv( std::string accelaration_voltage ){
   bool result = false;
   try {
     const double _ht_accelaration_voltage = boost::lexical_cast<double>( accelaration_voltage );
-    result = sim_crystal_properties->set_ht_accelaration_voltage( upper_bound );
+    result = sim_crystal_properties->set_ht_accelaration_voltage( _ht_accelaration_voltage );
   }
   catch(boost::bad_lexical_cast&  ex) {
     // pass it up
@@ -1363,15 +1327,15 @@ std::string TDMap::get_project_filename_with_path(){
 /* gui flag getters */
 
 bool TDMap::get_exp_image_properties_flag_full_image(){
-  return  _td_map_simgrid->get_exp_image_properties_flag_full_image();
+  return exp_image_properties->get_flag_full_image();
 }
 
 int TDMap::get_exp_image_properties_full_n_cols_width(){
-  return  _td_map_simgrid->get_exp_image_properties_full_n_cols_width();
+  return exp_image_properties->get_full_n_cols_width();
 }
 
 int TDMap::get_exp_image_properties_full_n_rows_height(){
-  return  _td_map_simgrid->get_exp_image_properties_full_n_rows_height();
+  return exp_image_properties->get_full_n_rows_height();
 }
 
 double TDMap::get_full_boundary_polygon_margin_nm(){
@@ -1388,15 +1352,15 @@ double TDMap::get_exp_image_properties_sampling_rate_nm_per_pixel_top_limit(){
 
 int TDMap::get_experimental_roi_dimensions_width_bottom_limit(){
   int bot_limit = 0;
-  if( _td_map_simgrid->get_sim_image_properties_flag_full_n_cols_width() ){
-    bot_limit = _td_map_simgrid->get_sim_image_properties_full_n_cols_width();
+  if( sim_image_properties->get_flag_full_n_cols_width() ){
+    bot_limit = sim_image_properties->get_full_n_cols_width();
   }
   return bot_limit;
 }
 
 int TDMap::get_experimental_roi_dimensions_width_top_limit(){
-  const int _center_y = _td_map_simgrid->get_exp_image_properties_roi_center_y();
-  const int _dim_y = _td_map_simgrid->get_exp_image_properties_full_n_cols_width();
+  const int _center_y = exp_image_properties->get_roi_center_y();
+  const int _dim_y = exp_image_properties->get_full_n_cols_width();
   const int top_half = _dim_y - _center_y;
   const int bot_half = _center_y - 0; // just to explain the tought
   // use the smaller half
@@ -1406,15 +1370,15 @@ int TDMap::get_experimental_roi_dimensions_width_top_limit(){
 
 int TDMap::get_experimental_roi_dimensions_height_bottom_limit(){
   int bot_limit = 0;
-  if( _td_map_simgrid->get_sim_image_properties_flag_full_n_rows_height() ){
-    bot_limit = _td_map_simgrid->get_sim_image_properties_full_n_rows_height();
+  if( sim_image_properties->get_flag_full_n_rows_height() ){
+    bot_limit = sim_image_properties->get_full_n_rows_height();
   }
   return bot_limit;
 }
 
 int TDMap::get_experimental_roi_dimensions_height_top_limit(){
-  const int _center_x = _td_map_simgrid->get_exp_image_properties_roi_center_x();
-  const int _dim_x = _td_map_simgrid->get_exp_image_properties_full_n_rows_height();
+  const int _center_x = exp_image_properties->get_roi_center_x();
+  const int _dim_x = exp_image_properties->get_full_n_rows_height();
   const int top_half = _dim_x - _center_x;
   const int bot_half = _center_x - 0; // just to explain the tought
   // use the smaller half
@@ -1529,19 +1493,19 @@ double TDMap::get_full_boundary_polygon_margin_nm_top_limit(){
 }
 
 bool TDMap::get_exp_image_properties_flag_roi_image(){
-  return  _td_map_simgrid->get_exp_image_properties_flag_roi_image();
+  return exp_image_properties->get_flag_roi_image();
 }
 
 bool TDMap::get_exp_image_properties_flag_roi_rectangle(){
-  return  _td_map_simgrid->get_exp_image_properties_flag_roi_rectangle();
+  return exp_image_properties->get_flag_roi_rectangle();
 }
 
 /* gui getters */
 int TDMap::get_experimental_roi_center_x_bottom_limit(){
   int bot_limit = 0;
-  if( _td_map_simgrid->get_exp_image_properties_flag_full_n_rows_height() ){
-    if( _td_map_simgrid->get_exp_image_properties_flag_roi_nx_size_height() ){
-      bot_limit = bot_limit + ( _td_map_simgrid->get_exp_image_properties_roi_nx_size_height() / 2.0f );
+  if( exp_image_properties->get_flag_full_n_rows_height() ){
+    if( exp_image_properties->get_flag_roi_n_rows_height() ){
+      bot_limit = bot_limit + ( exp_image_properties->get_roi_n_rows_height() / 2.0f );
     }
   }
   return bot_limit;
@@ -1549,9 +1513,9 @@ int TDMap::get_experimental_roi_center_x_bottom_limit(){
 
 int TDMap::get_experimental_roi_center_y_bottom_limit(){
   int bot_limit = 0;
-  if( _td_map_simgrid->get_exp_image_properties_flag_full_n_cols_width() ){
-    if( _td_map_simgrid->get_exp_image_properties_flag_roi_ny_size_width() ){
-      bot_limit = bot_limit + ( _td_map_simgrid->get_exp_image_properties_roi_ny_size_width() / 2.0f );
+  if( exp_image_properties->get_flag_full_n_cols_width() ){
+    if( exp_image_properties->get_flag_roi_n_cols_width() ){
+      bot_limit = bot_limit + ( exp_image_properties->get_roi_n_cols_width() / 2.0f );
     }
   }
   return bot_limit;
@@ -1559,10 +1523,10 @@ int TDMap::get_experimental_roi_center_y_bottom_limit(){
 
 int TDMap::get_experimental_roi_center_x_top_limit(){
   int top_limit = 0;
-  if( _td_map_simgrid->get_exp_image_properties_flag_full_n_rows_height() ){
-    top_limit = get_exp_image_properties_full_n_rows_height();
-    if( _td_map_simgrid->get_exp_image_properties_flag_roi_nx_size_height() ){
-      top_limit -= ( _td_map_simgrid->get_exp_image_properties_roi_nx_size_height() / 2.0f );
+  if( exp_image_properties->get_flag_full_n_rows_height() ){
+    top_limit = exp_image_properties->get_full_n_rows_height();
+    if( exp_image_properties->get_flag_roi_n_rows_height() ){
+      top_limit -= ( exp_image_properties->get_roi_n_rows_height() / 2.0f );
     }
   }
   return top_limit;
@@ -1570,45 +1534,45 @@ int TDMap::get_experimental_roi_center_x_top_limit(){
 
 int TDMap::get_experimental_roi_center_y_top_limit(){
   int top_limit = 0;
-  if( _td_map_simgrid->get_exp_image_properties_flag_full_n_cols_width() ){
+  if( exp_image_properties->get_flag_full_n_cols_width() ){
     top_limit = get_exp_image_properties_full_n_cols_width();
-    if( _td_map_simgrid->get_exp_image_properties_flag_roi_ny_size_width() ){
-      top_limit -= ( _td_map_simgrid->get_exp_image_properties_roi_ny_size_width() / 2.0f );
+    if( exp_image_properties->get_flag_roi_n_cols_width() ){
+      top_limit -= ( exp_image_properties->get_roi_n_cols_width() / 2.0f );
     }
   }
   return top_limit;
 }
 
 cv::Mat TDMap::get_exp_image_properties_full_image(){
-  return _td_map_simgrid->get_exp_image_properties_full_image();
+  return exp_image_properties->get_full_image();
 }
 
 cv::Mat TDMap::get_exp_image_properties_roi_image(){
-  return  _td_map_simgrid->get_exp_image_properties_roi_image();
+  return exp_image_properties->get_roi_image();
 }
 
 cv::Rect TDMap::get_exp_image_properties_roi_rectangle(){
-  return  _td_map_simgrid->get_exp_image_properties_roi_rectangle();
+  return exp_image_properties->get_roi_rectangle();
 }
 
 double TDMap::get_exp_image_properties_full_nx_size_height_nm(){
-  return  _td_map_simgrid->get_exp_image_properties_full_nx_size_height_nm();
+  return exp_image_properties->get_full_n_rows_height_nm();
 }
 
 double TDMap::get_exp_image_properties_full_ny_size_width_nm(){
-  return  _td_map_simgrid->get_exp_image_properties_full_ny_size_width_nm();
+  return exp_image_properties->get_full_n_cols_width_nm();
 }
 
 double TDMap::get_exp_image_properties_roi_nx_size_height_nm(){
-  return  _td_map_simgrid->get_exp_image_properties_roi_nx_size_height_nm();
+  return exp_image_properties->get_roi_n_rows_height_nm();
 }
 
 double TDMap::get_exp_image_properties_roi_ny_size_width_nm(){
-  return  _td_map_simgrid->get_exp_image_properties_roi_ny_size_width_nm();
+  return exp_image_properties->get_roi_n_cols_width_nm();
 }
 
 bool TDMap::calculate_exp_image_boundaries_from_full_image(){
-  return _super_cell->calculate_boundaries_from_full_image();
+  return tdmap_full_sim_super_cell->calculate_boundaries_from_full_image();
 }
 
 bool TDMap::set_exp_image_bounds_hysteresis_threshold( int value ){

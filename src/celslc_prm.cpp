@@ -45,11 +45,14 @@ void CELSLC_prm::cleanup_thread(){
     ){
     if(
         // BaseCrystal vars
-        sim_crystal_properties->get_flag_flag_slc_file_name_prefix() &&
+        sim_crystal_properties->get_flag_slc_file_name_prefix() &&
         sim_crystal_properties->get_flag_nz_simulated_partitions()
       ){
-      // remove prm first
+      // get const vars from class pointer
       const std::string slc_file_name_prefix = sim_crystal_properties->get_slc_file_name_prefix();
+      const int nz_simulated_partitions = sim_crystal_properties->get_nz_simulated_partitions();
+
+      // remove prm first
       std::string prm_filename = slc_file_name_prefix + ".prm";
       boost::filesystem::path prm_file ( prm_filename );
       boost::filesystem::path full_prm_path = base_bin_output_dir_path / prm_file;
@@ -73,7 +76,6 @@ void CELSLC_prm::cleanup_thread(){
         }
       }
 
-      const int nz_simulated_partitions = sim_crystal_properties->get_nz_simulated_partitions();
 
       for ( int slice_id = 1 ;
           slice_id <= nz_simulated_partitions;
@@ -119,12 +121,13 @@ bool CELSLC_prm::check_produced_slices(){
     ){
     if(
         // BaseCrystal vars
-        sim_crystal_properties->get_flag_flag_slc_file_name_prefix() &&
+        sim_crystal_properties->get_flag_slc_file_name_prefix() &&
         sim_crystal_properties->get_flag_nz_simulated_partitions() &&
         // BaseBin vars
         _flag_base_bin_start_dir_path &&
         _flag_base_bin_output_dir_path
       ){
+      // get const vars from class pointer
       const std::string slc_file_name_prefix = sim_crystal_properties->get_slc_file_name_prefix();
       const int nz_simulated_partitions = sim_crystal_properties->get_nz_simulated_partitions();
       bool flag_files = true;
@@ -198,13 +201,11 @@ bool CELSLC_prm::clean_for_re_run(){
 }
 
 std::ostream& CELSLC_prm::create_bin_args(std::ostream& args_stream) const {
-
   if(
       _flag_sim_super_cell &&
       _flag_sim_crystal_properties &&
       _flag_sim_image_properties
     ){
-
     args_stream << full_bin_path_execname.string();
 
     if( sim_super_cell->get_flag_cif_format() ){
@@ -289,31 +290,32 @@ std::ostream& CELSLC_prm::create_bin_args(std::ostream& args_stream) const {
 
   }
   else{
-    result = false;
     if( _flag_logger ){
       std::stringstream message;
       message << "The required Class POINTERS for create_bin_args() are not setted up.";
       logger->logEvent( ApplicationLog::error , message.str() );
     }
-    print_var_state();
   }
   return args_stream;
 }
 
 bool CELSLC_prm::call_boost_bin( ){
   bool result = false;
-  if( _flag_full_bin_path_execname ){
+  if(
+      _flag_sim_super_cell &&
+      _flag_sim_crystal_properties &&
+      _flag_sim_image_properties
+    ){
     if(
         // BaseCrystal vars
-        _flag_unit_cell_cif_path &&
-        _flag_slc_file_name_prefix &&
-        _flag_ht_accelaration_voltage &&
+        sim_crystal_properties->get_flag_slc_file_name_prefix() &&
+        sim_crystal_properties->get_flag_ht_accelaration_voltage() &&
         // BaseBin vars
         _flag_base_bin_start_dir_path &&
         _flag_base_bin_output_dir_path &&
         // BaseImage vars
-        _flag_full_n_rows_height  &&
-        _flag_full_n_cols_width
+        sim_image_properties->get_flag_full_n_rows_height() &&
+        sim_image_properties->get_flag_full_n_cols_width()
       )
     {
       std::stringstream args_stream;
@@ -366,7 +368,6 @@ bool CELSLC_prm::call_boost_bin( ){
         c.wait();
         _child_exit_code = c.exit_code();
       }
-
       bool _exit_sucess_flag;
 #if defined(BOOST_WINDOWS_API)
       if( _flag_logger ){
@@ -383,7 +384,6 @@ bool CELSLC_prm::call_boost_bin( ){
       }
       _exit_sucess_flag = ((EXIT_SUCCESS == WEXITSTATUS(_child_exit_code)));
 #endif
-
       if( _error_code ){
         if( _flag_logger ){
           std::stringstream message;
@@ -407,6 +407,43 @@ bool CELSLC_prm::call_boost_bin( ){
     }
   }
   return result;
+}
+
+/* Loggers */
+bool CELSLC_prm::set_application_logger( ApplicationLog::ApplicationLog* app_logger ){
+  logger = app_logger;
+  _flag_logger = true;
+  BaseBin::set_application_logger( app_logger );
+  logger->logEvent( ApplicationLog::notification, "Application logger setted for CELSLC_prm class." );
+  return true;
+}
+
+
+void CELSLC_prm::print_var_state(){
+  if( _flag_logger ){
+    std::stringstream message;
+    output(message);
+    logger->logEvent( ApplicationLog::notification , message.str() );
+  }
+}
+
+std::ostream& CELSLC_prm::output(std::ostream& stream) const {
+  stream << "Celslc vars:\n"
+    << "\t\t" << "ssc_runned_bin : " << std::boolalpha << ssc_runned_bin << "\n"
+    << "\t\t" << "dwf_switch : " << std::boolalpha << dwf_switch << "\n"
+    << "\t\t" << "abs_switch : " << std::boolalpha << abs_switch << "\n"
+    << "\t\t" << "auto_equidistant_slices_switch : " << std::boolalpha << auto_equidistant_slices_switch << "\n"
+    << "\t\t" << "auto_non_equidistant_slices_switch : " << std::boolalpha << auto_non_equidistant_slices_switch << "\n"
+    << "\t\t" << "single_slice_calculation_prepare_bin_runned_switch : " << std::boolalpha << single_slice_calculation_prepare_bin_runned_switch << "\n"
+    << "\t\t" << "single_slice_calculation_nz_switch : " << std::boolalpha << single_slice_calculation_nz_switch << "\n"
+    << "\t\t" << "single_slice_calculation_enabled_switch : " << std::boolalpha << single_slice_calculation_enabled_switch << "\n"
+    << "\t" << "BaseCrystal Properties : " << "\n";
+  //  BaseCrystal->output(message);
+  stream <<  "\t" << "BaseImage Properties : " << "\n";
+  //    BaseImage->output(message);
+  stream <<  "\t" << "BaseBin Properties : " << "\n";
+  //  BaseBin::output(message);
+  return stream;
 }
 
 /*
@@ -448,24 +485,24 @@ args_stream << " -prj " << (float) zone_axis_u  << "," << (float) zone_axis_v <<
  * or use -nz 0 to let CELSLC determine the number of equidistant slices automatically.
  * Omitting the -nz option will lead to an automatic non-equidistant slicing.
  * **/
- /*
-args_stream << " -nz 0";
+/*
+   args_stream << " -nz 0";
 
-if ( dwf_switch ){
-  args_stream << " -dwf";
-}
-if ( abs_switch ){
-  args_stream << " -abs";
-}
-std::cout << " prep run with args  " <<  args_stream.str() << std::endl;
-boost::process::system( args_stream.str() );
-single_slice_calculation_prepare_bin_runned_switch = set_nz_simulated_partitions_from_prm();
-std::cout << "ssc NZ max processes " << nz_simulated_partitions << std::endl;
-result = single_slice_calculation_prepare_bin_runned_switch;
-}
-return result;
-}
-*/
+   if ( dwf_switch ){
+   args_stream << " -dwf";
+   }
+   if ( abs_switch ){
+   args_stream << " -abs";
+   }
+   std::cout << " prep run with args  " <<  args_stream.str() << std::endl;
+   boost::process::system( args_stream.str() );
+   single_slice_calculation_prepare_bin_runned_switch = set_nz_simulated_partitions_from_prm();
+   std::cout << "ssc NZ max processes " << nz_simulated_partitions << std::endl;
+   result = single_slice_calculation_prepare_bin_runned_switch;
+   }
+   return result;
+   }
+   */
 /*
    bool CELSLC_prm::call_bin_ssc(){
    bool result = false;
@@ -576,37 +613,3 @@ result = false;
 return result;
 }
 */
-
-/* Loggers */
-bool CELSLC_prm::set_application_logger( ApplicationLog::ApplicationLog* app_logger ){
-  logger = app_logger;
-  _flag_logger = true;
-  BaseCrystal::set_application_logger( app_logger );
-  BaseImage::set_application_logger( app_logger );
-  BaseBin::set_application_logger( app_logger );
-  logger->logEvent( ApplicationLog::notification, "Application logger setted for CELSLC_prm class." );
-  return true;
-}
-
-void CELSLC_prm::print_var_state(){
-  if( _flag_logger ){
-    std::stringstream message;
-    message << "Celslc vars:\n"
-      << "\t\t" << "ssc_runned_bin : " << std::boolalpha << ssc_runned_bin << "\n"
-      << "\t\t" << "dwf_switch : " << std::boolalpha << dwf_switch << "\n"
-      << "\t\t" << "abs_switch : " << std::boolalpha << abs_switch << "\n"
-      << "\t\t" << "cel_format_switch : " << std::boolalpha << cel_format_switch << "\n"
-      << "\t\t" << "auto_equidistant_slices_switch : " << std::boolalpha << auto_equidistant_slices_switch << "\n"
-      << "\t\t" << "auto_non_equidistant_slices_switch : " << std::boolalpha << auto_non_equidistant_slices_switch << "\n"
-      << "\t\t" << "single_slice_calculation_prepare_bin_runned_switch : " << std::boolalpha << single_slice_calculation_prepare_bin_runned_switch << "\n"
-      << "\t\t" << "single_slice_calculation_nz_switch : " << std::boolalpha << single_slice_calculation_nz_switch << "\n"
-      << "\t\t" << "single_slice_calculation_enabled_switch : " << std::boolalpha << single_slice_calculation_enabled_switch << "\n"
-      << "\t" << "BaseCrystal Properties : " << "\n";
-    BaseCrystal->output(message);
-    message <<  "\t" << "BaseImage Properties : " << "\n";
-    BaseImage->output(message);
-    message <<  "\t" << "BaseBin Properties : " << "\n";
-    BaseBin::output(message);
-    logger->logEvent( ApplicationLog::notification , message.str() );
-  }
-}

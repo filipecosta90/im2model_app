@@ -23,9 +23,19 @@
 #include "base_crystal.hpp"
 #include "application_log.hpp"
 
-class MSA_prm : public BaseBin, public BaseCrystal, public BaseImage  {
-
+class MSA_prm : public BaseBin {
   private:
+    /* Classes with sim properties */
+    UnitCell* unit_cell = nullptr;
+    bool _flag_unit_cell = false;
+    BaseCrystal* sim_crystal_properties = nullptr;
+    bool _flag_sim_crystal_properties = false;
+    SuperCell* sim_super_cell = nullptr;
+    bool _flag_sim_super_cell = false;
+    BaseImage* sim_image_properties = nullptr;
+    bool _flag_sim_image_properties = false;
+
+    /* vars */
     double object_tilt_x_component = 0.0f;
     double object_tilt_y_component = 0.0f;
     int internal_repeat_factor_of_super_cell_along_x = 0;
@@ -50,7 +60,6 @@ class MSA_prm : public BaseBin, public BaseCrystal, public BaseImage  {
     bool _flag_logger = false;
 
     void cleanup_thread();
-
     bool save_prm_filename_path();
     bool _is_prm_filename_path_defined();
     bool _is_prm_produced();
@@ -58,6 +67,11 @@ class MSA_prm : public BaseBin, public BaseCrystal, public BaseImage  {
 
   public:
     MSA_prm( boost::process::ipstream& async_io_buffer_out );
+
+    bool set_unit_cell( UnitCell* unit_cell );
+    bool set_sim_crystal_properties ( BaseCrystal* crystal_prop );
+    bool set_sim_super_cell ( SuperCell* sim_super_cell );
+    bool set_sim_image_properties ( BaseImage* sim_image_properties );
 
     /** getters **/
     // flag getters
@@ -81,11 +95,6 @@ class MSA_prm : public BaseBin, public BaseCrystal, public BaseImage  {
 
     bool set_wave_function_name ( std::string wave_function_filename );
 
-    bool set_super_cell_size_a( double size );
-    bool set_super_cell_size_b( double size );
-    /* Loggers */
-    bool set_application_logger( ApplicationLog::ApplicationLog* logger );
-    void print_var_state();
 
 
     bool produce_prm();
@@ -97,7 +106,14 @@ class MSA_prm : public BaseBin, public BaseCrystal, public BaseImage  {
     bool check_produced_waves();
 
     bool clean_for_re_run();
+
     bool base_cystal_clean_for_re_run();
+
+    /* Loggers */
+    bool set_application_logger( ApplicationLog::ApplicationLog* logger );
+    virtual std::ostream& output(std::ostream& stream) const;
+    void print_var_state();
+
 
 
 
