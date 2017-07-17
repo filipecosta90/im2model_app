@@ -39,6 +39,7 @@
 #include "image_bounds.hpp"
 #include "base_cell.hpp"
 #include "unit_cell.hpp"
+//#include "edge.hpp"
 
 class SuperCell : public ImageBounds, public BaseCell {
   private:
@@ -64,10 +65,25 @@ protected:
   int expand_factor_a = 1;
   int expand_factor_b = 1;
   int expand_factor_c = 1;
+  bool _flag_expand_factor_a = false;
+  bool _flag_expand_factor_b = false;
+  bool _flag_expand_factor_c = false;
+  bool _flag_expand_factor = false;
 
   public:
     SuperCell();
     SuperCell( UnitCell* cell );
+
+    bool update_from_unit_cell();
+    bool create_atoms_from_unit_cell();
+
+    /* setters */
+    bool set_unit_cell( UnitCell* cell );
+
+    //overide set length from basecell
+    bool set_length_a_Nanometers( double a );
+    bool set_length_b_Nanometers( double b );
+    bool set_length_c_Nanometers( double c );
 
     /* Loggers */
     bool set_application_logger( ApplicationLog::ApplicationLog* logger );

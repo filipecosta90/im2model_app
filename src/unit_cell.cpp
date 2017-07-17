@@ -9,7 +9,7 @@
 #include "symbcalc.hpp"                  // for symbCalc
 
 UnitCell::UnitCell() {
-  
+
 }
 
 void UnitCell::add_symmetry_equiv_pos_as_xyz(std::string xyz){
@@ -303,5 +303,6 @@ bool UnitCell::create_atoms_from_site_and_symetry(){
       }
     }
   }
+  _flag_atom_positions = true;
   return true;
 }

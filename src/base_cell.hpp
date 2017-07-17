@@ -106,6 +106,7 @@ class BaseCell {
     bool _flag_zone_axis = false;
 
     std::vector<cv::Point3d> atom_positions;
+    bool _flag_atom_positions = false;
     std::vector<int> to_unit_cell_pos;
     std::vector<std::string> atom_symbol_string;
     std::vector<double> atom_site_occupancy;
@@ -127,8 +128,8 @@ class BaseCell {
     int cel_margin_a_px = 0.0f;
     int cel_margin_b_px = 0.0f;
 
-    int cel_nx_px;
-    int cel_ny_px;
+    int cel_nx_px = 0;
+    int cel_ny_px = 0;
 
     // used in the simulated super-cell. this is calculated based on _cel_nXY_px - 2 * _cel_margin_AB_px
     int cel_wout_margin_nx_px;
@@ -142,12 +143,12 @@ class BaseCell {
 
     std::string file_name_input_dat;
 
-    int min_width_px;
-    int min_height_px;
-    int left_padding_w_margin_px;
-    int top_padding_w_margin_px;
-    int left_padding_px;
-    int top_padding_px;
+    int min_width_px = 0;
+    int min_height_px = 0;
+    int left_padding_w_margin_px = 0;
+    int top_padding_w_margin_px = 0;
+    int left_padding_px = 0;
+    int top_padding_px = 0;
 
     /*
      * _width_px  and _min_width_px may differ since
@@ -159,8 +160,8 @@ class BaseCell {
      * (same for _height_px and _min_height_px )
      *
      * */
-    int width_px;
-    int height_px;
+    int width_px = 0;
+    int height_px = 0;
 
     std::vector<Atom> atoms;
     std::vector<cv::Point3d> symetry_atom_positions;
@@ -229,6 +230,7 @@ class BaseCell {
     bool get_flag_zone_axis_v(){ return _flag_zone_axis_v; }
     bool get_flag_zone_axis_w(){ return _flag_zone_axis_w; }
     bool get_flag_zone_axis(){ return _flag_zone_axis; }
+bool get_flag_atom_positions_vec(){ return _flag_atom_positions; }
 
     std::vector<std::string> get_atom_type_symbols_vec(){ return atom_type_symbols; }
     std::vector<double> get_atom_occupancy_vec(){ return atom_occupancies; }

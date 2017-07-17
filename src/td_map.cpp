@@ -19,6 +19,10 @@ TDMap::TDMap(
   tdmap_full_sim_super_cell = new SuperCell( unit_cell );
   final_full_sim_super_cell = new SuperCell( unit_cell );
 
+  tdmap_roi_sim_super_cell->set_unit_cell( unit_cell );
+  tdmap_full_sim_super_cell->set_unit_cell( unit_cell );
+  final_full_sim_super_cell->set_unit_cell( unit_cell );
+
   sim_image_properties = new BaseImage();
   exp_image_properties = new BaseImage();
 
@@ -32,8 +36,8 @@ TDMap::TDMap(
   exp_image_properties->set_flag_auto_a_size( true );
   exp_image_properties->set_flag_auto_b_size( true );
 
-  sim_image_properties->set_flag_auto_n_rows(true);
-  sim_image_properties->set_flag_auto_n_cols(true);
+  sim_image_properties->set_flag_auto_n_rows( true );
+  sim_image_properties->set_flag_auto_n_cols( true );
 
   // set pointers for celslc
   _tdmap_celslc_parameters->set_unit_cell ( unit_cell );
@@ -993,6 +997,13 @@ bool TDMap::set_unit_cell_cif_path( std::string cif_path ){
   bool result = false;
   try {
     result = unit_cell->set_cif_path( cif_path );
+    // in case of the dimensions being already setted up
+    if( result ){
+      const bool parse_result = unit_cell->parse_cif();
+      if( parse_result ){
+      tdmap_roi_sim_super_cell->update_from_unit_cell();
+      }
+    }
   }
   catch(boost::bad_lexical_cast&  ex) {
     // pass it up

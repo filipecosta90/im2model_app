@@ -52,8 +52,9 @@ class UnitCell : public BaseCell {
 
   public:
     UnitCell();
-
-    bool parse_cif( );
+    bool parse_cif();
+    
+    bool get_flag_parsed_cif(){ return _flag_parsed_cif; }
 
 };
 
