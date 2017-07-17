@@ -1,5 +1,5 @@
-bplist00Ñ_WebMainResourceÕ	
-_WebResourceTextEncodingName^WebResourceURL_WebResourceFrameName_WebResourceData_WebResourceMIMETypeUUTF-8_Rhttps://raw.githubusercontent.com/filipecosta90/im2model/master/src/super_cell.hppPO9ê<html><head></head><body><pre style="word-wrap: break-word; white-space: pre-wrap;">#ifndef SRC_SUPERCELL_H__
+bplist00ï¿½_WebMainResourceï¿½	
+_WebResourceTextEncodingName^WebResourceURL_WebResourceFrameName_WebResourceData_WebResourceMIMETypeUUTF-8_Rhttps://raw.githubusercontent.com/filipecosta90/im2model/master/src/super_cell.hppPO9ï¿½<html><head></head><body><pre style="word-wrap: break-word; white-space: pre-wrap;">#ifndef SRC_SUPERCELL_H__
 #define SRC_SUPERCELL_H__
 
 /* BEGIN BOOST */
@@ -110,7 +110,7 @@ class Super_Cell {
     cv::Mat orientation_matrix;
 
     /** Unit Cell **/
-    Unit_Cell* unit_cell;
+    UnitCell* unit_cell;
 
     /** Simulated Crystal image related **/
     double super_cell_simulated_defocus_lower_bound;
@@ -233,7 +233,7 @@ class Super_Cell {
     void update_experimental_image_size_parameters();
   public:
     Super_Cell();
-    Super_Cell( Unit_Cell* unit_cell );
+    Super_Cell( UnitCell* unit_cell );
     Super_Cell( TDMap* tdmap_ptr );
 
     // TDMap updaters
@@ -343,4 +343,4 @@ class Super_Cell {
 };
 
 #endif
-</pre></body></html>Ztext/plain    ( F U l ~ ” š ï ð:Þ                           :é
+</pre></body></html>Ztext/plain    ( F U l ~ ï¿½ ï¿½ ï¿½ ï¿½:ï¿½                           :

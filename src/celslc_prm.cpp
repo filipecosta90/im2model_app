@@ -3,8 +3,31 @@
 static const std::string SLI_EXTENSION = ".sli";
 
 CELSLC_prm::CELSLC_prm( boost::process::ipstream &async_io_buffer_out ) : BaseBin ( async_io_buffer_out ) {
-  BaseImage::set_flag_auto_n_rows( true );
-  BaseImage::set_flag_auto_n_cols( true );
+
+}
+
+bool CELSLC_prm::set_unit_cell ( UnitCell* cell ){
+  unit_cell = cell;
+  _flag_unit_cell = true;
+  return true;
+}
+
+bool CELSLC_prm::set_sim_crystal_properties ( BaseCrystal* crystal_prop ){
+  sim_crystal_properties = crystal_prop;
+  _flag_sim_crystal_properties = true;
+  return true;
+}
+
+bool CELSLC_prm::set_sim_super_cell ( SuperCell* sim_cell ){
+  sim_super_cell = sim_cell;
+  _flag_sim_super_cell = true;
+  return true;
+}
+
+bool CELSLC_prm::set_sim_image_properties ( BaseImage* sim_prop ){
+  sim_image_properties = sim_prop;
+  _flag_sim_image_properties = true;
+  return true;
 }
 
 void CELSLC_prm::set_dwf_switch( bool dwf ){
@@ -17,91 +40,133 @@ void CELSLC_prm::set_abs_switch( bool abs ){
 
 void CELSLC_prm::cleanup_thread(){
   bool status = true;
+  if(
+      _flag_sim_crystal_properties
+    ){
+    if(
+        // BaseCrystal vars
+        sim_crystal_properties->get_flag_flag_slc_file_name_prefix() &&
+        sim_crystal_properties->get_flag_nz_simulated_partitions()
+      ){
+      // remove prm first
+      const std::string slc_file_name_prefix = sim_crystal_properties->get_slc_file_name_prefix();
+      std::string prm_filename = slc_file_name_prefix + ".prm";
+      boost::filesystem::path prm_file ( prm_filename );
+      boost::filesystem::path full_prm_path = base_bin_output_dir_path / prm_file;
 
-  // remove prm first
-  std::string prm_filename = slc_file_name_prefix + ".prm";
-  boost::filesystem::path prm_file ( prm_filename );
-  boost::filesystem::path full_prm_path = base_bin_output_dir_path / prm_file;
-
-  if( boost::filesystem::exists( full_prm_path ) ){
-    try {
-      const bool remove_result = boost::filesystem::remove( full_prm_path );
-      status &= remove_result;
-      if( _flag_logger ){
-        std::stringstream message;
-        message << "removing the celslc prm file: " << full_prm_path.string() << " result: " << std::boolalpha << remove_result;
-        logger->logEvent( ApplicationLog::notification , message.str() );
+      if( boost::filesystem::exists( full_prm_path ) ){
+        try {
+          const bool remove_result = boost::filesystem::remove( full_prm_path );
+          status &= remove_result;
+          if( _flag_logger ){
+            std::stringstream message;
+            message << "removing the celslc prm file: " << full_prm_path.string() << " result: " << std::boolalpha << remove_result;
+            logger->logEvent( ApplicationLog::notification , message.str() );
+          }
+        }
+        catch(boost::filesystem::filesystem_error &ex) {
+          if( _flag_logger ){
+            std::stringstream message;
+            message << "boost::filesystem::filesystem_error: " << typeid(ex).name();
+            logger->logEvent( ApplicationLog::error , message.str() );
+          }
+        }
       }
-   }
-   catch(boost::filesystem::filesystem_error &ex) {
-     if( _flag_logger ){
-       std::stringstream message;
-       message << "boost::filesystem::filesystem_error: " << typeid(ex).name();
-       logger->logEvent( ApplicationLog::error , message.str() );
-     }
-   }
-  }
 
-  for ( int slice_id = 1 ;
-      slice_id <= nz_simulated_partitions;
-      slice_id++){
-    std::stringstream filename_stream;
-    filename_stream << slc_file_name_prefix << "_"<< std::setw(3) << std::setfill('0') << std::to_string(slice_id) << ".sli" ;
-    boost::filesystem::path slice_file ( filename_stream.str() );
-    boost::filesystem::path full_slice_path = base_bin_output_dir_path / slice_file;
-    if( boost::filesystem::exists( full_slice_path ) ){
-      const bool remove_result = boost::filesystem::remove( full_slice_path );
-      status &= remove_result;
-      if( _flag_logger ){
-        std::stringstream message;
-        message << "removing the slice file: " << full_slice_path.string() << " result: " << std::boolalpha << remove_result;
-        logger->logEvent( ApplicationLog::notification , message.str() );
+      const int nz_simulated_partitions = sim_crystal_properties->get_nz_simulated_partitions();
+
+      for ( int slice_id = 1 ;
+          slice_id <= nz_simulated_partitions;
+          slice_id++){
+        std::stringstream filename_stream;
+        filename_stream << slc_file_name_prefix << "_"<< std::setw(3) << std::setfill('0') << std::to_string(slice_id) << ".sli" ;
+        boost::filesystem::path slice_file ( filename_stream.str() );
+        boost::filesystem::path full_slice_path = base_bin_output_dir_path / slice_file;
+        if( boost::filesystem::exists( full_slice_path ) ){
+          const bool remove_result = boost::filesystem::remove( full_slice_path );
+          status &= remove_result;
+          if( _flag_logger ){
+            std::stringstream message;
+            message << "removing the slice file: " << full_slice_path.string() << " result: " << std::boolalpha << remove_result;
+            logger->logEvent( ApplicationLog::notification , message.str() );
+          }
+        }
       }
     }
+    else{
+      if( _flag_logger ){
+        std::stringstream message;
+        message << "The required vars for cleanup_thread() are not setted up.";
+        logger->logEvent( ApplicationLog::error , message.str() );
+      }
+      print_var_state();
+    }
+  }
+  else{
+    if( _flag_logger ){
+      std::stringstream message;
+      message << "The required Class POINTERS for cleanup_thread() are not setted up.";
+      logger->logEvent( ApplicationLog::error , message.str() );
+    }
+    print_var_state();
   }
 }
 
 bool CELSLC_prm::check_produced_slices(){
   bool result = false;
   if(
-    // BaseCrystal vars
-    _flag_slc_file_name_prefix &&
-    // BaseBin vars
-    _flag_base_bin_start_dir_path &&
-    _flag_base_bin_output_dir_path
-  ){
-  bool flag_files = true;
-  for ( int slice_id = 1 ;
-      slice_id <= nz_simulated_partitions && flag_files;
-      slice_id++){
-    std::stringstream filename_stream;
-    filename_stream << slc_file_name_prefix << "_"<< std::setw(3) << std::setfill('0') << std::to_string(slice_id) << ".sli" ;
-    boost::filesystem::path slice_file ( filename_stream.str() );
-    boost::filesystem::path full_slice_path = base_bin_output_dir_path / slice_file;
-    const bool _slice_exists = boost::filesystem::exists( full_slice_path );
-    flag_files &= _slice_exists;
-    if( _flag_logger ){
-      std::stringstream message;
-      message << "checking if the produced slice file \"" << full_slice_path.string() << "\" exists: " << std::boolalpha << _slice_exists;
-      logger->logEvent( ApplicationLog::notification , message.str() );
+      _flag_sim_crystal_properties
+    ){
+    if(
+        // BaseCrystal vars
+        sim_crystal_properties->get_flag_flag_slc_file_name_prefix() &&
+        sim_crystal_properties->get_flag_nz_simulated_partitions() &&
+        // BaseBin vars
+        _flag_base_bin_start_dir_path &&
+        _flag_base_bin_output_dir_path
+      ){
+      const std::string slc_file_name_prefix = sim_crystal_properties->get_slc_file_name_prefix();
+      const int nz_simulated_partitions = sim_crystal_properties->get_nz_simulated_partitions();
+      bool flag_files = true;
+      for ( int slice_id = 1 ;
+          slice_id <= nz_simulated_partitions && flag_files;
+          slice_id++){
+        std::stringstream filename_stream;
+        filename_stream << slc_file_name_prefix << "_"<< std::setw(3) << std::setfill('0') << std::to_string(slice_id) << ".sli" ;
+        boost::filesystem::path slice_file ( filename_stream.str() );
+        boost::filesystem::path full_slice_path = base_bin_output_dir_path / slice_file;
+        const bool _slice_exists = boost::filesystem::exists( full_slice_path );
+        flag_files &= _slice_exists;
+        if( _flag_logger ){
+          std::stringstream message;
+          message << "checking if the produced slice file \"" << full_slice_path.string() << "\" exists: " << std::boolalpha << _slice_exists;
+          logger->logEvent( ApplicationLog::notification , message.str() );
+        }
+      }
+      if( _flag_logger ){
+        std::stringstream message;
+        message << "check_produced_slices END RESULT: " << std::boolalpha << flag_files;
+        logger->logEvent( ApplicationLog::notification , message.str() );
+      }
+      result = flag_files;
+    }
+    else{
+      if( _flag_logger ){
+        std::stringstream message;
+        message << "The required vars for call_boost_bin() are not setted up.";
+        logger->logEvent( ApplicationLog::error , message.str() );
+      }
+      print_var_state();
     }
   }
-  if( _flag_logger ){
-    std::stringstream message;
-    message << "check_produced_slices  END RESULT: " << std::boolalpha << flag_files;
-    logger->logEvent( ApplicationLog::notification , message.str() );
-  }
-  result = flag_files;
-}
   else{
     if( _flag_logger ){
       std::stringstream message;
-      message << "The required vars for call_boost_bin() are not setted up.";
+      message << "The required Class POINTERS for call_boost_bin() are not setted up.";
       logger->logEvent( ApplicationLog::error , message.str() );
     }
     print_var_state();
-
-}
+  }
   return result;
 }
 
@@ -114,73 +179,123 @@ bool CELSLC_prm::cleanup_bin( ){
 bool CELSLC_prm::clean_for_re_run(){
   bool result = true;
   if( _flag_runned_bin ){
-    result &= BaseCrystal::clean_for_re_run();
-    _flag_runned_bin = false;
-    result &= cleanup_bin();
+    if( _flag_sim_crystal_properties ){
+      result &= sim_crystal_properties->clean_for_re_run();
+      _flag_runned_bin = false;
+      result &= cleanup_bin();
+    }
+    else{
+      result = false;
+      if( _flag_logger ){
+        std::stringstream message;
+        message << "The required Class POINTERS for clean_for_re_run() are not setted up.";
+        logger->logEvent( ApplicationLog::error , message.str() );
+      }
+      print_var_state();
+    }
   }
   return result;
 }
 
 std::ostream& CELSLC_prm::create_bin_args(std::ostream& args_stream) const {
 
-  args_stream << full_bin_path_execname.string();
+  if(
+      _flag_sim_super_cell &&
+      _flag_sim_crystal_properties &&
+      _flag_sim_image_properties
+    ){
 
-  if( _flag_unit_cell_cif_path  ){
-    args_stream << " -cif " << unit_cell_cif_path;
-  }
-  else{
-    if( cel_format_switch  ){
-      args_stream << " -cel " << super_cell_cel_file;
-    }
-  }
+    args_stream << full_bin_path_execname.string();
 
-  boost::filesystem::path file ( slc_file_name_prefix );
-  boost::filesystem::path full_path;
-  full_path = base_bin_output_dir_path / file;
-
-  args_stream << " -slc \"" << full_path.string() << "\"";
-
-  // input nx string
-  if( _flag_full_n_rows_height ){
-    args_stream << " -nx " << full_n_rows_height;
-  }
-  // input ny string
-  if( _flag_full_n_cols_width ){
-    args_stream << " -ny " << full_n_cols_width;
-  }
-  // input ht
-  if( _flag_ht_accelaration_voltage ){
-    args_stream << " -ht " << ht_accelaration_voltage;
-  }
-  if( _flag_zone_axis && _flag_projected_y_axis && _flag_super_cell_size ){
-    args_stream << " -prj " << (float) zone_axis_u  << "," << (float) zone_axis_v << "," << (float) zone_axis_w << ","
-      <<  projected_y_axis_u << "," << projected_y_axis_v << "," << projected_y_axis_w << ","
-      << (float) super_cell_size_a << "," << (float) super_cell_size_b << "," << (float) super_cell_size_c;
-  }
-  /**
-   * Equidistant slicing of the super-cell along the c-axis.
-   * Specify an explicit number of slices,
-   * or use -nz 0 to let CELSLC determine the number of equidistant slices automatically.
-   * Omitting the -nz option will lead to an automatic non-equidistant slicing.
-   * **/
-  if( !auto_non_equidistant_slices_switch ){
-    args_stream << " -nz ";
-    // input nz string
-    if( auto_equidistant_slices_switch ){
-      //let CELSLC determine the number of equidistant slices automatically
-      args_stream << "0";
+    if( sim_super_cell->get_flag_cif_format() ){
+      args_stream << " -cif " << sim_super_cell->get_cif_path();
     }
     else{
-      //Specify an explicit number of slices
-      args_stream << nz_simulated_partitions;
+      if( sim_super_cell->get_flag_cel_format()  ){
+        args_stream << " -cel "<< sim_super_cell->get_cel_path();
+      }
     }
-  }
+    const std::string slc_file_name_prefix = sim_crystal_properties->get_slc_file_name_prefix();
 
-  if ( dwf_switch ){
-    args_stream << " -dwf";
+    boost::filesystem::path file ( slc_file_name_prefix );
+    boost::filesystem::path full_path;
+    full_path = base_bin_output_dir_path / file;
+
+    args_stream << " -slc \"" << full_path.string() << "\"";
+
+    // input nx string
+    if( sim_image_properties->get_flag_full_n_rows_height() ){
+      const int full_n_rows_height = sim_image_properties->get_full_n_rows_height();
+      args_stream << " -nx " << full_n_rows_height;
+    }
+    // input ny string
+    if( sim_image_properties->get_flag_full_n_cols_width() ){
+      const int full_n_cols_width = sim_image_properties->get_full_n_cols_width();
+      args_stream << " -ny " << full_n_cols_width;
+    }
+    // input ht
+    if( sim_crystal_properties->get_flag_ht_accelaration_voltage() ){
+      const double ht_accelaration_voltage = sim_crystal_properties->get_ht_accelaration_voltage();
+      args_stream << " -ht " << ht_accelaration_voltage;
+    }
+    if(
+        sim_super_cell->get_flag_zone_axis() &&
+        sim_super_cell->get_flag_projected_y_axis() &&
+        sim_super_cell->get_flag_length()
+      ){
+
+      const double zone_axis_u = sim_super_cell->get_zone_axis_u();
+      const double zone_axis_v = sim_super_cell->get_zone_axis_v();
+      const double zone_axis_w = sim_super_cell->get_zone_axis_w();
+
+      const double projected_y_axis_u = sim_super_cell->get_projected_y_axis_u();
+      const double projected_y_axis_v = sim_super_cell->get_projected_y_axis_v();
+      const double projected_y_axis_w = sim_super_cell->get_projected_y_axis_w();
+
+      const double super_cell_size_a = sim_super_cell->get_length_a_Nanometers();
+      const double super_cell_size_b = sim_super_cell->get_length_b_Nanometers();
+      const double super_cell_size_c = sim_super_cell->get_length_c_Nanometers();
+
+      args_stream << " -prj " << (float) zone_axis_u  << "," << (float) zone_axis_v << "," << (float) zone_axis_w << ","
+        <<  projected_y_axis_u << "," << projected_y_axis_v << "," << projected_y_axis_w << ","
+        << (float) super_cell_size_a << "," << (float) super_cell_size_b << "," << (float) super_cell_size_c;
+    }
+    /**
+     * Equidistant slicing of the super-cell along the c-axis.
+     * Specify an explicit number of slices,
+     * or use -nz 0 to let CELSLC determine the number of equidistant slices automatically.
+     * Omitting the -nz option will lead to an automatic non-equidistant slicing.
+     * **/
+    if( !auto_non_equidistant_slices_switch ){
+      args_stream << " -nz ";
+      // input nz string
+      if( auto_equidistant_slices_switch ){
+        //let CELSLC determine the number of equidistant slices automatically
+        args_stream << "0";
+      }
+      else{
+        //Specify an explicit number of slices
+        const int nz_simulated_partitions = sim_crystal_properties->get_nz_simulated_partitions();
+        args_stream << nz_simulated_partitions;
+      }
+    }
+
+    if ( dwf_switch ){
+      args_stream << " -dwf";
+    }
+    if ( abs_switch ){
+      args_stream << " -abs";
+    }
+
   }
-  if ( abs_switch ){
-    args_stream << " -abs";
+  else{
+    result = false;
+    if( _flag_logger ){
+      std::stringstream message;
+      message << "The required Class POINTERS for create_bin_args() are not setted up.";
+      logger->logEvent( ApplicationLog::error , message.str() );
+    }
+    print_var_state();
   }
   return args_stream;
 }
@@ -294,183 +409,173 @@ bool CELSLC_prm::call_boost_bin( ){
   return result;
 }
 
-bool CELSLC_prm::prepare_bin_ssc(){
-  bool result = false;
-  if( _flag_full_bin_path_execname ){
+/*
+   bool CELSLC_prm::prepare_bin_ssc(){
+   bool result = false;
+   if( _flag_full_bin_path_execname ){
 
-    std::stringstream args_stream;
-    args_stream << full_bin_path_execname;
-    std::cout << args_stream.str() << "|" << full_bin_path_execname << std::endl;
-    if( _flag_unit_cell_cif_path ){
-      args_stream << " -cif " << unit_cell_cif_path;
-    }
-    else{
-      if( cel_format_switch  ){
-        args_stream << " -cel " << super_cell_cel_file;
-      }
-    }
+   std::stringstream args_stream;
+   args_stream << full_bin_path_execname;
+   std::cout << args_stream.str() << "|" << full_bin_path_execname << std::endl;
+   if( _flag_unit_cell_cif_path ){
+   args_stream << " -cif " << unit_cell_cif_path;
+   }
+   else{
+   if( cel_format_switch  ){
+   args_stream << " -cel " << super_cell_cel_file;
+   }
+   }
 
-    boost::filesystem::path file ( slc_file_name_prefix );
-    boost::filesystem::path full_path = base_bin_output_dir_path / file;
+   boost::filesystem::path file ( slc_file_name_prefix );
+   boost::filesystem::path full_path = base_bin_output_dir_path / file;
 
-    args_stream << " -slc " << full_path.string();
-    // input nx string
-    args_stream << " -nx 32";
-    // input ny string
-    args_stream << " -ny 32";
-    // input ht
-    args_stream << " -ht " << ht_accelaration_voltage;
+   args_stream << " -slc " << full_path.string();
+// input nx string
+args_stream << " -nx 32";
+// input ny string
+args_stream << " -ny 32";
+// input ht
+args_stream << " -ht " << ht_accelaration_voltage;
 
-    if( _flag_zone_axis && _flag_projected_y_axis && _flag_super_cell_size ){
-      args_stream << " -prj " << (float) zone_axis_u  << "," << (float) zone_axis_v << "," << (float) zone_axis_w << ","
-        <<  projected_y_axis_u << "," << projected_y_axis_v << "," << projected_y_axis_w << ","
-        << (float) super_cell_size_a << "," << (float) super_cell_size_b << "," << (float) super_cell_size_c;
-    }
-    /**
-     * Equidistant slicing of the super-cell along the c-axis.
-     * Specify an explicit number of slices,
-     * or use -nz 0 to let CELSLC determine the number of equidistant slices automatically.
-     * Omitting the -nz option will lead to an automatic non-equidistant slicing.
-     * **/
-    args_stream << " -nz 0";
+if( _flag_zone_axis && _flag_projected_y_axis && _flag_super_cell_size ){
+args_stream << " -prj " << (float) zone_axis_u  << "," << (float) zone_axis_v << "," << (float) zone_axis_w << ","
+<<  projected_y_axis_u << "," << projected_y_axis_v << "," << projected_y_axis_w << ","
+<< (float) super_cell_size_a << "," << (float) super_cell_size_b << "," << (float) super_cell_size_c;
+}
+/**
+ * Equidistant slicing of the super-cell along the c-axis.
+ * Specify an explicit number of slices,
+ * or use -nz 0 to let CELSLC determine the number of equidistant slices automatically.
+ * Omitting the -nz option will lead to an automatic non-equidistant slicing.
+ * **/
+ /*
+args_stream << " -nz 0";
 
-    if ( dwf_switch ){
-      args_stream << " -dwf";
-    }
-    if ( abs_switch ){
-      args_stream << " -abs";
-    }
-    std::cout << " prep run with args  " <<  args_stream.str() << std::endl;
-    boost::process::system( args_stream.str() );
-    single_slice_calculation_prepare_bin_runned_switch = set_nz_simulated_partitions_from_prm();
-    std::cout << "ssc NZ max processes " << nz_simulated_partitions << std::endl;
-    result = single_slice_calculation_prepare_bin_runned_switch;
-  }
-  return result;
+if ( dwf_switch ){
+  args_stream << " -dwf";
+}
+if ( abs_switch ){
+  args_stream << " -abs";
+}
+std::cout << " prep run with args  " <<  args_stream.str() << std::endl;
+boost::process::system( args_stream.str() );
+single_slice_calculation_prepare_bin_runned_switch = set_nz_simulated_partitions_from_prm();
+std::cout << "ssc NZ max processes " << nz_simulated_partitions << std::endl;
+result = single_slice_calculation_prepare_bin_runned_switch;
+}
+return result;
+}
+*/
+/*
+   bool CELSLC_prm::call_bin_ssc(){
+   bool result = false;
+   if( _flag_full_bin_path_execname ){
+   prepare_bin_ssc();
+
+   std::stringstream args_stream;
+   args_stream << full_bin_path_execname;
+
+   if( _flag_unit_cell_cif_path ){
+   args_stream << " -cif " << unit_cell_cif_path;
+   }
+   else{
+   if( cel_format_switch  ){
+   args_stream << " -cel " << super_cell_cel_file;
+   }
+   }
+   boost::filesystem::path file ( slc_file_name_prefix );
+   boost::filesystem::path full_path = base_bin_output_dir_path / file;
+
+   args_stream << " -slc " << full_path.string();
+
+// input nx string
+args_stream << " -nx " << full_n_rows_height;
+// input ny string
+args_stream << " -ny " << full_n_cols_width;
+
+args_stream << " -nz " << nz_simulated_partitions;
+// input ht
+args_stream << " -ht " << ht_accelaration_voltage;
+
+if( _flag_zone_axis && _flag_projected_y_axis && _flag_super_cell_size ){
+args_stream << " -prj " << (float) zone_axis_u  << "," << (float) zone_axis_v << "," << (float) zone_axis_w << ","
+<<  projected_y_axis_u << "," << projected_y_axis_v << "," << projected_y_axis_w << ","
+<< (float) super_cell_size_a << "," << (float) super_cell_size_b << "," << (float) super_cell_size_c;
 }
 
-bool CELSLC_prm::call_bin_ssc(){
-  bool result = false;
-  if( _flag_full_bin_path_execname ){
-    prepare_bin_ssc();
+if ( dwf_switch ){
+args_stream << " -dwf";
+}
+if ( abs_switch ){
+args_stream << " -abs";
+}
+// input ssc
+std::map<int, boost::process::child> ssc_queue;
+boost::process::group ssc_group;
 
-    std::stringstream args_stream;
-    args_stream << full_bin_path_execname;
+for ( int slice_id = 1; slice_id <= nz_simulated_partitions; slice_id++ ){
+std::error_code ecode;
+std::stringstream ssc_stream;
+ssc_stream << args_stream.str() << " -ssc " << slice_id;
+std::cout << "Process for slice #" << slice_id << std::endl;
+std::cout << "\tcommand: " << ssc_stream.str() << std::endl;
+std::stringstream celslc_stream;
+celslc_stream << "log_" << slc_file_name_prefix << "_" << slice_id << ".log";
+std::cout << "Saving log of slice #"<< slice_id << " in file: " << celslc_stream.str() << std::endl ;
 
-    if( _flag_unit_cell_cif_path ){
-      args_stream << " -cif " << unit_cell_cif_path;
-    }
-    else{
-      if( cel_format_switch  ){
-        args_stream << " -cel " << super_cell_cel_file;
-      }
-    }
-    boost::filesystem::path file ( slc_file_name_prefix );
-    boost::filesystem::path full_path = base_bin_output_dir_path / file;
+if ( _flag_io_ap_pipe_out == true ){
+ssc_queue[slice_id] = boost::process::child (
+// command
+ssc_stream.str(),
+// redirecting std_out
+boost::process::std_out > celslc_stream.str(),
+// process group
+ssc_group ,
+// error control
+ecode );
+}
+else{
+ssc_queue[slice_id] = boost::process::child (
+// command
+ssc_stream.str(),
+  // redirecting std_out
+  boost::process::std_out > boost::process::null,
+  // process group
+  ssc_group ,
+  // error control
+  ecode );
+  }
+assert( !ecode );
+}
+std::cout << " waiting for all child processes do end" << std::endl;
+while (!ssc_queue.empty()){
+  //win32 error https://github.com/klemens-morgenstern/boost-process/issues/67
+  //ssc_group.wait();
 
-    args_stream << " -slc " << full_path.string();
-
-    // input nx string
-    args_stream << " -nx " << full_n_rows_height;
-    // input ny string
-    args_stream << " -ny " << full_n_cols_width;
-
-    args_stream << " -nz " << nz_simulated_partitions;
-    // input ht
-    args_stream << " -ht " << ht_accelaration_voltage;
-
-    if( _flag_zone_axis && _flag_projected_y_axis && _flag_super_cell_size ){
-      args_stream << " -prj " << (float) zone_axis_u  << "," << (float) zone_axis_v << "," << (float) zone_axis_w << ","
-        <<  projected_y_axis_u << "," << projected_y_axis_v << "," << projected_y_axis_w << ","
-        << (float) super_cell_size_a << "," << (float) super_cell_size_b << "," << (float) super_cell_size_c;
-    }
-
-    if ( dwf_switch ){
-      args_stream << " -dwf";
-    }
-    if ( abs_switch ){
-      args_stream << " -abs";
-    }
-    // input ssc
-    std::map<int, boost::process::child> ssc_queue;
-    boost::process::group ssc_group;
-
-    for ( int slice_id = 1; slice_id <= nz_simulated_partitions; slice_id++ ){
-      std::error_code ecode;
-      std::stringstream ssc_stream;
-      ssc_stream << args_stream.str() << " -ssc " << slice_id;
-      std::cout << "Process for slice #" << slice_id << std::endl;
-      std::cout << "\tcommand: " << ssc_stream.str() << std::endl;
-      std::stringstream celslc_stream;
-      celslc_stream << "log_" << slc_file_name_prefix << "_" << slice_id << ".log";
-      std::cout << "Saving log of slice #"<< slice_id << " in file: " << celslc_stream.str() << std::endl ;
-
-      if ( _flag_io_ap_pipe_out == true ){
-        ssc_queue[slice_id] = boost::process::child (
-            // command
-            ssc_stream.str(),
-            // redirecting std_out
-            boost::process::std_out > celslc_stream.str(),
-            // process group
-            ssc_group ,
-            // error control
-            ecode );
-      }
-      else{
-        ssc_queue[slice_id] = boost::process::child (
-            // command
-            ssc_stream.str(),
-            // redirecting std_out
-            boost::process::std_out > boost::process::null,
-            // process group
-            ssc_group ,
-            // error control
-            ecode );
-      }
-      assert( !ecode );
-    }
-    std::cout << " waiting for all child processes do end" << std::endl;
-    while (!ssc_queue.empty()){
-      //win32 error https://github.com/klemens-morgenstern/boost-process/issues/67
-      //ssc_group.wait();
-
-      for (auto it = ssc_queue.begin(); it != ssc_queue.end(); ){
-        boost::process::child& c = it->second;
-        if (!c.running()){
-          int exit_code = c.exit_code();
+  for (auto it = ssc_queue.begin(); it != ssc_queue.end(); ){
+    boost::process::child& c = it->second;
+    if (!c.running()){
+      int exit_code = c.exit_code();
 #if defined(BOOST_WINDOWS_API)
-          assert (EXIT_SUCCESS == exit_code);
+      assert (EXIT_SUCCESS == exit_code);
 #elif defined(BOOST_POSIX_API)
-          assert (EXIT_SUCCESS == WEXITSTATUS(exit_code));
+      assert (EXIT_SUCCESS == WEXITSTATUS(exit_code));
 #endif
-          std::cout << "exit " << it->first << " exit code: " << exit_code << std::endl;
-          it = ssc_queue.erase(it);
-        }
-        else{
-          ++it;
-        }
-      }
-      std::this_thread::sleep_for(std::chrono::milliseconds(100));
+      std::cout << "exit " << it->first << " exit code: " << exit_code << std::endl;
+      it = ssc_queue.erase(it);
     }
-    ssc_runned_bin = true;
-    result = false;
+    else{
+      ++it;
+    }
   }
-  return result;
+  std::this_thread::sleep_for(std::chrono::milliseconds(100));
 }
-
-bool CELSLC_prm::set_super_cell_size_a( double size ){
-  const bool sim_result = BaseImage::set_full_nm_size_rows_a( size );
-  const bool crystal_result = BaseCrystal::set_super_cell_size_a( size );
-  const bool result = sim_result & crystal_result;
-  return result;
+ssc_runned_bin = true;
+result = false;
 }
-
-bool CELSLC_prm::set_super_cell_size_b( double size ){
-  const bool sim_result = BaseImage::set_full_nm_size_cols_b( size );
-  const bool crystal_result = BaseCrystal::set_super_cell_size_b( size );
-  const bool result = sim_result & crystal_result;
-  return result;
+return result;
 }
+*/
 
 /* Loggers */
 bool CELSLC_prm::set_application_logger( ApplicationLog::ApplicationLog* app_logger ){
@@ -497,9 +602,9 @@ void CELSLC_prm::print_var_state(){
       << "\t\t" << "single_slice_calculation_nz_switch : " << std::boolalpha << single_slice_calculation_nz_switch << "\n"
       << "\t\t" << "single_slice_calculation_enabled_switch : " << std::boolalpha << single_slice_calculation_enabled_switch << "\n"
       << "\t" << "BaseCrystal Properties : " << "\n";
-    BaseCrystal::output(message);
+    BaseCrystal->output(message);
     message <<  "\t" << "BaseImage Properties : " << "\n";
-    BaseImage::output(message);
+    BaseImage->output(message);
     message <<  "\t" << "BaseBin Properties : " << "\n";
     BaseBin::output(message);
     logger->logEvent( ApplicationLog::notification , message.str() );

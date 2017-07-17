@@ -128,23 +128,6 @@ int BaseCrystal::get_slice_number_from_nm_ceil( double goal_thickness_nm  ){
   return slice_pos;
 }
 
-//setters
-bool BaseCrystal::set_unit_cell_cif_path( std::string cif_path ){
-  unit_cell_cif_path = cif_path;
-  bool result = true;
-   cif_driver.parse( cif_path.c_str() );
-  result &= cif_driver.populate_unit_cell();
-  result &= cif_driver.populate_atom_site_unit_cell();
-  result &= cif_driver.populate_symetry_equiv_pos_as_xyz_unit_cell();
-  if( result ){
-    unit_cell = cif_driver.get_unit_cell();
-    result &= unit_cell->create_atoms_from_site_and_symetry();
-    _flag_unit_cell = result;
-  }
-  _flag_unit_cell_cif_path = result;
-  return result;
-}
-
 bool BaseCrystal::set_nz_simulated_partitions_from_prm(){
   assert( slc_file_name_prefix != "" );
   bool result = false;
@@ -242,83 +225,9 @@ bool BaseCrystal::set_nz_switch( bool value ){
   return true;
 }
 
-bool BaseCrystal::set_projected_y_axis( cv::Point3d ){
-  return false;
-}
-
-bool BaseCrystal::set_projected_y_axis_u( double u ){
-  projected_y_axis_u = u;
-  _flag_projected_y_axis_u = true;
-  _flag_projected_y_axis = _flag_projected_y_axis_u & _flag_projected_y_axis_v & _flag_projected_y_axis_w;
-  return true;
-}
-
-bool BaseCrystal::set_projected_y_axis_v( double v ){
-  projected_y_axis_v = v;
-  _flag_projected_y_axis_v = true;
-  _flag_projected_y_axis = _flag_projected_y_axis_u & _flag_projected_y_axis_v & _flag_projected_y_axis_w;
-  return true;
-}
-
-bool BaseCrystal::set_projected_y_axis_w( double w ){
-  projected_y_axis_w = w;
-  _flag_projected_y_axis_w = true;
-  _flag_projected_y_axis = _flag_projected_y_axis_u & _flag_projected_y_axis_v & _flag_projected_y_axis_w;
-  return true;
-}
-
-bool BaseCrystal::set_zone_axis( cv::Point3d za ){
-  return false;
-}
-
-bool BaseCrystal::set_zone_axis_u( double u ){
-  zone_axis_u = u;
-  _flag_zone_axis_u = true;
-  _flag_zone_axis = _flag_zone_axis_u & _flag_zone_axis_v & _flag_zone_axis_w;
-  return true;
-}
-
-bool BaseCrystal::set_zone_axis_v( double v ){
-  zone_axis_v = v;
-  _flag_zone_axis_v = true;
-  _flag_zone_axis = _flag_zone_axis_u & _flag_zone_axis_v & _flag_zone_axis_w;
-  return true;
-}
-
-bool BaseCrystal::set_zone_axis_w( double w ){
-  zone_axis_w = w;
-  _flag_zone_axis_w = true;
-  _flag_zone_axis = _flag_zone_axis_u & _flag_zone_axis_v & _flag_zone_axis_w;
-  return true;
-}
-
 bool BaseCrystal::set_ht_accelaration_voltage( double ht ){
   ht_accelaration_voltage = ht;
   _flag_ht_accelaration_voltage = true;
-  return true;
-}
-
-// [Super-Cell dimensions]
-bool BaseCrystal::set_super_cell_size_a( double size_a ){
-  super_cell_size_a = size_a;
-  _flag_super_cell_size_a = true;
-  _flag_super_cell_size = _flag_super_cell_size_a & _flag_super_cell_size_b & _flag_super_cell_size_c;
-  // auto calculate nx
-  return true;
-}
-
-bool BaseCrystal::set_super_cell_size_b( double size_b ){
-  super_cell_size_b = size_b;
-  _flag_super_cell_size_b = true;
-  // auto calculate nx
-  _flag_super_cell_size = _flag_super_cell_size_a & _flag_super_cell_size_b & _flag_super_cell_size_c;
-  return true;
-}
-
-bool BaseCrystal::set_super_cell_size_c( double size_c ){
-  super_cell_size_c = size_c;
-  _flag_super_cell_size_c = true;
-  _flag_super_cell_size = _flag_super_cell_size_a & _flag_super_cell_size_b & _flag_super_cell_size_c;
   return true;
 }
 
@@ -425,43 +334,11 @@ void BaseCrystal::print_var_state(){
 
 std::ostream& BaseCrystal::output(std::ostream& stream) const {
   stream << "BaseCrystal vars:\n"
-    << "\t" << "unit_cell_cif_path : " <<  unit_cell_cif_path << "\n"
-    << "\t\t" << "_flag_unit_cell_cif_path : " << std::boolalpha << _flag_unit_cell_cif_path << "\n"
-    << "\t" << "_flag_unit_cell : " <<  _flag_unit_cell << "\n"
-
     << "\t" << "nz_simulated_partitions : " <<  nz_simulated_partitions << "\n"
     << "\t\t" << "_flag_nz_simulated_partitions : " << std::boolalpha <<  _flag_nz_simulated_partitions << "\n"
     << "\t" << "nz_switch : " << std::boolalpha <<  nz_switch << "\n"
-
-    << "\t" << "projected_y_axis : " <<   projected_y_axis << "\n"
-    << "\t" << "projected_y_axis_u : " <<  projected_y_axis_u << "\n"
-    << "\t" << "projected_y_axis_v : " <<  projected_y_axis_v << "\n"
-    << "\t" << "projected_y_axis_w : " <<  projected_y_axis_w << "\n"
-    << "\t\t" << "_flag_projected_y_axis_u : " << std::boolalpha <<  _flag_projected_y_axis_u << "\n"
-    << "\t\t" << "_flag_projected_y_axis_v : " << std::boolalpha <<  _flag_projected_y_axis_v << "\n"
-    << "\t\t" << "_flag_projected_y_axis_w : " << std::boolalpha <<  _flag_projected_y_axis_w << "\n"
-    << "\t\t" << "_flag_projected_y_axis : " << std::boolalpha <<  _flag_projected_y_axis << "\n"
-
-    << "\t" << "zone_axis : " <<   zone_axis << "\n"
-    << "\t" << "zone_axis_u : " <<  zone_axis_u << "\n"
-    << "\t" << "zone_axis_v : " <<  zone_axis_v << "\n"
-    << "\t" << "zone_axis_w : " <<  zone_axis_w << "\n"
-    << "\t\t" << "_flag_zone_axis_u : " << std::boolalpha <<  _flag_zone_axis_u << "\n"
-    << "\t\t" << "_flag_zone_axis_v : " << std::boolalpha <<  _flag_zone_axis_v << "\n"
-    << "\t\t" << "_flag_zone_axis_w : " << std::boolalpha <<  _flag_zone_axis_w << "\n"
-    << "\t\t" << "_flag_zone_axis : " << std::boolalpha <<  _flag_zone_axis << "\n"
-
     << "\t" << "ht_accelaration_voltage : " <<  ht_accelaration_voltage << "\n"
     << "\t" << "_flag_ht_accelaration_voltage : " <<  _flag_ht_accelaration_voltage << "\n"
-
-    // [Super-Cell dimensions]
-    << "\t" << "super_cell_size_a : " <<  super_cell_size_a << "\n"
-    << "\t\t" << "_flag_super_cell_size_a : " << std::boolalpha <<  _flag_super_cell_size_a << "\n"
-    << "\t" << "super_cell_size_b : " <<  super_cell_size_b << "\n"
-    << "\t\t" << "_flag_super_cell_size_b : " << std::boolalpha <<  _flag_super_cell_size_b << "\n"
-    << "\t" << "super_cell_size_c : " <<  super_cell_size_c << "\n"
-    << "\t\t" << "_flag_super_cell_size_c : " << std::boolalpha <<  _flag_super_cell_size_c << "\n"
-    << "\t\t" << "_flag_super_cell_size : " << std::boolalpha << _flag_super_cell_size << "\n"
 
     // [Slice Parameters]
     << "\t" << "slc_file_name_prefix : " <<  slc_file_name_prefix << "\n"

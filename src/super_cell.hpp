@@ -40,7 +40,7 @@
 #include "base_cell.hpp"
 #include "unit_cell.hpp"
 
-class SuperCell : public ImageBounds , public BaseCell {
+class SuperCell : public ImageBounds, public BaseCell {
   private:
     /** Private Class methods **/
 
@@ -48,12 +48,26 @@ class SuperCell : public ImageBounds , public BaseCell {
     ApplicationLog::ApplicationLog* logger = nullptr;
     bool _flag_logger = false;
 
+    UnitCell* unit_cell = nullptr;
+    bool _flag_unit_cell = false;
+
 protected:
 
+  /** supercell exclusive **/
+  double _x_min_size_nm = 0.0f;
+  double _y_min_size_nm = 0.0f;
+  double _z_min_size_nm = 0.0f;
+
+  cv::Point3d _a,_b,_c,_d,_e,_f,_g,_h;
+  cv::Point3d _sim_a,_sim_b,_sim_c,_sim_d,_sim_e,_sim_f,_sim_g,_sim_h;
+
+  int expand_factor_a = 1;
+  int expand_factor_b = 1;
+  int expand_factor_c = 1;
 
   public:
     SuperCell();
-
+    SuperCell( UnitCell* cell );
 
     /* Loggers */
     bool set_application_logger( ApplicationLog::ApplicationLog* logger );

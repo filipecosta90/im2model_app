@@ -76,10 +76,21 @@ class TDMap  : public QObject {
     bool _run_simgrid_switch = true;
 
     /* *
+     * UnitCell
+     * */
+    UnitCell unit_cell = nullptr;
+
+    /* *
      * SuperCell
      * */
-    SuperCell* _super_cell;
+    SuperCell* tdmap_roi_sim_super_cell = nullptr;
+    SuperCell* tdmap_full_sim_super_cell = nullptr;
+    SuperCell* final_full_sim_super_cell = nullptr;
 
+    BaseImage* sim_image_properties = nullptr;
+    BaseImage* exp_image_properties = nullptr;
+
+    BaseCrystal* sim_crystal_properties = nullptr;
 
     /* Loggers */
     ApplicationLog::ApplicationLog* logger = nullptr;

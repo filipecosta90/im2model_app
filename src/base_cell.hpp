@@ -36,33 +36,74 @@
 #include <opencv2/core/matx.hpp>     // for Vec4d
 #include <opencv2/core/types.hpp>    // for Point3d, Point, Rect, Point2d
 
+#include <opencv2/core/mat.hpp>      // for Mat
+#include <opencv2/core/mat.inl.hpp>  // for Mat::~Mat
+#include <opencv2/core/matx.hpp>     // for Vec4d
+#include <opencv2/core/types.hpp>    // for Point3d
+#include <vector>                    // for vector
+#include "atom.hpp"                  // for Atom
+#include "chem_database.hpp"         // for Chem_Database
+#include "string_additions.hpp"
+#include "mc_driver.hpp"
+#include "symbcalc.hpp"
+
+
 class BaseCell {
+  private:
+    void update_length_flag();
 
-protected:
-    double length_a_Angstroms;
-    double length_b_Angstroms;
-    double length_c_Angstroms;
-    double length_a_Nanometers;
-    double length_b_Nanometers;
-    double length_c_Nanometers;
-    double cell_volume;
+  protected:
+    // Specifies the input super-cell file containing the atomic structure data in CIF file format.
+    std::string cif_path;
 
-    double angle_alpha;
-    double angle_beta;
-    double angle_gamma;
+    bool _flag_cif_path = false;
+    bool _flag_cif_format = false;
 
-    /** supercell exclusive **/
-    double _x_min_size_nm;
-    double _y_min_size_nm;
-    double _z_min_size_nm;
+    std::string cel_path;
+    bool _flag_cel_path = false;
+    bool _flag_cel_format = false;
 
-    cv::Mat inverse_orientation_matrix;
-    cv::Point3d _a,_b,_c,_d,_e,_f,_g,_h;
-    cv::Point3d _sim_a,_sim_b,_sim_c,_sim_d,_sim_e,_sim_f,_sim_g,_sim_h;
+    double length_a_Angstroms = 0.0f;
+    double length_b_Angstroms = 0.0f;
+    double length_c_Angstroms = 0.0f;
+    double length_a_Nanometers = 0.0f;
+    double length_b_Nanometers = 0.0f;
+    double length_c_Nanometers = 0.0f;
+    bool _flag_length_a = false;
+    bool _flag_length_b = false;
+    bool _flag_length_c = false;
+    bool _flag_length = false;
 
-    int expand_factor_a = 1;
-    int expand_factor_b = 1;
-    int expand_factor_c = 1;
+    double cell_volume = 0.0f;
+
+    double angle_alpha = 0.0f;
+    double angle_beta = 0.0f;
+    double angle_gamma = 0.0f;
+
+    /** Zone Axis / Lattice vector **/
+    cv::Point3d zone_axis_vector_uvw;
+
+    /** reciprocal-lattice (Miller) indices  **/
+    cv::Point3d upward_vector_hkl;
+    cv::Point3d vector_t;
+
+    cv::Point3d  projected_y_axis = cv::Point3d( 0.0f, 1.0f, 0.0f );
+    double projected_y_axis_u = 0.0f;
+    double projected_y_axis_v = 1.0f;
+    double projected_y_axis_w = 0.0f;
+    bool _flag_projected_y_axis_u = false;
+    bool _flag_projected_y_axis_v = false;
+    bool _flag_projected_y_axis_w = false;
+    bool _flag_projected_y_axis = false;
+
+    cv::Point3d  zone_axis;
+    double zone_axis_u = 0.0f;
+    double zone_axis_v = 0.0f;
+    double zone_axis_w = 0.0f;
+    bool _flag_zone_axis_u = false;
+    bool _flag_zone_axis_v = false;
+    bool _flag_zone_axis_w = false;
+    bool _flag_zone_axis = false;
 
     std::vector<cv::Point3d> atom_positions;
     std::vector<int> to_unit_cell_pos;
@@ -97,6 +138,7 @@ protected:
 
     /** Orientation **/
     cv::Mat orientation_matrix;
+    cv::Mat inverse_orientation_matrix;
 
     std::string file_name_input_dat;
 
@@ -120,46 +162,84 @@ protected:
     int width_px;
     int height_px;
 
-    double simgrid_best_match_thickness_nm;
+    std::vector<Atom> atoms;
+    std::vector<cv::Point3d> symetry_atom_positions;
+    std::vector<std::string> atom_type_symbols;
+    std::vector<double> atom_occupancies;
+    std::vector<double> atom_radii;
 
-    /** Private Class methods **/
+    //vertex buffer for colors
+    std::vector<cv::Vec4d> atom_rgba_colors;
+
+    /** Chem Database **/
+    Chem_Database chem_database;
 
   public:
     BaseCell();
 
-    // TDMap updaters
-
-
+    //others
+    void extract_space_group();
     //setters
-
-    bool set_cel_margin_nm( double margin );
-  /*  void set_length_a_Angstroms( double a );
+    bool set_cif_path( std::string path );
+    void set_length_a_Angstroms( double a );
     void set_length_b_Angstroms( double b );
     void set_length_c_Angstroms( double c );
-
     void set_length_a_Nanometers( double a );
     void set_length_b_Nanometers( double b );
     void set_length_c_Nanometers( double c );
-
     void set_angle_alpha( double alpha );
     void set_angle_beta( double beta );
     void set_angle_gamma( double gamma );
-    void set_volume( double volume );
-
-    void set_expand_factor_a( int factor_a );
-    void set_expand_factor_b( int factor_b );
-    void set_expand_factor_c( int factor_c );
-
-    void set_experimental_image_thickness_margin_z_Nanometers( double margin );
-
-    void set_experimental_min_size_nm_x( double x_min_size_nm );
-    void set_experimental_min_size_nm_y( double y_min_size_nm );
-    void set_experimental_min_size_nm_z( double z_min_size_nm );
-    void set_margin_nm( double margin );
-
-    void set_file_name_input_dat( std::string file_name_input_dat );*/
+    void set_cell_volume( double volume );
+    void set_zone_axis_vector( cv::Point3d uvw );
+    void set_upward_vector( cv::Point3d hkl );
+    bool set_cel_margin_nm( double margin );
+    bool set_projected_y_axis_u( double u );
+    bool set_projected_y_axis_v( double v );
+    bool set_projected_y_axis_w( double w );
+    bool set_zone_axis_u( double u );
+    bool set_zone_axis_v( double v );
+    bool set_zone_axis_w( double w );
 
     //getters
+
+    std::string get_cif_path(){ return cif_path; }
+    bool get_flag_cif_path(){ return _flag_cif_path; }
+    bool get_flag_cif_format(){ return _flag_cif_format; }
+    bool get_flag_cel_format(){ return _flag_cel_format; }
+    std::string get_cel_path(){ return cel_path; }
+    double get_angle_alpha(){ return angle_alpha; }
+    double get_angle_beta(){ return angle_beta; }
+    double get_angle_gamma(){ return angle_gamma; }
+    double get_volume(){ return cell_volume; }
+
+    /** Zone Axis / Lattice vector **/
+    cv::Point3d get_zone_axis_vector_uvw(){ return zone_axis_vector_uvw; }
+
+    /** reciprocal-lattice (Miller) indices  **/
+    bool get_flag_length_a(){ return _flag_length_a; }
+    bool get_flag_length_b(){ return _flag_length_b; }
+    bool get_flag_length_c(){ return _flag_length_c; }
+    bool get_flag_length(){ return _flag_length; }
+    bool get_flag_projected_y_axis_u(){ return _flag_projected_y_axis_u; }
+    bool get_flag_projected_y_axis_v(){ return _flag_projected_y_axis_v; }
+    bool get_flag_projected_y_axis_w(){ return _flag_projected_y_axis_w; }
+    bool get_flag_projected_y_axis(){ return _flag_projected_y_axis; }
+    bool get_flag_zone_axis_u(){ return _flag_zone_axis_u; }
+    bool get_flag_zone_axis_v(){ return _flag_zone_axis_v; }
+    bool get_flag_zone_axis_w(){ return _flag_zone_axis_w; }
+    bool get_flag_zone_axis(){ return _flag_zone_axis; }
+
+    std::vector<std::string> get_atom_type_symbols_vec(){ return atom_type_symbols; }
+    std::vector<double> get_atom_occupancy_vec(){ return atom_occupancies; }
+    std::vector<double> get_atom_debye_waller_factor_vec(){ return atom_debye_waller_factor; }
+    std::vector<cv::Point3d> get_symetry_atom_positions_vec(){ return symetry_atom_positions; }
+    std::vector<double> get_atom_radii_vec(){ return atom_radii; }
+
+    void form_matrix_from_miller_indices();
+
+    cv::Mat get_orientation_matrix(){ return orientation_matrix; }
+    cv::Mat get_inverse_orientation_matrix(){ return inverse_orientation_matrix; }
 
     /** getters **/
     double get_length_a_Angstroms(){ return length_a_Angstroms; }
@@ -168,6 +248,19 @@ protected:
     double get_length_a_Nanometers(){ return length_a_Nanometers; }
     double get_length_b_Nanometers(){ return length_b_Nanometers; }
     double get_length_c_Nanometers(){ return length_c_Nanometers; }
+
+    /** vector t **/
+    cv::Point3d get_vector_t(){ return vector_t; }
+
+    cv::Point3d get_projected_y_axis(){ return projected_y_axis; }
+    double get_projected_y_axis_u(){ return projected_y_axis_u; }
+    double get_projected_y_axis_v(){ return projected_y_axis_v; }
+    double get_projected_y_axis_w(){ return projected_y_axis_w; }
+
+    cv::Point3d get_zone_axis(){ return zone_axis; }
+    double get_zone_axis_u(){ return  zone_axis_u; }
+    double get_zone_axis_v(){ return zone_axis_v; }
+    double get_zone_axis_w(){ return zone_axis_w; }
 
     double get_fractional_norm_a_atom_pos_Nanometers(){ return fractional_norm_a_atom_pos; }
     double get_fractional_norm_b_atom_pos_Nanometers(){ return fractional_norm_b_atom_pos; }
@@ -181,24 +274,7 @@ protected:
 
     int get_nx_px(){ return cel_nx_px; }
     int get_ny_px(){ return cel_ny_px; }
-/*
-    bool update_unit_cell_parameters();
-    void update_length_parameters_from_fractional_norms();
-    void create_fractional_positions_atoms();
-    bool create_atoms_from_unit_cell();
-    void orientate_atoms_from_matrix();
-    void set_experimental_min_size_nm_from_unit_cell();
-    void calculate_experimental_min_size_nm();
-    void calculate_expand_factor();
-    void update_boundary_polygon();
-    void remove_z_out_of_range_atoms();
-    void remove_xy_out_of_range_atoms();
-    void generate_file(  std::string filename );
-    void read_simulated_from_dat_file( std::string file_name_input_dat );
-    void read_simulated_super_cells_from_dat_files( );
-    void match_experimental_simulated_super_cells( );
-    void create_experimental_image_roi_mask_from_boundary_polygon();
-    void calculate_atomic_columns_position_w_boundary_polygon();*/
+
 };
 
 #endif

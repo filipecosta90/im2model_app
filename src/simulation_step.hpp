@@ -10,7 +10,7 @@
 #include "wavimg_prm.hpp"                                 // for WAVIMG_prm
 // others
 #include "simgrid_steplength.hpp"                         // for SIMGRID_wav...
-#include "unit_cell.hpp"                                  // for Unit_Cell
+#include "unit_cell.hpp"                                  // for UnitCell
 #include "super_cell.hpp"                                 // for Super_Cell
 
 class Simulation_Step {
@@ -19,7 +19,7 @@ class Simulation_Step {
     std::string _step_descriptor;
 
     /** Unit Cell **/
-    Unit_Cell* _unit_cell;
+    UnitCell* _unit_cell;
 
     /** Super Cell **/
     Super_Cell* _super_cell;
@@ -34,11 +34,11 @@ class Simulation_Step {
     Simulation_Step( int step_id, std::string step_descriptor );
 
     /** setters **/
-    void set_unit_cell( Unit_Cell* unit_cell );
+    void set_unit_cell( UnitCell* unit_cell );
     void set_super_cell( Super_Cell* super_cell );
 
     /** getters **/
-    Unit_Cell* get_unit_cell();
+    UnitCell* get_unit_cell();
     Super_Cell* get_super_cell();
     CELSLC_prm* get_celslc_parameters();
     MSA_prm* get_msa_parameters();

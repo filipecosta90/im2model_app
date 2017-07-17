@@ -32,10 +32,10 @@
 #include "msa_prm.hpp"                                    // for MSA_prm
 #include "simgrid_steplength.hpp"                         // for SIMGRID_wav...
 #include "structure.hpp"                                  // for Structure
-#include "image_crystal.hpp"                              // for Image and Crystal 
-#include "td_map.hpp"                                     // for TDMap 
+#include "image_crystal.hpp"                              // for Image and Crystal
+#include "td_map.hpp"                                     // for TDMap
 #include "super_cell.hpp"                                 // for Super_Cell
-#include "unit_cell.hpp"                                  // for Unit_Cell
+#include "unit_cell.hpp"                                  // for UnitCell
 #include "wavimg_prm.hpp"                                 // for WAVIMG_prm
 
 using namespace cv;
@@ -63,7 +63,7 @@ int main(int argc, char** argv ){
   int max_contour_distance_px = 19;
   int max_contour_distance_thresh_px = 255;
 
-  Unit_Cell unit_cell;
+  UnitCell unit_cell;
   Super_Cell super_cell;
   Image_Crystal image_crystal;
   //TDMap td_map;
@@ -144,7 +144,7 @@ int main(int argc, char** argv ){
   bool user_estimated_defocus_nm_switch = false;
   bool user_estimated_thickness_nm_switch = false;
   bool user_estimated_thickness_slice_switch = false;
-  bool cleanup_switch = false; 
+  bool cleanup_switch = false;
 
   /////////////////////////
   // Simulated Thickness info
@@ -204,14 +204,14 @@ int main(int argc, char** argv ){
   int reshaped_simulated_image_height;
 
   /////////////////////////
-  // Dr Probe CEL file parameters 
+  // Dr Probe CEL file parameters
   /////////////////////////
-  double cel_margin_nm; 
+  double cel_margin_nm;
 
   MC::MC_Driver cif_driver;
 
   /////////////////////////
-  // Super Cell parameters 
+  // Super Cell parameters
   /////////////////////////
   int super_cell_nz_simulated_partitions;
   int super_cell_number_slices_to_max_thickness;
@@ -297,7 +297,7 @@ int main(int argc, char** argv ){
       std::cerr << desc << std::endl;
       return -1;
     }
-    boost::program_options::notify(vm); 
+    boost::program_options::notify(vm);
 
     if ( vm.count("help")  )
     {
@@ -321,7 +321,7 @@ int main(int argc, char** argv ){
       typedef boost::tokenizer<boost::char_separator<char>> tokenizer;
       boost::char_separator<char> sep{","};
       tokenizer tok{prj_hkl, sep};
-      tokenizer::iterator itt_h,itt_k,itt_l; 
+      tokenizer::iterator itt_h,itt_k,itt_l;
       itt_h = tok.begin();
       itt_k = tok.begin();
       itt_l = tok.begin();
@@ -340,7 +340,7 @@ int main(int argc, char** argv ){
       typedef boost::tokenizer<boost::char_separator<char>> tokenizer;
       boost::char_separator<char> sep{","};
       tokenizer tok{prj_uvw, sep};
-      tokenizer::iterator itt_u,itt_v,itt_w; 
+      tokenizer::iterator itt_u,itt_v,itt_w;
       itt_u = tok.begin();
       itt_v = tok.begin();
       itt_w = tok.begin();
@@ -359,7 +359,7 @@ int main(int argc, char** argv ){
       typedef boost::tokenizer<boost::char_separator<char>> tokenizer;
       boost::char_separator<char> sep{","};
       tokenizer tok{super_abc, sep};
-      tokenizer::iterator itt_a,itt_b,itt_c; 
+      tokenizer::iterator itt_a,itt_b,itt_c;
       itt_a = tok.begin();
       itt_b = tok.begin();
       itt_c = tok.begin();
@@ -469,8 +469,8 @@ int main(int argc, char** argv ){
     else{
       nx_simulated_horizontal_samples = (int) ( super_cell_size_a / sampling_rate_experimental_x_nm_per_pixel );
       ny_simulated_vertical_samples = (int) ( super_cell_size_b / sampling_rate_experimental_y_nm_per_pixel );
-      sampling_rate_super_cell_x_nm_pixel = sampling_rate_experimental_x_nm_per_pixel; 
-      sampling_rate_super_cell_y_nm_pixel = sampling_rate_experimental_y_nm_per_pixel; 
+      sampling_rate_super_cell_x_nm_pixel = sampling_rate_experimental_x_nm_per_pixel;
+      sampling_rate_super_cell_y_nm_pixel = sampling_rate_experimental_y_nm_per_pixel;
       std::cout << "automatic nx and ny. -nx " << nx_simulated_horizontal_samples << " -ny " << ny_simulated_vertical_samples << std::endl;
     }
 
@@ -597,7 +597,7 @@ int main(int argc, char** argv ){
 
     MSA_prm msa_parameters;
     // Since the release of MSA version 0.64 you may alternatively specify the electron energy in keV in line 6
-    msa_parameters.set_electron_wavelength( ht_accelaration_voltage ); 
+    msa_parameters.set_electron_wavelength( ht_accelaration_voltage );
     msa_parameters.set_internal_repeat_factor_of_super_cell_along_x ( 1 );
     msa_parameters.set_internal_repeat_factor_of_super_cell_along_y ( 1 );
     std::stringstream input_prefix_stream;
@@ -766,7 +766,7 @@ int main(int argc, char** argv ){
 
       // thickness/slice setters
 
-      wavimg_simgrid_steps.set_celslc_accum_nm_slice_vec( celslc_accum_nm_slice_vec ); 
+      wavimg_simgrid_steps.set_celslc_accum_nm_slice_vec( celslc_accum_nm_slice_vec );
       wavimg_simgrid_steps.set_slice_samples(slice_samples);
       wavimg_simgrid_steps.set_slice_period( slice_period );
       wavimg_simgrid_steps.set_number_slices_to_max_thickness( number_slices_to_max_thickness );
@@ -817,8 +817,8 @@ int main(int argc, char** argv ){
       //////////////////////////////////////////////////////
       unit_cell.create_atoms_from_site_and_symetry();
       super_cell = Super_Cell::Super_Cell( &unit_cell );
-      /** SUPER CELL setters **/
 
+      /** SUPER CELL setters **/
       const double best_match_thickness_nm = wavimg_simgrid_steps.get_simgrid_best_match_thickness_nm();
       const double best_match_defocus_nm = wavimg_simgrid_steps.get_simgrid_best_match_defocus_nm();
 
@@ -844,13 +844,12 @@ int main(int argc, char** argv ){
        * MILESTONE 3
        *
        * */
-
       CELSLC_prm* celslc_cel = new CELSLC_prm( _sim_tdmap_ostream_buffer );
       std::string super_cell_slc_filename_prefix = "cel_slc";
       celslc_cel->set_cel_file( "test_im2model.cel" );
       celslc_cel->set_slc_filename_prefix ( super_cell_slc_filename_prefix );
-      celslc_cel->set_nx_simulated_horizontal_samples( _super_cell_nx ); 
-      celslc_cel->set_ny_simulated_vertical_samples( _super_cell_ny ); 
+      celslc_cel->set_nx_simulated_horizontal_samples( _super_cell_nx );
+      celslc_cel->set_ny_simulated_vertical_samples( _super_cell_ny );
       celslc_cel->set_ht_accelaration_voltage(ht_accelaration_voltage);
       celslc_cel->set_dwf_switch(dwf_switch);
       celslc_cel->set_abs_switch(abs_switch);
@@ -865,7 +864,7 @@ int main(int argc, char** argv ){
       assert( super_cell_nz_simulated_partitions >= 1 );
 
       MSA_prm msa_cel;
-      msa_cel.set_electron_wavelength( ht_accelaration_voltage ); 
+      msa_cel.set_electron_wavelength( ht_accelaration_voltage );
       msa_cel.set_internal_repeat_factor_of_super_cell_along_x ( 1 );
       msa_cel.set_internal_repeat_factor_of_super_cell_along_y ( 1 );
       std::stringstream input_prefix_stream;
@@ -889,7 +888,7 @@ int main(int argc, char** argv ){
       }
 
       /* Calculate the defocus period of the super-cell */
-      super_cell_defocus_period = super_cell_defocus_interval / ((double) (super_cell_defocus_samples -1)); 
+      super_cell_defocus_period = super_cell_defocus_interval / ((double) (super_cell_defocus_samples -1));
       super_cell_defocus_lower_bound = best_match_defocus_nm - (super_cell_defocus_interval / 2.0f);
       super_cell_defocus_upper_bound = best_match_defocus_nm + (super_cell_defocus_interval / 2.0f);
 
@@ -968,7 +967,7 @@ int main(int argc, char** argv ){
       wavimg_cel.set_center_y_of_objective_aperture( 0.0f );
       // setters line 21 + aberration_definition_index_number
       wavimg_cel.set_prm_file_name("temporary_wavimg_im2model.prm");
-      wavimg_cel.set_number_parameter_loops( 1 ); 
+      wavimg_cel.set_number_parameter_loops( 1 );
       wavimg_cel.add_parameter_loop ( 1 , 1 , 1, super_cell_defocus_lower_bound, super_cell_defocus_upper_bound, super_cell_defocus_samples, "'foc'" );
       wavimg_cel.produce_prm();
       //wavimg_cel.set_bin_path( wavimg_bin_string );
@@ -993,9 +992,8 @@ int main(int argc, char** argv ){
   }
   catch(std::exception& e){
     std::cerr << "Unhandled Exception reached the top of main: "
-      << e.what() << ", application will now exit" << std::endl; 
+      << e.what() << ", application will now exit" << std::endl;
     return -1;
   }
   return 0;
 }
-

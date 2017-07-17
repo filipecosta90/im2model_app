@@ -42,7 +42,7 @@
 #include "base_image.hpp"
 #include "application_log.hpp"
 
-class SimGrid : public BaseCrystal {
+class SimGrid {
 
   private:
     // // // // //
@@ -53,8 +53,12 @@ class SimGrid : public BaseCrystal {
     double simgrid_best_match_thickness_nm;
     double simgrid_best_match_defocus_nm;
 
-    BaseImage exp_image_properties;
-    BaseImage sim_image_properties;
+    BaseCrystal* sim_crystal_properties = nullptr;
+    bool _flag_sim_crystal_properties = false;
+    BaseImage* exp_image_properties = nullptr;
+    bool _flag_exp_image_properties = false;
+    BaseImage* sim_image_properties = nullptr;
+    bool _flag_sim_image_properties = false;
 
     /***********
       simulation grid vars
@@ -88,7 +92,6 @@ class SimGrid : public BaseCrystal {
     // // // // //
     // debug info
     // // // // //
-
     bool sim_grid_switch = false;
     bool runned_simulation = false;
 
@@ -100,51 +103,14 @@ class SimGrid : public BaseCrystal {
 
     SimGrid( boost::process::ipstream& async_io_buffer_out );
     bool export_sim_grid( std::string filename );
-    bool setup_image_properties();
-    bool set_exp_image_properties_full_image( std::string path );
-    bool set_exp_image_properties_roi_n_rows_height( int nrows );
-    bool set_exp_image_properties_roi_n_cols_width( int ncols );
-    bool set_exp_image_properties_roi_center_x( int center_x );
-    bool set_exp_image_properties_roi_center_y( int center_y );
-    bool set_exp_image_sampling_rate_x_nm_per_pixel( double sampling );
-    bool set_exp_image_sampling_rate_y_nm_per_pixel( double sampling );
-    bool set_super_cell_size_a( double size );
-    bool set_super_cell_size_b( double size );
-    bool set_sampling_rate_x_nm_per_pixel( double rate );
-    bool set_sampling_rate_y_nm_per_pixel( double rate );
-
-    /* flag getters */
-
-    /* getters */
-
-    cv::Mat get_exp_image_properties_full_image();
-    cv::Mat get_exp_image_properties_roi_image();
-    cv::Rect get_exp_image_properties_roi_rectangle();
-    bool get_exp_image_properties_flag_full_image();
-    bool get_exp_image_properties_flag_roi_image();
-    bool get_exp_image_properties_flag_roi_rectangle();
-    bool get_exp_image_properties_flag_full_n_cols_width();
-    int get_exp_image_properties_full_n_cols_width();
-    double get_exp_image_properties_full_ny_size_width_nm();
-    bool get_exp_image_properties_flag_full_n_rows_height();
-    int get_exp_image_properties_full_n_rows_height();
-    double get_exp_image_properties_full_nx_size_height_nm();
-    double get_exp_image_properties_roi_ny_size_width_nm();
-    double get_exp_image_properties_roi_nx_size_height_nm();
-    int get_exp_image_properties_roi_ny_size_width();
-    int get_exp_image_properties_roi_nx_size_height();
-    bool get_exp_image_properties_flag_roi_ny_size_width();
-    bool get_exp_image_properties_flag_roi_nx_size_height();
-    int get_exp_image_properties_roi_center_x();
-    int get_exp_image_properties_roi_center_y();
-    int get_sim_image_properties_full_n_cols_width();
-    int get_sim_image_properties_full_n_rows_height();
-    bool get_sim_image_properties_flag_full_n_cols_width();
-    bool get_sim_image_properties_flag_full_n_rows_height();
 
     /** getters **/
+
     // flag getters
     bool get_flag_logger(){ return _flag_logger; }
+    bool get_flag_sim_crystal_properties(){ return _flag_sim_crystal_properties; }
+    bool get_flag_exp_image_properties(){ return _flag_exp_image_properties; }
+    bool get_flag_sim_image_properties(){ return _flag_sim_image_properties; }
     /* Loggers */
     ApplicationLog::ApplicationLog* get_logger(){ return logger; }
 
@@ -190,12 +156,14 @@ class SimGrid : public BaseCrystal {
     std::string get_export_sim_grid_filename_hint();
 
     bool set_image_correlation_matching_method( int enumerator );
-
-    void set_wavimg_var( WAVIMG_prm* wavimg_var );
-
     void set_roi_pixel_size( int pixel_size );
 
     void set_sim_grid_switch( bool sgrid_switch );
+
+    bool set_sim_crystal_properties ( BaseCrystal* crystal_prop );
+    bool set_exp_image_properties ( BaseImage* exp_image_properties );
+    bool set_sim_image_properties ( BaseImage* sim_image_properties );
+    bool set_wavimg_var( WAVIMG_prm *wavimg_var );
 
     void print_var_state();
 

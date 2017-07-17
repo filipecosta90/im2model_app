@@ -34,15 +34,26 @@
 
 #include <stdlib.h>
 
+#include "unit_cell.hpp"
+#include "super_cell.hpp"
 #include "base_bin.hpp"
 #include "base_image.hpp"
 #include "base_crystal.hpp"
 #include "application_log.hpp"
 
-class CELSLC_prm : public BaseBin, public BaseCrystal, public BaseImage {
-  private:
-    std::string super_cell_cel_file;
-    // [Slice Parameters]
+class CELSLC_prm : public BaseBin {
+private:
+  /* Classes with sim properties */
+  UnitCell* unit_cell = nullptr;
+  bool _flag_unit_cell = false;
+BaseCrystal* sim_crystal_properties = nullptr;
+bool _flag_sim_crystal_properties = false;
+SuperCell* sim_super_cell = nullptr;
+bool _flag_sim_super_cell = false;
+BaseImage* sim_image_properties = nullptr;
+bool _flag_sim_image_properties = false;
+
+/* vars */
 
     bool ssc_runned_bin = false;
     bool dwf_switch = false;
@@ -81,6 +92,11 @@ class CELSLC_prm : public BaseBin, public BaseCrystal, public BaseImage {
 
     void set_abs_switch( bool abs_switch );
 
+    bool set_unit_cell( UnitCell* unit_cell );
+    bool set_sim_crystal_properties ( BaseCrystal* crystal_prop );
+    bool set_sim_super_cell ( SuperCell* sim_super_cell );
+    bool set_sim_image_properties ( BaseImage* sim_image_properties );
+
     bool check_produced_slices();
 
     void produce_prm();
@@ -95,10 +111,9 @@ class CELSLC_prm : public BaseBin, public BaseCrystal, public BaseImage {
 
     bool call_bin_ssc();
 
-    bool set_super_cell_size_a( double size );
-    bool set_super_cell_size_b( double size );
     /* Loggers */
     bool set_application_logger( ApplicationLog::ApplicationLog* logger );
+
     void print_var_state();
 
 

@@ -1,7 +1,7 @@
 #include "simulation_step.hpp"
 
 Simulation_Step::Simulation_Step(){
-    _unit_cell = new Unit_Cell();
+    _unit_cell = new UnitCell();
     _super_cell = new Super_Cell();
     _celslc_parameters = new CELSLC_prm();
     _msa_parameters = new MSA_prm();
@@ -11,7 +11,7 @@ Simulation_Step::Simulation_Step(){
 Simulation_Step::Simulation_Step( int step_id, std::string step_descriptor ){
     _step_id = step_id;
     _step_descriptor = step_descriptor;
-    _unit_cell = new Unit_Cell();
+    _unit_cell = new UnitCell();
     _super_cell = new Super_Cell();
     _celslc_parameters = new CELSLC_prm();
     _msa_parameters = new MSA_prm();
@@ -20,7 +20,7 @@ Simulation_Step::Simulation_Step( int step_id, std::string step_descriptor ){
 
 
 /** setters **/
-void Simulation_Step::set_unit_cell( Unit_Cell* unit_cell ){
+void Simulation_Step::set_unit_cell( UnitCell* unit_cell ){
   _unit_cell = unit_cell; 
 }
 
@@ -29,7 +29,7 @@ void Simulation_Step::set_super_cell( Super_Cell* super_cell ){
 }
 
 /** getters **/
-Unit_Cell* Simulation_Step::get_unit_cell(){
+UnitCell* Simulation_Step::get_unit_cell(){
   return _unit_cell;
 }
 
