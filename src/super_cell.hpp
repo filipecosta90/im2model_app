@@ -4,6 +4,7 @@
 /* BEGIN BOOST */
 #include <boost/iostreams/device/mapped_file.hpp> // for mmap
 #include <boost/iostreams/stream.hpp>             // for stream
+#include <boost/format.hpp>
 /* END BOOST */
 
 #include <math.h>                        // for fabs, ceil, pow, M_PI

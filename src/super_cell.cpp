@@ -48,7 +48,7 @@ bool SuperCell::update_from_unit_cell(){
       if( angle_result && expand_result ){
         const bool create_result = create_atoms_from_unit_cell();
         if( create_result ){
-          const bool orientate_result = true; //orientate_atoms_from_matrix();
+          const bool orientate_result = orientate_atoms_from_matrix();
           if( orientate_result ){
             const bool fractional_result = create_fractional_positions_atoms();
             result = fractional_result;
@@ -465,10 +465,12 @@ bool SuperCell::generate_xyz_file(){
           _atom_pos_itt++ , loop_counter++
          ){
         const int unit_cell_pos = super_cell_to_unit_cell_pos.at(loop_counter);
-        const cv::Point3d atom = *_atom_pos_itt;
+        cv::Point3d atom = *_atom_pos_itt;
+        // from nanometers to angstroms
+        atom.x *= 10.0f; atom.y *= 10.0f; atom.z *= 10.0f;
         std::string atom_symbol = unit_cell_atom_symbol_string.at(unit_cell_pos);
           /** print **/
-        outfile << atom_symbol << " " << atom.x << " " << atom.y << " " << atom.z << std::endl;
+        outfile << atom_symbol << " " << boost::format("%+10.5d") % atom.x << " " << boost::format("%+10.5d") % atom.y << " " << boost::format("%+10.5d") % atom.z << std::endl;
       }
       outfile.close();
       _flag_xyz_format = true;
@@ -490,7 +492,7 @@ bool SuperCell::set_length_a_Nanometers( double a ){
   _flag_a_min_size_nm = true;
   _flag_min_size_nm = _flag_a_min_size_nm && _flag_b_min_size_nm && _flag_c_min_size_nm;
   const bool result = BaseCell::set_length_a_Nanometers( a );
-  update_from_unit_cell();
+  //update_from_unit_cell();
   return result;
 }
 
@@ -499,7 +501,7 @@ bool SuperCell::set_length_b_Nanometers( double b ){
   _flag_b_min_size_nm = true;
   _flag_min_size_nm = _flag_a_min_size_nm && _flag_b_min_size_nm && _flag_c_min_size_nm;
   const bool result = BaseCell::set_length_b_Nanometers( b );
-  update_from_unit_cell();
+  //update_from_unit_cell();
   return result;
 }
 
@@ -508,13 +510,13 @@ bool SuperCell::set_length_c_Nanometers( double c ){
   _flag_c_min_size_nm = true;
   _flag_min_size_nm = _flag_a_min_size_nm && _flag_b_min_size_nm && _flag_c_min_size_nm;
   const bool result = BaseCell::set_length_c_Nanometers( c );
-  update_from_unit_cell();
+  //update_from_unit_cell();
   return result;
 }
 
 bool SuperCell::set_zone_axis_u( double u){
   const bool result = BaseCell::set_zone_axis_u( u );
-  update_from_unit_cell();
+  //update_from_unit_cell();
   return result;
 }
 
@@ -526,25 +528,25 @@ bool SuperCell::set_zone_axis_v( double v){
 
 bool SuperCell::set_zone_axis_w( double w){
   const bool result = BaseCell::set_zone_axis_w( w );
-  update_from_unit_cell();
+  //update_from_unit_cell();
   return result;
 }
 
 bool SuperCell::set_upward_vector_u( double u){
   const bool result = BaseCell::set_upward_vector_u( u );
-  update_from_unit_cell();
+  //update_from_unit_cell();
   return result;
 }
 
 bool SuperCell::set_upward_vector_v( double v){
   const bool result = BaseCell::set_upward_vector_v( v );
-  update_from_unit_cell();
+  //update_from_unit_cell();
   return result;
 }
 
 bool SuperCell::set_upward_vector_w( double w){
   const bool result = BaseCell::set_upward_vector_w( w );
-  update_from_unit_cell();
+  //update_from_unit_cell();
   return result;
 }
 

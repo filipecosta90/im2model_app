@@ -38,6 +38,12 @@ bool BaseCell::set_cel_filename( std::string filename ){
   return true;
 }
 
+bool BaseCell::set_xyz_filename( std::string filename ){
+  xyz_filename = filename;
+  _flag_xyz_filename = true;
+  return true;
+}
+
 bool BaseCell::set_cel_margin_nm( double margin ){
   cel_margin_nm = margin;
   return true;
@@ -189,8 +195,8 @@ void BaseCell::form_matrix_from_miller_indices(){
       _flag_zone_axis &&
       _flag_upward_vector
     ){
-    const double norm_uvw = cv::norm(zone_axis);
-    const double norm_hkl = cv::norm(upward_vector);
+    const double norm_uvw = cv::norm( zone_axis );
+    const double norm_hkl = cv::norm( upward_vector );
 
     // Miller indices [integer representation of direction cosines]
     // can be converted to a unit vector, n, by dividing by the

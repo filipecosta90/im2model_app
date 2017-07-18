@@ -162,7 +162,6 @@ bool SimGrid::check_produced_dat(){
       _flag_sim_crystal_properties
     ){
     if(
-        _flag_raw_simulated_images_grid &&
         // BaseCrystal vars
         sim_crystal_properties->get_flag_base_dir_path() &&
         sim_crystal_properties->get_flag_slice_samples() &&

@@ -122,7 +122,6 @@ bool CELSLC_prm::check_produced_slices(){
     if(
         // BaseCrystal vars
         sim_crystal_properties->get_flag_slc_file_name_prefix() &&
-        sim_crystal_properties->get_flag_nz_simulated_partitions() &&
         // BaseBin vars
         _flag_base_bin_start_dir_path &&
         _flag_base_bin_output_dir_path
@@ -156,7 +155,7 @@ bool CELSLC_prm::check_produced_slices(){
     else{
       if( _flag_logger ){
         std::stringstream message;
-        message << "The required vars for call_boost_bin() are not setted up.";
+        message << "The required vars for check_produced_slices() are not setted up.";
         logger->logEvent( ApplicationLog::error , message.str() );
       }
       print_var_state();
@@ -165,7 +164,7 @@ bool CELSLC_prm::check_produced_slices(){
   else{
     if( _flag_logger ){
       std::stringstream message;
-      message << "The required Class POINTERS for call_boost_bin() are not setted up.";
+      message << "The required Class POINTERS for check_produced_slices() are not setted up.";
       logger->logEvent( ApplicationLog::error , message.str() );
     }
     print_var_state();
@@ -208,13 +207,13 @@ std::ostream& CELSLC_prm::create_bin_args(std::ostream& args_stream) const {
     ){
     args_stream << full_bin_path_execname.string();
 
-    if( sim_super_cell->get_flag_cif_format() ){
-      args_stream << " -cif " << sim_super_cell->get_cif_path();
+    if( sim_super_cell->get_flag_cel_format() ){
+      args_stream << " -cel \""<< sim_super_cell->get_cel_path() << "\"";
     }
     else{
-      if( sim_super_cell->get_flag_cel_format() ){
-        args_stream << " -cel "<< sim_super_cell->get_cel_path();
-      }
+    if( sim_super_cell->get_flag_cif_format() ){
+      args_stream << " -cif \"" << sim_super_cell->get_cif_path() << "\"";
+    }
     }
     const std::string slc_file_name_prefix = sim_crystal_properties->get_slc_file_name_prefix();
 
@@ -240,6 +239,7 @@ std::ostream& CELSLC_prm::create_bin_args(std::ostream& args_stream) const {
       args_stream << " -ht " << ht_accelaration_voltage;
     }
     if(
+        sim_super_cell->get_flag_cif_format() &&
         sim_super_cell->get_flag_zone_axis() &&
         sim_super_cell->get_flag_upward_vector() &&
         sim_super_cell->get_flag_length()
@@ -257,8 +257,10 @@ std::ostream& CELSLC_prm::create_bin_args(std::ostream& args_stream) const {
       const double super_cell_size_b = sim_super_cell->get_length_b_Nanometers();
       const double super_cell_size_c = sim_super_cell->get_length_c_Nanometers();
 
-      args_stream << " -prj " << (float) zone_axis_u  << "," << (float) zone_axis_v << "," << (float) zone_axis_w << ","
-        <<  upward_vector_u << "," << upward_vector_v << "," << upward_vector_w << ","
+      args_stream << " -prj " << (float)  upward_vector_u << "," << (float)  upward_vector_v << "," << (float) upward_vector_w << ","
+
+      << (float) zone_axis_u  << "," << (float) zone_axis_v << "," << (float) zone_axis_w << ","
+
         << (float) super_cell_size_a << "," << (float) super_cell_size_b << "," << (float) super_cell_size_c;
     }
     /**
@@ -299,7 +301,7 @@ std::ostream& CELSLC_prm::create_bin_args(std::ostream& args_stream) const {
   return args_stream;
 }
 
-bool CELSLC_prm::call_boost_bin( ){
+bool CELSLC_prm::call_boost_bin(){
   bool result = false;
   if(
       _flag_sim_super_cell &&
@@ -369,21 +371,21 @@ bool CELSLC_prm::call_boost_bin( ){
         _child_exit_code = c.exit_code();
       }
       bool _exit_sucess_flag;
-#if defined(BOOST_WINDOWS_API)
+      #if defined(BOOST_WINDOWS_API)
       if( _flag_logger ){
         std::stringstream message;
         message << "(EXIT_SUCCESS == _child_exit_code) "<< (EXIT_SUCCESS == _child_exit_code);
         logger->logEvent( ApplicationLog::notification , message.str() );
       }
       _exit_sucess_flag = ((EXIT_SUCCESS == _child_exit_code));
-#elif defined(BOOST_POSIX_API)
+      #elif defined(BOOST_POSIX_API)
       if( _flag_logger ){
         std::stringstream message;
         message << "(EXIT_SUCCESS == WEXITSTATUS(_child_exit_code)) "<< (EXIT_SUCCESS == WEXITSTATUS(_child_exit_code));
         logger->logEvent( ApplicationLog::notification , message.str() );
       }
       _exit_sucess_flag = ((EXIT_SUCCESS == WEXITSTATUS(_child_exit_code)));
-#endif
+      #endif
       if( _error_code ){
         if( _flag_logger ){
           std::stringstream message;
@@ -418,7 +420,6 @@ bool CELSLC_prm::set_application_logger( ApplicationLog::ApplicationLog* app_log
   return true;
 }
 
-
 void CELSLC_prm::print_var_state(){
   if( _flag_logger ){
     std::stringstream message;
@@ -438,11 +439,19 @@ std::ostream& CELSLC_prm::output(std::ostream& stream) const {
     << "\t\t" << "single_slice_calculation_nz_switch : " << std::boolalpha << single_slice_calculation_nz_switch << "\n"
     << "\t\t" << "single_slice_calculation_enabled_switch : " << std::boolalpha << single_slice_calculation_enabled_switch << "\n"
     << "\t" << "BaseCrystal Properties : " << "\n";
-  //  BaseCrystal->output(message);
+  if( _flag_sim_crystal_properties ){
+    sim_crystal_properties->output( stream );
+  }
+  stream << "\t" << "SuperCell Properties : " << "\n";
+  if( _flag_sim_super_cell ){
+    sim_super_cell->output( stream );
+  }
   stream <<  "\t" << "BaseImage Properties : " << "\n";
-  //    BaseImage->output(message);
+  if( _flag_sim_image_properties ){
+    sim_image_properties->output( stream );
+  }
   stream <<  "\t" << "BaseBin Properties : " << "\n";
-  //  BaseBin::output(message);
+  BaseBin::output( stream );
   return stream;
 }
 

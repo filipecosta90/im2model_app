@@ -21,6 +21,14 @@ TDMap::TDMap(
 
   tdmap_roi_sim_super_cell->set_unit_cell( unit_cell );
   tdmap_roi_sim_super_cell->set_cel_filename( "tdmap_roi.cel" );
+  tdmap_roi_sim_super_cell->set_xyz_filename( "tdmap_roi.xyz" );
+  /*tdmap_roi_sim_super_cell->set_zone_axis_u( 0.0f );
+  tdmap_roi_sim_super_cell->set_zone_axis_v( 0.0f );
+  tdmap_roi_sim_super_cell->set_zone_axis_w( 1.0f );
+  tdmap_roi_sim_super_cell->set_upward_vector_u( 0.0f );
+  tdmap_roi_sim_super_cell->set_upward_vector_v( 1.0f );
+  tdmap_roi_sim_super_cell->set_upward_vector_w( 0.0f );*/
+
   // use cel format
   //tdmap_roi_sim_super_cell->set_cel_format( true );
   tdmap_full_sim_super_cell->set_unit_cell( unit_cell );
@@ -307,7 +315,7 @@ bool TDMap::test_run_config(){
   return result;
 }
 
-bool TDMap::run_tdmap( ){
+bool TDMap::run_tdmap(){
   bool _simulation_status = false;
   const bool _vars_setted_up = test_run_config();
   if ( _vars_setted_up ){
@@ -337,6 +345,7 @@ bool TDMap::run_tdmap( ){
       }
       if( _clean_run_env ){
         emit TDMap_started_celslc();
+        const bool unit_cell_update = tdmap_roi_sim_super_cell->update_from_unit_cell();
         const bool cel_generation = tdmap_roi_sim_super_cell->generate_super_cell_file();
         tdmap_roi_sim_super_cell->generate_xyz_file();
         if( cel_generation ){
@@ -741,14 +750,23 @@ bool TDMap::set_file_name_output_image_wave_function( std::string image_wave ){
 }
 
 bool TDMap::set_slc_output_target_folder( std::string folder ){
-  return sim_crystal_properties->set_slc_output_target_folder( folder );
+  const bool celslc_result = _tdmap_celslc_parameters->set_base_bin_output_target_folder( folder );
+  const bool crystal_result = sim_crystal_properties->set_slc_output_target_folder( folder );
+  const bool result = celslc_result && crystal_result;
+  return result;
 }
 
 bool TDMap::set_wav_output_target_folder( std::string folder ){
-  return sim_crystal_properties->set_wav_output_target_folder( folder );
+  const bool msa_result = _tdmap_msa_parameters->set_base_bin_output_target_folder( folder );
+  const bool crystal_result = sim_crystal_properties->set_wav_output_target_folder( folder );
+  const bool result = msa_result && crystal_result;
+  return result;
 }
 
 bool TDMap::set_dat_output_target_folder( std::string folder ){
+  const bool wavimg_result = _tdmap_wavimg_parameters->set_base_bin_output_target_folder( folder );
+  const bool crystal_result = sim_crystal_properties->set_dat_output_target_folder( folder );
+  const bool result = wavimg_result && crystal_result;
   return sim_crystal_properties->set_dat_output_target_folder( folder );
 }
 
