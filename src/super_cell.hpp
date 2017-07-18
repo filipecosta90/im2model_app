@@ -39,6 +39,7 @@
 #include "image_bounds.hpp"
 #include "base_cell.hpp"
 #include "unit_cell.hpp"
+#include "application_log.hpp"
 //#include "edge.hpp"
 
 class SuperCell : public ImageBounds, public BaseCell {
@@ -52,30 +53,33 @@ class SuperCell : public ImageBounds, public BaseCell {
     UnitCell* unit_cell = nullptr;
     bool _flag_unit_cell = false;
 
-protected:
+    /** supercell exclusive **/
+    double a_min_size_nm = 0.0f;
+    bool _flag_a_min_size_nm = false;
+    double b_min_size_nm = 0.0f;
+    bool _flag_b_min_size_nm = false;
+    double c_min_size_nm = 0.0f;
+    bool _flag_c_min_size_nm = false;
+    bool _flag_min_size_nm = false;
 
-  /** supercell exclusive **/
-  double _x_min_size_nm = 0.0f;
-  double _y_min_size_nm = 0.0f;
-  double _z_min_size_nm = 0.0f;
+    cv::Point3d _a,_b,_c,_d,_e,_f,_g,_h;
+    cv::Point3d _sim_a,_sim_b,_sim_c,_sim_d,_sim_e,_sim_f,_sim_g,_sim_h;
 
-  cv::Point3d _a,_b,_c,_d,_e,_f,_g,_h;
-  cv::Point3d _sim_a,_sim_b,_sim_c,_sim_d,_sim_e,_sim_f,_sim_g,_sim_h;
+    int expand_factor_a = 1;
+    int expand_factor_b = 1;
+    int expand_factor_c = 1;
+    bool _flag_expand_factor = false;
 
-  int expand_factor_a = 1;
-  int expand_factor_b = 1;
-  int expand_factor_c = 1;
-  bool _flag_expand_factor_a = false;
-  bool _flag_expand_factor_b = false;
-  bool _flag_expand_factor_c = false;
-  bool _flag_expand_factor = false;
+  protected:
 
   public:
     SuperCell();
     SuperCell( UnitCell* cell );
 
+    bool calculate_expand_factor();
     bool update_from_unit_cell();
     bool create_atoms_from_unit_cell();
+    bool orientate_atoms_from_matrix();
 
     /* setters */
     bool set_unit_cell( UnitCell* cell );
@@ -84,11 +88,17 @@ protected:
     bool set_length_a_Nanometers( double a );
     bool set_length_b_Nanometers( double b );
     bool set_length_c_Nanometers( double c );
+    bool set_zone_axis_u( double u );
+    bool set_zone_axis_v( double v );
+    bool set_zone_axis_w( double w );
+    bool set_upward_vector_u( double u );
+    bool set_upward_vector_v( double u );
+    bool set_upward_vector_w( double u );
 
     /* Loggers */
     bool set_application_logger( ApplicationLog::ApplicationLog* logger );
     void print_var_state();
-   // friend std::ostream& operator<< (std::ostream& stream, const SuperCell::SuperCell& image);
+    // friend std::ostream& operator<< (std::ostream& stream, const SuperCell::SuperCell& image);
     virtual std::ostream& output(std::ostream& stream) const;
 };
 

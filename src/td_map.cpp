@@ -75,7 +75,6 @@ TDMap::TDMap(
   set_slc_output_target_folder("slc");
   set_wav_output_target_folder("wav");
   set_dat_output_target_folder("dat");
-
   /* ******
    * celslc static settings
    */
@@ -1001,7 +1000,7 @@ bool TDMap::set_unit_cell_cif_path( std::string cif_path ){
     if( result ){
       const bool parse_result = unit_cell->parse_cif();
       if( parse_result ){
-      tdmap_roi_sim_super_cell->update_from_unit_cell();
+        tdmap_roi_sim_super_cell->update_from_unit_cell();
       }
     }
   }
@@ -1016,8 +1015,9 @@ bool TDMap::set_zone_axis_u( std::string s_za_u ){
   bool result = false;
   try {
     const double za_u = boost::lexical_cast<double>( s_za_u );
-    result = unit_cell->set_zone_axis_u( za_u );
-
+    const bool unit_cell_result = unit_cell->set_zone_axis_u( za_u );
+    const bool roi_super_cell_result = tdmap_roi_sim_super_cell->set_zone_axis_u( za_u );
+    result = unit_cell_result && roi_super_cell_result;
   }
   catch(boost::bad_lexical_cast&  ex) {
     // pass it up
@@ -1030,7 +1030,9 @@ bool TDMap::set_zone_axis_v( std::string s_za_v ){
   bool result = false;
   try {
     const double za_v = boost::lexical_cast<double>( s_za_v );
-    result = unit_cell->set_zone_axis_v( za_v );
+    const bool unit_cell_result = unit_cell->set_zone_axis_v( za_v );
+    const bool roi_super_cell_result = tdmap_roi_sim_super_cell->set_zone_axis_v( za_v );
+    result = unit_cell_result && roi_super_cell_result;
   }
   catch(boost::bad_lexical_cast&  ex) {
     // pass it up
@@ -1043,7 +1045,9 @@ bool TDMap::set_zone_axis_w( std::string s_za_w ){
   bool result = false;
   try {
     const double za_w = boost::lexical_cast<double>( s_za_w );
-    result = unit_cell->set_zone_axis_w( za_w );
+    const bool unit_cell_result = unit_cell->set_zone_axis_w( za_w );
+    const bool roi_super_cell_result = tdmap_roi_sim_super_cell->set_zone_axis_w( za_w );
+    result = unit_cell_result && roi_super_cell_result;
   }
   catch(boost::bad_lexical_cast&  ex) {
     // pass it up
@@ -1052,11 +1056,14 @@ bool TDMap::set_zone_axis_w( std::string s_za_w ){
   return result;
 }
 
-bool TDMap::set_projected_y_axis_u( std::string s_y_u ){
+bool TDMap::set_upward_vector_u( std::string s_y_u ){
   bool result = false;
   try {
     const double y_u = boost::lexical_cast<double>( s_y_u );
-    result = unit_cell->set_projected_y_axis_u( y_u );
+    const bool unit_cell_result = unit_cell->set_upward_vector_u( y_u );
+    const bool roi_super_cell_result = tdmap_roi_sim_super_cell->set_upward_vector_u( y_u );
+    result = unit_cell_result && roi_super_cell_result;
+
   }
   catch(boost::bad_lexical_cast&  ex) {
     // pass it up
@@ -1065,11 +1072,13 @@ bool TDMap::set_projected_y_axis_u( std::string s_y_u ){
   return result;
 }
 
-bool TDMap::set_projected_y_axis_v( std::string s_y_v ){
+bool TDMap::set_upward_vector_v( std::string s_y_v ){
   bool result = false;
   try {
     const double y_v = boost::lexical_cast<double>( s_y_v );
-    result = unit_cell->set_projected_y_axis_v( y_v );
+    const bool unit_cell_result = unit_cell->set_upward_vector_v( y_v );
+    const bool roi_super_cell_result = tdmap_roi_sim_super_cell->set_upward_vector_v( y_v );
+    result = unit_cell_result && roi_super_cell_result;
   }
   catch(boost::bad_lexical_cast&  ex) {
     // pass it up
@@ -1078,11 +1087,13 @@ bool TDMap::set_projected_y_axis_v( std::string s_y_v ){
   return result;
 }
 
-bool TDMap::set_projected_y_axis_w( std::string s_y_w ){
+bool TDMap::set_upward_vector_w( std::string s_y_w ){
   bool result = false;
   try {
     const double y_w = boost::lexical_cast<double>( s_y_w );
-    result = unit_cell->set_projected_y_axis_w( y_w );
+    const bool unit_cell_result = unit_cell->set_upward_vector_w( y_w );
+    const bool roi_super_cell_result = tdmap_roi_sim_super_cell->set_upward_vector_w( y_w );
+    result = unit_cell_result && roi_super_cell_result;
   }
   catch(boost::bad_lexical_cast&  ex) {
     // pass it up

@@ -51,15 +51,24 @@ void UnitCell::add_atom_site_occupancy( double occupancy ){
 bool UnitCell::parse_cif(){
   bool result = false;
   if( _flag_cif_path ){
-    result = true;
     cif_driver.parse( cif_path.c_str() );
     std::map<std::string,std::string> non_looped_items = cif_driver.get_cif_non_looped_items();
-    result &= populate_cell( non_looped_items );
+    std::cout << "XXXXXXXX going to populate cell " << non_looped_items.size() << std::endl;
+    const bool populate_cell_result = populate_cell( non_looped_items );
+    std::cout <<  "populate_cell_result " << std::boolalpha << populate_cell_result << std::endl;
     std::map<std::string,std::vector<std::string>> looped_items = cif_driver.get_cif_looped_items();
-    result &= populate_atom_site( looped_items );
-    result &= populate_symetry_equiv_pos_as_xyz( looped_items );
-    result &= create_atoms_from_site_and_symetry();
-    _flag_parsed_cif = result;
+    const bool populate_atom_result = populate_atom_site( looped_items );
+    std::cout <<  "populate_atom_result " << std::boolalpha << populate_atom_result << std::endl;
+
+    const bool populate_symetry_result = populate_symetry_equiv_pos_as_xyz( looped_items );
+    std::cout <<  "populate_symetry_result " << std::boolalpha << populate_symetry_result << std::endl;
+
+    const bool create_atoms_result = create_atoms_from_site_and_symetry();
+    std::cout <<  "create_atoms_result " << std::boolalpha << create_atoms_result << std::endl;
+
+    _flag_parsed_cif = populate_cell_result && populate_atom_result && populate_symetry_result && create_atoms_result;
+    std::cout <<  "parse_cif result " << std::boolalpha << _flag_parsed_cif << std::endl;
+    result = _flag_parsed_cif;
   }
   return result;
 }
@@ -67,16 +76,17 @@ bool UnitCell::parse_cif(){
 bool UnitCell::populate_cell( std::map<std::string,std::string> non_looped_items ){
   bool parse_error=false;
   std::map<std::string,std::string>::iterator it;
-  it = non_looped_items.find("length_a");
+  it = non_looped_items.find("_cell_length_a");
   if (it != non_looped_items.end()){
     const std::string item_value = it->second;
     const double d_item_value = convert_to_double( item_value );
     set_length_a_Angstroms( d_item_value );
+    std::cout << " XXXXX " << d_item_value << std::endl;
   }
   else{
     parse_error = true;
   }
-  it = non_looped_items.find("length_b");
+  it = non_looped_items.find("_cell_length_b");
   if (it != non_looped_items.end()){
     const std::string item_value = it->second;
     const double d_item_value = convert_to_double( item_value );
@@ -85,7 +95,7 @@ bool UnitCell::populate_cell( std::map<std::string,std::string> non_looped_items
   else{
     parse_error = true;
   }
-  it = non_looped_items.find("length_c");
+  it = non_looped_items.find("_cell_length_c");
   if (it != non_looped_items.end()){
     const std::string item_value = it->second;
     const double d_item_value = convert_to_double( item_value );
@@ -94,7 +104,7 @@ bool UnitCell::populate_cell( std::map<std::string,std::string> non_looped_items
   else{
     parse_error = true;
   }
-  it = non_looped_items.find("angle_alpha");
+  it = non_looped_items.find("_cell_angle_alpha");
   if (it != non_looped_items.end()){
     const std::string item_value = it->second;
     const double d_item_value = convert_to_double( item_value );
@@ -103,7 +113,7 @@ bool UnitCell::populate_cell( std::map<std::string,std::string> non_looped_items
   else{
     parse_error = true;
   }
-  it = non_looped_items.find("angle_beta");
+  it = non_looped_items.find("_cell_angle_beta");
   if (it != non_looped_items.end()){
     const std::string item_value = it->second;
     const double d_item_value = convert_to_double( item_value );
@@ -112,7 +122,7 @@ bool UnitCell::populate_cell( std::map<std::string,std::string> non_looped_items
   else{
     parse_error = true;
   }
-  it = non_looped_items.find("angle_gamma");
+  it = non_looped_items.find("_cell_angle_gamma");
   if (it != non_looped_items.end()){
     const std::string item_value = it->second;
     const double d_item_value = convert_to_double( item_value );
@@ -121,7 +131,7 @@ bool UnitCell::populate_cell( std::map<std::string,std::string> non_looped_items
   else{
     parse_error = true;
   }
-  it = non_looped_items.find("volume");
+  it = non_looped_items.find("_cell_volume");
   if (it != non_looped_items.end()){
     const std::string item_value = it->second;
     const double d_item_value = convert_to_double( item_value );
@@ -305,4 +315,26 @@ bool UnitCell::create_atoms_from_site_and_symetry(){
   }
   _flag_atom_positions = true;
   return true;
+}
+
+
+void UnitCell::print_var_state(){
+  if( _flag_logger ){
+    std::stringstream message;
+    output( message );
+    logger->logEvent( ApplicationLog::notification , message.str() );
+  }
+}
+
+std::ostream& operator<<(std::ostream& stream, const UnitCell& var) {
+  var.output(stream);
+  return stream;
+}
+
+std::ostream& UnitCell::output(std::ostream& stream) const {
+  stream << "UnitCell vars:\n"
+  << "\t\t" << "_flag_parsed_cif : " << std::boolalpha << _flag_parsed_cif << "\n";
+  stream << "BaseCell Properties : " << "\n";
+  BaseCell::output(stream);
+  return stream;
 }

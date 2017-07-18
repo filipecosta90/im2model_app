@@ -7,6 +7,7 @@
 
 class UnitCell : public BaseCell {
   private:
+
     bool populate_cell( std::map<std::string,std::string> non_looped_items  );
     bool populate_symetry_equiv_pos_as_xyz( std::map<std::string,std::vector<std::string>> looped_items );
     bool populate_atom_site( std::map<std::string,std::vector<std::string>> looped_items );
@@ -48,13 +49,23 @@ class UnitCell : public BaseCell {
     void add_atom_site_fract_z( double fract_z );
     void add_atom_site_occupancy( double occupancy );
 
+        /* Loggers */
+        ApplicationLog::ApplicationLog* logger = nullptr;
+        bool _flag_logger = false;
+
   protected:
 
   public:
     UnitCell();
     bool parse_cif();
-    
+
     bool get_flag_parsed_cif(){ return _flag_parsed_cif; }
+
+    /* Loggers */
+    bool set_application_logger( ApplicationLog::ApplicationLog* logger );
+    void print_var_state();
+    // friend std::ostream& operator<< (std::ostream& stream, const SuperCell::SuperCell& image);
+    virtual std::ostream& output(std::ostream& stream) const;
 
 };
 

@@ -241,7 +241,7 @@ std::ostream& CELSLC_prm::create_bin_args(std::ostream& args_stream) const {
     }
     if(
         sim_super_cell->get_flag_zone_axis() &&
-        sim_super_cell->get_flag_projected_y_axis() &&
+        sim_super_cell->get_flag_upward_vector() &&
         sim_super_cell->get_flag_length()
       ){
 
@@ -249,16 +249,16 @@ std::ostream& CELSLC_prm::create_bin_args(std::ostream& args_stream) const {
       const double zone_axis_v = sim_super_cell->get_zone_axis_v();
       const double zone_axis_w = sim_super_cell->get_zone_axis_w();
 
-      const double projected_y_axis_u = sim_super_cell->get_projected_y_axis_u();
-      const double projected_y_axis_v = sim_super_cell->get_projected_y_axis_v();
-      const double projected_y_axis_w = sim_super_cell->get_projected_y_axis_w();
+      const double upward_vector_u = sim_super_cell->get_upward_vector_u();
+      const double upward_vector_v = sim_super_cell->get_upward_vector_v();
+      const double upward_vector_w = sim_super_cell->get_upward_vector_w();
 
       const double super_cell_size_a = sim_super_cell->get_length_a_Nanometers();
       const double super_cell_size_b = sim_super_cell->get_length_b_Nanometers();
       const double super_cell_size_c = sim_super_cell->get_length_c_Nanometers();
 
       args_stream << " -prj " << (float) zone_axis_u  << "," << (float) zone_axis_v << "," << (float) zone_axis_w << ","
-        <<  projected_y_axis_u << "," << projected_y_axis_v << "," << projected_y_axis_w << ","
+        <<  upward_vector_u << "," << upward_vector_v << "," << upward_vector_w << ","
         << (float) super_cell_size_a << "," << (float) super_cell_size_b << "," << (float) super_cell_size_c;
     }
     /**
@@ -474,9 +474,9 @@ args_stream << " -ny 32";
 // input ht
 args_stream << " -ht " << ht_accelaration_voltage;
 
-if( _flag_zone_axis && _flag_projected_y_axis && _flag_super_cell_size ){
+if( _flag_zone_axis && _flag_upward_vector && _flag_super_cell_size ){
 args_stream << " -prj " << (float) zone_axis_u  << "," << (float) zone_axis_v << "," << (float) zone_axis_w << ","
-<<  projected_y_axis_u << "," << projected_y_axis_v << "," << projected_y_axis_w << ","
+<<  upward_vector_u << "," << upward_vector_v << "," << upward_vector_w << ","
 << (float) super_cell_size_a << "," << (float) super_cell_size_b << "," << (float) super_cell_size_c;
 }
 /**
@@ -534,9 +534,9 @@ args_stream << " -nz " << nz_simulated_partitions;
 // input ht
 args_stream << " -ht " << ht_accelaration_voltage;
 
-if( _flag_zone_axis && _flag_projected_y_axis && _flag_super_cell_size ){
+if( _flag_zone_axis && _flag_upward_vector && _flag_super_cell_size ){
 args_stream << " -prj " << (float) zone_axis_u  << "," << (float) zone_axis_v << "," << (float) zone_axis_w << ","
-<<  projected_y_axis_u << "," << projected_y_axis_v << "," << projected_y_axis_w << ","
+<<  upward_vector_u << "," << upward_vector_v << "," << upward_vector_w << ","
 << (float) super_cell_size_a << "," << (float) super_cell_size_b << "," << (float) super_cell_size_c;
 }
 

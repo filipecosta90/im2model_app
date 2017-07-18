@@ -46,16 +46,19 @@
 #include "string_additions.hpp"
 #include "mc_driver.hpp"
 #include "symbcalc.hpp"
-
+#include "application_log.hpp"
 
 class BaseCell {
   private:
     void update_length_flag();
 
+    /* Loggers */
+    ApplicationLog::ApplicationLog* logger = nullptr;
+    bool _flag_logger = false;
+
   protected:
     // Specifies the input super-cell file containing the atomic structure data in CIF file format.
     std::string cif_path;
-
     bool _flag_cif_path = false;
     bool _flag_cif_format = false;
 
@@ -80,22 +83,21 @@ class BaseCell {
     double angle_beta = 0.0f;
     double angle_gamma = 0.0f;
 
-    /** Zone Axis / Lattice vector **/
-    cv::Point3d zone_axis_vector_uvw;
-
     /** reciprocal-lattice (Miller) indices  **/
-    cv::Point3d upward_vector_hkl;
     cv::Point3d vector_t;
 
-    cv::Point3d  projected_y_axis = cv::Point3d( 0.0f, 1.0f, 0.0f );
-    double projected_y_axis_u = 0.0f;
-    double projected_y_axis_v = 1.0f;
-    double projected_y_axis_w = 0.0f;
-    bool _flag_projected_y_axis_u = false;
-    bool _flag_projected_y_axis_v = false;
-    bool _flag_projected_y_axis_w = false;
-    bool _flag_projected_y_axis = false;
+    // projected z-axis:
+    cv::Point3d  upward_vector = cv::Point3d( 0.0f, 1.0f, 0.0f );
+    double upward_vector_u = 0.0f;
+    double upward_vector_v = 1.0f;
+    double upward_vector_w = 0.0f;
+    bool _flag_upward_vector_u = true;
+    bool _flag_upward_vector_v = true;
+    bool _flag_upward_vector_w = true;
+    bool _flag_upward_vector = true;
 
+    /** Zone Axis / Lattice vector **/
+    // projected y-axis
     cv::Point3d  zone_axis;
     double zone_axis_u = 0.0f;
     double zone_axis_v = 0.0f;
@@ -139,9 +141,9 @@ class BaseCell {
 
     /** Orientation **/
     cv::Mat orientation_matrix;
+    bool _flag_orientation_matrix = false;
     cv::Mat inverse_orientation_matrix;
-
-    std::string file_name_input_dat;
+    bool _flag_inverse_orientation_matrix = false;
 
     int min_width_px = 0;
     int min_height_px = 0;
@@ -180,6 +182,8 @@ class BaseCell {
 
     //others
     void extract_space_group();
+    bool clear_atom_positions();
+
     //setters
     bool set_cif_path( std::string path );
     bool set_length_a_Angstroms( double a );
@@ -192,18 +196,17 @@ class BaseCell {
     bool set_angle_beta( double beta );
     bool set_angle_gamma( double gamma );
     bool set_cell_volume( double volume );
-    bool set_zone_axis_vector( cv::Point3d uvw );
-    bool set_upward_vector( cv::Point3d hkl );
     bool set_cel_margin_nm( double margin );
-    bool set_projected_y_axis_u( double u );
-    bool set_projected_y_axis_v( double v );
-    bool set_projected_y_axis_w( double w );
+    bool set_zone_axis( cv::Point3d uvw );
+    bool set_upward_vector( cv::Point3d hkl );
+    bool set_upward_vector_u( double u );
+    bool set_upward_vector_v( double v );
+    bool set_upward_vector_w( double w );
     bool set_zone_axis_u( double u );
     bool set_zone_axis_v( double v );
     bool set_zone_axis_w( double w );
 
     //getters
-
     std::string get_cif_path(){ return cif_path; }
     bool get_flag_cif_path(){ return _flag_cif_path; }
     bool get_flag_cif_format(){ return _flag_cif_format; }
@@ -214,23 +217,23 @@ class BaseCell {
     double get_angle_gamma(){ return angle_gamma; }
     double get_volume(){ return cell_volume; }
 
-    /** Zone Axis / Lattice vector **/
-    cv::Point3d get_zone_axis_vector_uvw(){ return zone_axis_vector_uvw; }
 
     /** reciprocal-lattice (Miller) indices  **/
     bool get_flag_length_a(){ return _flag_length_a; }
     bool get_flag_length_b(){ return _flag_length_b; }
     bool get_flag_length_c(){ return _flag_length_c; }
     bool get_flag_length(){ return _flag_length; }
-    bool get_flag_projected_y_axis_u(){ return _flag_projected_y_axis_u; }
-    bool get_flag_projected_y_axis_v(){ return _flag_projected_y_axis_v; }
-    bool get_flag_projected_y_axis_w(){ return _flag_projected_y_axis_w; }
-    bool get_flag_projected_y_axis(){ return _flag_projected_y_axis; }
+    bool get_flag_upward_vector_u(){ return _flag_upward_vector_u; }
+    bool get_flag_upward_vector_v(){ return _flag_upward_vector_v; }
+    bool get_flag_upward_vector_w(){ return _flag_upward_vector_w; }
+    bool get_flag_upward_vector(){ return _flag_upward_vector; }
     bool get_flag_zone_axis_u(){ return _flag_zone_axis_u; }
     bool get_flag_zone_axis_v(){ return _flag_zone_axis_v; }
     bool get_flag_zone_axis_w(){ return _flag_zone_axis_w; }
     bool get_flag_zone_axis(){ return _flag_zone_axis; }
-bool get_flag_atom_positions_vec(){ return _flag_atom_positions; }
+    bool get_flag_atom_positions_vec(){ return _flag_atom_positions; }
+    bool get_flag_orientation_matrix(){ return _flag_orientation_matrix; }
+    bool get_flag_inverse_orientation_matrix(){ return _flag_inverse_orientation_matrix; }
 
     std::vector<std::string> get_atom_type_symbols_vec(){ return atom_type_symbols; }
     std::vector<double> get_atom_occupancy_vec(){ return atom_occupancies; }
@@ -252,17 +255,22 @@ bool get_flag_atom_positions_vec(){ return _flag_atom_positions; }
     double get_length_c_Nanometers(){ return length_c_Nanometers; }
 
     /** vector t **/
+    // project x axis
     cv::Point3d get_vector_t(){ return vector_t; }
 
-    cv::Point3d get_projected_y_axis(){ return projected_y_axis; }
-    double get_projected_y_axis_u(){ return projected_y_axis_u; }
-    double get_projected_y_axis_v(){ return projected_y_axis_v; }
-    double get_projected_y_axis_w(){ return projected_y_axis_w; }
-
+    /** Zone Axis / Lattice vector **/
+    // project y axis
     cv::Point3d get_zone_axis(){ return zone_axis; }
     double get_zone_axis_u(){ return  zone_axis_u; }
     double get_zone_axis_v(){ return zone_axis_v; }
     double get_zone_axis_w(){ return zone_axis_w; }
+
+    /** Upward vector  **/
+    // project z axis
+    cv::Point3d get_upward_vector(){ return upward_vector; }
+    double get_upward_vector_u(){ return upward_vector_u; }
+    double get_upward_vector_v(){ return upward_vector_v; }
+    double get_upward_vector_w(){ return upward_vector_w; }
 
     double get_fractional_norm_a_atom_pos_Nanometers(){ return fractional_norm_a_atom_pos; }
     double get_fractional_norm_b_atom_pos_Nanometers(){ return fractional_norm_b_atom_pos; }
@@ -276,6 +284,12 @@ bool get_flag_atom_positions_vec(){ return _flag_atom_positions; }
 
     int get_nx_px(){ return cel_nx_px; }
     int get_ny_px(){ return cel_ny_px; }
+
+    /* Loggers */
+    bool set_application_logger( ApplicationLog::ApplicationLog* logger );
+    void print_var_state();
+    // friend std::ostream& operator<< (std::ostream& stream, const SuperCell::SuperCell& image);
+    virtual std::ostream& output(std::ostream& stream) const;
 
 };
 

@@ -21,6 +21,7 @@
 #include "group_options.h"
 #include "super_cell.hpp"
 #include "unit_cell.hpp"
+#include "application_log.hpp"
 
 class TDMap  : public QObject {
   Q_OBJECT
@@ -252,9 +253,9 @@ class TDMap  : public QObject {
     bool set_zone_axis_u( std::string );
     bool set_zone_axis_v( std::string );
     bool set_zone_axis_w( std::string );
-    bool set_projected_y_axis_u( std::string );
-    bool set_projected_y_axis_v( std::string );
-    bool set_projected_y_axis_w( std::string );
+    bool set_upward_vector_u( std::string );
+    bool set_upward_vector_v( std::string );
+    bool set_upward_vector_w( std::string );
     bool set_thickness_user_estimated_nm( std::string );
     bool auto_calculate_thickness_range_lower_upper_nm();
     bool auto_calculate_thickness_lower_upper_nm();

@@ -1289,14 +1289,14 @@ experimental_roi_dimensions = new TreeItem ( box1_option_3_2  );
   ////////////////
   // Projection direction h
   ////////////////
-  QVector<QVariant> box2_option_3_1 = {"h",""};
+  QVector<QVariant> box2_option_3_1 = {"u",""};
   QVector<bool> box2_option_3_1_edit = {false,true};
   boost::function<bool(std::string)> box2_function_3_1 ( boost::bind( &TDMap::set_zone_axis_u,_core_td_map, _1 ) );
   projection_direction_h = new TreeItem ( box2_option_3_1 , box2_function_3_1, box2_option_3_1_edit );
   projection_direction->insertChildren( projection_direction_h );
 
   /*group options*/
-  projection_direction_h->set_variable_name( "zone_axis_h" );
+  projection_direction_h->set_variable_name( "zone_axis_u" );
   celslc_step_group_options->add_option( project_setup_crystalographic_fields_model, projection_direction_h , 1, true);
 
   /* validators */
@@ -1304,14 +1304,14 @@ experimental_roi_dimensions = new TreeItem ( box1_option_3_2  );
   ////////////////
   // Projection direction k
   ////////////////
-  QVector<QVariant> box2_option_3_2 = {"k",""};
+  QVector<QVariant> box2_option_3_2 = {"v",""};
   QVector<bool> box2_option_3_2_edit = {false,true};
   boost::function<bool(std::string)> box2_function_3_2 ( boost::bind( &TDMap::set_zone_axis_v,_core_td_map, _1 ) );
   projection_direction_k = new TreeItem ( box2_option_3_2 , box2_function_3_2, box2_option_3_2_edit );
   projection_direction->insertChildren( projection_direction_k );
 
   /*group options*/
-  projection_direction_k->set_variable_name( "zone_axis_k" );
+  projection_direction_k->set_variable_name( "zone_axis_v" );
   celslc_step_group_options->add_option( project_setup_crystalographic_fields_model, projection_direction_k , 1, true);
 
   /* validators */
@@ -1320,14 +1320,14 @@ experimental_roi_dimensions = new TreeItem ( box1_option_3_2  );
   ////////////////
   // Projection direction l
   ////////////////
-  QVector<QVariant> box2_option_3_3 = {"l",""};
+  QVector<QVariant> box2_option_3_3 = {"w",""};
   QVector<bool> box2_option_3_3_edit = {false,true};
   boost::function<bool(std::string)> box2_function_3_3 ( boost::bind( &TDMap::set_zone_axis_w,_core_td_map, _1 ) );
   projection_direction_l = new TreeItem ( box2_option_3_3 , box2_function_3_3, box2_option_3_3_edit );
   projection_direction->insertChildren( projection_direction_l );
 
   /*group options*/
-  projection_direction_l->set_variable_name( "zone_axis_l" );
+  projection_direction_l->set_variable_name( "zone_axis_w" );
   celslc_step_group_options->add_option( project_setup_crystalographic_fields_model, projection_direction_l , 1, true);
 
   /* validators */
@@ -1336,57 +1336,57 @@ experimental_roi_dimensions = new TreeItem ( box1_option_3_2  );
   ////////////////
   // Projected y axis
   ////////////////
-  QVector<QVariant> box2_option_2 = {"Projected y axis",""};
-  projected_y_axis  = new TreeItem (  box2_option_2 );
-  crystallography_root->insertChildren( projected_y_axis );
+  QVector<QVariant> box2_option_2 = {"Upward vector",""};
+  upward_vector  = new TreeItem (  box2_option_2 );
+  crystallography_root->insertChildren( upward_vector );
 
   ////////////////
   //Projected y axis u
   ////////////////
   QVector<QVariant> box2_option_2_1 = {"u",""};
   QVector<bool> box2_option_2_1_edit = {false,true};
-  boost::function<bool(std::string)> box2_function_2_1 ( boost::bind( &TDMap::set_projected_y_axis_u,_core_td_map, _1 ) );
-  projected_y_axis_u = new TreeItem ( box2_option_2_1 , box2_function_2_1, box2_option_2_1_edit );
-  projected_y_axis->insertChildren( projected_y_axis_u );
+  boost::function<bool(std::string)> box2_function_2_1 ( boost::bind( &TDMap::set_upward_vector_u,_core_td_map, _1 ) );
+  upward_vector_u = new TreeItem ( box2_option_2_1 , box2_function_2_1, box2_option_2_1_edit );
+  upward_vector->insertChildren( upward_vector_u );
 
   /*group options*/
-  projected_y_axis_u->set_variable_name( "projected_y_axis_u" );
-  celslc_step_group_options->add_option( project_setup_crystalographic_fields_model, projected_y_axis_u , 1, true);
+  upward_vector_u->set_variable_name( "upward_vector_u" );
+  celslc_step_group_options->add_option( project_setup_crystalographic_fields_model, upward_vector_u , 1, true);
 
   /* validators */
-  projected_y_axis_u->set_flag_validatable_double(1,true);
+  upward_vector_u->set_flag_validatable_double(1,true);
 
   ////////////////
   //Projected y axis v
   ////////////////
   QVector<QVariant> box2_option_2_2 = {"v",""};
   QVector<bool> box2_option_2_2_edit = {false,true};
-  boost::function<bool(std::string)> box2_function_2_2 ( boost::bind( &TDMap::set_projected_y_axis_v,_core_td_map, _1 ) );
-  projected_y_axis_v = new TreeItem ( box2_option_2_2 , box2_function_2_2, box2_option_2_2_edit );
-  projected_y_axis->insertChildren( projected_y_axis_v );
+  boost::function<bool(std::string)> box2_function_2_2 ( boost::bind( &TDMap::set_upward_vector_v,_core_td_map, _1 ) );
+  upward_vector_v = new TreeItem ( box2_option_2_2 , box2_function_2_2, box2_option_2_2_edit );
+  upward_vector->insertChildren( upward_vector_v );
 
   /*group options*/
-  projected_y_axis_v->set_variable_name( "projected_y_axis_v" );
-  celslc_step_group_options->add_option( project_setup_crystalographic_fields_model, projected_y_axis_v , 1, true);
+  upward_vector_v->set_variable_name( "upward_vector_v" );
+  celslc_step_group_options->add_option( project_setup_crystalographic_fields_model, upward_vector_v , 1, true);
 
   /* validators */
-  projected_y_axis_v->set_flag_validatable_double(1,true);
+  upward_vector_v->set_flag_validatable_double(1,true);
 
   ////////////////
   //Projected y axis w
   ////////////////
   QVector<QVariant> box2_option_2_3 = {"w",""};
   QVector<bool>  box2_option_2_3_edit = {false,true};
-  boost::function<bool(std::string)>  box2_function_2_3 ( boost::bind( &TDMap::set_projected_y_axis_w,_core_td_map, _1 ) );
-  projected_y_axis_w = new TreeItem (  box2_option_2_3 ,  box2_function_2_3,  box2_option_2_3_edit );
-  projected_y_axis->insertChildren( projected_y_axis_w );
+  boost::function<bool(std::string)>  box2_function_2_3 ( boost::bind( &TDMap::set_upward_vector_w,_core_td_map, _1 ) );
+  upward_vector_w = new TreeItem (  box2_option_2_3 ,  box2_function_2_3,  box2_option_2_3_edit );
+  upward_vector->insertChildren( upward_vector_w );
 
   /*group options*/
-  projected_y_axis_w->set_variable_name( "projected_y_axis_w" );
-  celslc_step_group_options->add_option( project_setup_crystalographic_fields_model, projected_y_axis_w , 1, true);
+  upward_vector_w->set_variable_name( "upward_vector_w" );
+  celslc_step_group_options->add_option( project_setup_crystalographic_fields_model, upward_vector_w , 1, true);
 
   /* validators */
-  projected_y_axis_w->set_flag_validatable_double(1,true);
+  upward_vector_w->set_flag_validatable_double(1,true);
 
   ui->qtree_view_project_setup_crystallography->setModel(project_setup_crystalographic_fields_model);
   ui->qtree_view_project_setup_crystallography->setItemDelegate( _load_file_delegate );
