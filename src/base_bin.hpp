@@ -62,6 +62,8 @@ class BaseBin {
     std::vector<std::string> run_env_warnings;
 
   public:
+    BaseBin();
+    
     BaseBin( boost::process::ipstream& async_io_buffer_out );
     virtual ~BaseBin() {} //Let's not forget to have destructor virtual
     /* boost process output streams */

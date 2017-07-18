@@ -317,7 +317,6 @@ bool UnitCell::create_atoms_from_site_and_symetry(){
   return true;
 }
 
-
 void UnitCell::print_var_state(){
   if( _flag_logger ){
     std::stringstream message;

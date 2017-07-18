@@ -62,9 +62,17 @@ class BaseCell {
     bool _flag_cif_path = false;
     bool _flag_cif_format = false;
 
+    std::string cel_filename;
     std::string cel_path;
+    bool _flag_cel_filename = false;
     bool _flag_cel_path = false;
     bool _flag_cel_format = false;
+
+    std::string xyz_filename;
+    bool _flag_xyz_filename = false;
+    std::string xyz_path;
+    bool _flag_xyz_path = false;
+    bool _flag_xyz_format = false;
 
     double length_a_Angstroms = 0.0f;
     double length_b_Angstroms = 0.0f;
@@ -82,6 +90,10 @@ class BaseCell {
     double angle_alpha = 0.0f;
     double angle_beta = 0.0f;
     double angle_gamma = 0.0f;
+
+    bool _flag_angle_alpha = false;
+    bool _flag_angle_beta = false;
+    bool _flag_angle_gamma = false;
 
     /** reciprocal-lattice (Miller) indices  **/
     cv::Point3d vector_t;
@@ -118,12 +130,14 @@ class BaseCell {
 
     /** .cel **/
     std::vector<cv::Point3d> atom_fractional_cell_coordinates;
+    bool _flag_atom_fractional_cell_coordinates = false;
     double min_a_atom_pos, max_a_atom_pos;
     double min_b_atom_pos, max_b_atom_pos;
     double min_c_atom_pos, max_c_atom_pos;
-    double fractional_norm_a_atom_pos;
-    double fractional_norm_b_atom_pos;
-    double fractional_norm_c_atom_pos;
+    double fractional_norm_a_atom_pos = 0.0f;
+    double fractional_norm_b_atom_pos = 0.0f;
+    double fractional_norm_c_atom_pos = 0.0f;
+    bool _flag_fractional_norm = false;
 
     double cel_margin_nm = 0.0f;
     double ab_margin = 0.0f;
@@ -186,6 +200,7 @@ class BaseCell {
 
     //setters
     bool set_cif_path( std::string path );
+    bool set_cel_filename( std::string filename );
     bool set_length_a_Angstroms( double a );
     bool set_length_b_Angstroms( double b );
     bool set_length_c_Angstroms( double c );
@@ -223,6 +238,11 @@ class BaseCell {
     bool get_flag_length_b(){ return _flag_length_b; }
     bool get_flag_length_c(){ return _flag_length_c; }
     bool get_flag_length(){ return _flag_length; }
+
+    bool get_flag_angle_alpha(){ return _flag_angle_alpha; }
+    bool get_flag_angle_beta(){ return _flag_angle_beta; }
+    bool get_flag_angle_gamma(){ return _flag_angle_gamma; }
+
     bool get_flag_upward_vector_u(){ return _flag_upward_vector_u; }
     bool get_flag_upward_vector_v(){ return _flag_upward_vector_v; }
     bool get_flag_upward_vector_w(){ return _flag_upward_vector_w; }
@@ -234,6 +254,7 @@ class BaseCell {
     bool get_flag_atom_positions_vec(){ return _flag_atom_positions; }
     bool get_flag_orientation_matrix(){ return _flag_orientation_matrix; }
     bool get_flag_inverse_orientation_matrix(){ return _flag_inverse_orientation_matrix; }
+    bool get_flag_fractional_norm(){ return _flag_fractional_norm; }
 
     std::vector<std::string> get_atom_type_symbols_vec(){ return atom_type_symbols; }
     std::vector<double> get_atom_occupancy_vec(){ return atom_occupancies; }

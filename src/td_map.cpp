@@ -20,6 +20,9 @@ TDMap::TDMap(
   final_full_sim_super_cell = new SuperCell( unit_cell );
 
   tdmap_roi_sim_super_cell->set_unit_cell( unit_cell );
+  tdmap_roi_sim_super_cell->set_cel_filename( "tdmap_roi.cel" );
+  // use cel format
+  //tdmap_roi_sim_super_cell->set_cel_format( true );
   tdmap_full_sim_super_cell->set_unit_cell( unit_cell );
   final_full_sim_super_cell->set_unit_cell( unit_cell );
 
@@ -71,6 +74,7 @@ TDMap::TDMap(
   set_msa_prm_name( "temporary_msa_im2model.prm" );
   set_wavimg_prm_name( "temporary_wavimg_im2model.prm" );
   set_file_name_output_image_wave_function("image" );
+
 
   set_slc_output_target_folder("slc");
   set_wav_output_target_folder("wav");
@@ -332,8 +336,12 @@ bool TDMap::run_tdmap( ){
         }
       }
       if( _clean_run_env ){
-        emit TDMap_started_celslc( );
+        emit TDMap_started_celslc();
+        const bool cel_generation = tdmap_roi_sim_super_cell->generate_super_cell_file();
+        tdmap_roi_sim_super_cell->generate_xyz_file();
+        if( cel_generation ){
         _flag_runned_tdmap_celslc = _tdmap_celslc_parameters->call_boost_bin();
+      }
         emit TDMap_ended_celslc( _flag_runned_tdmap_celslc );
       }
       _celslc_stage_ok = _flag_runned_tdmap_celslc;
@@ -843,6 +851,7 @@ bool TDMap::set_base_dir_path( boost::filesystem::path path ){
   result &= _tdmap_celslc_parameters->set_base_bin_start_dir_path( path );
   result &= _tdmap_msa_parameters->set_base_bin_start_dir_path( path );
   result &= _tdmap_wavimg_parameters->set_base_bin_start_dir_path( path );
+  result &= tdmap_roi_sim_super_cell->set_base_bin_start_dir_path( path );
   return result;
 }
 

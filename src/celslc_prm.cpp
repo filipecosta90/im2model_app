@@ -212,7 +212,7 @@ std::ostream& CELSLC_prm::create_bin_args(std::ostream& args_stream) const {
       args_stream << " -cif " << sim_super_cell->get_cif_path();
     }
     else{
-      if( sim_super_cell->get_flag_cel_format()  ){
+      if( sim_super_cell->get_flag_cel_format() ){
         args_stream << " -cel "<< sim_super_cell->get_cel_path();
       }
     }

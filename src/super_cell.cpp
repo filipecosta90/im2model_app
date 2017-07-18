@@ -8,6 +8,24 @@ SuperCell::SuperCell( UnitCell* cell ){
   _flag_unit_cell = true;
 }
 
+
+/* Base dir path */
+bool SuperCell::set_base_bin_start_dir_path( boost::filesystem::path path ){
+  base_bin_start_dir_path = path;
+  _flag_base_bin_start_dir_path = true;
+
+  // the default output is the same as input
+  base_bin_output_dir_path = path;
+  _flag_base_bin_output_dir_path = true;
+
+  if( _flag_logger ){
+    std::stringstream message;
+    message << "SuperCell baseDirPath: " << path.string();
+    logger->logEvent( ApplicationLog::notification, message.str() );
+  }
+  return true;
+}
+
 bool SuperCell::set_unit_cell ( UnitCell* cell ){
   unit_cell = cell;
   _flag_unit_cell = true;
@@ -25,16 +43,42 @@ bool SuperCell::update_from_unit_cell(){
       if( _flag_atom_positions ){
         BaseCell::clear_atom_positions();
       }
+      const bool angle_result = update_angle_parameters_from_unit_cell();
       const bool expand_result = calculate_expand_factor();
-      if( expand_result ){
+      if( angle_result && expand_result ){
         const bool create_result = create_atoms_from_unit_cell();
         if( create_result ){
-          const bool orientate_result = orientate_atoms_from_matrix();
-          result = orientate_result;
+          const bool orientate_result = true; //orientate_atoms_from_matrix();
+          if( orientate_result ){
+            const bool fractional_result = create_fractional_positions_atoms();
+            result = fractional_result;
+          }
           std::cout << " update_from_unit_cell result " << std::boolalpha << result << std::endl;
+          if( result ){
+            std::cout << " $$$$ SIZE " << atom_positions.size() << std::endl;
+          }
         }
       }
     }
+  }
+  return result;
+}
+
+bool SuperCell::update_angle_parameters_from_unit_cell(){
+  bool result = false;
+  if(
+      _flag_unit_cell &&
+      unit_cell->get_flag_angle_alpha() &&
+      unit_cell->get_flag_angle_beta() &&
+      unit_cell->get_flag_angle_gamma()
+    ){
+    angle_alpha = unit_cell->get_angle_alpha();
+    angle_beta = unit_cell->get_angle_beta();
+    angle_gamma = unit_cell->get_angle_gamma();
+    _flag_angle_alpha = true;
+    _flag_angle_beta = true;
+    _flag_angle_gamma = true;
+    result = true;
   }
   return result;
 }
@@ -202,7 +246,7 @@ bool SuperCell::create_atoms_from_unit_cell(){
             const cv::Point3d abc_expand (a_expand_nanometers, b_expand_nanometers, c_expand_nanometers);
 
             for ( size_t unit_cell_pos = 0; unit_cell_pos <  unit_cell_atom_positions.size(); unit_cell_pos++ ){
-              //super_cell_to_unit_cell_pos.push_back(unit_cell_pos);
+              super_cell_to_unit_cell_pos.push_back(unit_cell_pos);
               const cv::Point3d atom_pos = unit_cell_atom_positions.at(unit_cell_pos) + abc_expand;
               atom_positions.push_back(atom_pos);
             }
@@ -210,6 +254,7 @@ bool SuperCell::create_atoms_from_unit_cell(){
         }
       }
       _flag_atom_positions = true;
+      _flag_super_cell_to_unit_cell_pos = true;
       result = true;
     }
     else{
@@ -265,6 +310,178 @@ bool SuperCell::orientate_atoms_from_matrix(){
     }
     print_var_state();
   }
+  return result;
+}
+
+bool SuperCell::create_fractional_positions_atoms(){
+  bool result = false;
+  if(
+      // SuperCell vars
+      _flag_atom_positions &&
+      ( ! atom_positions.empty() )
+    ){
+
+    std :: vector <double> atom_positions_x ( atom_positions.size() );
+    std :: vector <double> atom_positions_y ( atom_positions.size() );
+    std :: vector <double> atom_positions_z ( atom_positions.size() );
+
+    unsigned int i = 0;
+    for (
+        std::vector<cv::Point3d>::iterator it = atom_positions.begin() ;
+        it != atom_positions.end();
+        it++, i++
+        ){
+      cv::Point3d _atom_pos = *it;
+      atom_positions_x.at(i) = _atom_pos.x;
+      atom_positions_y.at(i) = _atom_pos.y;
+      atom_positions_z.at(i) = _atom_pos.z;
+    }
+    std::vector<double>::iterator atom_xyz_it = max_element( atom_positions_x.begin(), atom_positions_x.end());
+    max_a_atom_pos = *atom_xyz_it + ab_margin;
+    atom_xyz_it = min_element( atom_positions_x.begin(), atom_positions_x.end());
+    min_a_atom_pos = *atom_xyz_it - ab_margin;
+    atom_xyz_it = max_element( atom_positions_y.begin(), atom_positions_y.end());
+    max_b_atom_pos = *atom_xyz_it + ab_margin;
+    atom_xyz_it = min_element( atom_positions_y.begin(), atom_positions_y.end());
+    min_b_atom_pos = *atom_xyz_it - ab_margin;
+    atom_xyz_it = max_element( atom_positions_z.begin(), atom_positions_z.end());
+    max_c_atom_pos = *atom_xyz_it;
+    atom_xyz_it = min_element( atom_positions_z.begin(), atom_positions_z.end());
+    min_c_atom_pos = *atom_xyz_it;
+
+    fractional_norm_a_atom_pos = fabs( max_a_atom_pos - min_a_atom_pos );
+    fractional_norm_b_atom_pos = fabs( max_b_atom_pos - min_b_atom_pos );
+    fractional_norm_c_atom_pos = fabs( max_c_atom_pos - min_c_atom_pos );
+    _flag_fractional_norm = true;
+
+    const double fractional_factor_a_Nanometers = (1 / fractional_norm_a_atom_pos );
+    const double fractional_factor_b_Nanometers = (1 / fractional_norm_b_atom_pos );
+    const double fractional_factor_c_Nanometers = (1 / fractional_norm_c_atom_pos );
+
+    for (
+        std::vector<cv::Point3d>::iterator it = atom_positions.begin() ;
+        it != atom_positions.end();
+        it++
+        ){
+      const cv::Point3d atom_pos = *it;
+      const double _fractional_x = (atom_pos.x - min_a_atom_pos) * fractional_factor_a_Nanometers;
+      const double _fractional_y = (atom_pos.y - min_b_atom_pos) * fractional_factor_b_Nanometers;
+      const double _fractional_z = (atom_pos.z - min_c_atom_pos) * fractional_factor_c_Nanometers;
+      const cv::Point3d atom_fractional ( _fractional_x, _fractional_y, _fractional_z );
+      atom_fractional_cell_coordinates.push_back( atom_fractional );
+    }
+    _flag_atom_fractional_cell_coordinates = true;
+    result = _flag_atom_fractional_cell_coordinates;
+  }
+  else{
+    if( _flag_logger ){
+      std::stringstream message;
+      message << "The required vars for create_fractional_positions_atoms() are not setted up.";
+      logger->logEvent( ApplicationLog::error , message.str() );
+    }
+    print_var_state();
+  }
+  return result;
+}
+
+bool SuperCell::generate_super_cell_file(){
+  bool result = false;
+    if(
+      _flag_base_bin_output_dir_path &&
+        _flag_cel_filename &&
+        _flag_fractional_norm &&
+        _flag_angle_alpha &&
+        _flag_angle_beta &&
+        _flag_angle_gamma &&
+        _flag_super_cell_to_unit_cell_pos &&
+        _flag_atom_fractional_cell_coordinates &&
+        ! atom_fractional_cell_coordinates.empty()
+      ){
+      /* method */
+      std::vector<std::string> unit_cell_atom_symbol_string = unit_cell->get_atom_type_symbols_vec();
+      std::vector<double> unit_cell_atom_site_occupancy = unit_cell->get_atom_occupancy_vec();
+      std::vector<double> unit_cell_atom_debye_waller_factor = unit_cell->get_atom_debye_waller_factor_vec();
+
+      boost::filesystem::path cel_file ( cel_filename );
+      boost::filesystem::path full_cell_path = base_bin_output_dir_path / cel_file;
+      cel_path = full_cell_path.string();
+      std::ofstream outfile;
+      outfile.open( full_cell_path.string() );
+      outfile << "Cel file generated by Im2Model" << std::endl;
+      outfile << "0 "
+        <<  fractional_norm_a_atom_pos << " " << fractional_norm_b_atom_pos << " " << fractional_norm_c_atom_pos
+        <<  " "  << angle_alpha << " " << angle_beta << " " << angle_gamma <<  std::endl;
+      unsigned int loop_counter = 0;
+      for( std::vector<cv::Point3d>::iterator _atom_fractional_itt = atom_fractional_cell_coordinates.begin() ;
+          _atom_fractional_itt != atom_fractional_cell_coordinates.end();
+          _atom_fractional_itt++ , loop_counter++
+         ){
+        const int unit_cell_pos = super_cell_to_unit_cell_pos.at(loop_counter);
+        const cv::Point3d fractional = *_atom_fractional_itt;
+        std::string atom_symbol = unit_cell_atom_symbol_string.at(unit_cell_pos);
+        const double atom_site_occupancy = unit_cell_atom_site_occupancy.at(unit_cell_pos);
+        const double atom_debye_waller_factor = unit_cell_atom_debye_waller_factor.at(unit_cell_pos);
+        /** print **/
+        outfile << atom_symbol
+          << " " << fractional.x << " " << fractional.y << " " << fractional.z
+          << " " << atom_site_occupancy << " " << atom_debye_waller_factor
+          << " " << 0.0f << " " << 0.0f << " " << 0.0f << std::endl;
+      }
+      outfile << "*" << std::endl;
+      outfile.close();
+      _flag_cel_format = true;
+
+      result = true;
+    }
+    else{
+      if( _flag_logger ){
+        std::stringstream message;
+        message << "The required vars for generate_super_cell_file() are not setted up.";
+        logger->logEvent( ApplicationLog::error , message.str() );
+      }
+      print_var_state();
+    }
+  return result;
+}
+
+bool SuperCell::generate_xyz_file(){
+  bool result = false;
+    if(
+      _flag_base_bin_output_dir_path &&
+        _flag_super_cell_to_unit_cell_pos &&
+        ! (atom_positions.empty() )
+      ){
+            boost::filesystem::path xyz_file( xyz_filename );
+            boost::filesystem::path full_xyz_path = base_bin_output_dir_path / xyz_file;
+      /* method */
+      std::vector<std::string> unit_cell_atom_symbol_string = unit_cell->get_atom_type_symbols_vec();
+      std::ofstream outfile;
+      outfile.open( full_xyz_path.string() );
+      outfile << atom_fractional_cell_coordinates.size() << std::endl;
+      outfile << "XYZ file generated by Im2Model" << std::endl;
+      unsigned int loop_counter = 0;
+      for( std::vector<cv::Point3d>::iterator _atom_pos_itt = atom_positions.begin() ;
+          _atom_pos_itt != atom_positions.end();
+          _atom_pos_itt++ , loop_counter++
+         ){
+        const int unit_cell_pos = super_cell_to_unit_cell_pos.at(loop_counter);
+        const cv::Point3d atom = *_atom_pos_itt;
+        std::string atom_symbol = unit_cell_atom_symbol_string.at(unit_cell_pos);
+          /** print **/
+        outfile << atom_symbol << " " << atom.x << " " << atom.y << " " << atom.z << std::endl;
+      }
+      outfile.close();
+      _flag_xyz_format = true;
+      result = true;
+    }
+    else{
+      if( _flag_logger ){
+        std::stringstream message;
+        message << "The required vars for generate_xyz_file() are not setted up.";
+        logger->logEvent( ApplicationLog::error , message.str() );
+      }
+      print_var_state();
+    }
   return result;
 }
 
@@ -355,26 +572,29 @@ std::ostream& operator<<(std::ostream& stream, const SuperCell& var) {
 }
 
 std::ostream& SuperCell::output(std::ostream& stream) const {
-  stream << "SuperCell vars:\n"
-  << "\t\t" << "_flag_unit_cell : " << std::boolalpha << _flag_unit_cell << "\n";
-  if( _flag_unit_cell ){
-    stream << "UnitCell vars:\n";
-    unit_cell->output(stream);
-  }
-  stream << "\t" << "a_min_size_nm : "  << a_min_size_nm << "\n"
-  << "\t\t" << "_flag_a_min_size_nm : " << std::boolalpha << _flag_a_min_size_nm << "\n"
-  << "\t" << "b_min_size_nm : "  << b_min_size_nm << "\n"
-  << "\t\t" << "_flag_b_min_size_nm : " << std::boolalpha << _flag_b_min_size_nm << "\n"
-  << "\t" << "c_min_size_nm : "  << c_min_size_nm << "\n"
-  << "\t\t" << "_flag_c_min_size_nm : " << std::boolalpha << _flag_c_min_size_nm << "\n"
-  << "\t\t" << "_flag_min_size_nm : " << std::boolalpha << _flag_min_size_nm << "\n"
-  << "\t" << "expand_factor_a : "  << expand_factor_a << "\n"
-  << "\t" << "expand_factor_a : "  << expand_factor_b << "\n"
-  << "\t" << "expand_factor_a : "  << expand_factor_c << "\n"
-  << "\t\t" << "_flag_expand_factor : " << std::boolalpha << _flag_expand_factor << "\n"
-    "\t" << "ImageBounds Properties : " << "\n";
+  stream << "BEGIN SuperCell vars:\n"
+  << "\t" << "a_min_size_nm : "  << a_min_size_nm << "\n"
+    << "\t\t" << "_flag_a_min_size_nm : " << std::boolalpha << _flag_a_min_size_nm << "\n"
+    << "\t" << "b_min_size_nm : "  << b_min_size_nm << "\n"
+    << "\t\t" << "_flag_b_min_size_nm : " << std::boolalpha << _flag_b_min_size_nm << "\n"
+    << "\t" << "c_min_size_nm : "  << c_min_size_nm << "\n"
+    << "\t\t" << "_flag_c_min_size_nm : " << std::boolalpha << _flag_c_min_size_nm << "\n"
+    << "\t\t" << "_flag_min_size_nm : " << std::boolalpha << _flag_min_size_nm << "\n"
+    << "\t" << "expand_factor_a : "  << expand_factor_a << "\n"
+    << "\t" << "expand_factor_b : "  << expand_factor_b << "\n"
+    << "\t" << "expand_factor_c : "  << expand_factor_c << "\n"
+    << "\t\t" << "_flag_expand_factor : " << std::boolalpha << _flag_expand_factor << "\n"
+    << "\t" << "super_cell_to_unit_cell_pos.size() : "  << super_cell_to_unit_cell_pos.size() << "\n"
+    << "\t\t" << "_flag_super_cell_to_unit_cell_pos : " << std::boolalpha << _flag_super_cell_to_unit_cell_pos << "\n"
+    << "ImageBounds Properties : " << "\n";
   ImageBounds::output(stream);
   stream << "BaseCell Properties : " << "\n";
   BaseCell::output(stream);
+  stream << "\t\t" << "_flag_unit_cell : " << std::boolalpha << _flag_unit_cell << "\n";
+if( _flag_unit_cell ){
+  stream << "UnitCell vars:\n";
+  unit_cell->output(stream);
+}
+stream << "END SuperCell vars:\n";
   return stream;
 }

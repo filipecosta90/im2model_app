@@ -32,6 +32,12 @@ bool BaseCell::set_cif_path( std::string path ){
   return true;
 }
 
+bool BaseCell::set_cel_filename( std::string filename ){
+  cel_filename = filename;
+  _flag_cel_filename = true;
+  return true;
+}
+
 bool BaseCell::set_cel_margin_nm( double margin ){
   cel_margin_nm = margin;
   return true;
@@ -91,16 +97,19 @@ void BaseCell::update_length_flag(){
 
 bool BaseCell::set_angle_alpha( double alpha ){
   angle_alpha = alpha;
+  _flag_angle_alpha = true;
   return true;
 }
 
 bool BaseCell::set_angle_beta( double beta ){
   angle_beta = beta;
+  _flag_angle_beta = true;
   return true;
 }
 
 bool BaseCell::set_angle_gamma( double gamma ){
   angle_gamma = gamma;
+  _flag_angle_gamma = true;
   return true;
 }
 
@@ -224,6 +233,7 @@ void BaseCell::form_matrix_from_miller_indices(){
   }
 }
 
+
 void BaseCell::print_var_state(){
   if( _flag_logger ){
     std::stringstream message;
@@ -264,7 +274,7 @@ std::ostream& BaseCell::output(std::ostream& stream) const {
     // projected z-axis:
     << "\t" << "upward_vector : "  << upward_vector << "\n"
     << "\t" << "upward_vector_u : "  << upward_vector_u << "\n"
-    << "\t" << "upward_vector_v : "  << upward_vector_w << "\n"
+    << "\t" << "upward_vector_v : "  << upward_vector_v << "\n"
     << "\t" << "upward_vector_w : "  << upward_vector_w << "\n"
     << "\t\t" << "_flag_upward_vector_u : " << std::boolalpha << _flag_upward_vector_u << "\n"
     << "\t\t" << "_flag_upward_vector_v : " << std::boolalpha << _flag_upward_vector_v << "\n"
@@ -290,6 +300,7 @@ std::ostream& BaseCell::output(std::ostream& stream) const {
     << "\t" << "atom_cpk_rgba_colors.size() : "  << atom_cpk_rgba_colors.size() << "\n"
     << "\t" << "atom_empirical_radii.size() : "  << atom_empirical_radii.size() << "\n"
     << "\t" << "atom_fractional_cell_coordinates.size() : "  << atom_fractional_cell_coordinates.size() << "\n"
+    << "\t\t" << "_flag_atom_fractional_cell_coordinates : " << std::boolalpha << _flag_atom_fractional_cell_coordinates << "\n"
     /** .cel **/
     << "\t" << "min_a_atom_pos : "  << min_a_atom_pos << "\n"
     << "\t" << "max_a_atom_pos : "  << max_a_atom_pos << "\n"
@@ -300,6 +311,7 @@ std::ostream& BaseCell::output(std::ostream& stream) const {
     << "\t" << "fractional_norm_a_atom_pos : "  << fractional_norm_a_atom_pos << "\n"
     << "\t" << "fractional_norm_b_atom_pos : "  << fractional_norm_b_atom_pos << "\n"
     << "\t" << "fractional_norm_c_atom_pos : "  << fractional_norm_c_atom_pos << "\n"
+    << "\t\t" << "_flag_fractional_norm : " << std::boolalpha << _flag_fractional_norm << "\n"
     << "\t" << "cel_margin_nm : "  << cel_margin_nm << "\n"
     << "\t" << "ab_margin : "  << ab_margin << "\n"
     << "\t" << "cel_margin_a_px : "  << cel_margin_a_px << "\n"

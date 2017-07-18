@@ -38,6 +38,7 @@
 
 #include "image_bounds.hpp"
 #include "base_cell.hpp"
+#include "base_bin.hpp"
 #include "unit_cell.hpp"
 #include "application_log.hpp"
 //#include "edge.hpp"
@@ -45,6 +46,13 @@
 class SuperCell : public ImageBounds, public BaseCell {
   private:
     /** Private Class methods **/
+
+    /* Base dir path */
+    boost::filesystem::path base_bin_start_dir_path;
+    bool _flag_base_bin_start_dir_path = false;
+
+    boost::filesystem::path base_bin_output_dir_path;
+    bool _flag_base_bin_output_dir_path = false;
 
     /* Loggers */
     ApplicationLog::ApplicationLog* logger = nullptr;
@@ -70,16 +78,24 @@ class SuperCell : public ImageBounds, public BaseCell {
     int expand_factor_c = 1;
     bool _flag_expand_factor = false;
 
+    std::vector<int> super_cell_to_unit_cell_pos;
+    bool _flag_super_cell_to_unit_cell_pos = false;
+
   protected:
 
   public:
     SuperCell();
     SuperCell( UnitCell* cell );
+    bool set_base_bin_start_dir_path( boost::filesystem::path base_dir );
 
-    bool calculate_expand_factor();
     bool update_from_unit_cell();
+    bool update_angle_parameters_from_unit_cell();
+    bool calculate_expand_factor();
     bool create_atoms_from_unit_cell();
+    bool create_fractional_positions_atoms();
     bool orientate_atoms_from_matrix();
+    bool generate_super_cell_file();
+    bool generate_xyz_file( );
 
     /* setters */
     bool set_unit_cell( UnitCell* cell );
