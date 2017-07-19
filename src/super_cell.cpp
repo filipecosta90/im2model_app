@@ -50,8 +50,13 @@ bool SuperCell::update_from_unit_cell(){
         if( create_result ){
           const bool orientate_result = orientate_atoms_from_matrix();
           if( orientate_result ){
+            const bool remove_z_result = remove_z_out_of_range_atoms();
+            const bool remove_xy_result = remove_xy_out_of_range_atoms();
+            const bool remove_result = remove_z_result && remove_xy_result;
+            if( remove_result ){
             const bool fractional_result = create_fractional_positions_atoms();
             result = fractional_result;
+            }
           }
           std::cout << " update_from_unit_cell result " << std::boolalpha << result << std::endl;
           if( result ){
@@ -384,106 +389,215 @@ bool SuperCell::create_fractional_positions_atoms(){
   return result;
 }
 
+bool SuperCell::remove_z_out_of_range_atoms(){
+  bool result = false;
+  if(
+      // SuperCell vars
+      _flag_c_min_size_nm &&
+      _flag_atom_positions &&
+      ( ! atom_positions.empty() )
+    ){
+    const double z_bot_limit = c_min_size_nm / -2.0f;
+    const double z_top_limit = c_min_size_nm / 2.0f;
+    std::vector<unsigned int> atom_positions_delete;
+    unsigned int loop_counter = 0;
+    std::cout << "Initial number of atoms prior to Z remotion: " << atom_positions.size() << std::endl;
+    for( std::vector<cv::Point3d>::iterator atom_positions_itt = atom_positions.begin() ;
+        atom_positions_itt != atom_positions.end();
+        atom_positions_itt++ , loop_counter++
+       ){
+      const double atom_z_nm = atom_positions_itt->z;
+      /** check for range in Z **/
+      if ( ( atom_z_nm > z_top_limit ) || ( atom_z_nm < z_bot_limit ) ){
+        atom_positions_delete.push_back( loop_counter );
+      }
+    }
+    /* We will delete from back to begin to preserve positions */
+    std::reverse( atom_positions_delete.begin() ,atom_positions_delete.end() );
+    for( std::vector<unsigned int>::iterator delete_itt =  atom_positions_delete.begin();
+        delete_itt != atom_positions_delete.end();
+        delete_itt++
+       ){
+      const unsigned int pos_delete = *delete_itt;
+      atom_positions.erase( atom_positions.begin() + pos_delete );
+      super_cell_to_unit_cell_pos.erase( super_cell_to_unit_cell_pos.begin() + pos_delete );
+    }
+    std::cout << "Final number of atoms after Z remotion: " << atom_positions.size() << std::endl;
+    result = true;
+  }
+  else{
+    if( _flag_logger ){
+      std::stringstream message;
+      message << "The required vars for remove_z_out_of_range_atoms() are not setted up.";
+      logger->logEvent( ApplicationLog::error , message.str() );
+    }
+    print_var_state();
+  }
+  return result;
+}
+
+bool SuperCell::remove_xy_out_of_range_atoms(){
+  bool result = false;
+  if(
+      // SuperCell vars
+      _flag_a_min_size_nm &&
+      _flag_b_min_size_nm &&
+      _flag_atom_positions &&
+      ( ! atom_positions.empty() )
+    ){
+    /* method */
+    std::vector<unsigned int> atom_positions_delete;
+    unsigned int loop_counter = 0;
+    const double x_bot_limit = a_min_size_nm / -2.0f;
+    const double x_top_limit = a_min_size_nm / 2.0f;
+    const double y_bot_limit = b_min_size_nm / -2.0f;
+    const double y_top_limit = b_min_size_nm / 2.0f;
+
+    std::cout << "Initial number of atoms prior to XY remotion: " << atom_positions.size() << std::endl;
+    for(
+        std::vector<cv::Point3d>::iterator _atom_positions_itt = atom_positions.begin() ;
+        _atom_positions_itt != atom_positions.end();
+        _atom_positions_itt++ , loop_counter++
+       ){
+      /** check for range in XY **/
+      const double atom_x_nm = _atom_positions_itt->x;
+      const double atom_y_nm = _atom_positions_itt->y;
+      /** check for range in Z **/
+      if (
+          // a
+          ( atom_x_nm > x_top_limit ) || ( atom_x_nm < x_bot_limit ) ||
+          // b
+          ( atom_y_nm > y_top_limit ) || ( atom_y_nm < y_bot_limit )
+         ){
+        atom_positions_delete.push_back( loop_counter );
+      }
+    }
+
+    std::cout << "going to delete " << atom_positions_delete.size() << " XY out of range atoms " << std::endl;
+    /* We will delete from back to begin to preserve positions */
+    std::reverse( atom_positions_delete.begin() ,atom_positions_delete.end() );
+    for( std::vector<unsigned int>::iterator delete_itt =  atom_positions_delete.begin();
+        delete_itt != atom_positions_delete.end();
+        delete_itt++
+       ){
+      const unsigned int pos_delete = *delete_itt;
+      atom_positions.erase( atom_positions.begin() + pos_delete );
+      super_cell_to_unit_cell_pos.erase( super_cell_to_unit_cell_pos.begin() + pos_delete );
+    }
+    std::cout << "Final number of atoms after XY remotion: " << atom_positions.size() << std::endl;
+    result = true;
+  }
+  else{
+    if( _flag_logger ){
+      std::stringstream message;
+      message << "The required vars for remove_xy_out_of_range_atoms() are not setted up.";
+      logger->logEvent( ApplicationLog::error , message.str() );
+    }
+    print_var_state();
+  }
+  return result;
+}
+
 bool SuperCell::generate_super_cell_file(){
   bool result = false;
-    if(
+  if(
       _flag_base_bin_output_dir_path &&
-        _flag_cel_filename &&
-        _flag_fractional_norm &&
-        _flag_angle_alpha &&
-        _flag_angle_beta &&
-        _flag_angle_gamma &&
-        _flag_super_cell_to_unit_cell_pos &&
-        _flag_atom_fractional_cell_coordinates &&
-        ! atom_fractional_cell_coordinates.empty()
-      ){
-      /* method */
-      std::vector<std::string> unit_cell_atom_symbol_string = unit_cell->get_atom_type_symbols_vec();
-      std::vector<double> unit_cell_atom_site_occupancy = unit_cell->get_atom_occupancy_vec();
-      std::vector<double> unit_cell_atom_debye_waller_factor = unit_cell->get_atom_debye_waller_factor_vec();
+      _flag_cel_filename &&
+      _flag_fractional_norm &&
+      _flag_angle_alpha &&
+      _flag_angle_beta &&
+      _flag_angle_gamma &&
+      _flag_super_cell_to_unit_cell_pos &&
+      _flag_atom_fractional_cell_coordinates &&
+      ! atom_fractional_cell_coordinates.empty()
+    ){
+    /* method */
+    std::vector<std::string> unit_cell_atom_symbol_string = unit_cell->get_atom_type_symbols_vec();
+    std::vector<double> unit_cell_atom_site_occupancy = unit_cell->get_atom_occupancy_vec();
+    std::vector<double> unit_cell_atom_debye_waller_factor = unit_cell->get_atom_debye_waller_factor_vec();
 
-      boost::filesystem::path cel_file ( cel_filename );
-      boost::filesystem::path full_cell_path = base_bin_output_dir_path / cel_file;
-      cel_path = full_cell_path.string();
-      std::ofstream outfile;
-      outfile.open( full_cell_path.string() );
-      outfile << "Cel file generated by Im2Model" << std::endl;
-      outfile << "0 "
-        <<  fractional_norm_a_atom_pos << " " << fractional_norm_b_atom_pos << " " << fractional_norm_c_atom_pos
-        <<  " "  << angle_alpha << " " << angle_beta << " " << angle_gamma <<  std::endl;
-      unsigned int loop_counter = 0;
-      for( std::vector<cv::Point3d>::iterator _atom_fractional_itt = atom_fractional_cell_coordinates.begin() ;
-          _atom_fractional_itt != atom_fractional_cell_coordinates.end();
-          _atom_fractional_itt++ , loop_counter++
-         ){
-        const int unit_cell_pos = super_cell_to_unit_cell_pos.at(loop_counter);
-        const cv::Point3d fractional = *_atom_fractional_itt;
-        std::string atom_symbol = unit_cell_atom_symbol_string.at(unit_cell_pos);
-        const double atom_site_occupancy = unit_cell_atom_site_occupancy.at(unit_cell_pos);
-        const double atom_debye_waller_factor = unit_cell_atom_debye_waller_factor.at(unit_cell_pos);
-        /** print **/
-        outfile << atom_symbol
-          << " " << fractional.x << " " << fractional.y << " " << fractional.z
-          << " " << atom_site_occupancy << " " << atom_debye_waller_factor
-          << " " << 0.0f << " " << 0.0f << " " << 0.0f << std::endl;
-      }
-      outfile << "*" << std::endl;
-      outfile.close();
-      _flag_cel_format = true;
+    boost::filesystem::path cel_file ( cel_filename );
+    boost::filesystem::path full_cell_path = base_bin_output_dir_path / cel_file;
+    cel_path = full_cell_path.string();
+    std::ofstream outfile;
+    outfile.open( full_cell_path.string() );
+    outfile << "Cel file generated by Im2Model" << std::endl;
+    outfile << "0 "
+      <<  fractional_norm_a_atom_pos << " " << fractional_norm_b_atom_pos << " " << fractional_norm_c_atom_pos
+      <<  " "  << angle_alpha << " " << angle_beta << " " << angle_gamma <<  std::endl;
+    unsigned int loop_counter = 0;
+    for( std::vector<cv::Point3d>::iterator _atom_fractional_itt = atom_fractional_cell_coordinates.begin() ;
+        _atom_fractional_itt != atom_fractional_cell_coordinates.end();
+        _atom_fractional_itt++ , loop_counter++
+       ){
+      const int unit_cell_pos = super_cell_to_unit_cell_pos.at(loop_counter);
+      const cv::Point3d fractional = *_atom_fractional_itt;
+      std::string atom_symbol = unit_cell_atom_symbol_string.at(unit_cell_pos);
+      const double atom_site_occupancy = unit_cell_atom_site_occupancy.at(unit_cell_pos);
+      const double atom_debye_waller_factor = unit_cell_atom_debye_waller_factor.at(unit_cell_pos);
+      /** print **/
+      outfile << atom_symbol
+        << " " << fractional.x << " " << fractional.y << " " << fractional.z
+        << " " << atom_site_occupancy << " " << atom_debye_waller_factor
+        << " " << 0.0f << " " << 0.0f << " " << 0.0f << std::endl;
+    }
+    outfile << "*" << std::endl;
+    outfile.close();
+    _flag_cel_format = true;
 
-      result = true;
+    result = true;
+  }
+  else{
+    if( _flag_logger ){
+      std::stringstream message;
+      message << "The required vars for generate_super_cell_file() are not setted up.";
+      logger->logEvent( ApplicationLog::error , message.str() );
     }
-    else{
-      if( _flag_logger ){
-        std::stringstream message;
-        message << "The required vars for generate_super_cell_file() are not setted up.";
-        logger->logEvent( ApplicationLog::error , message.str() );
-      }
-      print_var_state();
-    }
+    print_var_state();
+  }
   return result;
 }
 
 bool SuperCell::generate_xyz_file(){
   bool result = false;
-    if(
+  if(
       _flag_base_bin_output_dir_path &&
-        _flag_super_cell_to_unit_cell_pos &&
-        ! (atom_positions.empty() )
-      ){
-            boost::filesystem::path xyz_file( xyz_filename );
-            boost::filesystem::path full_xyz_path = base_bin_output_dir_path / xyz_file;
-      /* method */
-      std::vector<std::string> unit_cell_atom_symbol_string = unit_cell->get_atom_type_symbols_vec();
-      std::ofstream outfile;
-      outfile.open( full_xyz_path.string() );
-      outfile << atom_fractional_cell_coordinates.size() << std::endl;
-      outfile << "XYZ file generated by Im2Model" << std::endl;
-      unsigned int loop_counter = 0;
-      for( std::vector<cv::Point3d>::iterator _atom_pos_itt = atom_positions.begin() ;
-          _atom_pos_itt != atom_positions.end();
-          _atom_pos_itt++ , loop_counter++
-         ){
-        const int unit_cell_pos = super_cell_to_unit_cell_pos.at(loop_counter);
-        cv::Point3d atom = *_atom_pos_itt;
-        // from nanometers to angstroms
-        atom.x *= 10.0f; atom.y *= 10.0f; atom.z *= 10.0f;
-        std::string atom_symbol = unit_cell_atom_symbol_string.at(unit_cell_pos);
-          /** print **/
-        outfile << atom_symbol << " " << boost::format("%+10.5d") % atom.x << " " << boost::format("%+10.5d") % atom.y << " " << boost::format("%+10.5d") % atom.z << std::endl;
-      }
-      outfile.close();
-      _flag_xyz_format = true;
-      result = true;
+      _flag_super_cell_to_unit_cell_pos &&
+      ! (atom_positions.empty() )
+    ){
+    boost::filesystem::path xyz_file( xyz_filename );
+    boost::filesystem::path full_xyz_path = base_bin_output_dir_path / xyz_file;
+    /* method */
+    std::vector<std::string> unit_cell_atom_symbol_string = unit_cell->get_atom_type_symbols_vec();
+    std::ofstream outfile;
+    outfile.open( full_xyz_path.string() );
+    outfile << atom_fractional_cell_coordinates.size() << std::endl;
+    outfile << "XYZ file generated by Im2Model" << std::endl;
+    unsigned int loop_counter = 0;
+    for( std::vector<cv::Point3d>::iterator _atom_pos_itt = atom_positions.begin() ;
+        _atom_pos_itt != atom_positions.end();
+        _atom_pos_itt++ , loop_counter++
+       ){
+      const int unit_cell_pos = super_cell_to_unit_cell_pos.at(loop_counter);
+      cv::Point3d atom = *_atom_pos_itt;
+      // from nanometers to angstroms
+      atom.x *= 10.0f; atom.y *= 10.0f; atom.z *= 10.0f;
+      std::string atom_symbol = unit_cell_atom_symbol_string.at(unit_cell_pos);
+      /** print **/
+      outfile << atom_symbol << " " << boost::format("%+10.5d") % atom.x << " " << boost::format("%+10.5d") % atom.y << " " << boost::format("%+10.5d") % atom.z << std::endl;
     }
-    else{
-      if( _flag_logger ){
-        std::stringstream message;
-        message << "The required vars for generate_xyz_file() are not setted up.";
-        logger->logEvent( ApplicationLog::error , message.str() );
-      }
-      print_var_state();
+    outfile.close();
+    _flag_xyz_format = true;
+    result = true;
+  }
+  else{
+    if( _flag_logger ){
+      std::stringstream message;
+      message << "The required vars for generate_xyz_file() are not setted up.";
+      logger->logEvent( ApplicationLog::error , message.str() );
     }
+    print_var_state();
+  }
   return result;
 }
 
@@ -575,7 +689,7 @@ std::ostream& operator<<(std::ostream& stream, const SuperCell& var) {
 
 std::ostream& SuperCell::output(std::ostream& stream) const {
   stream << "BEGIN SuperCell vars:\n"
-  << "\t" << "a_min_size_nm : "  << a_min_size_nm << "\n"
+    << "\t" << "a_min_size_nm : "  << a_min_size_nm << "\n"
     << "\t\t" << "_flag_a_min_size_nm : " << std::boolalpha << _flag_a_min_size_nm << "\n"
     << "\t" << "b_min_size_nm : "  << b_min_size_nm << "\n"
     << "\t\t" << "_flag_b_min_size_nm : " << std::boolalpha << _flag_b_min_size_nm << "\n"
@@ -593,10 +707,10 @@ std::ostream& SuperCell::output(std::ostream& stream) const {
   stream << "BaseCell Properties : " << "\n";
   BaseCell::output(stream);
   stream << "\t\t" << "_flag_unit_cell : " << std::boolalpha << _flag_unit_cell << "\n";
-if( _flag_unit_cell ){
-  stream << "UnitCell vars:\n";
-  unit_cell->output(stream);
-}
-stream << "END SuperCell vars:\n";
+  if( _flag_unit_cell ){
+    stream << "UnitCell vars:\n";
+    unit_cell->output(stream);
+  }
+  stream << "END SuperCell vars:\n";
   return stream;
 }

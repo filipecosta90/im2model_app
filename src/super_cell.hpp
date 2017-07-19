@@ -95,6 +95,8 @@ class SuperCell : public ImageBounds, public BaseCell {
     bool create_atoms_from_unit_cell();
     bool create_fractional_positions_atoms();
     bool orientate_atoms_from_matrix();
+    bool remove_z_out_of_range_atoms();
+   bool remove_xy_out_of_range_atoms();
     bool generate_super_cell_file();
     bool generate_xyz_file( );
 
