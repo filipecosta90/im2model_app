@@ -140,8 +140,8 @@ bool BaseCell::set_upward_vector_u( double u ){
   upward_vector_u = u;
   _flag_upward_vector_u = true;
   _flag_upward_vector = _flag_upward_vector_u & _flag_upward_vector_v & _flag_upward_vector_w;
-  form_matrix_from_miller_indices();
   upward_vector.x = u;
+  form_matrix_from_miller_indices();
   return true;
 }
 
@@ -149,8 +149,8 @@ bool BaseCell::set_upward_vector_v( double v ){
   upward_vector_v = v;
   _flag_upward_vector_v = true;
   _flag_upward_vector = _flag_upward_vector_u & _flag_upward_vector_v & _flag_upward_vector_w;
-  form_matrix_from_miller_indices();
   upward_vector.y = v;
+  form_matrix_from_miller_indices();
   return true;
 }
 

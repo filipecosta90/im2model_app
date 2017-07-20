@@ -82,6 +82,8 @@ class SuperCell : public ImageBounds, public BaseCell {
     std::vector<int> super_cell_to_unit_cell_pos;
     bool _flag_super_cell_to_unit_cell_pos = false;
 
+    bool update_length_parameters_from_expand_factor();
+
   protected:
 
   public:
