@@ -15,6 +15,7 @@ TDMap::TDMap(
   /* *
    * SuperCell
    * */
+   const double cel_margin_nm = 0.0f;
   tdmap_roi_sim_super_cell = new SuperCell( unit_cell );
   tdmap_full_sim_super_cell = new SuperCell( unit_cell );
   final_full_sim_super_cell = new SuperCell( unit_cell );
@@ -22,6 +23,7 @@ TDMap::TDMap(
   tdmap_roi_sim_super_cell->set_unit_cell( unit_cell );
   tdmap_roi_sim_super_cell->set_cel_filename( "tdmap_roi.cel" );
   tdmap_roi_sim_super_cell->set_xyz_filename( "tdmap_roi.xyz" );
+  tdmap_roi_sim_super_cell->set_cel_margin_nm( cel_margin_nm );
   /*tdmap_roi_sim_super_cell->set_zone_axis_u( 0.0f );
   tdmap_roi_sim_super_cell->set_zone_axis_v( 0.0f );
   tdmap_roi_sim_super_cell->set_zone_axis_w( 1.0f );
@@ -35,6 +37,7 @@ TDMap::TDMap(
   final_full_sim_super_cell->set_unit_cell( unit_cell );
 
   sim_image_properties = new BaseImage();
+  sim_image_properties->set_ignore_edge_nm( cel_margin_nm );
   exp_image_properties = new BaseImage();
 
   sim_crystal_properties = new BaseCrystal();
@@ -347,7 +350,7 @@ bool TDMap::run_tdmap(){
         emit TDMap_started_celslc();
         const bool unit_cell_update = tdmap_roi_sim_super_cell->update_from_unit_cell();
         const bool cel_generation = tdmap_roi_sim_super_cell->generate_super_cell_file();
-        //tdmap_roi_sim_super_cell->generate_xyz_file();
+        tdmap_roi_sim_super_cell->generate_xyz_file();
         if( cel_generation ){
         _flag_runned_tdmap_celslc = _tdmap_celslc_parameters->call_boost_bin();
       }
@@ -790,7 +793,12 @@ bool TDMap::set_super_cell_size_a( std::string size_a ){
   try {
     const double _super_cell_size_a = boost::lexical_cast<double>( size_a );
     const bool cell_result = tdmap_roi_sim_super_cell->set_length_a_Nanometers( _super_cell_size_a );
-    const bool image_result = sim_image_properties->set_full_nm_size_rows_a(_super_cell_size_a  );
+    // get the length + margin from the supercell
+    // in the future separated this so we can dinamically change nm margin and it updates image size
+    const double cell_length_a_nm = tdmap_roi_sim_super_cell->get_length_a_Nanometers();
+    std::cout << " setting _super_cell_size_a " << _super_cell_size_a << std::endl;
+    std::cout << " setting cell_length_a_nm " << cell_length_a_nm << std::endl;
+    const bool image_result = sim_image_properties->set_full_nm_size_cols_a( cell_length_a_nm );
     result = cell_result & image_result;
   }
   catch(boost::bad_lexical_cast&  ex) {
@@ -805,7 +813,10 @@ bool TDMap::set_super_cell_size_b( std::string size_b ){
   try {
     const double _super_cell_size_b = boost::lexical_cast<double>( size_b );
     const bool cell_result = tdmap_roi_sim_super_cell->set_length_b_Nanometers( _super_cell_size_b );
-    const bool image_result = sim_image_properties->set_full_nm_size_cols_b( _super_cell_size_b );
+    // get the length + margin from the supercell
+    // in the future separated this so we can dinamically change nm margin and it updates image size
+    const double cell_length_b_nm = tdmap_roi_sim_super_cell->get_length_b_Nanometers();
+    const bool image_result = sim_image_properties->set_full_nm_size_rows_b( cell_length_b_nm );
     result = cell_result & image_result;
   }
   catch(boost::bad_lexical_cast&  ex) {
@@ -997,7 +1008,7 @@ bool TDMap::set_ny_size_width( std::string s_ny ){
   bool result = false;
   try {
     const double ny = boost::lexical_cast<double>( s_ny );
-    result = exp_image_properties->set_roi_n_cols_width( ny );
+    result = exp_image_properties->set_roi_n_rows_height( ny );
   }
   catch(boost::bad_lexical_cast&  ex) {
     // pass it up
@@ -1010,7 +1021,7 @@ bool TDMap::set_nx_size_height( std::string s_nx ){
   bool result = false;
   try {
     const double nx = boost::lexical_cast<double>( s_nx );
-    result = exp_image_properties->set_roi_n_rows_height( nx );
+    result = exp_image_properties->set_roi_n_cols_width( nx );
   }
   catch(boost::bad_lexical_cast&  ex) {
     // pass it up
@@ -1360,7 +1371,6 @@ bool TDMap::set_full_boundary_polygon_margin_nm( std::string s_margin ){
     const double margin = boost::lexical_cast<double>( s_margin );
     result = tdmap_full_sim_super_cell->set_full_boundary_polygon_margin_x_nm( margin );
     result &= tdmap_full_sim_super_cell->set_full_boundary_polygon_margin_y_nm( margin );
-
   }
   catch(boost::bad_lexical_cast&  ex) {
     // pass it up

@@ -139,7 +139,11 @@ class BaseCell {
     double fractional_norm_c_atom_pos = 0.0f;
     bool _flag_fractional_norm = false;
 
-    double cel_margin_nm = 0.0f;
+// this margin is used to generate .cel files
+    double cel_margin_Nanometers = 0.0f;
+    double cel_margin_Angstroms = 0.0f;
+    bool _flag_cel_margin = false;
+
     double ab_margin = 0.0f;
     int cel_margin_a_px = 0.0f;
     int cel_margin_b_px = 0.0f;
@@ -269,12 +273,12 @@ class BaseCell {
     cv::Mat get_inverse_orientation_matrix(){ return inverse_orientation_matrix; }
 
     /** getters **/
-    double get_length_a_Angstroms(){ return length_a_Angstroms; }
-    double get_length_b_Angstroms(){ return length_b_Angstroms; }
-    double get_length_c_Angstroms(){ return length_c_Angstroms; }
-    double get_length_a_Nanometers(){ return length_a_Nanometers; }
-    double get_length_b_Nanometers(){ return length_b_Nanometers; }
-    double get_length_c_Nanometers(){ return length_c_Nanometers; }
+    double get_length_a_Angstroms(){ return length_a_Angstroms + 2 * cel_margin_Angstroms; }
+    double get_length_b_Angstroms(){ return length_b_Angstroms + 2 * cel_margin_Angstroms; }
+    double get_length_c_Angstroms(){ return length_c_Angstroms + 2 * cel_margin_Angstroms; }
+    double get_length_a_Nanometers(){ return length_a_Nanometers + 2 * cel_margin_Nanometers; }
+    double get_length_b_Nanometers(){ return length_b_Nanometers + 2 * cel_margin_Nanometers; }
+    double get_length_c_Nanometers(){ return length_c_Nanometers + 2 * cel_margin_Nanometers; }
 
     /** vector t **/
     // project x axis
@@ -298,7 +302,7 @@ class BaseCell {
     double get_fractional_norm_b_atom_pos_Nanometers(){ return fractional_norm_b_atom_pos; }
     double get_fractional_norm_c_atom_pos_Nanometers(){ return fractional_norm_c_atom_pos; }
 
-    double get_cel_margin_nm(){ return cel_margin_nm; }
+    double get_cel_margin_nm(){ return cel_margin_Nanometers; }
 
     std::vector<cv::Point3d> get_atom_positions_vec( ){ return atom_positions; }
     std::vector<cv::Vec4d> get_atom_cpk_rgba_colors_vec( ){ return atom_cpk_rgba_colors; }

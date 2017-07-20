@@ -1,6 +1,6 @@
-HOWTO use the CELSLC program, Version 0.55b
+HOWTO use the CELSLC program, Version 0.60b
 
-(Juri Barthel, 2017-03-08)
+(Juri Barthel, 2017-07-12)
 
 
 1) Requireemts
@@ -542,6 +542,43 @@ cubic srtio3 110, original unit cell repeated 4x along x and 6x along y
 
 6) Changelog:
 
+
+- 170719. JB: Version 0.61b
+              Inserted bandwidth limitation on phase gratings.
+              Reimplemented Weickenmeier&Kohl form factors with numerical
+              integration of absorptive form factors.
+              Replaced source file fscatt.f with wekoscatt.f90
+              Corrected a scaling issue in the absorptive form factors.
+              Inserted a trigger "-wakisca" to switch to Waasmaier and
+              Kirfel form factors instead of Weickenmeier and Kohl.
+              Corrected an issue with string parsing for CIF file input.
+- 170712. JB: Version 0.60b
+              Removed atonum.f and atosym.f from the link list, the functions
+              are no longer used.
+              Added wakiscatt.f90 to the link list. This implements routines
+              to use Waasmaiers and Kirfels x-ray form factor table.
+              Added integration.f90 to the link list. This implements simple
+              routines for numerical integration. Used for absorptive form
+              factor calculations.
+              Changed the magnitude of 1d random displacements calculated from
+              Debye-Waller parameters Biso (input). The previous amplitudes
+              were by a factor Sqrt(3) too small. Calculations with Debye-Waller
+              factors were and are correct.
+- 170710: JB: Version 0.57b
+              Added Waasmaier and Kirfels x-ray scattering table for
+              neutral atomic form factors for cross-checking purposes. This table
+              is not made available in the public release.
+              Inserted code triggers for potential generation and
+              form factor oversampling and interpolation (CellSlicer).
+              Reduced the propagator aperture from 0.67 to 0.66.
+              Implemented the large angle propagator version (CellSlicer) in
+              addition to the previous Fresnel propagator (paraxial approx.).
+- 170630: JB: Version 0.56b
+              Corrected a bug in the consideration of occupancy for ionic charge
+              potentials.
+              Corrected a small (insignificant) bug in one numerical approximation
+              of terms involved in Weickenmeier's absorptive potential calculation.
+              Added "L" as symbol for a vacancy in CIF i/o, also with charges.
 - 170306: JB: Version 0.55b
               Added option -pps which is a switch to output the projected potentials
               in the slice files instead of the (default) phase grating output.

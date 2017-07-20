@@ -224,15 +224,17 @@ std::ostream& CELSLC_prm::create_bin_args(std::ostream& args_stream) const {
     args_stream << " -slc \"" << full_path.string() << "\"";
 
     // input nx string
-    if( sim_image_properties->get_flag_full_n_rows_height() ){
-      const int full_n_rows_height = sim_image_properties->get_full_n_rows_height();
-      args_stream << " -nx " << full_n_rows_height;
-    }
-    // input ny string
     if( sim_image_properties->get_flag_full_n_cols_width() ){
       const int full_n_cols_width = sim_image_properties->get_full_n_cols_width();
-      args_stream << " -ny " << full_n_cols_width;
+      args_stream << " -nx " << full_n_cols_width;
     }
+    
+    // input ny string
+    if( sim_image_properties->get_flag_full_n_rows_height() ){
+      const int full_n_rows_height = sim_image_properties->get_full_n_rows_height();
+      args_stream << " -ny " << full_n_rows_height;
+    }
+
     // input ht
     if( sim_crystal_properties->get_flag_ht_accelaration_voltage() ){
       const double ht_accelaration_voltage = sim_crystal_properties->get_ht_accelaration_voltage();

@@ -275,11 +275,13 @@ bool SimGrid::read_grid_from_dat_files(){
               _mmap_ok = true;
               p = (float*) mmap.data();
               cv::Mat raw_simulated_image ( full_n_rows_height , full_n_cols_width , CV_32FC1);
+              std::cout << "raw_simulated_image.size() " << raw_simulated_image.size() << std::endl;
               int pos = 0;
-              for (int row = 0; row < full_n_rows_height; row++) {
+              for (int row = full_n_rows_height-1; row >= 0 ; row--) {
+              //  for (int row = 0; row < full_n_rows_height ; row++) {
                 for (int col = 0; col < full_n_cols_width; col++) {
-                  const int inverse_col = full_n_cols_width - ( col + 1 );
-                  raw_simulated_image.at<float>(row, inverse_col) = (float) p[pos] ;
+                  //const int inverse_col = full_n_cols_width - ( col + 1 );
+                  raw_simulated_image.at<float>(row, col) = (float) p[pos] ;
                   pos++;
                 }
               }
@@ -373,12 +375,12 @@ bool SimGrid::apply_margin_to_grid(){
             // get the matrix in the specified col of tdmap (defocus pos)
             const cv::Mat raw_simulated_image = raw_simulated_images_row.at( defocus );
             cv::Mat cleaned_simulated_image;
-            if( sim_image_properties->get_flag_ignore_edge_pixels_rectangle() ){
+            /*if( sim_image_properties->get_flag_ignore_edge_pixels_rectangle() ){
               cleaned_simulated_image = raw_simulated_image( sim_image_properties->get_ignore_edge_pixels_rectangle() );
             }
-            else{
+            else{*/
               cleaned_simulated_image = raw_simulated_image;
-            }
+            //}
             cleaned_edges_simulated_images_row.push_back( cleaned_simulated_image );
           } catch ( const std::exception& e ){
             _error_flag = true;

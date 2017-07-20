@@ -67,10 +67,10 @@ class BaseImage {
     bool _flag_sampling_rate = false;
 
     // [nm dimensions]
-    double full_nm_size_rows_a = 0.0f;
-    bool _flag_full_nm_size_rows_a = false;
-    double full_nm_size_cols_b = 0.0f;
-    bool _flag_full_nm_size_cols_b = false;
+    double full_nm_size_rows_b = 0.0f;
+    bool _flag_full_nm_size_rows_b = false;
+    double full_nm_size_cols_a = 0.0f;
+    bool _flag_full_nm_size_cols_a = false;
 
     // ROI FRAME
     cv::Mat roi_image;
@@ -84,10 +84,10 @@ class BaseImage {
     bool _flag_roi_n_cols_width = false;
 
     // ROI [nm dimensions]
-    double roi_nm_size_rows_a = 0.0f;
-    bool _flag_roi_nm_size_rows_a = false;
-    double roi_nm_size_cols_b = 0.0f;
-    bool _flag_roi_nm_size_cols_b = false;
+    double roi_nm_size_rows_b = 0.0f;
+    bool _flag_roi_nm_size_rows_b = false;
+    double roi_nm_size_cols_a = 0.0f;
+    bool _flag_roi_nm_size_cols_a = false;
 
     int roi_center_x;
     bool _flag_roi_center_x = false;
@@ -99,7 +99,8 @@ class BaseImage {
     bool _flag_ignore_edge_pixels_rectangle = false;
     int ignore_edge_pixels = 0;
     bool _flag_ignore_edge_pixels = false;
-
+    double ignore_edge_nm = 0.0f;
+    bool _flag_ignore_edge_nm = false;
 
   public:
     BaseImage();
@@ -133,9 +134,9 @@ class BaseImage {
     cv::Mat get_roi_image(){ return roi_image.clone(); }
     cv::Rect get_roi_rectangle(){ return roi_rectangle; }
     int get_roi_n_rows_height(){ return roi_n_rows_height; }
-    double get_roi_n_rows_height_nm(){ return roi_nm_size_rows_a; }
+    double get_roi_n_rows_height_nm(){ return roi_nm_size_rows_b; }
     int get_roi_n_cols_width(){ return roi_n_cols_width; }
-    double get_roi_n_cols_width_nm(){ return roi_nm_size_cols_b; }
+    double get_roi_n_cols_width_nm(){ return roi_nm_size_cols_a; }
     int get_roi_center_x(){ return roi_center_x; }
     int get_roi_center_y(){ return roi_center_y; }
     // rectangle without the ignored edge pixels of the full image
@@ -155,14 +156,14 @@ class BaseImage {
     bool set_flag_auto_b_size( bool value );
     // full frame
     bool set_full_image( std::string path );
-    bool set_full_n_rows_height(  int full_n_rows_height );
+    bool set_full_n_rows_height( int full_n_rows_height );
     bool set_full_n_cols_width( int full_n_cols_width );
     bool set_sampling_rate_x_nm_per_pixel( double );
     bool set_pixel_size_height_x_m( double );
     bool set_sampling_rate_y_nm_per_pixel( double );
     bool set_pixel_size_width_y_m( double );
-    bool set_full_nm_size_rows_a( double size );
-    bool set_full_nm_size_cols_b( double size );
+    bool set_full_nm_size_rows_b( double size );
+    bool set_full_nm_size_cols_a( double size );
     // ROI FRAME
     void set_roi();
     bool set_roi_n_rows_height( int roi_n_rows_height );
@@ -170,6 +171,8 @@ class BaseImage {
     bool set_roi_center_x( int roi_center_x );
     bool set_roi_center_y( int roi_center_y );
     bool set_ignore_edge_pixels( int ignore_edge_pixels );
+    bool set_ignore_edge_nm( double ignore_edge_nm );
+
 
     /* Loggers */
     bool set_application_logger( ApplicationLog::ApplicationLog* logger );

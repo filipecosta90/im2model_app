@@ -70,10 +70,7 @@ class SuperCell : public ImageBounds, public BaseCell {
     double c_min_size_nm = 0.0f;
     bool _flag_c_min_size_nm = false;
     bool _flag_min_size_nm = false;
-
-    cv::Point3d _a,_b,_c,_d,_e,_f,_g,_h;
-    cv::Point3d _sim_a,_sim_b,_sim_c,_sim_d,_sim_e,_sim_f,_sim_g,_sim_h;
-
+    
     int expand_factor_a = 1;
     int expand_factor_b = 1;
     int expand_factor_c = 1;

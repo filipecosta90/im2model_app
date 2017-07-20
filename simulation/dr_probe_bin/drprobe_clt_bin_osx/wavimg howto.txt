@@ -3,9 +3,9 @@
 
 HOWTO use the WAVIMG program
 
-  Version 0.64b
+  Version 0.65b
 
-  by Juri Barthel, 2016-09-27
+  by Juri Barthel, 2017-06-19
 
 -------------------------------------------------------------------------------
 -------------------------------------------------------------------------------
@@ -59,6 +59,9 @@ wavimg -prm "C:\data\models\wavimg.prm"
 
 4) Changes
 
+170619: JB: Version 0.65b
+- Fixed a bug that caused wrong FL averaging of TEM images in coherence
+  mode 5, when using additional outer loops.
 160927: JB: Version 0.64b
 - Small changes to text output. More information when calculating loops.
 160914: JB: Version 0.63b

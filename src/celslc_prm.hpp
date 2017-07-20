@@ -59,7 +59,7 @@ class CELSLC_prm : public BaseBin {
     bool abs_switch = false;
 
     bool cel_format_switch = false;
-    bool auto_equidistant_slices_switch = false;
+    bool auto_equidistant_slices_switch = true;
     bool auto_non_equidistant_slices_switch = false;
 
     bool single_slice_calculation_prepare_bin_runned_switch = false;

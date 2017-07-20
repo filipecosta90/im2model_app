@@ -48,10 +48,10 @@ bool SuperCell::update_from_unit_cell(){
       expand_result &= update_length_parameters_from_expand_factor();
       if( angle_result && expand_result ){
         const bool create_result = create_atoms_from_unit_cell();
-        const bool debug_xyz_result = generate_xyz_file();
-        std::cout << "debug_xyz_result " << std::boolalpha << debug_xyz_result << std::endl;
-        if( create_result ){
+          if( create_result ){
           const bool orientate_result = orientate_atoms_from_matrix();
+        //  const bool debug_xyz_result = generate_xyz_file();
+        //  std::cout << "debug_xyz_result " << std::boolalpha << debug_xyz_result << std::endl;
           if( orientate_result ){
             const bool remove_z_result = remove_z_out_of_range_atoms();
             const bool remove_xy_result = remove_xy_out_of_range_atoms();
@@ -105,6 +105,10 @@ bool SuperCell::calculate_expand_factor(){
       ){
 
       /* method */
+
+          cv::Point3d _a,_b,_c,_d,_e,_f,_g,_h;
+          cv::Point3d _sim_a,_sim_b,_sim_c,_sim_d,_sim_e,_sim_f,_sim_g,_sim_h;
+
       const double r_a = a_min_size_nm / 2.0f;
       const double r_b = b_min_size_nm / 2.0f;
       const double r_c = c_min_size_nm / 2.0f;
@@ -278,9 +282,9 @@ bool SuperCell::create_atoms_from_unit_cell(){
       const double unit_cell_a_nm = unit_cell->get_length_a_Nanometers();
       const double unit_cell_b_nm = unit_cell->get_length_b_Nanometers();
       const double unit_cell_c_nm = unit_cell->get_length_c_Nanometers();
-      const double center_a_padding_nm = a_min_size_nm / -2.0f;
-      const double center_b_padding_nm = b_min_size_nm / -2.0f;
-      const double center_c_padding_nm = c_min_size_nm / -2.0f;
+      const double center_a_padding_nm = (expand_factor_a * unit_cell_a_nm) / -2.0f;
+      const double center_b_padding_nm = (expand_factor_b * unit_cell_b_nm) / -2.0f;
+      const double center_c_padding_nm = (expand_factor_c * unit_cell_c_nm) / -2.0f;
 
       for ( size_t c_expand_pos = 0; c_expand_pos < expand_factor_c; c_expand_pos++ ){
         const double c_expand_nanometers = c_expand_pos * unit_cell_c_nm + center_c_padding_nm;
@@ -384,17 +388,17 @@ bool SuperCell::create_fractional_positions_atoms(){
       atom_positions_z.at(i) = _atom_pos.z;
     }
     std::vector<double>::iterator atom_xyz_it = max_element( atom_positions_x.begin(), atom_positions_x.end());
-    max_a_atom_pos = *atom_xyz_it + ab_margin;
+    max_a_atom_pos = *atom_xyz_it + cel_margin_Nanometers;
     atom_xyz_it = min_element( atom_positions_x.begin(), atom_positions_x.end());
-    min_a_atom_pos = *atom_xyz_it - ab_margin;
+    min_a_atom_pos = *atom_xyz_it - cel_margin_Nanometers;
     atom_xyz_it = max_element( atom_positions_y.begin(), atom_positions_y.end());
-    max_b_atom_pos = *atom_xyz_it + ab_margin;
+    max_b_atom_pos = *atom_xyz_it + cel_margin_Nanometers;
     atom_xyz_it = min_element( atom_positions_y.begin(), atom_positions_y.end());
-    min_b_atom_pos = *atom_xyz_it - ab_margin;
+    min_b_atom_pos = *atom_xyz_it - cel_margin_Nanometers;
     atom_xyz_it = max_element( atom_positions_z.begin(), atom_positions_z.end());
-    max_c_atom_pos = *atom_xyz_it;
+    max_c_atom_pos = *atom_xyz_it + cel_margin_Nanometers;
     atom_xyz_it = min_element( atom_positions_z.begin(), atom_positions_z.end());
-    min_c_atom_pos = *atom_xyz_it;
+    min_c_atom_pos = *atom_xyz_it - cel_margin_Nanometers;
 
     fractional_norm_a_atom_pos = fabs( max_a_atom_pos - min_a_atom_pos );
     fractional_norm_b_atom_pos = fabs( max_b_atom_pos - min_b_atom_pos );
@@ -647,7 +651,7 @@ bool SuperCell::set_length_a_Nanometers( double a ){
   a_min_size_nm = a;
   _flag_a_min_size_nm = true;
   _flag_min_size_nm = _flag_a_min_size_nm && _flag_b_min_size_nm && _flag_c_min_size_nm;
-  const bool result = true; // BaseCell::set_length_a_Nanometers( a );
+  const bool result = BaseCell::set_length_a_Nanometers( a );
   //update_from_unit_cell();
   return result;
 }
@@ -656,7 +660,7 @@ bool SuperCell::set_length_b_Nanometers( double b ){
   b_min_size_nm = b;
   _flag_b_min_size_nm = true;
   _flag_min_size_nm = _flag_a_min_size_nm && _flag_b_min_size_nm && _flag_c_min_size_nm;
-  const bool result = true; //  = BaseCell::set_length_b_Nanometers( b );
+  const bool result = BaseCell::set_length_b_Nanometers( b );
   //update_from_unit_cell();
   return result;
 }
@@ -665,7 +669,7 @@ bool SuperCell::set_length_c_Nanometers( double c ){
   c_min_size_nm = c;
   _flag_c_min_size_nm = true;
   _flag_min_size_nm = _flag_a_min_size_nm && _flag_b_min_size_nm && _flag_c_min_size_nm;
-  const bool result = true; //  = BaseCell::set_length_c_Nanometers( c );
+  const bool result = BaseCell::set_length_c_Nanometers( c );
   //update_from_unit_cell();
   return result;
 }

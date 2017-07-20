@@ -28,13 +28,13 @@ bool BaseImage::auto_calculate_dimensions(){
 bool BaseImage::calculate_n_rows_from_a_size_and_sampling_rate(){
   bool result = false;
   if( _flag_auto_n_rows ){
-    if( _flag_full_nm_size_rows_a && _flag_sampling_rate_x_nm_per_pixel ){
-      full_n_rows_height = (int) ( full_nm_size_rows_a / sampling_rate_x_nm_per_pixel );
+    if( _flag_full_nm_size_rows_b && _flag_sampling_rate_x_nm_per_pixel ){
+      full_n_rows_height = (int) ( full_nm_size_rows_b / sampling_rate_x_nm_per_pixel );
       result = true;
       _flag_full_n_rows_height = true;
     }
-    if( _flag_roi_nm_size_rows_a && _flag_sampling_rate_x_nm_per_pixel ){
-      roi_n_rows_height = (int) ( roi_nm_size_rows_a / sampling_rate_x_nm_per_pixel );
+    if( _flag_roi_nm_size_rows_b && _flag_sampling_rate_x_nm_per_pixel ){
+      roi_n_rows_height = (int) ( roi_nm_size_rows_b / sampling_rate_x_nm_per_pixel );
       result = true;
       _flag_roi_n_rows_height = true;
     }
@@ -47,13 +47,13 @@ bool BaseImage::calculate_a_size_from_n_rows_and_sampling_rate(){
   bool result = false;
   if( _flag_auto_a_size ){
     if( _flag_full_n_rows_height && _flag_sampling_rate_x_nm_per_pixel ){
-      full_nm_size_rows_a = ( (double) full_n_rows_height ) * sampling_rate_x_nm_per_pixel;
-      _flag_full_nm_size_rows_a = true;
+      full_nm_size_rows_b = ( (double) full_n_rows_height ) * sampling_rate_x_nm_per_pixel;
+      _flag_full_nm_size_rows_b = true;
       result = true;
     }
     if( _flag_roi_n_rows_height && _flag_sampling_rate_x_nm_per_pixel ){
-      roi_nm_size_rows_a = ( (double) roi_n_rows_height ) * sampling_rate_x_nm_per_pixel;
-      _flag_roi_nm_size_rows_a = true;
+      roi_nm_size_rows_b = ( (double) roi_n_rows_height ) * sampling_rate_x_nm_per_pixel;
+      _flag_roi_nm_size_rows_b = true;
       result = true;
     }
   }
@@ -63,13 +63,13 @@ bool BaseImage::calculate_a_size_from_n_rows_and_sampling_rate(){
 bool BaseImage::calculate_n_cols_from_b_size_and_sampling_rate(){
   bool result = false;
   if( _flag_auto_n_cols ){
-    if( _flag_full_nm_size_cols_b && _flag_sampling_rate_y_nm_per_pixel ){
-      full_n_cols_width = (int) ( full_nm_size_cols_b / sampling_rate_y_nm_per_pixel );
+    if( _flag_full_nm_size_cols_a && _flag_sampling_rate_y_nm_per_pixel ){
+      full_n_cols_width = (int) ( full_nm_size_cols_a / sampling_rate_y_nm_per_pixel );
       result = true;
       _flag_full_n_cols_width = true;
     }
-    if( _flag_roi_nm_size_cols_b && _flag_sampling_rate_y_nm_per_pixel ){
-      roi_n_cols_width = (int) ( roi_nm_size_cols_b / sampling_rate_y_nm_per_pixel );
+    if( _flag_roi_nm_size_cols_a && _flag_sampling_rate_y_nm_per_pixel ){
+      roi_n_cols_width = (int) ( roi_nm_size_cols_a / sampling_rate_y_nm_per_pixel );
       result = true;
       _flag_roi_n_cols_width = true;
     }
@@ -83,13 +83,13 @@ bool BaseImage::calculate_b_size_from_n_cols_and_sampling_rate(){
   bool result = false;
   if( _flag_auto_b_size ){
     if( _flag_full_n_cols_width && _flag_sampling_rate_y_nm_per_pixel ){
-      full_nm_size_cols_b = ( (double) full_n_cols_width ) * sampling_rate_y_nm_per_pixel;
-      _flag_full_nm_size_cols_b = true;
+      full_nm_size_cols_a = ( (double) full_n_cols_width ) * sampling_rate_y_nm_per_pixel;
+      _flag_full_nm_size_cols_a = true;
       result = true;
     }
     if( _flag_roi_n_cols_width && _flag_sampling_rate_y_nm_per_pixel ){
-      roi_nm_size_cols_b = (double) ( roi_n_cols_width ) * sampling_rate_y_nm_per_pixel;
-      _flag_roi_nm_size_cols_b = true;
+      roi_nm_size_cols_a = (double) ( roi_n_cols_width ) * sampling_rate_y_nm_per_pixel;
+      _flag_roi_nm_size_cols_a = true;
       result = true;
     }
   }
@@ -235,19 +235,19 @@ bool BaseImage::set_pixel_size_width_y_m( double rate_m ){
   return true;
 }
 
-bool BaseImage::set_full_nm_size_rows_a( double size ){
+bool BaseImage::set_full_nm_size_rows_b( double size ){
   bool result = true;
-  full_nm_size_rows_a = size;
-  _flag_full_nm_size_rows_a = true;
+  full_nm_size_rows_b = size;
+  _flag_full_nm_size_rows_b = true;
   auto_calculate_dimensions();
   set_roi();
   return result;
 }
 
-bool BaseImage::set_full_nm_size_cols_b( double size ){
+bool BaseImage::set_full_nm_size_cols_a( double size ){
   bool result = true;
-  full_nm_size_cols_b = size;
-  _flag_full_nm_size_cols_b = true;
+  full_nm_size_cols_a = size;
+  _flag_full_nm_size_cols_a = true;
   auto_calculate_dimensions();
   set_roi();
   return result;
@@ -289,6 +289,17 @@ bool BaseImage::set_ignore_edge_pixels( int pixels ){
   _flag_ignore_edge_pixels = true;
   return true;
 }
+
+bool BaseImage::set_ignore_edge_nm( double ignore_nm ){
+  ignore_edge_nm = ignore_nm;
+  _flag_ignore_edge_nm = true;
+  if( _flag_sampling_rate ){
+    const int calculated_ignore_edge_pixels = (int) ( ignore_edge_nm / sampling_rate_x_nm_per_pixel );
+    set_ignore_edge_pixels( calculated_ignore_edge_pixels );
+  }
+  return true;
+}
+
 
 /* Loggers */
 bool BaseImage::set_application_logger( ApplicationLog::ApplicationLog* app_logger ){
@@ -333,10 +344,10 @@ std::ostream& BaseImage::output(std::ostream& stream) const {
     << "\t\t" << "_flag_sampling_rate_y_nm_per_pixel : " << std::boolalpha <<  _flag_sampling_rate_y_nm_per_pixel << "\n"
     << "\t\t" << "_flag_sampling_rate : " << std::boolalpha <<  _flag_sampling_rate << "\n"
     // [nm dimensions]
-    << "\t" << "full_nm_size_rows_a : " << full_nm_size_rows_a << "\n"
-    << "\t\t" << "_flag_full_nm_size_rows_a : " << std::boolalpha <<  _flag_full_nm_size_rows_a << "\n"
-    << "\t" << "full_nm_size_cols_b : " << full_nm_size_cols_b << "\n"
-    << "\t\t" << "_flag_full_nm_size_cols_b : " << std::boolalpha <<  _flag_full_nm_size_cols_b << "\n"
+    << "\t" << "full_nm_size_rows_b : " << full_nm_size_rows_b << "\n"
+    << "\t\t" << "_flag_full_nm_size_rows_b : " << std::boolalpha <<  _flag_full_nm_size_rows_b << "\n"
+    << "\t" << "full_nm_size_cols_a : " << full_nm_size_cols_a << "\n"
+    << "\t\t" << "_flag_full_nm_size_cols_a : " << std::boolalpha <<  _flag_full_nm_size_cols_a << "\n"
     // ROI FRAME
     << "\t\t" << "_flag_roi_image : " << std::boolalpha << _flag_roi_image << "\n"
     << "\t" << "roi_rectangle : " <<  roi_rectangle << "\n"
@@ -346,10 +357,10 @@ std::ostream& BaseImage::output(std::ostream& stream) const {
     << "\t" << "roi_n_cols_width : " <<  roi_n_cols_width << "\n"
     << "\t\t" << "_flag_roi_n_cols_width : " << std::boolalpha << _flag_roi_n_cols_width << "\n"
     // ROI [nm dimensions]
-    << "\t" << "roi_nm_size_rows_a : " << roi_nm_size_rows_a << "\n"
-    << "\t\t" << "_flag_roi_nm_size_rows_a : " << std::boolalpha <<  _flag_roi_nm_size_rows_a << "\n"
-    << "\t" << "roi_nm_size_cols_b : " << roi_nm_size_cols_b << "\n"
-    << "\t\t" << "_flag_roi_nm_size_cols_b : " << std::boolalpha <<  _flag_roi_nm_size_cols_b << "\n"
+    << "\t" << "roi_nm_size_rows_b : " << roi_nm_size_rows_b << "\n"
+    << "\t\t" << "_flag_roi_nm_size_rows_b : " << std::boolalpha <<  _flag_roi_nm_size_rows_b << "\n"
+    << "\t" << "roi_nm_size_cols_a : " << roi_nm_size_cols_a << "\n"
+    << "\t\t" << "_flag_roi_nm_size_cols_a : " << std::boolalpha <<  _flag_roi_nm_size_cols_a << "\n"
     << "\t" << "roi_center_x : " <<  roi_center_x << "\n"
     << "\t\t" << "_flag_roi_center_x : " << std::boolalpha << _flag_roi_center_x << "\n"
     << "\t" << "roi_center_y : " <<  roi_center_y << "\n"

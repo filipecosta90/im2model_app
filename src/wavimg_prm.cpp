@@ -81,7 +81,7 @@ bool WAVIMG_prm::produce_prm ( ) {
       input_prefix_stream << "'" << input_wave_function_full_path.string() << "_sl.wav"<< "'";
       outfile  << input_prefix_stream.str() << "\t\t! Wave function file name string used to locate existing wave functions. Use quotation marks to secure the input including space characters." << std::endl;
       // line 2
-      outfile <<  full_n_rows_height << ", " <<  full_n_cols_width << "\t\t! Dimension of the wave data in pixels, <nx> = number of horizontal wave pixels, <ny>  = number of vertical wave pixels." << std::endl;
+      outfile <<  full_n_cols_width << ", " <<  full_n_rows_height << "\t\t! Dimension of the wave data in pixels, <nx> = number of horizontal wave pixels, <ny>  = number of vertical wave pixels." << std::endl;
       // line 3
       outfile  << sampling_rate_x_nm_per_pixel << ", " << sampling_rate_y_nm_per_pixel << "\t\t! Sampling rate of the wave data (<sx> = horizontal, <sy> = vertical) [nm/pix]." << std::endl;
       // line 4

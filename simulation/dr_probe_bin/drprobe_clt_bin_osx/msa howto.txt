@@ -1,11 +1,11 @@
 
 #-----------------------------------------------------------------------------#
 #                                                                             #
-#   HOWTO use the program MSA, Version 0.74b                                  #
+#   HOWTO use the program MSA, Version 0.77b                                  #
 #                                                                             #
 #-----------------------------------------------------------------------------#
 #                                                                             #
-#   Date: 2017-04-11                                                          #
+#   Date: 2017-07-17                                                          #
 #                                                                             #
 #   Author: Juri Barthel                                                      #
 #           Ernst Ruska-Centre                                                #
@@ -70,8 +70,10 @@ Command-line calling options for the program msa.exe:
 >     -out <Output filename>
 >     [-in <Input image filename>]
 >     [-inw <Input wave filename> <insert slice number>]
->     [-px <horizontal-scan-pixel number>]
->     [-py <vertical-scan-pixel number>]
+>     [-px <horizontal scan-pixel number>]
+>     [-py <vertical scan-pixel number>]
+>     [-lx <last horiz. scan pixel>]
+>     [-ly <last vert. scan pixel>]
 >     [-foc <defocus value in nm>]
 >     [-tx <x beam tilt in mrad>]
 >     [-ty <y beam tilt in mrad>]
@@ -84,7 +86,8 @@ Command-line calling options for the program msa.exe:
 >     [/ctem, switch to imaging TEM simulation]
 >     [/txtout, switch for text output, STEM only]
 >     [/gaussap, uses a gaussian aperture profile, STEM only]
->     [/wave, save wave data at selected slices]
+>     [/wave, save wavefunctions]
+>     [/avwave, save average wavefunctions]
 >     [/detimg, save images of detector functions]
 >     [/verbose, show processing output]
 >     [/debug, show more processing output]
@@ -126,6 +129,14 @@ Options:
                   number starting with 0 up to number of scan columns -1.
 -py (integer number) : [optional] Defines the y-scan position or scan row
                   number starting with 0 up to number of scan rows -1.
+-lx (integer number) : [optional] Defines the last x-scan position (scan
+                  column) number starting from 0 up to # scan columns -1
+                  to be calculated, in this case -px defines the first scan
+                  column to be calculated.
+-ly (integer number) : [optional] Defines the last y-scan position (scan
+                  row) number starting from 0 up to # scan rows -1 to be
+                  calculated, in this case -py defines the first scan row
+                  to be calculated.
 -foc (float value) : [optional] Defines the probe or image wave defocus in
                   nanometers. Overrides the value set in the parameter file.
 -tx (float value) : [optional] Defines the x beam tilt in mrad.
@@ -164,15 +175,20 @@ Options:
                   leading to a larger delocalization of the incident probe.
                   The 1/e width of the applied Gaussian is defined by the
                   aperture size parameter in mrad.
-/wave : [optional] Activates wave export at selected slices. Wave functions
+/wave : [optional] Activates wave export at selected slices. Wavefunctions
                   are saved to file name = name of output file. The file name
                   is extended with ".wav". Index suffixes are added to denote
                   the scan pixel, the object slice and the frozen phonon
                   variation index.
+/avwave : [optional] Activates the output of an average wavefunctions over
+                  multiple frozen lattice calculations.
 /debug : [optional] Activates additional debug output to the console.
 /verbose : [optional] Activates additional program output to the console.
 /detimg : [optional] Images representing the applied detector functions in
                   Diffraction space are saved to files.
+/lapro : [optional] Use large-angle propagators
+                  exp(-2*Pi/Lambda*(1/cos(theta)-1)) instead of the default
+                  Fresnel propagators exp(-I*Pi*Lambda*q^2).
                   
                   
 #-----------------------------------------------------------------------------#
@@ -469,6 +485,32 @@ EXAMPLE 3: TEM SIMULATION OF A FULLY PERIODIC OBJECT WITHOUT FL CALCULATION
 
 6) History of changes
 
+
+170717: JB: Version 0.77b
+- Re-implementation of the switch for large-angle propagator funtions.
+  Using Fresnel propagators is default again. The large-angle propagator
+  can be switched on by the /lapro flag.
+170710: JB: Version 0.76b
+- Implementation of large-angle corrected propagator funtions. Old Fresnel
+  propagators can be switched on by the /fre flag.
+- Bug correction for average wave output trigger.
+170621: JB: Version 0.75b
+- Added command-line options -lx and -ly to define the end of the scan
+  calculation sub-frame. This may be useful to continue interrupted
+  calculations or to allow a more flexible spreading of calculations over
+  several nodes. The two options work together with -px and -py, which
+  define the begin of the scan sub-frame when -lx and -ly are present.
+  In case that only -lx and -ly is given, the calculation runs from scan
+  pixel (0,0) on. In case where only -px and -py are used, only the
+  respective scan pixel is calculated (as with previous msa versions).
+- Adden command-line switch /avwave, which activates the output of
+  average wavefunctions at each extraction point. The average is taken
+  over frozen lattice variations and works for both, STEM and CTEM
+  calculations. The average wavefunctions represent the elastic channel
+  free of thermal diffuse scattering and may be used to separate the
+  thermal diffuse scattering components as in Forbes et al. PRB82 (2010).
+- Removed the application of imaging aberrations in CTEM mode.
+  This should be done with the WAVIMG tool.
 170411: JB: Version 0.74b
 - Changed propagator creation algorithm form 32-bit to 64-bit arithmetics.
 170329: JB: Version 0.73b (bug fix)

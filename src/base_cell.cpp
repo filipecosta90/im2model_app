@@ -45,7 +45,9 @@ bool BaseCell::set_xyz_filename( std::string filename ){
 }
 
 bool BaseCell::set_cel_margin_nm( double margin ){
-  cel_margin_nm = margin;
+  cel_margin_Nanometers = margin;
+  cel_margin_Angstroms = margin * 10.0f;
+  _flag_cel_margin = true;
   return true;
 }
 
@@ -318,7 +320,8 @@ std::ostream& BaseCell::output(std::ostream& stream) const {
     << "\t" << "fractional_norm_b_atom_pos : "  << fractional_norm_b_atom_pos << "\n"
     << "\t" << "fractional_norm_c_atom_pos : "  << fractional_norm_c_atom_pos << "\n"
     << "\t\t" << "_flag_fractional_norm : " << std::boolalpha << _flag_fractional_norm << "\n"
-    << "\t" << "cel_margin_nm : "  << cel_margin_nm << "\n"
+    << "\t" << "cel_margin_nm : "  << cel_margin_Nanometers << "\n"
+    << "\t\t" << "_flag_cel_margin : " << std::boolalpha << _flag_cel_margin << "\n"
     << "\t" << "ab_margin : "  << ab_margin << "\n"
     << "\t" << "cel_margin_a_px : "  << cel_margin_a_px << "\n"
     << "\t" << "cel_margin_b_px : "  << cel_margin_b_px << "\n"
@@ -327,7 +330,7 @@ std::ostream& BaseCell::output(std::ostream& stream) const {
     // used in the simulated super-cell. this is calculated based on _cel_nXY_px - 2 * _cel_margin_AB_px
     << "\t" << "cel_wout_margin_nx_px : "  << cel_wout_margin_nx_px << "\n"
     << "\t" << "cel_wout_margin_ny_px : "  << cel_wout_margin_ny_px << "\n"
-    << "\t" << "ignore_cel_margin_rectangle : "  << ignore_cel_margin_rectangle << "\n"
+    << "\t" << "ignore_cel_margin_rectangle : \n"  << ignore_cel_margin_rectangle << "\n"
     /** Orientation **/
     << "\t" << "orientation_matrix : \n"  << orientation_matrix << "\n"
     << "\t\t" << "_flag_orientation_matrix : " << std::boolalpha << _flag_orientation_matrix << "\n"
