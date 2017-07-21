@@ -1,6 +1,6 @@
-HOWTO use the CELSLC program, Version 0.60b
+HOWTO use the CELSLC program, Version 0.62b
 
-(Juri Barthel, 2017-07-12)
+(Juri Barthel, 2017-07-20)
 
 
 1) Requireemts
@@ -543,6 +543,17 @@ cubic srtio3 110, original unit cell repeated 4x along x and 6x along y
 6) Changelog:
 
 
+- 170720. JB: Version 0.62b
+              Bug fix in the generation of phase gratings.
+- 170719. JB: Version 0.61b
+              Inserted bandwidth limitation on phase gratings.
+              Reimplemented Weickenmeier&Kohl form factors with numerical
+              integration of absorptive form factors.
+              Replaced source file fscatt.f with wekoscatt.f90
+              Corrected a scaling issue in the absorptive form factors.
+              Inserted a trigger "-wakisca" to switch to Waasmaier and
+              Kirfel form factors instead of Weickenmeier and Kohl.
+              Corrected an issue with string parsing for CIF file input.
 - 170712. JB: Version 0.60b
               Removed atonum.f and atosym.f from the link list, the functions
               are no longer used.
