@@ -279,10 +279,10 @@ bool SimGrid::read_grid_from_dat_files(){
               cv::Mat raw_simulated_image ( full_n_rows_height , full_n_cols_width , CV_32FC1);
 
               //special case of opencv for performance issues on accessing matrix values
-              if (raw_simulated_image.isContinuous()){
+              /*if (raw_simulated_image.isContinuous()){
                 full_n_cols_width *= full_n_rows_height;
                 full_n_rows_height = 1;
-              }
+              }*/
 
               std::cout << "raw_simulated_image.size() " << raw_simulated_image.size() << std::endl;
               int pos = 0;
@@ -295,7 +295,7 @@ bool SimGrid::read_grid_from_dat_files(){
                 // we only need to request the pointer a single time and go all the way to the end.
                 //pixel = raw_simulated_image.ptr<float>(row);
                   //pixel[col] = (float) p[pos] ;
-                  raw_simulated_image.at<float>(row, full_n_cols_width-col-1) = (float) p[pos] ;
+                  raw_simulated_image.at<float>(row, full_n_cols_width - col -1) = (float) p[pos] ;
                   pos++;
                 }
               }
