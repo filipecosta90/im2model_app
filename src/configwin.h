@@ -253,6 +253,13 @@ TreeItem* experimental_roi = nullptr;
   TreeItem* tdmap_cell_dimensions_a = nullptr;
   TreeItem* tdmap_cell_dimensions_b = nullptr;
   TreeItem* _simulation_refinement = nullptr;
+  TreeItem* _aberration_parameters = nullptr;
+  TreeItem* spherical_aberration_nm = nullptr;
+  TreeItem* _envelope_parameters = nullptr;
+  TreeItem* _envelope_parameters_vibrational_damping = nullptr;
+  TreeItem* envelop_parameters_vibrational_damping_isotropic_first_rms_amplitude = nullptr;
+  TreeItem* envelop_parameters_vibrational_damping_isotropic_second_rms_amplitude = nullptr;
+  TreeItem* envelop_parameters_vibrational_damping_isotropic_orientation_angle = nullptr;
 
     /* simulation outputs */
     TreeItem* _multislice_phase_granting_output;

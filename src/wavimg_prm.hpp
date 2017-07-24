@@ -78,7 +78,7 @@ class WAVIMG_prm : public BaseBin {
     std::string mtf_filename;
     bool _flag_mtf_filename = false;
     // line 17
-    int simulation_image_spread_envelope_switch;
+    int simulation_image_spread_envelope_switch = EnvelopeVibrationalDamping::Deactivated;
     double isotropic_one_rms_amplitude = 0.0f;
     double anisotropic_second_rms_amplitude = 0.0f;
     double azimuth_orientation_angle = 0.0f;
@@ -143,6 +143,8 @@ class WAVIMG_prm : public BaseBin {
       FiveFoldAstigmatism = 10, SphericalAberration6thOrder = 11, StarAberration6thOrder = 12,
       RosetteAberration = 13, SixfoldAstigmatism = 14, EightfoldAstigmatism = 23
     };
+
+    enum EnvelopeVibrationalDamping { Deactivated = 0, Isotropic = 1, Anisotropic = 2 };
 
     /** getters **/
     // flag getters
@@ -235,6 +237,8 @@ class WAVIMG_prm : public BaseBin {
     bool get_aberration_definition_switch( WAVIMG_prm::AberrationDefinition aberration_index );
 
     bool get_mtf_simulation_switch();
+
+    int get_simulation_image_spread_envelope_switch(){ return simulation_image_spread_envelope_switch; }
 
     /* Loggers */
     bool set_application_logger( ApplicationLog::ApplicationLog* logger );

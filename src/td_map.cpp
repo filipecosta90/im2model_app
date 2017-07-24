@@ -14,7 +14,7 @@ TDMap::TDMap(
   /* *
    * SuperCell
    * */
-   const double cel_margin_nm = 1.0f;
+   const double cel_margin_nm = 0.0f;
   tdmap_roi_sim_super_cell = new SuperCell( unit_cell );
   tdmap_full_sim_super_cell = new SuperCell( unit_cell );
   final_full_sim_super_cell = new SuperCell( unit_cell );
@@ -23,12 +23,6 @@ TDMap::TDMap(
   tdmap_roi_sim_super_cell->set_cel_filename( "tdmap_roi.cel" );
   tdmap_roi_sim_super_cell->set_xyz_filename( "tdmap_roi.xyz" );
   tdmap_roi_sim_super_cell->set_cel_margin_nm( cel_margin_nm );
-  /*tdmap_roi_sim_super_cell->set_zone_axis_u( 0.0f );
-  tdmap_roi_sim_super_cell->set_zone_axis_v( 0.0f );
-  tdmap_roi_sim_super_cell->set_zone_axis_w( 1.0f );
-  tdmap_roi_sim_super_cell->set_upward_vector_u( 0.0f );
-  tdmap_roi_sim_super_cell->set_upward_vector_v( 1.0f );
-  tdmap_roi_sim_super_cell->set_upward_vector_w( 0.0f );*/
 
   // use cel format
   //tdmap_roi_sim_super_cell->set_cel_format( true );
@@ -141,8 +135,8 @@ final_full_sim_super_cell->set_image_bounds( exp_image_bounds );
   // setters line 16
   // SIMULATION DEPENDENT
   // setters line 17
-  _tdmap_wavimg_parameters->set_simulation_image_spread_envelope_switch( 0 );
-  _tdmap_wavimg_parameters->set_isotropic_one_rms_amplitude( 0.03 ); // colocar a zero
+  //_tdmap_wavimg_parameters->set_simulation_image_spread_envelope_switch( 0 );
+  //_tdmap_wavimg_parameters->set_isotropic_one_rms_amplitude( 0.03 ); // colocar a zero
   // setters line 18
   // SIMULATION DEPENDENT
   // setters line 19
@@ -1303,6 +1297,50 @@ bool TDMap::set_refinement_definition_method ( int method ){
   _refinement_definition_method = method;
   _flag_refinement_definition_method = true;
   return _flag_refinement_definition_method;
+}
+
+bool TDMap::set_envelop_parameters_vibrational_damping_method ( int method ){
+  bool result = false;
+  if( _tdmap_wavimg_parameters != nullptr ){
+   _tdmap_wavimg_parameters->set_simulation_image_spread_envelope_switch( method );
+   result = true;
+  }
+  return result;
+}
+
+bool TDMap::set_envelop_parameters_vibrational_damping_isotropic_one_rms_amplitude( double amplitude ){
+  bool result = false;
+  if( _tdmap_wavimg_parameters != nullptr ){
+    _tdmap_wavimg_parameters->set_isotropic_one_rms_amplitude( amplitude );
+    result = true;
+  }
+  return result;
+}
+
+bool TDMap::set_envelop_parameters_vibrational_damping_anisotropic_second_rms_amplitude( double amplitude ){
+  bool result = false;
+  if( _tdmap_wavimg_parameters != nullptr ){
+    _tdmap_wavimg_parameters->set_anisotropic_second_rms_amplitude( amplitude );
+    result = true;
+  }
+  return result;
+}
+
+bool TDMap::set_envelop_parameters_vibrational_damping_azimuth_orientation_angle( double angle ){
+  bool result = false;
+  if( _tdmap_wavimg_parameters != nullptr ){
+    _tdmap_wavimg_parameters->set_azimuth_orientation_angle( angle );
+    result = true;
+  }
+  return result;
+}
+
+int TDMap::get_envelop_parameters_vibrational_damping_method(){
+  int result = WAVIMG_prm::EnvelopeVibrationalDamping::Deactivated;
+  if( _tdmap_wavimg_parameters != nullptr ){
+     result = _tdmap_wavimg_parameters->get_simulation_image_spread_envelope_switch( );
+  }
+  return result;
 }
 
 bool TDMap::set_mtf_filename( std::string file_name ){

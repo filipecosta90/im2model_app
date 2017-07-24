@@ -343,8 +343,8 @@ bool SuperCell::orientate_atoms_from_matrix(){
           it != atom_positions.end();
           it++
           ){
-        cv::Point3d initial_atom = *it;
-        cv::Mat result = orientation_matrix * cv::Mat(initial_atom);
+        const cv::Point3d initial_atom = *it;
+        cv::Mat result = orientation_matrix * cv::Mat( initial_atom );
         cv::Point3d final (result.at<double>(0,0), result.at<double>(1,0), result.at<double>(2,0));
         *it = final;
       }

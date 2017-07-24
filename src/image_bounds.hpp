@@ -108,7 +108,6 @@ class ImageBounds {
 
     cv::Mat experimental_image_contours;
 
-
   public:
     ImageBounds();
 

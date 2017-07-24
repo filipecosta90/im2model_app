@@ -1277,7 +1277,7 @@ experimental_roi_dimensions = new TreeItem ( box1_option_3_2  );
 
   /*group options*/
   unit_cell_file_cif->set_variable_name( "unit_cell_file_cif" );
-  celslc_step_group_options->add_option( project_setup_crystalographic_fields_model, unit_cell_file_cif , 1, false);
+  celslc_step_group_options->add_option( project_setup_crystalographic_fields_model, unit_cell_file_cif , 1, true );
 
   ////////////////
   // Projection direction
@@ -1425,6 +1425,7 @@ experimental_roi_dimensions = new TreeItem ( box1_option_3_2  );
   _parameter_variation_map_thickness  = new TreeItem ( box3_option_0_1 );
   _parameter_variation_map->insertChildren( _parameter_variation_map_thickness );
 
+  /*
   ////////////////
   // 2D variation map - > thickness - > user estimation
   ////////////////
@@ -1444,10 +1445,11 @@ experimental_roi_dimensions = new TreeItem ( box1_option_3_2  );
 
   _parameter_variation_map_thickness_estimated_nm->add_toolbar( box3_function_0_1_1_action_description, box3_function_0_1_1_actions );
 
-  /* validators */
+  // validators
   _parameter_variation_map_thickness_estimated_nm->set_flag_validatable_double(1,true);
 
   _parameter_variation_map_thickness->insertChildren( _parameter_variation_map_thickness_estimated_nm );
+  */
 
   ////////////////
   //Thickness range -- Samples
@@ -1514,14 +1516,16 @@ experimental_roi_dimensions = new TreeItem ( box1_option_3_2  );
   ////////////////
   // 2D variation map - > defocus - > user estimation
   ////////////////
+  /*
   QVector<QVariant> box3_option_0_2_1 = {"Estimated nm",""};
   QVector<bool> box3_option_0_2_1_edit = {false,true};
   boost::function<bool(std::string)> box3_function_0_2_1 ( boost::bind( &TDMap::set_defocus_user_estimated_nm, _core_td_map, _1 ) );
   _parameter_variation_map_defocus_estimated_nm  = new TreeItem ( box3_option_0_2_1, box3_function_0_2_1, box3_option_0_2_1_edit  );
   _parameter_variation_map_defocous->insertChildren( _parameter_variation_map_defocus_estimated_nm );
 
-    /* validators */
+    // validators
     _parameter_variation_map_defocus_estimated_nm->set_flag_validatable_double(1,true);
+*/
 
   ////////////////
   //Defocus range -- Samples
@@ -1633,7 +1637,7 @@ experimental_roi_dimensions = new TreeItem ( box1_option_3_2  );
   tdmap_cell_dimensions_a->set_validator_double_top(1, box3_function_4_1_validator_top );
 
   ////////////////
-  // Cell Dimensions -- a
+  // Cell Dimensions -- b
   ////////////////
   QVector<QVariant> box3_option_4_2 = {"b (nm)",""};
   QVector<bool> box3_option_4_2_edit = {false,true};
@@ -1677,7 +1681,7 @@ experimental_roi_dimensions = new TreeItem ( box1_option_3_2  );
   //Simulation Refinement -- Aberration parameters
   ////////////////
   QVector<QVariant> box3_option_5_1 = {"Aberration parameters",""};
-  TreeItem* _aberration_parameters = new TreeItem ( box3_option_5_1 );
+  _aberration_parameters = new TreeItem ( box3_option_5_1 );
   _simulation_refinement->insertChildren( _aberration_parameters );
 
   ////////////////
@@ -1689,8 +1693,9 @@ experimental_roi_dimensions = new TreeItem ( box1_option_3_2  );
   boost::function<double(void)> box3_function_5_1_1_getter ( boost::bind( &TDMap::get_spherical_aberration, _core_td_map ) );
   boost::function<bool(void)> box3_option_5_1_1_check_getter ( boost::bind( &TDMap::get_spherical_aberration_switch, _core_td_map  ) );
   boost::function<bool(bool)> box3_option_5_1_1_check_setter ( boost::bind( &TDMap::set_spherical_aberration_switch, _core_td_map, _1 ) );
-  TreeItem* spherical_aberration_nm = new TreeItem ( box3_option_5_1_1 , box3_function_5_1_1_setter, box3_function_5_1_1_getter, box3_option_5_1_1_edit );
+  spherical_aberration_nm = new TreeItem ( box3_option_5_1_1 , box3_function_5_1_1_setter, box3_function_5_1_1_getter, box3_option_5_1_1_edit );
   _aberration_parameters->insertChildren( spherical_aberration_nm );
+
   /*group options*/
   spherical_aberration_nm->set_variable_name( "spherical_aberration_nm" );
   spherical_aberration_nm->set_fp_check_setter( 0, box3_option_5_1_1_check_setter );
@@ -1701,8 +1706,60 @@ experimental_roi_dimensions = new TreeItem ( box1_option_3_2  );
   //Simulation Refinement -- envelope parameters
   ////////////////
   QVector<QVariant> box3_option_5_2 = {"Envelope parameters",""};
-  TreeItem* _envelope_parameters = new TreeItem ( box3_option_5_2 );
+  _envelope_parameters = new TreeItem ( box3_option_5_2 );
   _simulation_refinement->insertChildren( _envelope_parameters );
+
+  QVector<QVariant> box3_option_5_2_1 = {"Image spread",""};
+  QVector<bool> box3_option_5_2_1_edit = {false,true};
+
+  boost::function<int(void)> box3_function_5_2_1_getter ( boost::bind( &TDMap::get_envelop_parameters_vibrational_damping_method, _core_td_map ) );
+  boost::function<bool(int)> box3_function_5_2_1_setter ( boost::bind( &TDMap::set_envelop_parameters_vibrational_damping_method, _core_td_map, _1 ) );
+
+  _envelope_parameters_vibrational_damping = new TreeItem ( box3_option_5_2_1, box3_function_5_2_1_setter, box3_function_5_2_1_getter, box3_option_5_edit );
+  // load the preset data from core constuctor
+  _envelope_parameters_vibrational_damping->load_data_from_getter();
+  QVector<QVariant> box3_option_5_2_1_drop = {"Deactivated","Isotropic","Anisotropic"};
+  QVector<QVariant> box3_option_5_2_1_drop_enum( { WAVIMG_prm::EnvelopeVibrationalDamping::Deactivated, WAVIMG_prm::EnvelopeVibrationalDamping::Isotropic, WAVIMG_prm::EnvelopeVibrationalDamping::Anisotropic } );
+  _envelope_parameters_vibrational_damping->set_item_delegate_type( TreeItem::_delegate_DROP );
+  _envelope_parameters_vibrational_damping->set_dropdown_options( 1, box3_option_5_2_1_drop, box3_option_5_2_1_drop_enum  );
+
+  _envelope_parameters->insertChildren( _envelope_parameters_vibrational_damping );
+
+//  bool set_envelop_parameters_vibrational_damping_anisotropic_second_rms_amplitude( double amplitude );
+//  bool set_envelop_parameters_vibrational_damping_azimuth_orientation_angle( double angle );
+
+////////////////
+// Image spread -- first rms (nm)
+////////////////
+QVector<QVariant> box3_option_5_2_1_1 = {"First rms (nm)",""};
+QVector<bool> box3_option_5_2_1_1_edit = {false,true};
+boost::function<bool(double)> box3_function_5_2_1_1 ( boost::bind( &TDMap::set_envelop_parameters_vibrational_damping_isotropic_one_rms_amplitude, _core_td_map, _1 ) );
+envelop_parameters_vibrational_damping_isotropic_first_rms_amplitude = new TreeItem ( box3_option_5_2_1_1 , box3_function_5_2_1_1, box3_option_5_2_1_1_edit );
+_envelope_parameters_vibrational_damping->insertChildren( envelop_parameters_vibrational_damping_isotropic_first_rms_amplitude );
+/* validators */
+envelop_parameters_vibrational_damping_isotropic_first_rms_amplitude->set_flag_validatable_double(1,true);
+
+    ////////////////
+    // Image spread -- second rms (nm)
+    ////////////////
+    QVector<QVariant> box3_option_5_2_1_2 = {"Second rms (nm)",""};
+    QVector<bool> box3_option_5_2_1_2_edit = {false,true};
+    boost::function<bool(double)> box3_function_5_2_1_2 ( boost::bind( &TDMap::set_envelop_parameters_vibrational_damping_anisotropic_second_rms_amplitude, _core_td_map, _1 ) );
+    envelop_parameters_vibrational_damping_isotropic_second_rms_amplitude = new TreeItem ( box3_option_5_2_1_2 , box3_function_5_2_1_2, box3_option_5_2_1_2_edit );
+    _envelope_parameters_vibrational_damping->insertChildren( envelop_parameters_vibrational_damping_isotropic_second_rms_amplitude );
+    /* validators */
+    envelop_parameters_vibrational_damping_isotropic_second_rms_amplitude->set_flag_validatable_double(1,true);
+
+    ////////////////
+    // Image spread -- orientation angle
+    ////////////////
+    QVector<QVariant> box3_option_5_2_1_3 = {"Orientation angle",""};
+    QVector<bool> box3_option_5_2_1_3_edit = {false,true};
+    boost::function<bool(double)> box3_function_5_2_1_3 ( boost::bind( &TDMap::set_envelop_parameters_vibrational_damping_azimuth_orientation_angle, _core_td_map, _1 ) );
+    envelop_parameters_vibrational_damping_isotropic_orientation_angle = new TreeItem ( box3_option_5_2_1_3 , box3_function_5_2_1_3, box3_option_5_2_1_3_edit );
+    _envelope_parameters_vibrational_damping->insertChildren( envelop_parameters_vibrational_damping_isotropic_orientation_angle );
+    /* validators */
+    envelop_parameters_vibrational_damping_isotropic_orientation_angle->set_flag_validatable_double(1,true);
 
   ////////////////
   //Simulation Refinement -- MTF

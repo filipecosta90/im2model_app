@@ -150,6 +150,7 @@ class TDMap  : public QObject {
     // class getters
     int get_image_correlation_matching_method(){ return image_correlation_matching_method ; }
     int get_refinement_definition_method(){ return _refinement_definition_method; }
+    int get_envelop_parameters_vibrational_damping_method();
     bool get_run_celslc_switch(){ return _run_celslc_switch; }
     int get_run_celslc_exec_log_level(){ return _run_celslc_exec_log_level; }
     bool get_run_msa_switch(){ return _run_msa_switch; }
@@ -270,6 +271,10 @@ class TDMap  : public QObject {
     bool set_defocus_upper_bound( std::string );
     bool set_accelaration_voltage_kv( std::string accelaration_voltage );
     bool set_refinement_definition_method( int method );
+    bool set_envelop_parameters_vibrational_damping_method( int method );
+    bool set_envelop_parameters_vibrational_damping_isotropic_one_rms_amplitude( double amplitude );
+    bool set_envelop_parameters_vibrational_damping_anisotropic_second_rms_amplitude( double amplitude );
+    bool set_envelop_parameters_vibrational_damping_azimuth_orientation_angle( double angle );
     bool set_spherical_aberration ( std::string cs );
     bool set_spherical_aberration_switch( bool cs_switch );
     bool set_mtf_filename( std::string file_name );
