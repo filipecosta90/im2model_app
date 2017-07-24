@@ -92,6 +92,8 @@ class TDMap  : public QObject {
     BaseImage* sim_image_properties = nullptr;
     BaseImage* exp_image_properties = nullptr;
 
+    ImageBounds* exp_image_bounds = nullptr;
+
     BaseCrystal* sim_crystal_properties = nullptr;
 
     /* Loggers */

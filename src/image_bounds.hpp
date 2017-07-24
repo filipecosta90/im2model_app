@@ -45,7 +45,7 @@
 #include "application_log.hpp"
 #include "base_image.hpp"
 
-class ImageBounds : public BaseImage {
+class ImageBounds {
   private:
 
     bool update_roi_boundary_polygon_from_full_boundaries();
@@ -53,6 +53,9 @@ class ImageBounds : public BaseImage {
     /* Loggers */
     ApplicationLog::ApplicationLog* logger = nullptr;
     bool _flag_logger = false;
+
+    BaseImage* base_image = nullptr;
+    bool _flag_base_image = false;
 
   protected:
 
@@ -153,9 +156,11 @@ class ImageBounds : public BaseImage {
     /** setters **/
     bool set_hysteresis_threshold( int threshold );
     bool set_max_contour_distance_px( int max_distance );
-    
+
     bool set_full_boundary_polygon_margin_x_nm( double value );
     bool set_full_boundary_polygon_margin_y_nm( double value );
+
+    bool set_base_image( BaseImage* base_image_ptr );
 
     /* Loggers */
     bool set_application_logger( ApplicationLog::ApplicationLog* logger );

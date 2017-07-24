@@ -32,6 +32,12 @@ bool SuperCell::set_unit_cell ( UnitCell* cell ){
   return true;
 }
 
+bool SuperCell::set_image_bounds ( ImageBounds* bounds ){
+  image_bounds = bounds;
+  _flag_image_bounds = true;
+  return true;
+}
+
 bool SuperCell::update_from_unit_cell(){
   bool result = false;
   if( _flag_unit_cell ){
@@ -689,8 +695,6 @@ bool SuperCell::set_upward_vector_w( double w){
 bool SuperCell::set_application_logger( ApplicationLog::ApplicationLog* app_logger ){
   logger = app_logger;
   _flag_logger = true;
-  ImageBounds::set_application_logger( app_logger );
-  BaseImage::set_application_logger( app_logger );
   logger->logEvent( ApplicationLog::notification, "Application logger setted for SuperCell class." );
   return true;
 }
@@ -722,9 +726,12 @@ std::ostream& SuperCell::output(std::ostream& stream) const {
     << "\t" << "expand_factor_c : "  << expand_factor_c << "\n"
     << "\t\t" << "_flag_expand_factor : " << std::boolalpha << _flag_expand_factor << "\n"
     << "\t" << "super_cell_to_unit_cell_pos.size() : "  << super_cell_to_unit_cell_pos.size() << "\n"
-    << "\t\t" << "_flag_super_cell_to_unit_cell_pos : " << std::boolalpha << _flag_super_cell_to_unit_cell_pos << "\n"
-    << "ImageBounds Properties : " << "\n";
-  ImageBounds::output(stream);
+    << "\t\t" << "_flag_super_cell_to_unit_cell_pos : " << std::boolalpha << _flag_super_cell_to_unit_cell_pos << "\n";
+    stream << "\t\t" << "_flag_image_bounds : " << std::boolalpha << _flag_image_bounds << "\n";
+    if( _flag_image_bounds ){
+      stream << "ImageBounds vars:\n";
+      image_bounds->output(stream);
+    }
   stream << "BaseCell Properties : " << "\n";
   BaseCell::output(stream);
   stream << "\t\t" << "_flag_unit_cell : " << std::boolalpha << _flag_unit_cell << "\n";

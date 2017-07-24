@@ -39,6 +39,10 @@ TDMap::TDMap(
   //sim_image_properties->set_ignore_edge_nm( cel_margin_nm );
   exp_image_properties = new BaseImage();
 
+  exp_image_bounds = new ImageBounds();
+  exp_image_bounds->set_base_image( exp_image_properties );
+final_full_sim_super_cell->set_image_bounds( exp_image_bounds );
+
   sim_crystal_properties = new BaseCrystal();
 
   _tdmap_celslc_parameters = new CELSLC_prm( ostream_celslc_buffer );
@@ -904,6 +908,7 @@ bool TDMap::set_application_logger( ApplicationLog::ApplicationLog* app_logger )
   final_full_sim_super_cell->set_application_logger(app_logger);
   sim_image_properties->set_application_logger(app_logger);
   exp_image_properties->set_application_logger(app_logger);
+  exp_image_bounds->set_application_logger(app_logger);
   sim_crystal_properties->set_application_logger(app_logger);
   return true;
 }
@@ -974,9 +979,7 @@ bool TDMap::set_exp_image_properties_sampling_rate_x_nm_per_pixel( std::string s
     const double s_rate_x = boost::lexical_cast<double>( sampling_x );
     const bool exp_result = exp_image_properties->set_sampling_rate_x_nm_per_pixel( s_rate_x );
     const bool sim_result = sim_image_properties->set_sampling_rate_x_nm_per_pixel( s_rate_x );
-    const bool roi_result = tdmap_roi_sim_super_cell->set_sampling_rate_x_nm_per_pixel( s_rate_x );
-    const bool full_result = tdmap_full_sim_super_cell->set_sampling_rate_x_nm_per_pixel( s_rate_x );
-    result = exp_result & sim_result & roi_result & full_result;
+    result = exp_result && sim_result;
   }
   catch(boost::bad_lexical_cast&  ex) {
     // pass it up
@@ -991,9 +994,7 @@ bool TDMap::set_exp_image_properties_sampling_rate_y_nm_per_pixel( std::string s
     const double s_rate_y = boost::lexical_cast<double>( sampling_y );
     const bool exp_result = exp_image_properties->set_sampling_rate_y_nm_per_pixel( s_rate_y );
     const bool sim_result = sim_image_properties->set_sampling_rate_y_nm_per_pixel( s_rate_y );
-    const bool roi_result = tdmap_roi_sim_super_cell->set_sampling_rate_y_nm_per_pixel( s_rate_y );
-    const bool full_result = tdmap_full_sim_super_cell->set_sampling_rate_y_nm_per_pixel( s_rate_y );
-    result = exp_result & sim_result & roi_result & full_result;
+    result = exp_result && sim_result;
   }
   catch(boost::bad_lexical_cast&  ex) {
     // pass it up
@@ -1367,8 +1368,8 @@ bool TDMap::set_full_boundary_polygon_margin_nm( std::string s_margin ){
   bool result = false;
   try {
     const double margin = boost::lexical_cast<double>( s_margin );
-    result = tdmap_full_sim_super_cell->set_full_boundary_polygon_margin_x_nm( margin );
-    result &= tdmap_full_sim_super_cell->set_full_boundary_polygon_margin_y_nm( margin );
+    result = exp_image_bounds->set_full_boundary_polygon_margin_x_nm( margin );
+    result &= exp_image_bounds->set_full_boundary_polygon_margin_y_nm( margin );
   }
   catch(boost::bad_lexical_cast&  ex) {
     // pass it up
@@ -1396,7 +1397,7 @@ int TDMap::get_exp_image_properties_full_n_rows_height(){
 }
 
 double TDMap::get_full_boundary_polygon_margin_nm(){
-  return tdmap_full_sim_super_cell->get_full_boundary_polygon_margin_x_nm();
+  return exp_image_bounds->get_full_boundary_polygon_margin_x_nm();
 }
 
 double TDMap::get_exp_image_properties_sampling_rate_nm_per_pixel_bottom_limit(){
@@ -1629,43 +1630,43 @@ double TDMap::get_exp_image_properties_roi_ny_size_width_nm(){
 }
 
 bool TDMap::calculate_exp_image_boundaries_from_full_image(){
-  return tdmap_full_sim_super_cell->calculate_boundaries_from_full_image();
+  return exp_image_bounds->calculate_boundaries_from_full_image();
 }
 
 bool TDMap::set_exp_image_bounds_hysteresis_threshold( int value ){
-  return tdmap_full_sim_super_cell->set_hysteresis_threshold(value);
+  return exp_image_bounds->set_hysteresis_threshold(value);
 }
 bool TDMap::set_exp_image_bounds_max_contour_distance_px( int value ){
-  return tdmap_full_sim_super_cell->set_max_contour_distance_px(value);
+  return exp_image_bounds->set_max_contour_distance_px(value);
 }
 
 /* experimantal image boundaries */
-bool TDMap::get_exp_image_bounds_flag_full_boundary_polygon(){ return tdmap_full_sim_super_cell->get_flag_full_boundary_polygon(); }
-bool TDMap::get_exp_image_bounds_flag_full_boundary_polygon_w_margin(){ return tdmap_full_sim_super_cell->get_flag_full_boundary_polygon_w_margin(); }
-bool TDMap::get_exp_image_bounds_flag_roi_boundary_polygon(){ return tdmap_full_sim_super_cell->get_flag_roi_boundary_polygon(); }
-bool TDMap::get_exp_image_bounds_flag_roi_boundary_rect(){ return tdmap_full_sim_super_cell->get_flag_roi_boundary_rect(); }
-bool TDMap::get_exp_image_bounds_flag_roi_boundary_image(){ return tdmap_full_sim_super_cell->get_flag_roi_boundary_image(); }
-bool TDMap::get_exp_image_bounds_flag_roi_boundary_polygon_w_margin(){ return tdmap_full_sim_super_cell->get_flag_roi_boundary_polygon_w_margin(); }
-bool TDMap::get_exp_image_bounds_flag_roi_boundary_rect_w_margin(){ return tdmap_full_sim_super_cell->get_flag_roi_boundary_rect_w_margin(); }
-bool TDMap::get_exp_image_bounds_flag_roi_boundary_image_w_margin(){ return tdmap_full_sim_super_cell->get_flag_roi_boundary_image_w_margin(); }
+bool TDMap::get_exp_image_bounds_flag_full_boundary_polygon(){ return exp_image_bounds->get_flag_full_boundary_polygon(); }
+bool TDMap::get_exp_image_bounds_flag_full_boundary_polygon_w_margin(){ return exp_image_bounds->get_flag_full_boundary_polygon_w_margin(); }
+bool TDMap::get_exp_image_bounds_flag_roi_boundary_polygon(){ return exp_image_bounds->get_flag_roi_boundary_polygon(); }
+bool TDMap::get_exp_image_bounds_flag_roi_boundary_rect(){ return exp_image_bounds->get_flag_roi_boundary_rect(); }
+bool TDMap::get_exp_image_bounds_flag_roi_boundary_image(){ return exp_image_bounds->get_flag_roi_boundary_image(); }
+bool TDMap::get_exp_image_bounds_flag_roi_boundary_polygon_w_margin(){ return exp_image_bounds->get_flag_roi_boundary_polygon_w_margin(); }
+bool TDMap::get_exp_image_bounds_flag_roi_boundary_rect_w_margin(){ return exp_image_bounds->get_flag_roi_boundary_rect_w_margin(); }
+bool TDMap::get_exp_image_bounds_flag_roi_boundary_image_w_margin(){ return exp_image_bounds->get_flag_roi_boundary_image_w_margin(); }
 // var getters
-int TDMap::get_exp_image_bounds_hysteresis_threshold(){ return tdmap_full_sim_super_cell->get_hysteresis_threshold(); }
-int TDMap::get_exp_image_bounds_max_contour_distance_px(){ return tdmap_full_sim_super_cell->get_max_contour_distance_px(); }
+int TDMap::get_exp_image_bounds_hysteresis_threshold(){ return exp_image_bounds->get_hysteresis_threshold(); }
+int TDMap::get_exp_image_bounds_max_contour_distance_px(){ return exp_image_bounds->get_max_contour_distance_px(); }
 // threshold limits
-int TDMap::get_exp_image_bounds_hysteresis_threshold_range_bottom_limit(){ return tdmap_full_sim_super_cell->get_hysteresis_threshold_range_bottom_limit(); }
-int TDMap::get_exp_image_bounds_hysteresis_threshold_range_top_limit(){ return tdmap_full_sim_super_cell->get_hysteresis_threshold_range_top_limit(); }
-int TDMap::get_exp_image_bounds_max_contour_distance_px_range_bottom_limit(){ return tdmap_full_sim_super_cell->get_max_contour_distance_px_range_bottom_limit(); }
-int TDMap::get_exp_image_bounds_max_contour_distance_px_range_top_limit(){ return tdmap_full_sim_super_cell->get_max_contour_distance_px_range_top_limit(); }
-std::vector<cv::Point2i> TDMap::get_exp_image_bounds_full_boundary_polygon(){ return tdmap_full_sim_super_cell->get_full_boundary_polygon(); }
-std::vector<cv::Point2i> TDMap::get_exp_image_bounds_full_boundary_polygon_w_margin(){ return tdmap_full_sim_super_cell->get_full_boundary_polygon_w_margin(); }
+int TDMap::get_exp_image_bounds_hysteresis_threshold_range_bottom_limit(){ return exp_image_bounds->get_hysteresis_threshold_range_bottom_limit(); }
+int TDMap::get_exp_image_bounds_hysteresis_threshold_range_top_limit(){ return exp_image_bounds->get_hysteresis_threshold_range_top_limit(); }
+int TDMap::get_exp_image_bounds_max_contour_distance_px_range_bottom_limit(){ return exp_image_bounds->get_max_contour_distance_px_range_bottom_limit(); }
+int TDMap::get_exp_image_bounds_max_contour_distance_px_range_top_limit(){ return exp_image_bounds->get_max_contour_distance_px_range_top_limit(); }
+std::vector<cv::Point2i> TDMap::get_exp_image_bounds_full_boundary_polygon(){ return exp_image_bounds->get_full_boundary_polygon(); }
+std::vector<cv::Point2i> TDMap::get_exp_image_bounds_full_boundary_polygon_w_margin(){ return exp_image_bounds->get_full_boundary_polygon_w_margin(); }
 // the next 2 vectors are position-related to the ROI of the experimental image
-std::vector<cv::Point2i> TDMap::get_exp_image_bounds_roi_boundary_polygon(){ return tdmap_full_sim_super_cell->get_roi_boundary_polygon(); }
-cv::Rect TDMap::get_exp_image_bounds_roi_boundary_rect(){ return tdmap_full_sim_super_cell->get_roi_boundary_rect(); }
-cv::Mat TDMap::get_exp_image_bounds_roi_boundary_image(){ return tdmap_full_sim_super_cell->get_roi_boundary_image(); }
-std::vector<cv::Point2i> TDMap::get_exp_image_bounds_roi_boundary_polygon_w_margin(){ return tdmap_full_sim_super_cell->get_roi_boundary_polygon_w_margin(); }
-cv::Rect TDMap::get_exp_image_bounds_roi_boundary_rect_w_margin(){ return tdmap_full_sim_super_cell->get_roi_boundary_rect_w_margin(); }
-cv::Mat TDMap::get_exp_image_bounds_roi_boundary_image_w_margin(){ return tdmap_full_sim_super_cell->get_roi_boundary_image_w_margin(); }
-double TDMap::get_exp_image_bounds_full_boundary_polygon_margin_x_nm(){ return tdmap_full_sim_super_cell->get_full_boundary_polygon_margin_x_nm(); }
-int TDMap::get_exp_image_bounds_full_boundary_polygon_margin_x_px(){ return tdmap_full_sim_super_cell->get_full_boundary_polygon_margin_x_px(); }
-double TDMap::get_exp_image_bounds_full_boundary_polygon_margin_y_nm(){ return tdmap_full_sim_super_cell->get_full_boundary_polygon_margin_y_nm(); }
-int TDMap::get_exp_image_bounds_full_boundary_polygon_margin_y_px(){ return tdmap_full_sim_super_cell->get_full_boundary_polygon_margin_y_px(); }
+std::vector<cv::Point2i> TDMap::get_exp_image_bounds_roi_boundary_polygon(){ return exp_image_bounds->get_roi_boundary_polygon(); }
+cv::Rect TDMap::get_exp_image_bounds_roi_boundary_rect(){ return exp_image_bounds->get_roi_boundary_rect(); }
+cv::Mat TDMap::get_exp_image_bounds_roi_boundary_image(){ return exp_image_bounds->get_roi_boundary_image(); }
+std::vector<cv::Point2i> TDMap::get_exp_image_bounds_roi_boundary_polygon_w_margin(){ return exp_image_bounds->get_roi_boundary_polygon_w_margin(); }
+cv::Rect TDMap::get_exp_image_bounds_roi_boundary_rect_w_margin(){ return exp_image_bounds->get_roi_boundary_rect_w_margin(); }
+cv::Mat TDMap::get_exp_image_bounds_roi_boundary_image_w_margin(){ return exp_image_bounds->get_roi_boundary_image_w_margin(); }
+double TDMap::get_exp_image_bounds_full_boundary_polygon_margin_x_nm(){ return exp_image_bounds->get_full_boundary_polygon_margin_x_nm(); }
+int TDMap::get_exp_image_bounds_full_boundary_polygon_margin_x_px(){ return exp_image_bounds->get_full_boundary_polygon_margin_x_px(); }
+double TDMap::get_exp_image_bounds_full_boundary_polygon_margin_y_nm(){ return exp_image_bounds->get_full_boundary_polygon_margin_y_nm(); }
+int TDMap::get_exp_image_bounds_full_boundary_polygon_margin_y_px(){ return exp_image_bounds->get_full_boundary_polygon_margin_y_px(); }

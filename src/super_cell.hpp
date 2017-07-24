@@ -44,7 +44,7 @@
 #include "application_log.hpp"
 //#include "edge.hpp"
 
-class SuperCell : public ImageBounds, public BaseCell {
+class SuperCell : public BaseCell {
   private:
     /** Private Class methods **/
 
@@ -62,6 +62,9 @@ class SuperCell : public ImageBounds, public BaseCell {
     UnitCell* unit_cell = nullptr;
     bool _flag_unit_cell = false;
 
+    ImageBounds* image_bounds = nullptr;
+    bool _flag_image_bounds = false;
+
     /** supercell exclusive **/
     double a_min_size_nm = 0.0f;
     bool _flag_a_min_size_nm = false;
@@ -70,7 +73,7 @@ class SuperCell : public ImageBounds, public BaseCell {
     double c_min_size_nm = 0.0f;
     bool _flag_c_min_size_nm = false;
     bool _flag_min_size_nm = false;
-    
+
     int expand_factor_a = 1;
     int expand_factor_b = 1;
     int expand_factor_c = 1;
@@ -101,6 +104,7 @@ class SuperCell : public ImageBounds, public BaseCell {
 
     /* setters */
     bool set_unit_cell( UnitCell* cell );
+    bool set_image_bounds( ImageBounds* image_bounds );
 
     //overide set length from basecell
     bool set_length_a_Nanometers( double a );
