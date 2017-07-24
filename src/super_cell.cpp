@@ -45,7 +45,7 @@ bool SuperCell::update_from_unit_cell(){
       }
       const bool angle_result = update_angle_parameters_from_unit_cell();
       bool expand_result = calculate_expand_factor();
-      expand_result &= update_length_parameters_from_expand_factor();
+      expand_result &= true; //&= update_length_parameters_from_expand_factor();
       if( angle_result && expand_result ){
         const bool create_result = create_atoms_from_unit_cell();
           if( create_result ){
@@ -372,42 +372,17 @@ bool SuperCell::create_fractional_positions_atoms(){
       ( ! atom_positions.empty() )
     ){
 
-    std :: vector <double> atom_positions_x ( atom_positions.size() );
-    std :: vector <double> atom_positions_y ( atom_positions.size() );
-    std :: vector <double> atom_positions_z ( atom_positions.size() );
-
-    unsigned int i = 0;
-    for (
-        std::vector<cv::Point3d>::iterator it = atom_positions.begin() ;
-        it != atom_positions.end();
-        it++, i++
-        ){
-      cv::Point3d _atom_pos = *it;
-      atom_positions_x.at(i) = _atom_pos.x;
-      atom_positions_y.at(i) = _atom_pos.y;
-      atom_positions_z.at(i) = _atom_pos.z;
-    }
-    std::vector<double>::iterator atom_xyz_it = max_element( atom_positions_x.begin(), atom_positions_x.end());
-    max_a_atom_pos = *atom_xyz_it + cel_margin_Nanometers;
-    atom_xyz_it = min_element( atom_positions_x.begin(), atom_positions_x.end());
-    min_a_atom_pos = *atom_xyz_it - cel_margin_Nanometers;
-    atom_xyz_it = max_element( atom_positions_y.begin(), atom_positions_y.end());
-    max_b_atom_pos = *atom_xyz_it + cel_margin_Nanometers;
-    atom_xyz_it = min_element( atom_positions_y.begin(), atom_positions_y.end());
-    min_b_atom_pos = *atom_xyz_it - cel_margin_Nanometers;
-    atom_xyz_it = max_element( atom_positions_z.begin(), atom_positions_z.end());
-    max_c_atom_pos = *atom_xyz_it + cel_margin_Nanometers;
-    atom_xyz_it = min_element( atom_positions_z.begin(), atom_positions_z.end());
-    min_c_atom_pos = *atom_xyz_it - cel_margin_Nanometers;
-
-    fractional_norm_a_atom_pos = fabs( max_a_atom_pos - min_a_atom_pos );
-    fractional_norm_b_atom_pos = fabs( max_b_atom_pos - min_b_atom_pos );
-    fractional_norm_c_atom_pos = fabs( max_c_atom_pos - min_c_atom_pos );
+    fractional_norm_a_atom_pos = get_length_a_Nanometers();
+    fractional_norm_b_atom_pos = get_length_b_Nanometers();
+    fractional_norm_c_atom_pos = get_length_c_Nanometers();
     _flag_fractional_norm = true;
 
     const double fractional_factor_a_Nanometers = (1 / fractional_norm_a_atom_pos );
     const double fractional_factor_b_Nanometers = (1 / fractional_norm_b_atom_pos );
     const double fractional_factor_c_Nanometers = (1 / fractional_norm_c_atom_pos );
+const double halft_norm_a = 0.5f * get_length_a_Nanometers();
+const double halft_norm_b = 0.5f * get_length_b_Nanometers();
+const double halft_norm_c = 0.5f * get_length_c_Nanometers();
 
     for (
         std::vector<cv::Point3d>::iterator it = atom_positions.begin() ;
@@ -415,9 +390,9 @@ bool SuperCell::create_fractional_positions_atoms(){
         it++
         ){
       const cv::Point3d atom_pos = *it;
-      const double _fractional_x = (atom_pos.x - min_a_atom_pos) * fractional_factor_a_Nanometers;
-      const double _fractional_y = (atom_pos.y - min_b_atom_pos) * fractional_factor_b_Nanometers;
-      const double _fractional_z = (atom_pos.z - min_c_atom_pos) * fractional_factor_c_Nanometers;
+      const double _fractional_x = (atom_pos.x - halft_norm_a ) * fractional_factor_a_Nanometers;
+      const double _fractional_y = (atom_pos.y - halft_norm_b ) * fractional_factor_b_Nanometers;
+      const double _fractional_z = (atom_pos.z - halft_norm_c ) * fractional_factor_c_Nanometers;
       const cv::Point3d atom_fractional ( _fractional_x, _fractional_y, _fractional_z );
       atom_fractional_cell_coordinates.push_back( atom_fractional );
     }

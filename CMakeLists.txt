@@ -73,7 +73,7 @@ if (WIN32)
 
 else()
   message(status "Setting GCC flags")
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}  -fexceptions -g -fno-omit-frame-pointer -fsanitize=address -fsanitize=undefined -fsanitize=integer")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}  -fexceptions -g ") #"-fno-omit-frame-pointer -fsanitize=address -fsanitize=undefined -fsanitize=integer")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -std=c++14")
 endif(WIN32)
 

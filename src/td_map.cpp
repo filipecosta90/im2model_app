@@ -8,14 +8,13 @@ TDMap::TDMap(
     boost::process::ipstream& ostream_simgrid_buffer
     )
 {
-
   /* base unit cell info */
   unit_cell = new UnitCell();
 
   /* *
    * SuperCell
    * */
-   const double cel_margin_nm = 0.0f;
+   const double cel_margin_nm = 1.0f;
   tdmap_roi_sim_super_cell = new SuperCell( unit_cell );
   tdmap_full_sim_super_cell = new SuperCell( unit_cell );
   final_full_sim_super_cell = new SuperCell( unit_cell );
@@ -37,7 +36,7 @@ TDMap::TDMap(
   final_full_sim_super_cell->set_unit_cell( unit_cell );
 
   sim_image_properties = new BaseImage();
-  sim_image_properties->set_ignore_edge_nm( cel_margin_nm );
+  //sim_image_properties->set_ignore_edge_nm( cel_margin_nm );
   exp_image_properties = new BaseImage();
 
   sim_crystal_properties = new BaseCrystal();
@@ -85,7 +84,6 @@ TDMap::TDMap(
   set_msa_prm_name( "temporary_msa_im2model.prm" );
   set_wavimg_prm_name( "temporary_wavimg_im2model.prm" );
   set_file_name_output_image_wave_function("image" );
-
 
   set_slc_output_target_folder("slc");
   set_wav_output_target_folder("wav");

@@ -197,6 +197,7 @@ void BaseCell::form_matrix_from_miller_indices(){
       _flag_zone_axis &&
       _flag_upward_vector
     ){
+
     const double norm_uvw = cv::norm( zone_axis );
     const double norm_hkl = cv::norm( upward_vector );
 
@@ -240,7 +241,6 @@ void BaseCell::form_matrix_from_miller_indices(){
      * **/
   }
 }
-
 
 void BaseCell::print_var_state(){
   if( _flag_logger ){
@@ -310,12 +310,6 @@ std::ostream& BaseCell::output(std::ostream& stream) const {
     << "\t" << "atom_fractional_cell_coordinates.size() : "  << atom_fractional_cell_coordinates.size() << "\n"
     << "\t\t" << "_flag_atom_fractional_cell_coordinates : " << std::boolalpha << _flag_atom_fractional_cell_coordinates << "\n"
     /** .cel **/
-    << "\t" << "min_a_atom_pos : "  << min_a_atom_pos << "\n"
-    << "\t" << "max_a_atom_pos : "  << max_a_atom_pos << "\n"
-    << "\t" << "min_b_atom_pos : "  << min_b_atom_pos << "\n"
-    << "\t" << "max_b_atom_pos : "  << max_b_atom_pos << "\n"
-    << "\t" << "min_c_atom_pos : "  << min_c_atom_pos << "\n"
-    << "\t" << "max_c_atom_pos : "  << max_c_atom_pos << "\n"
     << "\t" << "fractional_norm_a_atom_pos : "  << fractional_norm_a_atom_pos << "\n"
     << "\t" << "fractional_norm_b_atom_pos : "  << fractional_norm_b_atom_pos << "\n"
     << "\t" << "fractional_norm_c_atom_pos : "  << fractional_norm_c_atom_pos << "\n"

@@ -228,7 +228,7 @@ std::ostream& CELSLC_prm::create_bin_args(std::ostream& args_stream) const {
       const int full_n_cols_width = sim_image_properties->get_full_n_cols_width();
       args_stream << " -nx " << full_n_cols_width;
     }
-    
+
     // input ny string
     if( sim_image_properties->get_flag_full_n_rows_height() ){
       const int full_n_rows_height = sim_image_properties->get_full_n_rows_height();

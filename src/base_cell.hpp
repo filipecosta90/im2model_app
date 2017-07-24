@@ -131,9 +131,6 @@ class BaseCell {
     /** .cel **/
     std::vector<cv::Point3d> atom_fractional_cell_coordinates;
     bool _flag_atom_fractional_cell_coordinates = false;
-    double min_a_atom_pos, max_a_atom_pos;
-    double min_b_atom_pos, max_b_atom_pos;
-    double min_c_atom_pos, max_c_atom_pos;
     double fractional_norm_a_atom_pos = 0.0f;
     double fractional_norm_b_atom_pos = 0.0f;
     double fractional_norm_c_atom_pos = 0.0f;
@@ -275,10 +272,10 @@ class BaseCell {
     /** getters **/
     double get_length_a_Angstroms(){ return length_a_Angstroms + 2 * cel_margin_Angstroms; }
     double get_length_b_Angstroms(){ return length_b_Angstroms + 2 * cel_margin_Angstroms; }
-    double get_length_c_Angstroms(){ return length_c_Angstroms + 2 * cel_margin_Angstroms; }
+    double get_length_c_Angstroms(){ return length_c_Angstroms; }
     double get_length_a_Nanometers(){ return length_a_Nanometers + 2 * cel_margin_Nanometers; }
     double get_length_b_Nanometers(){ return length_b_Nanometers + 2 * cel_margin_Nanometers; }
-    double get_length_c_Nanometers(){ return length_c_Nanometers + 2 * cel_margin_Nanometers; }
+    double get_length_c_Nanometers(){ return length_c_Nanometers; }
 
     /** vector t **/
     // project x axis

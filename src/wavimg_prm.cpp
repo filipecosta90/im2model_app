@@ -96,7 +96,7 @@ bool WAVIMG_prm::produce_prm ( ) {
       output_prefix_stream << "'" << output_wave_function_full_path.string() << ".dat" << "'";
       outfile <<  output_prefix_stream.str() << "\t\t! Image output file name string. Use quotation marks to secure the input including space characters." << std::endl;
       // line 7
-      outfile <<  full_n_rows_height << ", " << full_n_cols_width << "\t\t! Image output size (<ix> = horizontal , <iy> = vertical) in number of pixels." << std::endl;
+      outfile << full_n_cols_width  << ", " << full_n_rows_height << "\t\t! Image output size (<ix> = horizontal , <iy> = vertical) in number of pixels." << std::endl;
       // line 8
       outfile <<  image_data_type << ", " << image_vacuum_mean_intensity << ", " << conversion_rate << ", " <<  readout_noise_rms_amplitude << "\t\t! Flag and parameters for creating integer images with optional noise. Flag <intflg> 0 = off (default)" << std::endl;
       // line 9
