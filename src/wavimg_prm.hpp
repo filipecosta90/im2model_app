@@ -67,11 +67,11 @@ class WAVIMG_prm : public BaseBin {
     //  ! Coherence calculation model switch: 1 = averaging of coherent sub images explicit focal variation but quasi-coherent spatial envelope, 2 = averaging of coherent sub images with explicit focal and angular variation, 3 = quasi-coherent linear envelopes, 4 = Fourier-space synthesis with partially coherent TCC, 5: averaging of coherent sub images with explicit focal, angular, and frozen lattice variation)
     int switch_coherence_model = 1;
     // line 14
-    int partial_temporal_coherence_switch = 0;
+    bool partial_temporal_coherence_switch = false;
     double partial_temporal_coherence_focus_spread;
     // line 15
-    int partial_spacial_coherence_switch = 0;
-    double partial_spacial_coherence_semi_convergence_angle;
+    bool partial_spatial_coherence_switch = false;
+    double partial_spatial_coherence_semi_convergence_angle;
     // line 16
     bool mtf_simulation_switch = false;
     double k_space_scaling = 1.0f;
@@ -193,11 +193,11 @@ class WAVIMG_prm : public BaseBin {
     // setters line 13
     void set_switch_coherence_model( int coherence_model );
     // setters line 14
-    void set_partial_temporal_coherence_switch( int temporal_switch );
-    void set_partial_temporal_coherence_focus_spread( double focus_spread );
+    bool set_partial_temporal_coherence_switch( bool temporal_switch );
+    bool set_partial_temporal_coherence_focus_spread( double focus_spread );
     // setters line 15
-    void set_partial_spacial_coherence_switch( int coherence_switch );
-    void set_partial_spacial_coherence_semi_convergence_angle( double convergence_angle );
+    bool set_partial_spatial_coherence_switch( bool coherence_switch );
+    bool set_partial_spatial_coherence_semi_convergence_angle( double convergence_angle );
     // setters line 16
     bool set_mtf_simulation_switch( bool simulation_switch );
     void set_k_space_scaling( double scale );
@@ -229,16 +229,19 @@ class WAVIMG_prm : public BaseBin {
     bool set_prm_file_name( std::string filename );
 
     /**
-     * getters
+     * flag getters
      */
-
-    double get_aberration_definition( WAVIMG_prm::AberrationDefinition aberration_index, int coefficient );
-
     bool get_aberration_definition_switch( WAVIMG_prm::AberrationDefinition aberration_index );
-
+    bool get_partial_temporal_coherence_switch(){ return partial_temporal_coherence_switch;}
+    bool get_partial_spatial_coherence_switch(){ return partial_spatial_coherence_switch;}
     bool get_mtf_simulation_switch();
 
-    int get_simulation_image_spread_envelope_switch(){ return simulation_image_spread_envelope_switch; }
+    /**
+     * flag getters
+     */
+     int get_simulation_image_spread_envelope_switch(){ return simulation_image_spread_envelope_switch; }
+
+    double get_aberration_definition( WAVIMG_prm::AberrationDefinition aberration_index, int coefficient );
 
     /* Loggers */
     bool set_application_logger( ApplicationLog::ApplicationLog* logger );

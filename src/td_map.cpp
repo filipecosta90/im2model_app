@@ -126,11 +126,11 @@ TDMap::TDMap(
   // setters line 13
   _tdmap_wavimg_parameters->set_switch_coherence_model( 1 );
   // setters line 14
-  _tdmap_wavimg_parameters->set_partial_temporal_coherence_switch( 1 );
-  _tdmap_wavimg_parameters->set_partial_temporal_coherence_focus_spread( 4.0f );
+  //_tdmap_wavimg_parameters->set_partial_temporal_coherence_switch( 1 );
+  //_tdmap_wavimg_parameters->set_partial_temporal_coherence_focus_spread( 4.0f );
   // setters line 15
-  _tdmap_wavimg_parameters->set_partial_spacial_coherence_switch( 1 );
-  _tdmap_wavimg_parameters->set_partial_spacial_coherence_semi_convergence_angle( 0.2f );
+  //_tdmap_wavimg_parameters->set_partial_spacial_coherence_switch( 1 );
+  //_tdmap_wavimg_parameters->set_partial_spacial_coherence_semi_convergence_angle( 0.2f );
   // setters line 16
   // SIMULATION DEPENDENT
   // setters line 17
@@ -629,6 +629,14 @@ double TDMap::get_spherical_aberration(){
 
 bool TDMap::get_spherical_aberration_switch(){
   return _tdmap_wavimg_parameters->get_aberration_definition_switch( WAVIMG_prm::AberrationDefinition::SphericalAberration );
+}
+
+bool TDMap::get_partial_temporal_coherence_switch(){
+  return _tdmap_wavimg_parameters->get_partial_temporal_coherence_switch( );
+}
+
+bool TDMap::get_partial_spatial_coherence_switch(){
+  return _tdmap_wavimg_parameters->get_partial_spatial_coherence_switch( );
 }
 
 bool TDMap::get_mtf_switch( ){
@@ -1366,6 +1374,40 @@ bool TDMap::set_spherical_aberration ( std::string _string_cs ){
 
 bool TDMap::set_spherical_aberration_switch( bool cs_switch ){
   return _tdmap_wavimg_parameters->set_aberration_definition_switch( WAVIMG_prm::AberrationDefinition::SphericalAberration, cs_switch );
+}
+
+bool TDMap::set_partial_temporal_coherence_switch( bool tc_switch ){
+  return _tdmap_wavimg_parameters->set_partial_temporal_coherence_switch( tc_switch );
+}
+
+bool TDMap::set_partial_temporal_coherence_focus_spread ( std::string _string_fs ){
+  bool result = false;
+  try {
+    const double _fs = boost::lexical_cast<double>( _string_fs );
+  result = _tdmap_wavimg_parameters->set_partial_temporal_coherence_focus_spread( _fs );
+  }
+  catch(boost::bad_lexical_cast&  ex) {
+    // pass it up
+    boost::throw_exception( ex );
+  }
+  return result;
+}
+
+bool TDMap::set_partial_spatial_coherence_switch( bool sc_switch ){
+  return _tdmap_wavimg_parameters->set_partial_spatial_coherence_switch( sc_switch );
+}
+
+bool TDMap::set_partial_spatial_coherence_semi_convergence_angle ( std::string _string_ca ){
+  bool result = false;
+  try {
+    const double _ca = boost::lexical_cast<double>( _string_ca );
+  result = _tdmap_wavimg_parameters->set_partial_spatial_coherence_semi_convergence_angle( _ca );
+  }
+  catch(boost::bad_lexical_cast&  ex) {
+    // pass it up
+    boost::throw_exception( ex );
+  }
+  return result;
 }
 
 bool TDMap::set_mtf_switch( bool value ){

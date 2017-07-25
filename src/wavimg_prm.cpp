@@ -110,9 +110,9 @@ bool WAVIMG_prm::produce_prm ( ) {
       // line 13
       outfile <<  switch_coherence_model <<  "\t! Coherence calculation model switch: 1 = averaging of coherent sub images explicit focal variation but quasi-coherent spatial envelope, 2 = averaging of coherent sub images with explicit focal and angular variation, 3 = quasi-coherent linear envelopes, 4 = Fourier-space synthesis with partially coherent TCC, 5: averaging of coherent sub images with explicit focal, angular, and frozen lattice variation)" << std::endl;
       // line 14
-      outfile <<  partial_temporal_coherence_switch << ", " << partial_temporal_coherence_focus_spread << "\t\t! Flag and parameters for partial temporal coherence: <ptcflg> = flag (0=OFF, 1=ON), <f-spread> = focus spread (1/e) half width [nm]" << std::endl;
+      outfile <<  ( partial_temporal_coherence_switch ? "1" : "0") << ", " << partial_temporal_coherence_focus_spread << "\t\t! Flag and parameters for partial temporal coherence: <ptcflg> = flag (0=OFF, 1=ON), <f-spread> = focus spread (1/e) half width [nm]" << std::endl;
       // line 15
-      outfile <<  partial_spacial_coherence_switch << ", " << partial_spacial_coherence_semi_convergence_angle << "\t\t! Flag and parameters for partial spatial coherence: <pscflg> = flag (0=OFF, 1=ON), <s-conv> = beam convergence (1/e) half width [mrad]" << std::endl;
+      outfile <<  ( partial_spatial_coherence_switch ? "1" : "0") << ", " << partial_spatial_coherence_semi_convergence_angle << "\t\t! Flag and parameters for partial spatial coherence: <pscflg> = flag (0=OFF, 1=ON), <s-conv> = beam convergence (1/e) half width [mrad]" << std::endl;
       // line 16
       const int _mtf_swith = mtf_simulation_switch ? 1 : 0;
       outfile <<  _mtf_swith << ", " << k_space_scaling << ", \'" <<  mtf_filename << "\'\t\t! Flag and parameters for applying the detector MTF: <mtfflag> = flag (0=OFF, 1=ON), <mtf-scale> = calculation scale of the mtf = (sampling rate experiment)/(sampling rate simulation), <mtf-file> = File name string to locate the MTF data. Use quotation marks to secure the input including space characters." << std::endl;
@@ -564,21 +564,25 @@ void WAVIMG_prm::set_switch_coherence_model( int coherence_model ){
 }
 
 // setters line 14
-void WAVIMG_prm::set_partial_temporal_coherence_switch( int temporal_switch ){
+bool WAVIMG_prm::set_partial_temporal_coherence_switch( bool temporal_switch ){
   partial_temporal_coherence_switch = temporal_switch;
+  return true;
 }
 
-void WAVIMG_prm::set_partial_temporal_coherence_focus_spread( double focus_spread ){
+bool WAVIMG_prm::set_partial_temporal_coherence_focus_spread( double focus_spread ){
   partial_temporal_coherence_focus_spread = focus_spread;
+  return true;
 }
 
 // setters line 15
-void WAVIMG_prm::set_partial_spacial_coherence_switch( int coherence_switch ){
-  partial_spacial_coherence_switch = coherence_switch;
+bool WAVIMG_prm::set_partial_spatial_coherence_switch( bool coherence_switch ){
+  partial_spatial_coherence_switch = coherence_switch;
+  return true;
 }
 
-void WAVIMG_prm::set_partial_spacial_coherence_semi_convergence_angle( double convergence_angle ){
-  partial_spacial_coherence_semi_convergence_angle = convergence_angle;
+bool WAVIMG_prm::set_partial_spatial_coherence_semi_convergence_angle( double convergence_angle ){
+  partial_spatial_coherence_semi_convergence_angle = convergence_angle;
+  return true;
 }
 
 // setters line 16

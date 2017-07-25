@@ -180,6 +180,8 @@ class TDMap  : public QObject {
     double get_simulated_image_defocus_in_grid( int row, int col );
     double get_spherical_aberration();
     bool get_spherical_aberration_switch();
+    bool get_partial_temporal_coherence_switch();
+    bool get_partial_spatial_coherence_switch();
     bool get_mtf_switch( );
 
     // gui flag getters
@@ -277,6 +279,10 @@ class TDMap  : public QObject {
     bool set_envelop_parameters_vibrational_damping_azimuth_orientation_angle( double angle );
     bool set_spherical_aberration ( std::string cs );
     bool set_spherical_aberration_switch( bool cs_switch );
+    bool set_partial_temporal_coherence_switch( bool tc_switch );
+    bool set_partial_temporal_coherence_focus_spread( std::string _string_fs );
+    bool set_partial_spatial_coherence_switch( bool sc_switch );
+    bool set_partial_spatial_coherence_semi_convergence_angle ( std::string _string_ca );
     bool set_mtf_filename( std::string file_name );
     bool set_mtf_switch( bool value );
     bool set_image_correlation_matching_method( int method );

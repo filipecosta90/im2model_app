@@ -1720,6 +1720,8 @@ void MainWindow::create_box_options(){
   spherical_aberration_nm->set_fp_check_setter( 0, box3_option_5_1_1_check_setter );
   spherical_aberration_nm->set_fp_check_getter( 0, box3_option_5_1_1_check_getter );
   spherical_aberration_nm->load_check_status_from_getter( 0 );
+  /* validators */
+  spherical_aberration_nm->set_flag_validatable_double(1,true);
 
   ////////////////
   //Simulation Refinement -- envelope parameters
@@ -1779,6 +1781,45 @@ void MainWindow::create_box_options(){
   _envelope_parameters_vibrational_damping->insertChildren( envelop_parameters_vibrational_damping_isotropic_orientation_angle );
   /* validators */
   envelop_parameters_vibrational_damping_isotropic_orientation_angle->set_flag_validatable_double(1,true);
+
+
+  ////////////////
+  // Envelop parameters - temporal coherence
+  ////////////////
+  QVector<QVariant> box3_option_5_2_2 = {"Temporal coherence - focus-spread",""};
+  QVector<bool> box3_option_5_2_2_edit = {false,true};
+  boost::function<bool(std::string)> box3_function_5_2_2_setter ( boost::bind( &TDMap::set_partial_temporal_coherence_focus_spread, _core_td_map, _1 ) );
+  boost::function<bool(void)> box3_option_5_2_2_check_getter ( boost::bind( &TDMap::get_partial_temporal_coherence_switch, _core_td_map  ) );
+  boost::function<bool(bool)> box3_option_5_2_2_check_setter ( boost::bind( &TDMap::set_partial_temporal_coherence_switch, _core_td_map, _1 ) );
+  partial_temporal_coherence_focus_spread = new TreeItem ( box3_option_5_2_2 , box3_function_5_2_2_setter, box3_option_5_2_2_edit );
+  _envelope_parameters->insertChildren( partial_temporal_coherence_focus_spread );
+  /* validators */
+  partial_temporal_coherence_focus_spread->set_flag_validatable_double(1,true);
+
+  /*group options*/
+  partial_temporal_coherence_focus_spread->set_variable_name( "partial_temporal_coherence_focus_spread" );
+  partial_temporal_coherence_focus_spread->set_fp_check_setter( 0, box3_option_5_2_2_check_setter );
+  partial_temporal_coherence_focus_spread->set_fp_check_getter( 0, box3_option_5_2_2_check_getter );
+  partial_temporal_coherence_focus_spread->load_check_status_from_getter( 0 );
+
+  ////////////////
+  // Envelop parameters - spatial coherence
+  ////////////////
+  QVector<QVariant> box3_option_5_2_3 = {"Spatial coherence - semi-convergence angle",""};
+  QVector<bool> box3_option_5_2_3_edit = {false,true};
+  boost::function<bool(std::string)> box3_function_5_2_3_setter ( boost::bind( &TDMap::set_partial_spatial_coherence_semi_convergence_angle, _core_td_map, _1 ) );
+  boost::function<bool(void)> box3_option_5_2_3_check_getter ( boost::bind( &TDMap::get_partial_spatial_coherence_switch, _core_td_map  ) );
+  boost::function<bool(bool)> box3_option_5_2_3_check_setter ( boost::bind( &TDMap::set_partial_spatial_coherence_switch, _core_td_map, _1 ) );
+  partial_spatial_coherence_semi_convergence_angle = new TreeItem ( box3_option_5_2_3 , box3_function_5_2_3_setter, box3_option_5_2_3_edit );
+  _envelope_parameters->insertChildren( partial_spatial_coherence_semi_convergence_angle );
+
+  /* validators */
+  partial_spatial_coherence_semi_convergence_angle->set_flag_validatable_double(1,true);
+  /*group options*/
+  partial_spatial_coherence_semi_convergence_angle->set_variable_name( "partial_spatial_coherence_semi_convergence_angle" );
+  partial_spatial_coherence_semi_convergence_angle->set_fp_check_setter( 0, box3_option_5_2_3_check_setter );
+  partial_spatial_coherence_semi_convergence_angle->set_fp_check_getter( 0, box3_option_5_2_3_check_getter );
+  partial_spatial_coherence_semi_convergence_angle->load_check_status_from_getter( 0 );
 
   ////////////////
   //Simulation Refinement -- MTF

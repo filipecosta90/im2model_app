@@ -262,6 +262,8 @@ signals:
     TreeItem* envelop_parameters_vibrational_damping_isotropic_first_rms_amplitude = nullptr;
     TreeItem* envelop_parameters_vibrational_damping_isotropic_second_rms_amplitude = nullptr;
     TreeItem* envelop_parameters_vibrational_damping_isotropic_orientation_angle = nullptr;
+    TreeItem* partial_temporal_coherence_focus_spread = nullptr;
+    TreeItem* partial_spatial_coherence_semi_convergence_angle = nullptr;
 
     /* simulation outputs */
     TreeItem* _multislice_phase_granting_output;
