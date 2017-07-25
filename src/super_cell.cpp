@@ -38,6 +38,13 @@ bool SuperCell::set_image_bounds ( ImageBounds* bounds ){
   return true;
 }
 
+bool SuperCell::clean_for_re_run(){
+  BaseCell::clear_atom_positions();
+  super_cell_to_unit_cell_pos.clear();
+  _flag_super_cell_to_unit_cell_pos = false;
+  return true;
+}
+
 bool SuperCell::update_from_unit_cell(){
   bool result = false;
   if( _flag_unit_cell ){
@@ -47,24 +54,24 @@ bool SuperCell::update_from_unit_cell(){
         _flag_orientation_matrix
       ){
       if( _flag_atom_positions ){
-        BaseCell::clear_atom_positions();
+        clean_for_re_run();
       }
       const bool angle_result = update_angle_parameters_from_unit_cell();
       bool expand_result = calculate_expand_factor();
-      expand_result &= true; //&= update_length_parameters_from_expand_factor();
+      //  expand_result = update_length_parameters_from_expand_factor();
       if( angle_result && expand_result ){
         const bool create_result = create_atoms_from_unit_cell();
-          if( create_result ){
+        if( create_result ){
           const bool orientate_result = orientate_atoms_from_matrix();
-        //  const bool debug_xyz_result = generate_xyz_file();
-        //  std::cout << "debug_xyz_result " << std::boolalpha << debug_xyz_result << std::endl;
+          //  const bool debug_xyz_result = generate_xyz_file();
+          //  std::cout << "debug_xyz_result " << std::boolalpha << debug_xyz_result << std::endl;
           if( orientate_result ){
             const bool remove_z_result = remove_z_out_of_range_atoms();
             const bool remove_xy_result = remove_xy_out_of_range_atoms();
             const bool remove_result = remove_z_result && remove_xy_result;
             if( remove_result ){
-            const bool fractional_result = create_fractional_positions_atoms();
-            result = fractional_result;
+              const bool fractional_result = create_fractional_positions_atoms();
+              result = fractional_result;
             }
           }
           std::cout << " update_from_unit_cell result " << std::boolalpha << result << std::endl;
@@ -112,8 +119,8 @@ bool SuperCell::calculate_expand_factor(){
 
       /* method */
 
-          cv::Point3d _a,_b,_c,_d,_e,_f,_g,_h;
-          cv::Point3d _sim_a,_sim_b,_sim_c,_sim_d,_sim_e,_sim_f,_sim_g,_sim_h;
+      cv::Point3d _a,_b,_c,_d,_e,_f,_g,_h;
+      cv::Point3d _sim_a,_sim_b,_sim_c,_sim_d,_sim_e,_sim_f,_sim_g,_sim_h;
 
       const double r_a = a_min_size_nm / 2.0f;
       const double r_b = b_min_size_nm / 2.0f;
@@ -237,34 +244,34 @@ bool SuperCell::update_length_parameters_from_expand_factor(){
         // SuperCell vars
         _flag_expand_factor
       ){
-    /* method */
-    const double super_cell_length_a_Nanometers = expand_factor_a * unit_cell->get_length_a_Nanometers();
-    const double super_cell_length_b_Nanometers = expand_factor_b * unit_cell->get_length_b_Nanometers();
-    const double super_cell_length_c_Nanometers = expand_factor_c * unit_cell->get_length_c_Nanometers();
-    BaseCell::set_length_a_Nanometers( super_cell_length_a_Nanometers );
-    BaseCell::set_length_b_Nanometers( super_cell_length_b_Nanometers );
-    BaseCell::set_length_c_Nanometers( super_cell_length_c_Nanometers );
-    const double super_cell_volume = ( expand_factor_a * expand_factor_b * expand_factor_c ) * unit_cell->get_volume();
-        result = true;
-      }
-      else{
-        if( _flag_logger ){
-          std::stringstream message;
-          message << "The required vars for update_length_parameters_from_expand_factor() are not setted up.";
-          logger->logEvent( ApplicationLog::error , message.str() );
-        }
-        print_var_state();
-      }
+      /* method */
+      const double super_cell_length_a_Nanometers = expand_factor_a * unit_cell->get_length_a_Nanometers();
+      const double super_cell_length_b_Nanometers = expand_factor_b * unit_cell->get_length_b_Nanometers();
+      const double super_cell_length_c_Nanometers = expand_factor_c * unit_cell->get_length_c_Nanometers();
+      BaseCell::set_length_a_Nanometers( super_cell_length_a_Nanometers );
+      BaseCell::set_length_b_Nanometers( super_cell_length_b_Nanometers );
+      BaseCell::set_length_c_Nanometers( super_cell_length_c_Nanometers );
+      const double super_cell_volume = ( expand_factor_a * expand_factor_b * expand_factor_c ) * unit_cell->get_volume();
+      result = true;
     }
     else{
       if( _flag_logger ){
         std::stringstream message;
-        message << "The required Class POINTERS for update_length_parameters_from_expand_factor() are not setted up.";
+        message << "The required vars for update_length_parameters_from_expand_factor() are not setted up.";
         logger->logEvent( ApplicationLog::error , message.str() );
       }
       print_var_state();
     }
-    return result;
+  }
+  else{
+    if( _flag_logger ){
+      std::stringstream message;
+      message << "The required Class POINTERS for update_length_parameters_from_expand_factor() are not setted up.";
+      logger->logEvent( ApplicationLog::error , message.str() );
+    }
+    print_var_state();
+  }
+  return result;
 }
 
 /** other methods **/
@@ -274,13 +281,16 @@ bool SuperCell::create_atoms_from_unit_cell(){
       _flag_unit_cell
     ){
     if(
+
         // BaseCell vars
         unit_cell->get_flag_parsed_cif() &&
         unit_cell->get_flag_atom_positions_vec() &&
         unit_cell->get_flag_length() &&
         // SuperCell vars
         _flag_length &&
-        _flag_expand_factor
+        _flag_expand_factor &&
+        !_flag_atom_positions &&
+        !_flag_super_cell_to_unit_cell_pos
       ){
 
       /* method */
@@ -288,9 +298,9 @@ bool SuperCell::create_atoms_from_unit_cell(){
       const double unit_cell_a_nm = unit_cell->get_length_a_Nanometers();
       const double unit_cell_b_nm = unit_cell->get_length_b_Nanometers();
       const double unit_cell_c_nm = unit_cell->get_length_c_Nanometers();
-      const double center_a_padding_nm = (expand_factor_a * unit_cell_a_nm) / -2.0f;
-      const double center_b_padding_nm = (expand_factor_b * unit_cell_b_nm) / -2.0f;
-      const double center_c_padding_nm = (expand_factor_c * unit_cell_c_nm) / -2.0f;
+      const double center_a_padding_nm = ( expand_factor_a * unit_cell_a_nm ) / -2.0f;
+      const double center_b_padding_nm = ( expand_factor_b * unit_cell_b_nm ) / -2.0f;
+      const double center_c_padding_nm = ( expand_factor_c * unit_cell_c_nm ) / -2.0f;
 
       for ( size_t c_expand_pos = 0; c_expand_pos < expand_factor_c; c_expand_pos++ ){
         const double c_expand_nanometers = c_expand_pos * unit_cell_c_nm + center_c_padding_nm;
@@ -386,9 +396,9 @@ bool SuperCell::create_fractional_positions_atoms(){
     const double fractional_factor_a_Nanometers = (1 / fractional_norm_a_atom_pos );
     const double fractional_factor_b_Nanometers = (1 / fractional_norm_b_atom_pos );
     const double fractional_factor_c_Nanometers = (1 / fractional_norm_c_atom_pos );
-const double halft_norm_a = 0.5f * get_length_a_Nanometers();
-const double halft_norm_b = 0.5f * get_length_b_Nanometers();
-const double halft_norm_c = 0.5f * get_length_c_Nanometers();
+    const double halft_norm_a = 0.5f * fractional_norm_a_atom_pos;
+    const double halft_norm_b = 0.5f * fractional_norm_b_atom_pos;
+    const double halft_norm_c = 0.5f * fractional_norm_c_atom_pos;
 
     for (
         std::vector<cv::Point3d>::iterator it = atom_positions.begin() ;
@@ -655,42 +665,6 @@ bool SuperCell::set_length_c_Nanometers( double c ){
   return result;
 }
 
-bool SuperCell::set_zone_axis_u( double u){
-  const bool result = BaseCell::set_zone_axis_u( u );
-  //update_from_unit_cell();
-  return result;
-}
-
-bool SuperCell::set_zone_axis_v( double v){
-  const bool result = BaseCell::set_zone_axis_v( v );
-  update_from_unit_cell();
-  return result;
-}
-
-bool SuperCell::set_zone_axis_w( double w){
-  const bool result = BaseCell::set_zone_axis_w( w );
-  //update_from_unit_cell();
-  return result;
-}
-
-bool SuperCell::set_upward_vector_u( double u){
-  const bool result = BaseCell::set_upward_vector_u( u );
-  //update_from_unit_cell();
-  return result;
-}
-
-bool SuperCell::set_upward_vector_v( double v){
-  const bool result = BaseCell::set_upward_vector_v( v );
-  //update_from_unit_cell();
-  return result;
-}
-
-bool SuperCell::set_upward_vector_w( double w){
-  const bool result = BaseCell::set_upward_vector_w( w );
-  //update_from_unit_cell();
-  return result;
-}
-
 /* Loggers */
 bool SuperCell::set_application_logger( ApplicationLog::ApplicationLog* app_logger ){
   logger = app_logger;
@@ -727,11 +701,11 @@ std::ostream& SuperCell::output(std::ostream& stream) const {
     << "\t\t" << "_flag_expand_factor : " << std::boolalpha << _flag_expand_factor << "\n"
     << "\t" << "super_cell_to_unit_cell_pos.size() : "  << super_cell_to_unit_cell_pos.size() << "\n"
     << "\t\t" << "_flag_super_cell_to_unit_cell_pos : " << std::boolalpha << _flag_super_cell_to_unit_cell_pos << "\n";
-    stream << "\t\t" << "_flag_image_bounds : " << std::boolalpha << _flag_image_bounds << "\n";
-    if( _flag_image_bounds ){
-      stream << "ImageBounds vars:\n";
-      image_bounds->output(stream);
-    }
+  stream << "\t\t" << "_flag_image_bounds : " << std::boolalpha << _flag_image_bounds << "\n";
+  if( _flag_image_bounds ){
+    stream << "ImageBounds vars:\n";
+    image_bounds->output(stream);
+  }
   stream << "BaseCell Properties : " << "\n";
   BaseCell::output(stream);
   stream << "\t\t" << "_flag_unit_cell : " << std::boolalpha << _flag_unit_cell << "\n";

@@ -116,6 +116,11 @@ bool BaseImage::set_flag_auto_b_size( bool value ){
   return true;
 }
 
+bool BaseImage::set_flag_auto_roi_from_ignored_edge( bool value ){
+  _flag_auto_roi_from_ignored_edge = value;
+  return true;
+}
+
 bool BaseImage::set_full_image( std::string image_path ){
   if ( boost::filesystem::exists( image_path ) ){
     std::string extension = boost::filesystem::extension( image_path );
@@ -167,17 +172,18 @@ void BaseImage::set_roi(){
   if( _flag_roi_center_x &&
       _flag_roi_center_y &&
       _flag_roi_n_rows_height &&
-      _flag_roi_n_cols_width &&
-      _flag_full_image ){
+      _flag_roi_n_cols_width ) {
     const int top_left_x = roi_center_x - ( roi_n_cols_width  / 2 );
     const int top_left_y = roi_center_y - ( roi_n_rows_height / 2 );
     roi_rectangle.x = top_left_x;
     roi_rectangle.y = top_left_y;
     roi_rectangle.width = roi_n_cols_width;
     roi_rectangle.height = roi_n_rows_height;
-    roi_image = full_image( roi_rectangle );
-    _flag_roi_image = true;
     _flag_roi_rectangle = true;
+    if( _flag_full_image ){
+      roi_image = full_image( roi_rectangle );
+      _flag_roi_image = true;
+    }
   }
 }
 
@@ -185,6 +191,7 @@ bool BaseImage::set_full_n_rows_height(  int n_rows ){
   full_n_rows_height = n_rows;
   _flag_full_n_rows_height = true;
   auto_calculate_dimensions();
+  auto_calculate_ignore_edge_pixels();
   return true;
 }
 
@@ -192,6 +199,7 @@ bool BaseImage::set_full_n_cols_width( int witdth ){
   full_n_cols_width = witdth;
   _flag_full_n_cols_width = true;
   auto_calculate_dimensions();
+  auto_calculate_ignore_edge_pixels();
   return true;
 }
 
@@ -201,6 +209,7 @@ bool BaseImage::set_sampling_rate_x_nm_per_pixel( double rate_nm ){
   _flag_sampling_rate = _flag_sampling_rate_x_nm_per_pixel & _flag_sampling_rate_y_nm_per_pixel;
   // auto calculate nx
   auto_calculate_dimensions();
+  auto_calculate_ignore_edge_pixels();
   set_roi();
   return true;
 }
@@ -211,6 +220,7 @@ bool BaseImage::set_pixel_size_height_x_m( double rate_m ){
   _flag_sampling_rate = _flag_sampling_rate_x_nm_per_pixel & _flag_sampling_rate_y_nm_per_pixel;
   // auto calculate nx
   auto_calculate_dimensions();
+  auto_calculate_ignore_edge_pixels();
   set_roi();
   return true;
 }
@@ -221,6 +231,7 @@ bool BaseImage::set_sampling_rate_y_nm_per_pixel( double rate ){
   _flag_sampling_rate = _flag_sampling_rate_x_nm_per_pixel & _flag_sampling_rate_y_nm_per_pixel;
   // auto calculate ny
   auto_calculate_dimensions();
+  auto_calculate_ignore_edge_pixels();
   set_roi();
   return true;
 }
@@ -231,6 +242,7 @@ bool BaseImage::set_pixel_size_width_y_m( double rate_m ){
   _flag_sampling_rate = _flag_sampling_rate_x_nm_per_pixel & _flag_sampling_rate_y_nm_per_pixel;
   // auto calculate ny
   auto_calculate_dimensions();
+  auto_calculate_ignore_edge_pixels();
   set_roi();
   return true;
 }
@@ -240,6 +252,7 @@ bool BaseImage::set_full_nm_size_rows_b( double size ){
   full_nm_size_rows_b = size;
   _flag_full_nm_size_rows_b = true;
   auto_calculate_dimensions();
+  auto_calculate_ignore_edge_pixels();
   set_roi();
   return result;
 }
@@ -249,6 +262,7 @@ bool BaseImage::set_full_nm_size_cols_a( double size ){
   full_nm_size_cols_a = size;
   _flag_full_nm_size_cols_a = true;
   auto_calculate_dimensions();
+  auto_calculate_ignore_edge_pixels();
   set_roi();
   return result;
 }
@@ -293,13 +307,33 @@ bool BaseImage::set_ignore_edge_pixels( int pixels ){
 bool BaseImage::set_ignore_edge_nm( double ignore_nm ){
   ignore_edge_nm = ignore_nm;
   _flag_ignore_edge_nm = true;
-  if( _flag_sampling_rate ){
-    const int calculated_ignore_edge_pixels = (int) ( ignore_edge_nm / sampling_rate_x_nm_per_pixel );
-    set_ignore_edge_pixels( calculated_ignore_edge_pixels );
-  }
+  auto_calculate_ignore_edge_pixels();
+  set_roi();
   return true;
 }
 
+bool BaseImage::auto_calculate_ignore_edge_pixels(){
+  bool result = false;
+  if( _flag_auto_roi_from_ignored_edge ){
+    if( _flag_sampling_rate && _flag_ignore_edge_nm ){
+      const int calculated_ignore_edge_pixels = (int) ( ignore_edge_nm / sampling_rate_x_nm_per_pixel );
+      result = set_ignore_edge_pixels( calculated_ignore_edge_pixels );
+      if( _flag_full_n_cols_width ){
+        const int roi_cols = full_n_cols_width - 2 * ignore_edge_pixels;
+        result &= set_roi_n_cols_width( roi_cols );
+        const int center_x = full_n_cols_width / 2;
+        result &= set_roi_center_x( center_x );
+      }
+      if( _flag_full_n_rows_height ){
+        const int roi_rows = full_n_rows_height - 2 * ignore_edge_pixels;
+        result &= set_roi_n_rows_height( roi_rows );
+        const int center_y = full_n_rows_height / 2;
+        result &= set_roi_center_y( center_y );
+      }
+    }
+  }
+  return result;
+}
 
 /* Loggers */
 bool BaseImage::set_application_logger( ApplicationLog::ApplicationLog* app_logger ){
@@ -366,8 +400,8 @@ std::ostream& BaseImage::output(std::ostream& stream) const {
     << "\t" << "roi_center_y : " <<  roi_center_y << "\n"
     << "\t\t" << "_flag_roi_center_y : " << std::boolalpha << _flag_roi_center_y << "\n"
     // rectangle without the ignored edge pixels of the full image
-    << "\t" << "ignore_edge_pixels_rectangle : " <<  ignore_edge_pixels_rectangle << "\n"
-    << "\t\t" << "_flag_ignore_edge_pixels_rectangle : " << std::boolalpha << _flag_ignore_edge_pixels_rectangle << "\n"
+    << "\t" << "ignore_edge_nm : " <<  ignore_edge_nm << "\n"
+    << "\t\t" << "_flag_ignore_edge_nm : " << std::boolalpha << _flag_ignore_edge_nm << "\n"
     << "\t" << "ignore_edge_pixels : " <<  ignore_edge_pixels << "\n"
     << "\t\t" << "_flag_ignore_edge_pixels : " << std::boolalpha << _flag_ignore_edge_pixels << "\n";
   return stream;

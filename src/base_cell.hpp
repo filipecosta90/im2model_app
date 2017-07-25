@@ -99,7 +99,7 @@ class BaseCell {
     cv::Point3d vector_t;
     /** Upward vector **/
     // projected z-axis:
-    cv::Point3d upward_vector = cv::Point3d( 0.0f, 1.0f, 0.0f );
+    cv::Point3d upward_vector = cv::Point3d( 0.0f, 0.0f, 1.0f );
     double upward_vector_u = 0.0f;
     double upward_vector_v = 0.0f;
     double upward_vector_w = 1.0f;
@@ -110,7 +110,7 @@ class BaseCell {
 
     /** Zone Axis / Lattice vector **/
     // projected y-axis
-    cv::Point3d  zone_axis = cv::Point3d( 0.0f, 0.0f, 1.0f );
+    cv::Point3d  zone_axis = cv::Point3d( 0.0f, 1.0f, 0.0f );
     double zone_axis_u = 0.0f;
     double zone_axis_v = 1.0f;
     double zone_axis_w = 0.0f;
@@ -270,11 +270,11 @@ class BaseCell {
     cv::Mat get_inverse_orientation_matrix(){ return inverse_orientation_matrix; }
 
     /** getters **/
-    double get_length_a_Angstroms(){ return length_a_Angstroms + 2 * cel_margin_Angstroms; }
-    double get_length_b_Angstroms(){ return length_b_Angstroms + 2 * cel_margin_Angstroms; }
-    double get_length_c_Angstroms(){ return length_c_Angstroms; }
-    double get_length_a_Nanometers(){ return length_a_Nanometers + 2 * cel_margin_Nanometers; }
-    double get_length_b_Nanometers(){ return length_b_Nanometers + 2 * cel_margin_Nanometers; }
+    double get_length_a_Angstroms(){ return ( length_a_Angstroms + (2 * cel_margin_Angstroms) ); }
+    double get_length_b_Angstroms(){ return ( length_b_Angstroms + (2 * cel_margin_Angstroms) ); }
+    double get_length_c_Angstroms(){ return  length_c_Angstroms; }
+    double get_length_a_Nanometers(){ return ( length_a_Nanometers + (2 * cel_margin_Nanometers) ); }
+    double get_length_b_Nanometers(){ return ( length_b_Nanometers + (2 * cel_margin_Nanometers) ); }
     double get_length_c_Nanometers(){ return length_c_Nanometers; }
 
     /** vector t **/

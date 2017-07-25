@@ -282,7 +282,7 @@ void MainWindow::update_tdmap_best_match( int x,int y ){
     else{
       match_item = new QStandardItem(tr("N/A"));
     }
-        const double _simulated_image_thickness = _core_td_map->get_simulated_image_thickness_nm_in_grid(x,y);
+    const double _simulated_image_thickness = _core_td_map->get_simulated_image_thickness_nm_in_grid(x,y);
     const double _simulated_image_defocus = _core_td_map->get_simulated_image_defocus_in_grid(x,y);
 
     QStandardItemModel* model = new QStandardItemModel(3, 2,this);
@@ -376,12 +376,12 @@ void MainWindow::update_simgrid_frame(){
 }
 
 void MainWindow::update_super_cell_target_region(){
-/*  cv::Mat target_region = _core_super_cell->get_full_image();
-  this->ui->qgraphics_super_cell_edge_detection->setImage( target_region );
-*/
-this->ui->qgraphics_super_cell_edge_detection->cleanRenderAreas();
-update_super_cell_target_region_shapes();
-this->ui->qgraphics_super_cell_edge_detection->show();
+  /*  cv::Mat target_region = _core_super_cell->get_full_image();
+      this->ui->qgraphics_super_cell_edge_detection->setImage( target_region );
+      */
+  this->ui->qgraphics_super_cell_edge_detection->cleanRenderAreas();
+  update_super_cell_target_region_shapes();
+  this->ui->qgraphics_super_cell_edge_detection->show();
 }
 
 void MainWindow::update_super_cell_target_region_shapes(){
@@ -644,7 +644,16 @@ bool MainWindow::saveAs()
   return result;
 }
 
-bool MainWindow::export_TDMap(){
+
+bool MainWindow::export_TDMap_full( ){
+  return export_TDMap( false );
+}
+
+bool MainWindow::export_TDMap_cutted( ){
+  return export_TDMap( true );
+}
+
+bool MainWindow::export_TDMap( bool cut_margin ){
   // returns false if no settings were saved
   bool result = false;
   if( _core_td_map ){
@@ -663,9 +672,15 @@ bool MainWindow::export_TDMap(){
       }
       else{
         QString tdmap_filename = dialog.selectedFiles().first();
-        result = _core_td_map->export_sim_grid(  tdmap_filename.toStdString() );
+        result = _core_td_map->export_sim_grid(  tdmap_filename.toStdString() , cut_margin );
+        if( result ){
+          ui->statusBar->showMessage(tr("TDMap correctly exported to file: " ) + tdmap_filename , 2000);
+        }
       }
     }
+  }
+  if( !result ){
+    ui->statusBar->showMessage(tr("Error while exporting TDMap") );
   }
   return result;
 }
@@ -751,10 +766,14 @@ void MainWindow::createActions(){
 
   QMenu *tdmapMenu = ui->menuBar->addMenu(tr("&TD Map"));
   //QToolBar *fileToolBar = addToolBar(tr("File"));
-  QAction *exportTDMap = tdmapMenu->addAction( tr("&Export"), this , &MainWindow::export_TDMap );
+  QAction *exportTDMap_cut = tdmapMenu->addAction( tr("&Export "), this , &MainWindow::export_TDMap_cutted );
   // newAct->setShortcuts(QKeySequence::);
   newAct->setStatusTip(tr("Export the current TD Map"));
-  tdmapMenu->addAction(exportTDMap);
+  tdmapMenu->addAction( exportTDMap_cut );
+  QAction *exportTDMap_mrg = tdmapMenu->addAction( tr("&Export with super-cell margins"), this , &MainWindow::export_TDMap_full );
+  // newAct->setShortcuts(QKeySequence::);
+  newAct->setStatusTip(tr("Export the current TD Map with super-cell margin"));
+  tdmapMenu->addAction( exportTDMap_mrg );
 
 }
 
@@ -1097,7 +1116,7 @@ void MainWindow::create_box_options(){
   boost::function<bool(std::string)> box1_function_2_2 ( boost::bind( &TDMap::set_exp_image_properties_sampling_rate_y_nm_per_pixel,_core_td_map, _1 ) );
 
   experimental_sampling_rate = new TreeItem ( box1_option_2  );
-   experimental_sampling_rate_x = new TreeItem ( box1_option_2_1 , box1_function_2_1, box1_option_2_1_edit );
+  experimental_sampling_rate_x = new TreeItem ( box1_option_2_1 , box1_function_2_1, box1_option_2_1_edit );
   experimental_sampling_rate_y = new TreeItem ( box1_option_2_2 , box1_function_2_2, box1_option_2_2_edit );
   experimental_image_root->insertChildren( experimental_sampling_rate );
   experimental_sampling_rate->insertChildren( experimental_sampling_rate_x );
@@ -1141,7 +1160,7 @@ void MainWindow::create_box_options(){
   QVector<bool> box1_option_3_1_2_edit = {false,true};
   boost::function<bool(std::string)> box1_function_3_1_2 ( boost::bind( &TDMap::set_exp_image_properties_roi_center_y,_core_td_map, _1 ) );
 
- experimental_roi_center = new TreeItem ( box1_option_3_1  );
+  experimental_roi_center = new TreeItem ( box1_option_3_1  );
   experimental_roi_center_x = new TreeItem ( box1_option_3_1_1 , box1_function_3_1_1, box1_option_3_1_1_edit );
   connect( experimental_roi_center_x, SIGNAL(dataChanged( int )), this, SLOT( update_roi_experimental_image_frame() ) );
   connect( experimental_roi_center_x, SIGNAL(dataChanged( int )), this, SLOT( update_roi_full_experimental_image_frame() ) );
@@ -1168,7 +1187,7 @@ void MainWindow::create_box_options(){
   experimental_roi_center_x->set_validator_int_top(1, box1_function_3_1_1_validator_top );
 
   experimental_roi_center_y->set_flag_validatable_int(1,true);
-    boost::function<int(void)> box1_function_3_1_2_validator_bot ( boost::bind( &TDMap::get_experimental_roi_center_y_bottom_limit,_core_td_map ) );
+  boost::function<int(void)> box1_function_3_1_2_validator_bot ( boost::bind( &TDMap::get_experimental_roi_center_y_bottom_limit,_core_td_map ) );
   boost::function<int(void)> box1_function_3_1_2_validator_top ( boost::bind( &TDMap::get_experimental_roi_center_y_top_limit,_core_td_map ) );
   experimental_roi_center_y->set_validator_int_top(1, box1_function_3_1_2_validator_top );
   experimental_roi_center_y->set_validator_int_bottom(1, box1_function_3_1_2_validator_bot );
@@ -1178,7 +1197,7 @@ void MainWindow::create_box_options(){
   ////////////////
 
   QVector<QVariant> box1_option_3_2 = {"Dimensions",""};
-experimental_roi_dimensions = new TreeItem ( box1_option_3_2  );
+  experimental_roi_dimensions = new TreeItem ( box1_option_3_2  );
   experimental_roi->insertChildren( experimental_roi_dimensions );
 
   ////////////////
@@ -1188,9 +1207,9 @@ experimental_roi_dimensions = new TreeItem ( box1_option_3_2  );
   experimental_roi_dimensions_width  = new TreeItem ( box1_option_3_2_1 );
   experimental_roi_dimensions->insertChildren( experimental_roi_dimensions_width );
 
-  QVector<QVariant> box1_option_3_2_1_1 = {"<ny>",""};
+  QVector<QVariant> box1_option_3_2_1_1 = {"<nx>",""};
   QVector<bool> box1_option_3_2_1_1_edit = {false,true};
-  boost::function<bool(std::string)> box1_function_3_2_1_1 ( boost::bind( &TDMap::set_ny_size_width,_core_td_map, _1 ) );
+  boost::function<bool(std::string)> box1_function_3_2_1_1 ( boost::bind( &TDMap::set_nx_size_width,_core_td_map, _1 ) );
   experimental_roi_dimensions_width_px = new TreeItem ( box1_option_3_2_1_1 , box1_function_3_2_1_1 , box1_option_3_2_1_1_edit );
   connect( experimental_roi_dimensions_width_px, SIGNAL(dataChanged( int )), this, SLOT( update_roi_experimental_image_frame() ) );
   connect( experimental_roi_dimensions_width_px, SIGNAL(dataChanged( int )), this, SLOT( update_roi_full_experimental_image_frame() ) );
@@ -1198,7 +1217,7 @@ experimental_roi_dimensions = new TreeItem ( box1_option_3_2  );
 
   QVector<QVariant> box1_option_3_2_1_2 = {"nm",""};
   QVector<bool> box1_option_3_2_1_2_edit = {false,false};
-  boost::function<double(void)> box1_function_3_2_1_2 ( boost::bind( &TDMap::get_exp_image_properties_roi_ny_size_width_nm,_core_td_map ) );
+  boost::function<double(void)> box1_function_3_2_1_2 ( boost::bind( &TDMap::get_exp_image_properties_roi_nx_size_width_nm,_core_td_map ) );
   experimental_roi_dimensions_width_nm = new TreeItem ( box1_option_3_2_1_2  );
   experimental_roi_dimensions_width_nm->set_fp_data_getter_double_vec( 1, box1_function_3_2_1_2 );
   experimental_roi_dimensions_width->insertChildren( experimental_roi_dimensions_width_nm );
@@ -1211,9 +1230,9 @@ experimental_roi_dimensions = new TreeItem ( box1_option_3_2  );
   experimental_roi_dimensions_height  = new TreeItem ( box1_option_3_2_2 );
   experimental_roi_dimensions->insertChildren( experimental_roi_dimensions_height );
 
-    QVector<QVariant> box1_option_3_2_2_1 = {"<nx>",""};
-    QVector<bool> box1_option_3_2_2_1_edit = {false,true};
-    boost::function<bool(std::string)> box1_function_3_2_2_1 ( boost::bind( &TDMap::set_nx_size_height,_core_td_map, _1 ) );
+  QVector<QVariant> box1_option_3_2_2_1 = {"<ny>",""};
+  QVector<bool> box1_option_3_2_2_1_edit = {false,true};
+  boost::function<bool(std::string)> box1_function_3_2_2_1 ( boost::bind( &TDMap::set_ny_size_height,_core_td_map, _1 ) );
   experimental_roi_dimensions_height_px = new TreeItem ( box1_option_3_2_2_1 , box1_function_3_2_2_1, box1_option_3_2_2_1_edit );
   connect( experimental_roi_dimensions_height_px, SIGNAL(dataChanged( int )), this, SLOT( update_roi_experimental_image_frame() ) );
   connect( experimental_roi_dimensions_height_px, SIGNAL(dataChanged( int )), this, SLOT( update_roi_full_experimental_image_frame() ) );
@@ -1221,7 +1240,7 @@ experimental_roi_dimensions = new TreeItem ( box1_option_3_2  );
 
   QVector<QVariant> box1_option_3_2_2_2 = {"nm",""};
   QVector<bool> box1_option_3_2_2_2_edit = {false,false};
-  boost::function<double(void)> box1_function_3_2_2_2 ( boost::bind( &TDMap::get_exp_image_properties_roi_nx_size_height_nm,_core_td_map ) );
+  boost::function<double(void)> box1_function_3_2_2_2 ( boost::bind( &TDMap::get_exp_image_properties_roi_ny_size_height_nm,_core_td_map ) );
   experimental_roi_dimensions_height_nm = new TreeItem ( box1_option_3_2_2_2 );
   experimental_roi_dimensions_height_nm->set_fp_data_getter_double_vec( 1, box1_function_3_2_2_2 );
   experimental_roi_dimensions_height->insertChildren( experimental_roi_dimensions_height_nm );
@@ -1517,15 +1536,15 @@ experimental_roi_dimensions = new TreeItem ( box1_option_3_2  );
   // 2D variation map - > defocus - > user estimation
   ////////////////
   /*
-  QVector<QVariant> box3_option_0_2_1 = {"Estimated nm",""};
-  QVector<bool> box3_option_0_2_1_edit = {false,true};
-  boost::function<bool(std::string)> box3_function_0_2_1 ( boost::bind( &TDMap::set_defocus_user_estimated_nm, _core_td_map, _1 ) );
-  _parameter_variation_map_defocus_estimated_nm  = new TreeItem ( box3_option_0_2_1, box3_function_0_2_1, box3_option_0_2_1_edit  );
-  _parameter_variation_map_defocous->insertChildren( _parameter_variation_map_defocus_estimated_nm );
+     QVector<QVariant> box3_option_0_2_1 = {"Estimated nm",""};
+     QVector<bool> box3_option_0_2_1_edit = {false,true};
+     boost::function<bool(std::string)> box3_function_0_2_1 ( boost::bind( &TDMap::set_defocus_user_estimated_nm, _core_td_map, _1 ) );
+     _parameter_variation_map_defocus_estimated_nm  = new TreeItem ( box3_option_0_2_1, box3_function_0_2_1, box3_option_0_2_1_edit  );
+     _parameter_variation_map_defocous->insertChildren( _parameter_variation_map_defocus_estimated_nm );
 
-    // validators
-    _parameter_variation_map_defocus_estimated_nm->set_flag_validatable_double(1,true);
-*/
+  // validators
+  _parameter_variation_map_defocus_estimated_nm->set_flag_validatable_double(1,true);
+  */
 
   ////////////////
   //Defocus range -- Samples
@@ -1725,41 +1744,41 @@ experimental_roi_dimensions = new TreeItem ( box1_option_3_2  );
 
   _envelope_parameters->insertChildren( _envelope_parameters_vibrational_damping );
 
-//  bool set_envelop_parameters_vibrational_damping_anisotropic_second_rms_amplitude( double amplitude );
-//  bool set_envelop_parameters_vibrational_damping_azimuth_orientation_angle( double angle );
+  //  bool set_envelop_parameters_vibrational_damping_anisotropic_second_rms_amplitude( double amplitude );
+  //  bool set_envelop_parameters_vibrational_damping_azimuth_orientation_angle( double angle );
 
-////////////////
-// Image spread -- first rms (nm)
-////////////////
-QVector<QVariant> box3_option_5_2_1_1 = {"First rms (nm)",""};
-QVector<bool> box3_option_5_2_1_1_edit = {false,true};
-boost::function<bool(double)> box3_function_5_2_1_1 ( boost::bind( &TDMap::set_envelop_parameters_vibrational_damping_isotropic_one_rms_amplitude, _core_td_map, _1 ) );
-envelop_parameters_vibrational_damping_isotropic_first_rms_amplitude = new TreeItem ( box3_option_5_2_1_1 , box3_function_5_2_1_1, box3_option_5_2_1_1_edit );
-_envelope_parameters_vibrational_damping->insertChildren( envelop_parameters_vibrational_damping_isotropic_first_rms_amplitude );
-/* validators */
-envelop_parameters_vibrational_damping_isotropic_first_rms_amplitude->set_flag_validatable_double(1,true);
+  ////////////////
+  // Image spread -- first rms (nm)
+  ////////////////
+  QVector<QVariant> box3_option_5_2_1_1 = {"First rms (nm)",""};
+  QVector<bool> box3_option_5_2_1_1_edit = {false,true};
+  boost::function<bool(double)> box3_function_5_2_1_1 ( boost::bind( &TDMap::set_envelop_parameters_vibrational_damping_isotropic_one_rms_amplitude, _core_td_map, _1 ) );
+  envelop_parameters_vibrational_damping_isotropic_first_rms_amplitude = new TreeItem ( box3_option_5_2_1_1 , box3_function_5_2_1_1, box3_option_5_2_1_1_edit );
+  _envelope_parameters_vibrational_damping->insertChildren( envelop_parameters_vibrational_damping_isotropic_first_rms_amplitude );
+  /* validators */
+  envelop_parameters_vibrational_damping_isotropic_first_rms_amplitude->set_flag_validatable_double(1,true);
 
-    ////////////////
-    // Image spread -- second rms (nm)
-    ////////////////
-    QVector<QVariant> box3_option_5_2_1_2 = {"Second rms (nm)",""};
-    QVector<bool> box3_option_5_2_1_2_edit = {false,true};
-    boost::function<bool(double)> box3_function_5_2_1_2 ( boost::bind( &TDMap::set_envelop_parameters_vibrational_damping_anisotropic_second_rms_amplitude, _core_td_map, _1 ) );
-    envelop_parameters_vibrational_damping_isotropic_second_rms_amplitude = new TreeItem ( box3_option_5_2_1_2 , box3_function_5_2_1_2, box3_option_5_2_1_2_edit );
-    _envelope_parameters_vibrational_damping->insertChildren( envelop_parameters_vibrational_damping_isotropic_second_rms_amplitude );
-    /* validators */
-    envelop_parameters_vibrational_damping_isotropic_second_rms_amplitude->set_flag_validatable_double(1,true);
+  ////////////////
+  // Image spread -- second rms (nm)
+  ////////////////
+  QVector<QVariant> box3_option_5_2_1_2 = {"Second rms (nm)",""};
+  QVector<bool> box3_option_5_2_1_2_edit = {false,true};
+  boost::function<bool(double)> box3_function_5_2_1_2 ( boost::bind( &TDMap::set_envelop_parameters_vibrational_damping_anisotropic_second_rms_amplitude, _core_td_map, _1 ) );
+  envelop_parameters_vibrational_damping_isotropic_second_rms_amplitude = new TreeItem ( box3_option_5_2_1_2 , box3_function_5_2_1_2, box3_option_5_2_1_2_edit );
+  _envelope_parameters_vibrational_damping->insertChildren( envelop_parameters_vibrational_damping_isotropic_second_rms_amplitude );
+  /* validators */
+  envelop_parameters_vibrational_damping_isotropic_second_rms_amplitude->set_flag_validatable_double(1,true);
 
-    ////////////////
-    // Image spread -- orientation angle
-    ////////////////
-    QVector<QVariant> box3_option_5_2_1_3 = {"Orientation angle",""};
-    QVector<bool> box3_option_5_2_1_3_edit = {false,true};
-    boost::function<bool(double)> box3_function_5_2_1_3 ( boost::bind( &TDMap::set_envelop_parameters_vibrational_damping_azimuth_orientation_angle, _core_td_map, _1 ) );
-    envelop_parameters_vibrational_damping_isotropic_orientation_angle = new TreeItem ( box3_option_5_2_1_3 , box3_function_5_2_1_3, box3_option_5_2_1_3_edit );
-    _envelope_parameters_vibrational_damping->insertChildren( envelop_parameters_vibrational_damping_isotropic_orientation_angle );
-    /* validators */
-    envelop_parameters_vibrational_damping_isotropic_orientation_angle->set_flag_validatable_double(1,true);
+  ////////////////
+  // Image spread -- orientation angle
+  ////////////////
+  QVector<QVariant> box3_option_5_2_1_3 = {"Orientation angle",""};
+  QVector<bool> box3_option_5_2_1_3_edit = {false,true};
+  boost::function<bool(double)> box3_function_5_2_1_3 ( boost::bind( &TDMap::set_envelop_parameters_vibrational_damping_azimuth_orientation_angle, _core_td_map, _1 ) );
+  envelop_parameters_vibrational_damping_isotropic_orientation_angle = new TreeItem ( box3_option_5_2_1_3 , box3_function_5_2_1_3, box3_option_5_2_1_3_edit );
+  _envelope_parameters_vibrational_damping->insertChildren( envelop_parameters_vibrational_damping_isotropic_orientation_angle );
+  /* validators */
+  envelop_parameters_vibrational_damping_isotropic_orientation_angle->set_flag_validatable_double(1,true);
 
   ////////////////
   //Simulation Refinement -- MTF

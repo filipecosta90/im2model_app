@@ -14,28 +14,22 @@ TDMap::TDMap(
   /* *
    * SuperCell
    * */
-   const double cel_margin_nm = 0.0f;
+  const double cel_margin_nm = 1.0f;
   tdmap_roi_sim_super_cell = new SuperCell( unit_cell );
   tdmap_full_sim_super_cell = new SuperCell( unit_cell );
   final_full_sim_super_cell = new SuperCell( unit_cell );
 
-  tdmap_roi_sim_super_cell->set_unit_cell( unit_cell );
   tdmap_roi_sim_super_cell->set_cel_filename( "tdmap_roi.cel" );
   tdmap_roi_sim_super_cell->set_xyz_filename( "tdmap_roi.xyz" );
   tdmap_roi_sim_super_cell->set_cel_margin_nm( cel_margin_nm );
-
   // use cel format
-  //tdmap_roi_sim_super_cell->set_cel_format( true );
-  tdmap_full_sim_super_cell->set_unit_cell( unit_cell );
-  final_full_sim_super_cell->set_unit_cell( unit_cell );
 
   sim_image_properties = new BaseImage();
-  //sim_image_properties->set_ignore_edge_nm( cel_margin_nm );
   exp_image_properties = new BaseImage();
 
   exp_image_bounds = new ImageBounds();
   exp_image_bounds->set_base_image( exp_image_properties );
-final_full_sim_super_cell->set_image_bounds( exp_image_bounds );
+  final_full_sim_super_cell->set_image_bounds( exp_image_bounds );
 
   sim_crystal_properties = new BaseCrystal();
 
@@ -49,6 +43,11 @@ final_full_sim_super_cell->set_image_bounds( exp_image_bounds );
 
   sim_image_properties->set_flag_auto_n_rows( true );
   sim_image_properties->set_flag_auto_n_cols( true );
+
+  sim_image_properties->set_flag_auto_roi_from_ignored_edge( true );
+
+  sim_image_properties->set_ignore_edge_nm( cel_margin_nm );
+
 
   // set pointers for celslc
   _tdmap_celslc_parameters->set_unit_cell ( unit_cell );
@@ -348,8 +347,8 @@ bool TDMap::run_tdmap(){
         const bool cel_generation = tdmap_roi_sim_super_cell->generate_super_cell_file();
         tdmap_roi_sim_super_cell->generate_xyz_file();
         if( cel_generation ){
-        _flag_runned_tdmap_celslc = _tdmap_celslc_parameters->call_boost_bin();
-      }
+          _flag_runned_tdmap_celslc = _tdmap_celslc_parameters->call_boost_bin();
+        }
         emit TDMap_ended_celslc( _flag_runned_tdmap_celslc );
       }
       _celslc_stage_ok = _flag_runned_tdmap_celslc;
@@ -558,8 +557,8 @@ bool TDMap::run_tdmap(){
   return _simulation_status;
 }
 
-bool TDMap::export_sim_grid( std::string sim_grid_file_name_image ){
-  return _td_map_simgrid->export_sim_grid( sim_grid_file_name_image );
+bool TDMap::export_sim_grid( std::string sim_grid_file_name_image, bool cut_margin ){
+  return _td_map_simgrid->export_sim_grid( sim_grid_file_name_image, cut_margin );
 }
 
 // gui getters
@@ -997,7 +996,7 @@ bool TDMap::set_exp_image_properties_sampling_rate_y_nm_per_pixel( std::string s
   return result;
 }
 
-bool TDMap::set_ny_size_width( std::string s_ny ){
+bool TDMap::set_ny_size_height( std::string s_ny ){
   bool result = false;
   try {
     const double ny = boost::lexical_cast<double>( s_ny );
@@ -1010,7 +1009,7 @@ bool TDMap::set_ny_size_width( std::string s_ny ){
   return result;
 }
 
-bool TDMap::set_nx_size_height( std::string s_nx ){
+bool TDMap::set_nx_size_width( std::string s_nx ){
   bool result = false;
   try {
     const double nx = boost::lexical_cast<double>( s_nx );
@@ -1302,8 +1301,8 @@ bool TDMap::set_refinement_definition_method ( int method ){
 bool TDMap::set_envelop_parameters_vibrational_damping_method ( int method ){
   bool result = false;
   if( _tdmap_wavimg_parameters != nullptr ){
-   _tdmap_wavimg_parameters->set_simulation_image_spread_envelope_switch( method );
-   result = true;
+    _tdmap_wavimg_parameters->set_simulation_image_spread_envelope_switch( method );
+    result = true;
   }
   return result;
 }
@@ -1338,7 +1337,7 @@ bool TDMap::set_envelop_parameters_vibrational_damping_azimuth_orientation_angle
 int TDMap::get_envelop_parameters_vibrational_damping_method(){
   int result = WAVIMG_prm::EnvelopeVibrationalDamping::Deactivated;
   if( _tdmap_wavimg_parameters != nullptr ){
-     result = _tdmap_wavimg_parameters->get_simulation_image_spread_envelope_switch( );
+    result = _tdmap_wavimg_parameters->get_simulation_image_spread_envelope_switch( );
   }
   return result;
 }
@@ -1651,19 +1650,19 @@ cv::Rect TDMap::get_exp_image_properties_roi_rectangle(){
   return exp_image_properties->get_roi_rectangle();
 }
 
-double TDMap::get_exp_image_properties_full_nx_size_height_nm(){
+double TDMap::get_exp_image_properties_full_ny_size_height_nm(){
   return exp_image_properties->get_full_n_rows_height_nm();
 }
 
-double TDMap::get_exp_image_properties_full_ny_size_width_nm(){
+double TDMap::get_exp_image_properties_full_nx_size_width_nm(){
   return exp_image_properties->get_full_n_cols_width_nm();
 }
 
-double TDMap::get_exp_image_properties_roi_nx_size_height_nm(){
+double TDMap::get_exp_image_properties_roi_ny_size_height_nm(){
   return exp_image_properties->get_roi_n_rows_height_nm();
 }
 
-double TDMap::get_exp_image_properties_roi_ny_size_width_nm(){
+double TDMap::get_exp_image_properties_roi_nx_size_width_nm(){
   return exp_image_properties->get_roi_n_cols_width_nm();
 }
 

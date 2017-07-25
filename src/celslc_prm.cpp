@@ -211,9 +211,9 @@ std::ostream& CELSLC_prm::create_bin_args(std::ostream& args_stream) const {
       args_stream << " -cel \""<< sim_super_cell->get_cel_path() << "\"";
     }
     else{
-    if( sim_super_cell->get_flag_cif_format() ){
-      args_stream << " -cif \"" << sim_super_cell->get_cif_path() << "\"";
-    }
+      if( sim_super_cell->get_flag_cif_format() ){
+        args_stream << " -cif \"" << sim_super_cell->get_cif_path() << "\"";
+      }
     }
     const std::string slc_file_name_prefix = sim_crystal_properties->get_slc_file_name_prefix();
 
@@ -241,19 +241,19 @@ std::ostream& CELSLC_prm::create_bin_args(std::ostream& args_stream) const {
       args_stream << " -ht " << ht_accelaration_voltage;
     }
     if(
-        sim_super_cell->get_flag_cif_format() &&
+        //  sim_super_cell->get_flag_cif_format() &&
         sim_super_cell->get_flag_zone_axis() &&
         sim_super_cell->get_flag_upward_vector() &&
         sim_super_cell->get_flag_length()
       ){
+      const bool _flag_cif = sim_super_cell->get_flag_cif_format();
+      const double zone_axis_u = _flag_cif ? sim_super_cell->get_zone_axis_u() : 0.0f;
+      const double zone_axis_v = _flag_cif ? sim_super_cell->get_zone_axis_v() : 1.0f;
+      const double zone_axis_w = _flag_cif ? sim_super_cell->get_zone_axis_w() : 0.0f;
 
-      const double zone_axis_u = sim_super_cell->get_zone_axis_u();
-      const double zone_axis_v = sim_super_cell->get_zone_axis_v();
-      const double zone_axis_w = sim_super_cell->get_zone_axis_w();
-
-      const double upward_vector_u = sim_super_cell->get_upward_vector_u();
-      const double upward_vector_v = sim_super_cell->get_upward_vector_v();
-      const double upward_vector_w = sim_super_cell->get_upward_vector_w();
+      const double upward_vector_u = _flag_cif ? sim_super_cell->get_upward_vector_u() : 0.0f;
+      const double upward_vector_v = _flag_cif ? sim_super_cell->get_upward_vector_v() : 0.0f;
+      const double upward_vector_w = _flag_cif ? sim_super_cell->get_upward_vector_w() : 1.0f;
 
       const double super_cell_size_a = sim_super_cell->get_length_a_Nanometers();
       const double super_cell_size_b = sim_super_cell->get_length_b_Nanometers();
@@ -261,7 +261,7 @@ std::ostream& CELSLC_prm::create_bin_args(std::ostream& args_stream) const {
 
       args_stream << " -prj " << (float)  upward_vector_u << "," << (float)  upward_vector_v << "," << (float) upward_vector_w << ","
 
-      << (float) zone_axis_u  << "," << (float) zone_axis_v << "," << (float) zone_axis_w << ","
+        << (float) zone_axis_u  << "," << (float) zone_axis_v << "," << (float) zone_axis_w << ","
 
         << (float) super_cell_size_a << "," << (float) super_cell_size_b << "," << (float) super_cell_size_c;
     }
@@ -373,21 +373,21 @@ bool CELSLC_prm::call_boost_bin(){
         _child_exit_code = c.exit_code();
       }
       bool _exit_sucess_flag;
-      #if defined(BOOST_WINDOWS_API)
+#if defined(BOOST_WINDOWS_API)
       if( _flag_logger ){
         std::stringstream message;
         message << "(EXIT_SUCCESS == _child_exit_code) "<< (EXIT_SUCCESS == _child_exit_code);
         logger->logEvent( ApplicationLog::notification , message.str() );
       }
       _exit_sucess_flag = ((EXIT_SUCCESS == _child_exit_code));
-      #elif defined(BOOST_POSIX_API)
+#elif defined(BOOST_POSIX_API)
       if( _flag_logger ){
         std::stringstream message;
         message << "(EXIT_SUCCESS == WEXITSTATUS(_child_exit_code)) "<< (EXIT_SUCCESS == WEXITSTATUS(_child_exit_code));
         logger->logEvent( ApplicationLog::notification , message.str() );
       }
       _exit_sucess_flag = ((EXIT_SUCCESS == WEXITSTATUS(_child_exit_code)));
-      #endif
+#endif
       if( _error_code ){
         if( _flag_logger ){
           std::stringstream message;

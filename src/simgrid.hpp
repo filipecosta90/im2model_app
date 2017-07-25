@@ -103,7 +103,7 @@ class SimGrid {
   public:
 
     SimGrid( boost::process::ipstream& async_io_buffer_out );
-    bool export_sim_grid( std::string filename );
+    bool export_sim_grid( std::string filename , bool cut_margin = false );
 
     /** getters **/
 

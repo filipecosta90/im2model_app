@@ -244,77 +244,90 @@ bool UnitCell::populate_symetry_equiv_pos_as_xyz( std::map<std::string,std::vect
 }
 
 bool UnitCell::create_atoms_from_site_and_symetry(){
-  int distinct = 0;
-  for( int atom_site_pos = 0 ; atom_site_pos < atoms_site_type_symbols.size(); atom_site_pos++ ) {
-    distinct++;
-    const double fract_x = atoms_site_fract_x.at(atom_site_pos);
-    const double fract_y = atoms_site_fract_y.at(atom_site_pos);
-    const double fract_z = atoms_site_fract_z.at(atom_site_pos);
-    const std::string atom_site_type_symbol = atoms_site_type_symbols.at(atom_site_pos);
-    const double atom_occupancy = atoms_site_occupancy.at(atom_site_pos);
-    const double debye_waller_factor = 0.01f;
-    std::cout << "searching for "<<  atom_site_type_symbol << " in chem DB of size " << chem_database.size() << std::endl;
-    Atom_Info atom_info = chem_database.get_atom_info( atom_site_type_symbol );
-    double atom_radious = atom_info.empiricalRadius_Nanometers();
-    std::string atom_type_symbol = atom_info.symbol();
-    std::cout << "Atom symbol " << atom_type_symbol << std::endl;
-    std::cout << "Atom occupancy " << atom_occupancy << std::endl;
-    std::cout << "Atom radious " << atom_radious << std::endl;
-    cv::Vec4d cpk_color = atom_info.cpkColor();
+  bool result = false;
+  if(
+      ( ! atoms_site_type_symbols.empty() ) &&
+      ( atoms_site_fract_x.size() == atoms_site_type_symbols.size() ) &&
+      ( atoms_site_fract_y.size() == atoms_site_type_symbols.size() ) &&
+      ( atoms_site_fract_z.size() == atoms_site_type_symbols.size() ) &&
+      ( atoms_site_fract_z.size() == atoms_site_occupancy.size() ) &&
+      // BaseCell vars
+      _flag_length
+    ){
+    int distinct = 0;
+    for( int atom_site_pos = 0 ; atom_site_pos < atoms_site_type_symbols.size(); atom_site_pos++ ) {
+      distinct++;
+      const double fract_x = atoms_site_fract_x.at(atom_site_pos);
+      const double fract_y = atoms_site_fract_y.at(atom_site_pos);
+      const double fract_z = atoms_site_fract_z.at(atom_site_pos);
+      const std::string atom_site_type_symbol = atoms_site_type_symbols.at(atom_site_pos);
+      const double atom_occupancy = atoms_site_occupancy.at(atom_site_pos);
+      const double debye_waller_factor = 0.01f;
+      Atom_Info atom_info = chem_database.get_atom_info( atom_site_type_symbol );
+      double atom_radious = atom_info.empiricalRadius_Nanometers();
+      std::string atom_type_symbol = atom_info.symbol();
+      cv::Vec4d cpk_color = atom_info.cpkColor();
+      for( int value_list_pos = 0; value_list_pos < symmetry_equiv_pos_as_x.size(); value_list_pos++ ) {
+        std::string symetry_x = symmetry_equiv_pos_as_x.at(value_list_pos);
+        std::string symetry_y = symmetry_equiv_pos_as_y.at(value_list_pos);
+        std::string symetry_z = symmetry_equiv_pos_as_z.at(value_list_pos);
+        double temp_a = symbCalc( symetry_x , fract_x, fract_y, fract_z);
+        double temp_b = symbCalc( symetry_y , fract_x, fract_y, fract_z);
+        double temp_c = symbCalc( symetry_z , fract_x, fract_y, fract_z);
 
-    for( int value_list_pos = 0; value_list_pos < symmetry_equiv_pos_as_x.size(); value_list_pos++ ) {
-      std::string symetry_x = symmetry_equiv_pos_as_x.at(value_list_pos);
-      std::string symetry_y = symmetry_equiv_pos_as_y.at(value_list_pos);
-      std::string symetry_z = symmetry_equiv_pos_as_z.at(value_list_pos);
-      double temp_a = symbCalc( symetry_x , fract_x, fract_y, fract_z);
-      double temp_b = symbCalc( symetry_y , fract_x, fract_y, fract_z);
-      double temp_c = symbCalc( symetry_z , fract_x, fract_y, fract_z);
+        if  ( temp_a > 1.0f ) {
+          temp_a -= 1.0f;
+        }
+        if  ( temp_a < 0.0f ) {
+          temp_a += 1.0f;
+        }
+        if  ( temp_b > 1.0f ) {
+          temp_b -= 1.0f;
+        }
+        if  ( temp_b < 0.0f ) {
+          temp_b += 1.0f;
+        }
+        if  ( temp_c > 1.0f ) {
+          temp_c -= 1.0f;
+        }
+        if  ( temp_c < 0.0f ) {
+          temp_c += 1.0f;
+        }
 
-      if  ( temp_a > 1.0f ) {
-        temp_a = temp_a - 1.0f;
-      }
-      if  ( temp_a < 0.0f ) {
-        temp_a = temp_a + 1.0f;
-      }
-
-      if  ( temp_b > 1.0f ) {
-        temp_b = temp_b - 1.0f;
-      }
-      if  ( temp_b < 0.0f ) {
-        temp_b = temp_b + 1.0f;
-      }
-
-      if  ( temp_c > 1.0f ) {
-        temp_c = temp_c - 1.0f;
-      }
-      if  ( temp_c < 0.0f ) {
-        temp_c = temp_c + 1.0f;
-      }
-
-      const cv::Point3d temporary_point = cv::Point3d(temp_a, temp_b, temp_c );
-      std::vector<cv::Point3d>::iterator it ;
-      // check if it already exists
-      it = std::find( symetry_atom_positions.begin(), symetry_atom_positions.end(), temporary_point );
-      if(it == symetry_atom_positions.end() ){
-        std::cout << "atom # " << distinct << " ( " << atom_type_symbol << " )" << temp_a << " , " << temp_b << " , " << temp_c << std::endl;
-        const double px = temp_a * length_a_Nanometers;
-        const double py = temp_b * length_b_Nanometers;
-        const double pz = temp_c * length_c_Nanometers;
-        cv::Point3d atom_pos ( px, py, pz );
-        atom_type_symbols.push_back( atom_type_symbol );
-        atom_positions.push_back( atom_pos );
-        atom_occupancies.push_back( atom_occupancy );
-        atom_debye_waller_factor.push_back( debye_waller_factor );
-        atom_empirical_radii.push_back( atom_radious );
-        symetry_atom_positions.push_back(temporary_point);
-        //_atom_cpk_colors
-        atom_cpk_rgba_colors.push_back(cpk_color);
-        distinct++;
+        const cv::Point3d temporary_point = cv::Point3d(temp_a, temp_b, temp_c );
+        std::vector<cv::Point3d>::iterator it ;
+        // check if it already exists
+        it = std::find( symetry_atom_positions.begin(), symetry_atom_positions.end(), temporary_point );
+        if(it == symetry_atom_positions.end() ){
+          std::cout << "atom # " << distinct << " ( " << atom_type_symbol << " )" << temp_a << " , " << temp_b << " , " << temp_c << std::endl;
+          const double px = temp_a * length_a_Nanometers;
+          const double py = temp_b * length_b_Nanometers;
+          const double pz = temp_c * length_c_Nanometers;
+          cv::Point3d atom_pos ( px, py, pz );
+          atom_type_symbols.push_back( atom_type_symbol );
+          atom_positions.push_back( atom_pos );
+          atom_occupancies.push_back( atom_occupancy );
+          atom_debye_waller_factor.push_back( debye_waller_factor );
+          atom_empirical_radii.push_back( atom_radious );
+          symetry_atom_positions.push_back(temporary_point);
+          //_atom_cpk_colors
+          atom_cpk_rgba_colors.push_back(cpk_color);
+          distinct++;
+        }
       }
     }
+    _flag_atom_positions = true;
+    result = true;
   }
-  _flag_atom_positions = true;
-  return true;
+  else{
+    if( _flag_logger ){
+      std::stringstream message;
+      message << "The required vars for create_atoms_from_site_and_symetry() are not setted up.";
+      logger->logEvent( ApplicationLog::error , message.str() );
+    }
+    print_var_state();
+  }
+  return result;
 }
 
 void UnitCell::print_var_state(){
@@ -332,7 +345,7 @@ std::ostream& operator<<(std::ostream& stream, const UnitCell& var) {
 
 std::ostream& UnitCell::output(std::ostream& stream) const {
   stream << "UnitCell vars:\n"
-  << "\t\t" << "_flag_parsed_cif : " << std::boolalpha << _flag_parsed_cif << "\n";
+    << "\t\t" << "_flag_parsed_cif : " << std::boolalpha << _flag_parsed_cif << "\n";
   stream << "BaseCell Properties : " << "\n";
   BaseCell::output(stream);
   return stream;

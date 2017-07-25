@@ -232,6 +232,7 @@ void BaseCell::form_matrix_from_miller_indices(){
     inverse_orientation_matrix = orientation_matrix.inv();
     _flag_orientation_matrix = true;
     _flag_inverse_orientation_matrix = true;
+    std::cout << "NEW orientation matrix: \n" << orientation_matrix << "std::endl";
 
     /**
      * R is normalized: the squares of the elements in any row or column sum to 1.

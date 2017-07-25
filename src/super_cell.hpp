@@ -83,7 +83,7 @@ class SuperCell : public BaseCell {
     bool _flag_super_cell_to_unit_cell_pos = false;
 
     bool update_length_parameters_from_expand_factor();
-
+    bool clean_for_re_run();
   protected:
 
   public:
@@ -110,12 +110,6 @@ class SuperCell : public BaseCell {
     bool set_length_a_Nanometers( double a );
     bool set_length_b_Nanometers( double b );
     bool set_length_c_Nanometers( double c );
-    bool set_zone_axis_u( double u );
-    bool set_zone_axis_v( double v );
-    bool set_zone_axis_w( double w );
-    bool set_upward_vector_u( double u );
-    bool set_upward_vector_v( double u );
-    bool set_upward_vector_w( double u );
 
     /* Loggers */
     bool set_application_logger( ApplicationLog::ApplicationLog* logger );

@@ -37,7 +37,7 @@ bool SimGrid::get_flag_simulated_images_grid(){
   return _flag_simulated_images_grid;
 }
 
-bool SimGrid::export_sim_grid( std::string sim_grid_file_name_image ){
+bool SimGrid::export_sim_grid( std::string sim_grid_file_name_image , bool cut_margin ){
 
   // // // // //
   // visual info
@@ -63,17 +63,21 @@ bool SimGrid::export_sim_grid( std::string sim_grid_file_name_image ){
         sim_crystal_properties->get_flag_defocus_samples() &&
         sim_crystal_properties->get_flag_simulated_params_nm_defocus_vec() &&
         // Simulate Image BaseImage vars
-        sim_image_properties->get_flag_roi_n_cols_width() &&
-        sim_image_properties->get_flag_roi_n_rows_height()
+        sim_image_properties->get_flag_full_n_cols_width() &&
+        sim_image_properties->get_flag_full_n_rows_height()
       ){
+
       const int slice_samples = sim_crystal_properties->get_slice_samples();
       const std::vector<double> simulated_params_nm_slice_vec = sim_crystal_properties->get_simulated_params_nm_slice_vec();
       const std::vector<int> simulated_params_slice_vec = sim_crystal_properties->get_simulated_params_slice_vec();
       const int defocus_samples = sim_crystal_properties->get_defocus_samples();
       const std::vector<double> simulated_params_nm_defocus_vec = sim_crystal_properties->get_simulated_params_nm_defocus_vec();
 
-      sim_grid_width  = ( sim_image_properties->get_roi_n_cols_width() * defocus_samples );
-      sim_grid_height = ( sim_image_properties->get_roi_n_rows_height() * slice_samples );
+      const int n_cols = cut_margin ? sim_image_properties->get_roi_n_cols_width() : sim_image_properties->get_full_n_cols_width();
+      const int n_rows = cut_margin ? sim_image_properties->get_roi_n_rows_height() : sim_image_properties->get_full_n_rows_height();
+
+      sim_grid_width  = ( n_cols * defocus_samples );
+      sim_grid_height = ( n_rows * slice_samples );
       sim_grid.create ( sim_grid_height, sim_grid_width , CV_8UC1 );
       sim_grid = cv::Mat::zeros(sim_grid_height, sim_grid_width, CV_8UC1);
 
@@ -83,16 +87,15 @@ bool SimGrid::export_sim_grid( std::string sim_grid_file_name_image ){
         const int at_slice = simulated_params_slice_vec.at(thickness-1);
 
         // the slice thickness in nanometers
-        std::vector<cv::Mat> simulated_images_row = raw_simulated_images_grid.at(thickness-1);
+        std::vector<cv::Mat> simulated_images_row = cut_margin ? simulated_images_grid.at(thickness-1) : raw_simulated_images_grid.at(thickness-1);
 
         for (int defocus = 1; defocus <= defocus_samples; defocus ++ ){
 
           const double at_defocus = simulated_params_nm_defocus_vec.at(defocus-1);
 
           cv::Mat cleaned_simulated_image = simulated_images_row.at(defocus-1);
-
-          cv::Rect r1 = cv::Rect ( sim_image_properties->get_roi_n_cols_width()*(defocus-1),sim_image_properties->get_roi_n_rows_height()*(slice_samples-thickness),sim_image_properties->get_roi_n_cols_width(),sim_image_properties->get_roi_n_rows_height());
-
+          std::cout << "cleaned_simulated_image.size() " << cleaned_simulated_image.size() << std::endl;
+          cv::Rect r1 = cv::Rect ( n_cols *(defocus-1), n_rows *(slice_samples-thickness), n_cols, n_rows);
           cleaned_simulated_image.copyTo(sim_grid( r1 ));
 
           std::stringstream output_legend_line2;
@@ -105,8 +108,8 @@ bool SimGrid::export_sim_grid( std::string sim_grid_file_name_image ){
 
 
           // calculate the legend position on the grid
-          legend_position_x = sim_image_properties->get_roi_n_cols_width()*(defocus-1) + 10;
-          int legend_position_y_bottom_left = sim_image_properties->get_roi_n_rows_height()*(slice_samples-thickness);
+          legend_position_x = n_cols *(defocus-1) + 10;
+          int legend_position_y_bottom_left = n_rows *(slice_samples-thickness);
 
           putText(sim_grid, line2_simulated_info , cvPoint(legend_position_x , legend_position_y_bottom_left + legend_position_y_bottom_left_line_1), cv::FONT_HERSHEY_PLAIN, 1, cvScalar(255,255,255), 1, CV_AA);
           putText(sim_grid, line3_simulated_info , cvPoint(legend_position_x , legend_position_y_bottom_left + legend_position_y_bottom_left_line_2), cv::FONT_HERSHEY_PLAIN, 1, cvScalar(255,255,255), 1, CV_AA);
@@ -282,33 +285,33 @@ bool SimGrid::read_grid_from_dat_files(){
               /*if (raw_simulated_image.isContinuous()){
                 full_n_cols_width *= full_n_rows_height;
                 full_n_rows_height = 1;
-              }*/
+                }*/
 
               std::cout << "raw_simulated_image.size() " << raw_simulated_image.size() << std::endl;
               int pos = 0;
               float *pixel;
               for (int row = 0; row < full_n_rows_height; row++) {
-              for (int col = 0; col < full_n_cols_width; col++) {
-//                for (int row = 0; row < full_n_rows_height; row++) {
-                // acquire a pointer to the start of each row and go through it until it ends
-                // In the special case that the matrix is stored in a continues manner
-                // we only need to request the pointer a single time and go all the way to the end.
-                //pixel = raw_simulated_image.ptr<float>(row);
+                for (int col = 0; col < full_n_cols_width; col++) {
+                  //                for (int row = 0; row < full_n_rows_height; row++) {
+                  // acquire a pointer to the start of each row and go through it until it ends
+                  // In the special case that the matrix is stored in a continues manner
+                  // we only need to request the pointer a single time and go all the way to the end.
+                  //pixel = raw_simulated_image.ptr<float>(row);
                   //pixel[col] = (float) p[pos] ;
                   raw_simulated_image.at<float>(row, full_n_cols_width - col -1) = (float) p[pos] ;
                   pos++;
                 }
-              }
-              mmap.close();
+                }
+                mmap.close();
 
-              double min, max;
-              cv::minMaxLoc(raw_simulated_image, &min, &max);
-              // Create a new matrix to hold the gray image
-              cv::Mat raw_gray_simulated_image;
-              raw_simulated_image.convertTo(raw_gray_simulated_image, CV_8UC1 , 255.0f/(max - min), -min * 255.0f/(max - min));
+                double min, max;
+                cv::minMaxLoc(raw_simulated_image, &min, &max);
+                // Create a new matrix to hold the gray image
+                cv::Mat raw_gray_simulated_image;
+                raw_simulated_image.convertTo(raw_gray_simulated_image, CV_8UC1 , 255.0f/(max - min), -min * 255.0f/(max - min));
 
-              // store the gray image
-              raw_simulated_images_row.push_back( raw_gray_simulated_image );
+                // store the gray image
+                raw_simulated_images_row.push_back( raw_gray_simulated_image );
               }
               catch(const std::ios_base::failure & e) {
                 _mmap_ok = false;
@@ -389,12 +392,14 @@ bool SimGrid::read_grid_from_dat_files(){
               // get the matrix in the specified col of tdmap (defocus pos)
               const cv::Mat raw_simulated_image = raw_simulated_images_row.at( defocus );
               cv::Mat cleaned_simulated_image;
-              /*if( sim_image_properties->get_flag_ignore_edge_pixels_rectangle() ){
-                cleaned_simulated_image = raw_simulated_image( sim_image_properties->get_ignore_edge_pixels_rectangle() );
-                }
-                else{*/
-              cleaned_simulated_image = raw_simulated_image;
-              //}
+              if( sim_image_properties->get_flag_roi_rectangle() ){
+                const cv::Rect roi_rect = sim_image_properties->get_roi_rectangle();
+                cleaned_simulated_image = raw_simulated_image( roi_rect );
+                std::cout << " cleaned_simulated_image.size() " << cleaned_simulated_image.size() << std::endl;
+              }
+              else{
+                cleaned_simulated_image = raw_simulated_image;
+              }
               cleaned_edges_simulated_images_row.push_back( cleaned_simulated_image );
             } catch ( const std::exception& e ){
               _error_flag = true;
@@ -439,8 +444,9 @@ bool SimGrid::read_grid_from_dat_files(){
         _flag_sim_image_properties
       ){
       if(
-          raw_simulated_images_grid.size() == sim_crystal_properties->get_slice_samples() &&
-          _flag_raw_simulated_images_grid &&
+          simulated_images_grid.size() == sim_crystal_properties->get_slice_samples() &&
+          //_flag_raw_simulated_images_grid &&
+          _flag_simulated_images_grid &&
           // BaseCrystal vars
           sim_crystal_properties->get_flag_slice_samples() &&
           sim_crystal_properties->get_flag_defocus_samples() &&
@@ -646,7 +652,7 @@ bool SimGrid::read_grid_from_dat_files(){
   }
 
   std::vector< std::vector<cv::Mat> > SimGrid::get_simulated_images_grid(){
-    return raw_simulated_images_grid;
+    return simulated_images_grid;
   }
 
   cv::Mat SimGrid::get_simulated_image_in_grid( int row_thickness, int col_defocus ){
@@ -803,17 +809,34 @@ bool SimGrid::read_grid_from_dat_files(){
   std::ostream& SimGrid::output(std::ostream& stream) const {
     stream << "SimGrid vars:\n"
       // simulated images
+      << "\t\t" << "_flag_simulated_images_grid : " << std::boolalpha << _flag_simulated_images_grid << "\n"
       << "\t" << "simulated_images_grid.size() : " << simulated_images_grid.size() << "\n"
+      << "\t\t" << "_flag_raw_simulated_images_grid : " << std::boolalpha << _flag_raw_simulated_images_grid << "\n"
       << "\t" << "raw_simulated_images_grid.size() : " << raw_simulated_images_grid.size() << "\n"
       << "\t" << "experimental_images_match_location_grid.size() : " << experimental_images_match_location_grid.size() << "\n"
       //will contain the all the simulated images match percentage
       << "\t" << "simulated_matches.size() : " << simulated_matches.size() << "\n"
       << "\t" << "slice_defocus_match_points.size() : " << slice_defocus_match_points.size() << "\n"
+      << "\t\t" << "_flag_match_values_matrix : " << std::boolalpha << _flag_match_values_matrix << "\n"
+      << "\t" << "imregionalmax_match_values_matrix : " << imregionalmax_match_values_matrix << "\n"
+      << "\t" << "best_match_Point2i : " << best_match_Point2i << "\n"
+      << "\t\t" << "_flag_best_match_Point2i : " << std::boolalpha << _flag_best_match_Point2i << "\n"
+      << "\t\t" << "sim_grid_switch : " << std::boolalpha << sim_grid_switch << "\n"
+      << "\t\t" << "runned_simulation : " << std::boolalpha << runned_simulation << "\n"
+      << "\t\t" << "_flag_sim_crystal_properties : " << std::boolalpha << _flag_sim_crystal_properties << "\n"
       << "\t" << "BaseCrystal Properties : " << "\n";
-    sim_crystal_properties->output( stream );
-    stream << "\t" << "Experimental Image Properties : " << "\n";
-    exp_image_properties->output( stream );
-    stream  << "\t" << "Simulated Images Properties : " << "\n";
-    sim_image_properties->output( stream );
+    if( _flag_sim_crystal_properties ){
+      sim_crystal_properties->output( stream );
+    }
+    stream << "\t\t" << "_flag_exp_image_properties : " << std::boolalpha << _flag_exp_image_properties << "\n"
+      << "\t" << "Experimental Image Properties : " << "\n";
+    if( _flag_exp_image_properties ){
+      exp_image_properties->output( stream );
+    }
+    stream << "\t\t" << "_flag_sim_image_properties : " << std::boolalpha << _flag_sim_image_properties << "\n"
+      << "\t" << "Simulated Images Properties : " << "\n";
+    if( _flag_sim_image_properties ){
+      sim_image_properties->output( stream );
+    }
     return stream;
   }

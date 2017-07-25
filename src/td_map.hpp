@@ -132,7 +132,7 @@ class TDMap  : public QObject {
 
     /** others **/
 
-    bool export_sim_grid( std::string sim_grid_file_name_image );
+    bool export_sim_grid( std::string sim_grid_file_name_image , bool cut_margin = false );
 
     /*
      * RUN METHODS
@@ -250,8 +250,8 @@ class TDMap  : public QObject {
     bool set_dr_probe_wavimg_execname( std::string wavimg_execname );
 
     // gui setters
-    bool set_ny_size_width( std::string );
-    bool set_nx_size_height( std::string );
+    bool set_nx_size_width( std::string );
+    bool set_ny_size_height( std::string );
     bool set_unit_cell_cif_path( std::string cif_path );
     bool set_zone_axis_u( std::string );
     bool set_zone_axis_v( std::string );
@@ -328,10 +328,10 @@ class TDMap  : public QObject {
     cv::Mat get_exp_image_properties_full_image();
     cv::Mat get_exp_image_properties_roi_image();
     cv::Rect get_exp_image_properties_roi_rectangle();
-    double get_exp_image_properties_full_nx_size_height_nm();
-    double get_exp_image_properties_full_ny_size_width_nm();
-    double get_exp_image_properties_roi_nx_size_height_nm();
-    double get_exp_image_properties_roi_ny_size_width_nm();
+    double get_exp_image_properties_full_ny_size_height_nm();
+    double get_exp_image_properties_full_nx_size_width_nm();
+    double get_exp_image_properties_roi_ny_size_height_nm();
+    double get_exp_image_properties_roi_nx_size_width_nm();
     double get_full_boundary_polygon_margin_nm( );
 
 

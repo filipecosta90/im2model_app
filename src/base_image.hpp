@@ -34,7 +34,9 @@ class BaseImage {
     bool _flag_auto_n_cols = false;
     bool _flag_auto_a_size = false;
     bool _flag_auto_b_size = false;
+    bool _flag_auto_roi_from_ignored_edge = false;
 
+    bool auto_calculate_ignore_edge_pixels();
     bool auto_calculate_dimensions();
     bool calculate_n_rows_from_a_size_and_sampling_rate();
     bool calculate_a_size_from_n_rows_and_sampling_rate();
@@ -94,9 +96,7 @@ class BaseImage {
     int roi_center_y;
     bool _flag_roi_center_y = false;
 
-    // rectangle without the ignored edge pixels of the full image
-    cv::Rect ignore_edge_pixels_rectangle;
-    bool _flag_ignore_edge_pixels_rectangle = false;
+    // ignored edge pixels of the full image
     int ignore_edge_pixels = 0;
     bool _flag_ignore_edge_pixels = false;
     double ignore_edge_nm = 0.0f;
@@ -120,8 +120,9 @@ class BaseImage {
     bool get_flag_roi_n_cols_width (){ return _flag_roi_n_cols_width; }
     bool get_flag_roi_center_x (){ return _flag_roi_center_x; }
     bool get_flag_roi_center_y (){ return _flag_roi_center_y; }
-    bool get_flag_ignore_edge_pixels_rectangle (){ return _flag_ignore_edge_pixels_rectangle; }
+    bool get_flag_ignore_edge_nm (){ return _flag_ignore_edge_nm; }
     bool get_flag_ignore_edge_pixels (){ return _flag_ignore_edge_pixels; }
+    bool get_flag_auto_roi_from_ignored_edge(){ return _flag_auto_roi_from_ignored_edge; }
 
     // var getters
     cv::Mat get_full_image(){ return full_image.clone(); }
@@ -140,8 +141,8 @@ class BaseImage {
     int get_roi_center_x(){ return roi_center_x; }
     int get_roi_center_y(){ return roi_center_y; }
     // rectangle without the ignored edge pixels of the full image
-    cv::Rect get_ignore_edge_pixels_rectangle(){ return ignore_edge_pixels_rectangle; }
     int get_ignore_edge_pixels(){ return ignore_edge_pixels; }
+    int get_ignore_edge_nm(){ return ignore_edge_nm; }
 
     /** getters **/
     // flag getters
@@ -154,6 +155,8 @@ class BaseImage {
     bool set_flag_auto_n_cols( bool value );
     bool set_flag_auto_a_size( bool value );
     bool set_flag_auto_b_size( bool value );
+    bool set_flag_auto_roi_from_ignored_edge( bool value );
+
     // full frame
     bool set_full_image( std::string path );
     bool set_full_n_rows_height( int full_n_rows_height );
@@ -172,7 +175,6 @@ class BaseImage {
     bool set_roi_center_y( int roi_center_y );
     bool set_ignore_edge_pixels( int ignore_edge_pixels );
     bool set_ignore_edge_nm( double ignore_edge_nm );
-
 
     /* Loggers */
     bool set_application_logger( ApplicationLog::ApplicationLog* logger );
