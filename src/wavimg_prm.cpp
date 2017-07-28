@@ -47,129 +47,149 @@ bool WAVIMG_prm::produce_prm ( ) {
         sim_crystal_properties->get_flag_nm_lower_bound() &&
         sim_crystal_properties->get_flag_nm_upper_bound() &&
         sim_crystal_properties->get_flag_slice_samples() &&
+        // extra info
+        sim_crystal_properties->get_flag_simulated_params_nm_defocus_vec() &&
+        sim_crystal_properties->get_flag_simulated_params_slice_vec() &&
+        sim_crystal_properties->get_flag_simulated_params_nm_slice_vec() &&
         // BaseImage vars
         sim_image_properties->get_flag_full_n_cols_width() &&
         sim_image_properties->get_flag_full_n_rows_height() &&
         sim_image_properties->get_flag_sampling_rate_x_nm_per_pixel() &&
         sim_image_properties->get_flag_sampling_rate_y_nm_per_pixel()
-      ){
-      // get const vars from class pointer
-      const boost::filesystem::path base_dir_path = sim_crystal_properties->get_base_dir_path();
-      const double ht_accelaration_voltage = sim_crystal_properties->get_ht_accelaration_voltage();
-      const std::string wav_output_target_folder = sim_crystal_properties->get_wav_output_target_folder();
-      const double defocus_lower_bound = sim_crystal_properties->get_defocus_lower_bound();
-      const double defocus_upper_bound = sim_crystal_properties->get_defocus_upper_bound();
-      const int defocus_samples = sim_crystal_properties->get_defocus_samples();
-      const double slices_lower_bound = sim_crystal_properties->get_nm_lower_bound();
-      const double slices_upper_bound = sim_crystal_properties->get_nm_upper_bound();
-      const int slice_samples = sim_crystal_properties->get_slice_samples();
-      const int full_n_cols_width = sim_image_properties->get_full_n_cols_width();
-      const int full_n_rows_height = sim_image_properties->get_full_n_rows_height();
-      const double sampling_rate_x_nm_per_pixel = sim_image_properties->get_sampling_rate_x_nm_per_pixel();
-      const double sampling_rate_y_nm_per_pixel = sim_image_properties->get_sampling_rate_y_nm_per_pixel();
+        ){
+          // get const vars from class pointer
+          const boost::filesystem::path base_dir_path = sim_crystal_properties->get_base_dir_path();
+          const double ht_accelaration_voltage = sim_crystal_properties->get_ht_accelaration_voltage();
+          const std::string wav_output_target_folder = sim_crystal_properties->get_wav_output_target_folder();
+          const double defocus_lower_bound = sim_crystal_properties->get_defocus_lower_bound();
+          const double defocus_upper_bound = sim_crystal_properties->get_defocus_upper_bound();
+          const int defocus_samples = sim_crystal_properties->get_defocus_samples();
+          const int slices_lower_bound = sim_crystal_properties->get_slices_lower_bound();
+          const int slices_upper_bound = sim_crystal_properties->get_slices_upper_bound();
+          const int slice_samples = sim_crystal_properties->get_slice_samples();
+          const std::vector<double> simulated_params_nm_defocus_vec = sim_crystal_properties->get_simulated_params_nm_defocus_vec();
+          const std::vector<int> simulated_params_slice_vec = sim_crystal_properties->get_simulated_params_slice_vec();
+          const std::vector<double> simulated_params_nm_slice_vec = sim_crystal_properties->get_simulated_params_nm_slice_vec();
+          const int full_n_cols_width = sim_image_properties->get_full_n_cols_width();
+          const int full_n_rows_height = sim_image_properties->get_full_n_rows_height();
+          const double sampling_rate_x_nm_per_pixel = sim_image_properties->get_sampling_rate_x_nm_per_pixel();
+          const double sampling_rate_y_nm_per_pixel = sim_image_properties->get_sampling_rate_y_nm_per_pixel();
 
-      boost::filesystem::path file ( prm_filename );
-      boost::filesystem::path full_path = base_bin_output_dir_path / file;
-      std::ofstream outfile;
+          if( _flag_logger ){
+            std::stringstream message;
+            message << "Will simulate " << defocus_samples << " defocus samples: { ";
+            for(auto& def : simulated_params_nm_defocus_vec){
+              message << def << " ";
+            }
+            message << "}, and " << slice_samples << " thikness samples: {" ;
+            for(int slice_id = 0 ; slice_id <  simulated_params_slice_vec.size(); slice_id++ ){
+              message << simulated_params_nm_slice_vec[slice_id] << " (sli# "<< simulated_params_slice_vec[slice_id] << "), ";
+            }
+            message <<"}";
+            logger->logEvent( ApplicationLog::notification , message.str() );
+          }
 
-      outfile.open( full_path.string() );
-      // line 1
-      boost::filesystem::path input_wave_function ( file_name_input_wave_function );
-      boost::filesystem::path wav_input_dir ( wav_output_target_folder );
-      boost::filesystem::path input_wave_function_full_path = base_dir_path / wav_input_dir / input_wave_function;
-      std::stringstream  input_prefix_stream ;
-      input_prefix_stream << "'" << input_wave_function_full_path.string() << "_sl.wav"<< "'";
-      outfile  << input_prefix_stream.str() << "\t\t! Wave function file name string used to locate existing wave functions. Use quotation marks to secure the input including space characters." << std::endl;
-      // line 2
-      outfile <<  full_n_cols_width << ", " <<  full_n_rows_height << "\t\t! Dimension of the wave data in pixels, <nx> = number of horizontal wave pixels, <ny>  = number of vertical wave pixels." << std::endl;
-      // line 3
-      outfile  << sampling_rate_x_nm_per_pixel << ", " << sampling_rate_y_nm_per_pixel << "\t\t! Sampling rate of the wave data (<sx> = horizontal, <sy> = vertical) [nm/pix]." << std::endl;
-      // line 4
-      outfile <<  ht_accelaration_voltage << "\t\t! TEM high-tension as used for wave function calculation [kV]." << std::endl;
-      // line 5
-      outfile <<  type_of_output << "\t\t! Image output type option: 0 = TEM image" << std::endl;
-      // line 6
+          boost::filesystem::path file ( prm_filename );
+          boost::filesystem::path full_path = base_bin_output_dir_path / file;
+          std::ofstream outfile;
 
-      boost::filesystem::path output_wave_function ( file_name_output_image_wave_function );
-      boost::filesystem::path output_wave_function_full_path = base_bin_output_dir_path / output_wave_function;
-      std::stringstream  output_prefix_stream ;
-      output_prefix_stream << "'" << output_wave_function_full_path.string() << ".dat" << "'";
-      outfile <<  output_prefix_stream.str() << "\t\t! Image output file name string. Use quotation marks to secure the input including space characters." << std::endl;
-      // line 7
-      outfile << full_n_cols_width  << ", " << full_n_rows_height << "\t\t! Image output size (<ix> = horizontal , <iy> = vertical) in number of pixels." << std::endl;
-      // line 8
-      outfile <<  image_data_type << ", " << image_vacuum_mean_intensity << ", " << conversion_rate << ", " <<  readout_noise_rms_amplitude << "\t\t! Flag and parameters for creating integer images with optional noise. Flag <intflg> 0 = off (default)" << std::endl;
-      // line 9
-      outfile <<  switch_option_extract_particular_image_frame << "\t! Flag activating the extraction of a special image frame (0=OFF, 1=ON)." << std::endl;
-      // line 10
-      outfile <<  sampling_rate_x_nm_per_pixel << "\t! Image output sampling rate [nm/pix], isotropic. The parameter is used only if the Flag in line 09 is set to 1." << std::endl;
-      // line 11
-      outfile <<  image_frame_offset_x_pixels_input_wave_function << ", " << image_frame_offset_y_pixels_input_wave_function << " !" << std::endl;
-      // line 12
-      outfile <<  image_frame_rotation << " !" << std::endl;
-      // line 13
-      outfile <<  switch_coherence_model <<  "\t! Coherence calculation model switch: 1 = averaging of coherent sub images explicit focal variation but quasi-coherent spatial envelope, 2 = averaging of coherent sub images with explicit focal and angular variation, 3 = quasi-coherent linear envelopes, 4 = Fourier-space synthesis with partially coherent TCC, 5: averaging of coherent sub images with explicit focal, angular, and frozen lattice variation)" << std::endl;
-      // line 14
-      outfile <<  ( partial_temporal_coherence_switch ? "1" : "0") << ", " << partial_temporal_coherence_focus_spread << "\t\t! Flag and parameters for partial temporal coherence: <ptcflg> = flag (0=OFF, 1=ON), <f-spread> = focus spread (1/e) half width [nm]" << std::endl;
-      // line 15
-      outfile <<  ( partial_spatial_coherence_switch ? "1" : "0") << ", " << partial_spatial_coherence_semi_convergence_angle << "\t\t! Flag and parameters for partial spatial coherence: <pscflg> = flag (0=OFF, 1=ON), <s-conv> = beam convergence (1/e) half width [mrad]" << std::endl;
-      // line 16
-      const int _mtf_swith = mtf_simulation_switch ? 1 : 0;
-      outfile <<  _mtf_swith << ", " << k_space_scaling << ", \'" <<  mtf_filename << "\'\t\t! Flag and parameters for applying the detector MTF: <mtfflag> = flag (0=OFF, 1=ON), <mtf-scale> = calculation scale of the mtf = (sampling rate experiment)/(sampling rate simulation), <mtf-file> = File name string to locate the MTF data. Use quotation marks to secure the input including space characters." << std::endl;
-      // line 17
-      outfile <<  simulation_image_spread_envelope_switch << ", " << isotropic_one_rms_amplitude << "\t! Flag and parameters for a vibration envelope: <vibflg> = flag (0=OFF, 1=ON), <vibprm> = vibration RMS amplitude [nm]." << std::endl;
-      // line 18
-      number_image_aberrations_set = 0;
-      for (auto&& _aberration : aberration_definition_switch ){
-        if (_aberration.second == true)
-          ++number_image_aberrations_set;
-      }
-      outfile <<  number_image_aberrations_set << "\t! Number of aberration definitions following this line" << std::endl;
-      // line 19
-      if(number_image_aberrations_set == 1 ){
-        //        outfile <<  "1,0,0" << "\t\t! aberration definition (index, ax, ay) [nm]" << std::endl;
-      }
-      for (auto&& _aberration : aberration_definition_switch ){
-        if ( _aberration.second == true ){
-          outfile << _aberration.first << ", " << aberration_definition_1st_coefficient_value_nm.at( _aberration.first ) << ", "<< aberration_definition_2nd_coefficient_value_nm.at( _aberration.first ) << "\t\t! aberration definition (index, ax, ay) [nm]" << std::endl;
+          outfile.open( full_path.string() );
+          // line 1
+          boost::filesystem::path input_wave_function ( file_name_input_wave_function );
+          boost::filesystem::path wav_input_dir ( wav_output_target_folder );
+          boost::filesystem::path input_wave_function_full_path = base_dir_path / wav_input_dir / input_wave_function;
+          std::stringstream  input_prefix_stream ;
+          input_prefix_stream << "'" << input_wave_function_full_path.string() << "_sl.wav"<< "'";
+          outfile  << input_prefix_stream.str() << "\t\t! Wave function file name string used to locate existing wave functions. Use quotation marks to secure the input including space characters." << std::endl;
+          // line 2
+          outfile <<  full_n_cols_width << ", " <<  full_n_rows_height << "\t\t! Dimension of the wave data in pixels, <nx> = number of horizontal wave pixels, <ny>  = number of vertical wave pixels." << std::endl;
+          // line 3
+          outfile  << sampling_rate_x_nm_per_pixel << ", " << sampling_rate_y_nm_per_pixel << "\t\t! Sampling rate of the wave data (<sx> = horizontal, <sy> = vertical) [nm/pix]." << std::endl;
+          // line 4
+          outfile <<  ht_accelaration_voltage << "\t\t! TEM high-tension as used for wave function calculation [kV]." << std::endl;
+          // line 5
+          outfile <<  type_of_output << "\t\t! Image output type option: 0 = TEM image" << std::endl;
+          // line 6
+          boost::filesystem::path output_wave_function ( file_name_output_image_wave_function );
+          boost::filesystem::path output_wave_function_full_path = base_bin_output_dir_path / output_wave_function;
+          std::stringstream  output_prefix_stream ;
+          output_prefix_stream << "'" << output_wave_function_full_path.string() << ".dat" << "'";
+          outfile <<  output_prefix_stream.str() << "\t\t! Image output file name string. Use quotation marks to secure the input including space characters." << std::endl;
+          // line 7
+          outfile << full_n_cols_width  << ", " << full_n_rows_height << "\t\t! Image output size (<ix> = horizontal , <iy> = vertical) in number of pixels." << std::endl;
+          // line 8
+          outfile <<  image_data_type << ", " << image_vacuum_mean_intensity << ", " << conversion_rate << ", " <<  readout_noise_rms_amplitude << "\t\t! Flag and parameters for creating integer images with optional noise. Flag <intflg> 0 = off (default)" << std::endl;
+          // line 9
+          outfile <<  switch_option_extract_particular_image_frame << "\t! Flag activating the extraction of a special image frame (0=OFF, 1=ON)." << std::endl;
+          // line 10
+          outfile <<  sampling_rate_x_nm_per_pixel << "\t! Image output sampling rate [nm/pix], isotropic. The parameter is used only if the Flag in line 09 is set to 1." << std::endl;
+          // line 11
+          outfile <<  image_frame_offset_x_pixels_input_wave_function << ", " << image_frame_offset_y_pixels_input_wave_function << " !" << std::endl;
+          // line 12
+          outfile <<  image_frame_rotation << " !" << std::endl;
+          // line 13
+          outfile <<  switch_coherence_model <<  "\t! Coherence calculation model switch: 1 = averaging of coherent sub images explicit focal variation but quasi-coherent spatial envelope, 2 = averaging of coherent sub images with explicit focal and angular variation, 3 = quasi-coherent linear envelopes, 4 = Fourier-space synthesis with partially coherent TCC, 5: averaging of coherent sub images with explicit focal, angular, and frozen lattice variation)" << std::endl;
+          // line 14
+          outfile <<  ( partial_temporal_coherence_switch ? "1" : "0") << ", " << partial_temporal_coherence_focus_spread << "\t\t! Flag and parameters for partial temporal coherence: <ptcflg> = flag (0=OFF, 1=ON), <f-spread> = focus spread (1/e) half width [nm]" << std::endl;
+          // line 15
+          outfile <<  ( partial_spatial_coherence_switch ? "1" : "0") << ", " << partial_spatial_coherence_semi_convergence_angle << "\t\t! Flag and parameters for partial spatial coherence: <pscflg> = flag (0=OFF, 1=ON), <s-conv> = beam convergence (1/e) half width [mrad]" << std::endl;
+          // line 16
+          const int _mtf_swith = mtf_simulation_switch ? 1 : 0;
+          outfile <<  _mtf_swith << ", " << k_space_scaling << ", \'" <<  mtf_filename << "\'\t\t! Flag and parameters for applying the detector MTF: <mtfflag> = flag (0=OFF, 1=ON), <mtf-scale> = calculation scale of the mtf = (sampling rate experiment)/(sampling rate simulation), <mtf-file> = File name string to locate the MTF data. Use quotation marks to secure the input including space characters." << std::endl;
+          // line 17
+          outfile <<  simulation_image_spread_envelope_switch << ", " << isotropic_one_rms_amplitude << "\t! Flag and parameters for a vibration envelope: <vibflg> = flag (0=OFF, 1=ON), <vibprm> = vibration RMS amplitude [nm]." << std::endl;
+          // line 18
+          number_image_aberrations_set = 0;
+          for (auto&& _aberration : aberration_definition_switch ){
+            if (_aberration.second == true)
+              ++number_image_aberrations_set;
+          }
+          outfile <<  number_image_aberrations_set << "\t! Number of aberration definitions following this line" << std::endl;
+          // line 19
+          if(number_image_aberrations_set == 1 ){
+            //        outfile <<  "1,0,0" << "\t\t! aberration definition (index, ax, ay) [nm]" << std::endl;
+          }
+          for (auto&& _aberration : aberration_definition_switch ){
+            if ( _aberration.second == true ){
+              outfile << _aberration.first << ", " << aberration_definition_1st_coefficient_value_nm.at( _aberration.first ) << ", "<< aberration_definition_2nd_coefficient_value_nm.at( _aberration.first ) << "\t\t! aberration definition (index, ax, ay) [nm]" << std::endl;
+            }
+          }
+          // line 19 + aberration_definition_index_number
+          outfile <<  objective_aperture_radius << "\t\t! Objective aperture radius [mrad]. Set to very large values to deactivate." << std::endl;
+          // line 20 + aberration_definition_index_number
+          outfile <<  center_x_of_objective_aperture << ", " << center_y_of_objective_aperture << "\t\t! Center of the objective aperture with respect to the zero beam [mrad]." << std::endl;
+          // line 21
+
+          set_number_parameter_loops(2);
+          add_parameter_loop ( 1 , 1 , 1, defocus_lower_bound, defocus_upper_bound, defocus_samples, "'foc'" );
+          add_parameter_loop ( 3 , 1 , 1, slices_lower_bound, slices_upper_bound, slice_samples, "'_sl'" );
+
+          outfile <<  number_parameter_loops << "\t\t! Number variable of loop definitions following below." << std::endl;
+          for ( int pos = 0 ; pos < number_parameter_loops ; pos++){
+            // line 22 + aberration_definition_index_number
+            outfile << loop_parameter_class.at(pos) << " !" << std::endl;
+            // line 23 + aberration_definition_index_number
+            outfile <<  loop_parameter_index.at(pos) << " !" << std::endl;
+            // line 24 + aberration_definition_index_number
+            outfile << loop_variation_form.at(pos) << " !" << std::endl;
+            // line 25 + aberration_definition_index_number
+            outfile << loop_range_0.at(pos) << ", " << loop_range_1.at(pos) << ", " << loop_range_n.at(pos) << " !" << std::endl;
+            // line 26 + aberration_definition_index_number
+            outfile << loop_string_indentifier.at(pos) << " !" << std::endl;
+          }
+
+          outfile.close();
+          if( _flag_logger ){
+            std::stringstream message;
+            message << "checking if WAVIMG prm file was produced. filename: " <<  full_path.string() << " || result: " << boost::filesystem::exists( full_path.string() ) << std::endl;
+            logger->logEvent( ApplicationLog::notification , message.str() );
+          }
+
+          _flag_produced_prm = boost::filesystem::exists( full_path );
+          prm_filename_path = boost::filesystem::canonical( full_path ).string();
+          _flag_prm_filename_path = _flag_produced_prm;
+          result = _flag_produced_prm;
         }
-      }
-      // line 19 + aberration_definition_index_number
-      outfile <<  objective_aperture_radius << "\t\t! Objective aperture radius [mrad]. Set to very large values to deactivate." << std::endl;
-      // line 20 + aberration_definition_index_number
-      outfile <<  center_x_of_objective_aperture << ", " << center_y_of_objective_aperture << "\t\t! Center of the objective aperture with respect to the zero beam [mrad]." << std::endl;
-      // line 21
-
-      set_number_parameter_loops(2);
-      add_parameter_loop ( 1 , 1 , 1, defocus_lower_bound, defocus_upper_bound, defocus_samples, "'foc'" );
-      add_parameter_loop ( 3 , 1 , 1, slices_lower_bound, slices_upper_bound, slice_samples, "'_sl'" );
-
-      outfile <<  number_parameter_loops << "\t\t! Number variable of loop definitions following below." << std::endl;
-      for ( int pos = 0 ; pos < number_parameter_loops ; pos++){
-        // line 22 + aberration_definition_index_number
-        outfile << loop_parameter_class.at(pos) << " !" << std::endl;
-        // line 23 + aberration_definition_index_number
-        outfile <<  loop_parameter_index.at(pos) << " !" << std::endl;
-        // line 24 + aberration_definition_index_number
-        outfile << loop_variation_form.at(pos) << " !" << std::endl;
-        // line 25 + aberration_definition_index_number
-        outfile << loop_range_0.at(pos) << ", " << loop_range_1.at(pos) << ", " << loop_range_n.at(pos) << " !" << std::endl;
-        // line 26 + aberration_definition_index_number
-        outfile << loop_string_indentifier.at(pos) << " !" << std::endl;
-      }
-
-      outfile.close();
-      if( _flag_logger ){
-        std::stringstream message;
-        message << "checking if WAVIMG prm file was produced. filename: " <<  full_path.string() << " || result: " << boost::filesystem::exists( full_path.string() ) << std::endl;
-        logger->logEvent( ApplicationLog::notification , message.str() );
-      }
-
-      _flag_produced_prm = boost::filesystem::exists( full_path );
-      prm_filename_path = boost::filesystem::canonical( full_path ).string();
-      _flag_prm_filename_path = _flag_produced_prm;
-      result = _flag_produced_prm;
-    }
     else{
       if( _flag_logger ){
         std::stringstream message;
