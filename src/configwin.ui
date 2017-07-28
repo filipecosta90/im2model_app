@@ -21,7 +21,7 @@
     <item>
      <widget class="QTabWidget" name="tabWidget">
       <property name="currentIndex">
-       <number>0</number>
+       <number>1</number>
       </property>
       <widget class="QWidget" name="image_crystal_tab">
        <attribute name="title">
@@ -466,7 +466,7 @@
                </widget>
               </item>
               <item>
-               <widget class="QPushButton" name="qbutton_tdmap_accept_2">
+               <widget class="QPushButton" name="qbutton_tdmap_accept">
                 <property name="text">
                  <string>Accept</string>
                 </property>

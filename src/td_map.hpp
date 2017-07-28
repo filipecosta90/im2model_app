@@ -167,6 +167,9 @@ class TDMap  : public QObject {
     bool get_flag_simulated_images_vertical_header_slice_nm();
     bool get_flag_simulated_images_horizontal_header_defocus_nm();
     bool get_flag_simgrid_best_match_position();
+    bool get_flag_simgrid_best_match_thickness_slice();
+    bool get_flag_simgrid_best_match_thickness_nm();
+    bool get_flag_simgrid_best_match_defocus_nm();
     /* getters */
     std::vector< double > get_simulated_images_vertical_header_slice_nm();
     std::vector< double > get_simulated_images_horizontal_header_defocus_nm();
@@ -178,11 +181,15 @@ class TDMap  : public QObject {
     int get_simulated_image_thickness_slice_in_grid( int row, int col );
     double get_simulated_image_thickness_nm_in_grid( int row, int col );
     double get_simulated_image_defocus_in_grid( int row, int col );
+    int get_simgrid_best_match_thickness_slice();
+    double get_simgrid_best_match_thickness_nm();
+    double get_simgrid_best_match_defocus_nm();
+
     double get_spherical_aberration();
     bool get_spherical_aberration_switch();
     bool get_partial_temporal_coherence_switch();
     bool get_partial_spatial_coherence_switch();
-    bool get_mtf_switch( );
+    bool get_mtf_switch();
 
     // gui flag getters
     bool get_flag_celslc_io_ap_pipe_out();
@@ -220,7 +227,6 @@ class TDMap  : public QObject {
 
     boost::filesystem::path get_project_dir_path(){ return project_dir_path; }
     std::string get_project_filename_with_path();
-
 
     /** setters **/
     // class setters
@@ -294,6 +300,7 @@ class TDMap  : public QObject {
     bool set_exp_image_bounds_hysteresis_threshold( int value );
     bool set_exp_image_bounds_max_contour_distance_px( int value );
     bool set_full_boundary_polygon_margin_nm( std::string );
+    bool accept_tdmap_best_match_position();
 
     /* gui flag getters */
     bool get_exp_image_properties_flag_full_image();

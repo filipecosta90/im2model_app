@@ -576,6 +576,18 @@ bool TDMap::get_flag_simgrid_best_match_position(){
   return _td_map_simgrid->get_flag_simgrid_best_match_position();
 }
 
+bool TDMap::get_flag_simgrid_best_match_thickness_slice(){
+  return _td_map_simgrid->get_flag_simgrid_best_match_thickness_slice();
+}
+
+bool TDMap::get_flag_simgrid_best_match_thickness_nm(){
+  return _td_map_simgrid->get_flag_simgrid_best_match_thickness_nm();
+}
+
+bool TDMap::get_flag_simgrid_best_match_defocus_nm(){
+  return _td_map_simgrid->get_flag_simgrid_best_match_defocus_nm();
+}
+
 bool TDMap::get_flag_simulated_images_grid(){
   return _td_map_simgrid->get_flag_simulated_images_grid();
 }
@@ -1384,7 +1396,7 @@ bool TDMap::set_partial_temporal_coherence_focus_spread ( std::string _string_fs
   bool result = false;
   try {
     const double _fs = boost::lexical_cast<double>( _string_fs );
-  result = _tdmap_wavimg_parameters->set_partial_temporal_coherence_focus_spread( _fs );
+    result = _tdmap_wavimg_parameters->set_partial_temporal_coherence_focus_spread( _fs );
   }
   catch(boost::bad_lexical_cast&  ex) {
     // pass it up
@@ -1401,7 +1413,7 @@ bool TDMap::set_partial_spatial_coherence_semi_convergence_angle ( std::string _
   bool result = false;
   try {
     const double _ca = boost::lexical_cast<double>( _string_ca );
-  result = _tdmap_wavimg_parameters->set_partial_spatial_coherence_semi_convergence_angle( _ca );
+    result = _tdmap_wavimg_parameters->set_partial_spatial_coherence_semi_convergence_angle( _ca );
   }
   catch(boost::bad_lexical_cast&  ex) {
     // pass it up
@@ -1455,6 +1467,15 @@ bool TDMap::set_full_boundary_polygon_margin_nm( std::string s_margin ){
     boost::throw_exception( ex );
   }
   return result;
+}
+
+bool TDMap::accept_tdmap_best_match_position(){
+ bool result = false;
+ if( _td_map_simgrid->get_flag_simgrid_best_match_thickness_nm() ){
+   const double full_crystal_thickness = _td_map_simgrid->get_simgrid_best_match_thickness_nm();
+   result = true;
+ }
+ return result;
 }
 
 std::string TDMap::get_project_filename_with_path(){

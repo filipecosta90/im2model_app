@@ -58,6 +58,7 @@ class MainWindow : public QMainWindow {
     MainWindow( ApplicationLog::ApplicationLog* logger, QWidget *parent = 0 );
 
     bool set_dr_probe_path( QString path );
+    void setApplicationVersion( std::string app_version );
     bool set_application_logger( ApplicationLog::ApplicationLog* logger );
     bool set_project_dir_path( boost::filesystem::path base_dir );
 
@@ -123,6 +124,7 @@ class MainWindow : public QMainWindow {
 
     void on_qpush_apply_edge_detection_clicked();
     void on_qpush_test_tdmap_clicked();
+    void on_qbutton_tdmap_accept_clicked();
 
 signals:
     void experimental_image_filename_changed();
@@ -150,6 +152,9 @@ signals:
     bool saveFile(const QString &fileName);
     void setCurrentFile(const QString &fileName);
     QString strippedName(const QString &fullFileName);
+
+    std::string application_version;
+    bool  _flag_application_version = false;
 
     QString curFile;
     bool _flag_project_setted = false;
@@ -227,10 +232,10 @@ signals:
     TreeItem* crystallography_root = nullptr;
     TreeItem* unit_cell_file = nullptr;
     TreeItem* unit_cell_file_cif = nullptr;
-    TreeItem* projection_direction = nullptr;
-    TreeItem* projection_direction_h = nullptr;
-    TreeItem* projection_direction_k = nullptr;
-    TreeItem* projection_direction_l = nullptr;
+    TreeItem* zone_axis = nullptr;
+    TreeItem* zone_axis_u = nullptr;
+    TreeItem* zone_axis_v = nullptr;
+    TreeItem* zone_axis_w = nullptr;
     TreeItem* upward_vector = nullptr;
     TreeItem* upward_vector_u = nullptr;
     TreeItem* upward_vector_v = nullptr;
@@ -264,6 +269,9 @@ signals:
     TreeItem* envelop_parameters_vibrational_damping_isotropic_orientation_angle = nullptr;
     TreeItem* partial_temporal_coherence_focus_spread = nullptr;
     TreeItem* partial_spatial_coherence_semi_convergence_angle = nullptr;
+    TreeItem* _mtf_parameters = nullptr;
+    TreeItem* image_correlation = nullptr;
+    TreeItem* image_correlation_matching_method = nullptr;
 
     /* simulation outputs */
     TreeItem* _multislice_phase_granting_output;

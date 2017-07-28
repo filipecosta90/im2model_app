@@ -241,7 +241,7 @@ std::ostream& CELSLC_prm::create_bin_args(std::ostream& args_stream) const {
       args_stream << " -ht " << ht_accelaration_voltage;
     }
     if(
-        //  sim_super_cell->get_flag_cif_format() &&
+        sim_super_cell->get_flag_cif_format() &&
         sim_super_cell->get_flag_zone_axis() &&
         sim_super_cell->get_flag_upward_vector() &&
         sim_super_cell->get_flag_length()

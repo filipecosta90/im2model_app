@@ -66,16 +66,16 @@ TreeItem::TreeItem( QVector<QVariant> &data, TreeItem *parent) {
     itemIsValidatableDoubleBottomVec.push_back(false);
     fp_validator_double_range_min.push_back( boost::function<double(void)>() );
     fp_validator_double_range_max.push_back( boost::function<double(void)>() );
-/* checkable */
-fp_checkable_setters.push_back(  boost::function<bool(bool)>() );
-fp_checkable_getters.push_back(  boost::function<bool(void)>() );
-/* fp data getters */
- _flag_fp_data_getter_double_vec.push_back(false);
- fp_data_getter_double_vec.push_back( boost::function<double(void)>() );
+    /* checkable */
+    fp_checkable_setters.push_back(  boost::function<bool(bool)>() );
+    fp_checkable_getters.push_back(  boost::function<bool(void)>() );
+    /* fp data getters */
+    _flag_fp_data_getter_double_vec.push_back(false);
+    fp_data_getter_double_vec.push_back( boost::function<double(void)>() );
 
-/* tooltip */
-itemToolTip.push_back(QVariant());
-_flag_itemToolTip.push_back( false );
+    /* tooltip */
+    itemToolTip.push_back(QVariant());
+    _flag_itemToolTip.push_back( false );
     itemState.push_back(false);
     _flag_highlight_error.push_back( false );
   }
@@ -277,47 +277,68 @@ bool TreeItem::_is_toolbar_defined(){
 }
 
 bool TreeItem::load_data_from_property_tree( boost::property_tree::ptree pt_root ){
-
+  bool result = false;
   try{
-    boost::property_tree::ptree pt_data = pt_root.get_child("data_vec");
-    int col = 0;
-    for ( boost::property_tree::ptree::value_type &pt_data_node : pt_data ){
-      std::string value = pt_data_node.second.data();
-      setData( col , QVariant( value.c_str() ), Qt::EditRole );
-      col++;
+    const std::string file_variable_name = pt_root.get<std::string>( "varname" );
+    std::cout << "file_variable_name: " << file_variable_name << " | _variable_name: " << _variable_name << std::endl;
+    if( file_variable_name == _variable_name ){
+      _flag_variable_name = true;
+      result = true;
+      try{
+        boost::property_tree::ptree pt_data = pt_root.get_child("data_vec");
+        int col = 0;
+        for ( boost::property_tree::ptree::value_type &pt_data_node : pt_data ){
+          std::string value = pt_data_node.second.data();
+          setData( col , QVariant( value.c_str() ), Qt::EditRole );
+          col++;
+        }
+      }
+      catch(const boost::property_tree::ptree_error &e){
+        result &= false;
+        //std::cout << e.what() << std::endl;
+      }
+      try{
+        boost::property_tree::ptree pt_checked_state = pt_root.get_child("checked_state_vec");
+        int col = 0;
+        for ( boost::property_tree::ptree::value_type &pt_checked_state_node : pt_checked_state ){
+          bool value = pt_checked_state_node.second.get_value<bool>();
+          setData( col , QVariant( value ), Qt::CheckStateRole );
+          col++;
+        }
+      }
+      catch(const boost::property_tree::ptree_error &e) {
+        result &= false;
+        //std::cout << e.what() << std::endl;
+      }
+      try{
+        boost::property_tree::ptree pt_childs = pt_root.get_child("child_vec");
+        int child_num = 0;
+        const int tree_n_childs = childItems.size();
+        for ( int child_num = 0; child_num < tree_n_childs ; child_num++ ){
+          TreeItem* _child =  childItems.value( child_num );
+          const std::string child_varname = _child->get_variable_name();
+          boost::property_tree::ptree pt_child_node = pt_childs.get_child(child_varname);
+          result &= _child->load_data_from_property_tree(pt_child_node);
+          std::cout << "result of loading " << child_varname << std::boolalpha << result << std::endl;
+        }
+        /*
+        for ( boost::property_tree::ptree::value_type &pt_child_node_v : pt_childs ){
+          boost::property_tree::ptree pt_child_node = pt_child_node_v.second;
+          TreeItem* _child =  childItems.value( child_num );
+          result &= _child->load_data_from_property_tree(pt_child_node);
+          child_num++;
+        }
+        */
+      }
+      catch(const boost::property_tree::ptree_error &e){
+        std::cout << e.what() << std::endl;
+      }
     }
   }
   catch(const boost::property_tree::ptree_error &e){
-    std::cout << e.what() << std::endl;
+    result &= false;
   }
-  try{
-    boost::property_tree::ptree pt_checked_state = pt_root.get_child("checked_state_vec");
-    int col = 0;
-    for ( boost::property_tree::ptree::value_type &pt_checked_state_node : pt_checked_state ){
-      bool value = pt_checked_state_node.second.get_value<bool>();
-      setData( col , QVariant( value ), Qt::CheckStateRole );
-      col++;
-    }
-  }
-  catch(const boost::property_tree::ptree_error &e) {
-    std::cout << e.what() << std::endl;
-  }
-  try{
-    boost::property_tree::ptree pt_childs = pt_root.get_child("child_vec");
-    int child_num = 0;
-    for ( boost::property_tree::ptree::value_type &pt_child_node_v : pt_childs ){
-      boost::property_tree::ptree pt_child_node = pt_child_node_v.second;
-      TreeItem* _child =  childItems.value( child_num );
-      _child->load_data_from_property_tree(pt_child_node);
-      child_num++;
-    }
-  }
-  catch(const boost::property_tree::ptree_error &e){
-    std::cout << e.what() << std::endl;
-  }
-
-  // more work here
-  return true;
+  return result;
 }
 
 boost::property_tree::ptree* TreeItem::save_data_into_property_tree( ){
@@ -333,6 +354,7 @@ boost::property_tree::ptree* TreeItem::save_data_into_property_tree( ){
     // Add this node to the list.
     pt_data->push_back(std::make_pair("data", *pt_data_node));
   }
+  pt->put("varname", _variable_name );
 
   pt->add_child("data_vec", *pt_data);
 
@@ -349,9 +371,10 @@ boost::property_tree::ptree* TreeItem::save_data_into_property_tree( ){
   int number_childs = childCount();
   for( int n = 0; n < number_childs; n++){
     TreeItem* _child =  childItems.value(n);
+    const std::string child_varname = _child->get_variable_name();
     boost::property_tree::ptree* pt_child_node = _child->save_data_into_property_tree( );
     // Add this node to the list.
-    pt_childs->push_back(std::make_pair("child", *pt_child_node));
+    pt_childs->push_back(std::make_pair(child_varname, *pt_child_node));
   }
   pt->add_child("child_vec", *pt_childs );
   return pt;
@@ -451,6 +474,7 @@ std::string TreeItem::get_variable_name(){
 
 void TreeItem::set_variable_name( std::string varname ){
   _variable_name = varname;
+  _flag_variable_name = false;
 }
 
 void TreeItem::set_variable_description( std::string vardescription ){

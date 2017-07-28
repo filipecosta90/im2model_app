@@ -29,14 +29,6 @@ bool SimGrid::set_sim_image_properties ( BaseImage* sim_prop ){
   return true;
 }
 
-bool SimGrid::get_flag_raw_simulated_images_grid(){
-  return _flag_raw_simulated_images_grid;
-}
-
-bool SimGrid::get_flag_simulated_images_grid(){
-  return _flag_simulated_images_grid;
-}
-
 bool SimGrid::export_sim_grid( std::string sim_grid_file_name_image , bool cut_margin ){
 
   // // // // //
@@ -529,8 +521,11 @@ bool SimGrid::read_grid_from_dat_files(){
           _flag_best_match_Point2i = true;
 
           simgrid_best_match_thickness_slice = simulated_params_slice_vec.at(row_thickness);
+          _flag_simgrid_best_match_thickness_slice = true;
           simgrid_best_match_thickness_nm = simulated_params_nm_slice_vec.at(row_thickness);
+          _flag_simgrid_best_match_thickness_nm = true;
           simgrid_best_match_defocus_nm = simulated_params_nm_defocus_vec.at(col_defocus);
+          _flag_simgrid_best_match_defocus_nm = true;
           runned_simulation = true;
           _flag_match_values_matrix = true;
         }
@@ -596,18 +591,6 @@ bool SimGrid::read_grid_from_dat_files(){
       result = true;
     }
     return result;
-  }
-
-  int SimGrid::get_simgrid_best_match_thickness_slice(){
-    return simgrid_best_match_thickness_slice;
-  }
-
-  double SimGrid::get_simgrid_best_match_thickness_nm(){
-    return simgrid_best_match_thickness_nm;
-  }
-
-  double SimGrid::get_simgrid_best_match_defocus_nm(){
-    return simgrid_best_match_defocus_nm;
   }
 
   std::string SimGrid::get_export_sim_grid_filename_hint(){

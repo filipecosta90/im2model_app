@@ -235,6 +235,7 @@ signals:
     bool _flag_toolbar = false;
 
     std::string _variable_name;
+    bool _flag_variable_name = false;
     std::string _variable_description;
     bool _flag_is_action = false;
     int _status_column = 0;

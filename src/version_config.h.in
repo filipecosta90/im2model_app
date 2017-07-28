@@ -1,0 +1,13 @@
+#ifndef VERSION_CONFIG_H
+#define VERSION_CONFIG_H
+
+// define your version_im2model
+#define VERSION_IM2MODEL "@VERSION_IM2MODEL@"
+
+// alternatively you could add your global method getLibInterfaceVersion here
+std::string getIm2ModelVersion()
+{
+    return VERSION_IM2MODEL;
+}
+
+#endif // VERSION_CONFIG_H

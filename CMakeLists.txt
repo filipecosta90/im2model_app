@@ -5,7 +5,13 @@ set (CMAKE_CXX_COMPILER "clang++" )
 set (CMAKE_C_COMPILER "clang" )
 set (CMAKE_CXX_STANDARD 14)
 
-project( Im2Model VERSION 0.1 LANGUAGES CXX C )
+set ( VERSION_IM2MODEL "0.2.3" )
+project( Im2Model VERSION ${VERSION_IM2MODEL} LANGUAGES CXX C )
+
+add_definitions( -DVERSION_IM2MODEL="${VERSION_IM2MODEL}" )
+
+configure_file( src/version_config.h.in ${CMAKE_BINARY_DIR}/generated/version_config.h )
+include_directories( ${CMAKE_BINARY_DIR}/generated/ )
 
 ### EXTERNAL ###
 # CMake module to enable sanitizers for binary targets.

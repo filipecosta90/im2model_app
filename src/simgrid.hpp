@@ -50,9 +50,14 @@ class SimGrid {
     // simulation parameters
     // // // // //
 
-    int simgrid_best_match_thickness_slice;
-    double simgrid_best_match_thickness_nm;
-    double simgrid_best_match_defocus_nm;
+    int simgrid_best_match_thickness_slice = 0;
+    bool _flag_simgrid_best_match_thickness_slice = false;
+
+    double simgrid_best_match_thickness_nm = 0.0f;
+    bool _flag_simgrid_best_match_thickness_nm = false;
+
+    double simgrid_best_match_defocus_nm = 0.0f;
+    bool _flag_simgrid_best_match_defocus_nm = false;
 
     BaseCrystal* sim_crystal_properties = nullptr;
     bool _flag_sim_crystal_properties = false;
@@ -106,18 +111,25 @@ class SimGrid {
     bool export_sim_grid( std::string filename , bool cut_margin = false );
 
     /** getters **/
+    int get_simgrid_best_match_thickness_slice(){ return simgrid_best_match_thickness_slice; }
+    double get_simgrid_best_match_thickness_nm(){ return simgrid_best_match_thickness_nm; }
+    double get_simgrid_best_match_defocus_nm(){ return simgrid_best_match_defocus_nm; }
 
     // flag getters
+    bool get_flag_simgrid_best_match_thickness_slice(){ return _flag_simgrid_best_match_thickness_slice; }
+    bool get_flag_simgrid_best_match_thickness_nm(){ return _flag_simgrid_best_match_thickness_nm; }
+    bool get_flag_simgrid_best_match_defocus_nm(){ return _flag_simgrid_best_match_defocus_nm; }
+    bool get_flag_simgrid_best_match_position(){ return _flag_best_match_Point2i; }
+
     bool get_flag_logger(){ return _flag_logger; }
     bool get_flag_sim_crystal_properties(){ return _flag_sim_crystal_properties; }
     bool get_flag_exp_image_properties(){ return _flag_exp_image_properties; }
     bool get_flag_sim_image_properties(){ return _flag_sim_image_properties; }
+    bool get_flag_raw_simulated_images_grid(){ return _flag_raw_simulated_images_grid; }
+    bool get_flag_simulated_images_grid(){ return _flag_simulated_images_grid; }
+
     /* Loggers */
     ApplicationLog::ApplicationLog* get_logger(){ return logger; }
-
-    bool get_flag_simulated_images_grid();
-    bool get_flag_raw_simulated_images_grid();
-    bool get_flag_simgrid_best_match_position(){ return _flag_best_match_Point2i; }
 
     bool produce_png_from_dat_file();
 
@@ -131,12 +143,6 @@ class SimGrid {
     bool base_cystal_clean_for_re_run();
 
     int get_image_correlation_matching_method();
-
-    int get_simgrid_best_match_thickness_slice();
-
-    double get_simgrid_best_match_thickness_nm();
-
-    double get_simgrid_best_match_defocus_nm();
 
     std::vector< std::vector<cv::Mat> > get_simulated_images_grid();
 

@@ -6,6 +6,7 @@
 #include "application_log.hpp"
 #include "configwin.h"
 #include "QtAwesome.h"
+#include "version_config.h"
 
 #include <iostream>
 #include <QtWidgets>
@@ -87,6 +88,7 @@ int main(int argc, char *argv[]){
     app.setOrganizationName("uminho");
     app.setApplicationName("Im2Model");
 
+ std::cout << "Im2Model version: " << getIm2ModelVersion() << std::endl;
   // to ease the load process
   QCommandLineParser parser;
   parser.setApplicationDescription(QCoreApplication::applicationName());
@@ -95,6 +97,7 @@ int main(int argc, char *argv[]){
   parser.addPositionalArgument("file", "The file to open.");
   parser.process(app);
   MainWindow window( app.im2model_logger );
+  window.setApplicationVersion( getIm2ModelVersion() );
 
   if( window._is_initialization_ok() ){
     if (!parser.positionalArguments().isEmpty()){

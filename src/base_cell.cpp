@@ -205,8 +205,8 @@ void BaseCell::form_matrix_from_miller_indices(){
     // can be converted to a unit vector, n, by dividing by the
     // square root of the sum of the squares: {similar for [uvw]}.
     // This is known as normalization.
-    cv::Point3d vector_y_axis_projected = zone_axis / norm_uvw;
-    cv::Point3d vector_z_axis_projected = upward_vector / norm_hkl;
+    cv::Point3d vector_y_axis_projected = upward_vector / norm_hkl;
+    cv::Point3d vector_z_axis_projected = zone_axis / norm_uvw;
 
     // projected x-axis: y cross z
     // projected y-axis: (uvw)
