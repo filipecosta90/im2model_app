@@ -236,8 +236,8 @@ std::ostream& CELSLC_prm::create_bin_args(std::ostream& args_stream) const {
     }
 
     // input ht
-    if( sim_crystal_properties->get_flag_ht_accelaration_voltage() ){
-      const double ht_accelaration_voltage = sim_crystal_properties->get_ht_accelaration_voltage();
+    if( sim_crystal_properties->get_flag_ht_accelaration_voltage_KV() ){
+      const double ht_accelaration_voltage = sim_crystal_properties->get_ht_accelaration_voltage_KV();
       args_stream << " -ht " << ht_accelaration_voltage;
     }
     if(
@@ -313,7 +313,7 @@ bool CELSLC_prm::call_boost_bin(){
     if(
         // BaseCrystal vars
         sim_crystal_properties->get_flag_slc_file_name_prefix() &&
-        sim_crystal_properties->get_flag_ht_accelaration_voltage() &&
+        sim_crystal_properties->get_flag_ht_accelaration_voltage_KV() &&
         // BaseBin vars
         _flag_base_bin_start_dir_path &&
         _flag_base_bin_output_dir_path &&

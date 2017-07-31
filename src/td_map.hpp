@@ -92,6 +92,8 @@ class TDMap  : public QObject {
     BaseImage* sim_image_properties = nullptr;
     BaseImage* exp_image_properties = nullptr;
 
+    EMDWrapper* emd_wrapper = nullptr;
+
     ImageBounds* exp_image_bounds = nullptr;
 
     BaseCrystal* sim_crystal_properties = nullptr;
@@ -112,6 +114,7 @@ class TDMap  : public QObject {
     std::vector<std::string> test_clean_run_env_warnings;
 
     bool set_base_dir_path( boost::filesystem::path path );
+    bool update_emd_fields();
 
   public:
     enum RefinementPreset { NO_REFINEMENT, MICROSCOPE_CORRECTED, MICROSCOPE_NON_CORRECTED, USER_DEFINED_PRESET };
@@ -171,6 +174,9 @@ class TDMap  : public QObject {
     bool get_flag_simgrid_best_match_thickness_nm();
     bool get_flag_simgrid_best_match_defocus_nm();
     /* getters */
+    double get_exp_image_properties_sampling_rate_x_nm_per_pixel();
+    double get_exp_image_properties_sampling_rate_y_nm_per_pixel();
+    double get_accelaration_voltage_kv();
     std::vector< double > get_simulated_images_vertical_header_slice_nm();
     std::vector< double > get_simulated_images_horizontal_header_defocus_nm();
     std::vector< std::vector<cv::Mat> > get_simulated_images_grid();
@@ -205,7 +211,7 @@ class TDMap  : public QObject {
     bool get_flag_defocus_lower_bound();
     bool get_flag_defocus_period();
 
-    bool get_flag_ht_accelaration_voltage();
+    bool get_flag_ht_accelaration_voltage_KV();
     bool get_flag_slice_params_accum_nm_slice_vec();
     bool get_flag_simulated_images_grid();
     bool get_flag_raw_simulated_images_grid();
@@ -233,6 +239,10 @@ class TDMap  : public QObject {
     bool set_project_dir_path( std::string name_path );
     bool set_project_filename_with_path( std::string filename_with_path );
     bool set_exp_image_properties_full_image( std::string path );
+    bool set_image_properties_sampling_rate_x_m_per_pixel( const double sampling_x );
+    bool set_image_properties_sampling_rate_y_m_per_pixel( const double sampling_y );
+    bool set_image_properties_sampling_rate_x_nm_per_pixel( const double sampling_x );
+    bool set_image_properties_sampling_rate_y_nm_per_pixel( const double sampling_y );
     bool set_exp_image_properties_sampling_rate_x_nm_per_pixel( std::string sampling_x );
     bool set_exp_image_properties_sampling_rate_y_nm_per_pixel( std::string sampling_y );
     bool set_exp_image_properties_roi_center_x( std::string s_center_x );
@@ -392,6 +402,10 @@ class TDMap  : public QObject {
     double get_full_boundary_polygon_margin_nm_top_limit();
 
 signals:
+ void exp_image_properties_sampling_rate_x_nm_per_pixel_changed();
+void exp_image_properties_sampling_rate_y_nm_per_pixel_changed();
+void accelaration_voltage_kv_changed();
+
     void TDMap_started_celslc( );
     void TDMap_inform_celslc_n_steps( int number_steps );
     void TDMap_at_celslc_step( int step );

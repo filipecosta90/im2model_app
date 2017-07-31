@@ -121,11 +121,17 @@ bool BaseImage::set_flag_auto_roi_from_ignored_edge( bool value ){
   return true;
 }
 
+bool BaseImage::set_emd_wrapper( EMDWrapper* wrapper ){
+  emd_wrapper = wrapper;
+   _flag_emd_wrapper = true;
+return true;
+}
+
 bool BaseImage::set_full_image( std::string image_path ){
   if ( boost::filesystem::exists( image_path ) ){
-    std::string extension = boost::filesystem::extension( image_path );
-    if( extension == ".emd" ){
-      emd_wrapper = new EMDWrapper();
+  image_extension = boost::filesystem::extension( image_path );
+
+    if( image_extension == ".emd" ){
       const bool emd_result = emd_wrapper->read_emd(image_path);
       if( emd_result ){
         full_image = emd_wrapper->get_full_image();
@@ -134,12 +140,7 @@ bool BaseImage::set_full_image( std::string image_path ){
         _flag_full_n_rows_height = true;
         full_n_cols_width = emd_wrapper->get_full_n_cols_width();
         _flag_full_n_cols_width = true;
-        if( emd_wrapper->get_flag_pixel_size_width() ){
-          set_pixel_size_width_y_m( emd_wrapper->get_pixel_size_width() );
-        }
-        if( emd_wrapper->get_flag_pixel_size_height() ){
-          set_pixel_size_height_x_m( emd_wrapper->get_pixel_size_height() );
-        }
+        set_roi();
       }
     }
     else{

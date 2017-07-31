@@ -199,17 +199,22 @@ bool TreeItem::load_data_from_getter( ){
 void TreeItem::load_data_from_getter( int column ){
   if  (column >= 0 && column < itemData.size() ) {
     //call getter on core im2model
-    if ( _flag_fp_data_getter_double_vec.at(column) == true ){
       QVariant value;
       if( _flag_fp_data_getter_double_vec[column] == true  ){
         const double _double_value = fp_data_getter_double_vec[column]();
         std::cout << "_double_value " << _double_value << std::endl;
         value = QVariant::fromValue( _double_value );
+        emit dataChanged( column );
+        emit dataChanged( _variable_name );
+        itemData[column] = value;
       }
-      emit dataChanged( column );
-      emit dataChanged( _variable_name );
-      itemData[column] = value;
     }
+}
+
+// loads data for all cols
+void TreeItem::load_data_from_getter_double( ){
+  for(int pos = 0; pos < fp_data_getter_double_vec.size(); pos++ ){
+    load_data_from_getter( pos );
   }
 }
 

@@ -1149,21 +1149,28 @@ void MainWindow::create_box_options(){
   // Sampling rate
   ////////////////
   QVector<QVariant> box1_option_2 = {"Pixel size (nm/pixel)",""};
+    experimental_sampling_rate = new TreeItem ( box1_option_2  );
+    experimental_sampling_rate->set_variable_name( "experimental_sampling_rate" );
+    experimental_image_root->insertChildren( experimental_sampling_rate );
+
   QVector<QVariant> box1_option_2_1 = {"x",""};
   QVector<bool> box1_option_2_1_edit = {false,true};
   boost::function<bool(std::string)> box1_function_2_1 ( boost::bind( &TDMap::set_exp_image_properties_sampling_rate_x_nm_per_pixel,_core_td_map, _1 ) );
-  QVector<QVariant> box1_option_2_2 = {"y",""};
-  QVector<bool> box1_option_2_2_edit = {false,true};
-  boost::function<bool(std::string)> box1_function_2_2 ( boost::bind( &TDMap::set_exp_image_properties_sampling_rate_y_nm_per_pixel,_core_td_map, _1 ) );
-
-  experimental_sampling_rate = new TreeItem ( box1_option_2  );
-  experimental_sampling_rate->set_variable_name( "experimental_sampling_rate" );
-  experimental_sampling_rate_x = new TreeItem ( box1_option_2_1 , box1_function_2_1, box1_option_2_1_edit );
+  boost::function<double(void)> box1_function_2_1_getter ( boost::bind( &TDMap::get_exp_image_properties_sampling_rate_x_nm_per_pixel,_core_td_map ) );
+experimental_sampling_rate_x = new TreeItem ( box1_option_2_1 , box1_function_2_1, box1_option_2_1_edit );
+  experimental_sampling_rate_x->set_fp_data_getter_double_vec( 1, box1_function_2_1_getter );
+  connect( _core_td_map, SIGNAL(exp_image_properties_sampling_rate_x_nm_per_pixel_changed( )), experimental_sampling_rate_x, SLOT( load_data_from_getter_double() ) );
   experimental_sampling_rate_x->set_variable_name( "experimental_sampling_rate_x" );
-  experimental_sampling_rate_y = new TreeItem ( box1_option_2_2 , box1_function_2_2, box1_option_2_2_edit );
-  experimental_sampling_rate_y->set_variable_name( "experimental_sampling_rate_y" );
-  experimental_image_root->insertChildren( experimental_sampling_rate );
   experimental_sampling_rate->insertChildren( experimental_sampling_rate_x );
+
+    QVector<QVariant> box1_option_2_2 = {"y",""};
+    QVector<bool> box1_option_2_2_edit = {false,true};
+    boost::function<bool(std::string)> box1_function_2_2 ( boost::bind( &TDMap::set_exp_image_properties_sampling_rate_y_nm_per_pixel,_core_td_map, _1 ) );
+    boost::function<double(void)> box1_function_2_2_getter ( boost::bind( &TDMap::get_exp_image_properties_sampling_rate_y_nm_per_pixel,_core_td_map ) );
+  experimental_sampling_rate_y = new TreeItem ( box1_option_2_2 , box1_function_2_2, box1_option_2_2_edit );
+  experimental_sampling_rate_y->set_fp_data_getter_double_vec( 1, box1_function_2_2_getter );
+  connect( _core_td_map, SIGNAL( exp_image_properties_sampling_rate_y_nm_per_pixel_changed( )), experimental_sampling_rate_y, SLOT( load_data_from_getter_double() ) );
+  experimental_sampling_rate_y->set_variable_name( "experimental_sampling_rate_y" );
   experimental_sampling_rate->insertChildren( experimental_sampling_rate_y );
 
   /*group options*/
@@ -1687,7 +1694,12 @@ void MainWindow::create_box_options(){
   QVector<QVariant> box3_option_3_1 = {"Acceleration voltage (kV)",""};
   QVector<bool> box3_option_3_1_edit = {false,true};
   boost::function<bool(std::string)> box3_function_3_1 ( boost::bind( &TDMap::set_accelaration_voltage_kv, _core_td_map, _1 ) );
+  boost::function<double(void)> box3_function_3_1_getter ( boost::bind( &TDMap::get_accelaration_voltage_kv,_core_td_map ) );
   accelaration_voltage_kv = new TreeItem ( box3_option_3_1 , box3_function_3_1, box3_option_3_1_edit );
+  accelaration_voltage_kv->set_fp_data_getter_double_vec( 1, box3_function_3_1_getter );
+  connect( _core_td_map, SIGNAL( accelaration_voltage_kv_changed( )), accelaration_voltage_kv, SLOT( load_data_from_getter_double() ) );
+
+
   accelaration_voltage_kv->set_variable_name( "accelaration_voltage_kv" );
   incident_electron_beam->insertChildren( accelaration_voltage_kv );
   /*group options*/
@@ -1836,7 +1848,7 @@ void MainWindow::create_box_options(){
   ////////////////
   // Image spread -- first rms (nm)
   ////////////////
-  QVector<QVariant> box3_option_5_2_1_1 = {"First rms (nm)",""};
+  QVector<QVariant> box3_option_5_2_1_1 = {"Vibrational damping",""};
   QVector<bool> box3_option_5_2_1_1_edit = {false,true};
   boost::function<bool(double)> box3_function_5_2_1_1 ( boost::bind( &TDMap::set_envelop_parameters_vibrational_damping_isotropic_one_rms_amplitude, _core_td_map, _1 ) );
   envelop_parameters_vibrational_damping_isotropic_first_rms_amplitude = new TreeItem ( box3_option_5_2_1_1 , box3_function_5_2_1_1, box3_option_5_2_1_1_edit );
@@ -1845,31 +1857,6 @@ void MainWindow::create_box_options(){
   _envelope_parameters_vibrational_damping->insertChildren( envelop_parameters_vibrational_damping_isotropic_first_rms_amplitude );
   /* validators */
   envelop_parameters_vibrational_damping_isotropic_first_rms_amplitude->set_flag_validatable_double(1,true);
-
-  ////////////////
-  // Image spread -- second rms (nm)
-  ////////////////
-  QVector<QVariant> box3_option_5_2_1_2 = {"Second rms (nm)",""};
-  QVector<bool> box3_option_5_2_1_2_edit = {false,true};
-  boost::function<bool(double)> box3_function_5_2_1_2 ( boost::bind( &TDMap::set_envelop_parameters_vibrational_damping_anisotropic_second_rms_amplitude, _core_td_map, _1 ) );
-  envelop_parameters_vibrational_damping_isotropic_second_rms_amplitude = new TreeItem ( box3_option_5_2_1_2 , box3_function_5_2_1_2, box3_option_5_2_1_2_edit );
-  envelop_parameters_vibrational_damping_isotropic_second_rms_amplitude->set_variable_name( "envelop_parameters_vibrational_damping_isotropic_second_rms_amplitude" );
-  _envelope_parameters_vibrational_damping->insertChildren( envelop_parameters_vibrational_damping_isotropic_second_rms_amplitude );
-  /* validators */
-  envelop_parameters_vibrational_damping_isotropic_second_rms_amplitude->set_flag_validatable_double(1,true);
-
-  ////////////////
-  // Image spread -- orientation angle
-  ////////////////
-  QVector<QVariant> box3_option_5_2_1_3 = {"Orientation angle",""};
-  QVector<bool> box3_option_5_2_1_3_edit = {false,true};
-  boost::function<bool(double)> box3_function_5_2_1_3 ( boost::bind( &TDMap::set_envelop_parameters_vibrational_damping_azimuth_orientation_angle, _core_td_map, _1 ) );
-  envelop_parameters_vibrational_damping_isotropic_orientation_angle = new TreeItem ( box3_option_5_2_1_3 , box3_function_5_2_1_3, box3_option_5_2_1_3_edit );
-  envelop_parameters_vibrational_damping_isotropic_orientation_angle->set_variable_name( "envelop_parameters_vibrational_damping_isotropic_orientation_angle" );
-  _envelope_parameters_vibrational_damping->insertChildren( envelop_parameters_vibrational_damping_isotropic_orientation_angle );
-  /* validators */
-  envelop_parameters_vibrational_damping_isotropic_orientation_angle->set_flag_validatable_double(1,true);
-
 
   ////////////////
   // Envelop parameters - temporal coherence

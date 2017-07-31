@@ -39,7 +39,7 @@ bool WAVIMG_prm::produce_prm ( ) {
         _flag_prm_filename &&
         // BaseCrystal vars
         sim_crystal_properties->get_flag_base_dir_path() &&
-        sim_crystal_properties->get_flag_ht_accelaration_voltage() &&
+        sim_crystal_properties->get_flag_ht_accelaration_voltage_KV() &&
         sim_crystal_properties->get_flag_wav_output_target_folder() &&
         sim_crystal_properties->get_flag_defocus_lower_bound() &&
         sim_crystal_properties->get_flag_defocus_upper_bound() &&
@@ -59,7 +59,7 @@ bool WAVIMG_prm::produce_prm ( ) {
         ){
           // get const vars from class pointer
           const boost::filesystem::path base_dir_path = sim_crystal_properties->get_base_dir_path();
-          const double ht_accelaration_voltage = sim_crystal_properties->get_ht_accelaration_voltage();
+          const double ht_accelaration_voltage = sim_crystal_properties->get_ht_accelaration_voltage_KV();
           const std::string wav_output_target_folder = sim_crystal_properties->get_wav_output_target_folder();
           const double defocus_lower_bound = sim_crystal_properties->get_defocus_lower_bound();
           const double defocus_upper_bound = sim_crystal_properties->get_defocus_upper_bound();

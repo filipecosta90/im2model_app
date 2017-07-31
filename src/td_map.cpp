@@ -27,6 +27,9 @@ TDMap::TDMap(
   sim_image_properties = new BaseImage();
   exp_image_properties = new BaseImage();
 
+  emd_wrapper = new EMDWrapper();
+  exp_image_properties->set_emd_wrapper( emd_wrapper );
+
   exp_image_bounds = new ImageBounds();
   exp_image_bounds->set_base_image( exp_image_properties );
   final_full_sim_super_cell->set_image_bounds( exp_image_bounds );
@@ -593,6 +596,18 @@ bool TDMap::get_flag_simulated_images_grid(){
 }
 
 /* getters */
+
+double  TDMap::get_exp_image_properties_sampling_rate_x_nm_per_pixel(){
+  return exp_image_properties->get_sampling_rate_x_nm_per_pixel();
+}
+
+double  TDMap::get_exp_image_properties_sampling_rate_y_nm_per_pixel(){
+  return exp_image_properties->get_sampling_rate_y_nm_per_pixel();
+}
+double  TDMap::get_accelaration_voltage_kv(){
+  return sim_crystal_properties->get_ht_accelaration_voltage_KV();
+}
+
 std::vector< double > TDMap::get_simulated_images_vertical_header_slice_nm(){
   return sim_crystal_properties->get_simulated_params_nm_slice_vec();
 }
@@ -698,8 +713,8 @@ bool TDMap::get_flag_defocus_period(){
   return sim_crystal_properties->get_flag_defocus_period();
 }
 
-bool TDMap::get_flag_ht_accelaration_voltage(){
-  const bool result = sim_crystal_properties->get_flag_ht_accelaration_voltage( );
+bool TDMap::get_flag_ht_accelaration_voltage_KV(){
+  const bool result = sim_crystal_properties->get_flag_ht_accelaration_voltage_KV( );
   return result;
 }
 
@@ -957,7 +972,42 @@ bool TDMap::set_dr_probe_wavimg_execname( std::string wavimg_execname ){
 }
 
 bool TDMap::set_exp_image_properties_full_image( std::string path ){
-  return exp_image_properties->set_full_image( path );
+  const bool result = exp_image_properties->set_full_image( path );
+  if( result && exp_image_properties->get_image_extension() == ".emd" ){
+    update_emd_fields();
+  }
+  return result;
+}
+
+bool TDMap::update_emd_fields(){
+  bool result = false;
+  if( exp_image_properties->get_image_extension() == ".emd" ){
+    result = true;
+    if( emd_wrapper->get_flag_pixel_size_width() ){
+      const double m_pixel_size_width = emd_wrapper->get_pixel_size_width();
+      const bool set_result = set_image_properties_sampling_rate_x_m_per_pixel( m_pixel_size_width );
+      if( set_result ){
+        std::cout << "   emit exp_image_properties_sampling_rate_x_nm_per_pixel_changed() with value on var " << m_pixel_size_width << std::endl;
+        emit exp_image_properties_sampling_rate_x_nm_per_pixel_changed();
+      }
+    }
+    if( emd_wrapper->get_flag_pixel_size_height() ){
+      const double m_pixel_size_height = emd_wrapper->get_pixel_size_height();
+      const bool set_result = set_image_properties_sampling_rate_y_m_per_pixel( m_pixel_size_height );
+      if( set_result ){
+        std::cout << "   emit exp_image_properties_sampling_rate_y_nm_per_pixel_changed() with value on var " << m_pixel_size_height << std::endl;
+        emit exp_image_properties_sampling_rate_y_nm_per_pixel_changed();
+      }
+    }
+    if( emd_wrapper->get_flag_Optics_AccelerationVoltage() ){
+      const double acc_voltage_volts = emd_wrapper->get_Optics_AccelerationVoltage();
+      const bool set_result = sim_crystal_properties->set_ht_accelaration_voltage_V( acc_voltage_volts );
+      if( set_result ){
+        std::cout << "   emit accelaration_voltage_kv_changed() with value on var " << acc_voltage_volts << std::endl;
+        emit accelaration_voltage_kv_changed();
+      }
+    }
+  }
 }
 
 bool TDMap::set_exp_image_properties_roi_center_x( std::string s_center_x ){
@@ -986,13 +1036,35 @@ bool TDMap::set_exp_image_properties_roi_center_y( std::string s_center_y ){
   return result;
 }
 
+bool TDMap::set_image_properties_sampling_rate_x_m_per_pixel( const double s_rate_x ){
+  const bool exp_result = exp_image_properties->set_pixel_size_height_x_m( s_rate_x );
+  const bool sim_result = sim_image_properties->set_pixel_size_height_x_m( s_rate_x );
+  return exp_result && sim_result;
+}
+
+bool TDMap::set_image_properties_sampling_rate_y_m_per_pixel( const double s_rate_y ){
+  const bool exp_result = exp_image_properties->set_pixel_size_width_y_m( s_rate_y );
+  const bool sim_result = sim_image_properties->set_pixel_size_width_y_m( s_rate_y );
+  return exp_result && sim_result;
+}
+
+bool TDMap::set_image_properties_sampling_rate_x_nm_per_pixel( const double s_rate_x ){
+  const bool exp_result = exp_image_properties->set_sampling_rate_x_nm_per_pixel( s_rate_x );
+  const bool sim_result = sim_image_properties->set_sampling_rate_x_nm_per_pixel( s_rate_x );
+  return exp_result && sim_result;
+}
+
+bool TDMap::set_image_properties_sampling_rate_y_nm_per_pixel( const double s_rate_y ){
+  const bool exp_result = exp_image_properties->set_sampling_rate_y_nm_per_pixel( s_rate_y );
+  const bool sim_result = sim_image_properties->set_sampling_rate_y_nm_per_pixel( s_rate_y );
+  return exp_result && sim_result;
+}
+
 bool TDMap::set_exp_image_properties_sampling_rate_x_nm_per_pixel( std::string sampling_x ){
   bool result = false;
   try {
     const double s_rate_x = boost::lexical_cast<double>( sampling_x );
-    const bool exp_result = exp_image_properties->set_sampling_rate_x_nm_per_pixel( s_rate_x );
-    const bool sim_result = sim_image_properties->set_sampling_rate_x_nm_per_pixel( s_rate_x );
-    result = exp_result && sim_result;
+    result = set_image_properties_sampling_rate_x_nm_per_pixel( s_rate_x );
   }
   catch(boost::bad_lexical_cast&  ex) {
     // pass it up
@@ -1005,9 +1077,7 @@ bool TDMap::set_exp_image_properties_sampling_rate_y_nm_per_pixel( std::string s
   bool result = false;
   try {
     const double s_rate_y = boost::lexical_cast<double>( sampling_y );
-    const bool exp_result = exp_image_properties->set_sampling_rate_y_nm_per_pixel( s_rate_y );
-    const bool sim_result = sim_image_properties->set_sampling_rate_y_nm_per_pixel( s_rate_y );
-    result = exp_result && sim_result;
+    result = set_image_properties_sampling_rate_y_nm_per_pixel( s_rate_y );
   }
   catch(boost::bad_lexical_cast&  ex) {
     // pass it up
@@ -1303,7 +1373,7 @@ bool TDMap::set_accelaration_voltage_kv( std::string accelaration_voltage ){
   bool result = false;
   try {
     const double _ht_accelaration_voltage = boost::lexical_cast<double>( accelaration_voltage );
-    result = sim_crystal_properties->set_ht_accelaration_voltage( _ht_accelaration_voltage );
+    result = sim_crystal_properties->set_ht_accelaration_voltage_KV( _ht_accelaration_voltage );
   }
   catch(boost::bad_lexical_cast&  ex) {
     // pass it up

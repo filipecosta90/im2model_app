@@ -138,6 +138,7 @@ class TreeItem : public QObject {
     public slots:
       void setToolTipText(const QString&);
       void load_data_from_getter( int column );
+      void load_data_from_getter_double( );
 
 
 signals:
