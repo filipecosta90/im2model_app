@@ -225,9 +225,15 @@ bool BaseCrystal::set_nz_switch( bool value ){
   return true;
 }
 
-bool BaseCrystal::set_ht_accelaration_voltage( double ht ){
-  ht_accelaration_voltage = ht;
-  _flag_ht_accelaration_voltage = true;
+bool BaseCrystal::set_ht_accelaration_voltage_KV( double ht ){
+  ht_accelaration_voltage_KV = ht;
+  _flag_ht_accelaration_voltage_KV = true;
+  return true;
+}
+
+bool BaseCrystal::set_ht_accelaration_voltage_V( double ht ){
+  ht_accelaration_voltage_KV = ht / 1000.0f;
+  _flag_ht_accelaration_voltage_KV = true;
   return true;
 }
 
@@ -337,8 +343,8 @@ std::ostream& BaseCrystal::output(std::ostream& stream) const {
     << "\t" << "nz_simulated_partitions : " <<  nz_simulated_partitions << "\n"
     << "\t\t" << "_flag_nz_simulated_partitions : " << std::boolalpha <<  _flag_nz_simulated_partitions << "\n"
     << "\t" << "nz_switch : " << std::boolalpha <<  nz_switch << "\n"
-    << "\t" << "ht_accelaration_voltage : " <<  ht_accelaration_voltage << "\n"
-    << "\t" << "_flag_ht_accelaration_voltage : " <<  _flag_ht_accelaration_voltage << "\n"
+    << "\t" << "ht_accelaration_voltage_KV : " <<  ht_accelaration_voltage_KV << "\n"
+    << "\t" << "_flag_ht_accelaration_voltage_KV : " <<  _flag_ht_accelaration_voltage_KV << "\n"
 
     // [Slice Parameters]
     << "\t" << "slc_file_name_prefix : " <<  slc_file_name_prefix << "\n"

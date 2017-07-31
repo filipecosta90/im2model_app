@@ -44,9 +44,11 @@ bool EMDWrapper::read_emd( std::string filename ){
         Document metadata_doc;
         metadata_doc.Parse( std::string(meta.begin(), meta.end()).c_str() );
         Optics_AccelerationVoltage = boost::lexical_cast<double>( metadata_doc["Optics"]["AccelerationVoltage"].GetString() );
+        _flag_Optics_AccelerationVoltage = true;
         BinaryResult_PixelSize_width = boost::lexical_cast<double>( metadata_doc["BinaryResult"]["PixelSize"]["width"].GetString() );
+_flag_BinaryResult_PixelSize_width = true;
         BinaryResult_PixelSize_height = boost::lexical_cast<double>( metadata_doc["BinaryResult"]["PixelSize"]["height"].GetString() );
-
+_flag_BinaryResult_PixelSize_height = true;
         std::cout << "( " << Optics_AccelerationVoltage << " ) metadata_doc[\"Optics\"][\"AccelerationVoltage\"] :\t" << metadata_doc["Optics"]["AccelerationVoltage"].GetString() << std::endl;
         std::cout << "( " << BinaryResult_PixelSize_width << " ) metadata_doc[\"BinaryResult\"][\"PixelSize\"][\"width\"] :\t" << metadata_doc["BinaryResult"]["PixelSize"]["width"].GetString() << std::endl;
         std::cout << "( " << BinaryResult_PixelSize_height << " ) metadata_doc[\"BinaryResult\"][\"PixelSize\"][\"height\"] :\t" << metadata_doc["BinaryResult"]["PixelSize"]["height"].GetString() << std::endl;

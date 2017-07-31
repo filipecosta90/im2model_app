@@ -52,8 +52,8 @@ class BaseCrystal {
     bool _flag_nz_simulated_partitions = false;
     bool nz_switch = false;
 
-    double ht_accelaration_voltage = 0.0f;
-    bool _flag_ht_accelaration_voltage = false;
+    double ht_accelaration_voltage_KV = 0.0f;
+    bool _flag_ht_accelaration_voltage_KV= false;
 
     // [Slice Parameters] -- updated on run
     std::string slc_file_name_prefix;
@@ -124,7 +124,7 @@ class BaseCrystal {
 
     bool clean_for_re_run();
     bool get_flag_nz_simulated_partitions(){ return _flag_nz_simulated_partitions; }
-    bool get_flag_ht_accelaration_voltage(){ return _flag_ht_accelaration_voltage; }
+    bool get_flag_ht_accelaration_voltage_KV(){ return _flag_ht_accelaration_voltage_KV; }
     bool get_flag_slc_file_name_prefix(){ return _flag_slc_file_name_prefix; }
     // [Slice Parameters]
     bool get_flag_slice_params_nm_slice_vec(){ return _flag_slice_params_nm_slice_vec; };
@@ -166,7 +166,7 @@ class BaseCrystal {
     /** getters **/
     int get_nz_simulated_partitions(){ return nz_simulated_partitions; }
     bool get_nz_switch(){ return nz_switch; }
-    double get_ht_accelaration_voltage(){ return ht_accelaration_voltage; }
+    double get_ht_accelaration_voltage_KV(){ return ht_accelaration_voltage_KV; }
     // [Slice Parameters]
     std::string get_slc_file_name_prefix(){ return slc_file_name_prefix; }
     std::vector<double> get_slice_params_nm_slice_vec(){ return slice_params_nm_slice_vec; }
@@ -205,7 +205,8 @@ class BaseCrystal {
     bool set_nz_simulated_partitions_from_prm();
     bool set_nz_simulated_partitions( int nz_partitions );
     bool set_nz_switch( bool value );
-    bool set_ht_accelaration_voltage( double );
+    bool set_ht_accelaration_voltage_KV( double );
+    bool set_ht_accelaration_voltage_V( double );
 
     bool set_slc_file_name_prefix( std::string slc_file_name_prefix );
     // Intermediate files info

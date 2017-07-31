@@ -74,6 +74,7 @@ EMDGroup grp;
   protected:
 
     double Optics_AccelerationVoltage = 0.0f;
+    bool _flag_Optics_AccelerationVoltage = false;
     double BinaryResult_PixelSize_width = 0.0f;
     bool _flag_BinaryResult_PixelSize_width = false;
     double BinaryResult_PixelSize_height  = 0.0f;
@@ -91,11 +92,13 @@ EMDGroup grp;
     int get_full_n_rows_height();
     int get_full_n_cols_width();
 
-    // sampling rate
-    bool get_flag_pixel_size_width(){ return BinaryResult_PixelSize_height; }
-    double get_pixel_size_width(){ return _flag_BinaryResult_PixelSize_height; }
+     bool get_flag_Optics_AccelerationVoltage(){ return _flag_Optics_AccelerationVoltage; }
+     double get_Optics_AccelerationVoltage(){ return Optics_AccelerationVoltage; }
+     // sampling rate
+    bool get_flag_pixel_size_width(){ return _flag_BinaryResult_PixelSize_height; }
+    double get_pixel_size_width(){ return BinaryResult_PixelSize_height; }
     bool get_flag_pixel_size_height(){ return _flag_BinaryResult_PixelSize_height; }
-    int get_pixel_size_height(){ return BinaryResult_PixelSize_height; }
+    double get_pixel_size_height(){ return BinaryResult_PixelSize_height; }
 };
 
 #endif

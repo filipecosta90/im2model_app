@@ -372,7 +372,7 @@ bool MSA_prm::produce_prm () {
         sim_crystal_properties->get_flag_slc_file_name_prefix() &&
         sim_crystal_properties->get_flag_base_dir_path() &&
         sim_crystal_properties->get_flag_slc_output_target_folder() &&
-        sim_crystal_properties->get_flag_ht_accelaration_voltage() &&
+        sim_crystal_properties->get_flag_ht_accelaration_voltage_KV() &&
         sim_crystal_properties->get_flag_nz_simulated_partitions() &&
         _flag_prm_filename
       ){
@@ -380,7 +380,7 @@ bool MSA_prm::produce_prm () {
       const std::string slc_file_name_prefix = sim_crystal_properties->get_slc_file_name_prefix();
       const std::string slc_output_target_folder = sim_crystal_properties->get_slc_output_target_folder();
       const boost::filesystem::path base_dir_path = sim_crystal_properties->get_base_dir_path();
-      const double ht_accelaration_voltage = sim_crystal_properties->get_ht_accelaration_voltage();
+      const double ht_accelaration_voltage = sim_crystal_properties->get_ht_accelaration_voltage_KV();
       const int nz_simulated_partitions = sim_crystal_properties->get_nz_simulated_partitions();
 
       boost::filesystem::path file ( prm_filename );

@@ -47,10 +47,12 @@ class BaseImage {
     ApplicationLog::ApplicationLog* logger = nullptr;
     bool _flag_logger = false;
 
-    EMDWrapper* emd_wrapper;
+    EMDWrapper* emd_wrapper = nullptr;
+    bool _flag_emd_wrapper = false;
 
   protected:
     // FULL IMAGE
+    std::string image_extension;
     cv::Mat full_image;
     bool _flag_full_image = false;
 
@@ -125,6 +127,7 @@ class BaseImage {
     bool get_flag_auto_roi_from_ignored_edge(){ return _flag_auto_roi_from_ignored_edge; }
 
     // var getters
+    std::string get_image_extension(){ return image_extension; }
     cv::Mat get_full_image(){ return full_image.clone(); }
     int get_full_n_rows_height(){ return full_n_rows_height; }
     double get_full_n_rows_height_nm(){ return full_n_rows_height_nm; }
@@ -156,6 +159,8 @@ class BaseImage {
     bool set_flag_auto_a_size( bool value );
     bool set_flag_auto_b_size( bool value );
     bool set_flag_auto_roi_from_ignored_edge( bool value );
+
+    bool set_emd_wrapper( EMDWrapper* wrapper );
 
     // full frame
     bool set_full_image( std::string path );
