@@ -68,7 +68,7 @@ bool EMDWrapper::read_emd( std::string filename ){
 }
 
 cv::Mat EMDWrapper::get_full_image(){
-  return full_image;
+  return full_image.clone();
 }
 
 //dimensions

@@ -242,6 +242,7 @@ bool ImageBounds::update_roi_boundary_polygon_from_full_boundaries(){
 bool ImageBounds::set_base_image( BaseImage* base_image_ptr ){
   base_image = base_image_ptr;
   _flag_base_image = true;
+  return true;
 }
 
 bool ImageBounds::set_hysteresis_threshold( int threshold ){

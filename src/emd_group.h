@@ -51,9 +51,9 @@
 #define H5_BUILT_AS_DYNAMIC_LIB
 #include <H5Cpp.h>
 
-#include "rapidjson/reader.h"
-#include "rapidjson/stream.h"
-#include "rapidjson/document.h"
+#include "../include/rapidjson/reader.h"
+#include "../include/rapidjson/stream.h"
+#include "../include/rapidjson/document.h"
 
 #include "emd_object.h"
 #include "emd_dataset.h"
