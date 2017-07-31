@@ -1836,7 +1836,7 @@ void MainWindow::create_box_options(){
   ////////////////
   // Image spread -- first rms (nm)
   ////////////////
-  QVector<QVariant> box3_option_5_2_1_1 = {"First rms (nm)",""};
+  QVector<QVariant> box3_option_5_2_1_1 = {"Vibrational damping",""};
   QVector<bool> box3_option_5_2_1_1_edit = {false,true};
   boost::function<bool(double)> box3_function_5_2_1_1 ( boost::bind( &TDMap::set_envelop_parameters_vibrational_damping_isotropic_one_rms_amplitude, _core_td_map, _1 ) );
   envelop_parameters_vibrational_damping_isotropic_first_rms_amplitude = new TreeItem ( box3_option_5_2_1_1 , box3_function_5_2_1_1, box3_option_5_2_1_1_edit );
@@ -1845,31 +1845,6 @@ void MainWindow::create_box_options(){
   _envelope_parameters_vibrational_damping->insertChildren( envelop_parameters_vibrational_damping_isotropic_first_rms_amplitude );
   /* validators */
   envelop_parameters_vibrational_damping_isotropic_first_rms_amplitude->set_flag_validatable_double(1,true);
-
-  ////////////////
-  // Image spread -- second rms (nm)
-  ////////////////
-  QVector<QVariant> box3_option_5_2_1_2 = {"Second rms (nm)",""};
-  QVector<bool> box3_option_5_2_1_2_edit = {false,true};
-  boost::function<bool(double)> box3_function_5_2_1_2 ( boost::bind( &TDMap::set_envelop_parameters_vibrational_damping_anisotropic_second_rms_amplitude, _core_td_map, _1 ) );
-  envelop_parameters_vibrational_damping_isotropic_second_rms_amplitude = new TreeItem ( box3_option_5_2_1_2 , box3_function_5_2_1_2, box3_option_5_2_1_2_edit );
-  envelop_parameters_vibrational_damping_isotropic_second_rms_amplitude->set_variable_name( "envelop_parameters_vibrational_damping_isotropic_second_rms_amplitude" );
-  _envelope_parameters_vibrational_damping->insertChildren( envelop_parameters_vibrational_damping_isotropic_second_rms_amplitude );
-  /* validators */
-  envelop_parameters_vibrational_damping_isotropic_second_rms_amplitude->set_flag_validatable_double(1,true);
-
-  ////////////////
-  // Image spread -- orientation angle
-  ////////////////
-  QVector<QVariant> box3_option_5_2_1_3 = {"Orientation angle",""};
-  QVector<bool> box3_option_5_2_1_3_edit = {false,true};
-  boost::function<bool(double)> box3_function_5_2_1_3 ( boost::bind( &TDMap::set_envelop_parameters_vibrational_damping_azimuth_orientation_angle, _core_td_map, _1 ) );
-  envelop_parameters_vibrational_damping_isotropic_orientation_angle = new TreeItem ( box3_option_5_2_1_3 , box3_function_5_2_1_3, box3_option_5_2_1_3_edit );
-  envelop_parameters_vibrational_damping_isotropic_orientation_angle->set_variable_name( "envelop_parameters_vibrational_damping_isotropic_orientation_angle" );
-  _envelope_parameters_vibrational_damping->insertChildren( envelop_parameters_vibrational_damping_isotropic_orientation_angle );
-  /* validators */
-  envelop_parameters_vibrational_damping_isotropic_orientation_angle->set_flag_validatable_double(1,true);
-
 
   ////////////////
   // Envelop parameters - temporal coherence
