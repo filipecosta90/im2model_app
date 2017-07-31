@@ -1,10 +1,11 @@
 #include "emd_dataset.h"
 
 EMDDataSet::EMDDataSet( hid_t id ){
+  raw_data = new std::vector<unsigned char>;
   dsid = id;
 }
 
-const std::vector<unsigned char>& EMDDataSet::get_raw_data() const {
+std::vector<unsigned char>* EMDDataSet::get_raw_data() const {
   return raw_data;
 }
 
@@ -38,7 +39,6 @@ void EMDDataSet::scan_attrs(hid_t oid) {
  *
  *  Many other possible actions.
  *
- *  This example does not read the data of the dataset.
  */
 void EMDDataSet::do_dset(hid_t did){
   hid_t tid;
@@ -88,9 +88,9 @@ void EMDDataSet::do_dset(hid_t did){
 
   type_id = H5Tvlen_create (H5T_NATIVE_USHORT);
   size1 = H5Dget_storage_size(did);
-  raw_data.resize(static_cast<int>(size1), 0x00); //Allocate and Zero the array
+  raw_data->resize(static_cast<int>(size1), 0x00); //Allocate and Zero the array
   type_id = H5Dget_type(did);
-  status = H5Dread(did, tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, &(raw_data.front()) );
+  status = H5Dread(did, tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, &(raw_data->front()) );
 
   /*
    * The datatype and dataspace can be used to read all or

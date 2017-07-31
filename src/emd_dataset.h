@@ -46,11 +46,11 @@ class EMDDataSet : public EMDObject {
 
     size_t size_raw_data;
 
-    std::vector<unsigned char> raw_data;
+    std::vector<unsigned char>* raw_data;
 
   public:
     EMDDataSet( hid_t id );
-    const std::vector<unsigned char>&  get_raw_data() const;
+    std::vector<unsigned char>*  get_raw_data() const;
 
     hsize_t* get_chunk_dims_out();
 

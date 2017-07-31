@@ -28,17 +28,17 @@ bool EMDWrapper::read_emd( std::string filename ){
         EMDGroup* grp_2 = grp_1->get_group("/Data/Image");
         EMDGroup* grp_3 = grp_2->get_child_group(0);
         EMDDataSet* ds_grp_3 = grp_3->get_dataset(grp_3->get_name()+"/Data");
-        std::vector<unsigned char> full_image_data = ds_grp_3->get_raw_data();
+        std::vector<unsigned char>* full_image_data = ds_grp_3->get_raw_data();
         hsize_t* dims = ds_grp_3->get_chunk_dims_out();
 
         int n_rows = dims[0];
         int n_cols = dims[1];
-        full_image = cv::Mat ( n_rows , n_cols , cv::DataType<unsigned short>::type , full_image_data.data() );
+        full_image = cv::Mat ( n_rows , n_cols , cv::DataType<unsigned short>::type , full_image_data->data() );
 
         EMDDataSet* ds_grp_3_meta = grp_3->get_dataset(grp_3->get_name()+"/Metadata");
-        const std::vector<unsigned char> metadata_ds_grp_3 = ds_grp_3_meta->get_raw_data();
-        std::vector<char> meta( metadata_ds_grp_3.size() );
-        memcpy( &meta[0], metadata_ds_grp_3.data(), metadata_ds_grp_3.size() );
+        std::vector<unsigned char>* metadata_ds_grp_3 = ds_grp_3_meta->get_raw_data();
+        std::vector<char> meta( metadata_ds_grp_3->size() );
+        memcpy( &meta[0], metadata_ds_grp_3->data(), metadata_ds_grp_3->size() );
 
         // Read json.
         Document metadata_doc;
