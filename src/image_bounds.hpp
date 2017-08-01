@@ -106,6 +106,14 @@ class ImageBounds {
     double full_boundary_polygon_margin_y_nm = 0.0f;
     int full_boundary_polygon_margin_y_px = 0;
 
+    double boundary_polygon_length_x_nm = 0.0f;
+    int boundary_polygon_length_x_px = 0;
+    bool _flag_boundary_polygon_length_x_nm = false;
+    double boundary_polygon_length_y_nm = 0.0f;
+    int boundary_polygon_length_y_px = 0;
+    bool _flag_boundary_polygon_length_y_nm = false;
+
+
     cv::Mat experimental_image_contours;
 
   public:
@@ -122,6 +130,8 @@ class ImageBounds {
     bool get_flag_roi_boundary_polygon_w_margin(){ return _flag_roi_boundary_polygon_w_margin; }
     bool get_flag_roi_boundary_rect_w_margin(){ return _flag_roi_boundary_rect_w_margin; }
     bool get_flag_roi_boundary_image_w_margin(){ return _flag_roi_boundary_image_w_margin; }
+    bool get_flag_boundary_polygon_length_x_nm(){ return _flag_boundary_polygon_length_x_nm; }
+    bool get_flag_boundary_polygon_length_y_nm(){ return _flag_boundary_polygon_length_y_nm; }
 
     // var getters
     int get_hysteresis_threshold(){ return hysteresis_threshold; }
@@ -145,6 +155,11 @@ class ImageBounds {
     int get_full_boundary_polygon_margin_x_px(){ return full_boundary_polygon_margin_x_px; }
     double get_full_boundary_polygon_margin_y_nm(){ return full_boundary_polygon_margin_y_nm; }
     int get_full_boundary_polygon_margin_y_px(){ return full_boundary_polygon_margin_y_px; }
+
+    double get_boundary_polygon_length_x_nm(){ return boundary_polygon_length_x_nm; }
+    double get_boundary_polygon_length_x_px(){ return boundary_polygon_length_x_px; }
+    double get_boundary_polygon_length_y_nm(){ return boundary_polygon_length_y_nm; }
+    double get_boundary_polygon_length_y_px(){ return boundary_polygon_length_y_px; }
 
     /** getters **/
     // flag getters

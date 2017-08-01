@@ -22,6 +22,12 @@ TDMap::TDMap(
   tdmap_roi_sim_super_cell->set_cel_filename( "tdmap_roi.cel" );
   tdmap_roi_sim_super_cell->set_xyz_filename( "tdmap_roi.xyz" );
   tdmap_roi_sim_super_cell->set_cel_margin_nm( cel_margin_nm );
+
+  tdmap_full_sim_super_cell->set_cel_filename( "tdmap_full.cel" );
+  tdmap_full_sim_super_cell->set_xyz_filename( "tdmap_full.xyz" );
+  tdmap_full_sim_super_cell->set_cel_margin_nm( cel_margin_nm );
+  tdmap_full_sim_super_cell->set_zone_axis( cv::Point3d( 0.0f, 1.0f, 0.0f ) );
+  tdmap_full_sim_super_cell->set_upward_vector( cv::Point3d( 0.0f, 0.0f, 1.0f ) );
   // use cel format
 
   sim_image_properties = new BaseImage();
@@ -671,7 +677,7 @@ bool TDMap::get_mtf_switch( ){
 }
 
 double TDMap::get_super_cell_dimensions_a(){
-return tdmap_full_sim_super_cell->get_length_a_Nanometers();
+  return tdmap_full_sim_super_cell->get_length_a_Nanometers();
 }
 
 double TDMap::get_super_cell_dimensions_b(){
@@ -1552,16 +1558,30 @@ bool TDMap::set_full_boundary_polygon_margin_nm( std::string s_margin ){
 }
 
 bool TDMap::accept_tdmap_best_match_position(){
- bool result = false;
- if( _td_map_simgrid->get_flag_simgrid_best_match_thickness_nm() ){
-   const double full_crystal_thickness = _td_map_simgrid->get_simgrid_best_match_thickness_nm();
-   const bool super_cell_result = tdmap_full_sim_super_cell->set_length_c_Nanometers( full_crystal_thickness );
-   if( super_cell_result ){
-     emit super_cell_dimensions_c_changed();
-     result = true;
-   }
- }
- return result;
+  bool result = false;
+  if( _td_map_simgrid->get_flag_simgrid_best_match_thickness_nm() ){
+    const double full_crystal_thickness = _td_map_simgrid->get_simgrid_best_match_thickness_nm();
+    const bool super_cell_result = tdmap_full_sim_super_cell->set_length_c_Nanometers( full_crystal_thickness );
+    if( super_cell_result ){
+      emit super_cell_dimensions_c_changed();
+      result = true;
+    }
+  }
+  return result;
+}
+
+bool TDMap::compute_full_super_cell(){
+  bool result = false;
+  if( tdmap_full_sim_super_cell->get_flag_length() ){
+    const bool unit_cell_update = tdmap_full_sim_super_cell->update_from_unit_cell();
+    const bool cel_generation = tdmap_full_sim_super_cell->generate_super_cell_file();
+    const bool xyz_export = tdmap_full_sim_super_cell->generate_xyz_file();
+    const bool super_cell_result = unit_cell_update && cel_generation && xyz_export;
+    if( super_cell_result ){
+      result = true;
+    }
+  }
+  return result;
 }
 
 std::string TDMap::get_project_filename_with_path(){
@@ -1816,7 +1836,25 @@ double TDMap::get_exp_image_properties_roi_nx_size_width_nm(){
 }
 
 bool TDMap::calculate_exp_image_boundaries_from_full_image(){
-  return exp_image_bounds->calculate_boundaries_from_full_image();
+  bool result = false;
+  result = exp_image_bounds->calculate_boundaries_from_full_image();
+  if(
+      exp_image_bounds->get_flag_boundary_polygon_length_x_nm() &&
+      exp_image_bounds->get_flag_boundary_polygon_length_y_nm()
+    ){
+    const double full_crystal_a_size = exp_image_bounds->get_boundary_polygon_length_x_nm();
+    const double full_crystal_b_size = exp_image_bounds->get_boundary_polygon_length_y_nm();
+    const bool a_result = tdmap_full_sim_super_cell->set_length_a_Nanometers( full_crystal_a_size );
+    const bool b_result = tdmap_full_sim_super_cell->set_length_b_Nanometers( full_crystal_b_size );
+    const bool super_cell_result = a_result && b_result;
+    std::cout << "full_crystal_a_size " << full_crystal_a_size << " full_crystal_b_size " << full_crystal_b_size << " super_cell_result " << std::boolalpha << super_cell_result << std::endl;
+    if( super_cell_result ){
+      emit super_cell_dimensions_b_changed();
+      emit super_cell_dimensions_a_changed();
+      result = true;
+    }
+  }
+  return result;
 }
 
 bool TDMap::set_exp_image_bounds_hysteresis_threshold( int value ){

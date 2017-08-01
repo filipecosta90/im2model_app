@@ -81,6 +81,22 @@ bool SuperCell::update_from_unit_cell(){
         }
       }
     }
+    else{
+      if( _flag_logger ){
+        std::stringstream message;
+        message << "The required vars for update_from_unit_cell() are not setted up.";
+        logger->logEvent( ApplicationLog::error , message.str() );
+      }
+      print_var_state();
+    }
+  }
+  else{
+    if( _flag_logger ){
+      std::stringstream message;
+      message << "The required Class POINTERS for update_from_unit_cell() are not setted up.";
+      logger->logEvent( ApplicationLog::error , message.str() );
+    }
+    print_var_state();
   }
   return result;
 }

@@ -164,6 +164,13 @@ bool ImageBounds::calculate_boundaries_from_full_image(){
       roi_boundary_image_w_margin = full_image( roi_boundary_rect_w_margin ).clone();
       _flag_roi_boundary_image_w_margin = true;
 
+      boundary_polygon_length_x_px = roi_boundary_rect_w_margin.width;
+      boundary_polygon_length_x_nm = boundary_polygon_length_x_px * sampling_rate_x_nm_per_pixel;
+      _flag_boundary_polygon_length_x_nm = true;
+      boundary_polygon_length_y_px = roi_boundary_rect_w_margin.height;
+      boundary_polygon_length_y_nm = boundary_polygon_length_y_px * sampling_rate_y_nm_per_pixel;
+      _flag_boundary_polygon_length_y_nm = true;
+
       update_roi_boundary_polygon_from_full_boundaries();
       result = true;
     }
@@ -194,6 +201,10 @@ bool ImageBounds::update_roi_boundary_polygon_from_full_boundaries(){
       _flag_full_boundary_polygon &&
       _flag_full_boundary_polygon_w_margin
     ){
+
+    const double sampling_rate_x_nm_per_pixel = base_image->get_sampling_rate_x_nm_per_pixel();
+    const double sampling_rate_y_nm_per_pixel = base_image->get_sampling_rate_y_nm_per_pixel();
+
     //clean the roi boundaries vec
     roi_boundary_polygon.clear();
     roi_boundary_polygon_w_margin.clear();
@@ -226,7 +237,6 @@ bool ImageBounds::update_roi_boundary_polygon_from_full_boundaries(){
       roi_boundary_polygon_w_margin.push_back( super_cell_boundary_point );
     }
     _flag_roi_boundary_polygon_w_margin = true;
-
   }
   else{
     if( _flag_logger ){
@@ -318,8 +328,8 @@ std::ostream& ImageBounds::output(std::ostream& stream) const {
     << "\t" << "full_boundary_polygon_margin_y_nm : " <<  full_boundary_polygon_margin_y_nm << "\n"
     << "\t" << "full_boundary_polygon_margin_y_px : " <<  full_boundary_polygon_margin_y_px << "\n"
     "\t" << "BaseImage Properties : " << "\n";
-    if( _flag_base_image ){
-base_image->output(stream);
-    }
+  if( _flag_base_image ){
+    base_image->output(stream);
+  }
   return stream;
 }

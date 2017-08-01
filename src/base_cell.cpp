@@ -128,66 +128,80 @@ bool BaseCell::set_cell_volume( double volume ){
 
 bool BaseCell::set_zone_axis( cv::Point3d uvw ){
   zone_axis = uvw;
+  zone_axis_u = uvw.x;
+  zone_axis_v = uvw.y;
+  zone_axis_w = uvw.z;
+  _flag_zone_axis_u = true;
+  _flag_zone_axis_v = true;
+  _flag_zone_axis_w = true;
+  _flag_zone_axis = true;
   form_matrix_from_miller_indices();
   return true;
 }
 
 bool BaseCell::set_upward_vector ( cv::Point3d hkl ){
   upward_vector = hkl;
+  upward_vector_u = hkl.x;
+  upward_vector_v = hkl.y;
+  upward_vector_w = hkl.z;
+  _flag_upward_vector_u = true;
+  _flag_upward_vector_v = true;
+  _flag_upward_vector_w = true;
+  _flag_upward_vector = true;
   form_matrix_from_miller_indices();
   return true;
 }
 
 bool BaseCell::set_upward_vector_u( double u ){
   upward_vector_u = u;
+  upward_vector.x = u;
   _flag_upward_vector_u = true;
   _flag_upward_vector = _flag_upward_vector_u & _flag_upward_vector_v & _flag_upward_vector_w;
-  upward_vector.x = u;
   form_matrix_from_miller_indices();
   return true;
 }
 
 bool BaseCell::set_upward_vector_v( double v ){
   upward_vector_v = v;
+  upward_vector.y = v;
   _flag_upward_vector_v = true;
   _flag_upward_vector = _flag_upward_vector_u & _flag_upward_vector_v & _flag_upward_vector_w;
-  upward_vector.y = v;
   form_matrix_from_miller_indices();
   return true;
 }
 
 bool BaseCell::set_upward_vector_w( double w ){
   upward_vector_w = w;
+  upward_vector.z = w;
   _flag_upward_vector_w = true;
   _flag_upward_vector = _flag_upward_vector_u & _flag_upward_vector_v & _flag_upward_vector_w;
-  upward_vector.z = w;
   form_matrix_from_miller_indices();
   return true;
 }
 
 bool BaseCell::set_zone_axis_u( double u ){
   zone_axis_u = u;
+  zone_axis.x = u;
   _flag_zone_axis_u = true;
   _flag_zone_axis = _flag_zone_axis_u & _flag_zone_axis_v & _flag_zone_axis_w;
-  zone_axis.x = u;
   form_matrix_from_miller_indices();
   return true;
 }
 
 bool BaseCell::set_zone_axis_v( double v ){
   zone_axis_v = v;
+  zone_axis.y = v;
   _flag_zone_axis_v = true;
   _flag_zone_axis = _flag_zone_axis_u & _flag_zone_axis_v & _flag_zone_axis_w;
-  zone_axis.y = v;
   form_matrix_from_miller_indices();
   return true;
 }
 
 bool BaseCell::set_zone_axis_w( double w ){
   zone_axis_w = w;
+  zone_axis.z = w;
   _flag_zone_axis_w = true;
   _flag_zone_axis = _flag_zone_axis_u & _flag_zone_axis_v & _flag_zone_axis_w;
-  zone_axis.z = w;
   form_matrix_from_miller_indices();
   return true;
 }

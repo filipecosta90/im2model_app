@@ -125,6 +125,7 @@ class MainWindow : public QMainWindow {
     void on_qpush_apply_edge_detection_clicked();
     void on_qpush_test_tdmap_clicked();
     void on_qbutton_tdmap_accept_clicked();
+    void on_qpush_compute_full_super_cell_clicked();
 
 signals:
     void experimental_image_filename_changed();
@@ -273,11 +274,11 @@ signals:
     TreeItem* image_correlation = nullptr;
     TreeItem* image_correlation_matching_method = nullptr;
 
-// tab 3
-TreeItem* super_cell_setup_root = nullptr;
-TreeItem* super_cell_edge_detection = nullptr;
-TreeItem* edge_detection_hysteris_thresholding = nullptr;
-TreeItem* edge_detection_max_contour_distance = nullptr;
+    // tab 3
+    TreeItem* super_cell_setup_root = nullptr;
+    TreeItem* super_cell_edge_detection = nullptr;
+    TreeItem* edge_detection_hysteris_thresholding = nullptr;
+    TreeItem* edge_detection_max_contour_distance = nullptr;
     TreeItem* super_cell_dimensions = nullptr;
     TreeItem* super_cell_dimensions_a = nullptr;
     TreeItem* super_cell_dimensions_b = nullptr;
@@ -299,7 +300,6 @@ TreeItem* edge_detection_max_contour_distance = nullptr;
     group_options* wavimg_step_group_options;
     group_options* simgrid_step_group_options;
     group_options* super_cell_target_step_group_options;
-
     QProgressBar* running_progress;
 
 };

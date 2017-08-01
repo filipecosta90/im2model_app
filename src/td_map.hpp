@@ -314,6 +314,7 @@ class TDMap  : public QObject {
     bool set_exp_image_bounds_max_contour_distance_px( int value );
     bool set_full_boundary_polygon_margin_nm( std::string );
     bool accept_tdmap_best_match_position();
+    bool compute_full_super_cell();
 
     /* gui flag getters */
     bool get_exp_image_properties_flag_full_image();
@@ -405,12 +406,12 @@ class TDMap  : public QObject {
     double get_full_boundary_polygon_margin_nm_top_limit();
 
 signals:
- void exp_image_properties_sampling_rate_x_nm_per_pixel_changed();
-void exp_image_properties_sampling_rate_y_nm_per_pixel_changed();
-void accelaration_voltage_kv_changed();
-void super_cell_dimensions_a_changed();
-void super_cell_dimensions_b_changed();
-void super_cell_dimensions_c_changed();
+    void exp_image_properties_sampling_rate_x_nm_per_pixel_changed();
+    void exp_image_properties_sampling_rate_y_nm_per_pixel_changed();
+    void accelaration_voltage_kv_changed();
+    void super_cell_dimensions_a_changed();
+    void super_cell_dimensions_b_changed();
+    void super_cell_dimensions_c_changed();
 
     void TDMap_started_celslc( );
     void TDMap_inform_celslc_n_steps( int number_steps );

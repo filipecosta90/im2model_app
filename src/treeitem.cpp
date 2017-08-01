@@ -187,9 +187,9 @@ bool TreeItem::load_data_from_getter( ){
       if( _flag_fp_data_getter_double ){
         value = QVariant::fromValue( fp_data_getter_double() );
       }
+      itemData[column] = value;
       emit dataChanged( column );
       emit dataChanged( _variable_name );
-      itemData[column] = value;
       result = true;
     }
   }
@@ -204,17 +204,17 @@ void TreeItem::load_data_from_getter( int column ){
         const double _double_value = fp_data_getter_double_vec[column]();
         std::cout << "_double_value " << _double_value << std::endl;
         value = QVariant::fromValue( _double_value );
+        itemData[column] = value;
         emit dataChanged( column );
         emit dataChanged( _variable_name );
-        itemData[column] = value;
       }
     }
 }
 
 // loads data for all cols
 void TreeItem::load_data_from_getter_double( ){
-  for(int pos = 0; pos < fp_data_getter_double_vec.size(); pos++ ){
-    load_data_from_getter( pos );
+  for(int col = 0; col < fp_data_getter_double_vec.size(); col++ ){
+    load_data_from_getter( col );
   }
 }
 
@@ -223,7 +223,6 @@ bool TreeItem::get_flag_fp_data_getter_bool( ){
 }
 
 bool TreeItem::call_fp_data_getter_bool( ){
-  std::cout << "calling fp_data_getter_bool" << std::endl;
   return fp_data_getter_bool();
 }
 
@@ -232,7 +231,6 @@ bool TreeItem::get_flag_fp_data_setter_bool( ){
 }
 
 bool TreeItem::call_fp_data_setter_bool( bool value ){
-  std::cout << "calling fp_data_setter_bool" << std::endl;
   return fp_data_setter_bool( value );
 }
 
@@ -447,7 +445,7 @@ bool TreeItem::isItemEditable( int column ) const{
 bool TreeItem::isItemCheckable( int column ) const {
   bool result = false;
   if ( column >= 0 && column < itemIsCheckableVec.size() ){
-    result = itemIsCheckableVec.at(column );
+    result = itemIsCheckableVec.at( column );
   }
   return result;
 }
@@ -461,8 +459,7 @@ bool TreeItem::insertChildren(TreeItem *item){
 bool TreeItem::insertChildren(int position, int count, int columns){
   if (position < 0 || position > childItems.size()){
     return false;
-  }
-
+}
   for (int row = 0; row < count; ++row) {
     QVector< QVariant > data;
     boost::function<bool(std::string)> data_setters;
@@ -479,7 +476,7 @@ std::string TreeItem::get_variable_name(){
 
 void TreeItem::set_variable_name( std::string varname ){
   _variable_name = varname;
-  _flag_variable_name = false;
+  _flag_variable_name = true;
 }
 
 void TreeItem::set_variable_description( std::string vardescription ){

@@ -1149,24 +1149,24 @@ void MainWindow::create_box_options(){
   // Sampling rate
   ////////////////
   QVector<QVariant> box1_option_2 = {"Pixel size (nm/pixel)",""};
-    experimental_sampling_rate = new TreeItem ( box1_option_2  );
-    experimental_sampling_rate->set_variable_name( "experimental_sampling_rate" );
-    experimental_image_root->insertChildren( experimental_sampling_rate );
+  experimental_sampling_rate = new TreeItem ( box1_option_2  );
+  experimental_sampling_rate->set_variable_name( "experimental_sampling_rate" );
+  experimental_image_root->insertChildren( experimental_sampling_rate );
 
   QVector<QVariant> box1_option_2_1 = {"x",""};
   QVector<bool> box1_option_2_1_edit = {false,true};
   boost::function<bool(std::string)> box1_function_2_1 ( boost::bind( &TDMap::set_exp_image_properties_sampling_rate_x_nm_per_pixel,_core_td_map, _1 ) );
   boost::function<double(void)> box1_function_2_1_getter ( boost::bind( &TDMap::get_exp_image_properties_sampling_rate_x_nm_per_pixel,_core_td_map ) );
-experimental_sampling_rate_x = new TreeItem ( box1_option_2_1 , box1_function_2_1, box1_option_2_1_edit );
+  experimental_sampling_rate_x = new TreeItem ( box1_option_2_1 , box1_function_2_1, box1_option_2_1_edit );
   experimental_sampling_rate_x->set_fp_data_getter_double_vec( 1, box1_function_2_1_getter );
   connect( _core_td_map, SIGNAL(exp_image_properties_sampling_rate_x_nm_per_pixel_changed( )), experimental_sampling_rate_x, SLOT( load_data_from_getter_double() ) );
   experimental_sampling_rate_x->set_variable_name( "experimental_sampling_rate_x" );
   experimental_sampling_rate->insertChildren( experimental_sampling_rate_x );
 
-    QVector<QVariant> box1_option_2_2 = {"y",""};
-    QVector<bool> box1_option_2_2_edit = {false,true};
-    boost::function<bool(std::string)> box1_function_2_2 ( boost::bind( &TDMap::set_exp_image_properties_sampling_rate_y_nm_per_pixel,_core_td_map, _1 ) );
-    boost::function<double(void)> box1_function_2_2_getter ( boost::bind( &TDMap::get_exp_image_properties_sampling_rate_y_nm_per_pixel,_core_td_map ) );
+  QVector<QVariant> box1_option_2_2 = {"y",""};
+  QVector<bool> box1_option_2_2_edit = {false,true};
+  boost::function<bool(std::string)> box1_function_2_2 ( boost::bind( &TDMap::set_exp_image_properties_sampling_rate_y_nm_per_pixel,_core_td_map, _1 ) );
+  boost::function<double(void)> box1_function_2_2_getter ( boost::bind( &TDMap::get_exp_image_properties_sampling_rate_y_nm_per_pixel,_core_td_map ) );
   experimental_sampling_rate_y = new TreeItem ( box1_option_2_2 , box1_function_2_2, box1_option_2_2_edit );
   experimental_sampling_rate_y->set_fp_data_getter_double_vec( 1, box1_function_2_2_getter );
   connect( _core_td_map, SIGNAL( exp_image_properties_sampling_rate_y_nm_per_pixel_changed( )), experimental_sampling_rate_y, SLOT( load_data_from_getter_double() ) );
@@ -2178,7 +2178,7 @@ experimental_sampling_rate_x = new TreeItem ( box1_option_2_1 , box1_function_2_
   /*************************
    * CRYSTALLOGRAPLY
    *************************/
-super_cell_setup_root = new TreeItem ( common_header );
+  super_cell_setup_root = new TreeItem ( common_header );
   super_cell_setup_root->set_variable_name( "super_cell_setup_root" );
   super_cell_setup_model = new TreeModel( super_cell_setup_root );
 
@@ -2266,7 +2266,7 @@ super_cell_setup_root = new TreeItem ( common_header );
   super_cell_dimensions_a->set_variable_name( "super_cell_dimensions_a" );
   super_cell_dimensions_a->set_fp_data_getter_double_vec( 1, box5_option_2_1_getter );
   connect( _core_td_map, SIGNAL( super_cell_dimensions_a_changed( )), super_cell_dimensions_a, SLOT( load_data_from_getter_double() ) );
-  super_cell_setup_root->insertChildren( super_cell_dimensions_a );
+  super_cell_dimensions->insertChildren( super_cell_dimensions_a );
 
   ////////////////
   // Super-Cell Dimensions -- b
@@ -2277,7 +2277,8 @@ super_cell_setup_root = new TreeItem ( common_header );
   super_cell_dimensions_b->set_variable_name( "super_cell_dimensions_b" );
   super_cell_dimensions_b->set_fp_data_getter_double_vec( 1, box5_option_2_2_getter );
   connect( _core_td_map, SIGNAL( super_cell_dimensions_b_changed( )), super_cell_dimensions_b, SLOT( load_data_from_getter_double() ) );
-  super_cell_setup_root->insertChildren( super_cell_dimensions_b );
+  super_cell_dimensions->insertChildren( super_cell_dimensions_b );
+
 
   ////////////////
   // Super-Cell Dimensions -- c
@@ -2288,7 +2289,7 @@ super_cell_setup_root = new TreeItem ( common_header );
   super_cell_dimensions_c->set_variable_name( "super_cell_dimensions_c" );
   super_cell_dimensions_c->set_fp_data_getter_double_vec( 1, box5_option_2_3_getter );
   connect( _core_td_map, SIGNAL( super_cell_dimensions_c_changed( )), super_cell_dimensions_c, SLOT( load_data_from_getter_double() ) );
-  super_cell_setup_root->insertChildren( super_cell_dimensions_c );
+  super_cell_dimensions->insertChildren( super_cell_dimensions_c );
 
 
   ui->qtree_view_supercell_model_edge_detection_setup->setModel( super_cell_setup_model );
@@ -2378,5 +2379,16 @@ void MainWindow::on_qbutton_tdmap_accept_clicked(){
   }
   else{
     ui->statusBar->showMessage(tr("Error while accepting TD Map best match position.") );
+  }
+}
+
+void MainWindow::on_qpush_compute_full_super_cell_clicked(){
+  bool result = false;
+  result = _core_td_map->compute_full_super_cell();
+  if( result ){
+    ui->statusBar->showMessage(tr("Sucessufully created full-crystal super-cell from parameters."), 2000);
+  }
+  else{
+    ui->statusBar->showMessage(tr("Error while creating full-crystal super-cell from parameters.") );
   }
 }
