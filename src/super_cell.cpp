@@ -704,6 +704,11 @@ std::ostream& operator<<(std::ostream& stream, const SuperCell& var) {
 
 std::ostream& SuperCell::output(std::ostream& stream) const {
   stream << "BEGIN SuperCell vars:\n"
+      /* Base dir path */
+      << "\t" << "base_bin_start_dir_path : "  << base_bin_start_dir_path << "\n"
+      << "\t\t" << "_flag_base_bin_start_dir_path : " << std::boolalpha << _flag_base_bin_start_dir_path << "\n"
+      << "\t" << "base_bin_output_dir_path : "  << base_bin_output_dir_path << "\n"
+      << "\t\t" << "_flag_base_bin_output_dir_path : " << std::boolalpha << _flag_base_bin_output_dir_path << "\n"
     << "\t" << "a_min_size_nm : "  << a_min_size_nm << "\n"
     << "\t\t" << "_flag_a_min_size_nm : " << std::boolalpha << _flag_a_min_size_nm << "\n"
     << "\t" << "b_min_size_nm : "  << b_min_size_nm << "\n"
@@ -716,7 +721,9 @@ std::ostream& SuperCell::output(std::ostream& stream) const {
     << "\t" << "expand_factor_c : "  << expand_factor_c << "\n"
     << "\t\t" << "_flag_expand_factor : " << std::boolalpha << _flag_expand_factor << "\n"
     << "\t" << "super_cell_to_unit_cell_pos.size() : "  << super_cell_to_unit_cell_pos.size() << "\n"
-    << "\t\t" << "_flag_super_cell_to_unit_cell_pos : " << std::boolalpha << _flag_super_cell_to_unit_cell_pos << "\n";
+    << "\t\t" << "_flag_super_cell_to_unit_cell_pos : " << std::boolalpha << _flag_super_cell_to_unit_cell_pos << "\n"
+    << "\t" << "atom_fractional_cell_coordinates.size() : "  << atom_fractional_cell_coordinates.size() << "\n"
+    << "\t\t" << "_flag_atom_fractional_cell_coordinates : " << std::boolalpha << _flag_atom_fractional_cell_coordinates << "\n";
   stream << "\t\t" << "_flag_image_bounds : " << std::boolalpha << _flag_image_bounds << "\n";
   if( _flag_image_bounds ){
     stream << "ImageBounds vars:\n";

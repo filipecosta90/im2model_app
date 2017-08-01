@@ -276,6 +276,7 @@ std::ostream& BaseCell::output(std::ostream& stream) const {
     << "\t\t" << "_flag_cif_path : " << std::boolalpha << _flag_cif_path << "\n"
     << "\t\t" << "_flag_cif_path : " << std::boolalpha << _flag_cif_path << "\n"
     << "\t" << "cel_path : "  << cel_path << "\n"
+    << "\t\t" << "_flag_cel_filename : " << std::boolalpha << _flag_cel_filename << "\n"
     << "\t\t" << "_flag_cel_path : " << std::boolalpha << _flag_cel_path << "\n"
     << "\t\t" << "_flag_cel_format : " << std::boolalpha << _flag_cel_path << "\n"
     << "\t" << "length_a_Angstroms : "  << length_a_Angstroms << "\n"
