@@ -273,6 +273,16 @@ signals:
     TreeItem* image_correlation = nullptr;
     TreeItem* image_correlation_matching_method = nullptr;
 
+// tab 3
+TreeItem* super_cell_setup_root = nullptr;
+TreeItem* super_cell_edge_detection = nullptr;
+TreeItem* edge_detection_hysteris_thresholding = nullptr;
+TreeItem* edge_detection_max_contour_distance = nullptr;
+    TreeItem* super_cell_dimensions = nullptr;
+    TreeItem* super_cell_dimensions_a = nullptr;
+    TreeItem* super_cell_dimensions_b = nullptr;
+    TreeItem* super_cell_dimensions_c = nullptr;
+
     /* simulation outputs */
     TreeItem* _multislice_phase_granting_output;
     TreeItem* _electron_diffraction_patterns_output;

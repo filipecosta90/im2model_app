@@ -670,6 +670,18 @@ bool TDMap::get_mtf_switch( ){
   return _tdmap_wavimg_parameters->get_mtf_simulation_switch();
 }
 
+double TDMap::get_super_cell_dimensions_a(){
+return tdmap_full_sim_super_cell->get_length_a_Nanometers();
+}
+
+double TDMap::get_super_cell_dimensions_b(){
+  return tdmap_full_sim_super_cell->get_length_b_Nanometers();
+}
+
+double TDMap::get_super_cell_dimensions_c(){
+  return tdmap_full_sim_super_cell->get_length_c_Nanometers();
+}
+
 // gui flag getters
 
 bool TDMap::get_flag_celslc_io_ap_pipe_out(){
@@ -1543,7 +1555,11 @@ bool TDMap::accept_tdmap_best_match_position(){
  bool result = false;
  if( _td_map_simgrid->get_flag_simgrid_best_match_thickness_nm() ){
    const double full_crystal_thickness = _td_map_simgrid->get_simgrid_best_match_thickness_nm();
-   result = true;
+   const bool super_cell_result = tdmap_full_sim_super_cell->set_length_c_Nanometers( full_crystal_thickness );
+   if( super_cell_result ){
+     emit super_cell_dimensions_c_changed();
+     result = true;
+   }
  }
  return result;
 }

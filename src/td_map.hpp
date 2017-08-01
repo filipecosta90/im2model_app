@@ -196,6 +196,9 @@ class TDMap  : public QObject {
     bool get_partial_temporal_coherence_switch();
     bool get_partial_spatial_coherence_switch();
     bool get_mtf_switch();
+    double get_super_cell_dimensions_a();
+    double get_super_cell_dimensions_b();
+    double get_super_cell_dimensions_c();
 
     // gui flag getters
     bool get_flag_celslc_io_ap_pipe_out();
@@ -405,6 +408,9 @@ signals:
  void exp_image_properties_sampling_rate_x_nm_per_pixel_changed();
 void exp_image_properties_sampling_rate_y_nm_per_pixel_changed();
 void accelaration_voltage_kv_changed();
+void super_cell_dimensions_a_changed();
+void super_cell_dimensions_b_changed();
+void super_cell_dimensions_c_changed();
 
     void TDMap_started_celslc( );
     void TDMap_inform_celslc_n_steps( int number_steps );

@@ -2178,7 +2178,7 @@ experimental_sampling_rate_x = new TreeItem ( box1_option_2_1 , box1_function_2_
   /*************************
    * CRYSTALLOGRAPLY
    *************************/
-  TreeItem* super_cell_setup_root = new TreeItem ( common_header );
+super_cell_setup_root = new TreeItem ( common_header );
   super_cell_setup_root->set_variable_name( "super_cell_setup_root" );
   super_cell_setup_model = new TreeModel( super_cell_setup_root );
 
@@ -2186,46 +2186,46 @@ experimental_sampling_rate_x = new TreeItem ( box1_option_2_1 , box1_function_2_
   // Edge detection
   ////////////////
   QVector<QVariant> box5_option_1 = {"Edge detection",""};
-  TreeItem* edge_detection  = new TreeItem ( box5_option_1 );
-  edge_detection->set_variable_name( "edge_detection" );
+  super_cell_edge_detection  = new TreeItem ( box5_option_1 );
+  super_cell_edge_detection->set_variable_name( "super_cell_edge_detection" );
 
-  super_cell_setup_root->insertChildren( edge_detection );
+  super_cell_setup_root->insertChildren( super_cell_edge_detection );
 
   QVector<QVariant> box5_option_1_data_1 = {"Hysteresis thresholding",""};
   boost::function<int(void)> box5_option_1_check_getter ( boost::bind( &TDMap::get_exp_image_bounds_hysteresis_threshold, _core_td_map ) );
   boost::function<bool(int)> box5_option_1_check_setter ( boost::bind( &TDMap::set_exp_image_bounds_hysteresis_threshold, _core_td_map, _1 ) );
   QVector<bool> box5_option_1_edit = {false,true};
-  TreeItem* _hysteris_thresholding  = new TreeItem ( box5_option_1_data_1 ,box5_option_1_check_setter, box5_option_1_check_getter, box5_option_1_edit );
-  _hysteris_thresholding->set_variable_name( "_hysteris_thresholding" );
+  edge_detection_hysteris_thresholding  = new TreeItem ( box5_option_1_data_1 ,box5_option_1_check_setter, box5_option_1_check_getter, box5_option_1_edit );
+  edge_detection_hysteris_thresholding->set_variable_name( "edge_detection_hysteris_thresholding" );
 
-  _hysteris_thresholding->set_item_delegate_type( TreeItem::_delegate_SLIDER_INT );
+  edge_detection_hysteris_thresholding->set_item_delegate_type( TreeItem::_delegate_SLIDER_INT );
   // load the preset data from core constuctor
-  _hysteris_thresholding->load_data_from_getter();
+  edge_detection_hysteris_thresholding->load_data_from_getter();
   // set the bottom and top limits of the interval
   int hysteresis_threshold_bottom_limit = _core_td_map->get_exp_image_bounds_hysteresis_threshold_range_bottom_limit( );
   int hysteresis_threshold_top_limit = _core_td_map->get_exp_image_bounds_hysteresis_threshold_range_top_limit( );
-  _hysteris_thresholding->set_slider_int_range_min( hysteresis_threshold_bottom_limit );
-  _hysteris_thresholding->set_slider_int_range_max( hysteresis_threshold_top_limit );
+  edge_detection_hysteris_thresholding->set_slider_int_range_min( hysteresis_threshold_bottom_limit );
+  edge_detection_hysteris_thresholding->set_slider_int_range_max( hysteresis_threshold_top_limit );
 
-  edge_detection->insertChildren( _hysteris_thresholding );
+  super_cell_edge_detection->insertChildren( edge_detection_hysteris_thresholding );
 
   QVector<QVariant> box5_option_1_data_2 = {"Max. contour distance",""};
   boost::function<int(void)> box5_option_1_2_check_getter ( boost::bind( &TDMap::get_exp_image_bounds_max_contour_distance_px, _core_td_map ) );
   boost::function<bool(int)> box5_option_1_2_check_setter ( boost::bind( &TDMap::set_exp_image_bounds_max_contour_distance_px, _core_td_map, _1 ) );
   QVector<bool> box5_option_1_2_edit = {false,true};
-  TreeItem* _max_contour_distance  = new TreeItem ( box5_option_1_data_2 ,box5_option_1_2_check_setter, box5_option_1_2_check_getter, box5_option_1_2_edit );
-  _max_contour_distance->set_variable_name( "_max_contour_distance" );
+  edge_detection_max_contour_distance = new TreeItem ( box5_option_1_data_2 ,box5_option_1_2_check_setter, box5_option_1_2_check_getter, box5_option_1_2_edit );
+  edge_detection_max_contour_distance->set_variable_name( "edge_detection_max_contour_distance" );
 
-  _max_contour_distance->set_item_delegate_type( TreeItem::_delegate_SLIDER_INT );
+  edge_detection_max_contour_distance->set_item_delegate_type( TreeItem::_delegate_SLIDER_INT );
   // load the preset data from core constuctor
-  _max_contour_distance->load_data_from_getter();
+  edge_detection_max_contour_distance->load_data_from_getter();
   // set the bottom and top limits of the interval
   int max_contour_distance_bottom_limit =  _core_td_map->get_exp_image_bounds_max_contour_distance_px_range_bottom_limit( );
   int max_contour_distance_top_limit =  _core_td_map->get_exp_image_bounds_max_contour_distance_px_range_top_limit( );
-  _max_contour_distance->set_slider_int_range_min( max_contour_distance_bottom_limit );
-  _max_contour_distance->set_slider_int_range_max( max_contour_distance_top_limit );
+  edge_detection_max_contour_distance->set_slider_int_range_min( max_contour_distance_bottom_limit );
+  edge_detection_max_contour_distance->set_slider_int_range_max( max_contour_distance_top_limit );
 
-  edge_detection->insertChildren( _max_contour_distance );
+  super_cell_edge_detection->insertChildren( edge_detection_max_contour_distance );
   //connect( _max_contour_distance, SIGNAL(dataChanged( int )), this, SLOT( update_supercell_model_edge_detection_setup() ) );
 
   ////////////////
@@ -2238,7 +2238,7 @@ experimental_sampling_rate_x = new TreeItem ( box1_option_2_1 , box1_function_2_
   TreeItem* super_cell_margin_nm = new TreeItem ( box5_option_1_data_3 , box5_option_1_3_setter, box5_option_1_3_getter, box5_option_1_3_edit );
   super_cell_margin_nm->set_variable_name( "super_cell_margin_nm" );
 
-  edge_detection->insertChildren( super_cell_margin_nm );
+  super_cell_edge_detection->insertChildren( super_cell_margin_nm );
   /*group options*/
   super_cell_margin_nm->load_data_from_getter();
 
@@ -2248,6 +2248,48 @@ experimental_sampling_rate_x = new TreeItem ( box1_option_2_1 , box1_function_2_
   boost::function<double(void)> box5_function_1_3_validator_top ( boost::bind( &TDMap::get_full_boundary_polygon_margin_nm_top_limit, _core_td_map ) );
   super_cell_margin_nm->set_validator_double_bottom(1, box5_function_1_3_validator_bot );
   super_cell_margin_nm->set_validator_double_top(1, box5_function_1_3_validator_top );
+
+  ////////////////
+  // Super-Cell Dimensions
+  ////////////////
+  QVector<QVariant> box5_option_2 = {"Super-Cell Dimensions",""};
+  super_cell_dimensions = new TreeItem ( box3_option_4 );
+  super_cell_dimensions->set_variable_name( "super_cell_dimensions" );
+  super_cell_setup_root->insertChildren( super_cell_dimensions );
+
+  ////////////////
+  // Super-Cell Dimensions -- a
+  ////////////////
+  QVector<QVariant> box5_option_2_1_data = {"a (nm)",""};
+  boost::function<double(void)> box5_option_2_1_getter ( boost::bind( &TDMap::get_super_cell_dimensions_a,_core_td_map ) );
+  super_cell_dimensions_a = new TreeItem ( box5_option_2_1_data );
+  super_cell_dimensions_a->set_variable_name( "super_cell_dimensions_a" );
+  super_cell_dimensions_a->set_fp_data_getter_double_vec( 1, box5_option_2_1_getter );
+  connect( _core_td_map, SIGNAL( super_cell_dimensions_a_changed( )), super_cell_dimensions_a, SLOT( load_data_from_getter_double() ) );
+  super_cell_setup_root->insertChildren( super_cell_dimensions_a );
+
+  ////////////////
+  // Super-Cell Dimensions -- b
+  ////////////////
+  QVector<QVariant> box5_option_2_2_data = {"b (nm)",""};
+  boost::function<double(void)> box5_option_2_2_getter ( boost::bind( &TDMap::get_super_cell_dimensions_b,_core_td_map ) );
+  super_cell_dimensions_b = new TreeItem ( box5_option_2_2_data );
+  super_cell_dimensions_b->set_variable_name( "super_cell_dimensions_b" );
+  super_cell_dimensions_b->set_fp_data_getter_double_vec( 1, box5_option_2_2_getter );
+  connect( _core_td_map, SIGNAL( super_cell_dimensions_b_changed( )), super_cell_dimensions_b, SLOT( load_data_from_getter_double() ) );
+  super_cell_setup_root->insertChildren( super_cell_dimensions_b );
+
+  ////////////////
+  // Super-Cell Dimensions -- c
+  ////////////////
+  QVector<QVariant> box5_option_2_3_data = {"c (nm)",""};
+  boost::function<double(void)> box5_option_2_3_getter ( boost::bind( &TDMap::get_super_cell_dimensions_c,_core_td_map ) );
+  super_cell_dimensions_c = new TreeItem ( box5_option_2_3_data );
+  super_cell_dimensions_c->set_variable_name( "super_cell_dimensions_c" );
+  super_cell_dimensions_c->set_fp_data_getter_double_vec( 1, box5_option_2_3_getter );
+  connect( _core_td_map, SIGNAL( super_cell_dimensions_c_changed( )), super_cell_dimensions_c, SLOT( load_data_from_getter_double() ) );
+  super_cell_setup_root->insertChildren( super_cell_dimensions_c );
+
 
   ui->qtree_view_supercell_model_edge_detection_setup->setModel( super_cell_setup_model );
   ui->qtree_view_supercell_model_edge_detection_setup->setItemDelegate( _load_file_delegate );
