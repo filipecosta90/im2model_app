@@ -583,10 +583,17 @@ bool SuperCell::remove_xy_out_of_range_atoms_from_image_bounds(){
 
       std::vector<cv::Point2d> roi_boundary_polygon_w_margin_nm = image_bounds->get_roi_boundary_polygon_w_margin_nm();
       std::vector<cv::Point2d> centered_roi_boundary_polygon_w_margin_nm;
-      centered_roi_boundary_polygon_w_margin_nm.resize(roi_boundary_polygon_w_margin_nm.size());                         // allocate space
-      //std::transform( roi_boundary_polygon_w_margin_nm.begin(), roi_boundary_polygon_w_margin_nm.end(), centered_roi_boundary_polygon_w_margin_nm.begin() , boost::bind(&SuperCell::op_Point2d_padding, _1, center_a_padding_nm, center_b_padding_nm));
+      std::vector<size_t> positions_to_delete;
+      // allocate space
+      centered_roi_boundary_polygon_w_margin_nm.resize(roi_boundary_polygon_w_margin_nm.size());
+      boost::function<cv::Point2d(cv::Point2d)> functor ( boost::bind(&SuperCell::op_Point2d_padding, this , _1, center_a_padding_nm, center_b_padding_nm) );
+      std::transform( roi_boundary_polygon_w_margin_nm.begin(), roi_boundary_polygon_w_margin_nm.end(), centered_roi_boundary_polygon_w_margin_nm.begin() , functor );
+      // allocate space
+      positions_to_delete.resize(atom_positions.size());
+      CvPolygon* poly_ptr = new CvPolygon();
+      boost::function<bool(cv::Point3d)> functor_poly ( boost::bind(&CvPolygon::inpolygon, poly_ptr, _1 , centered_roi_boundary_polygon_w_margin_nm ) );
       std::cout << "Initial number of atoms prior to XY remotion: " << atom_positions.size() << std::endl;
-      //std::remove_if(atom_positions.begin(), atom_positions.end(), boost::bind(&CvPolygon::inpolygon1, _1)); // remove invisible objects
+      //  std::remove_if(atom_positions.begin(), atom_positions.end(), functor_poly ); // remove invisible objects
       std::cout << "Final number of atoms after XY remotion: " << atom_positions.size() << std::endl;
       result = true;
     }

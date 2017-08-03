@@ -57,7 +57,7 @@ class ImageBounds {
   private:
 
     bool update_roi_boundary_polygon_from_full_boundaries();
-    Point2d op_px_to_nm ( Point2i point, const double pixel_size_nm_x, const double pixel_size_nm_y );
+    cv::Point2d op_px_to_nm ( cv::Point2i point, const double pixel_size_nm_x, const double pixel_size_nm_y );
     bool generate_boundary_polygon_w_margin_nm();
 
     /* Loggers */

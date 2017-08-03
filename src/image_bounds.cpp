@@ -245,7 +245,7 @@ bool ImageBounds::update_roi_boundary_polygon_from_full_boundaries(){
   return result;
 }
 
-Point2d ImageBounds::op_px_to_nm ( Point2i point, const double pixel_size_nm_x, const double  pixel_size_nm_y ) {
+cv::Point2d ImageBounds::op_px_to_nm ( cv::Point2i point, const double pixel_size_nm_x, const double  pixel_size_nm_y ) {
   const double point_x = pixel_size_nm_x * ((double) point.x );
   const double point_y = pixel_size_nm_y * ((double) point.y );
   return Point2d ( point_x, point_y );
@@ -262,9 +262,9 @@ bool ImageBounds::generate_boundary_polygon_w_margin_nm(){
       ){
       const double pixel_size_nm_x = base_image->get_sampling_rate_x_nm_per_pixel();
       const double pixel_size_nm_y = base_image->get_sampling_rate_y_nm_per_pixel();
+      // allocate space
       roi_boundary_polygon_w_margin_nm.resize(roi_boundary_polygon_w_margin.size());
-      boost::function<cv::Point2d(cv::Point2d, double, double)> functor ( boost::bind(&ImageBounds::op_px_to_nm, _1, pixel_size_nm_x, pixel_size_nm_y) );
-                       // allocate space
+      boost::function<cv::Point2d(cv::Point2i)> functor ( boost::bind(&ImageBounds::op_px_to_nm, this, _1, pixel_size_nm_x, pixel_size_nm_y) );
       std::transform( roi_boundary_polygon_w_margin.begin(), roi_boundary_polygon_w_margin.end(), roi_boundary_polygon_w_margin_nm.begin() , functor );
       _flag_roi_boundary_polygon_w_margin_nm = true;
       result = true;
