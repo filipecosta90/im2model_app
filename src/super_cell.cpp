@@ -67,7 +67,13 @@ bool SuperCell::update_from_unit_cell(){
           //  std::cout << "debug_xyz_result " << std::boolalpha << debug_xyz_result << std::endl;
           if( orientate_result ){
             const bool remove_z_result = remove_z_out_of_range_atoms();
-            const bool remove_xy_result = remove_xy_out_of_range_atoms();
+            bool remove_xy_result = false;
+            if( _flag_calculate_ab_cell_limits_from_image_bounds ){
+              remove_xy_result = remove_xy_out_of_range_atoms_from_image_bounds();
+            }
+            else{
+              remove_xy_result = remove_xy_out_of_range_atoms();
+            }
             const bool remove_result = remove_z_result && remove_xy_result;
             if( remove_result ){
               const bool fractional_result = create_fractional_positions_atoms();
@@ -551,12 +557,64 @@ bool SuperCell::remove_xy_out_of_range_atoms(){
   return result;
 }
 
+
+cv::Point2d SuperCell::op_Point2d_padding (cv::Point2d point, const double padd_x, const double  padd_y ){
+  const double point_x =  point.x + padd_x;
+  const double point_y = point.y + padd_y;
+  return cv::Point2d ( point_x, point_y );
+}
+
+bool SuperCell::remove_xy_out_of_range_atoms_from_image_bounds(){
+  bool result = false;
+  if( _flag_image_bounds ){
+    if(
+        // Image bounds vars
+        image_bounds->get_flag_roi_boundary_polygon_w_margin_nm() &&
+        // SuperCell vars
+        _flag_a_min_size_nm &&
+        _flag_b_min_size_nm &&
+        _flag_atom_positions &&
+        ( ! atom_positions.empty() )
+      ){
+      /* method */
+
+      const double center_a_padding_nm = a_min_size_nm / -2.0f;
+      const double center_b_padding_nm = b_min_size_nm / 2.0f;
+
+      std::vector<cv::Point2d> roi_boundary_polygon_w_margin_nm = image_bounds->get_roi_boundary_polygon_w_margin_nm();
+      std::vector<cv::Point2d> centered_roi_boundary_polygon_w_margin_nm;
+      centered_roi_boundary_polygon_w_margin_nm.resize(roi_boundary_polygon_w_margin_nm.size());                         // allocate space
+      //std::transform( roi_boundary_polygon_w_margin_nm.begin(), roi_boundary_polygon_w_margin_nm.end(), centered_roi_boundary_polygon_w_margin_nm.begin() , boost::bind(&SuperCell::op_Point2d_padding, _1, center_a_padding_nm, center_b_padding_nm));
+      std::cout << "Initial number of atoms prior to XY remotion: " << atom_positions.size() << std::endl;
+      //std::remove_if(atom_positions.begin(), atom_positions.end(), boost::bind(&CvPolygon::inpolygon1, _1)); // remove invisible objects
+      std::cout << "Final number of atoms after XY remotion: " << atom_positions.size() << std::endl;
+      result = true;
+    }
+    else{
+      if( _flag_logger ){
+        std::stringstream message;
+        message << "The required vars for remove_xy_out_of_range_atoms_from_image_bounds() are not setted up.";
+        logger->logEvent( ApplicationLog::error , message.str() );
+      }
+      print_var_state();
+    }
+  }
+  else{
+    if( _flag_logger ){
+      std::stringstream message;
+      message << "The required Class POINTERS for remove_xy_out_of_range_atoms_from_image_bounds() are not setted up.";
+      logger->logEvent( ApplicationLog::error , message.str() );
+    }
+    print_var_state();
+  }
+  return result;
+}
+
 bool SuperCell::generate_super_cell_file(){
   bool result = false;
   if(
       _flag_base_bin_output_dir_path &&
       _flag_cel_filename &&
-      _flag_fractional_norm &&
       _flag_angle_alpha &&
       _flag_angle_beta &&
       _flag_angle_gamma &&
@@ -654,6 +712,11 @@ bool SuperCell::generate_xyz_file(){
   return result;
 }
 
+bool SuperCell::set_calculate_ab_cell_limits_from_image_bounds( bool value ){
+  _flag_calculate_ab_cell_limits_from_image_bounds = value;
+  return true;
+}
+
 bool SuperCell::set_length_a_Nanometers( double a ){
   a_min_size_nm = a;
   _flag_a_min_size_nm = true;
@@ -704,11 +767,11 @@ std::ostream& operator<<(std::ostream& stream, const SuperCell& var) {
 
 std::ostream& SuperCell::output(std::ostream& stream) const {
   stream << "BEGIN SuperCell vars:\n"
-      /* Base dir path */
-      << "\t" << "base_bin_start_dir_path : "  << base_bin_start_dir_path << "\n"
-      << "\t\t" << "_flag_base_bin_start_dir_path : " << std::boolalpha << _flag_base_bin_start_dir_path << "\n"
-      << "\t" << "base_bin_output_dir_path : "  << base_bin_output_dir_path << "\n"
-      << "\t\t" << "_flag_base_bin_output_dir_path : " << std::boolalpha << _flag_base_bin_output_dir_path << "\n"
+    /* Base dir path */
+    << "\t" << "base_bin_start_dir_path : "  << base_bin_start_dir_path << "\n"
+    << "\t\t" << "_flag_base_bin_start_dir_path : " << std::boolalpha << _flag_base_bin_start_dir_path << "\n"
+    << "\t" << "base_bin_output_dir_path : "  << base_bin_output_dir_path << "\n"
+    << "\t\t" << "_flag_base_bin_output_dir_path : " << std::boolalpha << _flag_base_bin_output_dir_path << "\n"
     << "\t" << "a_min_size_nm : "  << a_min_size_nm << "\n"
     << "\t\t" << "_flag_a_min_size_nm : " << std::boolalpha << _flag_a_min_size_nm << "\n"
     << "\t" << "b_min_size_nm : "  << b_min_size_nm << "\n"

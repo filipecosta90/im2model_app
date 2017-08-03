@@ -21,7 +21,8 @@
 #include <limits>                        // for numeric_limits
 #include <string>                        // for allocator, char_traits, to_s...
 #include <vector>                        // for vector, vector<>::iterator
-#include <iosfwd>                    // for string
+#include <iosfwd>                         // for string
+#include <algorithm>                    // for std::transform
 
 #include <opencv2/core/hal/interface.h>  // for CV_8UC1, CV_32F, CV_32FC1
 #include <opencv2/imgproc/imgproc_c.h>   // for cvGetSpatialMoment
@@ -40,15 +41,24 @@
 #include <opencv2/core/mat.inl.hpp>  // for Mat::~Mat
 #include <opencv2/core/matx.hpp>     // for Vec4d
 #include <opencv2/core/types.hpp>    // for Point3d, Point, Rect, Point2d
+#include <opencv2/opencv.hpp>
+
+#include <boost/bind.hpp>
 
 #include "unit_cell.hpp"
 #include "application_log.hpp"
 #include "base_image.hpp"
 
+using namespace cv;
+
+//BOOST_GEOMETRY_REGISTER_POINT_2D(cv::Point2d, double, boost::geometry::cs::cartesian, x, y)
+
 class ImageBounds {
   private:
 
     bool update_roi_boundary_polygon_from_full_boundaries();
+    Point2d op_px_to_nm ( Point2i point, const double pixel_size_nm_x, const double pixel_size_nm_y );
+    bool generate_boundary_polygon_w_margin_nm();
 
     /* Loggers */
     ApplicationLog::ApplicationLog* logger = nullptr;
@@ -93,8 +103,10 @@ class ImageBounds {
     int roi_left_padding_px_w_margin = 0;
     int roi_top_padding_px_w_margin = 0;
 
-    std::vector<cv::Point2i> roi_boundary_polygon_w_margin;
+    std::vector<Point2i> roi_boundary_polygon_w_margin;
     bool _flag_roi_boundary_polygon_w_margin = false;
+    std::vector<Point2d> roi_boundary_polygon_w_margin_nm;
+    bool _flag_roi_boundary_polygon_w_margin_nm = false;
     cv::Rect roi_boundary_rect_w_margin;
     bool _flag_roi_boundary_rect_w_margin = false;
     cv::Mat roi_boundary_image_w_margin;
@@ -128,6 +140,7 @@ class ImageBounds {
     bool get_flag_roi_boundary_rect(){ return _flag_roi_boundary_rect; }
     bool get_flag_roi_boundary_image(){ return _flag_roi_boundary_image; }
     bool get_flag_roi_boundary_polygon_w_margin(){ return _flag_roi_boundary_polygon_w_margin; }
+    bool get_flag_roi_boundary_polygon_w_margin_nm(){ return _flag_roi_boundary_polygon_w_margin_nm; }
     bool get_flag_roi_boundary_rect_w_margin(){ return _flag_roi_boundary_rect_w_margin; }
     bool get_flag_roi_boundary_image_w_margin(){ return _flag_roi_boundary_image_w_margin; }
     bool get_flag_boundary_polygon_length_x_nm(){ return _flag_boundary_polygon_length_x_nm; }
@@ -149,6 +162,7 @@ class ImageBounds {
     cv::Rect get_roi_boundary_rect(){ return roi_boundary_rect; }
     cv::Mat get_roi_boundary_image(){ return roi_boundary_image; }
     std::vector<cv::Point2i> get_roi_boundary_polygon_w_margin(){ return roi_boundary_polygon_w_margin; }
+    std::vector<cv::Point2d> get_roi_boundary_polygon_w_margin_nm(){ return roi_boundary_polygon_w_margin_nm; }
     cv::Rect get_roi_boundary_rect_w_margin(){ return roi_boundary_rect_w_margin; }
     cv::Mat get_roi_boundary_image_w_margin(){ return roi_boundary_image_w_margin; }
     double get_full_boundary_polygon_margin_x_nm(){ return full_boundary_polygon_margin_x_nm; }

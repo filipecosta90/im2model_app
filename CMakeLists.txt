@@ -1,8 +1,8 @@
 # the minimum version of CMake required
 cmake_minimum_required(VERSION 3.6.2)
 
-set (CMAKE_CXX_COMPILER "clang++" )
-set (CMAKE_C_COMPILER "clang" )
+set (CMAKE_CXX_COMPILER "g++" )
+set (CMAKE_C_COMPILER "gcc" )
 set (CMAKE_CXX_STANDARD 14)
 
 set ( VERSION_IM2MODEL "0.2.3" )

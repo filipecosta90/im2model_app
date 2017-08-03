@@ -36,17 +36,22 @@
 #include <opencv2/core/mat.inl.hpp>  // for Mat::~Mat
 #include <opencv2/core/matx.hpp>     // for Vec4d
 #include <opencv2/core/types.hpp>    // for Point3d, Point, Rect, Point2d
+#include <opencv2/opencv.hpp>
+
+#include <boost/bind.hpp>
 
 #include "image_bounds.hpp"
 #include "base_cell.hpp"
 #include "base_bin.hpp"
 #include "unit_cell.hpp"
 #include "application_log.hpp"
-//#include "edge.hpp"
+#include "cv_polygon.hpp"
 
 class SuperCell : public BaseCell {
   private:
     /** Private Class methods **/
+
+    cv::Point2d op_Point2d_padding ( cv::Point2d point, const double padd_x, const double  padd_y );
 
     /* Base dir path */
     boost::filesystem::path base_bin_start_dir_path;
@@ -64,6 +69,7 @@ class SuperCell : public BaseCell {
 
     ImageBounds* image_bounds = nullptr;
     bool _flag_image_bounds = false;
+    bool _flag_calculate_ab_cell_limits_from_image_bounds = false;
 
     /** supercell exclusive **/
     double a_min_size_nm = 0.0f;
@@ -99,12 +105,15 @@ class SuperCell : public BaseCell {
     bool orientate_atoms_from_matrix();
     bool remove_z_out_of_range_atoms();
     bool remove_xy_out_of_range_atoms();
+    bool remove_xy_out_of_range_atoms_from_image_bounds();
     bool generate_super_cell_file();
     bool generate_xyz_file( );
 
     /* setters */
     bool set_unit_cell( UnitCell* cell );
     bool set_image_bounds( ImageBounds* image_bounds );
+
+    bool set_calculate_ab_cell_limits_from_image_bounds( bool value );
 
     //overide set length from basecell
     bool set_length_a_Nanometers( double a );

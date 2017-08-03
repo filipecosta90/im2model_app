@@ -7,7 +7,8 @@
   string_additions.hpp
   unit_cell.hpp
   atom_info.hpp
-  edge.hpp
+  cv_polygon.hpp
+  cv_polygon.cpp
   msa_prm.hpp
   super_cell.hpp
   wavimg_prm.hpp

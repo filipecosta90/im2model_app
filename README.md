@@ -5,6 +5,9 @@
 Msc. Thesis regarding efficient computation to refine atomic models for TEM image simulation and matching 
 ********************************************************************************
 
+### Metrics 
+[![BCH compliance](https://bettercodehub.com/edge/badge/filipecosta90/im2model?branch=master)](https://bettercodehub.com/)
+
 ### Prerequisites
 
 ```

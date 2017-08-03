@@ -1,0 +1,6 @@
+exclude:
+  - /include/rapidjson/.*
+  - /src/deprecated/.*
+component_depth: 1
+languages:
+  - cpp
