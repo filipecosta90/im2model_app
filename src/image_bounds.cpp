@@ -233,6 +233,7 @@ bool ImageBounds::update_roi_boundary_polygon_from_full_boundaries(){
       roi_boundary_polygon_w_margin.push_back( super_cell_boundary_point );
     }
     _flag_roi_boundary_polygon_w_margin = true;
+    generate_boundary_polygon_w_margin_nm();
   }
   else{
     if( _flag_logger ){
