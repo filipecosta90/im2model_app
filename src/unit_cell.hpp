@@ -29,6 +29,8 @@ class UnitCell : public BaseCell {
     std::vector<std::string> atoms_site_type_symbols;
     std::vector<std::string> atoms_site_symetry_multiplicities;
     std::vector<std::string> atoms_site_Wyckoff_symbols;
+    std::vector<cv::Point3d> symetry_atom_positions;
+    std::vector<double> atom_site_occupancy;
     std::vector<double> atoms_site_fract_x;
     std::vector<double> atoms_site_fract_y;
     std::vector<double> atoms_site_fract_z;
@@ -49,9 +51,9 @@ class UnitCell : public BaseCell {
     void add_atom_site_fract_z( double fract_z );
     void add_atom_site_occupancy( double occupancy );
 
-        /* Loggers */
-        ApplicationLog::ApplicationLog* logger = nullptr;
-        bool _flag_logger = false;
+    /* Loggers */
+    ApplicationLog::ApplicationLog* logger = nullptr;
+    bool _flag_logger = false;
 
   protected:
 

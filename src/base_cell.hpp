@@ -119,24 +119,25 @@ class BaseCell {
     bool _flag_zone_axis_w = false;
     bool _flag_zone_axis = false;
 
-    std::vector<cv::Point3d> atom_positions;
+    std::vector< std::vector<cv::Point3d> > atom_positions;
+    std::vector<std::string> atom_symbols;
     bool _flag_atom_positions = false;
-    std::vector<int> to_unit_cell_pos;
-    std::vector<std::string> atom_symbol_string;
-    std::vector<double> atom_site_occupancy;
-    std::vector<double> atom_debye_waller_factor;
+    std::vector<double> atom_debye_waller_factors;
     std::vector<cv::Vec4d> atom_cpk_rgba_colors;
-    std::vector<double> atom_empirical_radii;
+    std::vector<double> atom_occupancies;
+    std::vector<double> atom_empirical_radiis;
+    std::vector<Atom> atoms;
 
     /** .cel **/
-    std::vector<cv::Point3d> atom_fractional_cell_coordinates;
+    std::vector< std::vector<cv::Point3d> > atom_fractional_cell_coordinates;
     bool _flag_atom_fractional_cell_coordinates = false;
+
     double fractional_norm_a_atom_pos = 0.0f;
     double fractional_norm_b_atom_pos = 0.0f;
     double fractional_norm_c_atom_pos = 0.0f;
     bool _flag_fractional_norm = false;
 
-// this margin is used to generate .cel files
+    // this margin is used to generate .cel files
     double cel_margin_Nanometers = 0.0f;
     double cel_margin_Angstroms = 0.0f;
     bool _flag_cel_margin = false;
@@ -167,27 +168,8 @@ class BaseCell {
     int left_padding_px = 0;
     int top_padding_px = 0;
 
-    /*
-     * _width_px  and _min_width_px may differ since
-     * _min_width_px reffers to the minimum acceptable width based on
-     * the ZA and UV directions. _width_px reffers to the width in pixels
-     * based on the expand factor.
-     *
-     * _width_px is ALWAYS >= _min_width_px
-     * (same for _height_px and _min_height_px )
-     *
-     * */
     int width_px = 0;
     int height_px = 0;
-
-    std::vector<Atom> atoms;
-    std::vector<cv::Point3d> symetry_atom_positions;
-    std::vector<std::string> atom_type_symbols;
-    std::vector<double> atom_occupancies;
-    std::vector<double> atom_radii;
-
-    //vertex buffer for colors
-    std::vector<cv::Vec4d> atom_rgba_colors;
 
     /** Chem Database **/
     Chem_Database chem_database;
@@ -258,12 +240,6 @@ class BaseCell {
     bool get_flag_inverse_orientation_matrix(){ return _flag_inverse_orientation_matrix; }
     bool get_flag_fractional_norm(){ return _flag_fractional_norm; }
 
-    std::vector<std::string> get_atom_type_symbols_vec(){ return atom_type_symbols; }
-    std::vector<double> get_atom_occupancy_vec(){ return atom_occupancies; }
-    std::vector<double> get_atom_debye_waller_factor_vec(){ return atom_debye_waller_factor; }
-    std::vector<cv::Point3d> get_symetry_atom_positions_vec(){ return symetry_atom_positions; }
-    std::vector<double> get_atom_radii_vec(){ return atom_radii; }
-
     void form_matrix_from_miller_indices();
 
     cv::Mat get_orientation_matrix(){ return orientation_matrix; }
@@ -301,9 +277,14 @@ class BaseCell {
 
     double get_cel_margin_nm(){ return cel_margin_Nanometers; }
 
-    std::vector<cv::Point3d> get_atom_positions_vec( ){ return atom_positions; }
+    std::vector< std::vector<cv::Point3d> > get_atom_positions_vec( ){ return atom_positions; }
+    int get_atom_positions_vec_size();
+    std::vector<std::string> get_atom_symbols_vec(){ return atom_symbols; }
     std::vector<cv::Vec4d> get_atom_cpk_rgba_colors_vec( ){ return atom_cpk_rgba_colors; }
-    std::vector<double> get_atom_empirical_radii_vec(){ return atom_empirical_radii; }
+    std::vector<double> get_atom_empirical_radiis_vec(){ return atom_empirical_radiis; }
+    std::vector<double> get_atom_occupancies_vec(){ return atom_occupancies; }
+    std::vector<double> get_atom_debye_waller_factors_vec(){ return atom_debye_waller_factors; }
+    std::vector<Atom> get_atoms_vec(){ return atoms;}
 
     int get_nx_px(){ return cel_nx_px; }
     int get_ny_px(){ return cel_ny_px; }

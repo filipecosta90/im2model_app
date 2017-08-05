@@ -52,6 +52,12 @@ class SuperCell : public BaseCell {
     /** Private Class methods **/
 
     cv::Point2d op_Point2d_padding ( cv::Point2d point, const double padd_x, const double  padd_y );
+    cv::Point3d op_Point3d_padding ( cv::Point3d point,  cv::Point3d padd  );
+    cv::Point3d op_Point3d_a_plus_b_times_c ( cv::Point3d point, cv::Point3d b, cv::Point3d c );
+
+    bool op_Point3d_z_in_range ( cv::Point3d point,  const double bot_limit, const double top_limit );
+    bool op_Point3d_xy_in_range ( cv::Point3d point,  const double x_bot_limit, const double x_top_limit , const double y_bot_limit, const double y_top_limit );
+    cv::Point3d op_Mat3d_dot_Point3d ( cv::Mat mat , cv::Point3d point );
 
     /* Base dir path */
     boost::filesystem::path base_bin_start_dir_path;
@@ -84,9 +90,6 @@ class SuperCell : public BaseCell {
     int expand_factor_b = 1;
     int expand_factor_c = 1;
     bool _flag_expand_factor = false;
-
-    std::vector<int> super_cell_to_unit_cell_pos;
-    bool _flag_super_cell_to_unit_cell_pos = false;
 
     bool update_length_parameters_from_expand_factor();
     bool clean_for_re_run();

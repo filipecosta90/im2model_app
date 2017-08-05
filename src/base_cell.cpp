@@ -6,23 +6,19 @@ BaseCell::BaseCell(){
 }
 
 bool BaseCell::clear_atom_positions(){
-  atom_positions.clear();
+  for( size_t pos = 0; pos < atom_positions.size() ; pos++ ){
+    std::vector<cv::Point3d>().swap(atom_positions[pos]);
+  }
+  std::vector< std::vector<cv::Point3d> >().swap(atom_positions);
   _flag_atom_positions = false;
-  to_unit_cell_pos.clear();
-  atom_symbol_string.clear();
-  atom_site_occupancy.clear();
-  atom_debye_waller_factor.clear();
+  atom_symbols.clear();
+  atom_debye_waller_factors.clear();
   atom_cpk_rgba_colors.clear();
-  atom_empirical_radii.clear();
+  atom_empirical_radiis.clear();
+  atom_occupancies.clear();
   /** .cel **/
   atom_fractional_cell_coordinates.clear();
   atoms.clear();
-  symetry_atom_positions.clear();
-  atom_type_symbols.clear();
-  atom_occupancies.clear();
-  atom_radii.clear();
-  //vertex buffer for colors
-  atom_rgba_colors.clear();
   return true;
 }
 
@@ -206,6 +202,15 @@ bool BaseCell::set_zone_axis_w( double w ){
   return true;
 }
 
+int BaseCell::get_atom_positions_vec_size( ){
+  int size = 0;
+  for ( size_t pos = 0; pos < atom_positions.size() ; pos++ ){
+    size += atom_positions[pos].size();
+  }
+  return size;
+}
+
+
 void BaseCell::form_matrix_from_miller_indices(){
   if(
       _flag_zone_axis &&
@@ -315,14 +320,14 @@ std::ostream& BaseCell::output(std::ostream& stream) const {
     << "\t\t" << "_flag_zone_axis_w : " << std::boolalpha << _flag_zone_axis_w << "\n"
     << "\t\t" << "_flag_zone_axis : " << std::boolalpha << _flag_zone_axis << "\n"
     << "\t" << "#### VECTORS: \n"
+    << "\t" << "atoms.size() : "  << atoms.size() << "\n"
     << "\t" << "atom_positions.size() : "  << atom_positions.size() << "\n"
+    //<< "\t" << "get_atom_positions_vec_size : "  << BaseCell::get_atom_positions_vec_size() << "\n"
     << "\t\t" << "_flag_atom_positions : " << std::boolalpha << _flag_atom_positions << "\n"
-    << "\t" << "to_unit_cell_pos.size() : "  << to_unit_cell_pos.size() << "\n"
-    << "\t" << "atom_symbol_string.size() : "  << atom_symbol_string.size() << "\n"
-    << "\t" << "atom_site_occupancy.size() : "  << atom_site_occupancy.size() << "\n"
-    << "\t" << "atom_debye_waller_factor.size() : "  << atom_debye_waller_factor.size() << "\n"
+    << "\t" << "atom_symbols.size() : "  << atom_symbols.size() << "\n"
+    << "\t" << "atom_debye_waller_factors.size() : "  << atom_debye_waller_factors.size() << "\n"
     << "\t" << "atom_cpk_rgba_colors.size() : "  << atom_cpk_rgba_colors.size() << "\n"
-    << "\t" << "atom_empirical_radii.size() : "  << atom_empirical_radii.size() << "\n"
+    << "\t" << "atom_empirical_radiis.size() : "  << atom_empirical_radiis.size() << "\n"
     << "\t" << "atom_fractional_cell_coordinates.size() : "  << atom_fractional_cell_coordinates.size() << "\n"
     << "\t\t" << "_flag_atom_fractional_cell_coordinates : " << std::boolalpha << _flag_atom_fractional_cell_coordinates << "\n"
     /** .cel **/
@@ -353,13 +358,6 @@ std::ostream& BaseCell::output(std::ostream& stream) const {
     << "\t" << "left_padding_px : "  << left_padding_px << "\n"
     << "\t" << "top_padding_px : "  << top_padding_px << "\n"
     << "\t" << "width_px : "  << width_px << "\n"
-    << "\t" << "height_px : "  << height_px << "\n"
-    << "\t" << "#### VECTORS: \n"
-    << "\t" << "atoms.size() : "  << atoms.size() << "\n"
-    << "\t" << "symetry_atom_positions.size() : "  << symetry_atom_positions.size() << "\n"
-    << "\t" << "atom_type_symbols.size() : "  << atom_type_symbols.size() << "\n"
-    << "\t" << "atom_occupancies.size() : "  << atom_occupancies.size() << "\n"
-    << "\t" << "atom_radii.size() : "  << atom_radii.size() << "\n"
-    << "\t" << "atom_rgba_colors.size() : "  << atom_rgba_colors.size() << "\n";
+    << "\t" << "height_px : "  << height_px << "\n";
   return stream;
 }

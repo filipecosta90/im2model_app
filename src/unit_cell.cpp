@@ -255,22 +255,41 @@ bool UnitCell::create_atoms_from_site_and_symetry(){
       _flag_length
     ){
     int distinct = 0;
+    const int distinct_atom_types = atoms_site_type_symbols.size() ;
+
+    //  allocates enough memory for the elements before we start
+    atom_positions.reserve( distinct_atom_types );
+    atom_symbols.reserve( distinct_atom_types );
+    atom_occupancies.reserve( distinct_atom_types );
+    atom_debye_waller_factors.reserve( distinct_atom_types );
+    atom_empirical_radiis.reserve( distinct_atom_types );
+    atom_cpk_rgba_colors.reserve( distinct_atom_types );
+
     for( int atom_site_pos = 0 ; atom_site_pos < atoms_site_type_symbols.size(); atom_site_pos++ ) {
-      distinct++;
-      const double fract_x = atoms_site_fract_x.at(atom_site_pos);
-      const double fract_y = atoms_site_fract_y.at(atom_site_pos);
-      const double fract_z = atoms_site_fract_z.at(atom_site_pos);
-      const std::string atom_site_type_symbol = atoms_site_type_symbols.at(atom_site_pos);
-      const double atom_occupancy = atoms_site_occupancy.at(atom_site_pos);
+      atom_positions.push_back(std::vector<cv::Point3d>(  ));
+      const double fract_x = atoms_site_fract_x[atom_site_pos];
+      const double fract_y = atoms_site_fract_y[atom_site_pos];
+      const double fract_z = atoms_site_fract_z[atom_site_pos];
+      std::string atom_site_type_symbol = atoms_site_type_symbols[atom_site_pos];
+      const double atom_occupancy = atoms_site_occupancy[atom_site_pos];
       const double debye_waller_factor = 0.01f;
       Atom_Info atom_info = chem_database.get_atom_info( atom_site_type_symbol );
       double atom_radious = atom_info.empiricalRadius_Nanometers();
       std::string atom_type_symbol = atom_info.symbol();
       cv::Vec4d cpk_color = atom_info.cpkColor();
+
+      atom_symbols.push_back( atom_type_symbol );
+      atom_occupancies.push_back(atom_occupancy);
+      atom_debye_waller_factors.push_back(debye_waller_factor);
+      atom_empirical_radiis.push_back(atom_radious);
+      //_atom_cpk_colors
+      atom_cpk_rgba_colors.push_back(cpk_color);
+
+      std::cout << "symmetry_equiv_pos_as_x.size()" << symmetry_equiv_pos_as_x.size() << std::endl;
       for( int value_list_pos = 0; value_list_pos < symmetry_equiv_pos_as_x.size(); value_list_pos++ ) {
-        std::string symetry_x = symmetry_equiv_pos_as_x.at(value_list_pos);
-        std::string symetry_y = symmetry_equiv_pos_as_y.at(value_list_pos);
-        std::string symetry_z = symmetry_equiv_pos_as_z.at(value_list_pos);
+        std::string symetry_x = symmetry_equiv_pos_as_x[value_list_pos];
+        std::string symetry_y = symmetry_equiv_pos_as_y[value_list_pos];
+        std::string symetry_z = symmetry_equiv_pos_as_z[value_list_pos];
         double temp_a = symbCalc( symetry_x , fract_x, fract_y, fract_z);
         double temp_b = symbCalc( symetry_y , fract_x, fract_y, fract_z);
         double temp_c = symbCalc( symetry_z , fract_x, fract_y, fract_z);
@@ -299,19 +318,13 @@ bool UnitCell::create_atoms_from_site_and_symetry(){
         // check if it already exists
         it = std::find( symetry_atom_positions.begin(), symetry_atom_positions.end(), temporary_point );
         if(it == symetry_atom_positions.end() ){
+          symetry_atom_positions.push_back(temporary_point);
           std::cout << "atom # " << distinct << " ( " << atom_type_symbol << " )" << temp_a << " , " << temp_b << " , " << temp_c << std::endl;
           const double px = temp_a * length_a_Nanometers;
           const double py = temp_b * length_b_Nanometers;
           const double pz = temp_c * length_c_Nanometers;
           cv::Point3d atom_pos ( px, py, pz );
-          atom_type_symbols.push_back( atom_type_symbol );
-          atom_positions.push_back( atom_pos );
-          atom_occupancies.push_back( atom_occupancy );
-          atom_debye_waller_factor.push_back( debye_waller_factor );
-          atom_empirical_radii.push_back( atom_radious );
-          symetry_atom_positions.push_back(temporary_point);
-          //_atom_cpk_colors
-          atom_cpk_rgba_colors.push_back(cpk_color);
+          atom_positions[atom_site_pos].push_back( atom_pos );
           distinct++;
         }
       }
