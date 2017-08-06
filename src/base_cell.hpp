@@ -279,6 +279,7 @@ class BaseCell {
 
     std::vector< std::vector<cv::Point3d> > get_atom_positions_vec( ){ return atom_positions; }
     int get_atom_positions_vec_size();
+    int get_atom_fractional_cell_coordinates_vec_size();
     std::vector<std::string> get_atom_symbols_vec(){ return atom_symbols; }
     std::vector<cv::Vec4d> get_atom_cpk_rgba_colors_vec( ){ return atom_cpk_rgba_colors; }
     std::vector<double> get_atom_empirical_radiis_vec(){ return atom_empirical_radiis; }

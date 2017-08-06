@@ -440,8 +440,9 @@ bool SuperCell::create_fractional_positions_atoms(){
       // lets apply the transformation
       atom_fractional_cell_coordinates.push_back(std::vector<cv::Point3d>());
       atom_fractional_cell_coordinates[pos].reserve( atom_positions[pos].size() );
-      std::transform( atom_positions[pos].begin(), atom_positions[pos].end(), atom_fractional_cell_coordinates[pos].begin() , functor );
+      std::transform( atom_positions[pos].begin(), atom_positions[pos].end(), std::back_inserter( atom_fractional_cell_coordinates[pos] ) , functor );
     }
+   std::cout << "get_atom_fractional_cell_coordinates_vec_size: " << get_atom_fractional_cell_coordinates_vec_size() << std::endl;
     _flag_atom_fractional_cell_coordinates = true;
     result = _flag_atom_fractional_cell_coordinates;
   }
@@ -466,13 +467,13 @@ bool SuperCell::remove_z_out_of_range_atoms(){
     ){
     const double z_bot_limit = c_min_size_nm / -2.0f;
     const double z_top_limit = c_min_size_nm / 2.0f;
-    std::cout << "Initial number of atoms prior to Z remotion: " << atom_positions.size() << std::endl;
+    std::cout << "Initial number of atoms prior to Z remotion: " << get_atom_positions_vec_size() << std::endl;
     boost::function<bool(cv::Point3d)> functor ( !boost::bind(&SuperCell::op_Point3d_z_in_range, this , _1, z_bot_limit, z_top_limit ) );
     for ( size_t pos = 0; pos < atom_positions.size() ; pos++ ){
       // lets apply the transformation
-      atom_positions[pos].erase( std::remove_if( atom_positions[pos].begin(), atom_positions[pos].end(), functor ) );
+      atom_positions[pos].erase( std::remove_if( atom_positions[pos].begin(), atom_positions[pos].end(), functor ), atom_positions[pos].end() );
     }
-    std::cout << "Final number of atoms after Z remotion: " << atom_positions.size() << std::endl;
+    std::cout << "Final number of atoms after Z remotion: " << get_atom_positions_vec_size() << std::endl;
     result = true;
   }
   else{
@@ -506,7 +507,7 @@ bool SuperCell::remove_xy_out_of_range_atoms(){
     boost::function<bool(cv::Point3d)> functor ( !boost::bind(&SuperCell::op_Point3d_xy_in_range, this , _1, x_bot_limit, x_top_limit , y_bot_limit, y_top_limit ) );
     for ( size_t pos = 0; pos < atom_positions.size() ; pos++ ){
       // lets apply the transformation
-      atom_positions[pos].erase( std::remove_if( atom_positions[pos].begin(), atom_positions[pos].end(), functor ) );
+      atom_positions[pos].erase( std::remove_if( atom_positions[pos].begin(), atom_positions[pos].end(), functor ) , atom_positions[pos].end() );
     }
     std::cout << "Final number of atoms after XY remotion: " << get_atom_positions_vec_size() << std::endl;
     result = true;
@@ -538,21 +539,19 @@ bool SuperCell::remove_xy_out_of_range_atoms_from_image_bounds(){
 
       const double center_a_padding_nm = a_min_size_nm / -2.0f;
       const double center_b_padding_nm = b_min_size_nm / 2.0f;
-
       std::vector<cv::Point2d> roi_boundary_polygon_w_margin_nm = image_bounds->get_roi_boundary_polygon_w_margin_nm();
       std::vector<cv::Point2d> centered_roi_boundary_polygon_w_margin_nm;
-      std::vector<bool> positions_to_delete;
       // allocate space
       centered_roi_boundary_polygon_w_margin_nm.resize(roi_boundary_polygon_w_margin_nm.size());
       boost::function<cv::Point2d(cv::Point2d)> functor ( boost::bind(&SuperCell::op_Point2d_padding, this , _1, center_a_padding_nm, center_b_padding_nm) );
-      std::transform( roi_boundary_polygon_w_margin_nm.begin(), roi_boundary_polygon_w_margin_nm.end(), centered_roi_boundary_polygon_w_margin_nm.begin() , functor );
+      std::transform( roi_boundary_polygon_w_margin_nm.begin(), roi_boundary_polygon_w_margin_nm.end(), std::back_inserter( centered_roi_boundary_polygon_w_margin_nm ) , functor );
       // allocate space
       CvPolygon* poly_ptr = new CvPolygon();
       boost::function<bool(cv::Point3d)> functor_poly ( !boost::bind(&CvPolygon::inpolygon, poly_ptr, _1 , centered_roi_boundary_polygon_w_margin_nm ) );
       // erase-remove idiom
       for ( size_t pos = 0; pos < atom_positions.size() ; pos++ ){
         // lets apply the remove clause
-        atom_positions[pos].erase( std::remove_if( atom_positions[pos].begin(), atom_positions[pos].end(), functor_poly ) );
+        atom_positions[pos].erase( std::remove_if( atom_positions[pos].begin(), atom_positions[pos].end(), functor_poly ) , atom_positions[pos].end() );
       }
       result = true;
     }
@@ -603,7 +602,7 @@ bool SuperCell::generate_super_cell_file(){
       const std::string atom_symbol = atom_symbols[pos];
       const double atom_site_occupancy = atom_occupancies[pos];
       const double atom_debye_waller_factor = atom_debye_waller_factors[pos];
-      for ( size_t atom_pos = 0; pos < atom_fractional_cell_coordinates[pos].size() ; atom_pos++ ){
+      for ( size_t atom_pos = 0; atom_pos < atom_fractional_cell_coordinates[pos].size() ; atom_pos++ ){
         /** print **/
         const cv::Point3d fractional = atom_fractional_cell_coordinates[pos][atom_pos];
         outfile << atom_symbol
@@ -707,6 +706,7 @@ cv::Point3d SuperCell::op_Point3d_padding (cv::Point3d point, cv::Point3d padd )
 }
 
 cv::Point3d SuperCell::op_Point3d_a_plus_b_times_c ( cv::Point3d point, cv::Point3d b, cv::Point3d c ){
+  //std::cout << "point: (" << point << " + "<< b << ") * " << c << " = " << cv::Point3d( ( point.x + b.x ) * c.x, ( point.y + b.y ) * c.y, ( point.z + b.z ) * c.z ) << std::endl;
   return  cv::Point3d( ( point.x + b.x ) * c.x, ( point.y + b.y ) * c.y, ( point.z + b.z ) * c.z );
 }
 
@@ -717,7 +717,6 @@ bool SuperCell::op_Point3d_z_in_range ( cv::Point3d point,  const double bot_lim
 bool SuperCell::op_Point3d_xy_in_range ( cv::Point3d point,  const double x_bot_limit, const double x_top_limit , const double y_bot_limit, const double y_top_limit ){
   return ( ( point.x >= x_bot_limit ) && ( point.x <= x_top_limit ) &&  ( point.y >= y_bot_limit ) && ( point.y <= y_top_limit ) );
 }
-
 
 cv::Point3d SuperCell::op_Mat3d_dot_Point3d ( cv::Mat mat , cv::Point3d point ){
   cv::Mat result = mat * cv::Mat( point );

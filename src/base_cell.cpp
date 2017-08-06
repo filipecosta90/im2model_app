@@ -205,11 +205,18 @@ bool BaseCell::set_zone_axis_w( double w ){
 int BaseCell::get_atom_positions_vec_size( ){
   int size = 0;
   for ( size_t pos = 0; pos < atom_positions.size() ; pos++ ){
-    size += atom_positions[pos].size();
+    size += ( atom_positions[pos].size() );
   }
   return size;
 }
 
+int BaseCell::get_atom_fractional_cell_coordinates_vec_size( ){
+  int size = 0;
+  for ( size_t pos = 0; pos < atom_fractional_cell_coordinates.size() ; pos++ ){
+    size += ( atom_fractional_cell_coordinates[pos].size() );
+  }
+  return size;
+}
 
 void BaseCell::form_matrix_from_miller_indices(){
   if(
