@@ -1029,6 +1029,7 @@ bool TDMap::update_emd_fields(){
       }
     }
   }
+  return result;
 }
 
 bool TDMap::set_exp_image_properties_roi_center_x( std::string s_center_x ){
