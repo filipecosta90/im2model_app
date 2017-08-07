@@ -442,7 +442,7 @@ bool SuperCell::create_fractional_positions_atoms(){
       atom_fractional_cell_coordinates[pos].reserve( atom_positions[pos].size() );
       std::transform( atom_positions[pos].begin(), atom_positions[pos].end(), std::back_inserter( atom_fractional_cell_coordinates[pos] ) , functor );
     }
-   std::cout << "get_atom_fractional_cell_coordinates_vec_size: " << get_atom_fractional_cell_coordinates_vec_size() << std::endl;
+    std::cout << "get_atom_fractional_cell_coordinates_vec_size: " << get_atom_fractional_cell_coordinates_vec_size() << std::endl;
     _flag_atom_fractional_cell_coordinates = true;
     result = _flag_atom_fractional_cell_coordinates;
   }
@@ -542,10 +542,14 @@ bool SuperCell::remove_xy_out_of_range_atoms_from_image_bounds(){
       std::vector<cv::Point2d> roi_boundary_polygon_w_margin_nm = image_bounds->get_roi_boundary_polygon_w_margin_nm();
       std::vector<cv::Point2d> centered_roi_boundary_polygon_w_margin_nm;
       // allocate space
-      centered_roi_boundary_polygon_w_margin_nm.resize(roi_boundary_polygon_w_margin_nm.size());
+      centered_roi_boundary_polygon_w_margin_nm.reserve(roi_boundary_polygon_w_margin_nm.size());
       boost::function<cv::Point2d(cv::Point2d)> functor ( boost::bind(&SuperCell::op_Point2d_padding, this , _1, center_a_padding_nm, center_b_padding_nm) );
       std::transform( roi_boundary_polygon_w_margin_nm.begin(), roi_boundary_polygon_w_margin_nm.end(), std::back_inserter( centered_roi_boundary_polygon_w_margin_nm ) , functor );
       // allocate space
+
+      for( int pos = 0; pos <  centered_roi_boundary_polygon_w_margin_nm.size(); pos++){
+        std::cout << roi_boundary_polygon_w_margin_nm[pos] << " " << centered_roi_boundary_polygon_w_margin_nm[pos] << std::endl;
+      }
       CvPolygon* poly_ptr = new CvPolygon();
       boost::function<bool(cv::Point3d)> functor_poly ( !boost::bind(&CvPolygon::inpolygon, poly_ptr, _1 , centered_roi_boundary_polygon_w_margin_nm ) );
       // erase-remove idiom
@@ -700,6 +704,7 @@ cv::Point2d SuperCell::op_Point2d_padding (cv::Point2d point, const double padd_
   const double point_y = point.y + padd_y;
   return cv::Point2d ( point_x, point_y );
 }
+
 
 cv::Point3d SuperCell::op_Point3d_padding (cv::Point3d point, cv::Point3d padd ){
   return  point + padd;

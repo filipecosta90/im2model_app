@@ -205,34 +205,26 @@ bool ImageBounds::update_roi_boundary_polygon_from_full_boundaries(){
     roi_boundary_polygon.clear();
     roi_boundary_polygon_w_margin.clear();
 
-    roi_left_padding_px = roi_boundary_rect.x;
-    roi_top_padding_px = roi_boundary_rect.y;
-    roi_left_padding_px_w_margin = roi_boundary_rect_w_margin.x;
-    roi_top_padding_px_w_margin = roi_boundary_rect_w_margin.y;
+    roi_left_padding_px = - roi_boundary_rect.x;
+    roi_top_padding_px = - roi_boundary_rect.y;
+    roi_left_padding_px_w_margin = - roi_boundary_rect_w_margin.x;
+    roi_top_padding_px_w_margin = - roi_boundary_rect_w_margin.y;
 
-    for (
-        std::vector<cv::Point>::iterator experimental_bound_it = full_boundary_polygon.begin();
-        experimental_bound_it != full_boundary_polygon.end();
-        experimental_bound_it++
-        ){
-      cv::Point super_cell_boundary_point = *experimental_bound_it;
-      super_cell_boundary_point.x -= roi_left_padding_px;
-      super_cell_boundary_point.y -= roi_top_padding_px;
-      roi_boundary_polygon.push_back( super_cell_boundary_point );
-    }
+    boost::function<cv::Point2i(cv::Point2i)> functor ( boost::bind(&ImageBounds::op_Point2i_padding, this , _1, roi_left_padding_px, roi_top_padding_px ) );
+    boost::function<cv::Point2i(cv::Point2i)> functor_w_margin ( boost::bind(&ImageBounds::op_Point2i_padding, this , _1, roi_left_padding_px_w_margin, roi_top_padding_px_w_margin ) );
+    roi_boundary_polygon.reserve(full_boundary_polygon.size());
+    roi_boundary_polygon_w_margin.reserve(full_boundary_polygon_w_margin.size());
+    std::transform( full_boundary_polygon.begin(), full_boundary_polygon.end(), std::back_inserter( roi_boundary_polygon ) , functor );
     _flag_roi_boundary_polygon = true;
-
-    for (
-        std::vector<cv::Point>::iterator experimental_bound_it = full_boundary_polygon_w_margin.begin();
-        experimental_bound_it != full_boundary_polygon_w_margin.end();
-        experimental_bound_it++
-        ){
-      cv::Point super_cell_boundary_point = *experimental_bound_it;
-      super_cell_boundary_point.x -= roi_left_padding_px_w_margin;
-      super_cell_boundary_point.y -= roi_top_padding_px_w_margin;
-      roi_boundary_polygon_w_margin.push_back( super_cell_boundary_point );
-    }
+    std::transform( full_boundary_polygon_w_margin.begin(), full_boundary_polygon_w_margin.end(), std::back_inserter( roi_boundary_polygon_w_margin ) , functor_w_margin );
     _flag_roi_boundary_polygon_w_margin = true;
+    std::cout << " #### " << std::endl;
+
+    for( int pos = 0; pos < full_boundary_polygon.size(); pos++ ){
+      std::cout << full_boundary_polygon[pos] << " " << roi_boundary_polygon[pos] << std::endl;
+    }
+    std::cout << " #### " << std::endl;
+
     generate_boundary_polygon_w_margin_nm();
   }
   else{
@@ -262,11 +254,14 @@ bool ImageBounds::generate_boundary_polygon_w_margin_nm(){
         base_image->get_flag_sampling_rate()
       ){
       const double pixel_size_nm_x = base_image->get_sampling_rate_x_nm_per_pixel();
-      const double pixel_size_nm_y = base_image->get_sampling_rate_y_nm_per_pixel();
+      const double pixel_size_nm_y = -1.0f * base_image->get_sampling_rate_y_nm_per_pixel();
       // allocate space
-      roi_boundary_polygon_w_margin_nm.resize(roi_boundary_polygon_w_margin.size());
+      roi_boundary_polygon_w_margin_nm.reserve(roi_boundary_polygon_w_margin.size());
       boost::function<cv::Point2d(cv::Point2i)> functor ( boost::bind(&ImageBounds::op_px_to_nm, this, _1, pixel_size_nm_x, pixel_size_nm_y) );
-      std::transform( roi_boundary_polygon_w_margin.begin(), roi_boundary_polygon_w_margin.end(), roi_boundary_polygon_w_margin_nm.begin() , functor );
+      std::transform( roi_boundary_polygon_w_margin.begin(), roi_boundary_polygon_w_margin.end(), std::back_inserter( roi_boundary_polygon_w_margin_nm ) , functor );
+      for( int pos = 0; pos < roi_boundary_polygon_w_margin.size(); pos++ ){
+        std::cout << roi_boundary_polygon_w_margin[pos] << " " << roi_boundary_polygon_w_margin_nm[pos] << std::endl;
+      }
       _flag_roi_boundary_polygon_w_margin_nm = true;
       result = true;
     }
@@ -314,6 +309,12 @@ bool ImageBounds::set_full_boundary_polygon_margin_x_nm( double value ){
 bool ImageBounds::set_full_boundary_polygon_margin_y_nm( double value ){
   full_boundary_polygon_margin_y_nm = value;
   return true;
+}
+
+cv::Point2i ImageBounds::op_Point2i_padding (cv::Point2d point, const int padd_x, const int  padd_y ){
+  const double point_x =  point.x + padd_x;
+  const double point_y = point.y + padd_y;
+  return cv::Point2i ( point_x, point_y );
 }
 
 /* Loggers */

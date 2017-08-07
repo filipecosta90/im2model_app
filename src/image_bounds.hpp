@@ -190,6 +190,8 @@ class ImageBounds {
 
     bool set_base_image( BaseImage* base_image_ptr );
 
+    cv::Point2i op_Point2i_padding (cv::Point2d point, const int padd_x, const int  padd_y );
+
     /* Loggers */
     bool set_application_logger( ApplicationLog::ApplicationLog* logger );
 
