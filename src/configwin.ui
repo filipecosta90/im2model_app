@@ -21,7 +21,7 @@
     <item>
      <widget class="QTabWidget" name="tabWidget">
       <property name="currentIndex">
-       <number>2</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="image_crystal_tab">
        <attribute name="title">
@@ -189,36 +189,12 @@
            </widget>
           </item>
           <item>
-           <widget class="QGraphicsView" name="qgraphics_experimental_data_2">
-            <property name="enabled">
-             <bool>true</bool>
-            </property>
+           <widget class="QWidget" name="qwidget_qt_scene_view_roi_tdmap_super_cell" native="true">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
               <horstretch>0</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
-            </property>
-            <property name="minimumSize">
-             <size>
-              <width>320</width>
-              <height>320</height>
-             </size>
-            </property>
-            <property name="sizeIncrement">
-             <size>
-              <width>1</width>
-              <height>1</height>
-             </size>
-            </property>
-            <property name="baseSize">
-             <size>
-              <width>320</width>
-              <height>320</height>
-             </size>
-            </property>
-            <property name="sizeAdjustPolicy">
-             <enum>QAbstractScrollArea::AdjustToContents</enum>
             </property>
            </widget>
           </item>
@@ -649,8 +625,8 @@
                 <rect>
                  <x>0</x>
                  <y>0</y>
-                 <width>1204</width>
-                 <height>664</height>
+                 <width>98</width>
+                 <height>198</height>
                 </rect>
                </property>
               </widget>

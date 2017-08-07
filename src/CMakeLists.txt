@@ -125,9 +125,7 @@ else(build_cli)
 
     # Find the QtWidgets library
     message(STATUS "Building the Qt5 version")
-    find_package(Qt5Core 5.2 REQUIRED)
-    find_package(Qt5Gui REQUIRED)
-    find_package(Qt5Widgets REQUIRED)
+    find_package(Qt5 REQUIRED COMPONENTS Core Gui Widgets 3DCore 3DExtras 3DRender 3DInput)
 
     # Set PROJECT_VERSION_PATCH and PROJECT_VERSION_TWEAK to 0 if not present, needed by add_project_meta
 
@@ -144,6 +142,8 @@ else(build_cli)
       QtAwesome.h
       QtAwesomeAnim.cpp
       QtAwesomeAnim.h
+      qt_scene_supercell.cpp
+      qt_scene_supercell.h
       group_options.h
       group_options.cpp
       renderarea.h
@@ -213,7 +213,17 @@ else(build_cli)
       ${RESOURCE_FILES}  ${im2model_core_src} mc_driver.cpp ${FLEX_mc_lexer_OUTPUTS} ${BISON_mc_parser_OUTPUTS} ${DR_PROBE_RESOURCES}
       )
     # Use the Widgets module from Qt 5.
-    qt5_use_modules( ${PROJECT_NAME} Core Gui Widgets )
+    qt5_use_modules( ${PROJECT_NAME} Core Gui Widgets 3DCore 3DExtras 3DRender 3DInput )
+    # link the qt3d libraries
+target_link_libraries(${PROJECT_NAME}
+    Qt5::Core
+    Qt5::Gui
+    Qt5::Widgets
+    Qt5::3DCore
+    Qt5::3DExtras
+    Qt5::3DRender
+    Qt5::3DInput
+    )
     SET_SOURCE_FILES_PROPERTIES(${DR_PROBE_RESOURCES} PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
 
     fix_win_compiler()

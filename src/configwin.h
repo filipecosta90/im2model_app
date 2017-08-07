@@ -4,6 +4,42 @@
 #include <QMainWindow>
 #include <QtWidgets>
 
+#include <Qt3DRender/qcamera.h>
+#include <Qt3DCore/qentity.h>
+#include <Qt3DRender/qcameralens.h>
+
+#include <QtWidgets/QApplication>
+#include <QtWidgets/QWidget>
+#include <QtWidgets/QHBoxLayout>
+#include <QtWidgets/QCheckBox>
+#include <QtWidgets/QCommandLinkButton>
+#include <QtGui/QScreen>
+#include <QToolBar>
+#include <QMenu>
+#include <QAction>
+#include <Qt3DInput/QInputAspect>
+
+#include <Qt3DExtras/qtorusmesh.h>
+#include <Qt3DRender/qmesh.h>
+#include <Qt3DRender/qtechnique.h>
+#include <Qt3DRender/qmaterial.h>
+#include <Qt3DRender/qeffect.h>
+#include <Qt3DRender/qtexture.h>
+#include <Qt3DRender/qrenderpass.h>
+#include <Qt3DRender/qsceneloader.h>
+#include <Qt3DRender/qpointlight.h>
+
+#include <Qt3DCore/qtransform.h>
+#include <Qt3DCore/qaspectengine.h>
+
+#include <Qt3DRender/qrenderaspect.h>
+#include <Qt3DExtras/qforwardrenderer.h>
+
+#include <Qt3DExtras/qt3dwindow.h>
+#include <Qt3DExtras/qfirstpersoncameracontroller.h>
+#include <Qt3DExtras/QOrbitCameraController>
+#include <Qt3DExtras/QPhongMaterial>
+
 #include <opencv2/core/hal/interface.h>                   // for CV_8UC1
 #include <opencv2/imgcodecs/imgcodecs_c.h>                // for ::CV_LOAD_I...
 #include <opencv2/core.hpp>                               // for RNG
@@ -32,9 +68,7 @@
 #include "ui_configwin.h"
 #include "treeitem.h"
 #include "cv_image_widget.h"
-#include <QToolBar>
-#include <QMenu>
-#include <QAction>
+#include "qt_scene_supercell.h"
 #include "settings.h"
 #include "ui_settings.h"
 
@@ -146,6 +180,7 @@ signals:
     void updateProgressBar( int lower_range, int current_value, int upper_range , bool error );
     void createProgressBar();
 
+    bool create_3d_widgets( QMainWindow *parent );
     void create_box_options();
     bool readSettings();
     void writeSettings();
@@ -301,6 +336,11 @@ signals:
     group_options* simgrid_step_group_options;
     group_options* super_cell_target_step_group_options;
     QProgressBar* running_progress;
+
+    Qt3DExtras::Qt3DWindow *qt_scene_view_roi_tdmap_super_cell;
+    QtSceneSuperCell* qt_scene_roi_tdmap_super_cell = nullptr;
+    Qt3DExtras::Qt3DWindow *qt_scene_view_full_tdmap_super_cell;
+    QtSceneSuperCell* qt_scene_full_tdmap_super_cell = nullptr;
 
 };
 

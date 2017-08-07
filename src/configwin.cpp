@@ -1,9 +1,52 @@
 #include "configwin.h"
 
+bool MainWindow::create_3d_widgets( QMainWindow *parent ){
+  qt_scene_view_roi_tdmap_super_cell = new Qt3DExtras::Qt3DWindow( );
+  //ui->qwidget_qt_scene_view_roi_tdmap_super_cell =  QWidget::createWindowContainer(qt_scene_view_roi_tdmap_super_cell,parent);
+QWidget *container = QWidget::createWindowContainer(qt_scene_view_roi_tdmap_super_cell,ui->qwidget_qt_scene_view_roi_tdmap_super_cell);
+container->setMinimumSize(ui->qwidget_qt_scene_view_roi_tdmap_super_cell->size());
+//container->setMaximumSize(200, 200);
+
+  Qt3DInput::QInputAspect *input = new Qt3DInput::QInputAspect;
+  qt_scene_view_roi_tdmap_super_cell->registerAspect(input);
+  // Root entity
+  Qt3DCore::QEntity *rootEntity = new Qt3DCore::QEntity();
+  // Camera
+  Qt3DRender::QCamera *cameraEntity = qt_scene_view_roi_tdmap_super_cell->camera();
+
+  cameraEntity->lens()->setPerspectiveProjection(45.0f, 16.0f/9.0f, 0.1f, 1000.0f);
+  cameraEntity->setPosition(QVector3D(0, 0, 20.0f));
+  cameraEntity->setUpVector(QVector3D(0, 1, 0));
+  cameraEntity->setViewCenter(QVector3D(0, 0, 0));
+
+  Qt3DCore::QEntity *lightEntity = new Qt3DCore::QEntity(rootEntity);
+  Qt3DRender::QPointLight *light = new Qt3DRender::QPointLight(lightEntity);
+  light->setColor("white");
+  light->setIntensity(1);
+  lightEntity->addComponent(light);
+  Qt3DCore::QTransform *lightTransform = new Qt3DCore::QTransform(lightEntity);
+  lightTransform->setTranslation(cameraEntity->position());
+  lightEntity->addComponent(lightTransform);
+
+  // For camera controls
+  Qt3DExtras::QOrbitCameraController *camController = new Qt3DExtras::QOrbitCameraController(rootEntity);
+  camController->setLinearSpeed(50.f);
+  camController->setLookSpeed(180.f);
+  camController->setCamera(cameraEntity);
+
+  // Scene SuperCell
+  qt_scene_roi_tdmap_super_cell = new QtSceneSuperCell(rootEntity);
+
+  // Set root object of the scene
+  qt_scene_view_roi_tdmap_super_cell->setRootEntity(rootEntity);
+  ui->qwidget_qt_scene_view_roi_tdmap_super_cell->show();
+  return true;
+}
 MainWindow::MainWindow( ApplicationLog::ApplicationLog* logger , QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow) {
   im2model_logger = logger;
   _flag_im2model_logger = true;
   im2model_logger->logEvent(ApplicationLog::notification, "Application logger setted for MainWindow class.");
+
 
   if (_flag_im2model_logger) {
     im2model_logger->logEvent(ApplicationLog::normal, "Setting up UI.");
@@ -14,6 +57,8 @@ MainWindow::MainWindow( ApplicationLog::ApplicationLog* logger , QWidget *parent
   ui->td_map_splitter->setStretchFactor(2,2);
   ui->super_cell_splitter->setStretchFactor(0,3);
   ui->super_cell_splitter->setStretchFactor(1,7);
+  create_3d_widgets( this );
+
   if (_flag_im2model_logger) {
     im2model_logger->logEvent(ApplicationLog::normal, "Creating actions.");
   }
