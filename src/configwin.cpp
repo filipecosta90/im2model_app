@@ -1,6 +1,6 @@
 #include "configwin.h"
 
-bool MainWindow::create_3d_widgets( QMainWindow *parent ){
+bool MainWindow::create_3d_widgets( QMainWindow *parent , SuperCell* tdmap_roi_sim_super_cell, SuperCell* tdmap_full_sim_super_cell ){
   qt_scene_view_roi_tdmap_super_cell = new Qt3DExtras::Qt3DWindow( );
   //ui->qwidget_qt_scene_view_roi_tdmap_super_cell =  QWidget::createWindowContainer(qt_scene_view_roi_tdmap_super_cell,parent);
 QWidget *container = QWidget::createWindowContainer(qt_scene_view_roi_tdmap_super_cell,ui->qwidget_qt_scene_view_roi_tdmap_super_cell);
@@ -34,9 +34,10 @@ container->setMinimumSize(ui->qwidget_qt_scene_view_roi_tdmap_super_cell->size()
   camController->setLookSpeed(180.f);
   camController->setCamera(cameraEntity);
 
-  // Scene SuperCell
+  // Scene SuperCell for TDMAP ROI
   qt_scene_roi_tdmap_super_cell = new QtSceneSuperCell(rootEntity);
-
+  qt_scene_roi_tdmap_super_cell->set_super_cell(tdmap_roi_sim_super_cell);
+  QObject::connect( tdmap_roi_sim_super_cell, SIGNAL(atom_positions_changed()), qt_scene_roi_tdmap_super_cell, SLOT(reload_data_from_super_cell()));
   // Set root object of the scene
   qt_scene_view_roi_tdmap_super_cell->setRootEntity(rootEntity);
   ui->qwidget_qt_scene_view_roi_tdmap_super_cell->show();
@@ -57,7 +58,6 @@ MainWindow::MainWindow( ApplicationLog::ApplicationLog* logger , QWidget *parent
   ui->td_map_splitter->setStretchFactor(2,2);
   ui->super_cell_splitter->setStretchFactor(0,3);
   ui->super_cell_splitter->setStretchFactor(1,7);
-  create_3d_widgets( this );
 
   if (_flag_im2model_logger) {
     im2model_logger->logEvent(ApplicationLog::normal, "Creating actions.");
@@ -100,6 +100,11 @@ MainWindow::MainWindow( ApplicationLog::ApplicationLog* logger , QWidget *parent
         _sim_tdmap_msa_ostream_buffer,
         _sim_tdmap_wavimg_ostream_buffer,
         _sim_tdmap_simgrid_ostream_buffer );
+
+        SuperCell* tdmap_roi_sim_super_cell = _core_td_map->get_tdmap_roi_sim_super_cell();
+        SuperCell* tdmap_full_sim_super_cell = _core_td_map->get_tdmap_full_sim_super_cell();
+
+        create_3d_widgets( this , tdmap_roi_sim_super_cell, tdmap_full_sim_super_cell );
 
     celslc_step_group_options = new group_options("celslc_step");
     msa_step_group_options = new group_options("msa_step");

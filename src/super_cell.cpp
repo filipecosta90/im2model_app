@@ -360,6 +360,7 @@ bool SuperCell::create_atoms_from_unit_cell(){
       }
       _flag_atom_positions = true;
       result = true;
+      emit atom_positions_changed();
     }
     else{
       if( _flag_logger ){

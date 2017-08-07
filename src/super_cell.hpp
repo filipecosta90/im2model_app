@@ -5,6 +5,7 @@
 #include <boost/iostreams/device/mapped_file.hpp> // for mmap
 #include <boost/iostreams/stream.hpp>             // for stream
 #include <boost/format.hpp>
+#include <boost/bind.hpp>
 /* END BOOST */
 
 #include <math.h>                        // for fabs, ceil, pow, M_PI
@@ -38,7 +39,9 @@
 #include <opencv2/core/types.hpp>    // for Point3d, Point, Rect, Point2d
 #include <opencv2/opencv.hpp>
 
-#include <boost/bind.hpp>
+
+#include <QtWidgets>
+#include <QObject>
 
 #include "image_bounds.hpp"
 #include "base_cell.hpp"
@@ -47,7 +50,7 @@
 #include "application_log.hpp"
 #include "cv_polygon.hpp"
 
-class SuperCell : public BaseCell {
+class SuperCell : public BaseCell{
   private:
     /** Private Class methods **/
 
@@ -128,6 +131,8 @@ class SuperCell : public BaseCell {
     void print_var_state();
     // friend std::ostream& operator<< (std::ostream& stream, const SuperCell::SuperCell& image);
     virtual std::ostream& output(std::ostream& stream) const;
+
+
 };
 
 #endif

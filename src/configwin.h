@@ -180,7 +180,7 @@ signals:
     void updateProgressBar( int lower_range, int current_value, int upper_range , bool error );
     void createProgressBar();
 
-    bool create_3d_widgets( QMainWindow *parent );
+    bool create_3d_widgets( QMainWindow *parent , SuperCell* tdmap_roi_sim_super_cell, SuperCell* tdmap_full_sim_super_cell );
     void create_box_options();
     bool readSettings();
     void writeSettings();

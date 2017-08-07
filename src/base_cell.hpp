@@ -18,6 +18,10 @@
 #include <vector>                        // for vector, vector<>::iterator
 #include <iosfwd>                    // for string
 
+#include <QMainWindow>
+#include <QtWidgets>
+#include <QObject>
+
 #include <opencv2/core/hal/interface.h>  // for CV_8UC1, CV_32F, CV_32FC1
 #include <opencv2/imgproc/imgproc_c.h>   // for cvGetSpatialMoment
 #include <opencv2/imgproc/types_c.h>     // for ::CV_THRESH_BINARY, CvMoments
@@ -48,7 +52,8 @@
 #include "symbcalc.hpp"
 #include "application_log.hpp"
 
-class BaseCell {
+class BaseCell : public QObject {
+  Q_OBJECT
   private:
     void update_length_flag();
 
@@ -295,6 +300,9 @@ class BaseCell {
     void print_var_state();
     // friend std::ostream& operator<< (std::ostream& stream, const SuperCell::SuperCell& image);
     virtual std::ostream& output(std::ostream& stream) const;
+
+    signals:
+    void atom_positions_changed();
 
 };
 
