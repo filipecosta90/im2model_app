@@ -3,14 +3,16 @@
 bool MainWindow::create_3d_widgets( QMainWindow *parent , SuperCell* tdmap_roi_sim_super_cell, SuperCell* tdmap_full_sim_super_cell ){
   qt_scene_view_roi_tdmap_super_cell = new Qt3DExtras::Qt3DWindow( );
   //ui->qwidget_qt_scene_view_roi_tdmap_super_cell =  QWidget::createWindowContainer(qt_scene_view_roi_tdmap_super_cell,parent);
-QWidget *container = QWidget::createWindowContainer(qt_scene_view_roi_tdmap_super_cell,ui->qwidget_qt_scene_view_roi_tdmap_super_cell);
-container->setMinimumSize(ui->qwidget_qt_scene_view_roi_tdmap_super_cell->size());
-//container->setMaximumSize(200, 200);
+  QWidget *container = QWidget::createWindowContainer(qt_scene_view_roi_tdmap_super_cell,ui->qwidget_qt_scene_view_roi_tdmap_super_cell);
+  container->setMinimumSize(ui->qwidget_qt_scene_view_roi_tdmap_super_cell->size());
+  //container->setMaximumSize(200, 200);
 
   Qt3DInput::QInputAspect *input = new Qt3DInput::QInputAspect;
   qt_scene_view_roi_tdmap_super_cell->registerAspect(input);
   // Root entity
   Qt3DCore::QEntity *rootEntity = new Qt3DCore::QEntity();
+  rootEntity->setObjectName(QStringLiteral("rootEntity"));
+
   // Camera
   Qt3DRender::QCamera *cameraEntity = qt_scene_view_roi_tdmap_super_cell->camera();
 
@@ -37,9 +39,31 @@ container->setMinimumSize(ui->qwidget_qt_scene_view_roi_tdmap_super_cell->size()
   // Scene SuperCell for TDMAP ROI
   qt_scene_roi_tdmap_super_cell = new QtSceneSuperCell(rootEntity);
   qt_scene_roi_tdmap_super_cell->set_super_cell(tdmap_roi_sim_super_cell);
-  QObject::connect( tdmap_roi_sim_super_cell, SIGNAL(atom_positions_changed()), qt_scene_roi_tdmap_super_cell, SLOT(reload_data_from_super_cell()));
+  //QObject::connect( tdmap_roi_sim_super_cell, SIGNAL(atom_positions_changed()), qt_scene_roi_tdmap_super_cell, SLOT(reload_data_from_super_cell()));
+
+  Qt3DRender::QSceneLoader  *scene = new Qt3DRender::QSceneLoader();
+
+  // FrameGraph
+  //Qt3DRender::QFrameGraph *frameGraph = new Qt3DRender::QFrameGraph();
+  Qt3DRender::QTechniqueFilter *techniqueFilter = new Qt3DRender::QTechniqueFilter();
+  Qt3DRender::QViewport *viewport = new Qt3DRender::QViewport(techniqueFilter);
+  Qt3DRender::QClearBuffers *clearBuffer = new Qt3DRender::QClearBuffers(viewport);
+  Qt3DRender::QCameraSelector *cameraSelector = new Qt3DRender::QCameraSelector(clearBuffer);
+  (void) new Qt3DRender::QRenderPassFilter(cameraSelector);
+
+  // TechiqueFilter and renderPassFilter are not implement yet
+  viewport->setNormalizedRect(QRectF(0, 0, 1, 1));
+  clearBuffer->setBuffers(Qt3DRender::QClearBuffers::ColorDepthBuffer);
+  cameraSelector->setCamera(cameraEntity);
+  //frameGraph->setActiveFrameGraph(techniqueFilter);
+
+  // Setting the FrameGraph
+  //rootEntity->addComponent(frameGraph);
+
+  // Set root object of the scene
   // Set root object of the scene
   qt_scene_view_roi_tdmap_super_cell->setRootEntity(rootEntity);
+
   ui->qwidget_qt_scene_view_roi_tdmap_super_cell->show();
   return true;
 }
@@ -101,10 +125,10 @@ MainWindow::MainWindow( ApplicationLog::ApplicationLog* logger , QWidget *parent
         _sim_tdmap_wavimg_ostream_buffer,
         _sim_tdmap_simgrid_ostream_buffer );
 
-        SuperCell* tdmap_roi_sim_super_cell = _core_td_map->get_tdmap_roi_sim_super_cell();
-        SuperCell* tdmap_full_sim_super_cell = _core_td_map->get_tdmap_full_sim_super_cell();
+    SuperCell* tdmap_roi_sim_super_cell = _core_td_map->get_tdmap_roi_sim_super_cell();
+    SuperCell* tdmap_full_sim_super_cell = _core_td_map->get_tdmap_full_sim_super_cell();
 
-        create_3d_widgets( this , tdmap_roi_sim_super_cell, tdmap_full_sim_super_cell );
+    create_3d_widgets( this , tdmap_roi_sim_super_cell, tdmap_full_sim_super_cell );
 
     celslc_step_group_options = new group_options("celslc_step");
     msa_step_group_options = new group_options("msa_step");

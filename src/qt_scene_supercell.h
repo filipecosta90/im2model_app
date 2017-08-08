@@ -63,6 +63,14 @@
 #include <Qt3DExtras/QPlaneMesh>
 #include <Qt3DExtras/QSphereMesh>
 #include <Qt3DExtras/QPhongMaterial>
+#include <Qt3DCore/QEntity>
+#include <Qt3DRender/QGeometryRenderer>
+#include <Qt3DRender/QLayer>
+#include <Qt3DRender/QLayerFilter>
+#include <Qt3DRender/QViewport>
+#include <QGoochMaterial>
+#include <QColor>
+
 
 #include "super_cell.hpp"
 
@@ -82,6 +90,7 @@ class QtSceneSuperCell : public QObject
 
   private:
     Qt3DCore::QEntity *m_rootEntity;
+    Qt3DCore::QEntity *m_axisEntity;
     Qt3DCore::QEntity *m_planeEntity;
     std::vector<Qt3DCore::QEntity*> sphere_entities;
     std::vector<Qt3DExtras::QSphereMesh*> sphere_meshes;

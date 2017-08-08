@@ -215,6 +215,7 @@ else(build_cli)
     # Use the Widgets module from Qt 5.
     qt5_use_modules( ${PROJECT_NAME} Core Gui Widgets 3DCore 3DExtras 3DRender 3DInput )
     # link the qt3d libraries
+
 target_link_libraries(${PROJECT_NAME}
     Qt5::Core
     Qt5::Gui
@@ -224,6 +225,7 @@ target_link_libraries(${PROJECT_NAME}
     Qt5::3DRender
     Qt5::3DInput
     )
+    
     SET_SOURCE_FILES_PROPERTIES(${DR_PROBE_RESOURCES} PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
 
     fix_win_compiler()
@@ -247,7 +249,7 @@ endif(APPLE)
 set_property(TARGET ${PROJECT_NAME} PROPERTY FOLDER "executables")
 
 # Properties->General->Output Directory
-set_target_properties( ${PROJECT_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR})
+set_target_properties( ${PROJECT_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
 
 
 set(CMAKE_INSTALL_PREFIX ${CMAKE_CURRENT_BINARY_DIR} )

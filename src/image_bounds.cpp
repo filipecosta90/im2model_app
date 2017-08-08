@@ -253,6 +253,7 @@ bool ImageBounds::generate_boundary_polygon_w_margin_nm(){
         base_image->get_flag_full_image() &&
         base_image->get_flag_sampling_rate()
       ){
+        roi_boundary_polygon_w_margin_nm.clear();
       const double pixel_size_nm_x = base_image->get_sampling_rate_x_nm_per_pixel();
       const double pixel_size_nm_y = -1.0f * base_image->get_sampling_rate_y_nm_per_pixel();
       // allocate space

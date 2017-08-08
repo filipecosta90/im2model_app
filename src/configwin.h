@@ -31,6 +31,13 @@
 
 #include <Qt3DCore/qtransform.h>
 #include <Qt3DCore/qaspectengine.h>
+#include <QSceneLoader>
+#include <QTechniqueFilter>
+#include <QViewport>
+#include <QClearBuffers>
+#include <QCameraSelector>
+#include <QRenderPassFilter>
+#include <QSceneLoader>
 
 #include <Qt3DRender/qrenderaspect.h>
 #include <Qt3DExtras/qforwardrenderer.h>
