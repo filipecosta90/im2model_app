@@ -48,21 +48,20 @@ bool SuperCell::update_from_unit_cell(){
   if( _flag_unit_cell ){
     if(
         unit_cell->get_flag_parsed_cif() &&
-        _flag_min_size_nm &&
         _flag_orientation_matrix
       ){
       if( _flag_atom_positions ){
         clean_for_re_run();
       }
       const bool angle_result = update_angle_parameters_from_unit_cell();
-      bool expand_result = calculate_expand_factor();
-      //  expand_result = update_length_parameters_from_expand_factor();
+      const bool expand_result = _flag_auto_calculate_expand_factor ? calculate_expand_factor() : _flag_expand_factor;
+      if( !_flag_auto_calculate_expand_factor ){
+        update_length_parameters_from_expand_factor();
+      }
       if( angle_result && expand_result ){
         const bool create_result = create_atoms_from_unit_cell();
         if( create_result ){
           const bool orientate_result = orientate_atoms_from_matrix();
-          //  const bool debug_xyz_result = generate_xyz_file();
-          //  std::cout << "debug_xyz_result " << std::boolalpha << debug_xyz_result << std::endl;
           if( orientate_result ){
             const bool remove_z_result = remove_z_out_of_range_atoms();
             bool remove_xy_result = false;
@@ -302,7 +301,6 @@ bool SuperCell::create_atoms_from_unit_cell(){
       _flag_unit_cell
     ){
     if(
-
         // BaseCell vars
         unit_cell->get_flag_parsed_cif() &&
         unit_cell->get_flag_atom_positions_vec() &&
@@ -392,6 +390,7 @@ bool SuperCell::orientate_atoms_from_matrix(){
         std::transform( atom_positions[pos].begin(), atom_positions[pos].end(), atom_positions[pos].begin() , functor );
       }
       result = true;
+      emit atom_positions_changed();
     }
     else{
       if( _flag_logger ){
@@ -476,6 +475,7 @@ bool SuperCell::remove_z_out_of_range_atoms(){
     }
     std::cout << "Final number of atoms after Z remotion: " << get_atom_positions_vec_size() << std::endl;
     result = true;
+    emit atom_positions_changed();
   }
   else{
     if( _flag_logger ){
@@ -512,6 +512,7 @@ bool SuperCell::remove_xy_out_of_range_atoms(){
     }
     std::cout << "Final number of atoms after XY remotion: " << get_atom_positions_vec_size() << std::endl;
     result = true;
+    emit atom_positions_changed();
   }
   else{
     if( _flag_logger ){
@@ -559,6 +560,7 @@ bool SuperCell::remove_xy_out_of_range_atoms_from_image_bounds(){
         atom_positions[pos].erase( std::remove_if( atom_positions[pos].begin(), atom_positions[pos].end(), functor_poly ) , atom_positions[pos].end() );
       }
       result = true;
+      emit atom_positions_changed();
     }
     else{
       if( _flag_logger ){
@@ -698,6 +700,19 @@ bool SuperCell::set_length_c_Nanometers( double c ){
   _flag_min_size_nm = _flag_a_min_size_nm && _flag_b_min_size_nm && _flag_c_min_size_nm;
   const bool result = BaseCell::set_length_c_Nanometers( c );
   return result;
+}
+
+bool SuperCell::set_expand_factor_abc( int factor_a, int factor_b, int factor_c ){
+  expand_factor_a = factor_a;
+  expand_factor_b = factor_b;
+  expand_factor_c = factor_c;
+_flag_expand_factor = true;
+return true;
+}
+
+bool SuperCell::set_flag_auto_calculate_expand_factor( bool value ){
+_flag_auto_calculate_expand_factor = value;
+return true;
 }
 
 cv::Point2d SuperCell::op_Point2d_padding (cv::Point2d point, const double padd_x, const double  padd_y ){

@@ -96,7 +96,6 @@ void QtSceneSuperCell::set_super_cell( SuperCell* cell ){
    _flag_super_cell = true;
 }
 
-
 void QtSceneSuperCell::reload_data_from_super_cell(){
 if( _flag_super_cell ){
   std::cout << "########\nreloading data from super cell\n########\n" << std::endl;

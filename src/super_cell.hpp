@@ -93,6 +93,7 @@ class SuperCell : public BaseCell{
     int expand_factor_b = 1;
     int expand_factor_c = 1;
     bool _flag_expand_factor = false;
+    bool _flag_auto_calculate_expand_factor = true;
 
     bool update_length_parameters_from_expand_factor();
     bool clean_for_re_run();
@@ -113,7 +114,7 @@ class SuperCell : public BaseCell{
     bool remove_xy_out_of_range_atoms();
     bool remove_xy_out_of_range_atoms_from_image_bounds();
     bool generate_super_cell_file();
-    bool generate_xyz_file( );
+    bool generate_xyz_file();
 
     /* setters */
     bool set_unit_cell( UnitCell* cell );
@@ -125,6 +126,9 @@ class SuperCell : public BaseCell{
     bool set_length_a_Nanometers( double a );
     bool set_length_b_Nanometers( double b );
     bool set_length_c_Nanometers( double c );
+
+    bool set_expand_factor_abc( int factor_a, int factor_b, int factor_c );
+    bool set_flag_auto_calculate_expand_factor( bool value );
 
     /* Loggers */
     bool set_application_logger( ApplicationLog::ApplicationLog* logger );

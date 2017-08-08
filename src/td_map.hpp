@@ -85,6 +85,7 @@ class TDMap  : public QObject {
     /* *
      * SuperCell
      * */
+     SuperCell* tdmap_vis_sim_unit_cell = nullptr;
     SuperCell* tdmap_roi_sim_super_cell = nullptr;
     SuperCell* tdmap_full_sim_super_cell = nullptr;
     SuperCell* final_full_sim_super_cell = nullptr;
@@ -361,8 +362,10 @@ class TDMap  : public QObject {
     double get_exp_image_properties_roi_nx_size_width_nm();
     double get_full_boundary_polygon_margin_nm( );
 
+    SuperCell*  get_tdmap_vis_sim_unit_cell(){ return tdmap_vis_sim_unit_cell; }
     SuperCell*  get_tdmap_roi_sim_super_cell(){ return tdmap_roi_sim_super_cell; }
     SuperCell*  get_tdmap_full_sim_super_cell(){ return tdmap_full_sim_super_cell; }
+
 
     /* gui validator limits getters */
     double get_exp_image_properties_sampling_rate_nm_per_pixel_bottom_limit();

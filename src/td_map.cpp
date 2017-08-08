@@ -15,9 +15,18 @@ TDMap::TDMap(
    * SuperCell
    * */
   const double cel_margin_nm = 1.0f;
+
+// just for visualization purposes
+  tdmap_vis_sim_unit_cell = new SuperCell( unit_cell );
+  tdmap_vis_sim_unit_cell->set_cel_margin_nm( cel_margin_nm );
+  tdmap_vis_sim_unit_cell->set_flag_auto_calculate_expand_factor( false );
+  tdmap_vis_sim_unit_cell->set_expand_factor_abc( 4, 4, 4 );
+
+
   tdmap_roi_sim_super_cell = new SuperCell( unit_cell );
   tdmap_full_sim_super_cell = new SuperCell( unit_cell );
   final_full_sim_super_cell = new SuperCell( unit_cell );
+
 
   tdmap_roi_sim_super_cell->set_cel_filename( "tdmap_roi.cel" );
   tdmap_roi_sim_super_cell->set_xyz_filename( "tdmap_roi.xyz" );
@@ -1143,6 +1152,8 @@ bool TDMap::set_unit_cell_cif_path( std::string cif_path ){
       const bool parse_result = unit_cell->parse_cif();
       if( parse_result ){
         tdmap_roi_sim_super_cell->update_from_unit_cell();
+        // just for visualization purposes
+        tdmap_vis_sim_unit_cell->update_from_unit_cell();
       }
     }
   }
@@ -1161,6 +1172,8 @@ bool TDMap::set_zone_axis_u( std::string s_za_u ){
     const bool roi_super_cell_result = tdmap_roi_sim_super_cell->set_zone_axis_u( za_u );
     const bool full_super_cell_result = tdmap_full_sim_super_cell->set_zone_axis_u( za_u );
     result = unit_cell_result && roi_super_cell_result && full_super_cell_result;
+    // just for visualization purposes
+    tdmap_vis_sim_unit_cell->set_zone_axis_u( za_u );
   }
   catch(boost::bad_lexical_cast&  ex) {
     // pass it up
@@ -1177,6 +1190,8 @@ bool TDMap::set_zone_axis_v( std::string s_za_v ){
     const bool roi_super_cell_result = tdmap_roi_sim_super_cell->set_zone_axis_v( za_v );
     const bool full_super_cell_result = tdmap_full_sim_super_cell->set_zone_axis_v( za_v );
     result = unit_cell_result && roi_super_cell_result && full_super_cell_result;
+    // just for visualization purposes
+    tdmap_vis_sim_unit_cell->set_zone_axis_v( za_v );
   }
   catch(boost::bad_lexical_cast&  ex) {
     // pass it up
@@ -1193,6 +1208,8 @@ bool TDMap::set_zone_axis_w( std::string s_za_w ){
     const bool roi_super_cell_result = tdmap_roi_sim_super_cell->set_zone_axis_w( za_w );
     const bool full_super_cell_result = tdmap_full_sim_super_cell->set_zone_axis_w( za_w );
     result = unit_cell_result && roi_super_cell_result && full_super_cell_result;
+    // just for visualization purposes
+    tdmap_vis_sim_unit_cell->set_zone_axis_w( za_w );
   }
   catch(boost::bad_lexical_cast&  ex) {
     // pass it up
@@ -1209,6 +1226,8 @@ bool TDMap::set_upward_vector_u( std::string s_y_u ){
     const bool roi_super_cell_result = tdmap_roi_sim_super_cell->set_upward_vector_u( y_u );
     const bool full_super_cell_result = tdmap_full_sim_super_cell->set_upward_vector_u( y_u );
     result = unit_cell_result && roi_super_cell_result && full_super_cell_result;
+    // just for visualization purposes
+    tdmap_vis_sim_unit_cell->set_upward_vector_u( y_u );
   }
   catch(boost::bad_lexical_cast&  ex) {
     // pass it up
@@ -1225,6 +1244,8 @@ bool TDMap::set_upward_vector_v( std::string s_y_v ){
     const bool roi_super_cell_result = tdmap_roi_sim_super_cell->set_upward_vector_v( y_v );
     const bool full_super_cell_result = tdmap_full_sim_super_cell->set_upward_vector_v( y_v );
     result = unit_cell_result && roi_super_cell_result && full_super_cell_result;
+    // just for visualization purposes
+    tdmap_vis_sim_unit_cell->set_upward_vector_v( y_v );
   }
   catch(boost::bad_lexical_cast&  ex) {
     // pass it up
@@ -1241,6 +1262,8 @@ bool TDMap::set_upward_vector_w( std::string s_y_w ){
     const bool roi_super_cell_result = tdmap_roi_sim_super_cell->set_upward_vector_w( y_w );
     const bool full_super_cell_result = tdmap_full_sim_super_cell->set_upward_vector_w( y_w );
     result = unit_cell_result && roi_super_cell_result && full_super_cell_result;
+    // just for visualization purposes
+    tdmap_vis_sim_unit_cell->set_upward_vector_w( y_w );
   }
   catch(boost::bad_lexical_cast&  ex) {
     // pass it up

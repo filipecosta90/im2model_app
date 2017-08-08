@@ -1,6 +1,6 @@
 #include "configwin.h"
 
-bool MainWindow::create_3d_widgets( QMainWindow *parent , SuperCell* tdmap_roi_sim_super_cell, SuperCell* tdmap_full_sim_super_cell ){
+bool MainWindow::create_3d_widgets( QMainWindow *parent , SuperCell* tdmap_vis_sim_unit_cell, SuperCell* tdmap_full_sim_super_cell ){
   qt_scene_view_roi_tdmap_super_cell = new Qt3DExtras::Qt3DWindow( );
   //ui->qwidget_qt_scene_view_roi_tdmap_super_cell =  QWidget::createWindowContainer(qt_scene_view_roi_tdmap_super_cell,parent);
   QWidget *container = QWidget::createWindowContainer(qt_scene_view_roi_tdmap_super_cell,ui->qwidget_qt_scene_view_roi_tdmap_super_cell);
@@ -38,8 +38,8 @@ bool MainWindow::create_3d_widgets( QMainWindow *parent , SuperCell* tdmap_roi_s
 
   // Scene SuperCell for TDMAP ROI
   qt_scene_roi_tdmap_super_cell = new QtSceneSuperCell(rootEntity);
-  qt_scene_roi_tdmap_super_cell->set_super_cell(tdmap_roi_sim_super_cell);
-  //QObject::connect( tdmap_roi_sim_super_cell, SIGNAL(atom_positions_changed()), qt_scene_roi_tdmap_super_cell, SLOT(reload_data_from_super_cell()));
+  qt_scene_roi_tdmap_super_cell->set_super_cell(tdmap_vis_sim_unit_cell);
+  QObject::connect( tdmap_vis_sim_unit_cell, SIGNAL(atom_positions_changed()), qt_scene_roi_tdmap_super_cell, SLOT(reload_data_from_super_cell()));
 
   Qt3DRender::QSceneLoader  *scene = new Qt3DRender::QSceneLoader();
 
@@ -125,10 +125,10 @@ MainWindow::MainWindow( ApplicationLog::ApplicationLog* logger , QWidget *parent
         _sim_tdmap_wavimg_ostream_buffer,
         _sim_tdmap_simgrid_ostream_buffer );
 
-    SuperCell* tdmap_roi_sim_super_cell = _core_td_map->get_tdmap_roi_sim_super_cell();
+    SuperCell* tdmap_vis_sim_unit_cell = _core_td_map->get_tdmap_vis_sim_unit_cell();
     SuperCell* tdmap_full_sim_super_cell = _core_td_map->get_tdmap_full_sim_super_cell();
 
-    create_3d_widgets( this , tdmap_roi_sim_super_cell, tdmap_full_sim_super_cell );
+    create_3d_widgets( this , tdmap_vis_sim_unit_cell, tdmap_full_sim_super_cell );
 
     celslc_step_group_options = new group_options("celslc_step");
     msa_step_group_options = new group_options("msa_step");
