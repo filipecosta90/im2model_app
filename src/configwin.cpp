@@ -26,6 +26,7 @@ bool MainWindow::create_3d_widgets( QMainWindow *parent , SuperCell* tdmap_vis_s
   light->setColor("white");
   light->setIntensity(1);
   lightEntity->addComponent(light);
+  
   Qt3DCore::QTransform *lightTransform = new Qt3DCore::QTransform(lightEntity);
   lightTransform->setTranslation(cameraEntity->position());
   lightEntity->addComponent(lightTransform);

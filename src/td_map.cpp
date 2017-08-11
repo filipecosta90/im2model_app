@@ -1174,6 +1174,7 @@ bool TDMap::set_zone_axis_u( std::string s_za_u ){
     result = unit_cell_result && roi_super_cell_result && full_super_cell_result;
     // just for visualization purposes
     tdmap_vis_sim_unit_cell->set_zone_axis_u( za_u );
+    tdmap_vis_sim_unit_cell->update_from_unit_cell();
   }
   catch(boost::bad_lexical_cast&  ex) {
     // pass it up
@@ -1192,6 +1193,7 @@ bool TDMap::set_zone_axis_v( std::string s_za_v ){
     result = unit_cell_result && roi_super_cell_result && full_super_cell_result;
     // just for visualization purposes
     tdmap_vis_sim_unit_cell->set_zone_axis_v( za_v );
+    tdmap_vis_sim_unit_cell->update_from_unit_cell();
   }
   catch(boost::bad_lexical_cast&  ex) {
     // pass it up
@@ -1210,6 +1212,7 @@ bool TDMap::set_zone_axis_w( std::string s_za_w ){
     result = unit_cell_result && roi_super_cell_result && full_super_cell_result;
     // just for visualization purposes
     tdmap_vis_sim_unit_cell->set_zone_axis_w( za_w );
+    tdmap_vis_sim_unit_cell->update_from_unit_cell();
   }
   catch(boost::bad_lexical_cast&  ex) {
     // pass it up
@@ -1228,6 +1231,7 @@ bool TDMap::set_upward_vector_u( std::string s_y_u ){
     result = unit_cell_result && roi_super_cell_result && full_super_cell_result;
     // just for visualization purposes
     tdmap_vis_sim_unit_cell->set_upward_vector_u( y_u );
+    tdmap_vis_sim_unit_cell->update_from_unit_cell();
   }
   catch(boost::bad_lexical_cast&  ex) {
     // pass it up
@@ -1246,6 +1250,7 @@ bool TDMap::set_upward_vector_v( std::string s_y_v ){
     result = unit_cell_result && roi_super_cell_result && full_super_cell_result;
     // just for visualization purposes
     tdmap_vis_sim_unit_cell->set_upward_vector_v( y_v );
+    tdmap_vis_sim_unit_cell->update_from_unit_cell();
   }
   catch(boost::bad_lexical_cast&  ex) {
     // pass it up
@@ -1264,6 +1269,7 @@ bool TDMap::set_upward_vector_w( std::string s_y_w ){
     result = unit_cell_result && roi_super_cell_result && full_super_cell_result;
     // just for visualization purposes
     tdmap_vis_sim_unit_cell->set_upward_vector_w( y_w );
+    tdmap_vis_sim_unit_cell->update_from_unit_cell();
   }
   catch(boost::bad_lexical_cast&  ex) {
     // pass it up

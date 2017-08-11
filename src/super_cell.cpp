@@ -8,7 +8,6 @@ SuperCell::SuperCell( UnitCell* cell ){
   _flag_unit_cell = true;
 }
 
-
 /* Base dir path */
 bool SuperCell::set_base_bin_start_dir_path( boost::filesystem::path path ){
   base_bin_start_dir_path = path;
@@ -45,6 +44,7 @@ bool SuperCell::clean_for_re_run(){
 
 bool SuperCell::update_from_unit_cell(){
   bool result = false;
+  std::cout << " update_from_unit_cell" << std::endl;
   if( _flag_unit_cell ){
     if(
         unit_cell->get_flag_parsed_cif() &&
@@ -53,17 +53,24 @@ bool SuperCell::update_from_unit_cell(){
       if( _flag_atom_positions ){
         clean_for_re_run();
       }
+      std::cout << " update_from_unit_cell $$" << std::endl;
       const bool angle_result = update_angle_parameters_from_unit_cell();
       const bool expand_result = _flag_auto_calculate_expand_factor ? calculate_expand_factor() : _flag_expand_factor;
       if( !_flag_auto_calculate_expand_factor ){
         update_length_parameters_from_expand_factor();
       }
+      std::cout << " angle_result result " << std::boolalpha << angle_result << std::endl;
+      std::cout << " expand_result result " << std::boolalpha << expand_result << std::endl;
+
       if( angle_result && expand_result ){
         const bool create_result = create_atoms_from_unit_cell();
+        std::cout << " create_result result " << std::boolalpha << create_result << std::endl;
         if( create_result ){
           const bool orientate_result = orientate_atoms_from_matrix();
+          std::cout << " orientate_result result " << std::boolalpha << orientate_result << std::endl;
           if( orientate_result ){
             const bool remove_z_result = remove_z_out_of_range_atoms();
+            std::cout << " remove_z_result result " << std::boolalpha << remove_z_result << std::endl;
             bool remove_xy_result = false;
             if( remove_z_result ){
               if( _flag_calculate_ab_cell_limits_from_image_bounds ){
@@ -72,6 +79,7 @@ bool SuperCell::update_from_unit_cell(){
               else{
                 remove_xy_result = remove_xy_out_of_range_atoms();
               }
+              std::cout << " remove_xy_result result " << std::boolalpha << remove_xy_result << std::endl;
               if( remove_xy_result ){
                 const bool fractional_result = create_fractional_positions_atoms();
                 result = fractional_result;
@@ -297,11 +305,8 @@ bool SuperCell::update_length_parameters_from_expand_factor(){
 /** other methods **/
 bool SuperCell::create_atoms_from_unit_cell(){
   bool result = false;
-  if(
-      _flag_unit_cell
-    ){
-    if(
-        // BaseCell vars
+  if(  _flag_unit_cell ){
+    if( // BaseCell vars
         unit_cell->get_flag_parsed_cif() &&
         unit_cell->get_flag_atom_positions_vec() &&
         unit_cell->get_flag_length() &&
@@ -311,7 +316,6 @@ bool SuperCell::create_atoms_from_unit_cell(){
         !_flag_atom_positions &&
         get_atom_positions_vec_size() == 0
       ){
-
       /* method */
       const std::vector< std::vector<cv::Point3d> > unit_cell_atoms = unit_cell->get_atom_positions_vec();
       const double unit_cell_a_nm = unit_cell->get_length_a_Nanometers();

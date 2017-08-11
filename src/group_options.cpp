@@ -31,7 +31,7 @@ bool group_options::add_option(TreeModel* model, TreeItem* item , int column, bo
   std::string description = item->get_variable_name();
   bool result = false;
   if(  variables_map.find( varname ) == variables_map.end() ){
-    std::cout << "tracking a new variable " << varname << " [required: " << required << " ] in group options: " << _group_name << std::endl;
+    //std::cout << "tracking a new variable " << varname << " [required: " << required << " ] in group options: " << _group_name << std::endl;
     qRegisterMetaType<std::string>("std::string");
     connect( item, SIGNAL(dataChanged( std::string )), this, SLOT( update_track_var( std::string ) ) );
     variables_map.insert(std::pair<std::string,std::string>(varname,description));
@@ -51,13 +51,13 @@ void group_options::listen_group_update_required( group_options* group_to_listen
 }
 
 void group_options::set_update_required_from_pipeline( std::string signaling_group_name ){
-  std::cout << "group dependency from "<< signaling_group_name << " is forcing an update required on group " << _group_name << std::endl;
+  //std::cout << "group dependency from "<< signaling_group_name << " is forcing an update required on group " << _group_name << std::endl;
   _force_update_from_group_dependency = true;
   emit update_required( _group_name );
 }
 
 bool group_options::update_track_var( std::string varname ){
-  std::cout << " private slot called update_track_var on var: " << varname << std::endl;
+  //std::cout << " private slot called update_track_var on var: " << varname << std::endl;
   bool result = false;
   // if var exists both in the variable map and in the current variable map
   if(  variables_map.find( varname ) != variables_map.end() ){
@@ -70,12 +70,9 @@ bool group_options::update_track_var( std::string varname ){
           emit update_required( _group_name );
         }
       }
-      std::cout << "\tnew tracking" << std::endl;
     }
     else{
       _current_variables_map[varname] = TheTime;
-      std::cout << "\tupdating tracking" << std::endl;
-
     }
     result = true;
   }

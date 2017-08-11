@@ -253,7 +253,6 @@ bool TreeItem::set_fp_check_setter( int col,  boost::function<bool(bool)> check_
 bool TreeItem::set_fp_check_getter( int col,  boost::function<bool(void)> check_getter ){
   itemIsCheckableVec[col] = true;
   fp_checkable_getters[col] = check_getter;
-  std::cout << "just testing check getter " << fp_checkable_getters[col]() << std::endl;
   return true;
 }
 
@@ -283,7 +282,7 @@ bool TreeItem::load_data_from_property_tree( boost::property_tree::ptree pt_root
   bool result = false;
   try{
     const std::string file_variable_name = pt_root.get<std::string>( "varname" );
-    std::cout << "file_variable_name: " << file_variable_name << " | _variable_name: " << _variable_name << std::endl;
+    //std::cout << "file_variable_name: " << file_variable_name << " | _variable_name: " << _variable_name << std::endl;
     if( file_variable_name == _variable_name ){
       _flag_variable_name = true;
       result = true;
@@ -322,7 +321,7 @@ bool TreeItem::load_data_from_property_tree( boost::property_tree::ptree pt_root
           const std::string child_varname = _child->get_variable_name();
           boost::property_tree::ptree pt_child_node = pt_childs.get_child(child_varname);
           result &= _child->load_data_from_property_tree(pt_child_node);
-          std::cout << "result of loading " << child_varname << std::boolalpha << result << std::endl;
+        //  std::cout << "result of loading " << child_varname << std::boolalpha << result << std::endl;
         }
         /*
         for ( boost::property_tree::ptree::value_type &pt_child_node_v : pt_childs ){

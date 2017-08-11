@@ -64,7 +64,7 @@ QtSceneSuperCell::QtSceneSuperCell(Qt3DCore::QEntity *rootEntity) : m_rootEntity
   Qt3DCore::QTransform *planeTransform = new Qt3DCore::QTransform();
   planeTransform->setScale(1.3f);
   planeTransform->setRotation(QQuaternion::fromAxisAndAngle(QVector3D(1.0f, 0.0f, 0.0f), 45.0f));
-  planeTransform->setTranslation(QVector3D(0.0f, -4.0f, 0.0f));
+  planeTransform->setTranslation(QVector3D(0.0f, 0.0f, 0.0f));
 
   Qt3DExtras::QPhongMaterial *planeMaterial = new Qt3DExtras::QPhongMaterial();
   planeMaterial->setDiffuse(QColor(QRgb(0xa69929)));
@@ -97,8 +97,9 @@ void QtSceneSuperCell::set_super_cell( SuperCell* cell ){
 }
 
 void QtSceneSuperCell::reload_data_from_super_cell(){
-if( _flag_super_cell ){
   std::cout << "########\nreloading data from super cell\n########\n" << std::endl;
+if( _flag_super_cell ){
+  std::cout << "########\n_flag_super_cell reloading data from super cell\n########\n" << std::endl;
   const std::vector< std::vector<cv::Point3d> > atom_positions_vec = super_cell->get_atom_positions_vec();
   const std::vector<std::string> atom_symbols = super_cell->get_atom_symbols_vec();
   const std::vector<cv::Vec4d> atom_cpk_rgba_colors = super_cell->get_atom_cpk_rgba_colors_vec();
@@ -106,13 +107,15 @@ if( _flag_super_cell ){
   for( auto &e : sphere_entities ){
   //  m_rootEntity->removeComponent( e );
   }
-  for( int distinct_atom_pos = 0; distinct_atom_pos < atom_positions_vec.size(); distinct_atom_pos++ ){
 
-    // Sphere shape data
-    Qt3DExtras::QSphereMesh *sphereMesh = new Qt3DExtras::QSphereMesh();
-    sphereMesh->setRings(5);
-    sphereMesh->setSlices(5);
-    Qt3DExtras::QGoochMaterial *sphereMaterial = new Qt3DExtras::QGoochMaterial();
+  // Sphere shape data
+  Qt3DExtras::QSphereMesh *sphereMesh = new Qt3DExtras::QSphereMesh();
+  sphereMesh->setRings(5);
+  sphereMesh->setSlices(5);
+  Qt3DExtras::QGoochMaterial *sphereMaterial = new Qt3DExtras::QGoochMaterial();
+
+
+  for( int distinct_atom_pos = 0; distinct_atom_pos < atom_positions_vec.size(); distinct_atom_pos++ ){
 
     const cv::Vec4d atom_cpk_rgba_color = atom_cpk_rgba_colors[distinct_atom_pos];
     const double atom_empirical_radii = ( atom_empirical_radiis[distinct_atom_pos] );
@@ -120,7 +123,6 @@ if( _flag_super_cell ){
     sphereMaterial->setDiffuse(QColor::fromRgbF( atom_cpk_rgba_color[0], atom_cpk_rgba_color[1], atom_cpk_rgba_color[2] ) );
     sphereMesh->setRadius( atom_empirical_radii );
     sphere_meshes.push_back( sphereMesh );
-
 
     const std::vector<cv::Point3d> same_type_atoms = atom_positions_vec[distinct_atom_pos];
     for( int same_type_pos = 0; same_type_pos < atom_positions_vec[distinct_atom_pos].size(); same_type_pos++ ){
