@@ -50,20 +50,19 @@
 
 #include "qt_scene_supercell.h"
 
-#include <QtCore/QDebug>
 
-QtSceneSuperCell::QtSceneSuperCell(Qt3DCore::QEntity *rootEntity) : m_rootEntity(rootEntity) {
-
+QtSceneSuperCell::QtSceneSuperCell(Qt3DCore::QEntity *rootEntity, Qt3DRender::QCamera *camEntity ) : m_rootEntity(rootEntity) {
+cameraEntity = camEntity;
 
   // Plane shape data
   Qt3DExtras::QPlaneMesh *planeMesh = new Qt3DExtras::QPlaneMesh();
-  planeMesh->setWidth(2);
+  planeMesh->setWidth(5);
   planeMesh->setHeight(2);
 
   // Plane mesh transform
   Qt3DCore::QTransform *planeTransform = new Qt3DCore::QTransform();
-  planeTransform->setScale(1.3f);
-  planeTransform->setRotation(QQuaternion::fromAxisAndAngle(QVector3D(1.0f, 0.0f, 0.0f), 45.0f));
+  planeTransform->setScale(1.0f);
+  planeTransform->setRotation(QQuaternion::fromAxisAndAngle(QVector3D(1.0f, 0.0f, 0.0f), 90.0f));
   planeTransform->setTranslation(QVector3D(0.0f, 0.0f, 0.0f));
 
   Qt3DExtras::QPhongMaterial *planeMaterial = new Qt3DExtras::QPhongMaterial();
@@ -79,13 +78,9 @@ QtSceneSuperCell::QtSceneSuperCell(Qt3DCore::QEntity *rootEntity) : m_rootEntity
   // Axis
   m_axisEntity = new Qt3DCore::QEntity(m_rootEntity);
   Qt3DRender::QGeometryRenderer *geometryRenderer = new Qt3DRender::QGeometryRenderer(m_axisEntity);
-  Qt3DRender::QLayer *layer1 = new Qt3DRender::QLayer(m_axisEntity);
-  m_axisEntity->addComponent(geometryRenderer);
-  m_axisEntity->addComponent(layer1);
-  // FrameGraph
-Qt3DRender::QViewport *viewport = new Qt3DRender::QViewport;
-Qt3DRender::QLayerFilter *layerFilter = new Qt3DRender::QLayerFilter(viewport);
-layerFilter->addLayer(layer1);
+  xyz_axis_layer = new Qt3DRender::QLayer(m_axisEntity);
+  m_axisEntity->addComponent( geometryRenderer );
+  m_axisEntity->addComponent( xyz_axis_layer );
 }
 
 QtSceneSuperCell::~QtSceneSuperCell(){
@@ -93,55 +88,127 @@ QtSceneSuperCell::~QtSceneSuperCell(){
 
 void QtSceneSuperCell::set_super_cell( SuperCell* cell ){
   super_cell = cell;
-   _flag_super_cell = true;
+  _flag_super_cell = true;
 }
 
 void QtSceneSuperCell::reload_data_from_super_cell(){
   std::cout << "########\nreloading data from super cell\n########\n" << std::endl;
-if( _flag_super_cell ){
-  std::cout << "########\n_flag_super_cell reloading data from super cell\n########\n" << std::endl;
-  const std::vector< std::vector<cv::Point3d> > atom_positions_vec = super_cell->get_atom_positions_vec();
-  const std::vector<std::string> atom_symbols = super_cell->get_atom_symbols_vec();
-  const std::vector<cv::Vec4d> atom_cpk_rgba_colors = super_cell->get_atom_cpk_rgba_colors_vec();
-  std::vector<double> atom_empirical_radiis = super_cell->get_atom_empirical_radiis_vec();
-  for( auto &e : sphere_entities ){
-  //  m_rootEntity->removeComponent( e );
-  }
+  if( _flag_super_cell ){
+    std::cout << "########\n_flag_super_cell reloading data from super cell\n########\n" << std::endl;
+    cv::Mat orientation_matrix = super_cell->get_orientation_matrix();
+    cv::Point3d upward_vector = super_cell->get_upward_vector();
+    cv::Point3d zone_axis = super_cell->get_zone_axis();
 
-  // Sphere shape data
-  Qt3DExtras::QSphereMesh *sphereMesh = new Qt3DExtras::QSphereMesh();
-  sphereMesh->setRings(5);
-  sphereMesh->setSlices(5);
-  Qt3DExtras::QGoochMaterial *sphereMaterial = new Qt3DExtras::QGoochMaterial();
+    // Cylinder shape data
+        Qt3DExtras::QCylinderMesh *cylinder_x = new Qt3DExtras::QCylinderMesh();
+        cylinder_x->setRadius(0.1);
+        cylinder_x->setLength(10);
+        cylinder_x->setRings(5);
+        cylinder_x->setSlices(5);
+
+        Qt3DExtras::QCylinderMesh *cylinder_y = new Qt3DExtras::QCylinderMesh();
+        cylinder_y->setRadius(0.1);
+        cylinder_y->setLength(10);
+        cylinder_y->setRings(5);
+        cylinder_y->setSlices(5);
+
+        Qt3DExtras::QCylinderMesh *cylinder_z = new Qt3DExtras::QCylinderMesh();
+        cylinder_z->setRadius(0.1);
+        cylinder_z->setLength(10);
+        cylinder_z->setRings(5);
+        cylinder_z->setSlices(5);
+
+        // CylinderMesh Transform
+        Qt3DCore::QTransform *cylinderTransform_x = new Qt3DCore::QTransform();
+        Qt3DCore::QTransform *cylinderTransform_y = new Qt3DCore::QTransform();
+        Qt3DCore::QTransform *cylinderTransform_z = new Qt3DCore::QTransform();
+
+        cylinderTransform_x->setScale(1.0f);
+        cylinderTransform_y->setScale(1.0f);
+        cylinderTransform_z->setScale(1.0f);
+
+        cylinderTransform_x->setRotation(QQuaternion::fromAxisAndAngle(QVector3D(0.0f, 0.0f, 1.0f), 90.0f));
+        cylinderTransform_z->setRotation(QQuaternion::fromAxisAndAngle(QVector3D(1.0f, 0.0f, 0.0f), 90.0f));
+
+        Qt3DExtras::QPhongMaterial *cylinderMaterial_x = new Qt3DExtras::QPhongMaterial();
+        cylinderMaterial_x->setDiffuse(QColor( QColor::fromRgbF( 1.0f, 0.0f, 0.0f ) ));
+
+        Qt3DExtras::QPhongMaterial *cylinderMaterial_y = new Qt3DExtras::QPhongMaterial();
+        cylinderMaterial_y->setDiffuse(QColor( QColor::fromRgbF( 0.0f, 1.0f, 0.0f ) ));
+
+        Qt3DExtras::QPhongMaterial *cylinderMaterial_z = new Qt3DExtras::QPhongMaterial();
+        cylinderMaterial_z->setDiffuse(QColor( QColor::fromRgbF( 0.0f, 0.0f, 1.0f ) ));
+
+        // Cylinder
+        m_cylinderEntity_x = new Qt3DCore::QEntity( m_rootEntity );
+        m_cylinderEntity_y = new Qt3DCore::QEntity( m_rootEntity );
+        m_cylinderEntity_z = new Qt3DCore::QEntity( m_rootEntity );
+
+        m_cylinderEntity_x->addComponent( cylinder_x );
+        m_cylinderEntity_y->addComponent( cylinder_y );
+        m_cylinderEntity_z->addComponent( cylinder_z );
+
+        m_cylinderEntity_x->addComponent( cylinderMaterial_x );
+        m_cylinderEntity_y->addComponent( cylinderMaterial_y );
+        m_cylinderEntity_z->addComponent( cylinderMaterial_z );
+
+        m_cylinderEntity_x->addComponent( cylinderTransform_x );
+        m_cylinderEntity_y->addComponent( cylinderTransform_y );
+        m_cylinderEntity_z->addComponent( cylinderTransform_z );
+
+        m_cylinderEntity_x->addComponent( xyz_axis_layer );
+        m_cylinderEntity_y->addComponent( xyz_axis_layer );
+        m_cylinderEntity_z->addComponent( xyz_axis_layer );
 
 
-  for( int distinct_atom_pos = 0; distinct_atom_pos < atom_positions_vec.size(); distinct_atom_pos++ ){
+    const std::vector< std::vector<cv::Point3d> > atom_positions_vec = super_cell->get_atom_positions_vec();
+    const std::vector<std::string> atom_symbols = super_cell->get_atom_symbols_vec();
+    const std::vector<cv::Vec4d> atom_cpk_rgba_colors = super_cell->get_atom_cpk_rgba_colors_vec();
+    std::vector<double> atom_empirical_radiis = super_cell->get_atom_empirical_radiis_vec();
 
-    const cv::Vec4d atom_cpk_rgba_color = atom_cpk_rgba_colors[distinct_atom_pos];
-    const double atom_empirical_radii = ( atom_empirical_radiis[distinct_atom_pos] );
-
-    sphereMaterial->setDiffuse(QColor::fromRgbF( atom_cpk_rgba_color[0], atom_cpk_rgba_color[1], atom_cpk_rgba_color[2] ) );
-    sphereMesh->setRadius( atom_empirical_radii );
-    sphere_meshes.push_back( sphereMesh );
-
-    const std::vector<cv::Point3d> same_type_atoms = atom_positions_vec[distinct_atom_pos];
-    for( int same_type_pos = 0; same_type_pos < atom_positions_vec[distinct_atom_pos].size(); same_type_pos++ ){
-      const cv::Point3d atom_pos = atom_positions_vec[distinct_atom_pos][same_type_pos];
-      Qt3DCore::QEntity* sphereEntity = new Qt3DCore::QEntity(m_rootEntity);
-
-      sphereEntity->addComponent( sphereMesh );
-      sphereEntity->addComponent( sphereMaterial );
-      sphere_entities.push_back( sphereEntity );
-      sphereEntity->setEnabled( true );
-
-      // Sphere mesh transform
-      Qt3DCore::QTransform *sphereTransform = new Qt3DCore::QTransform();
-      sphereTransform->setTranslation(QVector3D( atom_pos.x, atom_pos.y, atom_pos.z ));
-      // Sphere
-      sphereEntity->addComponent( sphereTransform );
+    for( int ent_pos = 0; ent_pos < sphere_entities.size(); ent_pos++ ){
+      delete sphere_entities[ent_pos];
     }
-  //  std::cout << "sphereEntity->components().size() " << sphereEntity->components().size() << std::endl;
-  }
+
+    for( int distinct_atom_pos = 0; distinct_atom_pos < atom_positions_vec.size(); distinct_atom_pos++ ){
+
+      const cv::Vec4d atom_cpk_rgba_color = atom_cpk_rgba_colors[distinct_atom_pos];
+      const double atom_empirical_radii = ( atom_empirical_radiis[distinct_atom_pos] );
+
+      const std::vector<cv::Point3d> same_type_atoms = atom_positions_vec[distinct_atom_pos];
+      for( int same_type_pos = 0; same_type_pos < atom_positions_vec[distinct_atom_pos].size(); same_type_pos++ ){
+        const cv::Point3d atom_pos = atom_positions_vec[distinct_atom_pos][same_type_pos];
+
+        Qt3DCore::QEntity* sphereEntity = new Qt3DCore::QEntity(m_rootEntity);
+        //Layer
+        Qt3DRender::QGeometryRenderer *geometryRenderer = new Qt3DRender::QGeometryRenderer(sphereEntity);
+        sphereEntity->addComponent( geometryRenderer );
+        sphereEntity->addComponent( xyz_axis_layer );
+
+        // Mesh
+        Qt3DExtras::QSphereMesh *sphereMesh = new Qt3DExtras::QSphereMesh();
+        sphereMesh->setRings(5);
+        sphereMesh->setSlices(5);
+        sphereMesh->setRadius( atom_empirical_radii );
+        sphere_meshes.push_back( sphereMesh );
+        sphereEntity->addComponent( sphereMesh );
+
+        // Material
+        Qt3DExtras::QGoochMaterial *sphereMaterial = new Qt3DExtras::QGoochMaterial();
+        sphereMaterial->setDiffuse(QColor::fromRgbF( atom_cpk_rgba_color[0], atom_cpk_rgba_color[1], atom_cpk_rgba_color[2] ) );
+        sphereEntity->addComponent( sphereMaterial );
+
+        // Transform
+        Qt3DCore::QTransform *sphereTransform = new Qt3DCore::QTransform();
+        sphereTransform->setTranslation(QVector3D( atom_pos.x, atom_pos.y, atom_pos.z ));
+        sphereEntity->addComponent( sphereTransform );
+
+        //Save entity
+        sphereEntity->setEnabled( true );
+        sphere_entities.push_back( sphereEntity );
+
+      }
+    }
   }
 }
 

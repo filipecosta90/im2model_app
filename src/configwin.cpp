@@ -14,54 +14,58 @@ bool MainWindow::create_3d_widgets( QMainWindow *parent , SuperCell* tdmap_vis_s
   rootEntity->setObjectName(QStringLiteral("rootEntity"));
 
   // Camera
-  Qt3DRender::QCamera *cameraEntity = qt_scene_view_roi_tdmap_super_cell->camera();
-
-  cameraEntity->lens()->setPerspectiveProjection(45.0f, 16.0f/9.0f, 0.1f, 1000.0f);
+  cameraEntity = qt_scene_view_roi_tdmap_super_cell->camera();
   cameraEntity->setPosition(QVector3D(0, 0, 20.0f));
   cameraEntity->setUpVector(QVector3D(0, 1, 0));
+  //cameraEntity->setViewVector(QVector3D(0, 1, 0));
   cameraEntity->setViewCenter(QVector3D(0, 0, 0));
+  cameraEntity->lens()->setPerspectiveProjection(50.0f, 16.0f/9.0f, 0.1f, 1000.0f);
+
+  // Scene SuperCell for TDMAP ROI
+  qt_scene_roi_tdmap_super_cell = new QtSceneSuperCell( rootEntity, cameraEntity );
+  qt_scene_roi_tdmap_super_cell->set_super_cell(tdmap_vis_sim_unit_cell);
+QObject::connect( tdmap_vis_sim_unit_cell, SIGNAL(atom_positions_changed()), qt_scene_roi_tdmap_super_cell, SLOT(reload_data_from_super_cell()));
+
 
   Qt3DCore::QEntity *lightEntity = new Qt3DCore::QEntity(rootEntity);
   Qt3DRender::QPointLight *light = new Qt3DRender::QPointLight(lightEntity);
   light->setColor("white");
   light->setIntensity(1);
   lightEntity->addComponent(light);
-  
+
   Qt3DCore::QTransform *lightTransform = new Qt3DCore::QTransform(lightEntity);
   lightTransform->setTranslation(cameraEntity->position());
   lightEntity->addComponent(lightTransform);
 
+  // FrameGraph
+  Qt3DRender::QFrameGraphNode* activeFrameGraph = qt_scene_view_roi_tdmap_super_cell->activeFrameGraph();
+  QList< QObject* > childrens = activeFrameGraph->children();
+  QList< Qt3DRender::QViewport* > childrens_views = activeFrameGraph->findChildren<Qt3DRender::QViewport *>();
+
+  Qt3DRender::QViewport *mainViewport = childrens_views[0];
+  //Qt3DRender::QLayerFilter *layerFilter = new Qt3DRender::QLayerFilter(mainViewport);
+  //Qt3DRender::QLayer *xyz_scene_layer = qt_scene_roi_tdmap_super_cell->get_xyz_axis_layer();
+  //layerFilter->addLayer( xyz_scene_layer );
+
+  Qt3DRender::QViewport *topLeftViewport = new Qt3DRender::QViewport( mainViewport );
+  //topLeftViewport->setObjectName(QStringLiteral("topLeftViewport"));
+  topLeftViewport->setNormalizedRect(QRectF(0, 0.8, 0.2, 0.2));
+  Qt3DRender::QCameraSelector *cameraSelector = new Qt3DRender::QCameraSelector(topLeftViewport);
+  Qt3DRender::QCamera *cameraEntitytopLeft = new Qt3DRender::QCamera( cameraEntity );
+  cameraSelector->setCamera( cameraEntitytopLeft );
+
   // For camera controls
-  Qt3DExtras::QOrbitCameraController *camController = new Qt3DExtras::QOrbitCameraController(rootEntity);
+  Qt3DExtras::QOrbitCameraController *camController = new Qt3DExtras::QOrbitCameraController(mainViewport);
   camController->setLinearSpeed(50.f);
   camController->setLookSpeed(180.f);
   camController->setCamera(cameraEntity);
 
-  // Scene SuperCell for TDMAP ROI
-  qt_scene_roi_tdmap_super_cell = new QtSceneSuperCell(rootEntity);
-  qt_scene_roi_tdmap_super_cell->set_super_cell(tdmap_vis_sim_unit_cell);
-  QObject::connect( tdmap_vis_sim_unit_cell, SIGNAL(atom_positions_changed()), qt_scene_roi_tdmap_super_cell, SLOT(reload_data_from_super_cell()));
+  // For camera controls
+  Qt3DExtras::QOrbitCameraController *camControllerTopLeft = new Qt3DExtras::QOrbitCameraController(topLeftViewport);
+  camControllerTopLeft->setLinearSpeed(50.f);
+  camControllerTopLeft->setLookSpeed(180.f);
+  camControllerTopLeft->setCamera(cameraEntitytopLeft);
 
-  Qt3DRender::QSceneLoader  *scene = new Qt3DRender::QSceneLoader();
-
-  // FrameGraph
-  //Qt3DRender::QFrameGraph *frameGraph = new Qt3DRender::QFrameGraph();
-  Qt3DRender::QTechniqueFilter *techniqueFilter = new Qt3DRender::QTechniqueFilter();
-  Qt3DRender::QViewport *viewport = new Qt3DRender::QViewport(techniqueFilter);
-  Qt3DRender::QClearBuffers *clearBuffer = new Qt3DRender::QClearBuffers(viewport);
-  Qt3DRender::QCameraSelector *cameraSelector = new Qt3DRender::QCameraSelector(clearBuffer);
-  (void) new Qt3DRender::QRenderPassFilter(cameraSelector);
-
-  // TechiqueFilter and renderPassFilter are not implement yet
-  viewport->setNormalizedRect(QRectF(0, 0, 1, 1));
-  clearBuffer->setBuffers(Qt3DRender::QClearBuffers::ColorDepthBuffer);
-  cameraSelector->setCamera(cameraEntity);
-  //frameGraph->setActiveFrameGraph(techniqueFilter);
-
-  // Setting the FrameGraph
-  //rootEntity->addComponent(frameGraph);
-
-  // Set root object of the scene
   // Set root object of the scene
   qt_scene_view_roi_tdmap_super_cell->setRootEntity(rootEntity);
 

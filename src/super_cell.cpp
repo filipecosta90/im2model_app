@@ -394,7 +394,7 @@ bool SuperCell::orientate_atoms_from_matrix(){
         std::transform( atom_positions[pos].begin(), atom_positions[pos].end(), atom_positions[pos].begin() , functor );
       }
       result = true;
-      emit atom_positions_changed();
+      emit atom_orientation_changed();
     }
     else{
       if( _flag_logger ){

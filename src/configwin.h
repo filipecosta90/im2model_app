@@ -18,6 +18,12 @@
 #include <QMenu>
 #include <QAction>
 #include <Qt3DInput/QInputAspect>
+#include <QFrameGraphNode>
+#include <Qt3DCore/QEntity>
+ #include <Qt3DRender/QGeometryRenderer>
+ #include <Qt3DRender/QLayer>
+ #include <Qt3DRender/QLayerFilter>
+ #include <Qt3DRender/QViewport>
 
 #include <Qt3DExtras/qtorusmesh.h>
 #include <Qt3DRender/qmesh.h>
@@ -348,6 +354,7 @@ signals:
     QtSceneSuperCell* qt_scene_roi_tdmap_super_cell = nullptr;
     Qt3DExtras::Qt3DWindow *qt_scene_view_full_tdmap_super_cell;
     QtSceneSuperCell* qt_scene_full_tdmap_super_cell = nullptr;
+    Qt3DRender::QCamera *cameraEntity;
 
 };
 
