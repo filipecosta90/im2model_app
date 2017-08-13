@@ -131,8 +131,9 @@
 #include <Qt3DRender/QLayerFilter>
 #include <Qt3DRender/QViewport>
 
-
 #include "super_cell.hpp"
+#include "qtscene_editorutils.h"
+
 
 class QtSceneSuperCell : public QObject
 {
@@ -154,6 +155,10 @@ class QtSceneSuperCell : public QObject
   private:
     Qt3DRender::QCamera *cameraEntity;
     Qt3DCore::QEntity *m_rootEntity;
+    // helper arrows
+    Qt3DCore::QEntity *m_helperArrows;
+    Qt3DCore::QTransform *m_helperArrowsTransform;
+
     Qt3DCore::QEntity *m_cylinderEntity_x;
     Qt3DCore::QEntity *m_cylinderEntity_y;
     Qt3DCore::QEntity *m_cylinderEntity_z;

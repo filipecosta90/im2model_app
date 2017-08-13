@@ -51,6 +51,22 @@
 #include "qt_scene_supercell.h"
 
 
+static const QString cameraVisibleEntityName = QStringLiteral("__internal camera visible entity");
+static const QString lightVisibleEntityName = QStringLiteral("__internal light visible entity");
+static const QString sceneLoaderSubEntityName = QStringLiteral("__internal sceneloader sub entity");
+static const QString helperArrowName = QStringLiteral("__internal helper arrow");
+static const QVector3D defaultLightDirection(0.0f, -1.0f, 0.0f);
+static const float freeViewCameraNearPlane = 0.1f;
+static const float freeViewCameraFarPlane = 10000.0f;
+static const float freeViewCameraFov = 45.0f;
+static const int dragCornerHandleCount = 8; // One handle for each selection box corner
+static const QColor selectionBoxColor("#43adee");
+static const QColor cameraFrustumColor("#c22555");
+static const QColor helperPlaneColor("#585a5c");
+static const QColor helperArrowColorX("red");
+static const QColor helperArrowColorY("green");
+static const QColor helperArrowColorZ("blue");
+
 QtSceneSuperCell::QtSceneSuperCell(Qt3DCore::QEntity *rootEntity, Qt3DRender::QCamera *camEntity ) : m_rootEntity(rootEntity) {
 cameraEntity = camEntity;
 
@@ -81,6 +97,29 @@ cameraEntity = camEntity;
   xyz_axis_layer = new Qt3DRender::QLayer(m_axisEntity);
   m_axisEntity->addComponent( geometryRenderer );
   m_axisEntity->addComponent( xyz_axis_layer );
+
+  m_helperArrows = new Qt3DCore::QEntity( m_rootEntity );
+  m_helperArrows->setEnabled(true);
+   m_helperArrows->setObjectName(QStringLiteral("__internal helper arrows"));
+
+   QMatrix4x4 matrix;
+   Qt3DCore::QEntity *arrow = EditorUtils::createArrowEntity(helperArrowColorY, m_helperArrows,
+                                                             matrix, helperArrowName);
+   //createObjectPickerForEntity(arrow);
+
+   matrix.rotate(90.0f, QVector3D(1.0f, 0.0f, 0.0f));
+   arrow = EditorUtils::createArrowEntity(helperArrowColorZ, m_helperArrows, matrix,
+                                          helperArrowName);
+   //createObjectPickerForEntity(arrow);
+
+   matrix = QMatrix();
+   matrix.rotate(-90.0f, QVector3D(0.0f, 0.0f, 1.0f));
+   arrow = EditorUtils::createArrowEntity(helperArrowColorX, m_helperArrows, matrix,
+                                          helperArrowName);
+   //createObjectPickerForEntity(arrow);
+   m_helperArrowsTransform = new Qt3DCore::QTransform();
+   m_helperArrows->addComponent(m_helperArrowsTransform);
+   m_helperArrows->setParent(m_rootEntity);
 }
 
 QtSceneSuperCell::~QtSceneSuperCell(){

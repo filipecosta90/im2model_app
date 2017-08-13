@@ -94,6 +94,7 @@ class SuperCell : public BaseCell{
     int expand_factor_c = 1;
     bool _flag_expand_factor = false;
     bool _flag_auto_calculate_expand_factor = true;
+    bool _flag_enable_orientation = true;
 
     bool update_length_parameters_from_expand_factor();
     bool clean_for_re_run();
@@ -129,6 +130,7 @@ class SuperCell : public BaseCell{
 
     bool set_expand_factor_abc( int factor_a, int factor_b, int factor_c );
     bool set_flag_auto_calculate_expand_factor( bool value );
+    bool set_flag_enable_orientation( bool value );
 
     /* Loggers */
     bool set_application_logger( ApplicationLog::ApplicationLog* logger );

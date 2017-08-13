@@ -303,6 +303,7 @@ class BaseCell : public QObject {
 
     signals:
     void atom_positions_changed();
+    void atom_orientation_changed();
 
 };
 

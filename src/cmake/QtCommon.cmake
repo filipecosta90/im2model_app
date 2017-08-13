@@ -79,4 +79,3 @@ endmacro()
 
 init_os_bundle()
 init_qt()
-

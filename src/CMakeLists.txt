@@ -188,6 +188,10 @@ else(build_cli)
       gui_stream.hpp
       custom_tool_button.h
       custom_tool_button.cpp
+      qtscene_editorutils.h
+      qtscene_editorutils.cpp
+      qtscene_qdummyobjectpicker.h
+      qtscene_qdummyobjectpicker.cpp
       )
 
     # Set PROJECT_VERSION_PATCH and PROJECT_VERSION_TWEAK to 0 if not present, needed by add_project_meta
@@ -225,7 +229,7 @@ target_link_libraries(${PROJECT_NAME}
     Qt5::3DRender
     Qt5::3DInput
     )
-    
+
     SET_SOURCE_FILES_PROPERTIES(${DR_PROBE_RESOURCES} PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
 
     fix_win_compiler()

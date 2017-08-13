@@ -21,7 +21,7 @@ TDMap::TDMap(
   tdmap_vis_sim_unit_cell->set_cel_margin_nm( cel_margin_nm );
   tdmap_vis_sim_unit_cell->set_flag_auto_calculate_expand_factor( false );
   tdmap_vis_sim_unit_cell->set_expand_factor_abc( 4, 4, 4 );
-
+  tdmap_vis_sim_unit_cell->set_flag_enable_orientation( false );
 
   tdmap_roi_sim_super_cell = new SuperCell( unit_cell );
   tdmap_full_sim_super_cell = new SuperCell( unit_cell );

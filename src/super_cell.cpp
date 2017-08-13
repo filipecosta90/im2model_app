@@ -66,7 +66,7 @@ bool SuperCell::update_from_unit_cell(){
         const bool create_result = create_atoms_from_unit_cell();
         std::cout << " create_result result " << std::boolalpha << create_result << std::endl;
         if( create_result ){
-          const bool orientate_result = orientate_atoms_from_matrix();
+          const bool orientate_result = _flag_enable_orientation ? orientate_atoms_from_matrix() : true ;
           std::cout << " orientate_result result " << std::boolalpha << orientate_result << std::endl;
           if( orientate_result ){
             const bool remove_z_result = remove_z_out_of_range_atoms();
@@ -716,6 +716,11 @@ return true;
 
 bool SuperCell::set_flag_auto_calculate_expand_factor( bool value ){
 _flag_auto_calculate_expand_factor = value;
+return true;
+}
+
+bool SuperCell::set_flag_enable_orientation( bool value ){
+_flag_enable_orientation = value;
 return true;
 }
 
