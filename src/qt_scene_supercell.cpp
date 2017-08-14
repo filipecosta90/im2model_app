@@ -74,6 +74,7 @@ cameraEntity = camEntity;
   Qt3DExtras::QPlaneMesh *planeMesh = new Qt3DExtras::QPlaneMesh();
   planeMesh->setWidth(5);
   planeMesh->setHeight(2);
+  std::cout << "load QPlaneMesh with " << planeMesh->vertexCount() << "vertices. " << std::endl;
 
   // Plane mesh transform
   Qt3DCore::QTransform *planeTransform = new Qt3DCore::QTransform();
@@ -85,11 +86,13 @@ cameraEntity = camEntity;
   planeMaterial->setDiffuse(QColor(QRgb(0xa69929)));
 
   // Plane
+  /*
   m_planeEntity = new Qt3DCore::QEntity(m_rootEntity);
   m_planeEntity->addComponent(planeMesh);
   m_planeEntity->addComponent(planeMaterial);
   m_planeEntity->addComponent(planeTransform);
   m_planeEntity->setEnabled(true);
+  */
 
   // Axis
   m_axisEntity = new Qt3DCore::QEntity(m_rootEntity);
@@ -103,19 +106,16 @@ cameraEntity = camEntity;
    m_helperArrows->setObjectName(QStringLiteral("__internal helper arrows"));
 
    QMatrix4x4 matrix;
-   Qt3DCore::QEntity *arrow = EditorUtils::createArrowEntity(helperArrowColorY, m_helperArrows,
-                                                             matrix, helperArrowName);
+   Qt3DCore::QEntity *arrow_x = EditorUtils::createArrowEntity(helperArrowColorY, m_helperArrows, matrix, helperArrowName);
    //createObjectPickerForEntity(arrow);
 
    matrix.rotate(90.0f, QVector3D(1.0f, 0.0f, 0.0f));
-   arrow = EditorUtils::createArrowEntity(helperArrowColorZ, m_helperArrows, matrix,
-                                          helperArrowName);
+   Qt3DCore::QEntity *arrow_y = EditorUtils::createArrowEntity(helperArrowColorZ, m_helperArrows, matrix, helperArrowName);
    //createObjectPickerForEntity(arrow);
 
    matrix = QMatrix();
    matrix.rotate(-90.0f, QVector3D(0.0f, 0.0f, 1.0f));
-   arrow = EditorUtils::createArrowEntity(helperArrowColorX, m_helperArrows, matrix,
-                                          helperArrowName);
+   Qt3DCore::QEntity *arrow_z = EditorUtils::createArrowEntity(helperArrowColorX, m_helperArrows, matrix, helperArrowName);
    //createObjectPickerForEntity(arrow);
    m_helperArrowsTransform = new Qt3DCore::QTransform();
    m_helperArrows->addComponent(m_helperArrowsTransform);
@@ -137,68 +137,6 @@ void QtSceneSuperCell::reload_data_from_super_cell(){
     cv::Mat orientation_matrix = super_cell->get_orientation_matrix();
     cv::Point3d upward_vector = super_cell->get_upward_vector();
     cv::Point3d zone_axis = super_cell->get_zone_axis();
-
-    // Cylinder shape data
-        Qt3DExtras::QCylinderMesh *cylinder_x = new Qt3DExtras::QCylinderMesh();
-        cylinder_x->setRadius(0.1);
-        cylinder_x->setLength(10);
-        cylinder_x->setRings(5);
-        cylinder_x->setSlices(5);
-
-        Qt3DExtras::QCylinderMesh *cylinder_y = new Qt3DExtras::QCylinderMesh();
-        cylinder_y->setRadius(0.1);
-        cylinder_y->setLength(10);
-        cylinder_y->setRings(5);
-        cylinder_y->setSlices(5);
-
-        Qt3DExtras::QCylinderMesh *cylinder_z = new Qt3DExtras::QCylinderMesh();
-        cylinder_z->setRadius(0.1);
-        cylinder_z->setLength(10);
-        cylinder_z->setRings(5);
-        cylinder_z->setSlices(5);
-
-        // CylinderMesh Transform
-        Qt3DCore::QTransform *cylinderTransform_x = new Qt3DCore::QTransform();
-        Qt3DCore::QTransform *cylinderTransform_y = new Qt3DCore::QTransform();
-        Qt3DCore::QTransform *cylinderTransform_z = new Qt3DCore::QTransform();
-
-        cylinderTransform_x->setScale(1.0f);
-        cylinderTransform_y->setScale(1.0f);
-        cylinderTransform_z->setScale(1.0f);
-
-        cylinderTransform_x->setRotation(QQuaternion::fromAxisAndAngle(QVector3D(0.0f, 0.0f, 1.0f), 90.0f));
-        cylinderTransform_z->setRotation(QQuaternion::fromAxisAndAngle(QVector3D(1.0f, 0.0f, 0.0f), 90.0f));
-
-        Qt3DExtras::QPhongMaterial *cylinderMaterial_x = new Qt3DExtras::QPhongMaterial();
-        cylinderMaterial_x->setDiffuse(QColor( QColor::fromRgbF( 1.0f, 0.0f, 0.0f ) ));
-
-        Qt3DExtras::QPhongMaterial *cylinderMaterial_y = new Qt3DExtras::QPhongMaterial();
-        cylinderMaterial_y->setDiffuse(QColor( QColor::fromRgbF( 0.0f, 1.0f, 0.0f ) ));
-
-        Qt3DExtras::QPhongMaterial *cylinderMaterial_z = new Qt3DExtras::QPhongMaterial();
-        cylinderMaterial_z->setDiffuse(QColor( QColor::fromRgbF( 0.0f, 0.0f, 1.0f ) ));
-
-        // Cylinder
-        m_cylinderEntity_x = new Qt3DCore::QEntity( m_rootEntity );
-        m_cylinderEntity_y = new Qt3DCore::QEntity( m_rootEntity );
-        m_cylinderEntity_z = new Qt3DCore::QEntity( m_rootEntity );
-
-        m_cylinderEntity_x->addComponent( cylinder_x );
-        m_cylinderEntity_y->addComponent( cylinder_y );
-        m_cylinderEntity_z->addComponent( cylinder_z );
-
-        m_cylinderEntity_x->addComponent( cylinderMaterial_x );
-        m_cylinderEntity_y->addComponent( cylinderMaterial_y );
-        m_cylinderEntity_z->addComponent( cylinderMaterial_z );
-
-        m_cylinderEntity_x->addComponent( cylinderTransform_x );
-        m_cylinderEntity_y->addComponent( cylinderTransform_y );
-        m_cylinderEntity_z->addComponent( cylinderTransform_z );
-
-        m_cylinderEntity_x->addComponent( xyz_axis_layer );
-        m_cylinderEntity_y->addComponent( xyz_axis_layer );
-        m_cylinderEntity_z->addComponent( xyz_axis_layer );
-
 
     const std::vector< std::vector<cv::Point3d> > atom_positions_vec = super_cell->get_atom_positions_vec();
     const std::vector<std::string> atom_symbols = super_cell->get_atom_symbols_vec();
