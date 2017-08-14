@@ -24,8 +24,7 @@ bool MainWindow::create_3d_widgets( QMainWindow *parent , SuperCell* tdmap_vis_s
   // Scene SuperCell for TDMAP ROI
   qt_scene_roi_tdmap_super_cell = new QtSceneSuperCell( rootEntity, cameraEntity );
   qt_scene_roi_tdmap_super_cell->set_super_cell(tdmap_vis_sim_unit_cell);
-QObject::connect( tdmap_vis_sim_unit_cell, SIGNAL(atom_positions_changed()), qt_scene_roi_tdmap_super_cell, SLOT(reload_data_from_super_cell()));
-
+  QObject::connect( tdmap_vis_sim_unit_cell, SIGNAL(atom_positions_changed()), qt_scene_roi_tdmap_super_cell, SLOT(reload_data_from_super_cell()));
 
   Qt3DCore::QEntity *lightEntity = new Qt3DCore::QEntity(rootEntity);
   Qt3DRender::QPointLight *light = new Qt3DRender::QPointLight(lightEntity);

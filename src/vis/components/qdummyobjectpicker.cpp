@@ -25,7 +25,7 @@
  ** $QT_END_LICENSE$
  **
  ****************************************************************************/
-#include "qtscene_qdummyobjectpicker.h"
+#include "qdummyobjectpicker.h"
 
 QT_BEGIN_NAMESPACE
 

@@ -132,7 +132,7 @@
 #include <Qt3DRender/QViewport>
 
 #include "super_cell.hpp"
-#include "qtscene_editorutils.h"
+#include "vis/components/editorutils.h"
 
 
 class QtSceneSuperCell : public QObject

@@ -188,10 +188,10 @@ else(build_cli)
       gui_stream.hpp
       custom_tool_button.h
       custom_tool_button.cpp
-      qtscene_editorutils.h
-      qtscene_editorutils.cpp
-      qtscene_qdummyobjectpicker.h
-      qtscene_qdummyobjectpicker.cpp
+      vis/components/editorutils.h
+      vis/components/editorutils.cpp
+      vis/components/qdummyobjectpicker.h
+      vis/components/qdummyobjectpicker.cpp
       )
 
     # Set PROJECT_VERSION_PATCH and PROJECT_VERSION_TWEAK to 0 if not present, needed by add_project_meta

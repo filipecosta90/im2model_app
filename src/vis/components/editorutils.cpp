@@ -25,8 +25,8 @@
  ** $QT_END_LICENSE$
  **
  ****************************************************************************/
-#include "qtscene_editorutils.h"
-#include "qtscene_qdummyobjectpicker.h"
+#include "editorutils.h"
+#include "qdummyobjectpicker.h"
 
 #include <Qt3DCore/QEntity>
 #include <Qt3DRender/QCamera>
