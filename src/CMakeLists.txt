@@ -125,7 +125,9 @@ else(build_cli)
 
     # Find the QtWidgets library
     message(STATUS "Building the Qt5 version")
-    find_package(Qt5 REQUIRED COMPONENTS Core Gui Widgets 3DCore 3DExtras 3DRender 3DInput)
+    find_package(Qt5 REQUIRED COMPONENTS Core Gui Widgets 3DCore 3DExtras 3DRender 3DInput 3DLogic 3DQuick 3DQuickRender Qml QuickWidgets )
+
+      set(ENABLE_SIGNAL_SPY false CACHE BOOL "if Qt private headers are installed, enable this to debug Qt signals")
 
     # Set PROJECT_VERSION_PATCH and PROJECT_VERSION_TWEAK to 0 if not present, needed by add_project_meta
 
@@ -192,6 +194,10 @@ else(build_cli)
       vis/components/editorutils.cpp
       vis/components/qdummyobjectpicker.h
       vis/components/qdummyobjectpicker.cpp
+      vis/inputcontrols/qtrackballcameracontroller.cpp
+      vis/inputcontrols/qtrackballcameracontroller.h
+      vis/inputcontrols/qtrackballcameracontroller_p.cpp
+      vis/inputcontrols/qtrackballcameracontroller_p.h
       )
 
     # Set PROJECT_VERSION_PATCH and PROJECT_VERSION_TWEAK to 0 if not present, needed by add_project_meta
@@ -216,19 +222,38 @@ else(build_cli)
       ${META_FILES_TO_INCLUDE}
       ${RESOURCE_FILES}  ${im2model_core_src} mc_driver.cpp ${FLEX_mc_lexer_OUTPUTS} ${BISON_mc_parser_OUTPUTS} ${DR_PROBE_RESOURCES}
       )
-    # Use the Widgets module from Qt 5.
-    qt5_use_modules( ${PROJECT_NAME} Core Gui Widgets 3DCore 3DExtras 3DRender 3DInput )
-    # link the qt3d libraries
+      # Use the Widgets module from Qt 5.
+    qt5_use_modules( ${PROJECT_NAME} Core Gui Widgets 3DCore 3DExtras 3DRender 3DInput 3DLogic 3DQuick QuickWidgets 3DQuickRender Qml )
 
-target_link_libraries(${PROJECT_NAME}
-    Qt5::Core
-    Qt5::Gui
-    Qt5::Widgets
-    Qt5::3DCore
-    Qt5::3DExtras
-    Qt5::3DRender
-    Qt5::3DInput
-    )
+  #include qt5 dirs
+    foreach(module Core Gui Widgets 3DCore 3DExtras 3DRender 3DInput 3DLogic 3DQuick 3DQuickRender Qml QuickWidgets )
+      set(qt_module Qt${module})
+      set(qt5_module Qt5${module})
+      find_package(${qt5_module})
+      if("${${qt5_module}_PRIVATE_INCLUDE_DIRS}" STREQUAL "")
+        foreach(base_dir ${${qt5_module}_INCLUDE_DIRS})
+          if("${base_dir}" MATCHES "/${qt_module}\$")
+            list(APPEND ${qt5_module}_PRIVATE_INCLUDE_DIRS "${base_dir}/${${qt5_module}_VERSION}/${qt_module}")
+          endif()
+        endforeach()
+      endif()
+      target_include_directories(${PROJECT_NAME} PRIVATE ${${qt5_module}_PRIVATE_INCLUDE_DIRS})
+      message(STATUS "Including qt5 private dir - ${${qt5_module}_PRIVATE_INCLUDE_DIRS}\n")
+    endforeach()
+
+    # link the qt3d libraries
+    target_link_libraries(${PROJECT_NAME}
+      Qt5::Core
+      Qt5::Gui
+      Qt5::Widgets
+      Qt5::QuickWidgets
+      Qt5::3DCore
+      Qt5::3DExtras
+      Qt5::3DRender
+      Qt5::3DInput
+      Qt5::3DQuickRender
+      Qt5::3DQuick
+      )
 
     SET_SOURCE_FILES_PROPERTIES(${DR_PROBE_RESOURCES} PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
 

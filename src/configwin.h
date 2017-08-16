@@ -93,7 +93,7 @@
 #include "application_log.hpp"
 #include "group_options.h"
 
-
+#include "vis/inputcontrols/qtrackballcameracontroller.h"
 namespace Ui {
   class MainWindow;
 }

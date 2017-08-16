@@ -54,17 +54,15 @@ bool MainWindow::create_3d_widgets( QMainWindow *parent , SuperCell* tdmap_vis_s
   cameraSelector->setCamera( cameraEntitytopLeft );
 
   // For camera controls
-  Qt3DExtras::QOrbitCameraController *camController = new Qt3DExtras::QOrbitCameraController(mainViewport);
-  camController->setLinearSpeed(50.f);
-  camController->setLookSpeed(180.f);
+  Qt3DExtras::QTrackballCameraController *camController = new Qt3DExtras::QTrackballCameraController(mainViewport);
+
   camController->setCamera(cameraEntity);
 
   // For camera controls
+  /*
   Qt3DExtras::QOrbitCameraController *camControllerTopLeft = new Qt3DExtras::QOrbitCameraController(topLeftViewport);
-  camControllerTopLeft->setLinearSpeed(50.f);
-  camControllerTopLeft->setLookSpeed(180.f);
   camControllerTopLeft->setCamera(cameraEntitytopLeft);
-
+*/
   // Set root object of the scene
   qt_scene_view_roi_tdmap_super_cell->setRootEntity(rootEntity);
 
