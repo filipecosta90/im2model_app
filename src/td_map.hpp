@@ -207,6 +207,9 @@ class TDMap  : public QObject {
     bool get_flag_wavimg_io_ap_pipe_out();
     bool get_flag_simgrid_io_ap_pipe_out();
 
+    bool get_flag_upward_vector();
+    bool get_flag_zone_axis();
+
     bool get_flag_slice_samples();
     bool get_flag_nm_lower_bound();
     bool get_flag_slice_period();
@@ -221,6 +224,8 @@ class TDMap  : public QObject {
     bool get_flag_raw_simulated_images_grid();
 
     // gui var getters
+    cv::Point3d get_zone_axis();
+    cv::Point3d get_upward_vector();
     /////////////////////////
     // Simulated Thickness info
     /////////////////////////

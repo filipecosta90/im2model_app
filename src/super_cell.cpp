@@ -385,6 +385,7 @@ bool SuperCell::create_atoms_from_unit_cell(){
 }
 
 bool SuperCell::orientate_atoms_from_matrix(){
+  std::cout <<  "### orientate_atoms_from_matrix" << std::endl;
   bool result = false;
   if( _flag_unit_cell ){
     if( _flag_orientation_matrix ){

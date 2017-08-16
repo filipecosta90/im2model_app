@@ -139,7 +139,8 @@ class MainWindow : public QMainWindow {
     bool _reset_document_modified_flags();
 
     private slots:
-
+    void update_qt_scene_roi_cameraEntity_zone_axis();
+    void update_qt_scene_roi_cameraEntity_upward_vector();
       bool update_qline_image_path( std::string fileName );
     void update_full_experimental_image();
     void update_roi_experimental_image_frame();
@@ -354,8 +355,8 @@ signals:
     QtSceneSuperCell* qt_scene_roi_tdmap_super_cell = nullptr;
     Qt3DExtras::Qt3DWindow *qt_scene_view_full_tdmap_super_cell;
     QtSceneSuperCell* qt_scene_full_tdmap_super_cell = nullptr;
-    Qt3DRender::QCamera *cameraEntity;
-
+    Qt3DRender::QCamera *qt_scene_roi_cameraEntity;
+    Qt3DCore::QTransform *lightTransform;
 };
 
 

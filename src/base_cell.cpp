@@ -149,56 +149,74 @@ bool BaseCell::set_upward_vector ( cv::Point3d hkl ){
 }
 
 bool BaseCell::set_upward_vector_u( double u ){
-  upward_vector_u = u;
-  upward_vector.x = u;
-  _flag_upward_vector_u = true;
-  _flag_upward_vector = _flag_upward_vector_u & _flag_upward_vector_v & _flag_upward_vector_w;
-  form_matrix_from_miller_indices();
+  if( upward_vector_u != u ){
+    upward_vector_u = u;
+    upward_vector.x = u;
+    _flag_upward_vector_u = true;
+    _flag_upward_vector = _flag_upward_vector_u & _flag_upward_vector_v & _flag_upward_vector_w;
+    emit upward_vector_changed();
+    form_matrix_from_miller_indices();
+  }
   return true;
 }
 
 bool BaseCell::set_upward_vector_v( double v ){
-  upward_vector_v = v;
-  upward_vector.y = v;
-  _flag_upward_vector_v = true;
-  _flag_upward_vector = _flag_upward_vector_u & _flag_upward_vector_v & _flag_upward_vector_w;
-  form_matrix_from_miller_indices();
+  if( upward_vector_v != v ){
+    upward_vector_v = v;
+    upward_vector.y = v;
+    _flag_upward_vector_v = true;
+    _flag_upward_vector = _flag_upward_vector_u & _flag_upward_vector_v & _flag_upward_vector_w;
+    emit upward_vector_changed();
+    form_matrix_from_miller_indices();
+  }
   return true;
 }
 
 bool BaseCell::set_upward_vector_w( double w ){
-  upward_vector_w = w;
-  upward_vector.z = w;
-  _flag_upward_vector_w = true;
-  _flag_upward_vector = _flag_upward_vector_u & _flag_upward_vector_v & _flag_upward_vector_w;
-  form_matrix_from_miller_indices();
+  if( upward_vector_w != w ){
+    upward_vector_w = w;
+    upward_vector.z = w;
+    _flag_upward_vector_w = true;
+    _flag_upward_vector = _flag_upward_vector_u & _flag_upward_vector_v & _flag_upward_vector_w;
+    emit upward_vector_changed();
+    form_matrix_from_miller_indices();
+  }
   return true;
 }
 
 bool BaseCell::set_zone_axis_u( double u ){
-  zone_axis_u = u;
-  zone_axis.x = u;
-  _flag_zone_axis_u = true;
-  _flag_zone_axis = _flag_zone_axis_u & _flag_zone_axis_v & _flag_zone_axis_w;
-  form_matrix_from_miller_indices();
+  if( zone_axis_u != u ){
+    zone_axis_u = u;
+    zone_axis.x = u;
+    _flag_zone_axis_u = true;
+    _flag_zone_axis = _flag_zone_axis_u & _flag_zone_axis_v & _flag_zone_axis_w;
+    emit zone_axis_vector_changed();
+    form_matrix_from_miller_indices();
+  }
   return true;
 }
 
 bool BaseCell::set_zone_axis_v( double v ){
-  zone_axis_v = v;
-  zone_axis.y = v;
-  _flag_zone_axis_v = true;
-  _flag_zone_axis = _flag_zone_axis_u & _flag_zone_axis_v & _flag_zone_axis_w;
-  form_matrix_from_miller_indices();
+  if( zone_axis_v != v ){
+    zone_axis_v = v;
+    zone_axis.y = v;
+    _flag_zone_axis_v = true;
+    _flag_zone_axis = _flag_zone_axis_u & _flag_zone_axis_v & _flag_zone_axis_w;
+    emit zone_axis_vector_changed();
+    form_matrix_from_miller_indices();
+  }
   return true;
 }
 
 bool BaseCell::set_zone_axis_w( double w ){
-  zone_axis_w = w;
-  zone_axis.z = w;
-  _flag_zone_axis_w = true;
-  _flag_zone_axis = _flag_zone_axis_u & _flag_zone_axis_v & _flag_zone_axis_w;
-  form_matrix_from_miller_indices();
+  if( zone_axis_w != w ){
+    zone_axis_w = w;
+    zone_axis.z = w;
+    _flag_zone_axis_w = true;
+    _flag_zone_axis = _flag_zone_axis_u & _flag_zone_axis_v & _flag_zone_axis_w;
+    emit zone_axis_vector_changed();
+    form_matrix_from_miller_indices();
+  }
   return true;
 }
 
@@ -258,7 +276,8 @@ void BaseCell::form_matrix_from_miller_indices(){
     inverse_orientation_matrix = orientation_matrix.inv();
     _flag_orientation_matrix = true;
     _flag_inverse_orientation_matrix = true;
-    std::cout << "NEW orientation matrix: \n" << orientation_matrix << "std::endl";
+    emit orientation_matrix_changed();
+    std::cout << "NEW orientation matrix: \n" << orientation_matrix << std::endl;
 
     /**
      * R is normalized: the squares of the elements in any row or column sum to 1.

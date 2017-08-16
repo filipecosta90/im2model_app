@@ -304,7 +304,9 @@ class BaseCell : public QObject {
     signals:
     void atom_positions_changed();
     void atom_orientation_changed();
-
+    void orientation_matrix_changed();
+    void upward_vector_changed();
+    void zone_axis_vector_changed();
 };
 
 #endif

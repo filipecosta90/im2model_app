@@ -42,6 +42,7 @@
 #include <Qt3DInput/QActionInput>
 #include <Qt3DInput/QAxis>
 #include <Qt3DInput/QAnalogAxisInput>
+#include <Qt3DInput/QButtonAxisInput>
 #include <Qt3DInput/QMouseDevice>
 #include <Qt3DInput/QKeyboardDevice>
 #include <Qt3DInput/QMouseHandler>

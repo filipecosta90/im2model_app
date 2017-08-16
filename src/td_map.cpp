@@ -21,7 +21,7 @@ TDMap::TDMap(
   tdmap_vis_sim_unit_cell->set_cel_margin_nm( cel_margin_nm );
   tdmap_vis_sim_unit_cell->set_flag_auto_calculate_expand_factor( false );
   tdmap_vis_sim_unit_cell->set_expand_factor_abc( 4, 4, 4 );
-  tdmap_vis_sim_unit_cell->set_flag_enable_orientation( false );
+ tdmap_vis_sim_unit_cell->set_flag_enable_orientation( false );
 
   tdmap_roi_sim_super_cell = new SuperCell( unit_cell );
   tdmap_full_sim_super_cell = new SuperCell( unit_cell );
@@ -586,6 +586,22 @@ bool TDMap::export_sim_grid( std::string sim_grid_file_name_image, bool cut_marg
 /* flag getters */
 bool TDMap::get_flag_simulated_images_vertical_header_slice_nm(){
   return sim_crystal_properties->get_flag_simulated_params_nm_slice_vec();
+}
+
+cv::Point3d TDMap::get_upward_vector(){
+  return tdmap_roi_sim_super_cell->get_upward_vector();
+}
+
+cv::Point3d TDMap::get_zone_axis(){
+  return tdmap_roi_sim_super_cell->get_zone_axis();
+}
+
+bool TDMap::get_flag_upward_vector(){
+  return tdmap_roi_sim_super_cell->get_flag_upward_vector();
+}
+
+bool TDMap::get_flag_zone_axis(){
+  return tdmap_roi_sim_super_cell->get_flag_zone_axis();
 }
 
 bool TDMap::get_flag_simulated_images_horizontal_header_defocus_nm(){

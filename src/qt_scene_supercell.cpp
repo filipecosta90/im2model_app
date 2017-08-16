@@ -101,7 +101,9 @@ cameraEntity = camEntity;
   m_axisEntity->addComponent( geometryRenderer );
   m_axisEntity->addComponent( xyz_axis_layer );
 
-  m_helperArrows = new Qt3DCore::QEntity( m_rootEntity );
+  sphere_layer = new Qt3DRender::QLayer(m_rootEntity);
+
+  m_helperArrows = new Qt3DCore::QEntity( m_axisEntity );
   m_helperArrows->setEnabled(true);
    m_helperArrows->setObjectName(QStringLiteral("__internal helper arrows"));
 
@@ -119,7 +121,7 @@ cameraEntity = camEntity;
    //createObjectPickerForEntity(arrow);
    m_helperArrowsTransform = new Qt3DCore::QTransform();
    m_helperArrows->addComponent(m_helperArrowsTransform);
-   m_helperArrows->setParent(m_rootEntity);
+   m_helperArrows->setParent(m_axisEntity);
 }
 
 QtSceneSuperCell::~QtSceneSuperCell(){
@@ -131,20 +133,15 @@ void QtSceneSuperCell::set_super_cell( SuperCell* cell ){
 }
 
 void QtSceneSuperCell::reload_data_from_super_cell(){
-  std::cout << "########\nreloading data from super cell\n########\n" << std::endl;
   if( _flag_super_cell ){
-    std::cout << "########\n_flag_super_cell reloading data from super cell\n########\n" << std::endl;
-    cv::Mat orientation_matrix = super_cell->get_orientation_matrix();
-    cv::Point3d upward_vector = super_cell->get_upward_vector();
-    cv::Point3d zone_axis = super_cell->get_zone_axis();
+
 
     const std::vector< std::vector<cv::Point3d> > atom_positions_vec = super_cell->get_atom_positions_vec();
-    const std::vector<std::string> atom_symbols = super_cell->get_atom_symbols_vec();
     const std::vector<cv::Vec4d> atom_cpk_rgba_colors = super_cell->get_atom_cpk_rgba_colors_vec();
     std::vector<double> atom_empirical_radiis = super_cell->get_atom_empirical_radiis_vec();
 
     for( int ent_pos = 0; ent_pos < sphere_entities.size(); ent_pos++ ){
-      delete sphere_entities[ent_pos];
+    sphere_entities[ent_pos]->setEnabled(false);
     }
 
     for( int distinct_atom_pos = 0; distinct_atom_pos < atom_positions_vec.size(); distinct_atom_pos++ ){
@@ -160,10 +157,10 @@ void QtSceneSuperCell::reload_data_from_super_cell(){
         //Layer
         Qt3DRender::QGeometryRenderer *geometryRenderer = new Qt3DRender::QGeometryRenderer(sphereEntity);
         sphereEntity->addComponent( geometryRenderer );
-        sphereEntity->addComponent( xyz_axis_layer );
+        sphereEntity->addComponent( sphere_layer );
 
         // Mesh
-        Qt3DExtras::QSphereMesh *sphereMesh = new Qt3DExtras::QSphereMesh();
+        Qt3DExtras::QSphereMesh *sphereMesh = new Qt3DExtras::QSphereMesh( sphereEntity );
         sphereMesh->setRings(5);
         sphereMesh->setSlices(5);
         sphereMesh->setRadius( atom_empirical_radii );
@@ -171,28 +168,24 @@ void QtSceneSuperCell::reload_data_from_super_cell(){
         sphereEntity->addComponent( sphereMesh );
 
         // Material
-        Qt3DExtras::QGoochMaterial *sphereMaterial = new Qt3DExtras::QGoochMaterial();
+        Qt3DExtras::QGoochMaterial *sphereMaterial = new Qt3DExtras::QGoochMaterial( sphereEntity );
         sphereMaterial->setDiffuse(QColor::fromRgbF( atom_cpk_rgba_color[0], atom_cpk_rgba_color[1], atom_cpk_rgba_color[2] ) );
         sphereEntity->addComponent( sphereMaterial );
 
         // Transform
-        Qt3DCore::QTransform *sphereTransform = new Qt3DCore::QTransform();
+        Qt3DCore::QTransform *sphereTransform = new Qt3DCore::QTransform( sphereEntity );
         sphereTransform->setTranslation(QVector3D( atom_pos.x, atom_pos.y, atom_pos.z ));
         sphereEntity->addComponent( sphereTransform );
 
         //Save entity
         sphereEntity->setEnabled( true );
+        sphereEntity->setObjectName( atomEntityName );
         sphere_entities.push_back( sphereEntity );
-
       }
     }
   }
 }
 
-void QtSceneSuperCell::enablePlane(bool enabled){
-  //m_planeEntity->setEnabled(enabled);
-}
-
-void QtSceneSuperCell::enableSphere(bool enabled){
-  //m_sphereEntity->setEnabled(enabled);
+void QtSceneSuperCell::orientate_data_from_super_cell(){
+std::cout << " orientate_data_from_super_cell" << std::endl;
 }
