@@ -92,7 +92,7 @@ double Atom_Info::empiricalRadius_Angstroms()  {
   return mEmpiricalRadius_Picometers / 100.0;
 }
 
-//! Returns the atom's empirical radius in Nanometers 
+//! Returns the atom's empirical radius in Nanometers
 double Atom_Info::empiricalRadius_Nanometers()  {
   return mEmpiricalRadius_Picometers / 1000.0;
 }
@@ -103,8 +103,13 @@ double Atom_Info::covalentRadius()  {
 }
 
 //! Returns the atom's van der Waals radius in Angstroms
-double Atom_Info::vanDerWaalsRadius()  {
+double Atom_Info::vanDerWaalsRadius_Angstroms()  {
   return mVanDerWaalsRadius / 100.0;
+}
+
+//! Returns the atom's van der Waals radius in Angstroms
+double Atom_Info::vanDerWaalsRadius_Nanometers()  {
+  return mVanDerWaalsRadius / 1000.0;
 }
 
 //! Returns the atom's CPK color

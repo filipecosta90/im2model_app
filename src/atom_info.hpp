@@ -1,5 +1,5 @@
-#ifndef __ATOM_INFO_H__ 
-#define __ATOM_INFO_H__ 
+#ifndef __ATOM_INFO_H__
+#define __ATOM_INFO_H__
 
 #include <iosfwd>                 // for string
 #include <opencv2/core/matx.hpp>  // for Vec4d
@@ -70,7 +70,8 @@ class Atom_Info
     double covalentRadius();
 
     //! Returns the atom's van der Waals radius in Angstroms
-    double vanDerWaalsRadius();
+    double vanDerWaalsRadius_Angstroms();
+    double vanDerWaalsRadius_Nanometers();
 
     //! Returns the atom's CPK color
     cv::Vec4d cpkColor();

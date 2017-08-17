@@ -257,6 +257,7 @@ class BaseCell : public QObject {
     double get_length_a_Nanometers(){ return ( length_a_Nanometers + (2 * cel_margin_Nanometers) ); }
     double get_length_b_Nanometers(){ return ( length_b_Nanometers + (2 * cel_margin_Nanometers) ); }
     double get_length_c_Nanometers(){ return length_c_Nanometers; }
+    double get_max_length_abc_Nanometers();
 
     /** vector t **/
     // project x axis

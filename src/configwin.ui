@@ -189,7 +189,7 @@
            </widget>
           </item>
           <item>
-           <widget class="QWidget" name="qwidget_qt_scene_view_roi_tdmap_super_cell" native="true">
+           <widget class="UnitCellViewerWindow" name="qwidget_qt_scene_view_roi_tdmap_super_cell" native="true">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
               <horstretch>0</horstretch>
@@ -1071,6 +1071,12 @@
    <class>CvImageFrameTableWidget</class>
    <extends>QWidget</extends>
    <header location="global">cv_image_table_frame.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>UnitCellViewerWindow</class>
+   <extends>QWidget</extends>
+   <header location="global">vis/unit_cell_view_widget.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

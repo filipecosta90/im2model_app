@@ -262,7 +262,7 @@ bool SuperCell::calculate_expand_factor(){
   }
   return result;
 }
-
+ 
 bool SuperCell::update_length_parameters_from_expand_factor(){
   bool result = false;
   if( _flag_unit_cell ){

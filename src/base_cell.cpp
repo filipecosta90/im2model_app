@@ -220,6 +220,10 @@ bool BaseCell::set_zone_axis_w( double w ){
   return true;
 }
 
+double BaseCell::get_max_length_abc_Nanometers( ){
+  return ( length_a_Nanometers > length_b_Nanometers ) && ( length_a_Nanometers > length_c_Nanometers ) ? ( ( length_b_Nanometers > length_a_Nanometers ) && ( length_b_Nanometers > length_c_Nanometers ) ? length_b_Nanometers : length_c_Nanometers ) : length_c_Nanometers;
+}
+
 int BaseCell::get_atom_positions_vec_size( ){
   int size = 0;
   for ( size_t pos = 0; pos < atom_positions.size() ; pos++ ){

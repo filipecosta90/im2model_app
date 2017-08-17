@@ -130,6 +130,13 @@ Qt3DCore::QEntity *EditorUtils::createArrowEntity(const QColor &color, Qt3DCore:
   return arrow;
 }
 
+void EditorUtils::removeExpandedChildEntities(Qt3DCore::QEntity *entity, const QString &childName ){
+  QList<Qt3DCore::QEntity*> childs = entity->findChildren<Qt3DCore::QEntity*>( childName );
+    Q_FOREACH (Qt3DCore::QEntity *childEntity, childs) {
+      delete childEntity;
+    }
+}
+
 Qt3DRender::QObjectPicker *EditorUtils::entityPicker(Qt3DCore::QEntity *entity){
   Qt3DCore::QComponentVector components = entity->components();
   for (int i = 0; i < components.size(); i++) {

@@ -70,30 +70,6 @@ static const QColor helperArrowColorZ("blue");
 QtSceneSuperCell::QtSceneSuperCell(Qt3DCore::QEntity *rootEntity, Qt3DRender::QCamera *camEntity ) : m_rootEntity(rootEntity) {
 cameraEntity = camEntity;
 
-  // Plane shape data
-  Qt3DExtras::QPlaneMesh *planeMesh = new Qt3DExtras::QPlaneMesh();
-  planeMesh->setWidth(5);
-  planeMesh->setHeight(2);
-  std::cout << "load QPlaneMesh with " << planeMesh->vertexCount() << "vertices. " << std::endl;
-
-  // Plane mesh transform
-  Qt3DCore::QTransform *planeTransform = new Qt3DCore::QTransform();
-  planeTransform->setScale(1.0f);
-  planeTransform->setRotation(QQuaternion::fromAxisAndAngle(QVector3D(1.0f, 0.0f, 0.0f), 90.0f));
-  planeTransform->setTranslation(QVector3D(0.0f, 0.0f, 0.0f));
-
-  Qt3DExtras::QPhongMaterial *planeMaterial = new Qt3DExtras::QPhongMaterial();
-  planeMaterial->setDiffuse(QColor(QRgb(0xa69929)));
-
-  // Plane
-  /*
-  m_planeEntity = new Qt3DCore::QEntity(m_rootEntity);
-  m_planeEntity->addComponent(planeMesh);
-  m_planeEntity->addComponent(planeMaterial);
-  m_planeEntity->addComponent(planeTransform);
-  m_planeEntity->setEnabled(true);
-  */
-
   // Axis
   m_axisEntity = new Qt3DCore::QEntity(m_rootEntity);
   Qt3DRender::QGeometryRenderer *geometryRenderer = new Qt3DRender::QGeometryRenderer(m_axisEntity);
@@ -135,19 +111,17 @@ void QtSceneSuperCell::set_super_cell( SuperCell* cell ){
 void QtSceneSuperCell::reload_data_from_super_cell(){
   if( _flag_super_cell ){
 
-
     const std::vector< std::vector<cv::Point3d> > atom_positions_vec = super_cell->get_atom_positions_vec();
     const std::vector<cv::Vec4d> atom_cpk_rgba_colors = super_cell->get_atom_cpk_rgba_colors_vec();
     std::vector<double> atom_empirical_radiis = super_cell->get_atom_empirical_radiis_vec();
+    const double get_max_length_abc_Nanometers
 
-    for( int ent_pos = 0; ent_pos < sphere_entities.size(); ent_pos++ ){
-    sphere_entities[ent_pos]->setEnabled(false);
-    }
+    EditorUtils::removeExpandedChildEntities(m_rootEntity,atomEntityName);
 
     for( int distinct_atom_pos = 0; distinct_atom_pos < atom_positions_vec.size(); distinct_atom_pos++ ){
 
       const cv::Vec4d atom_cpk_rgba_color = atom_cpk_rgba_colors[distinct_atom_pos];
-      const double atom_empirical_radii = ( atom_empirical_radiis[distinct_atom_pos] );
+      const double atom_empirical_radii = atom_empirical_radiis[distinct_atom_pos];
 
       const std::vector<cv::Point3d> same_type_atoms = atom_positions_vec[distinct_atom_pos];
       for( int same_type_pos = 0; same_type_pos < atom_positions_vec[distinct_atom_pos].size(); same_type_pos++ ){

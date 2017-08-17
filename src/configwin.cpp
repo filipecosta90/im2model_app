@@ -1,99 +1,11 @@
 #include "configwin.h"
 
 bool MainWindow::create_3d_widgets( QMainWindow *parent , SuperCell* tdmap_vis_sim_unit_cell, SuperCell* tdmap_full_sim_super_cell ){
-  qt_scene_view_roi_tdmap_super_cell = new Qt3DExtras::Qt3DWindow( );
-  //ui->qwidget_qt_scene_view_roi_tdmap_super_cell =  QWidget::createWindowContainer(qt_scene_view_roi_tdmap_super_cell,parent);
-  QWidget *container = QWidget::createWindowContainer(qt_scene_view_roi_tdmap_super_cell,ui->qwidget_qt_scene_view_roi_tdmap_super_cell);
-  container->setMinimumSize(ui->qwidget_qt_scene_view_roi_tdmap_super_cell->size());
-  //container->setMaximumSize(200, 200);
 
-  Qt3DInput::QInputAspect *input = new Qt3DInput::QInputAspect;
-  qt_scene_view_roi_tdmap_super_cell->registerAspect(input);
   // Root entity
-  Qt3DCore::QEntity *rootEntity = new Qt3DCore::QEntity();
-  rootEntity->setObjectName(QStringLiteral("rootEntity"));
-
-  // Camera
-  qt_scene_roi_cameraEntity = qt_scene_view_roi_tdmap_super_cell->camera();
-  qt_scene_roi_cameraEntity->setPosition(QVector3D(0, 0, 20.0f));
-  qt_scene_roi_cameraEntity->setUpVector(QVector3D(0, 1, 0));
-  //cameraEntity->setViewVector(QVector3D(0, 1, 0));
-  qt_scene_roi_cameraEntity->setViewCenter(QVector3D(0, 0, 0));
-  qt_scene_roi_cameraEntity->lens()->setPerspectiveProjection(50.0f, 16.0f/9.0f, 0.1f, 1000.0f);
-
-  // Scene SuperCell for TDMAP ROI
-  qt_scene_roi_tdmap_super_cell = new QtSceneSuperCell( rootEntity, qt_scene_roi_cameraEntity );
-  qt_scene_roi_tdmap_super_cell->set_super_cell(tdmap_vis_sim_unit_cell);
-  QObject::connect( tdmap_vis_sim_unit_cell, SIGNAL(atom_positions_changed()), qt_scene_roi_tdmap_super_cell, SLOT(reload_data_from_super_cell()));
-  QObject::connect( tdmap_vis_sim_unit_cell, SIGNAL(orientation_matrix_changed()), qt_scene_roi_tdmap_super_cell, SLOT(orientate_data_from_super_cell()));
-  connect(tdmap_vis_sim_unit_cell, SIGNAL(zone_axis_vector_changed()), this, SLOT(update_qt_scene_roi_cameraEntity_zone_axis()));
-  connect(tdmap_vis_sim_unit_cell, SIGNAL(upward_vector_changed()), this, SLOT(update_qt_scene_roi_cameraEntity_upward_vector()));
-
-  Qt3DCore::QEntity *lightEntity = new Qt3DCore::QEntity(rootEntity);
-  Qt3DRender::QPointLight *light = new Qt3DRender::QPointLight(lightEntity);
-  light->setColor("white");
-  light->setIntensity(1);
-  lightEntity->addComponent(light);
-
-  lightTransform = new Qt3DCore::QTransform(lightEntity);
-  lightTransform->setTranslation(qt_scene_roi_cameraEntity->position());
-  lightEntity->addComponent(lightTransform);
-
-  // FrameGraph
-  Qt3DRender::QFrameGraphNode* activeFrameGraph = qt_scene_view_roi_tdmap_super_cell->activeFrameGraph();
-  QList< QObject* > childrens = activeFrameGraph->children();
-  QList< Qt3DRender::QViewport* > childrens_views = activeFrameGraph->findChildren<Qt3DRender::QViewport *>();
-
-  Qt3DRender::QViewport *mainViewport = childrens_views[0];
-
-
-  Qt3DRender::QViewport *topLeftViewport = new Qt3DRender::QViewport( );
-  Qt3DRender::QLayerFilter *layerFilter = new Qt3DRender::QLayerFilter( topLeftViewport );
-  Qt3DRender::QLayer *xyz_scene_layer = qt_scene_roi_tdmap_super_cell->get_xyz_axis_layer();
-  QList< QObject* > childrens_xyz_scene_layer = xyz_scene_layer->children();
-  std::cout << "childrens_xyz_scene_layer.size() " << childrens_xyz_scene_layer.size() << std::endl;
-  layerFilter->addLayer( xyz_scene_layer );
-
-  topLeftViewport->setNormalizedRect(QRectF(0, 0.8, 0.2, 0.2));
-  Qt3DRender::QCameraSelector *cameraSelector = new Qt3DRender::QCameraSelector(topLeftViewport);
-  Qt3DRender::QCamera *cameraEntitytopLeft = new Qt3DRender::QCamera( qt_scene_roi_cameraEntity );
-  cameraSelector->setCamera( cameraEntitytopLeft );
-
-  // For camera controls
-  Qt3DExtras::QTrackballCameraController *camController = new Qt3DExtras::QTrackballCameraController(mainViewport);
-
-  camController->setCamera(qt_scene_roi_cameraEntity);
-
-  // Set root object of the scene
-  qt_scene_view_roi_tdmap_super_cell->setRootEntity(rootEntity);
-
-  ui->qwidget_qt_scene_view_roi_tdmap_super_cell->show();
+  ui->qwidget_qt_scene_view_roi_tdmap_super_cell->set_super_cell( tdmap_vis_sim_unit_cell );
+  
   return true;
-}
-
-void MainWindow::update_qt_scene_roi_cameraEntity_zone_axis(){
-  if(_core_td_map->get_flag_zone_axis()){
-    cv::Point3d zone_axis = _core_td_map->get_zone_axis() ;
-    QVector3D q_zone_axis_vector ( zone_axis.x, zone_axis.y, zone_axis.z );
-    q_zone_axis_vector.normalize();
-    q_zone_axis_vector*= 20.0f;
-    lightTransform->setTranslation(q_zone_axis_vector);
-    qt_scene_roi_cameraEntity->setPosition(q_zone_axis_vector);
-    Qt3DRender::QLayer *sphere_layer = qt_scene_roi_tdmap_super_cell->get_sphere_layer();
-    QList< QObject* > childrens_sphere_layer = sphere_layer->children();
-    std::cout << "childrens_sphere_layer.size() " << childrens_sphere_layer.size() << std::endl;
-  }
-}
-
-void MainWindow::update_qt_scene_roi_cameraEntity_upward_vector(){
-  if(_core_td_map->get_flag_upward_vector()){
-    cv::Point3d upward_vector = _core_td_map->get_upward_vector();
-    qt_scene_roi_cameraEntity->setUpVector(QVector3D(upward_vector.x, upward_vector.y, upward_vector.z));
-
-    Qt3DRender::QLayer *sphere_layer = qt_scene_roi_tdmap_super_cell->get_sphere_layer();
-    QList< QObject* > childrens_sphere_layer = sphere_layer->children();
-    std::cout << "childrens_sphere_layer.size() " << childrens_sphere_layer.size() << std::endl;
-  }
 }
 
 MainWindow::MainWindow( ApplicationLog::ApplicationLog* logger , QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow) {

@@ -57,6 +57,7 @@ class EditorUtils : public QObject
 
     static Qt3DRender::QGeometryRenderer *createArrowMesh();
     static Qt3DCore::QEntity *createArrowEntity(const QColor &color, Qt3DCore::QEntity *parent, const QMatrix4x4 &matrix, const QString &name);
+static void removeExpandedChildEntities(Qt3DCore::QEntity *entity, const QString &childName );
     static Qt3DRender::QObjectPicker *entityPicker(Qt3DCore::QEntity *entity);
     static void setEnabledToSubtree(Qt3DCore::QEntity *entity, bool enable);
     static Qt3DCore::QEntity *findEntityByName(Qt3DCore::QEntity *entity, const QString &name);

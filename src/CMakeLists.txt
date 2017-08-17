@@ -198,6 +198,8 @@ else(build_cli)
       vis/inputcontrols/qtrackballcameracontroller.h
       vis/inputcontrols/qtrackballcameracontroller_p.cpp
       vis/inputcontrols/qtrackballcameracontroller_p.h
+      vis/unit_cell_view_widget.cpp
+      vis/unit_cell_view_widget.h
       )
 
     # Set PROJECT_VERSION_PATCH and PROJECT_VERSION_TWEAK to 0 if not present, needed by add_project_meta
