@@ -260,10 +260,9 @@ signals:
 
     /* GUI options */
     TreeItem* experimental_image_root = nullptr;
-    TreeItem* image_path = nullptr;
     TreeItem* experimental_sampling_rate = nullptr;
     TreeItem* experimental_sampling_rate_x = nullptr;
-    TreeItem* experimental_sampling_rate_y = nullptr;
+    TreeItem* image_path = nullptr;
     TreeItem* experimental_roi = nullptr;
 
     TreeItem* experimental_roi_center = nullptr;
@@ -288,6 +287,12 @@ signals:
     TreeItem* upward_vector_u = nullptr;
     TreeItem* upward_vector_v = nullptr;
     TreeItem* upward_vector_w = nullptr;
+    TreeItem* unit_cell_display = nullptr;
+    TreeItem* unit_cell_display_expand_factor = nullptr;
+    TreeItem* unit_cell_display_expand_factor_a = nullptr;
+    TreeItem* unit_cell_display_expand_factor_b = nullptr;
+    TreeItem* unit_cell_display_expand_factor_c = nullptr;
+
     TreeItem* tdmap_root = nullptr;
     TreeItem* _parameter_variation_map = nullptr;
     TreeItem* _parameter_variation_map_thickness = nullptr;

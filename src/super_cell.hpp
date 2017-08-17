@@ -51,6 +51,7 @@
 #include "cv_polygon.hpp"
 
 class SuperCell : public BaseCell{
+  Q_OBJECT
   private:
     /** Private Class methods **/
 
@@ -93,6 +94,9 @@ class SuperCell : public BaseCell{
     int expand_factor_b = 1;
     int expand_factor_c = 1;
     bool _flag_expand_factor = false;
+    bool _flag_expand_factor_a = false;
+    bool _flag_expand_factor_b = false;
+    bool _flag_expand_factor_c = false;
     bool _flag_auto_calculate_expand_factor = true;
     bool _flag_enable_orientation = true;
 
@@ -117,6 +121,11 @@ class SuperCell : public BaseCell{
     bool generate_super_cell_file();
     bool generate_xyz_file();
 
+    /* getters */
+    int get_expand_factor_a(){ return expand_factor_a; }
+    int get_expand_factor_b(){ return expand_factor_b; }
+    int get_expand_factor_c(){ return expand_factor_c; }
+
     /* setters */
     bool set_unit_cell( UnitCell* cell );
     bool set_image_bounds( ImageBounds* image_bounds );
@@ -129,6 +138,9 @@ class SuperCell : public BaseCell{
     bool set_length_c_Nanometers( double c );
 
     bool set_expand_factor_abc( int factor_a, int factor_b, int factor_c );
+    bool set_expand_factor_a( int factor_a );
+    bool set_expand_factor_b( int factor_b );
+    bool set_expand_factor_c( int factor_c );
     bool set_flag_auto_calculate_expand_factor( bool value );
     bool set_flag_enable_orientation( bool value );
 
@@ -138,6 +150,8 @@ class SuperCell : public BaseCell{
     // friend std::ostream& operator<< (std::ostream& stream, const SuperCell::SuperCell& image);
     virtual std::ostream& output(std::ostream& stream) const;
 
+    signals:
+      void expand_factor_changed();
 
 };
 

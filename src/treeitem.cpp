@@ -72,6 +72,8 @@ TreeItem::TreeItem( QVector<QVariant> &data, TreeItem *parent) {
     /* fp data getters */
     _flag_fp_data_getter_double_vec.push_back(false);
     fp_data_getter_double_vec.push_back( boost::function<double(void)>() );
+    _flag_fp_data_getter_int_vec.push_back(false);
+    fp_data_getter_int_vec.push_back( boost::function<int(void)>() );
 
     /* tooltip */
     itemToolTip.push_back(QVariant());
@@ -202,8 +204,14 @@ void TreeItem::load_data_from_getter( int column ){
       QVariant value;
       if( _flag_fp_data_getter_double_vec[column] == true  ){
         const double _double_value = fp_data_getter_double_vec[column]();
-        std::cout << "_double_value " << _double_value << std::endl;
         value = QVariant::fromValue( _double_value );
+        itemData[column] = value;
+        emit dataChanged( column );
+        emit dataChanged( _variable_name );
+      }
+      if( _flag_fp_data_getter_int_vec[column] == true  ){
+        const int _int_value = fp_data_getter_int_vec[column]();
+        value = QVariant::fromValue( _int_value );
         itemData[column] = value;
         emit dataChanged( column );
         emit dataChanged( _variable_name );
@@ -745,6 +753,18 @@ bool TreeItem::set_fp_data_getter_double_vec(int col_pos ,  boost::function<doub
     //call getter on core im2model
     fp_data_getter_double_vec[col_pos] = fp ;
     _flag_fp_data_getter_double_vec[col_pos] = true;
+    result = true;
+  }
+  return result;
+}
+
+
+bool TreeItem::set_fp_data_getter_int_vec(int col_pos ,  boost::function<int(void)> fp ){
+  bool result = false;
+  if  (col_pos >= 0 && col_pos < fp_data_getter_int_vec.size() ) {
+    //call getter on core im2model
+    fp_data_getter_int_vec[col_pos] = fp ;
+    _flag_fp_data_getter_int_vec[col_pos] = true;
     result = true;
   }
   return result;

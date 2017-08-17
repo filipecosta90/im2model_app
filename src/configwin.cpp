@@ -1,10 +1,7 @@
 #include "configwin.h"
 
 bool MainWindow::create_3d_widgets( QMainWindow *parent , SuperCell* tdmap_vis_sim_unit_cell, SuperCell* tdmap_full_sim_super_cell ){
-
-  // Root entity
   ui->qwidget_qt_scene_view_roi_tdmap_super_cell->set_super_cell( tdmap_vis_sim_unit_cell );
-  
   return true;
 }
 
@@ -396,9 +393,6 @@ void MainWindow::update_simgrid_frame(){
 }
 
 void MainWindow::update_super_cell_target_region(){
-  /*  cv::Mat target_region = _core_super_cell->get_full_image();
-      this->ui->qgraphics_super_cell_edge_detection->setImage( target_region );
-      */
   this->ui->qgraphics_super_cell_edge_detection->cleanRenderAreas();
   update_super_cell_target_region_shapes();
   this->ui->qgraphics_super_cell_edge_detection->show();
@@ -1147,20 +1141,6 @@ void MainWindow::create_box_options(){
   project_setup_image_fields_model = new TreeModel( experimental_image_root );
 
   ////////////////
-  // Image Path
-  ////////////////
-  QVector<QVariant> box1_option_1 = {"Image path",""};
-  QVector<bool> box1_option_1_edit = {false,true};
-  boost::function<bool(std::string)> box1_function_1( boost::bind( &MainWindow::update_qline_image_path, this, _1 ) );
-  image_path  = new TreeItem (  box1_option_1 , box1_function_1, box1_option_1_edit );
-  image_path->set_variable_name( "image_path" );
-  image_path->set_item_delegate_type( TreeItem::_delegate_FILE );
-  experimental_image_root->insertChildren( image_path );
-  /*group options*/
-  image_path->set_variable_description( "Experimental image path" );
-  simgrid_step_group_options->add_option( project_setup_image_fields_model, image_path , 1, true);
-
-  ////////////////
   // Sampling rate
   ////////////////
   QVector<QVariant> box1_option_2 = {"Pixel size (nm/pixel)",""};
@@ -1178,21 +1158,9 @@ void MainWindow::create_box_options(){
   experimental_sampling_rate_x->set_variable_name( "experimental_sampling_rate_x" );
   experimental_sampling_rate->insertChildren( experimental_sampling_rate_x );
 
-  QVector<QVariant> box1_option_2_2 = {"y",""};
-  QVector<bool> box1_option_2_2_edit = {false,true};
-  boost::function<bool(std::string)> box1_function_2_2 ( boost::bind( &TDMap::set_exp_image_properties_sampling_rate_y_nm_per_pixel,_core_td_map, _1 ) );
-  boost::function<double(void)> box1_function_2_2_getter ( boost::bind( &TDMap::get_exp_image_properties_sampling_rate_y_nm_per_pixel,_core_td_map ) );
-  experimental_sampling_rate_y = new TreeItem ( box1_option_2_2 , box1_function_2_2, box1_option_2_2_edit );
-  experimental_sampling_rate_y->set_fp_data_getter_double_vec( 1, box1_function_2_2_getter );
-  connect( _core_td_map, SIGNAL( exp_image_properties_sampling_rate_y_nm_per_pixel_changed( )), experimental_sampling_rate_y, SLOT( load_data_from_getter_double() ) );
-  experimental_sampling_rate_y->set_variable_name( "experimental_sampling_rate_y" );
-  experimental_sampling_rate->insertChildren( experimental_sampling_rate_y );
-
   /*group options*/
   celslc_step_group_options->add_option( project_setup_image_fields_model, experimental_sampling_rate_x , 1, true);
-  celslc_step_group_options->add_option( project_setup_image_fields_model, experimental_sampling_rate_y , 1, true);
   simgrid_step_group_options->add_option( project_setup_image_fields_model, experimental_sampling_rate_x , 1, true);
-  simgrid_step_group_options->add_option( project_setup_image_fields_model, experimental_sampling_rate_y , 1, true);
 
   /* validators */
   experimental_sampling_rate_x->set_flag_validatable_double(1,true);
@@ -1201,10 +1169,19 @@ void MainWindow::create_box_options(){
   experimental_sampling_rate_x->set_validator_double_bottom(1, box1_function_2_1_validator_bot );
   experimental_sampling_rate_x->set_validator_double_top(1, box1_function_2_1_validator_top );
 
-  experimental_sampling_rate_y->set_flag_validatable_double(1,true);
-  // same validator as experimental sampling rate x
-  experimental_sampling_rate_y->set_validator_double_bottom(1, box1_function_2_1_validator_bot );
-  experimental_sampling_rate_y->set_validator_double_top(1, box1_function_2_1_validator_top );
+  ////////////////
+  // Image Path
+  ////////////////
+  QVector<QVariant> box1_option_1 = {"Image path",""};
+  QVector<bool> box1_option_1_edit = {false,true};
+  boost::function<bool(std::string)> box1_function_1( boost::bind( &MainWindow::update_qline_image_path, this, _1 ) );
+  image_path  = new TreeItem (  box1_option_1 , box1_function_1, box1_option_1_edit );
+  image_path->set_variable_name( "image_path" );
+  image_path->set_item_delegate_type( TreeItem::_delegate_FILE );
+  experimental_image_root->insertChildren( image_path );
+  /*group options*/
+  image_path->set_variable_description( "Experimental image path" );
+  simgrid_step_group_options->add_option( project_setup_image_fields_model, image_path , 1, true);
 
   ////////////////
   // ROI
@@ -1354,7 +1331,7 @@ void MainWindow::create_box_options(){
   ////////////////
   // Unit-cell file
   ////////////////
-  QVector<QVariant> box2_option_1 = {"Unit-cell file",""};
+  QVector<QVariant> box2_option_1 = {"Unit-cell",""};
   unit_cell_file  = new TreeItem ( box2_option_1 );
   unit_cell_file->set_variable_name( "unit_cell_file" );
   crystallography_root->insertChildren( unit_cell_file );
@@ -1372,6 +1349,80 @@ void MainWindow::create_box_options(){
 
   /*group options*/
   celslc_step_group_options->add_option( project_setup_crystalographic_fields_model, unit_cell_file_cif , 1, true );
+
+  QVector<QVariant> box2_option_1_2 = {"Display",""};
+  unit_cell_display  = new TreeItem ( box2_option_1_2 );
+  unit_cell_display->set_variable_name( "unit_cell_display" );
+  unit_cell_file->insertChildren( unit_cell_display );
+
+  ////////////////
+  //Unit cell display  -- Expand factor
+  ////////////////
+
+  QVector<QVariant> box2_option_1_2_1 = {"Expand factor",""};
+  unit_cell_display_expand_factor  = new TreeItem ( box2_option_1_2_1 );
+  unit_cell_display_expand_factor->set_variable_name( "unit_cell_display_expand_factor" );
+  unit_cell_display->insertChildren( unit_cell_display_expand_factor );
+
+  ////////////////
+  //Unit cell display  -- Expand factor a
+  ////////////////
+  QVector<QVariant> box2_option_1_2_1_1 = {"a",""};
+  QVector<bool> box2_option_1_2_1_1_edit = {false,true};
+  boost::function<bool(std::string)> box2_function_1_2_1_1_setter ( boost::bind( &TDMap::set_unit_cell_display_expand_factor_a, _core_td_map, _1 ) );
+  boost::function<int(void)> box2_function_1_2_1_1_getter ( boost::bind( &TDMap::get_unit_cell_display_expand_factor_a, _core_td_map ) );
+
+  unit_cell_display_expand_factor_a = new TreeItem ( box2_option_1_2_1_1 , box2_function_1_2_1_1_setter, box2_option_1_2_1_1_edit );
+  unit_cell_display_expand_factor_a->set_fp_data_getter_int_vec( 1, box2_function_1_2_1_1_getter );
+  // load the preset data from core constuctor
+  unit_cell_display_expand_factor_a->load_data_from_getter( 1 );
+  unit_cell_display_expand_factor_a->set_variable_name( "unit_cell_display_expand_factor_a" );
+  unit_cell_display_expand_factor->insertChildren( unit_cell_display_expand_factor_a );
+
+  /* validators */
+  unit_cell_display_expand_factor_a->set_flag_validatable_int(1,true);
+  boost::function<int(void)> box2_function_1_2_1_1_validator_bot ( boost::bind( &TDMap::get_unit_cell_display_expand_factor_bottom_limit, _core_td_map ) );
+  unit_cell_display_expand_factor_a->set_validator_int_bottom(1, box2_function_1_2_1_1_validator_bot );
+
+  ////////////////
+  //Unit cell display  -- Expand factor b
+  ////////////////
+  QVector<QVariant> box2_option_1_2_1_2 = {"b",""};
+  QVector<bool> box2_option_1_2_1_2_edit = {false,true};
+  boost::function<bool(std::string)> box2_function_1_2_1_2_setter ( boost::bind( &TDMap::set_unit_cell_display_expand_factor_b, _core_td_map, _1 ) );
+  boost::function<int(void)> box2_function_1_2_1_2_getter ( boost::bind( &TDMap::get_unit_cell_display_expand_factor_b, _core_td_map ) );
+
+  unit_cell_display_expand_factor_b = new TreeItem ( box2_option_1_2_1_2 , box2_function_1_2_1_2_setter, box2_option_1_2_1_2_edit );
+  unit_cell_display_expand_factor_b->set_fp_data_getter_int_vec( 1, box2_function_1_2_1_2_getter );
+  // load the preset data from core constuctor
+  unit_cell_display_expand_factor_b->load_data_from_getter( 1 );
+  unit_cell_display_expand_factor_b->set_variable_name( "unit_cell_display_expand_factor_b" );
+  unit_cell_display_expand_factor->insertChildren( unit_cell_display_expand_factor_b );
+
+  /* validators */
+  unit_cell_display_expand_factor_b->set_flag_validatable_int(1,true);
+  boost::function<int(void)> box2_function_1_2_1_2_validator_bot ( boost::bind( &TDMap::get_unit_cell_display_expand_factor_bottom_limit, _core_td_map ) );
+  unit_cell_display_expand_factor_b->set_validator_int_bottom(1, box2_function_1_2_1_2_validator_bot );
+
+  ////////////////
+  //Unit cell display  -- Expand factor c
+  ////////////////
+  QVector<QVariant> box2_option_1_2_1_3 = {"c",""};
+  QVector<bool> box2_option_1_2_1_3_edit = {false,true};
+  boost::function<bool(std::string)> box2_function_1_2_1_3_setter ( boost::bind( &TDMap::set_unit_cell_display_expand_factor_c, _core_td_map, _1 ) );
+  boost::function<int(void)> box2_function_1_2_1_3_getter ( boost::bind( &TDMap::get_unit_cell_display_expand_factor_c, _core_td_map ) );
+
+  unit_cell_display_expand_factor_c = new TreeItem ( box2_option_1_2_1_3 , box2_function_1_2_1_3_setter, box2_option_1_2_1_3_edit );
+  unit_cell_display_expand_factor_c->set_fp_data_getter_int_vec( 1, box2_function_1_2_1_3_getter );
+  // load the preset data from core constuctor
+  unit_cell_display_expand_factor_c->load_data_from_getter( 1 );
+  unit_cell_display_expand_factor_c->set_variable_name( "unit_cell_display_expand_factor_c" );
+  unit_cell_display_expand_factor->insertChildren( unit_cell_display_expand_factor_c );
+
+  /* validators */
+  unit_cell_display_expand_factor_c->set_flag_validatable_int(1,true);
+  boost::function<int(void)> box2_function_1_2_1_3_validator_bot ( boost::bind( &TDMap::get_unit_cell_display_expand_factor_bottom_limit, _core_td_map ) );
+  unit_cell_display_expand_factor_c->set_validator_int_bottom(1, box2_function_1_2_1_3_validator_bot );
 
   ////////////////
   // Projection direction
@@ -1525,32 +1576,6 @@ void MainWindow::create_box_options(){
   _parameter_variation_map_thickness  = new TreeItem ( box3_option_0_1 );
   _parameter_variation_map_thickness->set_variable_name( "_parameter_variation_map_thickness" );
   _parameter_variation_map->insertChildren( _parameter_variation_map_thickness );
-
-  /*
-  ////////////////
-  // 2D variation map - > thickness - > user estimation
-  ////////////////
-  QVector<QVariant> box3_option_0_1_1 = {"Estimated nm",""};
-  QVector<bool> box3_option_0_1_1_edit = {false,true};
-  boost::function<bool(std::string)> box3_function_0_1_1 ( boost::bind( &TDMap::set_thickness_user_estimated_nm, _core_td_map, _1 ) );
-  _parameter_variation_map_thickness_estimated_nm  = new TreeItem ( box3_option_0_1_1, box3_function_0_1_1, box3_option_0_1_1_edit  );
-  _parameter_variation_map_thickness_estimated_nm->set_item_delegate_type( TreeItem::_delegate_TEXT_ACTION );
-
-  QVector<QVariant> box3_function_0_1_1_action_description = {"Auto range","Auto lower/upper"};
-  boost::function<bool()> box3_function_0_1_1_auto ( boost::bind( &TDMap::auto_calculate_thickness_range_lower_upper_nm, _core_td_map ) );
-  boost::function<bool()> box3_function_0_1_1_auto_lower_upper ( boost::bind( &TDMap::auto_calculate_thickness_lower_upper_nm, _core_td_map ) );
-
-  std::vector<boost::function<bool()>> box3_function_0_1_1_actions;
-  box3_function_0_1_1_actions.push_back(box3_function_0_1_1_auto);
-  box3_function_0_1_1_actions.push_back(box3_function_0_1_1_auto_lower_upper);
-
-  _parameter_variation_map_thickness_estimated_nm->add_toolbar( box3_function_0_1_1_action_description, box3_function_0_1_1_actions );
-
-  // validators
-  _parameter_variation_map_thickness_estimated_nm->set_flag_validatable_double(1,true);
-
-  _parameter_variation_map_thickness->insertChildren( _parameter_variation_map_thickness_estimated_nm );
-  */
 
   ////////////////
   //Thickness range -- Samples

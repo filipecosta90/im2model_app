@@ -121,7 +121,7 @@ Qt3DCore::QEntity *EditorUtils::createArrowEntity(const QColor &color, Qt3DCore:
 
   Qt3DCore::QTransform *transform = new Qt3DCore::QTransform();
   transform->setMatrix(matrix);
-  transform->setScale(2.0f);
+  transform->setScale(3.0f);
 
   arrow->addComponent(mesh);
   arrow->addComponent(material);

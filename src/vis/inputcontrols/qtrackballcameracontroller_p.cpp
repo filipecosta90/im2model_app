@@ -325,18 +325,22 @@ namespace Qt3DExtras {
           m_camera->rotateAboutViewCenter(QQuaternion::fromAxisAndAngle( QVector3D(0, 1, 0), -temp_m_rotationAngle ));
         }
         else{
-          const float distance = (m_camera->position() - m_camera->viewCenter()).length();
-          if (distance - m_zoomSpeed * m_wheelAxis->value() > m_zoomCameraLimit){
-            m_camera->translate(m_zoomSpeed * QVector3D(0, 0, m_wheelAxis->value()), Qt3DRender::QCamera::DontTranslateViewCenter );
-            //Compute the size of the frustum at the view center
-            float size = std::tan(m_camera->fieldOfView())* distance /4.0f;
-            m_camera->setTop(size);
-            m_camera->setBottom(-size);
-            m_camera->setLeft(-size*m_camera->aspectRatio());
-            m_camera->setRight(size*m_camera->aspectRatio());
-          }
+          zoomOnCenter(m_camera->position(), m_zoomSpeed * m_wheelAxis->value(), m_camera->viewCenter() );
         }
       }
+    }
+  }
+
+  void QTrackballCameraControllerPrivate::zoomOnCenter( QVector3D cam_pos, double value, QVector3D center ){
+    const float distance = (cam_pos - center).length();
+    if ( (distance -  value ) > m_zoomCameraLimit){
+      m_camera->translate( QVector3D(0, 0, value ), Qt3DRender::QCamera::DontTranslateViewCenter );
+      //Compute the size of the frustum at the view center
+      float size = std::tan(m_camera->fieldOfView())* distance /4.0f;
+      m_camera->setTop(size);
+      m_camera->setBottom(-size);
+      m_camera->setLeft(-size*m_camera->aspectRatio());
+      m_camera->setRight(size*m_camera->aspectRatio());
     }
   }
 

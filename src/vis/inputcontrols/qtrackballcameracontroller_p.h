@@ -78,8 +78,7 @@ namespace Qt3DInput {
 
 namespace Qt3DExtras {
 
-  class QTrackballCameraControllerPrivate : public Qt3DCore::QEntityPrivate
-  {
+  class QTrackballCameraControllerPrivate : public Qt3DCore::QEntityPrivate {
     public:
       QTrackballCameraControllerPrivate();
 
@@ -150,6 +149,9 @@ namespace Qt3DExtras {
       float m_zoomCameraLimit;
 
       void onTriggered(float);
+
+ public slots:
+  void zoomOnCenter( QVector3D cam_pos, double value, QVector3D center );
 
       Q_DECLARE_PUBLIC(QTrackballCameraController)
   };

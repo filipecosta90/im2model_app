@@ -1112,6 +1112,8 @@ bool TDMap::set_exp_image_properties_sampling_rate_x_nm_per_pixel( std::string s
   try {
     const double s_rate_x = boost::lexical_cast<double>( sampling_x );
     result = set_image_properties_sampling_rate_x_nm_per_pixel( s_rate_x );
+    // Isotropic pixel size
+    result &= set_image_properties_sampling_rate_y_nm_per_pixel( s_rate_x );
   }
   catch(boost::bad_lexical_cast&  ex) {
     // pass it up
@@ -1286,6 +1288,45 @@ bool TDMap::set_upward_vector_w( std::string s_y_w ){
     // just for visualization purposes
     tdmap_vis_sim_unit_cell->set_upward_vector_w( y_w );
     tdmap_vis_sim_unit_cell->update_from_unit_cell();
+  }
+  catch(boost::bad_lexical_cast&  ex) {
+    // pass it up
+    boost::throw_exception( ex );
+  }
+  return result;
+}
+
+bool TDMap::set_unit_cell_display_expand_factor_a( std::string s_factor_a ){
+  bool result = false;
+  try {
+    const int factor_a = boost::lexical_cast<int>( s_factor_a );
+    result = tdmap_vis_sim_unit_cell->set_expand_factor_a( factor_a );
+  }
+  catch(boost::bad_lexical_cast&  ex) {
+    // pass it up
+    boost::throw_exception( ex );
+  }
+  return result;
+}
+
+bool TDMap::set_unit_cell_display_expand_factor_b( std::string s_factor_b ){
+  bool result = false;
+  try {
+    const int factor_b = boost::lexical_cast<int>( s_factor_b );
+    result = tdmap_vis_sim_unit_cell->set_expand_factor_b( factor_b );
+  }
+  catch(boost::bad_lexical_cast&  ex) {
+    // pass it up
+    boost::throw_exception( ex );
+  }
+  return result;
+}
+
+bool TDMap::set_unit_cell_display_expand_factor_c( std::string s_factor_c ){
+  bool result = false;
+  try {
+    const int factor_c = boost::lexical_cast<int>( s_factor_c );
+    result = tdmap_vis_sim_unit_cell->set_expand_factor_c( factor_c );
   }
   catch(boost::bad_lexical_cast&  ex) {
     // pass it up
@@ -1493,6 +1534,21 @@ bool TDMap::set_envelop_parameters_vibrational_damping_azimuth_orientation_angle
     _tdmap_wavimg_parameters->set_azimuth_orientation_angle( angle );
     result = true;
   }
+  return result;
+}
+
+int TDMap::get_unit_cell_display_expand_factor_a(){
+  int result = tdmap_vis_sim_unit_cell->get_expand_factor_a( );
+  return result;
+}
+
+int TDMap::get_unit_cell_display_expand_factor_b(){
+  int result = tdmap_vis_sim_unit_cell->get_expand_factor_b( );
+  return result;
+}
+
+int TDMap::get_unit_cell_display_expand_factor_c(){
+  int result = tdmap_vis_sim_unit_cell->get_expand_factor_c( );
   return result;
 }
 
@@ -1706,6 +1762,10 @@ int TDMap::get_experimental_roi_dimensions_height_top_limit(){
   // use the smaller half
   const int limit_top = 2 * ( top_half < bot_half ? top_half : bot_half );
   return ( limit_top >= 0 ? limit_top : 0 );
+}
+
+int TDMap::get_unit_cell_display_expand_factor_bottom_limit(){
+  return 1;
 }
 
 int TDMap::get_slice_samples_bottom_limit(){

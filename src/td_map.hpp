@@ -286,6 +286,9 @@ class TDMap  : public QObject {
     bool set_upward_vector_u( std::string );
     bool set_upward_vector_v( std::string );
     bool set_upward_vector_w( std::string );
+    bool set_unit_cell_display_expand_factor_a( std::string );
+    bool set_unit_cell_display_expand_factor_b( std::string );
+    bool set_unit_cell_display_expand_factor_c( std::string );
     bool set_thickness_user_estimated_nm( std::string );
     bool auto_calculate_thickness_range_lower_upper_nm();
     bool auto_calculate_thickness_lower_upper_nm();
@@ -358,6 +361,9 @@ class TDMap  : public QObject {
     int get_exp_image_bounds_full_boundary_polygon_margin_y_px();
 
     /* gui getters */
+    int get_unit_cell_display_expand_factor_a();
+    int get_unit_cell_display_expand_factor_b();
+    int get_unit_cell_display_expand_factor_c();
     cv::Mat get_exp_image_properties_full_image();
     cv::Mat get_exp_image_properties_roi_image();
     cv::Rect get_exp_image_properties_roi_rectangle();
@@ -389,6 +395,8 @@ class TDMap  : public QObject {
     int get_experimental_roi_dimensions_height_bottom_limit();
     int get_experimental_roi_dimensions_height_top_limit();
 
+    int get_unit_cell_display_expand_factor_bottom_limit();
+    
     int get_slice_samples_bottom_limit();
     int get_slice_samples_top_limit();
     double get_nm_lower_bound_bottom_limit();

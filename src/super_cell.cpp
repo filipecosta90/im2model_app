@@ -262,7 +262,7 @@ bool SuperCell::calculate_expand_factor(){
   }
   return result;
 }
- 
+
 bool SuperCell::update_length_parameters_from_expand_factor(){
   bool result = false;
   if( _flag_unit_cell ){
@@ -711,7 +711,40 @@ bool SuperCell::set_expand_factor_abc( int factor_a, int factor_b, int factor_c 
   expand_factor_a = factor_a;
   expand_factor_b = factor_b;
   expand_factor_c = factor_c;
+  _flag_expand_factor_a = true;
+  _flag_expand_factor_b = true;
+  _flag_expand_factor_c = true;
 _flag_expand_factor = true;
+return true;
+}
+
+bool SuperCell::set_expand_factor_a( int factor_a ){
+  expand_factor_a = factor_a;
+  _flag_expand_factor_a = true;
+_flag_expand_factor = _flag_expand_factor_a && _flag_expand_factor_b && _flag_expand_factor_c;
+if(_flag_expand_factor){
+  update_from_unit_cell();
+}
+return true;
+}
+
+bool SuperCell::set_expand_factor_b( int factor_b ){
+  expand_factor_b = factor_b;
+  _flag_expand_factor_b = true;
+_flag_expand_factor = _flag_expand_factor_a && _flag_expand_factor_b && _flag_expand_factor_c;
+if(_flag_expand_factor){
+  update_from_unit_cell();
+}
+return true;
+}
+
+bool SuperCell::set_expand_factor_c( int factor_c ){
+  expand_factor_c = factor_c;
+  _flag_expand_factor_c = true;
+_flag_expand_factor = _flag_expand_factor_a && _flag_expand_factor_b && _flag_expand_factor_c;
+if(_flag_expand_factor){
+  update_from_unit_cell();
+}
 return true;
 }
 

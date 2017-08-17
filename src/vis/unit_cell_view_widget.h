@@ -79,6 +79,10 @@ QT_FORWARD_DECLARE_CLASS(QLayout)
       void update_cameraEntity_zone_axis();
       void update_cameraEntity_upward_vector();
       void update_m_cameraEntity_centerDistance();
+      void view_along_ZA_UV();
+      void view_along_a_axis();
+      void view_along_b_axis();
+      void view_along_c_axis();
 
     protected:
 
@@ -87,6 +91,8 @@ QT_FORWARD_DECLARE_CLASS(QLayout)
       //Layout
       QLayout *m_containerLayout;
       QWidget *container;
+      QBoxLayout *toolsLayout;
+      QToolBar *toolbar;
       //Core vis
       Qt3DCore::QEntity *_m_rootEntity;
       Qt3DExtras::Qt3DWindow *qt_scene_view;
