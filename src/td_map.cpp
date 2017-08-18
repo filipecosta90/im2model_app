@@ -596,12 +596,26 @@ cv::Point3d TDMap::get_zone_axis(){
   return tdmap_roi_sim_super_cell->get_zone_axis();
 }
 
+cv::Mat TDMap::get_orientation_matrix(){
+  return tdmap_roi_sim_super_cell->get_orientation_matrix();
+}
+
+std::string TDMap::get_orientation_matrix_string(){
+  std::stringstream matrix_stream;
+  matrix_stream << tdmap_roi_sim_super_cell->get_orientation_matrix() ;
+  return  matrix_stream.str();
+}
+
 bool TDMap::get_flag_upward_vector(){
   return tdmap_roi_sim_super_cell->get_flag_upward_vector();
 }
 
 bool TDMap::get_flag_zone_axis(){
   return tdmap_roi_sim_super_cell->get_flag_zone_axis();
+}
+
+bool TDMap::get_flag_orientation_matrix(){
+  return tdmap_roi_sim_super_cell->get_flag_orientation_matrix();
 }
 
 bool TDMap::get_flag_simulated_images_horizontal_header_defocus_nm(){

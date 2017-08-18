@@ -207,6 +207,7 @@ class TDMap  : public QObject {
     bool get_flag_wavimg_io_ap_pipe_out();
     bool get_flag_simgrid_io_ap_pipe_out();
 
+    bool get_flag_orientation_matrix();
     bool get_flag_upward_vector();
     bool get_flag_zone_axis();
 
@@ -226,6 +227,9 @@ class TDMap  : public QObject {
     // gui var getters
     cv::Point3d get_zone_axis();
     cv::Point3d get_upward_vector();
+    cv::Mat get_orientation_matrix();
+    std::string get_orientation_matrix_string();
+
     /////////////////////////
     // Simulated Thickness info
     /////////////////////////
@@ -396,7 +400,7 @@ class TDMap  : public QObject {
     int get_experimental_roi_dimensions_height_top_limit();
 
     int get_unit_cell_display_expand_factor_bottom_limit();
-    
+
     int get_slice_samples_bottom_limit();
     int get_slice_samples_top_limit();
     double get_nm_lower_bound_bottom_limit();

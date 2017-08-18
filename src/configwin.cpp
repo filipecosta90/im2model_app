@@ -1536,6 +1536,22 @@ void MainWindow::create_box_options(){
   /* validators */
   upward_vector_w->set_flag_validatable_double(1,true);
 
+  ////////////////
+  // Orientation
+  ////////////////
+  QVector<QVariant> box2_option_4 = {"Orientation matrix",""};
+  orientation_matrix  = new TreeItem (  box2_option_4 );
+  orientation_matrix->set_variable_name( "orientation_matrix" );
+  crystallography_root->insertChildren( orientation_matrix );
+
+  boost::function<std::string(void)> box2_function_4_getter ( boost::bind( &TDMap::get_orientation_matrix_string, _core_td_map ) );
+
+  orientation_matrix->set_fp_data_getter_string_vec( 1, box2_function_4_getter );
+  // load the preset data from core constuctor
+  orientation_matrix->load_data_from_getter( 1 );
+  SuperCell* tdmap_vis_sim_unit_cell = _core_td_map->get_tdmap_vis_sim_unit_cell();
+  connect( tdmap_vis_sim_unit_cell, SIGNAL( orientation_matrix_changed()), orientation_matrix, SLOT( load_data_from_getter_string() ) );
+
   ui->qtree_view_project_setup_crystallography->setModel(project_setup_crystalographic_fields_model);
   ui->qtree_view_project_setup_crystallography->setItemDelegate( _load_file_delegate );
 
@@ -1644,20 +1660,6 @@ void MainWindow::create_box_options(){
   _parameter_variation_map_defocous  = new TreeItem ( box3_option_0_2 );
   _parameter_variation_map_defocous->set_variable_name( "_parameter_variation_map_defocous" );
   _parameter_variation_map->insertChildren( _parameter_variation_map_defocous );
-
-  ////////////////
-  // 2D variation map - > defocus - > user estimation
-  ////////////////
-  /*
-     QVector<QVariant> box3_option_0_2_1 = {"Estimated nm",""};
-     QVector<bool> box3_option_0_2_1_edit = {false,true};
-     boost::function<bool(std::string)> box3_function_0_2_1 ( boost::bind( &TDMap::set_defocus_user_estimated_nm, _core_td_map, _1 ) );
-     _parameter_variation_map_defocus_estimated_nm  = new TreeItem ( box3_option_0_2_1, box3_function_0_2_1, box3_option_0_2_1_edit  );
-     _parameter_variation_map_defocous->insertChildren( _parameter_variation_map_defocus_estimated_nm );
-
-  // validators
-  _parameter_variation_map_defocus_estimated_nm->set_flag_validatable_double(1,true);
-  */
 
   ////////////////
   //Defocus range -- Samples

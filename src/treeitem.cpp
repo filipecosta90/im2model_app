@@ -74,6 +74,8 @@ TreeItem::TreeItem( QVector<QVariant> &data, TreeItem *parent) {
     fp_data_getter_double_vec.push_back( boost::function<double(void)>() );
     _flag_fp_data_getter_int_vec.push_back(false);
     fp_data_getter_int_vec.push_back( boost::function<int(void)>() );
+    _flag_fp_data_getter_string_vec.push_back(false);
+    fp_data_getter_string_vec.push_back( boost::function<std::string(void)>() );
 
     /* tooltip */
     itemToolTip.push_back(QVariant());
@@ -216,12 +218,26 @@ void TreeItem::load_data_from_getter( int column ){
         emit dataChanged( column );
         emit dataChanged( _variable_name );
       }
+      if( _flag_fp_data_getter_string_vec[column] == true  ){
+        std::string _string_value = fp_data_getter_string_vec[column]();
+        value = QVariant::fromValue( _string_value );
+        itemData[column] = value;
+        emit dataChanged( column );
+        emit dataChanged( _variable_name );
+      }
     }
 }
 
 // loads data for all cols
 void TreeItem::load_data_from_getter_double( ){
   for(int col = 0; col < fp_data_getter_double_vec.size(); col++ ){
+    load_data_from_getter( col );
+  }
+}
+
+// loads data for all cols
+void TreeItem::load_data_from_getter_string( ){
+  for(int col = 0; col < fp_data_getter_string_vec.size(); col++ ){
     load_data_from_getter( col );
   }
 }
@@ -765,6 +781,17 @@ bool TreeItem::set_fp_data_getter_int_vec(int col_pos ,  boost::function<int(voi
     //call getter on core im2model
     fp_data_getter_int_vec[col_pos] = fp ;
     _flag_fp_data_getter_int_vec[col_pos] = true;
+    result = true;
+  }
+  return result;
+}
+
+bool TreeItem::set_fp_data_getter_string_vec(int col_pos ,  boost::function<std::string(void)> fp ){
+  bool result = false;
+  if  (col_pos >= 0 && col_pos < fp_data_getter_string_vec.size() ) {
+    //call getter on core im2model
+    fp_data_getter_string_vec[col_pos] = fp ;
+    _flag_fp_data_getter_string_vec[col_pos] = true;
     result = true;
   }
   return result;

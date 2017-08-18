@@ -134,11 +134,13 @@ class TreeItem : public QObject {
 
     bool set_fp_data_getter_double_vec( int col_pos ,  boost::function<double(void)> fp );
     bool set_fp_data_getter_int_vec( int col_pos ,  boost::function<int(void)> fp );
+    bool set_fp_data_getter_string_vec( int col_pos ,  boost::function<std::string(void)> fp );
 
     public slots:
       void setToolTipText(const QString&);
       void load_data_from_getter( int column );
-      void load_data_from_getter_double( );
+      void load_data_from_getter_double();
+      void load_data_from_getter_string();
 
 
 signals:
@@ -180,11 +182,13 @@ signals:
     QVector<bool> itemIsValidatableDoubleBottomVec;
     QVector<bool> _flag_fp_data_getter_double_vec;
     QVector<bool> _flag_fp_data_getter_int_vec;
+    QVector<bool> _flag_fp_data_getter_string_vec;
 
     std::vector< boost::function<double(void)> > fp_validator_double_range_min;
     std::vector< boost::function<double(void)> > fp_validator_double_range_max;
     std::vector< boost::function<double(void)> > fp_data_getter_double_vec;
     std::vector< boost::function<int(void)> > fp_data_getter_int_vec;
+    std::vector< boost::function<std::string(void)> > fp_data_getter_string_vec;
 
 
     /* item tooltip */
