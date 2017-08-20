@@ -1540,7 +1540,9 @@ void MainWindow::create_box_options(){
   // Orientation
   ////////////////
   QVector<QVariant> box2_option_4 = {"Orientation matrix",""};
-  orientation_matrix  = new TreeItem (  box2_option_4 );
+  QVector<bool> box2_option_4_edit = {false,true};
+
+  orientation_matrix  = new TreeItem (  box2_option_4, box2_option_4_edit );
   orientation_matrix->set_variable_name( "orientation_matrix" );
   crystallography_root->insertChildren( orientation_matrix );
 
@@ -1549,8 +1551,8 @@ void MainWindow::create_box_options(){
   orientation_matrix->set_fp_data_getter_string_vec( 1, box2_function_4_getter );
   // load the preset data from core constuctor
   orientation_matrix->load_data_from_getter( 1 );
-  SuperCell* tdmap_vis_sim_unit_cell = _core_td_map->get_tdmap_vis_sim_unit_cell();
-  connect( tdmap_vis_sim_unit_cell, SIGNAL( orientation_matrix_changed()), orientation_matrix, SLOT( load_data_from_getter_string() ) );
+  SuperCell* tdmap_roi_sim_super_cell = _core_td_map->get_tdmap_roi_sim_super_cell();
+  connect( tdmap_roi_sim_super_cell, SIGNAL( orientation_matrix_changed()), orientation_matrix, SLOT( load_data_from_getter_string() ) );
 
   ui->qtree_view_project_setup_crystallography->setModel(project_setup_crystalographic_fields_model);
   ui->qtree_view_project_setup_crystallography->setItemDelegate( _load_file_delegate );
@@ -1813,11 +1815,13 @@ void MainWindow::create_box_options(){
   boost::function<int(void)> box3_function_5_getter ( boost::bind( &TDMap::get_refinement_definition_method, _core_td_map ) );
   boost::function<bool(int)> box3_function_5_setter ( boost::bind( &TDMap::set_refinement_definition_method, _core_td_map, _1 ) );
 
-  _simulation_refinement = new TreeItem ( box3_option_5, box3_function_5_setter, box3_function_5_getter, box3_option_5_edit );
+  _simulation_refinement = new TreeItem ( box3_option_5, box3_function_5_setter, box3_option_5_edit );
+  _simulation_refinement->set_fp_data_getter_int_vec( 1, box3_function_5_getter );
+
   _simulation_refinement->set_variable_name( "_simulation_refinement" );
 
   // load the preset data from core constuctor
-  _simulation_refinement->load_data_from_getter();
+  _simulation_refinement->load_data_from_getter( 1 );
   QVector<QVariant> box3_option_5_drop = {"No refinement","Corrected","Non-Corrected", "User defined"};
 
   QVector<QVariant> box3_option_5_drop_enum( { TDMap::RefinementPreset::NO_REFINEMENT, TDMap::RefinementPreset::MICROSCOPE_CORRECTED, TDMap::RefinementPreset::MICROSCOPE_NON_CORRECTED, TDMap::RefinementPreset::USER_DEFINED_PRESET } );
@@ -1845,7 +1849,8 @@ void MainWindow::create_box_options(){
   boost::function<double(void)> box3_function_5_1_1_getter ( boost::bind( &TDMap::get_spherical_aberration, _core_td_map ) );
   boost::function<bool(void)> box3_option_5_1_1_check_getter ( boost::bind( &TDMap::get_spherical_aberration_switch, _core_td_map  ) );
   boost::function<bool(bool)> box3_option_5_1_1_check_setter ( boost::bind( &TDMap::set_spherical_aberration_switch, _core_td_map, _1 ) );
-  spherical_aberration_nm = new TreeItem ( box3_option_5_1_1 , box3_function_5_1_1_setter, box3_function_5_1_1_getter, box3_option_5_1_1_edit );
+  spherical_aberration_nm = new TreeItem ( box3_option_5_1_1 , box3_function_5_1_1_setter, box3_option_5_1_1_edit );
+spherical_aberration_nm->set_fp_data_getter_double_vec( 1, box3_function_5_1_1_getter );
   spherical_aberration_nm->set_variable_name( "spherical_aberration_nm" );
 
   _aberration_parameters->insertChildren( spherical_aberration_nm );
@@ -1872,11 +1877,13 @@ void MainWindow::create_box_options(){
   boost::function<int(void)> box3_function_5_2_1_getter ( boost::bind( &TDMap::get_envelop_parameters_vibrational_damping_method, _core_td_map ) );
   boost::function<bool(int)> box3_function_5_2_1_setter ( boost::bind( &TDMap::set_envelop_parameters_vibrational_damping_method, _core_td_map, _1 ) );
 
-  _envelope_parameters_vibrational_damping = new TreeItem ( box3_option_5_2_1, box3_function_5_2_1_setter, box3_function_5_2_1_getter, box3_option_5_edit );
+  _envelope_parameters_vibrational_damping = new TreeItem ( box3_option_5_2_1, box3_function_5_2_1_setter, box3_option_5_edit );
+  _envelope_parameters_vibrational_damping->set_fp_data_getter_int_vec( 1, box3_function_5_2_1_getter );
+
   _envelope_parameters_vibrational_damping->set_variable_name( "_envelope_parameters_vibrational_damping" );
 
   // load the preset data from core constuctor
-  _envelope_parameters_vibrational_damping->load_data_from_getter();
+  _envelope_parameters_vibrational_damping->load_data_from_getter( 1 );
   QVector<QVariant> box3_option_5_2_1_drop = {"Deactivated","Isotropic","Anisotropic"};
   QVector<QVariant> box3_option_5_2_1_drop_enum( { WAVIMG_prm::EnvelopeVibrationalDamping::Deactivated, WAVIMG_prm::EnvelopeVibrationalDamping::Isotropic, WAVIMG_prm::EnvelopeVibrationalDamping::Anisotropic } );
   _envelope_parameters_vibrational_damping->set_item_delegate_type( TreeItem::_delegate_DROP );
@@ -1974,11 +1981,12 @@ void MainWindow::create_box_options(){
 
   boost::function<int(void)> box3_function_6_1_getter ( boost::bind( &TDMap::get_image_correlation_matching_method, _core_td_map ) );
   boost::function<bool(int)> box3_function_6_1_setter ( boost::bind( &TDMap::set_image_correlation_matching_method, _core_td_map, _1 ) );
-  image_correlation_matching_method = new TreeItem ( box3_option_6_1 , box3_function_6_1_setter, box3_function_6_1_getter,  box3_option_6_1_edit );
+  image_correlation_matching_method = new TreeItem ( box3_option_6_1 , box3_function_6_1_setter,  box3_option_6_1_edit );
   image_correlation_matching_method->set_variable_name( "image_correlation_matching_method" );
+  image_correlation_matching_method->set_fp_data_getter_int_vec( 1, box3_function_6_1_getter );
 
   // load the preset data from core constuctor
-  image_correlation_matching_method->load_data_from_getter();
+  image_correlation_matching_method->load_data_from_getter( 1 );
 
   QVector<QVariant> box3_option_6_1_drop = {"Normalized squared difference","Normalized cross correlation","Normalized correlation coefficient"};
   QVector<QVariant> box3_option_6_1_drop_enum( { CV_TM_SQDIFF_NORMED, CV_TM_CCORR_NORMED, CV_TM_CCOEFF_NORMED} );
@@ -2039,14 +2047,16 @@ void MainWindow::create_box_options(){
 
   QVector<QVariant> box4_option_1 = {"", ""};
   QVector<bool> box4_option_1_edit = {false,true};
-  boost::function<int()> box4_function_1_getter ( boost::bind( &TDMap::get_exec_log_level, _core_td_map ) );
+  boost::function<int(void)> box4_function_1_getter ( boost::bind( &TDMap::get_exec_log_level, _core_td_map ) );
   boost::function<bool(int)> box4_function_1_setter ( boost::bind( &TDMap::set_exec_log_level, _core_td_map, _1 ) );
 
-  TreeItem* _log_level_setter  = new TreeItem ( box4_option_1, box4_function_1_setter, box4_function_1_getter, box4_option_1_edit );
+  TreeItem* _log_level_setter  = new TreeItem ( box4_option_1, box4_function_1_setter, box4_option_1_edit );
+  _log_level_setter->set_fp_data_getter_int_vec( 1, box4_function_1_getter );
+
   _log_level_setter->set_variable_name( "_log_level_setter" );
 
   // load the preset data from core constuctor
-  _log_level_setter->load_data_from_getter();
+  _log_level_setter->load_data_from_getter( 1 );
 
   QVector<QVariant> box4_option_1_drop = {"Full log","Debug mode","Silent mode", "User defined"};
   QVector<QVariant> box4_option_1_drop_enum( { TDMap::ExecLogMode::FULL_LOG, TDMap::ExecLogMode::DEBUG_MODE, TDMap::ExecLogMode::SILENT_MODE, TDMap::ExecLogMode::USER_DEFINED_LOG_MODE } );
@@ -2234,15 +2244,17 @@ void MainWindow::create_box_options(){
   super_cell_setup_root->insertChildren( super_cell_edge_detection );
 
   QVector<QVariant> box5_option_1_data_1 = {"Hysteresis thresholding",""};
-  boost::function<int(void)> box5_option_1_check_getter ( boost::bind( &TDMap::get_exp_image_bounds_hysteresis_threshold, _core_td_map ) );
-  boost::function<bool(int)> box5_option_1_check_setter ( boost::bind( &TDMap::set_exp_image_bounds_hysteresis_threshold, _core_td_map, _1 ) );
+  boost::function<int(void)> box5_option_1_getter ( boost::bind( &TDMap::get_exp_image_bounds_hysteresis_threshold, _core_td_map ) );
+  boost::function<bool(int)> box5_option_1_setter ( boost::bind( &TDMap::set_exp_image_bounds_hysteresis_threshold, _core_td_map, _1 ) );
   QVector<bool> box5_option_1_edit = {false,true};
-  edge_detection_hysteris_thresholding  = new TreeItem ( box5_option_1_data_1 ,box5_option_1_check_setter, box5_option_1_check_getter, box5_option_1_edit );
+  edge_detection_hysteris_thresholding  = new TreeItem ( box5_option_1_data_1 ,box5_option_1_setter, box5_option_1_edit );
+  edge_detection_hysteris_thresholding->set_fp_data_getter_int_vec( 1, box5_option_1_getter );
+  // load the preset data from core constuctor
+  edge_detection_hysteris_thresholding->load_data_from_getter( 1 );
+
   edge_detection_hysteris_thresholding->set_variable_name( "edge_detection_hysteris_thresholding" );
 
   edge_detection_hysteris_thresholding->set_item_delegate_type( TreeItem::_delegate_SLIDER_INT );
-  // load the preset data from core constuctor
-  edge_detection_hysteris_thresholding->load_data_from_getter();
   // set the bottom and top limits of the interval
   int hysteresis_threshold_bottom_limit = _core_td_map->get_exp_image_bounds_hysteresis_threshold_range_bottom_limit( );
   int hysteresis_threshold_top_limit = _core_td_map->get_exp_image_bounds_hysteresis_threshold_range_top_limit( );
@@ -2252,15 +2264,17 @@ void MainWindow::create_box_options(){
   super_cell_edge_detection->insertChildren( edge_detection_hysteris_thresholding );
 
   QVector<QVariant> box5_option_1_data_2 = {"Max. contour distance",""};
-  boost::function<int(void)> box5_option_1_2_check_getter ( boost::bind( &TDMap::get_exp_image_bounds_max_contour_distance_px, _core_td_map ) );
-  boost::function<bool(int)> box5_option_1_2_check_setter ( boost::bind( &TDMap::set_exp_image_bounds_max_contour_distance_px, _core_td_map, _1 ) );
+  boost::function<int(void)> box5_option_1_2_getter ( boost::bind( &TDMap::get_exp_image_bounds_max_contour_distance_px, _core_td_map ) );
+  boost::function<bool(int)> box5_option_1_2_setter ( boost::bind( &TDMap::set_exp_image_bounds_max_contour_distance_px, _core_td_map, _1 ) );
   QVector<bool> box5_option_1_2_edit = {false,true};
-  edge_detection_max_contour_distance = new TreeItem ( box5_option_1_data_2 ,box5_option_1_2_check_setter, box5_option_1_2_check_getter, box5_option_1_2_edit );
+  edge_detection_max_contour_distance = new TreeItem ( box5_option_1_data_2 ,box5_option_1_2_setter, box5_option_1_2_edit );
+  edge_detection_max_contour_distance->set_fp_data_getter_int_vec( 1, box5_option_1_2_getter );
+
   edge_detection_max_contour_distance->set_variable_name( "edge_detection_max_contour_distance" );
 
   edge_detection_max_contour_distance->set_item_delegate_type( TreeItem::_delegate_SLIDER_INT );
   // load the preset data from core constuctor
-  edge_detection_max_contour_distance->load_data_from_getter();
+  edge_detection_max_contour_distance->load_data_from_getter( 1 );
   // set the bottom and top limits of the interval
   int max_contour_distance_bottom_limit =  _core_td_map->get_exp_image_bounds_max_contour_distance_px_range_bottom_limit( );
   int max_contour_distance_top_limit =  _core_td_map->get_exp_image_bounds_max_contour_distance_px_range_top_limit( );
@@ -2277,12 +2291,14 @@ void MainWindow::create_box_options(){
   QVector<bool> box5_option_1_3_edit = {false,true};
   boost::function<bool(std::string)> box5_option_1_3_setter ( boost::bind( &TDMap::set_full_boundary_polygon_margin_nm, _core_td_map, _1 ) );
   boost::function<double(void)> box5_option_1_3_getter ( boost::bind( &TDMap::get_full_boundary_polygon_margin_nm, _core_td_map ) );
-  TreeItem* super_cell_margin_nm = new TreeItem ( box5_option_1_data_3 , box5_option_1_3_setter, box5_option_1_3_getter, box5_option_1_3_edit );
+  TreeItem* super_cell_margin_nm = new TreeItem ( box5_option_1_data_3 , box5_option_1_3_setter, box5_option_1_3_edit );
+  super_cell_margin_nm->set_fp_data_getter_double_vec( 1, box5_option_1_3_getter );
+
   super_cell_margin_nm->set_variable_name( "super_cell_margin_nm" );
 
   super_cell_edge_detection->insertChildren( super_cell_margin_nm );
   /*group options*/
-  super_cell_margin_nm->load_data_from_getter();
+  super_cell_margin_nm->load_data_from_getter( 1 );
 
   /* validators */
   super_cell_margin_nm->set_flag_validatable_double(1,true);

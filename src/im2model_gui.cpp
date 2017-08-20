@@ -79,6 +79,7 @@ class Application final : public QApplication {
 };
 
 int main(int argc, char *argv[]){
+  qRegisterMetaType<std::string>("std::string");
   std::cout <<  QDir::currentPath().toStdString() << std::endl;
 
   // to access resources

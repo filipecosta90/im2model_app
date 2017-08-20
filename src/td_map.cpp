@@ -602,6 +602,7 @@ cv::Mat TDMap::get_orientation_matrix(){
 
 std::string TDMap::get_orientation_matrix_string(){
   std::stringstream matrix_stream;
+  matrix_stream.precision(2);
   matrix_stream << tdmap_roi_sim_super_cell->get_orientation_matrix() ;
   return  matrix_stream.str();
 }

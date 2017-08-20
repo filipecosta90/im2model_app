@@ -21,6 +21,7 @@
 
 #include "custom_tool_button.h"
 
+
 class TreeItem : public QObject {
   Q_OBJECT
   public:
@@ -31,23 +32,17 @@ class TreeItem : public QObject {
     explicit TreeItem( QVector<QVariant> &data, QVector<bool> editable, TreeItem *parent = 0 );
 
     explicit TreeItem( QVector<QVariant> &data, boost::function<bool(double)> setter, TreeItem *parent = 0);
-    explicit TreeItem( QVector<QVariant> &data, boost::function<double(void)> getter, TreeItem *parent = 0);
     explicit TreeItem( QVector<QVariant> &data, boost::function<bool(double)> setter, QVector<bool> editable, TreeItem *parent = 0);
 
     explicit TreeItem( QVector<QVariant> &data, boost::function<bool(bool)> setter, QVector<QVariant> &legend, TreeItem *parent = 0);
     explicit TreeItem( QVector<QVariant> &data, boost::function<bool(bool)> setter, QVector<QVariant> &legend, QVector<bool> editable, TreeItem *parent = 0);
-    explicit TreeItem( QVector<QVariant> &data, boost::function<bool(bool)> setter, boost::function<bool(void)> getter, QVector<QVariant> &legend, TreeItem *parent = 0);
     explicit TreeItem( QVector<QVariant> &data, boost::function<bool(bool)> setter, boost::function<bool(void)> getter, QVector<QVariant> &legend, QVector<bool> editable, TreeItem *parent = 0);
 
     explicit TreeItem( QVector<QVariant> &data, boost::function<bool(int)> setter, TreeItem *parent = 0);
-    explicit TreeItem( QVector<QVariant> &data, boost::function<bool(int)> setter, boost::function<int(void)> getter, TreeItem *parent = 0 );
     explicit TreeItem( QVector<QVariant> &data, boost::function<bool(int)> setter, QVector<bool> editable, TreeItem *parent = 0);
-    explicit TreeItem( QVector<QVariant> &data, boost::function<bool(int)> setter, boost::function<int(void)> getter, QVector<bool> editable, TreeItem *parent = 0);
 
     explicit TreeItem( QVector<QVariant> &data, boost::function<bool(std::string)> setter, TreeItem *parent = 0);
     explicit TreeItem( QVector<QVariant> &data, boost::function<bool(std::string)> setter, QVector<bool> editable, TreeItem *parent = 0);
-    explicit TreeItem( QVector<QVariant> &data, boost::function<bool(std::string)> setter, boost::function<double(void)> getter , TreeItem *parent = 0);
-    explicit TreeItem( QVector<QVariant> &data, boost::function<bool(std::string)> setter, boost::function<double(void)> getter, QVector<bool> editable, TreeItem *parent = 0);
 
     ~TreeItem();
     TreeItem *parent();
@@ -95,7 +90,7 @@ class TreeItem : public QObject {
     std::vector<boost::function<bool()>> get_toolbar_actions();
     bool _is_toolbar_defined();
     bool set_fp_check_setter( int col,  boost::function<bool(bool)> fp_check_setter );
-    bool  set_fp_check_getter( int col,  boost::function<bool()> fp_check_getter );
+    bool  set_fp_check_getter( int col,  boost::function<bool(void)> fp_check_getter );
     bool load_check_status_from_getter( int col );
 
     void set_variable_name( std::string varname );
@@ -105,7 +100,7 @@ class TreeItem : public QObject {
     std::string  get_variable_description();
     void setStatusOption( int col , ActionStatusType action );
 
-    bool get_flag_fp_data_getter_bool();
+    bool get_flag_fp_data_getter_bool( int col );
     bool call_fp_data_getter_bool();
     bool get_flag_fp_data_setter_bool();
     bool call_fp_data_setter_bool( bool value );
@@ -132,6 +127,7 @@ class TreeItem : public QObject {
     double get_validator_value_double_bottom( int col_pos );
     double get_validator_value_double_top( int col_pos );
 
+    bool set_fp_data_getter_bool_vec( int col_pos ,  boost::function<bool(void)> fp );
     bool set_fp_data_getter_double_vec( int col_pos ,  boost::function<double(void)> fp );
     bool set_fp_data_getter_int_vec( int col_pos ,  boost::function<int(void)> fp );
     bool set_fp_data_getter_string_vec( int col_pos ,  boost::function<std::string(void)> fp );
@@ -180,16 +176,17 @@ signals:
     QVector<bool> itemIsValidatableDoubleVec;
     QVector<bool> itemIsValidatableDoubleTopVec;
     QVector<bool> itemIsValidatableDoubleBottomVec;
+    QVector<bool> _flag_fp_data_getter_bool_vec;
     QVector<bool> _flag_fp_data_getter_double_vec;
     QVector<bool> _flag_fp_data_getter_int_vec;
     QVector<bool> _flag_fp_data_getter_string_vec;
 
     std::vector< boost::function<double(void)> > fp_validator_double_range_min;
     std::vector< boost::function<double(void)> > fp_validator_double_range_max;
+    std::vector< boost::function<bool(void)> > fp_data_getter_bool_vec;
     std::vector< boost::function<double(void)> > fp_data_getter_double_vec;
     std::vector< boost::function<int(void)> > fp_data_getter_int_vec;
     std::vector< boost::function<std::string(void)> > fp_data_getter_string_vec;
-
 
     /* item tooltip */
     QVector<QVariant> itemToolTip;
@@ -201,31 +198,20 @@ signals:
     int slider_column = 1;
     bool _flag_dropdown = false;
 
-    boost::function<bool(std::string)> fp_data_setter_string;
     boost::function<bool(std::string)> fp_data_appender_string;
-    boost::function<std::string(void)> fp_data_getter_string;
-
+    boost::function<bool(std::string)> fp_data_setter_string;
     boost::function<bool(double)> fp_data_setter_double;
-    boost::function<double(void)> fp_data_getter_double;
-
     boost::function<bool(bool)> fp_data_setter_bool;
-    boost::function<bool(void)> fp_data_getter_bool;
-
     boost::function<bool(int)> fp_data_setter_int;
-    boost::function<int(void)> fp_data_getter_int;
 
     bool _flag_fp_data_setter_string = false;
     bool _flag_fp_data_appender_string = false;
-    bool _flag_fp_data_getter_string = false;
 
     bool _flag_fp_data_setter_bool = false;
-    bool _flag_fp_data_getter_bool = false;
 
     bool _flag_fp_data_setter_double = false;
-    bool _flag_fp_data_getter_double = false;
 
     bool _flag_fp_data_setter_int = false;
-    bool _flag_fp_data_getter_int = false;
 
     int _fp_data_setter_col_pos = 1;
     int _fp_data_getter_col_pos = 1;

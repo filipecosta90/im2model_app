@@ -48,7 +48,6 @@ bool TreeItem::enable_highlight_error( std::string varname , int column ){
 }
 
 TreeItem::TreeItem( QVector<QVariant> &data, TreeItem *parent) {
-  qRegisterMetaType<std::string>("std::string");
   itemData = data;
   parentItem = parent;
   for( int pos = 0; pos < data.size(); pos++ ){
@@ -70,6 +69,8 @@ TreeItem::TreeItem( QVector<QVariant> &data, TreeItem *parent) {
     fp_checkable_setters.push_back(  boost::function<bool(bool)>() );
     fp_checkable_getters.push_back(  boost::function<bool(void)>() );
     /* fp data getters */
+    _flag_fp_data_getter_bool_vec.push_back(false);
+    fp_data_getter_bool_vec.push_back( boost::function<bool(void)>() );
     _flag_fp_data_getter_double_vec.push_back(false);
     fp_data_getter_double_vec.push_back( boost::function<double(void)>() );
     _flag_fp_data_getter_int_vec.push_back(false);
@@ -102,16 +103,7 @@ TreeItem::TreeItem( QVector<QVariant> &data, boost::function<bool(bool)> setter,
   itemLegend = legend;
 }
 
-TreeItem::TreeItem( QVector<QVariant> &data, boost::function<bool(bool)> setter, boost::function<bool(void)> getter, QVector<QVariant> &legend, TreeItem *parent) : TreeItem( data, setter, legend, parent ) {
-  fp_data_getter_bool = getter;
-  _flag_fp_data_getter_bool = true;
-}
-
 TreeItem::TreeItem( QVector<QVariant> &data, boost::function<bool(bool)> setter,  QVector<QVariant> &legend, QVector<bool> editable, TreeItem *parent  ) : TreeItem( data, setter, legend, parent ){
-  itemIsEditableVec = editable;
-}
-
-TreeItem::TreeItem( QVector<QVariant> &data, boost::function<bool(bool)> setter, boost::function<bool(void)> getter, QVector<QVariant> &legend, QVector<bool> editable, TreeItem *parent  ) : TreeItem( data, setter, getter, legend, parent ){
   itemIsEditableVec = editable;
 }
 
@@ -120,27 +112,13 @@ TreeItem::TreeItem( QVector<QVariant> &data, boost::function<bool(std::string)> 
   _flag_fp_data_setter_string = true;
 }
 
-TreeItem::TreeItem( QVector<QVariant> &data, boost::function<bool(std::string)> setter, boost::function<double(void)> getter, TreeItem *parent) : TreeItem( data, setter, parent ) {
-  fp_data_getter_double = getter;
-  _flag_fp_data_getter_double = true;
-}
-
 TreeItem::TreeItem( QVector<QVariant> &data, boost::function<bool(std::string)> setter, QVector<bool> editable, TreeItem *parent  ) : TreeItem( data, setter, parent ){
-  itemIsEditableVec = editable;
-}
-
-TreeItem::TreeItem( QVector<QVariant> &data, boost::function<bool(std::string)> setter,  boost::function<double(void)> getter, QVector<bool> editable, TreeItem *parent  ) : TreeItem( data, setter, getter, parent ){
   itemIsEditableVec = editable;
 }
 
 TreeItem::TreeItem( QVector<QVariant> &data, boost::function<bool(double)> setter, TreeItem *parent) : TreeItem( data, parent ) {
   fp_data_setter_double = setter;
   _flag_fp_data_setter_double = true;
-}
-
-TreeItem::TreeItem( QVector<QVariant> &data, boost::function<double(void)> getter, TreeItem *parent) : TreeItem( data, parent ) {
-  fp_data_getter_double = getter;
-  _flag_fp_data_getter_double = true;
 }
 
 TreeItem::TreeItem( QVector<QVariant> &data, boost::function<bool(double)> setter, QVector<bool> editable, TreeItem *parent  ) : TreeItem( data, setter, parent ){
@@ -153,57 +131,25 @@ TreeItem::TreeItem( QVector<QVariant> &data, boost::function<bool(int)> setter, 
   _flag_fp_data_setter_int = true;
 }
 
-TreeItem::TreeItem( QVector<QVariant> &data, boost::function<bool(int)> setter, boost::function<int(void)> getter, TreeItem *parent  ) : TreeItem( data, setter, parent ){
-  fp_data_getter_int = getter;
-  _flag_fp_data_getter_int = true;
-}
-
 TreeItem::TreeItem( QVector<QVariant> &data, boost::function<bool(int)> setter, QVector<bool> editable, TreeItem *parent  ) : TreeItem( data, setter, parent ){
   itemIsEditableVec = editable;
 }
 
-TreeItem::TreeItem( QVector<QVariant> &data, boost::function<bool(int)> setter, boost::function<int(void)> getter, QVector<bool> editable, TreeItem *parent  ) : TreeItem( data, setter, getter, parent ){
-  itemIsEditableVec = editable;
-}
-
 TreeItem::~TreeItem(){
-  qDeleteAll(childItems);
-}
-
-bool TreeItem::load_data_from_getter( ){
-  bool result = false;
-  int column = _fp_data_getter_col_pos;
-  if  (column >= 0 && column < itemData.size() ) {
-    //call getter on core im2model
-    if( ( _fp_data_setter_col_pos == column )
-        && (_flag_fp_data_setter_string || _flag_fp_data_setter_bool ||
-          _flag_fp_data_setter_int || _flag_fp_data_setter_double ) ){
-      QVariant value;
-      if( _flag_fp_data_getter_int ){
-        value = QVariant::fromValue( fp_data_getter_int() );
-      }
-      if( _flag_fp_data_getter_bool ){
-        value = QVariant::fromValue( fp_data_getter_bool() );
-      }
-      if( _flag_fp_data_getter_string ){
-        value = QVariant::fromValue( fp_data_getter_string() );
-      }
-      if( _flag_fp_data_getter_double ){
-        value = QVariant::fromValue( fp_data_getter_double() );
-      }
-      itemData[column] = value;
-      emit dataChanged( column );
-      emit dataChanged( _variable_name );
-      result = true;
-    }
-  }
-  return result;
+  qDeleteAll( childItems );
 }
 
 void TreeItem::load_data_from_getter( int column ){
   if  (column >= 0 && column < itemData.size() ) {
     //call getter on core im2model
       QVariant value;
+      if( _flag_fp_data_getter_bool_vec[column] == true  ){
+        const bool _bool_value = fp_data_getter_bool_vec[column]();
+        value = QVariant::fromValue( _bool_value );
+        itemData[column] = value;
+        emit dataChanged( column );
+        emit dataChanged( _variable_name );
+      }
       if( _flag_fp_data_getter_double_vec[column] == true  ){
         const double _double_value = fp_data_getter_double_vec[column]();
         value = QVariant::fromValue( _double_value );
@@ -220,8 +166,9 @@ void TreeItem::load_data_from_getter( int column ){
       }
       if( _flag_fp_data_getter_string_vec[column] == true  ){
         std::string _string_value = fp_data_getter_string_vec[column]();
-        value = QVariant::fromValue( _string_value );
-        itemData[column] = value;
+        std::cout << "\t\tfp_data_getter_string_vec in col "<< column << " value:\n"<< _string_value <<std::endl;
+        //value = QVariant::fromValue( _string_value );
+        itemData[column] = QString::fromStdString(_string_value);
         emit dataChanged( column );
         emit dataChanged( _variable_name );
       }
@@ -237,17 +184,10 @@ void TreeItem::load_data_from_getter_double( ){
 
 // loads data for all cols
 void TreeItem::load_data_from_getter_string( ){
+  std::cout << "##### load_data_from_getter_string()" << std::endl;
   for(int col = 0; col < fp_data_getter_string_vec.size(); col++ ){
     load_data_from_getter( col );
   }
-}
-
-bool TreeItem::get_flag_fp_data_getter_bool( ){
-  return _flag_fp_data_getter_bool;
-}
-
-bool TreeItem::call_fp_data_getter_bool( ){
-  return fp_data_getter_bool();
 }
 
 bool TreeItem::get_flag_fp_data_setter_bool( ){
@@ -637,7 +577,14 @@ bool TreeItem::setData(int column, const QVariant &value, int role ){
       if( itemData[column] != value ){
         bool setter_result = false;
         //call setter on core im2model
-        if( ( _fp_data_setter_col_pos == column ) && (_flag_fp_data_setter_string || _flag_fp_data_setter_bool || _flag_fp_data_setter_int || _flag_fp_data_setter_double ) ){
+        std::cout << "call setter on core im2model" << std::endl;
+        if( ( _fp_data_setter_col_pos == column )
+        && (_flag_fp_data_setter_string
+          || _flag_fp_data_setter_bool
+          || _flag_fp_data_setter_int
+          || _flag_fp_data_setter_double )
+        ){
+          std::cout << "\t\t inside call setter on core im2model" << std::endl;
           if( _flag_fp_data_setter_string ){
             std::string t1 = value.toString().toStdString();
             setter_result = fp_data_setter_string( t1 );
@@ -763,6 +710,17 @@ int TreeItem::get_validator_value_int_bottom( int col_pos ){
   return value;
 }
 
+bool TreeItem::set_fp_data_getter_bool_vec(int col_pos ,  boost::function<bool(void)> fp ){
+  bool result = false;
+  if  (col_pos >= 0 && col_pos < fp_data_getter_bool_vec.size() ) {
+    //call getter on core im2model
+    fp_data_getter_bool_vec[col_pos] = fp ;
+    _flag_fp_data_getter_bool_vec[col_pos] = true;
+    result = true;
+  }
+  return result;
+}
+
 bool TreeItem::set_fp_data_getter_double_vec(int col_pos ,  boost::function<double(void)> fp ){
   bool result = false;
   if  (col_pos >= 0 && col_pos < fp_data_getter_double_vec.size() ) {
@@ -773,7 +731,6 @@ bool TreeItem::set_fp_data_getter_double_vec(int col_pos ,  boost::function<doub
   }
   return result;
 }
-
 
 bool TreeItem::set_fp_data_getter_int_vec(int col_pos ,  boost::function<int(void)> fp ){
   bool result = false;
