@@ -55,7 +55,7 @@ namespace Qt3DExtras {
 
 class QTrackballCameraControllerPrivate;
 
-class QT3DEXTRASSHARED_EXPORT QTrackballCameraController : public Qt3DCore::QEntity
+class  QTrackballCameraController : public Qt3DCore::QEntity
 {
     Q_OBJECT
     Q_PROPERTY(Qt3DRender::QCamera *camera READ camera WRITE setCamera NOTIFY cameraChanged)
