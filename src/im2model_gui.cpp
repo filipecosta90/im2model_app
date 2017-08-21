@@ -84,6 +84,7 @@ int main(int argc, char *argv[]){
 
   // to access resources
   Q_INIT_RESOURCE(im2model);
+QDir::setSearchPaths("qrc", QStringList(":/") );
 
   Application app(argc, argv );
     app.setOrganizationName("uminho");

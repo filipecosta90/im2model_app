@@ -32,7 +32,7 @@
 Qt3DRender::QMesh *EditorUtils::createArrowMesh(){
   Qt3DRender::QMesh *customMesh = new Qt3DRender::QMesh();
   //QUrl source( QStringLiteral(":/MeshArrow3d") );
-  QUrl source ("qrc:///Icons/MeshArrow3d");
+  QUrl source ( QStringLiteral("qrc:///Icons/MeshArrow3d"));
   if (!source.isValid()) {
           std::cout << "Invalid URL: " << source.toString().toStdString() << std::endl;
       }
