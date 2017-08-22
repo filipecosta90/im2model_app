@@ -8,6 +8,12 @@ set (CMAKE_CXX_STANDARD 14)
 set ( VERSION_IM2MODEL "0.2.3" )
 project( Im2Model VERSION ${VERSION_IM2MODEL} LANGUAGES CXX C )
 
+# Tell CMake to run moc when necessary:
+  set(CMAKE_AUTOMOC ON)
+  set(CMAKE_AUTORCC ON)
+
+# Find includes in corresponding build directories
+set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 add_definitions( -DVERSION_IM2MODEL="${VERSION_IM2MODEL}" )
 

@@ -123,6 +123,11 @@ else(build_cli)
     # Include Qt basic functions
     include(QtCommon)
 
+
+    # As moc files are generated in the binary dir, tell CMake
+    # to always look for includes there:
+    set(CMAKE_INCLUDE_CURRENT_DIR ON)
+
     # Find the QtWidgets library
     message(STATUS "Building the Qt5 version")
     find_package(Qt5 REQUIRED COMPONENTS Core Gui Widgets 3DCore 3DExtras 3DRender 3DInput 3DLogic 3DQuick 3DQuickRender Qml QuickWidgets )
