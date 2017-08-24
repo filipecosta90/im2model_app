@@ -1,4 +1,4 @@
-# the minimum version of CMake required
+﻿# the minimum version of CMake required
 cmake_minimum_required(VERSION 3.6.2)
 
 set (CMAKE_CXX_COMPILER "g++" )
@@ -14,7 +14,7 @@ project( Im2Model VERSION ${VERSION_IM2MODEL} LANGUAGES CXX C )
   # Find includes in corresponding build directories
   set(CMAKE_INCLUDE_CURRENT_DIR ON)
   set(CMAKE_AUTORCC ON)
-
+  set(CMAKE_AUTOUIC ON)
 
 add_definitions( -DVERSION_IM2MODEL="${VERSION_IM2MODEL}" )
 
@@ -305,7 +305,7 @@ else(build_cli)
       )
 
 
-      set(RESOURCE_FOLDER "${PROJECT_SOURCE_DIR}/src/res")
+      set(RESOURCE_FOLDER "${PROJECT_SOURCE_DIR}/resources")
       set(RESOURCE_FILES im2model.qrc)
 
     # Set PROJECT_VERSION_PATCH and PROJECT_VERSION_TWEAK to 0 if not present, needed by add_project_meta

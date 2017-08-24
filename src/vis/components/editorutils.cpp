@@ -28,39 +28,6 @@
 #include "editorutils.h"
 #include "qdummyobjectpicker.h"
 
-// Creates a single arrow
-Qt3DRender::QMesh *EditorUtils::createArrowMesh(){
-  Qt3DRender::QMesh *customMesh = new Qt3DRender::QMesh();
-  //QUrl source( QStringLiteral(":/MeshArrow3d") );
-  QUrl source ( QStringLiteral("qrc:///Icons/MeshArrow3d"));
-  if (!source.isValid()) {
-          std::cout << "Invalid URL: " << source.toString().toStdString() << std::endl;
-      }
-  customMesh->setSource( source );
-  std::cout << " load mesh from " << source.toString().toStdString() << " with " << customMesh->vertexCount() << "vertices. " << std::endl;
-  return customMesh;
-}
-
-Qt3DCore::QEntity *EditorUtils::createArrowEntity(const QColor &color, Qt3DCore::QEntity *parent, const QMatrix4x4 &matrix, const QString &name){
-
-  Qt3DCore::QEntity *arrow = new Qt3DCore::QEntity(parent);
-  arrow->setObjectName(name);
-
-  Qt3DRender::QGeometryRenderer *mesh = EditorUtils::createArrowMesh();
-  Qt3DExtras::QPhongMaterial *material = new Qt3DExtras::QPhongMaterial();
-  material->setDiffuse( color );
-
-  Qt3DCore::QTransform *transform = new Qt3DCore::QTransform();
-  transform->setMatrix(matrix);
-  transform->setScale(3.0f);
-
-  arrow->addComponent(mesh);
-  arrow->addComponent(material);
-  arrow->addComponent(transform);
-  arrow->setEnabled(true);
-  return arrow;
-}
-
 void EditorUtils::removeExpandedChildEntities(Qt3DCore::QEntity *entity, const QString &childName ){
   QList<Qt3DCore::QEntity*> childs = entity->findChildren<Qt3DCore::QEntity*>( childName );
     Q_FOREACH (Qt3DCore::QEntity *childEntity, childs) {

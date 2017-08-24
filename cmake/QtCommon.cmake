@@ -10,7 +10,7 @@ endmacro()
 
 macro(add_project_meta FILES_TO_INCLUDE)
 if (NOT RESOURCE_FOLDER)
-    set(RESOURCE_FOLDER res)
+    set(RESOURCE_FOLDER resources)
 endif()
 
 if (NOT ICON_NAME)
@@ -24,7 +24,7 @@ elseif (WIN32)
 endif()
 
 if (WIN32)
-    configure_file("${PROJECT_SOURCE_DIR}/src/cmake/windows_metafile.rc.in"
+    configure_file("${PROJECT_SOURCE_DIR}/cmake/windows_metafile.rc.in"
       "windows_metafile.rc"
     )
     set(RES_FILES "windows_metafile.rc")
@@ -70,16 +70,5 @@ if (MSVC)
 endif()
 endmacro()
 
-macro(init_qt)
-# Let's do the CMake job for us
-set(CMAKE_AUTOMOC ON) # For meta object compiler
-set(CMAKE_AUTORCC ON) # Resource files
-set(CMAKE_AUTOUIC ON) # UI files
-
-# As moc files are generated in the binary dir, tell CMake
-# to always look for includes there:
-set(CMAKE_INCLUDE_CURRENT_DIR ON)
-endmacro()
-
 init_os_bundle()
-init_qt()
+

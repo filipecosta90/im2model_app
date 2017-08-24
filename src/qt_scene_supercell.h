@@ -97,6 +97,9 @@ class QtSceneSuperCell : public QObject
     Qt3DRender::QLayer* get_xyz_axis_layer(){ return xyz_axis_layer; }
     Qt3DRender::QLayer* get_sphere_layer(){ return sphere_layer; }
 
+	static Qt3DRender::QMesh *createArrowMesh();
+	static Qt3DCore::QEntity *createArrowEntity(const QColor &color, Qt3DCore::QEntity *parent, const QMatrix4x4 &matrix, const QString &name);
+
     public slots:
     void reload_data_from_super_cell();
     void orientate_data_from_super_cell();
