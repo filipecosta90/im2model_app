@@ -81,6 +81,7 @@
 #include "ui_configwin.h"
 #include "treeitem.h"
 #include "cv_image_widget.h"
+#include "cv_image_frame.h"
 #include "qt_scene_supercell.h"
 #include "settings.h"
 #include "ui_settings.h"
@@ -94,6 +95,7 @@
 #include "group_options.h"
 
 #include "vis/inputcontrols/qtrackballcameracontroller.h"
+
 namespace Ui {
   class MainWindow;
 }

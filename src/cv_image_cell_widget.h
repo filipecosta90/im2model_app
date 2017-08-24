@@ -1,4 +1,6 @@
-#pragma once
+#ifndef SRC_CVIMAGECELLWIDGET_H__
+#define SRC_CVIMAGECELLWIDGET_H__
+
 #include <QWidget>
 #include <QtWidgets>
 #include <QAbstractItemView>
@@ -88,3 +90,4 @@ class CvImageCellWidget : public QWidget
     // QToolBar *toolbar;
 };
 
+#endif

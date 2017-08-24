@@ -1,7 +1,7 @@
 %skeleton "lalr1.cc"
 %require  "3.0"
-%debug 
-%defines 
+%debug
+%defines
 %define api.namespace {MC}
 %define parser_class_name {MC_Parser}
 
@@ -29,9 +29,9 @@
    #include <iostream>
    #include <cstdlib>
    #include <fstream>
-   
+
 /* include for all driver functions */
-#include "mc_driver.hpp"
+#include "src/mc_driver.hpp"
 
 #undef yylex
 #define yylex scanner.yylex
@@ -62,7 +62,7 @@ Datablocks : Assignments
            | Datablocks  Datablock
            ;
 
-Datablock : DatablockName Assignments 
+Datablock : DatablockName Assignments
           ;
 
 Assignments :  /* empty */
@@ -79,31 +79,31 @@ Assignment : ItemName ItemValue  {
            }
            ;
 
-ItemNameList : Loop  ItemName { 
-             /*  the beginning of a loop_ */ 
+ItemNameList : Loop  ItemName {
+             /*  the beginning of a loop_ */
              $$ = $2;
              loop_col_num = 1;
              loop_number++;
              driver.add_loop(loop_number);
              driver.add_looped_ItemName(loop_number,loop_col_num,$2);
              }
-             | ItemNameList ItemName { 
-             $$ = $2; 
+             | ItemNameList ItemName {
+             $$ = $2;
              loop_col_num++;
              driver.add_looped_ItemName(loop_number,loop_col_num,$2);
              }
              ;
 
-ValueList : ItemValue { 
+ValueList : ItemValue {
           driver.add_looped_ItemValue(loop_number, loop_col_pos, $1);
-          loop_col_pos++; 
+          loop_col_pos++;
           if (loop_col_pos > loop_col_num) {
             loop_col_pos=1;
             }
           }
-          | ValueList ItemValue { 
+          | ValueList ItemValue {
           driver.add_looped_ItemValue(loop_number, loop_col_pos, $2);
-          loop_col_pos++; 
+          loop_col_pos++;
           if (loop_col_pos > loop_col_num) {
             loop_col_pos=1;
           }
@@ -127,9 +127,8 @@ DatablockName : DATABLOCK
 
 %%
 
-void 
+void
 MC::MC_Parser::error( const location_type &l, const std::string &err_message )
 {
    std::cerr << "Error: " << err_message << " at " << l << "\n";
 }
-

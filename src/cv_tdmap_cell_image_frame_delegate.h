@@ -1,5 +1,5 @@
-#ifndef CELL_DELEGATE_HPP
-#define CELL_DELEGATE_HPP
+#ifndef SRC_CVTDMAPCELLIMAGEFRAMEDELEGATE_H__
+#define SRC_CVTDMAPCELLIMAGEFRAMEDELEGATE_H__
 
 #include <QWidget>
 #include <QtWidgets>
@@ -43,4 +43,4 @@ class CvTDMapImageFrameDelegate : public QStyledItemDelegate
     bool _best_defined = false;
 };
 
-#endif //CELL_DELEGATE_HPP
+#endif // SRC_CVTDMAPCELLIMAGEFRAMEDELEGATE_H__

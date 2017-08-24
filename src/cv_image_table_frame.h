@@ -1,4 +1,6 @@
-#pragma once
+#ifndef SRC_CVIMAGETABLEFRAME_H__
+#define SRC_CVIMAGETABLEFRAME_H__
+
 #include <QWidget>
 #include <QtWidgets>
 #include <QAbstractItemView>
@@ -44,3 +46,4 @@ class CvImageFrameTableWidget : public CvImageFrameWidget
 
 };
 
+#endif

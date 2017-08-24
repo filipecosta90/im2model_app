@@ -1,4 +1,6 @@
-#pragma once
+#ifndef SRC_CVIMAGEFRAME_H__
+#define SRC_CVIMAGEFRAME_H__
+
 #include <QWidget>
 #include <QtWidgets>
 #include <QAbstractItemView>
@@ -7,7 +9,6 @@
 #include <opencv2/opencv.hpp>
 #include <QFrame>
 #include <QBoxLayout>
-
 
 #include "cv_image_widget.h"
 
@@ -39,3 +40,4 @@ class CvImageFrameWidget : public QWidget
     QToolBar *toolbar;
 };
 
+#endif

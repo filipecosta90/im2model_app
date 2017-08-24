@@ -44,5 +44,4 @@ class CvPolygon {
 
 };
 
-
 #endif

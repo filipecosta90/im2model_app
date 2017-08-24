@@ -2,8 +2,8 @@
 /* C++ string header, for string ops below */
 #include <string>
 
-/* Implementation of yyFlexScanner */ 
-#include "mc_scanner.hpp"
+/* Implementation of yyFlexScanner */
+#include "src/mc_scanner.hpp"
 #undef  YY_DECL
 #define YY_DECL int MC::MC_Scanner::yylex( MC::MC_Parser::semantic_type * const lval, MC::MC_Parser::location_type *loc )
 
@@ -99,7 +99,7 @@ EOL     (({CR}{LF})|{LF})
   return( token::ITEMVALUE );
 }
 
-[\"](.)*[\"]([ \t]|{EOL})  {  
+[\"](.)*[\"]([ \t]|{EOL})  {
   /* Double Quoted Strings */
 
   /* remove initial quote */
@@ -116,5 +116,3 @@ EOL     (({CR}{LF})|{LF})
 }
 
 %%
-
-
