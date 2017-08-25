@@ -92,15 +92,8 @@ void UnitCellViewerWindow::init(){
   cameraSelector->setCamera( cameraEntitytopLeft );
 
   // For camera controls
-  //Qt3DExtras::QTrackballCameraController *camController = new Qt3DExtras::QTrackballCameraController(mainViewport);
-
-  // manipulator
-  Qt3DExtras::QOrbitCameraController* manipulator = new Qt3DExtras::QOrbitCameraController(mainViewport);
-  manipulator->setLinearSpeed(50.f);
-  manipulator->setLookSpeed(180.f);
-  manipulator->setCamera(_m_cameraEntity);
-
- // camController->setCamera( _m_cameraEntity );
+  Qt3DExtras::QTrackballCameraController *camController = new Qt3DExtras::QTrackballCameraController(mainViewport);
+ camController->setCamera( _m_cameraEntity );
 
   // Set root object of the scene
   qt_scene_view->setRootEntity( _m_rootEntity );
