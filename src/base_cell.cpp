@@ -296,7 +296,7 @@ void BaseCell::print_var_state(){
   if( _flag_logger ){
     std::stringstream message;
     output( message );
-    logger->logEvent( ApplicationLog::notification , message.str() );
+   BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification , message.str() );
   }
 }
 

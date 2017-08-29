@@ -65,7 +65,7 @@ void MSA_prm::set_linear_slices_for_full_object_structure () {
       if( _flag_logger ){
         std::stringstream message;
         message << "The required vars for set_linear_slices_for_full_object_structure() are not setted up.";
-        logger->logEvent( ApplicationLog::error , message.str() );
+       BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::error , message.str() );
       }
       print_var_state();
     }
@@ -74,7 +74,7 @@ void MSA_prm::set_linear_slices_for_full_object_structure () {
     if( _flag_logger ){
       std::stringstream message;
       message << "The required Class POINTERS for set_linear_slices_for_full_object_structure() are not setted up.";
-      logger->logEvent( ApplicationLog::error , message.str() );
+     BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::error , message.str() );
     }
     print_var_state();
   }
@@ -104,7 +104,7 @@ void MSA_prm::cleanup_thread(){
         if( _flag_logger ){
           std::stringstream message;
           message << "removing the msa prm file: " << full_prm_path.string() << " result: " << std::boolalpha << remove_result;
-          logger->logEvent( ApplicationLog::notification , message.str() );
+         BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification , message.str() );
         }
       }
 
@@ -123,7 +123,7 @@ void MSA_prm::cleanup_thread(){
           if( _flag_logger ){
             std::stringstream message;
             message << "removing the wave file: " << full_wave_path.string() << " result: " << remove_result;
-            logger->logEvent( ApplicationLog::notification , message.str() );
+           BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification , message.str() );
           }
         }
       }
@@ -132,7 +132,7 @@ void MSA_prm::cleanup_thread(){
       if( _flag_logger ){
         std::stringstream message;
         message << "The required vars for cleanup_thread() are not setted up.";
-        logger->logEvent( ApplicationLog::error , message.str() );
+       BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::error , message.str() );
       }
       print_var_state();
     }
@@ -141,7 +141,7 @@ void MSA_prm::cleanup_thread(){
     if( _flag_logger ){
       std::stringstream message;
       message << "The required Class POINTERS for cleanup_thread() are not setted up.";
-      logger->logEvent( ApplicationLog::error , message.str() );
+     BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::error , message.str() );
     }
     print_var_state();
   }
@@ -185,7 +185,7 @@ bool MSA_prm::call_bin(){
     if( _flag_logger ){
       std::stringstream message;
       message << "going to run boost process with args: "<< args_stream.str();
-      logger->logEvent( ApplicationLog::notification , message.str() );
+     BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification , message.str() );
     }
 
     int _child_exit_code = -1;
@@ -211,7 +211,7 @@ bool MSA_prm::call_bin(){
         if( _flag_logger ){
           std::stringstream message;
           message << " ERROR. pipe output is enabled but pipe is closed";
-          logger->logEvent( ApplicationLog::error ,  message.str() );
+         BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::error ,  message.str() );
         }
       }
     }
@@ -231,7 +231,7 @@ bool MSA_prm::call_bin(){
       if( _flag_logger ){
         std::stringstream message;
         message << " runned in silent mode";
-        logger->logEvent( ApplicationLog::notification ,  message.str() );
+       BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification ,  message.str() );
       }
     }
 
@@ -241,14 +241,14 @@ bool MSA_prm::call_bin(){
     if( _flag_logger ){
       std::stringstream message;
       message << "(EXIT_SUCCESS == _child_exit_code) "<< (EXIT_SUCCESS == _child_exit_code);
-      logger->logEvent( ApplicationLog::notification , message.str() );
+     BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification , message.str() );
     }
     _exit_sucess_flag = ((EXIT_SUCCESS == _child_exit_code));
 #elif defined(BOOST_POSIX_API)
     if( _flag_logger ){
       std::stringstream message;
       message << "(EXIT_SUCCESS == WEXITSTATUS(_child_exit_code)) "<< (EXIT_SUCCESS == WEXITSTATUS(_child_exit_code));
-      logger->logEvent( ApplicationLog::notification , message.str() );
+     BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification , message.str() );
     }
     _exit_sucess_flag = ((EXIT_SUCCESS == WEXITSTATUS(_child_exit_code)));
 #endif
@@ -257,7 +257,7 @@ bool MSA_prm::call_bin(){
       if( _flag_logger ){
         std::stringstream message;
         message << "ERROR CODE:" << _error_code.value() << " MESSAGE:" << _error_code.message();
-        logger->logEvent( ApplicationLog::notification , message.str() );
+       BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification , message.str() );
       }
       _exit_sucess_flag = false;
     }
@@ -292,7 +292,7 @@ bool MSA_prm::check_produced_waves(){
         if( _flag_logger ){
           std::stringstream message;
           message << "checking if the produced wave file exists: " << full_wave_path.string() << " result: " << _wave_exists;
-          logger->logEvent( ApplicationLog::notification , message.str() );
+         BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification , message.str() );
         }
       }
       result = status;
@@ -301,7 +301,7 @@ bool MSA_prm::check_produced_waves(){
       if( _flag_logger ){
         std::stringstream message;
         message << "The required vars for check_produced_waves() are not setted up.";
-        logger->logEvent( ApplicationLog::error , message.str() );
+       BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::error , message.str() );
       }
       print_var_state();
     }
@@ -310,7 +310,7 @@ bool MSA_prm::check_produced_waves(){
     if( _flag_logger ){
       std::stringstream message;
       message << "The required Class POINTERS for check_produced_waves() are not setted up.";
-      logger->logEvent( ApplicationLog::error , message.str() );
+     BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::error , message.str() );
     }
     print_var_state();
   }
@@ -457,7 +457,7 @@ bool MSA_prm::produce_prm () {
       if( _flag_logger ){
         std::stringstream message;
         message << "checking if MSA prm file was produced. filename: " <<  full_path.string() << " || result: " << boost::filesystem::exists( full_path.string() ) << std::endl;
-        logger->logEvent( ApplicationLog::notification , message.str() );
+       BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification , message.str() );
       }
       _flag_produced_prm = boost::filesystem::exists( full_path );
 
@@ -469,7 +469,7 @@ bool MSA_prm::produce_prm () {
       if( _flag_logger ){
         std::stringstream message;
         message << "The required vars for produce_prm() are not setted up.";
-        logger->logEvent( ApplicationLog::error , message.str() );
+       BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::error , message.str() );
       }
       print_var_state();
     }
@@ -478,7 +478,7 @@ bool MSA_prm::produce_prm () {
     if( _flag_logger ){
       std::stringstream message;
       message << "The required Class POINTERS for produce_prm() are not setted up.";
-      logger->logEvent( ApplicationLog::error , message.str() );
+     BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::error , message.str() );
     }
     print_var_state();
   }
@@ -489,7 +489,7 @@ void MSA_prm::print_var_state(){
   if( _flag_logger ){
     std::stringstream message;
     output(message);
-    logger->logEvent( ApplicationLog::notification , message.str() );
+   BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification , message.str() );
   }
 }
 
@@ -511,6 +511,6 @@ bool MSA_prm::set_application_logger( ApplicationLog::ApplicationLog* app_logger
   logger = app_logger;
   _flag_logger = true;
   BaseBin::set_application_logger( app_logger );
-  logger->logEvent( ApplicationLog::notification, "Application logger setted for MSA_prm class." );
+ BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification, "Application logger setted for MSA_prm class." );
   return true;
 }

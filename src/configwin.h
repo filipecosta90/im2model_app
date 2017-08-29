@@ -328,6 +328,7 @@ signals:
     TreeItem* _mtf_parameters = nullptr;
     TreeItem* image_correlation = nullptr;
     TreeItem* image_correlation_matching_method = nullptr;
+    TreeItem* image_normalization_method = nullptr;
 
     // tab 3
     TreeItem* super_cell_setup_root = nullptr;

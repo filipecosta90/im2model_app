@@ -340,7 +340,7 @@ bool BaseImage::auto_calculate_ignore_edge_pixels(){
 bool BaseImage::set_application_logger( ApplicationLog::ApplicationLog* app_logger ){
   logger = app_logger;
   _flag_logger = true;
-  logger->logEvent( ApplicationLog::notification, "Application logger setted for BaseImage class." );
+ BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification, "Application logger setted for BaseImage class." );
   return true;
 }
 
@@ -349,7 +349,7 @@ void BaseImage::print_var_state(){
     std::stringstream message;
     // using overloaded operator<<
     output( message );
-    logger->logEvent( ApplicationLog::notification , message.str() );
+   BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification , message.str() );
   }
 }
 

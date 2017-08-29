@@ -7,6 +7,6 @@ BaseLogger::BaseLogger() {
 bool BaseLogger::set_application_logger( ApplicationLog::ApplicationLog* app_logger ){
   logger = app_logger;
   _flag_logger = true;
-  logger->logEvent( ApplicationLog::notification, "Application logger setted for BaseLogger class." );
+ BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification, "Application logger setted for BaseLogger class." );
   return true;
 }

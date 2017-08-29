@@ -17,7 +17,7 @@ bool BaseBin::set_base_bin_start_dir_path( boost::filesystem::path path ){
   if( _flag_logger ){
     std::stringstream message;
     message << "BaseBim baseDirPath: " << path.string();
-    logger->logEvent( ApplicationLog::notification, message.str() );
+   BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification, message.str() );
   }
   create_target_folder();
   return true;
@@ -48,7 +48,7 @@ bool BaseBin::create_target_folder(){
     if( _flag_logger ){
       std::stringstream message;
       message << "BaseBin base_bin_output_target_folder setted: " << base_bin_output_target_folder.string();
-      logger->logEvent( ApplicationLog::notification, message.str() );
+     BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification, message.str() );
     }
     result = true;
   }
@@ -67,13 +67,13 @@ bool BaseBin::set_bin_execname( std::string execname ){
     if( _flag_logger ){
       std::stringstream message;
       message << "Error: " << ex.what();
-      logger->logEvent( ApplicationLog::error , message.str() );
+     BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::error , message.str() );
     }
   }
   if( _flag_logger ){
     std::stringstream message;
     message << "Checking if exec exists. full path: " <<  full_bin_path_execname.string() << " || result: " << std::boolalpha << _flag_full_bin_path_execname;
-    logger->logEvent( ApplicationLog::notification , message.str() );
+   BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification , message.str() );
   }
   return _flag_full_bin_path_execname;
 }
@@ -82,7 +82,7 @@ bool BaseBin::set_bin_execname( std::string execname ){
 bool BaseBin::set_application_logger( ApplicationLog::ApplicationLog* app_logger ){
   logger = app_logger;
   _flag_logger = true;
-  logger->logEvent( ApplicationLog::notification, "Application logger setted for BaseBin class." );
+ BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification, "Application logger setted for BaseBin class." );
   return true;
 }
 
@@ -91,7 +91,7 @@ void BaseBin::print_var_state(){
     std::stringstream message;
     // using overloaded operator<<
     output(message);
-    logger->logEvent( ApplicationLog::notification , message.str() );
+   BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification , message.str() );
   }
 }
 

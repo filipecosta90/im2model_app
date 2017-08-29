@@ -20,7 +20,7 @@ bool SuperCell::set_base_bin_start_dir_path( boost::filesystem::path path ){
   if( _flag_logger ){
     std::stringstream message;
     message << "SuperCell baseDirPath: " << path.string();
-    logger->logEvent( ApplicationLog::notification, message.str() );
+   BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification, message.str() );
   }
   return true;
 }
@@ -97,7 +97,7 @@ bool SuperCell::update_from_unit_cell(){
       if( _flag_logger ){
         std::stringstream message;
         message << "The required vars for update_from_unit_cell() are not setted up.";
-        logger->logEvent( ApplicationLog::error , message.str() );
+       BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::error , message.str() );
       }
       print_var_state();
     }
@@ -106,7 +106,7 @@ bool SuperCell::update_from_unit_cell(){
     if( _flag_logger ){
       std::stringstream message;
       message << "The required Class POINTERS for update_from_unit_cell() are not setted up.";
-      logger->logEvent( ApplicationLog::error , message.str() );
+     BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::error , message.str() );
     }
     print_var_state();
   }
@@ -247,7 +247,7 @@ bool SuperCell::calculate_expand_factor(){
       if( _flag_logger ){
         std::stringstream message;
         message << "The required vars for calculate_expand_factor() are not setted up.";
-        logger->logEvent( ApplicationLog::error , message.str() );
+       BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::error , message.str() );
       }
       print_var_state();
     }
@@ -256,7 +256,7 @@ bool SuperCell::calculate_expand_factor(){
     if( _flag_logger ){
       std::stringstream message;
       message << "The required Class POINTERS for calculate_expand_factor() are not setted up.";
-      logger->logEvent( ApplicationLog::error , message.str() );
+     BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::error , message.str() );
     }
     print_var_state();
   }
@@ -286,7 +286,7 @@ bool SuperCell::update_length_parameters_from_expand_factor(){
       if( _flag_logger ){
         std::stringstream message;
         message << "The required vars for update_length_parameters_from_expand_factor() are not setted up.";
-        logger->logEvent( ApplicationLog::error , message.str() );
+       BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::error , message.str() );
       }
       print_var_state();
     }
@@ -295,7 +295,7 @@ bool SuperCell::update_length_parameters_from_expand_factor(){
     if( _flag_logger ){
       std::stringstream message;
       message << "The required Class POINTERS for update_length_parameters_from_expand_factor() are not setted up.";
-      logger->logEvent( ApplicationLog::error , message.str() );
+     BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::error , message.str() );
     }
     print_var_state();
   }
@@ -368,7 +368,7 @@ bool SuperCell::create_atoms_from_unit_cell(){
       if( _flag_logger ){
         std::stringstream message;
         message << "The required vars for create_atoms_from_unit_cell() are not setted up.";
-        logger->logEvent( ApplicationLog::error , message.str() );
+       BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::error , message.str() );
       }
       print_var_state();
     }
@@ -377,7 +377,7 @@ bool SuperCell::create_atoms_from_unit_cell(){
     if( _flag_logger ){
       std::stringstream message;
       message << "The required Class POINTERS for create_atoms_from_unit_cell() are not setted up.";
-      logger->logEvent( ApplicationLog::error , message.str() );
+     BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::error , message.str() );
     }
     print_var_state();
   }
@@ -401,7 +401,7 @@ bool SuperCell::orientate_atoms_from_matrix(){
       if( _flag_logger ){
         std::stringstream message;
         message << "The required vars for orientate_atoms_from_matrix() are not setted up.";
-        logger->logEvent( ApplicationLog::error , message.str() );
+       BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::error , message.str() );
       }
       print_var_state();
     }
@@ -410,7 +410,7 @@ bool SuperCell::orientate_atoms_from_matrix(){
     if( _flag_logger ){
       std::stringstream message;
       message << "The required Class POINTERS for orientate_atoms_from_matrix() are not setted up.";
-      logger->logEvent( ApplicationLog::error , message.str() );
+     BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::error , message.str() );
     }
     print_var_state();
   }
@@ -455,7 +455,7 @@ bool SuperCell::create_fractional_positions_atoms(){
     if( _flag_logger ){
       std::stringstream message;
       message << "The required vars for create_fractional_positions_atoms() are not setted up.";
-      logger->logEvent( ApplicationLog::error , message.str() );
+     BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::error , message.str() );
     }
     print_var_state();
   }
@@ -486,7 +486,7 @@ bool SuperCell::remove_z_out_of_range_atoms(){
     if( _flag_logger ){
       std::stringstream message;
       message << "The required vars for remove_z_out_of_range_atoms() are not setted up.";
-      logger->logEvent( ApplicationLog::error , message.str() );
+     BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::error , message.str() );
     }
     print_var_state();
   }
@@ -523,7 +523,7 @@ bool SuperCell::remove_xy_out_of_range_atoms(){
     if( _flag_logger ){
       std::stringstream message;
       message << "The required vars for remove_xy_out_of_range_atoms() are not setted up.";
-      logger->logEvent( ApplicationLog::error , message.str() );
+     BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::error , message.str() );
     }
     print_var_state();
   }
@@ -571,7 +571,7 @@ bool SuperCell::remove_xy_out_of_range_atoms_from_image_bounds(){
       if( _flag_logger ){
         std::stringstream message;
         message << "The required vars for remove_xy_out_of_range_atoms_from_image_bounds() are not setted up.";
-        logger->logEvent( ApplicationLog::error , message.str() );
+       BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::error , message.str() );
       }
       print_var_state();
     }
@@ -580,7 +580,7 @@ bool SuperCell::remove_xy_out_of_range_atoms_from_image_bounds(){
     if( _flag_logger ){
       std::stringstream message;
       message << "The required Class POINTERS for remove_xy_out_of_range_atoms_from_image_bounds() are not setted up.";
-      logger->logEvent( ApplicationLog::error , message.str() );
+     BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::error , message.str() );
     }
     print_var_state();
   }
@@ -632,7 +632,7 @@ bool SuperCell::generate_super_cell_file(){
     if( _flag_logger ){
       std::stringstream message;
       message << "The required vars for generate_super_cell_file() are not setted up.";
-      logger->logEvent( ApplicationLog::error , message.str() );
+     BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::error , message.str() );
     }
     print_var_state();
   }
@@ -671,7 +671,7 @@ bool SuperCell::generate_xyz_file(){
     if( _flag_logger ){
       std::stringstream message;
       message << "The required vars for generate_xyz_file() are not setted up.";
-      logger->logEvent( ApplicationLog::error , message.str() );
+     BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::error , message.str() );
     }
     print_var_state();
   }
@@ -791,7 +791,7 @@ cv::Point3d SuperCell::op_Mat3d_dot_Point3d ( cv::Mat mat , cv::Point3d point ){
 bool SuperCell::set_application_logger( ApplicationLog::ApplicationLog* app_logger ){
   logger = app_logger;
   _flag_logger = true;
-  logger->logEvent( ApplicationLog::notification, "Application logger setted for SuperCell class." );
+ BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification, "Application logger setted for SuperCell class." );
   return true;
 }
 
@@ -799,7 +799,7 @@ void SuperCell::print_var_state(){
   if( _flag_logger ){
     std::stringstream message;
     output( message );
-    logger->logEvent( ApplicationLog::notification , message.str() );
+   BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification , message.str() );
   }
 }
 

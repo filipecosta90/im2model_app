@@ -336,7 +336,7 @@ bool UnitCell::create_atoms_from_site_and_symetry(){
     if( _flag_logger ){
       std::stringstream message;
       message << "The required vars for create_atoms_from_site_and_symetry() are not setted up.";
-      logger->logEvent( ApplicationLog::error , message.str() );
+     BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::error , message.str() );
     }
     print_var_state();
   }
@@ -347,7 +347,7 @@ void UnitCell::print_var_state(){
   if( _flag_logger ){
     std::stringstream message;
     output( message );
-    logger->logEvent( ApplicationLog::notification , message.str() );
+   BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification , message.str() );
   }
 }
 

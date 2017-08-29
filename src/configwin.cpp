@@ -1996,6 +1996,25 @@ spherical_aberration_nm->set_fp_data_getter_double_vec( 1, box3_function_5_1_1_g
 
   image_correlation->insertChildren( image_correlation_matching_method );
 
+  QVector<QVariant> box3_option_6_2 = {"Normalization method",""};
+  QVector<bool> box3_option_6_2_edit = {false,true};
+
+  boost::function<int(void)> box3_function_6_2_getter ( boost::bind( &TDMap::get_image_normalization_method, _core_td_map ) );
+  boost::function<bool(int)> box3_function_6_2_setter ( boost::bind( &TDMap::set_image_normalization_method, _core_td_map, _1 ) );
+  image_normalization_method = new TreeItem ( box3_option_6_2 , box3_function_6_2_setter,  box3_option_6_2_edit );
+  image_normalization_method->set_variable_name( "image_normalization_method" );
+  image_normalization_method->set_fp_data_getter_int_vec( 1, box3_function_6_2_getter );
+
+  // load the preset data from core constuctor
+  image_normalization_method->load_data_from_getter( 1 );
+
+  QVector<QVariant> box3_option_6_2_drop = {"Local normalization","Global normalization","No normalization"};
+  QVector<QVariant> box3_option_6_2_drop_enum( { SimGrid::InmageNormalizationMode::LOCAL_NORMALIZATION, SimGrid::InmageNormalizationMode::GLOBAL_NORMALIZATION, SimGrid::InmageNormalizationMode::NO_NORMALIZATION } );
+
+  image_normalization_method->set_item_delegate_type( TreeItem::_delegate_DROP );
+  image_normalization_method->set_dropdown_options( 1, box3_option_6_2_drop, box3_option_6_2_drop_enum  );
+
+  image_correlation->insertChildren( image_normalization_method );
 
   ui->qtree_view_tdmap_simulation_setup->setModel( tdmap_simulation_setup_model );
   ui->qtree_view_tdmap_simulation_setup->setItemDelegate( _load_file_delegate );

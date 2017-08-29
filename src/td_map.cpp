@@ -242,7 +242,7 @@ bool TDMap::test_run_config(){
       << ", MSA: " << std::boolalpha << _run_msa_switch
       << ", WAVIMG: " << std::boolalpha << _run_wavimg_switch
       << ", SIMGRID: " << std::boolalpha << _run_simgrid_switch << " }";
-    logger->logEvent( ApplicationLog::notification , message.str() );
+   BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification , message.str() );
   }
   if( _run_celslc_switch ){
     const bool celslc_res = celslc_step_group_options->are_group_vars_setted_up();
@@ -258,10 +258,10 @@ bool TDMap::test_run_config(){
       std::stringstream message;
       message << "TEST CELSLC are_group_vars_setted_up: " << std::boolalpha << celslc_res;
       if( celslc_res ){
-        logger->logEvent( ApplicationLog::notification , message.str() );
+       BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification , message.str() );
       }
       else{
-        logger->logEvent( ApplicationLog::error , message.str() );
+       BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::error , message.str() );
       }
     }
   }
@@ -279,10 +279,10 @@ bool TDMap::test_run_config(){
       std::stringstream message;
       message << "TEST MSA are_group_vars_setted_up: " << std::boolalpha << msa_res;
       if( msa_res ){
-        logger->logEvent( ApplicationLog::notification , message.str() );
+       BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification , message.str() );
       }
       else{
-        logger->logEvent( ApplicationLog::error , message.str() );
+       BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::error , message.str() );
       }
     }
   }
@@ -300,10 +300,10 @@ bool TDMap::test_run_config(){
       std::stringstream message;
       message << "TEST WAVIMG are_group_vars_setted_up: " << std::boolalpha << wavimg_res;
       if( wavimg_res ){
-        logger->logEvent( ApplicationLog::notification , message.str() );
+       BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification , message.str() );
       }
       else{
-        logger->logEvent( ApplicationLog::error , message.str() );
+       BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::error , message.str() );
       }
     }
   }
@@ -321,10 +321,10 @@ bool TDMap::test_run_config(){
       std::stringstream message;
       message << "TEST SIMGRID are_group_vars_setted_up: " << std::boolalpha << simgrid_res;
       if( simgrid_res ){
-        logger->logEvent( ApplicationLog::notification , message.str() );
+       BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification , message.str() );
       }
       else{
-        logger->logEvent( ApplicationLog::error , message.str() );
+       BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::error , message.str() );
       }
     }
   }
@@ -352,10 +352,10 @@ bool TDMap::run_tdmap(){
           std::stringstream message;
           message << "Already runned celslc. going to clean vars. result: " << std::boolalpha << _clean_run_env ;
           if( _clean_run_env ){
-            logger->logEvent( ApplicationLog::notification , message.str() );
+           BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification , message.str() );
           }
           else{
-            logger->logEvent( ApplicationLog::error , message.str() );
+           BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::error , message.str() );
           }
         }
       }
@@ -376,10 +376,10 @@ bool TDMap::run_tdmap(){
         std::stringstream message;
         message << "_flag_runned_tdmap_celslc: " << std::boolalpha << _flag_runned_tdmap_celslc;
         if( _flag_runned_tdmap_celslc ){
-          logger->logEvent( ApplicationLog::notification , message.str() );
+         BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification , message.str() );
         }
         else{
-          logger->logEvent( ApplicationLog::error , message.str() );
+         BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::error , message.str() );
         }
       }
     }
@@ -390,7 +390,7 @@ bool TDMap::run_tdmap(){
     if( _flag_logger ){
       std::stringstream message;
       message << "Celslc step result: " << std::boolalpha << _celslc_stage_ok;
-      logger->logEvent( ApplicationLog::notification , message.str() );
+     BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification , message.str() );
     }
     //MSA
     if( _celslc_stage_ok ){
@@ -403,10 +403,10 @@ bool TDMap::run_tdmap(){
             std::stringstream message;
             message << "Already runned msa. going to clean vars. result: " << std::boolalpha << _clean_run_env ;
             if( _clean_run_env ){
-              logger->logEvent( ApplicationLog::notification , message.str() );
+             BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification , message.str() );
             }
             else{
-              logger->logEvent( ApplicationLog::error , message.str() );
+             BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::error , message.str() );
             }
           }
         }
@@ -421,10 +421,10 @@ bool TDMap::run_tdmap(){
             std::stringstream message;
             message << "_flag_runned_tdmap_msa: " << std::boolalpha << _flag_runned_tdmap_msa;
             if( _flag_runned_tdmap_msa ){
-              logger->logEvent( ApplicationLog::notification , message.str() );
+             BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification , message.str() );
             }
             else{
-              logger->logEvent( ApplicationLog::error , message.str() );
+             BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::error , message.str() );
             }
           }
         }
@@ -436,7 +436,7 @@ bool TDMap::run_tdmap(){
         if( _flag_logger ){
           std::stringstream message;
           message << "Run msa flag was false, the wav files should exist and we should update from them. result: " << std::boolalpha << _msa_stage_ok;
-          logger->logEvent( ApplicationLog::notification , message.str() );
+         BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification , message.str() );
         }
       }
     }
@@ -450,10 +450,10 @@ bool TDMap::run_tdmap(){
           std::stringstream message;
           message << "Already runned wavimg. going to clean vars. result: " << std::boolalpha << _clean_run_env ;
           if( _clean_run_env ){
-            logger->logEvent( ApplicationLog::notification , message.str() );
+           BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification , message.str() );
           }
           else{
-            logger->logEvent( ApplicationLog::error , message.str() );
+           BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::error , message.str() );
           }
         }
       }
@@ -473,7 +473,7 @@ bool TDMap::run_tdmap(){
             std::stringstream message;
             message << "_flag_runned_tdmap_wavimg: " << std::boolalpha << _flag_runned_tdmap_wavimg;
             ApplicationLog::severity_level _log_type = _flag_runned_tdmap_wavimg ? ApplicationLog::notification : ApplicationLog::error;
-            logger->logEvent( _log_type , message.str() );
+           BOOST_LOG_FUNCTION();  logger->logEvent( _log_type , message.str() );
           }
         }
         _wavimg_stage_ok = _flag_runned_tdmap_wavimg;
@@ -484,7 +484,7 @@ bool TDMap::run_tdmap(){
         if( _flag_logger ){
           std::stringstream message;
           message << "Run wavimg flag is false, the dat files should exist and we should update from them. result: " << std::boolalpha << _wavimg_stage_ok;
-          logger->logEvent( ApplicationLog::notification , message.str() );
+         BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification , message.str() );
         }
       }
     }
@@ -499,7 +499,7 @@ bool TDMap::run_tdmap(){
           std::stringstream message;
           message << "Already runned simgrid. going to clean vars. result: " << std::boolalpha << _clean_run_env ;
           ApplicationLog::severity_level _log_type = _clean_run_env ? ApplicationLog::notification : ApplicationLog::error;
-          logger->logEvent( _log_type , message.str() );
+         BOOST_LOG_FUNCTION();  logger->logEvent( _log_type , message.str() );
         }
       }
       if( _clean_run_env ){
@@ -514,7 +514,7 @@ bool TDMap::run_tdmap(){
             std::stringstream message;
             message << "A standard exception was caught, while running _td_map_simgrid->read_grid_from_dat_files(): " << e.what();
             ApplicationLog::severity_level _log_type = ApplicationLog::error;
-            logger->logEvent( _log_type , message.str() );
+           BOOST_LOG_FUNCTION();  logger->logEvent( _log_type , message.str() );
           }
         }
         // 2nd step in simgrid
@@ -522,7 +522,11 @@ bool TDMap::run_tdmap(){
         if( _grid_ok ){
           _margin_ok = _td_map_simgrid->apply_margin_to_grid();
         }
-        _flag_runned_tdmap_simgrid_read = _margin_ok & _grid_ok;
+        bool _normalization_ok = false;
+        if( _grid_ok && _margin_ok ){
+          _normalization_ok = _td_map_simgrid->apply_normalization_to_grid();
+        }
+        _flag_runned_tdmap_simgrid_read = _margin_ok && _grid_ok && _normalization_ok;
         if ( _run_simgrid_switch ){
           // 3rd step in simgrid
           if( _flag_runned_tdmap_simgrid_read ){
@@ -534,7 +538,7 @@ bool TDMap::run_tdmap(){
                 std::stringstream message;
                 message << "A standard exception was caught, while running _td_map_simgrid->simulate_from_grid(): " << e.what();
                 ApplicationLog::severity_level _log_type = ApplicationLog::error;
-                logger->logEvent( _log_type , message.str() );
+               BOOST_LOG_FUNCTION();  logger->logEvent( _log_type , message.str() );
               }
             }
           }
@@ -544,7 +548,7 @@ bool TDMap::run_tdmap(){
             std::stringstream message;
             message << "_simgrid_stage_ok: " << std::boolalpha << _simgrid_stage_ok;
             ApplicationLog::severity_level _log_type = _simgrid_stage_ok ? ApplicationLog::notification : ApplicationLog::error;
-            logger->logEvent( _log_type , message.str() );
+           BOOST_LOG_FUNCTION();  logger->logEvent( _log_type , message.str() );
           }
         }
         else{
@@ -554,7 +558,7 @@ bool TDMap::run_tdmap(){
             std::stringstream message;
             message << "emiting TDMap_no_simgrid( _flag_runned_tdmap_simgrid_read ) ";
             ApplicationLog::severity_level _log_type = ApplicationLog::notification;
-            logger->logEvent( _log_type , message.str() );
+           BOOST_LOG_FUNCTION();  logger->logEvent( _log_type , message.str() );
           }
         }
       }
@@ -565,14 +569,14 @@ bool TDMap::run_tdmap(){
     if( _flag_logger ){
       std::stringstream message;
       message << "TDMap vars are not correcly setted up. _vars_setted_up: " << std::boolalpha << _vars_setted_up ;
-      logger->logEvent( ApplicationLog::error , message.str() );
+     BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::error , message.str() );
     }
   }
   if( _flag_logger ){
     std::stringstream message;
     message << "final TDMap::run_tdmap( ) result: " << std::boolalpha << _simulation_status;
     ApplicationLog::severity_level _log_type = _simulation_status ? ApplicationLog::notification : ApplicationLog::error;
-    logger->logEvent( _log_type , message.str() );
+   BOOST_LOG_FUNCTION();  logger->logEvent( _log_type , message.str() );
   }
   return _simulation_status;
 }
@@ -985,7 +989,7 @@ void TDMap::set_group_options( group_options* celslc_step, group_options* msa_st
 bool TDMap::set_application_logger( ApplicationLog::ApplicationLog* app_logger ){
   logger = app_logger;
   _flag_logger = true;
-  logger->logEvent( ApplicationLog::notification, "Application logger setted for TDMap class." );
+ BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification, "Application logger setted for TDMap class." );
   _tdmap_celslc_parameters->set_application_logger( app_logger );
   _tdmap_msa_parameters->set_application_logger( app_logger );
   _tdmap_wavimg_parameters->set_application_logger( app_logger );
@@ -1007,7 +1011,7 @@ bool TDMap::set_dr_probe_celslc_execname( std::string celslc_execname ){
   if( _flag_logger ){
     std::stringstream message;
     message << "Set_dr_probe_celslc_execname result: " << std::boolalpha << result;
-    logger->logEvent( ApplicationLog::notification , message.str() );
+   BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification , message.str() );
   }
   return result;
 }
@@ -1017,7 +1021,7 @@ bool TDMap::set_dr_probe_msa_execname( std::string msa_execname ){
   if( _flag_logger ){
     std::stringstream message;
     message << "Set_dr_probe_msa_execname result: " << result;
-    logger->logEvent( ApplicationLog::notification , message.str() );
+   BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification , message.str() );
   }
   return result;
 }
@@ -1027,7 +1031,7 @@ bool TDMap::set_dr_probe_wavimg_execname( std::string wavimg_execname ){
   if( _flag_logger ){
     std::stringstream message;
     message << " set_dr_probe_wavimg_execname result: " << result;
-    logger->logEvent( ApplicationLog::notification , message.str() );
+   BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification , message.str() );
   }
   return result;
 }
@@ -1639,8 +1643,20 @@ bool TDMap::set_mtf_switch( bool value ){
   return _tdmap_wavimg_parameters->set_mtf_simulation_switch( value );
 }
 
+int TDMap::get_image_correlation_matching_method(){
+  return _td_map_simgrid->get_image_correlation_matching_method();
+}
+
+int TDMap::get_image_normalization_method(){
+  return _td_map_simgrid->get_image_normalization_method();
+}
+
 bool TDMap::set_image_correlation_matching_method( int method ){
   return _td_map_simgrid->set_image_correlation_matching_method( method );
+}
+
+bool TDMap::set_image_normalization_method( int method ){
+  return _td_map_simgrid->set_image_normalization_method( method );
 }
 
 bool TDMap::set_exec_log_level( int level ){

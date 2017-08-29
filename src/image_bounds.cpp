@@ -178,7 +178,7 @@ bool ImageBounds::calculate_boundaries_from_full_image(){
       if( _flag_logger ){
         std::stringstream message;
         message << "The required vars for calculate_boundaries_from_full_image() are not setted up.";
-        logger->logEvent( ApplicationLog::error , message.str() );
+       BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::error , message.str() );
       }
       print_var_state();
     }
@@ -187,7 +187,7 @@ bool ImageBounds::calculate_boundaries_from_full_image(){
     if( _flag_logger ){
       std::stringstream message;
       message << "The required Class POINTERS for calculate_boundaries_from_full_image() are not setted up.";
-      logger->logEvent( ApplicationLog::error , message.str() );
+     BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::error , message.str() );
     }
     print_var_state();
   }
@@ -231,7 +231,7 @@ bool ImageBounds::update_roi_boundary_polygon_from_full_boundaries(){
     if( _flag_logger ){
       std::stringstream message;
       message << "The required vars for update_roi_boundary_polygon_from_full_boundaries() are not setted up.";
-      logger->logEvent( ApplicationLog::error , message.str() );
+     BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::error , message.str() );
     }
     print_var_state();
   }
@@ -270,7 +270,7 @@ bool ImageBounds::generate_boundary_polygon_w_margin_nm(){
       if( _flag_logger ){
         std::stringstream message;
         message << "The required vars for generate_boundary_polygon_w_margin_nm() are not setted up.";
-        logger->logEvent( ApplicationLog::error , message.str() );
+       BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::error , message.str() );
       }
       print_var_state();
     }
@@ -279,7 +279,7 @@ bool ImageBounds::generate_boundary_polygon_w_margin_nm(){
     if( _flag_logger ){
       std::stringstream message;
       message << "The required Class POINTERS for generate_boundary_polygon_w_margin_nm() are not setted up.";
-      logger->logEvent( ApplicationLog::error , message.str() );
+     BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::error , message.str() );
     }
     print_var_state();
   }
@@ -322,7 +322,7 @@ cv::Point2i ImageBounds::op_Point2i_padding (cv::Point2d point, const int padd_x
 bool ImageBounds::set_application_logger( ApplicationLog::ApplicationLog* app_logger ){
   logger = app_logger;
   _flag_logger = true;
-  logger->logEvent( ApplicationLog::notification, "Application logger setted for ImageBounds class." );
+ BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification, "Application logger setted for ImageBounds class." );
   return true;
 }
 
@@ -330,7 +330,7 @@ void ImageBounds::print_var_state(){
   if( _flag_logger ){
     std::stringstream message;
     output( message );
-    logger->logEvent( ApplicationLog::notification , message.str() );
+   BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification , message.str() );
   }
 }
 

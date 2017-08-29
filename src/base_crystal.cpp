@@ -145,7 +145,7 @@ bool BaseCrystal::set_nz_simulated_partitions_from_prm(){
   if( _flag_logger ){
     std::stringstream message;
     message << "checking if CELSLC prm file exists. filename: " <<  full_path.string() << "\t| result: " << std::boolalpha << _file_exists;
-    logger->logEvent( ApplicationLog::notification , message.str() );
+   BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification , message.str() );
   }
 
   if( _file_exists ){
@@ -207,7 +207,7 @@ bool BaseCrystal::set_nz_simulated_partitions_from_prm(){
       if( _flag_logger ){
         std::stringstream message;
         message << "unable to open file \"" <<  input_prm_stream.str() << "\"";
-        logger->logEvent( ApplicationLog::error , message.str() );
+       BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::error , message.str() );
       }
     }
   }
@@ -317,7 +317,7 @@ bool BaseCrystal::set_base_dir_path( boost::filesystem::path path ){
   if( _flag_logger ){
     std::stringstream message;
     message << "BaseCrystal baseDirPath: " << path.string();
-    logger->logEvent( ApplicationLog::notification, message.str() );
+   BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification, message.str() );
   }
   return true;
 }
@@ -326,7 +326,7 @@ bool BaseCrystal::set_base_dir_path( boost::filesystem::path path ){
 bool BaseCrystal::set_application_logger( ApplicationLog::ApplicationLog* app_logger ){
   logger = app_logger;
   _flag_logger = true;
-  logger->logEvent( ApplicationLog::notification, "Application logger setted for BaseCrystal class." );
+ BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification, "Application logger setted for BaseCrystal class." );
   return true;
 }
 
@@ -334,7 +334,7 @@ void BaseCrystal::print_var_state(){
   if( _flag_logger ){
     std::stringstream message;
     output(message);
-    logger->logEvent( ApplicationLog::notification , message.str() );
+   BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification , message.str() );
   }
 }
 

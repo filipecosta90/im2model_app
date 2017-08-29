@@ -67,25 +67,29 @@ namespace ApplicationLog{
 
     auto fmtThreadId = boost::log::expressions::attr<boost::log::attributes::current_thread_id::value_type>("ThreadID");
 
+    auto fmtLineN = boost::log::expressions::attr< unsigned int >("LineID");
+
     auto fmtScope = boost::log::expressions::format_named_scope("Scope",
             boost::log::keywords::format = "%n(%f:%l)",
             boost::log::keywords::iteration = boost::log::expressions::reverse,
-            boost::log::keywords::depth = 2);
+            boost::log::keywords::depth = 3);
 
             boost::log::formatter logFmt =
-       boost::log::expressions::format("[%1%] (%2%) [%3%] [%4%] %5%")
-       % fmtTimeStamp % fmtThreadId % severity % fmtScope
-       % boost::log::expressions::smessage;
-
+       boost::log::expressions::format("%1%\t(%2%)\tThread: %3% \tSeverity: %4% \n\t\t\tScope: %5% \n\t\t\tMessage: %6%\n")
+       % fmtLineN % fmtTimeStamp % fmtThreadId % severity % fmtScope % boost::log::expressions::smessage;
         sink->set_formatter( logFmt );
 
     // Add the sink to the core
     core->add_sink(sink);
   }
 
-  // Actually designate the message to the log
-  void ApplicationLog::logEvent(const severity_level level, std::string message)
-    {
-      BOOST_LOG_SEV(m_logger, level) << message;
-    }
+      // Actually designate the message to the log
+      void ApplicationLog::logEvent(const severity_level level, std::string message){
+          BOOST_LOG_SEV(m_logger, level)  << message;
+        }
+
+    // Actually designate the message to the log
+    void ApplicationLog::logEvent(const severity_level level, std::string message, std::string file, std::string line, std::string function){
+        BOOST_LOG_SEV(m_logger, level)  << "(" << file << ":" << line << ":" << function << ") " << message;
+      }
 }

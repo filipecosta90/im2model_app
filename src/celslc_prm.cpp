@@ -64,14 +64,14 @@ void CELSLC_prm::cleanup_thread(){
           if( _flag_logger ){
             std::stringstream message;
             message << "removing the celslc prm file: " << full_prm_path.string() << " result: " << std::boolalpha << remove_result;
-            logger->logEvent( ApplicationLog::notification , message.str() );
+           BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification , message.str() );
           }
         }
         catch(boost::filesystem::filesystem_error &ex) {
           if( _flag_logger ){
             std::stringstream message;
             message << "boost::filesystem::filesystem_error: " << typeid(ex).name();
-            logger->logEvent( ApplicationLog::error , message.str() );
+           BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::error , message.str() );
           }
         }
       }
@@ -90,7 +90,7 @@ void CELSLC_prm::cleanup_thread(){
           if( _flag_logger ){
             std::stringstream message;
             message << "removing the slice file: " << full_slice_path.string() << " result: " << std::boolalpha << remove_result;
-            logger->logEvent( ApplicationLog::notification , message.str() );
+           BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification , message.str() );
           }
         }
       }
@@ -99,7 +99,7 @@ void CELSLC_prm::cleanup_thread(){
       if( _flag_logger ){
         std::stringstream message;
         message << "The required vars for cleanup_thread() are not setted up.";
-        logger->logEvent( ApplicationLog::error , message.str() );
+       BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::error , message.str() );
       }
       print_var_state();
     }
@@ -108,7 +108,7 @@ void CELSLC_prm::cleanup_thread(){
     if( _flag_logger ){
       std::stringstream message;
       message << "The required Class POINTERS for cleanup_thread() are not setted up.";
-      logger->logEvent( ApplicationLog::error , message.str() );
+     BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::error , message.str() );
     }
     print_var_state();
   }
@@ -142,13 +142,13 @@ bool CELSLC_prm::check_produced_slices(){
         if( _flag_logger ){
           std::stringstream message;
           message << "checking if the produced slice file \"" << full_slice_path.string() << "\" exists: " << std::boolalpha << _slice_exists;
-          logger->logEvent( ApplicationLog::notification , message.str() );
+         BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification , message.str() );
         }
       }
       if( _flag_logger ){
         std::stringstream message;
         message << "check_produced_slices END RESULT: " << std::boolalpha << flag_files;
-        logger->logEvent( ApplicationLog::notification , message.str() );
+       BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification , message.str() );
       }
       result = flag_files;
     }
@@ -156,7 +156,7 @@ bool CELSLC_prm::check_produced_slices(){
       if( _flag_logger ){
         std::stringstream message;
         message << "The required vars for check_produced_slices() are not setted up.";
-        logger->logEvent( ApplicationLog::error , message.str() );
+       BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::error , message.str() );
       }
       print_var_state();
     }
@@ -165,7 +165,7 @@ bool CELSLC_prm::check_produced_slices(){
     if( _flag_logger ){
       std::stringstream message;
       message << "The required Class POINTERS for check_produced_slices() are not setted up.";
-      logger->logEvent( ApplicationLog::error , message.str() );
+     BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::error , message.str() );
     }
     print_var_state();
   }
@@ -191,7 +191,7 @@ bool CELSLC_prm::clean_for_re_run(){
       if( _flag_logger ){
         std::stringstream message;
         message << "The required Class POINTERS for clean_for_re_run() are not setted up.";
-        logger->logEvent( ApplicationLog::error , message.str() );
+       BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::error , message.str() );
       }
       print_var_state();
     }
@@ -297,7 +297,7 @@ std::ostream& CELSLC_prm::create_bin_args(std::ostream& args_stream) const {
     if( _flag_logger ){
       std::stringstream message;
       message << "The required Class POINTERS for create_bin_args() are not setted up.";
-      logger->logEvent( ApplicationLog::error , message.str() );
+     BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::error , message.str() );
     }
   }
   return args_stream;
@@ -328,7 +328,7 @@ bool CELSLC_prm::call_boost_bin(){
       if( _flag_logger ){
         std::stringstream message;
         message << "going to run boost process with args: "<< args_stream.str();
-        logger->logEvent( ApplicationLog::notification , message.str() );
+       BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification , message.str() );
       }
 
       int _child_exit_code = -1;
@@ -354,7 +354,7 @@ bool CELSLC_prm::call_boost_bin(){
           if( _flag_logger ){
             std::stringstream message;
             message << " ERROR in child process. message: "<< _error_code.message() ;
-            logger->logEvent( ApplicationLog::error , " ERROR. pipe output is enabled but pipe is closed" );
+           BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::error , " ERROR. pipe output is enabled but pipe is closed" );
           }
         }
       }
@@ -377,14 +377,14 @@ bool CELSLC_prm::call_boost_bin(){
       if( _flag_logger ){
         std::stringstream message;
         message << "(EXIT_SUCCESS == _child_exit_code) "<< (EXIT_SUCCESS == _child_exit_code);
-        logger->logEvent( ApplicationLog::notification , message.str() );
+       BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification , message.str() );
       }
       _exit_sucess_flag = ((EXIT_SUCCESS == _child_exit_code));
 #elif defined(BOOST_POSIX_API)
       if( _flag_logger ){
         std::stringstream message;
         message << "(EXIT_SUCCESS == WEXITSTATUS(_child_exit_code)) "<< (EXIT_SUCCESS == WEXITSTATUS(_child_exit_code));
-        logger->logEvent( ApplicationLog::notification , message.str() );
+       BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification , message.str() );
       }
       _exit_sucess_flag = ((EXIT_SUCCESS == WEXITSTATUS(_child_exit_code)));
 #endif
@@ -392,7 +392,7 @@ bool CELSLC_prm::call_boost_bin(){
         if( _flag_logger ){
           std::stringstream message;
           message << "ERROR CODE:" << _error_code.value() << " MESSAGE:" << _error_code.message();
-          logger->logEvent( ApplicationLog::notification , message.str() );
+         BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification , message.str() );
         }
         _exit_sucess_flag = false;
       }
@@ -405,7 +405,7 @@ bool CELSLC_prm::call_boost_bin(){
       if( _flag_logger ){
         std::stringstream message;
         message << "The required vars for call_boost_bin() are not setted up.";
-        logger->logEvent( ApplicationLog::error , message.str() );
+       BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::error , message.str() );
       }
       print_var_state();
     }
@@ -418,7 +418,7 @@ bool CELSLC_prm::set_application_logger( ApplicationLog::ApplicationLog* app_log
   logger = app_logger;
   _flag_logger = true;
   BaseBin::set_application_logger( app_logger );
-  logger->logEvent( ApplicationLog::notification, "Application logger setted for CELSLC_prm class." );
+ BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification, "Application logger setted for CELSLC_prm class." );
   return true;
 }
 
@@ -426,7 +426,7 @@ void CELSLC_prm::print_var_state(){
   if( _flag_logger ){
     std::stringstream message;
     output(message);
-    logger->logEvent( ApplicationLog::notification , message.str() );
+   BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification , message.str() );
   }
 }
 

@@ -27,8 +27,8 @@ class TDMap  : public QObject {
   Q_OBJECT
   private:
 
-    int image_correlation_matching_method = CV_TM_CCOEFF_NORMED;
-    bool _flag_image_correlation_matching_method = true;
+    //int image_correlation_matching_method = CV_TM_CCOEFF_NORMED;
+    //bool _flag_image_correlation_matching_method = true;
 
     int _refinement_definition_method = RefinementPreset::NO_REFINEMENT ;
     bool _flag_refinement_definition_method = true;
@@ -148,11 +148,13 @@ class TDMap  : public QObject {
 
     // class flag getters
     bool get_flag_project_dir_path(){ return _flag_project_dir_path; };
-    bool get_flag_image_correlation_matching_method(){ return _flag_image_correlation_matching_method; }
     bool get_flag_refinement_definition_method(){ return _flag_refinement_definition_method; }
 
     // class getters
-    int get_image_correlation_matching_method(){ return image_correlation_matching_method ; }
+    int get_image_correlation_matching_method();
+    int get_image_normalization_method();
+
+
     int get_refinement_definition_method(){ return _refinement_definition_method; }
     int get_envelop_parameters_vibrational_damping_method();
     bool get_run_celslc_switch(){ return _run_celslc_switch; }
@@ -318,6 +320,7 @@ class TDMap  : public QObject {
     bool set_mtf_filename( std::string file_name );
     bool set_mtf_switch( bool value );
     bool set_image_correlation_matching_method( int method );
+    bool set_image_normalization_method( int method );
     bool set_exec_log_level( int level );
     bool set_run_celslc_switch( bool value );
     bool set_run_msa_switch( bool value );

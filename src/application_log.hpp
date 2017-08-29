@@ -1,4 +1,4 @@
-#ifndef __APP_LOG_H__ 
+#ifndef __APP_LOG_H__
 #define __APP_LOG_H__
 
 #include <boost/filesystem.hpp>
@@ -15,6 +15,8 @@
 #include <boost/log/attributes/scoped_attribute.hpp>
 #include <boost/log/support/date_time.hpp>
 #include <boost/filesystem.hpp>
+
+#define LOG_EVENT( level, message )	ApplicationLog::logEvent(level, message, __FILE__, __LINE__, __FUNCTION__ )
 
 namespace ApplicationLog {
   namespace logging = boost::log;
@@ -36,6 +38,7 @@ namespace ApplicationLog {
     public:
       ApplicationLog( boost::filesystem::path full_path_file );
       void logEvent(const severity_level level, std::string message);
+      void logEvent(const severity_level level, std::string message, std::string file , std::string line, std::string function);
 
     private:
       src::severity_logger<severity_level> m_logger;

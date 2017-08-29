@@ -25,11 +25,13 @@
 class Application final : public QApplication {
   public:
     ApplicationLog::ApplicationLog* im2model_logger;
+
     Application(int& argc, char** argv ) : QApplication(argc, argv) {
       QCoreApplication::addLibraryPath("./");
       boost::filesystem::path full_path( boost::filesystem::current_path() );
       boost::filesystem::path app_path( QCoreApplication::applicationDirPath().toStdString() );
       im2model_logger = new ApplicationLog::ApplicationLog( app_path );
+      BOOST_LOG_FUNCTION();
       im2model_logger->logEvent(ApplicationLog::notification, "Application start");
       std::stringstream message;
       message << "applicationDirPath: " << app_path.string();
@@ -40,6 +42,7 @@ class Application final : public QApplication {
     }
 
     bool notify(QObject *receiver, QEvent *event) override {
+      BOOST_LOG_FUNCTION();
       bool result = false;
       try {
         result = QApplication::notify(receiver, event);

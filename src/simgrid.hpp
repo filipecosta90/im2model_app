@@ -74,10 +74,13 @@ class SimGrid {
     cv::Mat sim_grid;
 
     // simulated images
+    std::vector< std::vector<cv::Mat> > cleaned_simulated_images_grid;
+    bool _flag_cleaned_simulated_images_grid = false;
     std::vector< std::vector<cv::Mat> > simulated_images_grid;
     bool _flag_simulated_images_grid = false;
     std::vector< std::vector<cv::Mat> > raw_simulated_images_grid;
     bool _flag_raw_simulated_images_grid = false;
+
     std::vector< std::vector<cv::Point> > experimental_images_match_location_grid;
 
     //will contain the all the simulated images match percentage
@@ -100,6 +103,7 @@ class SimGrid {
     // // // // //
     bool sim_grid_switch = false;
     bool runned_simulation = false;
+    int normalization_mode = InmageNormalizationMode::LOCAL_NORMALIZATION;
 
     /* Loggers */
     ApplicationLog::ApplicationLog* logger = nullptr;
@@ -110,10 +114,23 @@ class SimGrid {
     SimGrid( boost::process::ipstream& async_io_buffer_out );
     bool export_sim_grid( std::string filename , bool cut_margin = false );
 
+    enum InmageNormalizationMode { LOCAL_NORMALIZATION, GLOBAL_NORMALIZATION, NO_NORMALIZATION };
+
     /** getters **/
     int get_simgrid_best_match_thickness_slice(){ return simgrid_best_match_thickness_slice; }
     double get_simgrid_best_match_thickness_nm(){ return simgrid_best_match_thickness_nm; }
     double get_simgrid_best_match_defocus_nm(){ return simgrid_best_match_defocus_nm; }
+    int get_image_correlation_matching_method(){ return _sim_correlation_method; }
+        std::vector< std::vector<cv::Mat> > get_simulated_images_grid();
+        cv::Mat get_match_values_matrix(){ return match_values_matrix; }
+        cv::Point2i get_best_match_position(){ return best_match_Point2i; }
+        cv::Mat get_simulated_image_in_grid( int row, int col );
+        double get_simulated_image_match_in_grid( int row, int col );
+        int get_simulated_image_thickness_slice_in_grid( int row, int col );
+        double get_simulated_image_thickness_nm_in_grid( int row, int col );
+        double get_simulated_image_defocus_in_grid( int row, int col );
+        std::string get_export_sim_grid_filename_hint();
+            int get_image_normalization_method(){ return normalization_mode; }
 
     // flag getters
     bool get_flag_simgrid_best_match_thickness_slice(){ return _flag_simgrid_best_match_thickness_slice; }
@@ -137,36 +154,18 @@ class SimGrid {
 
     bool read_grid_from_dat_files();
     bool apply_margin_to_grid();
+    bool apply_normalization_to_grid();
     bool simulate_from_grid();
 
     bool clean_for_re_run();
     bool base_cystal_clean_for_re_run();
 
-    int get_image_correlation_matching_method();
-
-    std::vector< std::vector<cv::Mat> > get_simulated_images_grid();
-
-    cv::Mat get_match_values_matrix();
-
-    cv::Point2i get_best_match_position();
-
-    cv::Mat get_simulated_image_in_grid( int row, int col );
-
-    double get_simulated_image_match_in_grid( int row, int col );
-
-    int get_simulated_image_thickness_slice_in_grid( int row, int col );
-
-    double get_simulated_image_thickness_nm_in_grid( int row, int col );
-
-    double get_simulated_image_defocus_in_grid( int row, int col );
-
-    std::string get_export_sim_grid_filename_hint();
 
     bool set_image_correlation_matching_method( int enumerator );
+    bool set_image_normalization_method( int enumerator );
     void set_roi_pixel_size( int pixel_size );
-
     void set_sim_grid_switch( bool sgrid_switch );
-
+    void set_global_normalization_switch( bool normalization_switch );
     bool set_sim_crystal_properties ( BaseCrystal* crystal_prop );
     bool set_exp_image_properties ( BaseImage* exp_image_properties );
     bool set_sim_image_properties ( BaseImage* sim_image_properties );

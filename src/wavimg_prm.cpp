@@ -86,7 +86,7 @@ bool WAVIMG_prm::produce_prm ( ) {
               message << simulated_params_nm_slice_vec[slice_id] << " (sli# "<< simulated_params_slice_vec[slice_id] << "), ";
             }
             message <<"}";
-            logger->logEvent( ApplicationLog::notification , message.str() );
+           BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification , message.str() );
           }
 
           boost::filesystem::path file ( prm_filename );
@@ -182,7 +182,7 @@ bool WAVIMG_prm::produce_prm ( ) {
           if( _flag_logger ){
             std::stringstream message;
             message << "checking if WAVIMG prm file was produced. filename: " <<  full_path.string() << " || result: " << boost::filesystem::exists( full_path.string() ) << std::endl;
-            logger->logEvent( ApplicationLog::notification , message.str() );
+           BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification , message.str() );
           }
 
           _flag_produced_prm = boost::filesystem::exists( full_path );
@@ -194,7 +194,7 @@ bool WAVIMG_prm::produce_prm ( ) {
       if( _flag_logger ){
         std::stringstream message;
         message << "The required vars for produce_prm() are not setted up.";
-        logger->logEvent( ApplicationLog::error , message.str() );
+       BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::error , message.str() );
       }
       print_var_state();
     }
@@ -203,7 +203,7 @@ bool WAVIMG_prm::produce_prm ( ) {
     if( _flag_logger ){
       std::stringstream message;
       message << "The required Class POINTERS for produce_prm() are not setted up.";
-      logger->logEvent( ApplicationLog::error , message.str() );
+     BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::error , message.str() );
     }
     print_var_state();
   }
@@ -237,7 +237,7 @@ bool WAVIMG_prm::check_clean_run_env(){
           message << "The file: " << full_dat_path.string() << " should be deleted.";
           run_env_warnings.push_back( message.str() );
           if( _flag_logger ){
-            logger->logEvent( ApplicationLog::notification , message.str() );
+           BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification , message.str() );
           }
         }
       }
@@ -258,7 +258,7 @@ bool WAVIMG_prm::cleanup_prm(){
     if( _flag_logger ){
       std::stringstream message;
       message << "Removing the wavimg prm file: " << full_prm_path.string() << " result: " << std::boolalpha << status;
-      logger->logEvent( ApplicationLog::notification , message.str() );
+     BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification , message.str() );
     }
   }
   return status;
@@ -286,7 +286,7 @@ bool WAVIMG_prm::cleanup_dat(){
           if( _flag_logger ){
             std::stringstream message;
             message << "Removing the dat file: " << full_dat_path.string() << " result: " << std::boolalpha << remove_result;
-            logger->logEvent( ApplicationLog::notification , message.str() );
+           BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification , message.str() );
           }
         }
       }
@@ -332,7 +332,7 @@ bool WAVIMG_prm::call_bin(){
     if( _flag_logger ){
       std::stringstream message;
       message << "going to run boost process with args: "<< args_stream.str();
-      logger->logEvent( ApplicationLog::notification , message.str() );
+     BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification , message.str() );
     }
 
     int _child_exit_code = -1;
@@ -358,7 +358,7 @@ bool WAVIMG_prm::call_bin(){
         if( _flag_logger ){
           std::stringstream message;
           message << " ERROR. pipe output is enabled but pipe is closed";
-          logger->logEvent( ApplicationLog::error ,  message.str() );
+         BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::error ,  message.str() );
         }
       }
     }
@@ -378,7 +378,7 @@ bool WAVIMG_prm::call_bin(){
       if( _flag_logger ){
         std::stringstream message;
         message << " runned in silent mode";
-        logger->logEvent( ApplicationLog::notification ,  message.str() );
+       BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification ,  message.str() );
       }
     }
 
@@ -387,14 +387,14 @@ bool WAVIMG_prm::call_bin(){
     if( _flag_logger ){
       std::stringstream message;
       message << "(EXIT_SUCCESS == _child_exit_code) "<< (EXIT_SUCCESS == _child_exit_code);
-      logger->logEvent( ApplicationLog::notification , message.str() );
+     BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification , message.str() );
     }
     _exit_sucess_flag = ((EXIT_SUCCESS == _child_exit_code));
 #elif defined(BOOST_POSIX_API)
     if( _flag_logger ){
       std::stringstream message;
       message << "(EXIT_SUCCESS == WEXITSTATUS(_child_exit_code)) "<< (EXIT_SUCCESS == WEXITSTATUS(_child_exit_code));
-      logger->logEvent( ApplicationLog::notification , message.str() );
+     BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification , message.str() );
     }
     _exit_sucess_flag = ((EXIT_SUCCESS == WEXITSTATUS(_child_exit_code)));
 #endif
@@ -403,7 +403,7 @@ bool WAVIMG_prm::call_bin(){
       if( _flag_logger ){
         std::stringstream message;
         message << "ERROR CODE:" << _error_code.value() << " MESSAGE:" << _error_code.message();
-        logger->logEvent( ApplicationLog::notification , message.str() );
+       BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification , message.str() );
       }
       _exit_sucess_flag = false;
     }
@@ -437,7 +437,7 @@ bool WAVIMG_prm::check_produced_dat(){
         if( _flag_logger ){
           std::stringstream message;
           message << "Checking if the produced dat file exists: " << full_dat_path.string() << " result: " << std::boolalpha << _dat_exists;
-          logger->logEvent( ApplicationLog::notification , message.str() );
+         BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification , message.str() );
         }
       }
     }
@@ -628,14 +628,14 @@ bool WAVIMG_prm::set_mtf_filename( std::string file_name ){
     if( _flag_logger ){
       std::stringstream message;
       message << "Specified mtf file: " <<  mtf_filename;
-      logger->logEvent( ApplicationLog::normal , message.str() );
+     BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::normal , message.str() );
     }
   }
   else{
     if( _flag_logger ){
       std::stringstream message;
       message << "The specified mtf file does not exist: " <<  file_name << " result " << _flag_mtf_filename;
-      logger->logEvent( ApplicationLog::error , message.str() );
+     BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::error , message.str() );
     }
   }
   return _flag_mtf_filename;
@@ -775,7 +775,7 @@ bool WAVIMG_prm::set_application_logger( ApplicationLog::ApplicationLog* app_log
   logger = app_logger;
   _flag_logger = true;
   BaseBin::set_application_logger( app_logger );
-  logger->logEvent( ApplicationLog::notification, "Application logger setted for WAVIMG_prm class." );
+ BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification, "Application logger setted for WAVIMG_prm class." );
   return true;
 }
 
@@ -783,7 +783,7 @@ void WAVIMG_prm::print_var_state(){
   if( _flag_logger ){
     std::stringstream message;
     output( message );
-    logger->logEvent( ApplicationLog::notification , message.str() );
+   BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification , message.str() );
   }
 }
 
