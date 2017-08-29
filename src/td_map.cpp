@@ -130,7 +130,7 @@ TDMap::TDMap(
   // SIMULATION DEPENDENT
   // setters line 8
   _tdmap_wavimg_parameters->set_image_data_type( 0 );
-  _tdmap_wavimg_parameters->set_image_vacuum_mean_intensity( 3000.0f );
+  _tdmap_wavimg_parameters->set_image_vacuum_mean_intensity( 1.0f );
   _tdmap_wavimg_parameters->set_conversion_rate( 1.0f );
   _tdmap_wavimg_parameters->set_readout_noise_rms_amplitude( 0.0f );
   // setters line 9

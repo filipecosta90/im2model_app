@@ -2008,8 +2008,8 @@ spherical_aberration_nm->set_fp_data_getter_double_vec( 1, box3_function_5_1_1_g
   // load the preset data from core constuctor
   image_normalization_method->load_data_from_getter( 1 );
 
-  QVector<QVariant> box3_option_6_2_drop = {"Local normalization","Global normalization","No normalization"};
-  QVector<QVariant> box3_option_6_2_drop_enum( { SimGrid::InmageNormalizationMode::LOCAL_NORMALIZATION, SimGrid::InmageNormalizationMode::GLOBAL_NORMALIZATION, SimGrid::InmageNormalizationMode::NO_NORMALIZATION } );
+  QVector<QVariant> box3_option_6_2_drop = {"Local normalization","Global normalization"};
+  QVector<QVariant> box3_option_6_2_drop_enum( { SimGrid::InmageNormalizationMode::LOCAL_NORMALIZATION, SimGrid::InmageNormalizationMode::GLOBAL_NORMALIZATION} );
 
   image_normalization_method->set_item_delegate_type( TreeItem::_delegate_DROP );
   image_normalization_method->set_dropdown_options( 1, box3_option_6_2_drop, box3_option_6_2_drop_enum  );

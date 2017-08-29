@@ -165,7 +165,18 @@ bool BaseImage::set_full_image( std::string image_path ){
         std::cout << "Exception: " << e.what() << std::endl;
       }
     }
+    if( _flag_full_image ){
+      if( _flag_logger ){
+        std::stringstream message;
+        message << "Sucessfully read image with type " << type2str( full_image.type() );
+        ApplicationLog::severity_level _log_type = ApplicationLog::normal;
+       BOOST_LOG_FUNCTION();
+       logger->logEvent( _log_type , message.str() );
+      }
+    }
+
   }
+
   return _flag_full_image;
 }
 
@@ -224,6 +235,29 @@ bool BaseImage::set_pixel_size_height_x_m( double rate_m ){
   auto_calculate_ignore_edge_pixels();
   set_roi();
   return true;
+}
+
+std::string BaseImage::type2str(int type){
+  std::string r;
+
+  uchar depth = type & CV_MAT_DEPTH_MASK;
+  uchar chans = 1 + (type >> CV_CN_SHIFT);
+
+  switch ( depth ) {
+    case CV_8U:  r = "8U"; break;
+    case CV_8S:  r = "8S"; break;
+    case CV_16U: r = "16U"; break;
+    case CV_16S: r = "16S"; break;
+    case CV_32S: r = "32S"; break;
+    case CV_32F: r = "32F"; break;
+    case CV_64F: r = "64F"; break;
+    default:     r = "User"; break;
+  }
+
+  r += "C";
+  r += (chans+'0');
+
+  return r;
 }
 
 bool BaseImage::set_sampling_rate_y_nm_per_pixel( double rate ){

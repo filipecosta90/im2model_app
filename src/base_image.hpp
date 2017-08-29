@@ -181,6 +181,7 @@ class BaseImage {
     bool set_ignore_edge_pixels( int ignore_edge_pixels );
     bool set_ignore_edge_nm( double ignore_edge_nm );
 
+static std::string type2str(int type);
     /* Loggers */
     bool set_application_logger( ApplicationLog::ApplicationLog* logger );
 

@@ -370,10 +370,10 @@ bool SimGrid::apply_normalization_to_grid(){
               case LOCAL_NORMALIZATION:
                 double min, max;
                 cv::minMaxLoc(cleaned_simulated_image, &min, &max);
-                cleaned_simulated_image.convertTo(normalized_simulated_image, CV_8UC1 , 255.0f/(max - min), -min * 255.0f/(max - min));
+                cleaned_simulated_image.convertTo(normalized_simulated_image, cv::DataType<unsigned char>::type , 255.0f/(max - min), -min * 255.0f/(max - min));
                 break;
               case NO_NORMALIZATION:
-                normalized_simulated_image = cleaned_simulated_image;
+                cleaned_simulated_image.convertTo(normalized_simulated_image, cv::DataType<unsigned char>::type );
                 break;
             }
             normalized_simulated_images_row.push_back( normalized_simulated_image );
@@ -394,13 +394,13 @@ bool SimGrid::apply_normalization_to_grid(){
           for (int defocus = 0; defocus < defocus_samples ; defocus ++ ){
             try{
               cv::Mat normalized_simulated_image = simulated_images_grid[thickness][defocus];
-              normalized_simulated_image.convertTo(normalized_simulated_image, CV_8UC1 , 255.0f/(global_max - global_min), -global_min * 255.0f/(global_max - global_min));
+              normalized_simulated_image.convertTo(normalized_simulated_image, cv::DataType<unsigned char>::type , 255.0f/(global_max - global_min), -global_min * 255.0f/(global_max - global_min));
               simulated_images_grid[thickness][defocus] = normalized_simulated_image;
             } catch ( const std::exception& e ){
               _error_flag = true;
               if( _flag_logger ){
                 std::stringstream message;
-                message << "A standard exception was caught, while running apply_normalization_to_grid(): \"" << e.what() <<  "\" while processing image: row,col[<<" << thickness <<" , " << defocus <<  " ]"  ;
+                message << "A standard exception was caught, while running apply_normalization_to_grid(): \"" << e.what() <<  "\" while processing image: row,col[<<" << thickness << " , " << defocus <<  " ]"  ;
                 ApplicationLog::severity_level _log_type = ApplicationLog::error;
                BOOST_LOG_FUNCTION();  logger->logEvent( _log_type , message.str() );
               }
@@ -459,7 +459,8 @@ bool SimGrid::apply_margin_to_grid(){
             if( sim_image_properties->get_flag_roi_rectangle() ){
               const cv::Rect roi_rect = sim_image_properties->get_roi_rectangle();
               cleaned_simulated_image = raw_simulated_image( roi_rect );
-              std::cout << " cleaned_simulated_image.size() " << cleaned_simulated_image.size() << std::endl;
+
+              std::cout << " cleaned_simulated_image.size() " << cleaned_simulated_image.size() << " type " << BaseImage::type2str( cleaned_simulated_image.type() )<< std::endl;
             }
             else{
               cleaned_simulated_image = raw_simulated_image;
@@ -554,11 +555,14 @@ bool SimGrid::simulate_from_grid(){
           try{
             // get the matrix in the specified col of tdmap (defocus pos)
             const cv::Mat cleaned_simulated_image = cleaned_edges_simulated_images_row.at( defocus );
+            std::cout << " cleaned_simulated_image.size() " << cleaned_simulated_image.size() << " type " << BaseImage::type2str( cleaned_simulated_image.type() )<< std::endl;
 
             /// Create the result matrix
             int result_cols =  roi_n_cols_width - cleaned_simulated_image.cols + 1;
             int result_rows = roi_n_rows_height - cleaned_simulated_image.rows + 1;
-            cv::Mat result( result_rows, result_cols, CV_8UC1 );
+
+            cv::Mat result( result_rows, result_cols, cv::DataType<unsigned char>::type );
+            std::cout << " result.size() " << result.size() << " type " << BaseImage::type2str( result.type() )<< std::endl;
 
             //: normalized correlation, non-normalized correlation and sum-absolute-difference
             cv::matchTemplate( roi_image , cleaned_simulated_image, result, _sim_correlation_method  );
@@ -574,7 +578,7 @@ bool SimGrid::simulate_from_grid(){
             _error_flag = true;
             if( _flag_logger ){
               std::stringstream message;
-              message << "A standard exception was caught, while running _td_map_simgrid->read_grid_from_dat_files(): \"" << e.what() <<  "\" while processing image: row,col[<<" << thickness-1 <<" , " << defocus-1<<  " ]"  ;
+              message << "A standard exception was caught, while running _td_map_simgrid->simulate_from_grid(): \"" << e.what() <<  "\" while processing image: row,col[<<" << thickness <<" , " << defocus <<  " ]"  ;
               ApplicationLog::severity_level _log_type = ApplicationLog::error;
              BOOST_LOG_FUNCTION();  logger->logEvent( _log_type , message.str() );
             }

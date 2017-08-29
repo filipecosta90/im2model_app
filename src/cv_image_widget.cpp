@@ -46,14 +46,14 @@ void CVImageWidget::setImage( const cv::Mat& image ){
   // Convert the image to the RGB888 format
   //std::cout << "image.type() " << image.type() << std::endl;
   switch (image.type()) {
-    case CV_8UC1:
+    case cv::DataType<unsigned char>::type:
       cvtColor(image, _tmp_original, CV_GRAY2RGB);
       break;
     case cv::DataType<unsigned short>::type:
       {
         //std::cout << "cv::DataType<unsigned short>::type" << std::endl;
         cv::Mat temp;
-        image.convertTo(temp, CV_8UC1, 1.0f/255.0f);
+        image.convertTo(temp, cv::DataType<unsigned char>::type, 1.0f/255.0f);
         cvtColor(temp, _tmp_original, CV_GRAY2RGB );
         break;
       }
