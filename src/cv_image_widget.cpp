@@ -44,14 +44,12 @@ void CVImageWidget::fitToWindow(){
 
 void CVImageWidget::setImage( const cv::Mat& image ){
   // Convert the image to the RGB888 format
-  //std::cout << "image.type() " << image.type() << std::endl;
   switch (image.type()) {
     case cv::DataType<unsigned char>::type:
       cvtColor(image, _tmp_original, CV_GRAY2RGB);
       break;
     case cv::DataType<unsigned short>::type:
       {
-        //std::cout << "cv::DataType<unsigned short>::type" << std::endl;
         cv::Mat temp;
         image.convertTo(temp, cv::DataType<unsigned char>::type, 1.0f/255.0f);
         cvtColor(temp, _tmp_original, CV_GRAY2RGB );
@@ -64,7 +62,7 @@ void CVImageWidget::setImage( const cv::Mat& image ){
 
   // QImage needs the data to be stored continuously in memory
   assert( _tmp_original.isContinuous() );
-  original_size = _tmp_original.size();
+  original_size = image.size();
   std::cout << " original size " << original_size << std::endl;
   // Assign OpenCV's image buffer to the QImage. Note that the bytesPerLine parameter
   // (http://qt-project.org/doc/qt-4.8/qimage.html#QImage-6) is 3*width because each pixel

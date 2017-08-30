@@ -118,7 +118,7 @@
            </widget>
           </item>
           <item>
-           <widget class="CvImageFrameWidget" name="qgraphics_roi_experimental_image" native="true">
+           <widget class="CvImageFrameWidget" name="qgraphics_roi_experimental_image_tab1" native="true">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
               <horstretch>0</horstretch>
@@ -359,12 +359,12 @@
                  </font>
                 </property>
                 <property name="text">
-                 <string>Current TD selection</string>
+                 <string>TEM ROI</string>
                 </property>
                </widget>
               </item>
               <item>
-               <widget class="CvImageFrameTableWidget" name="qgraphics_tdmap_selection" native="true">
+               <widget class="CvImageFrameTableWidget" name="qgraphics_roi_experimental_image_tab2" native="true">
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
                   <horstretch>0</horstretch>
@@ -417,12 +417,12 @@
                  </font>
                 </property>
                 <property name="text">
-                 <string>TD best match</string>
+                 <string>Current TD Selection</string>
                 </property>
                </widget>
               </item>
               <item>
-               <widget class="CvImageFrameTableWidget" name="qgraphics_tdmap_best_match" native="true">
+               <widget class="CvImageFrameTableWidget" name="qgraphics_tdmap_selection" native="true">
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
                   <horstretch>0</horstretch>

@@ -46,6 +46,9 @@ bool SuperCell::update_from_unit_cell(){
   bool result = false;
   std::cout << " update_from_unit_cell" << std::endl;
   if( _flag_unit_cell ){
+    if( _flag_zone_axis && _flag_upward_vector && !_flag_orientation_matrix ){
+      form_matrix_from_miller_indices();
+    }
     if(
         unit_cell->get_flag_parsed_cif() &&
         _flag_orientation_matrix
@@ -388,6 +391,9 @@ bool SuperCell::orientate_atoms_from_matrix(){
   std::cout <<  "### orientate_atoms_from_matrix" << std::endl;
   bool result = false;
   if( _flag_unit_cell ){
+    if( _flag_zone_axis && _flag_upward_vector && !_flag_orientation_matrix ){
+      form_matrix_from_miller_indices();
+    }
     if( _flag_orientation_matrix ){
       boost::function<cv::Point3d(cv::Point3d)> functor ( boost::bind(&SuperCell::op_Mat3d_dot_Point3d, this , orientation_matrix, _1) );
       for ( size_t pos = 0; pos < atom_positions.size() ; pos++ ){

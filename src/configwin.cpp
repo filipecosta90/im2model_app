@@ -10,7 +10,6 @@ MainWindow::MainWindow( ApplicationLog::ApplicationLog* logger , QWidget *parent
   _flag_im2model_logger = true;
   im2model_logger->logEvent(ApplicationLog::notification, "Application logger setted for MainWindow class.");
 
-
   if (_flag_im2model_logger) {
     im2model_logger->logEvent(ApplicationLog::normal, "Setting up UI.");
   }
@@ -317,8 +316,8 @@ void MainWindow::update_tdmap_best_match( int x,int y ){
     model->setItem(1, 1, thickness_item);
     model->setItem(2, 1, defocus_item);
 
-    ui->qgraphics_tdmap_best_match->setModel(model);
-    ui->qgraphics_tdmap_best_match->setImage( _simulated_image );
+    ui->qgraphics_tdmap_selection->setModel(model);
+    ui->qgraphics_tdmap_selection->setImage( _simulated_image );
   }
 }
 
@@ -439,8 +438,10 @@ void MainWindow::update_full_experimental_image(){
 void MainWindow::update_roi_experimental_image_frame(){
   if( _core_td_map->get_exp_image_properties_flag_roi_image() ){
     cv::Mat roi_image = _core_td_map->get_exp_image_properties_roi_image();
-    ui->qgraphics_roi_experimental_image->setImage( roi_image );
-    ui->qgraphics_roi_experimental_image->show();
+    ui->qgraphics_roi_experimental_image_tab1->setImage( roi_image );
+    ui->qgraphics_roi_experimental_image_tab2->setImage( roi_image );
+    ui->qgraphics_roi_experimental_image_tab1->show();
+    ui->qgraphics_roi_experimental_image_tab2->show();
   }
 }
 
@@ -1441,6 +1442,10 @@ void MainWindow::create_box_options(){
   boost::function<bool(std::string)> box2_function_3_1 ( boost::bind( &TDMap::set_zone_axis_u,_core_td_map, _1 ) );
   zone_axis_u = new TreeItem ( box2_option_3_1 , box2_function_3_1, box2_option_3_1_edit );
   zone_axis_u->set_variable_name( "zone_axis_u" );
+  boost::function<double(void)> box2_function_3_1_getter ( boost::bind( &TDMap::get_zone_axis_u, _core_td_map ) );
+  zone_axis_u->set_fp_data_getter_int_vec( 1, box2_function_3_1_getter );
+  // load the preset data from core constuctor
+  zone_axis_u->load_data_from_getter( 1 );
   zone_axis->insertChildren( zone_axis_u );
 
   /*group options*/
@@ -1456,6 +1461,10 @@ void MainWindow::create_box_options(){
   boost::function<bool(std::string)> box2_function_3_2 ( boost::bind( &TDMap::set_zone_axis_v,_core_td_map, _1 ) );
   zone_axis_v = new TreeItem ( box2_option_3_2 , box2_function_3_2, box2_option_3_2_edit );
   zone_axis_v->set_variable_name( "zone_axis_v" );
+  boost::function<double(void)> box2_function_3_2_getter ( boost::bind( &TDMap::get_zone_axis_v, _core_td_map ) );
+  zone_axis_v->set_fp_data_getter_int_vec( 1, box2_function_3_2_getter );
+  // load the preset data from core constuctor
+  zone_axis_v->load_data_from_getter( 1 );
   zone_axis->insertChildren( zone_axis_v );
 
   /*group options*/
@@ -1472,6 +1481,10 @@ void MainWindow::create_box_options(){
   boost::function<bool(std::string)> box2_function_3_3 ( boost::bind( &TDMap::set_zone_axis_w,_core_td_map, _1 ) );
   zone_axis_w = new TreeItem ( box2_option_3_3 , box2_function_3_3, box2_option_3_3_edit );
   zone_axis_w->set_variable_name( "zone_axis_w" );
+  boost::function<double(void)> box2_function_3_3_getter ( boost::bind( &TDMap::get_zone_axis_w, _core_td_map ) );
+  zone_axis_w->set_fp_data_getter_int_vec( 1, box2_function_3_3_getter );
+  // load the preset data from core constuctor
+  zone_axis_w->load_data_from_getter( 1 );
   zone_axis->insertChildren( zone_axis_w );
 
   /*group options*/
@@ -1496,6 +1509,10 @@ void MainWindow::create_box_options(){
   boost::function<bool(std::string)> box2_function_2_1 ( boost::bind( &TDMap::set_upward_vector_u,_core_td_map, _1 ) );
   upward_vector_u = new TreeItem ( box2_option_2_1 , box2_function_2_1, box2_option_2_1_edit );
   upward_vector_u->set_variable_name( "upward_vector_u" );
+  boost::function<double(void)> box2_function_2_1_getter ( boost::bind( &TDMap::get_upward_vector_u, _core_td_map ) );
+  upward_vector_u->set_fp_data_getter_int_vec( 1, box2_function_2_1_getter );
+  // load the preset data from core constuctor
+  upward_vector_u->load_data_from_getter( 1 );
   upward_vector->insertChildren( upward_vector_u );
 
   /*group options*/
@@ -1512,6 +1529,10 @@ void MainWindow::create_box_options(){
   boost::function<bool(std::string)> box2_function_2_2 ( boost::bind( &TDMap::set_upward_vector_v,_core_td_map, _1 ) );
   upward_vector_v = new TreeItem ( box2_option_2_2 , box2_function_2_2, box2_option_2_2_edit );
   upward_vector_v->set_variable_name( "upward_vector_v" );
+  boost::function<double(void)> box2_function_2_2_getter ( boost::bind( &TDMap::get_upward_vector_v, _core_td_map ) );
+  upward_vector_v->set_fp_data_getter_int_vec( 1, box2_function_2_2_getter );
+  // load the preset data from core constuctor
+  upward_vector_v->load_data_from_getter( 1 );
   upward_vector->insertChildren( upward_vector_v );
 
   /*group options*/
@@ -1528,6 +1549,10 @@ void MainWindow::create_box_options(){
   boost::function<bool(std::string)>  box2_function_2_3 ( boost::bind( &TDMap::set_upward_vector_w,_core_td_map, _1 ) );
   upward_vector_w = new TreeItem (  box2_option_2_3 ,  box2_function_2_3,  box2_option_2_3_edit );
   upward_vector_w->set_variable_name( "upward_vector_w" );
+  boost::function<double(void)> box2_function_2_3_getter ( boost::bind( &TDMap::get_upward_vector_w, _core_td_map ) );
+  upward_vector_w->set_fp_data_getter_int_vec( 1, box2_function_2_3_getter );
+  // load the preset data from core constuctor
+  upward_vector_w->load_data_from_getter( 1 );
   upward_vector->insertChildren( upward_vector_w );
 
   /*group options*/
@@ -1580,6 +1605,55 @@ void MainWindow::create_box_options(){
   tdmap_simulation_setup_model = new TreeModel( tdmap_root );
 
   ////////////////
+  // Cell Dimensions
+  ////////////////
+  QVector<QVariant> box3_option_4 = {"Cell Dimensions",""};
+  tdmap_cell_dimensions = new TreeItem ( box3_option_4 );
+  tdmap_cell_dimensions->set_variable_name( "tdmap_cell_dimensions" );
+  tdmap_root->insertChildren( tdmap_cell_dimensions );
+
+  ////////////////
+  // Cell Dimensions -- a
+  ////////////////
+  QVector<QVariant> box3_option_4_1 = {"a (nm)",""};
+  QVector<bool> box3_option_4_1_edit = {false,true};
+  boost::function<bool(std::string)> box3_function_4_1 ( boost::bind( &TDMap::set_super_cell_size_a, _core_td_map, _1 ) );
+  tdmap_cell_dimensions_a = new TreeItem ( box3_option_4_1 , box3_function_4_1, box3_option_4_1_edit );
+  tdmap_cell_dimensions_a->set_variable_name( "tdmap_cell_dimensions_a" );
+
+  tdmap_cell_dimensions->insertChildren( tdmap_cell_dimensions_a );
+
+  /*group options*/
+  celslc_step_group_options->add_option( tdmap_simulation_setup_model, tdmap_cell_dimensions_a , 1, true);
+
+  /* validators */
+  tdmap_cell_dimensions_a->set_flag_validatable_double(1,true);
+  boost::function<double(void)> box3_function_4_1_validator_bot ( boost::bind( &TDMap::get_tdmap_cell_dimensions_a_bottom_limit, _core_td_map ) );
+  boost::function<double(void)> box3_function_4_1_validator_top ( boost::bind( &TDMap::get_tdmap_cell_dimensions_a_top_limit, _core_td_map ) );
+  tdmap_cell_dimensions_a->set_validator_double_bottom(1, box3_function_4_1_validator_bot );
+  tdmap_cell_dimensions_a->set_validator_double_top(1, box3_function_4_1_validator_top );
+
+  ////////////////
+  // Cell Dimensions -- b
+  ////////////////
+  QVector<QVariant> box3_option_4_2 = {"b (nm)",""};
+  QVector<bool> box3_option_4_2_edit = {false,true};
+  boost::function<bool(std::string)> box3_function_4_2 ( boost::bind( &TDMap::set_super_cell_size_b, _core_td_map, _1 ) );
+  tdmap_cell_dimensions_b = new TreeItem ( box3_option_4_2 , box3_function_4_2, box3_option_4_2_edit );
+  tdmap_cell_dimensions_b->set_variable_name( "tdmap_cell_dimensions_b" );
+  tdmap_cell_dimensions->insertChildren( tdmap_cell_dimensions_b );
+
+  /*group options*/
+  celslc_step_group_options->add_option( tdmap_simulation_setup_model, tdmap_cell_dimensions_b , 1, true);
+
+  /* validators */
+  tdmap_cell_dimensions_b->set_flag_validatable_double(1,true);
+  boost::function<double(void)> box3_function_4_2_validator_bot ( boost::bind( &TDMap::get_tdmap_cell_dimensions_b_bottom_limit, _core_td_map ) );
+  boost::function<double(void)> box3_function_4_2_validator_top ( boost::bind( &TDMap::get_tdmap_cell_dimensions_b_top_limit, _core_td_map ) );
+  tdmap_cell_dimensions_b->set_validator_double_bottom(1, box3_function_4_2_validator_bot );
+  tdmap_cell_dimensions_b->set_validator_double_top(1, box3_function_4_2_validator_top );
+
+  ////////////////
   // 2D variation map
   ////////////////
   QVector<QVariant> box3_option_0 = {"Parameter variation map",""};
@@ -1594,23 +1668,6 @@ void MainWindow::create_box_options(){
   _parameter_variation_map_thickness  = new TreeItem ( box3_option_0_1 );
   _parameter_variation_map_thickness->set_variable_name( "_parameter_variation_map_thickness" );
   _parameter_variation_map->insertChildren( _parameter_variation_map_thickness );
-
-  ////////////////
-  //Thickness range -- Samples
-  ////////////////
-  QVector<QVariant> box3_option_1_3 = {"Samples",""};
-  QVector<bool> box3_option_1_3_edit = {false,true};
-  boost::function<bool(std::string)> box3_function_1_3 ( boost::bind( &TDMap::set_slice_samples, _core_td_map, _1 ) );
-  thickness_range_number_samples = new TreeItem ( box3_option_1_3 , box3_function_1_3, box3_option_1_3_edit );
-  thickness_range_number_samples->set_variable_name( "thickness_range_number_samples" );
-  _parameter_variation_map_thickness->insertChildren( thickness_range_number_samples );
-
-  /* validators */
-  thickness_range_number_samples->set_flag_validatable_int(1,true);
-  boost::function<int(void)> box3_function_1_3_validator_bot ( boost::bind( &TDMap::get_slice_samples_bottom_limit, _core_td_map ) );
-  boost::function<int(void)> box3_function_1_3_validator_top ( boost::bind( &TDMap::get_slice_samples_top_limit, _core_td_map ) );
-  thickness_range_number_samples->set_validator_int_bottom(1, box3_function_1_3_validator_bot );
-  thickness_range_number_samples->set_validator_int_top(1, box3_function_1_3_validator_top );
 
   ////////////////
   // Thickness range
@@ -1656,29 +1713,29 @@ void MainWindow::create_box_options(){
   thickness_range_upper_bound->set_validator_double_top(1, box3_function_1_2_validator_top );
 
   ////////////////
+  //Thickness range -- Samples
+  ////////////////
+  QVector<QVariant> box3_option_1_3 = {"Samples",""};
+  QVector<bool> box3_option_1_3_edit = {false,true};
+  boost::function<bool(std::string)> box3_function_1_3 ( boost::bind( &TDMap::set_slice_samples, _core_td_map, _1 ) );
+  thickness_range_number_samples = new TreeItem ( box3_option_1_3 , box3_function_1_3, box3_option_1_3_edit );
+  thickness_range_number_samples->set_variable_name( "thickness_range_number_samples" );
+  _parameter_variation_map_thickness->insertChildren( thickness_range_number_samples );
+
+  /* validators */
+  thickness_range_number_samples->set_flag_validatable_int(1,true);
+  boost::function<int(void)> box3_function_1_3_validator_bot ( boost::bind( &TDMap::get_slice_samples_bottom_limit, _core_td_map ) );
+  boost::function<int(void)> box3_function_1_3_validator_top ( boost::bind( &TDMap::get_slice_samples_top_limit, _core_td_map ) );
+  thickness_range_number_samples->set_validator_int_bottom(1, box3_function_1_3_validator_bot );
+  thickness_range_number_samples->set_validator_int_top(1, box3_function_1_3_validator_top );
+
+  ////////////////
   // 2D variation map - defocus
   ////////////////
   QVector<QVariant> box3_option_0_2 = {"Defocus",""};
   _parameter_variation_map_defocous  = new TreeItem ( box3_option_0_2 );
   _parameter_variation_map_defocous->set_variable_name( "_parameter_variation_map_defocous" );
   _parameter_variation_map->insertChildren( _parameter_variation_map_defocous );
-
-  ////////////////
-  //Defocus range -- Samples
-  ////////////////
-  QVector<QVariant> box3_option_2_3 = {"Samples",""};
-  QVector<bool> box3_option_2_3_edit = {false,true};
-  boost::function<bool(std::string)> box3_function_2_3 ( boost::bind( &TDMap::set_defocus_samples, _core_td_map, _1 ) );
-  defocus_range_number_samples = new TreeItem ( box3_option_2_3 , box3_function_2_3, box3_option_2_3_edit );
-  defocus_range_number_samples->set_variable_name( "defocus_range_number_samples" );
-  _parameter_variation_map_defocous->insertChildren( defocus_range_number_samples );
-
-  /* validators */
-  defocus_range_number_samples->set_flag_validatable_int(1,true);
-  boost::function<int(void)> box3_function_2_3_validator_bot ( boost::bind( &TDMap::get_defocus_samples_bottom_limit, _core_td_map ) );
-  boost::function<int(void)> box3_function_2_3_validator_top ( boost::bind( &TDMap::get_defocus_samples_top_limit, _core_td_map ) );
-  defocus_range_number_samples->set_validator_int_bottom(1, box3_function_2_3_validator_bot );
-  defocus_range_number_samples->set_validator_int_top(1, box3_function_2_3_validator_top );
 
   ////////////////
   // Defocus range
@@ -1725,6 +1782,23 @@ void MainWindow::create_box_options(){
   defocus_range_upper_bound->set_validator_double_top(1, box3_function_2_2_validator_top );
 
   ////////////////
+  //Defocus range -- Samples
+  ////////////////
+  QVector<QVariant> box3_option_2_3 = {"Samples",""};
+  QVector<bool> box3_option_2_3_edit = {false,true};
+  boost::function<bool(std::string)> box3_function_2_3 ( boost::bind( &TDMap::set_defocus_samples, _core_td_map, _1 ) );
+  defocus_range_number_samples = new TreeItem ( box3_option_2_3 , box3_function_2_3, box3_option_2_3_edit );
+  defocus_range_number_samples->set_variable_name( "defocus_range_number_samples" );
+  _parameter_variation_map_defocous->insertChildren( defocus_range_number_samples );
+
+  /* validators */
+  defocus_range_number_samples->set_flag_validatable_int(1,true);
+  boost::function<int(void)> box3_function_2_3_validator_bot ( boost::bind( &TDMap::get_defocus_samples_bottom_limit, _core_td_map ) );
+  boost::function<int(void)> box3_function_2_3_validator_top ( boost::bind( &TDMap::get_defocus_samples_top_limit, _core_td_map ) );
+  defocus_range_number_samples->set_validator_int_bottom(1, box3_function_2_3_validator_bot );
+  defocus_range_number_samples->set_validator_int_top(1, box3_function_2_3_validator_top );
+
+  ////////////////
   // Incident electron beam
   ////////////////
   QVector<QVariant> box3_option_3 = {"Optics",""};
@@ -1756,55 +1830,6 @@ void MainWindow::create_box_options(){
   boost::function<double(void)> box3_function_3_1_validator_top ( boost::bind( &TDMap::get_accelaration_voltage_kv_top_limit, _core_td_map ) );
   accelaration_voltage_kv->set_validator_double_bottom(1, box3_function_3_1_validator_bot );
   accelaration_voltage_kv->set_validator_double_top(1, box3_function_3_1_validator_top );
-
-  ////////////////
-  // Cell Dimensions
-  ////////////////
-  QVector<QVariant> box3_option_4 = {"Cell Dimensions",""};
-  tdmap_cell_dimensions = new TreeItem ( box3_option_4 );
-  tdmap_cell_dimensions->set_variable_name( "tdmap_cell_dimensions" );
-  _parameter_variation_map->insertChildren( tdmap_cell_dimensions );
-
-  ////////////////
-  // Cell Dimensions -- a
-  ////////////////
-  QVector<QVariant> box3_option_4_1 = {"a (nm)",""};
-  QVector<bool> box3_option_4_1_edit = {false,true};
-  boost::function<bool(std::string)> box3_function_4_1 ( boost::bind( &TDMap::set_super_cell_size_a, _core_td_map, _1 ) );
-  tdmap_cell_dimensions_a = new TreeItem ( box3_option_4_1 , box3_function_4_1, box3_option_4_1_edit );
-  tdmap_cell_dimensions_a->set_variable_name( "tdmap_cell_dimensions_a" );
-
-  tdmap_cell_dimensions->insertChildren( tdmap_cell_dimensions_a );
-
-  /*group options*/
-  celslc_step_group_options->add_option( tdmap_simulation_setup_model, tdmap_cell_dimensions_a , 1, true);
-
-  /* validators */
-  tdmap_cell_dimensions_a->set_flag_validatable_double(1,true);
-  boost::function<double(void)> box3_function_4_1_validator_bot ( boost::bind( &TDMap::get_tdmap_cell_dimensions_a_bottom_limit, _core_td_map ) );
-  boost::function<double(void)> box3_function_4_1_validator_top ( boost::bind( &TDMap::get_tdmap_cell_dimensions_a_top_limit, _core_td_map ) );
-  tdmap_cell_dimensions_a->set_validator_double_bottom(1, box3_function_4_1_validator_bot );
-  tdmap_cell_dimensions_a->set_validator_double_top(1, box3_function_4_1_validator_top );
-
-  ////////////////
-  // Cell Dimensions -- b
-  ////////////////
-  QVector<QVariant> box3_option_4_2 = {"b (nm)",""};
-  QVector<bool> box3_option_4_2_edit = {false,true};
-  boost::function<bool(std::string)> box3_function_4_2 ( boost::bind( &TDMap::set_super_cell_size_b, _core_td_map, _1 ) );
-  tdmap_cell_dimensions_b = new TreeItem ( box3_option_4_2 , box3_function_4_2, box3_option_4_2_edit );
-  tdmap_cell_dimensions_b->set_variable_name( "tdmap_cell_dimensions_b" );
-  tdmap_cell_dimensions->insertChildren( tdmap_cell_dimensions_b );
-
-  /*group options*/
-  celslc_step_group_options->add_option( tdmap_simulation_setup_model, tdmap_cell_dimensions_b , 1, true);
-
-  /* validators */
-  tdmap_cell_dimensions_b->set_flag_validatable_double(1,true);
-  boost::function<double(void)> box3_function_4_2_validator_bot ( boost::bind( &TDMap::get_tdmap_cell_dimensions_b_bottom_limit, _core_td_map ) );
-  boost::function<double(void)> box3_function_4_2_validator_top ( boost::bind( &TDMap::get_tdmap_cell_dimensions_b_top_limit, _core_td_map ) );
-  tdmap_cell_dimensions_b->set_validator_double_bottom(1, box3_function_4_2_validator_bot );
-  tdmap_cell_dimensions_b->set_validator_double_top(1, box3_function_4_2_validator_top );
 
   ////////////////
   // Simulation Refinement
@@ -1850,7 +1875,7 @@ void MainWindow::create_box_options(){
   boost::function<bool(void)> box3_option_5_1_1_check_getter ( boost::bind( &TDMap::get_spherical_aberration_switch, _core_td_map  ) );
   boost::function<bool(bool)> box3_option_5_1_1_check_setter ( boost::bind( &TDMap::set_spherical_aberration_switch, _core_td_map, _1 ) );
   spherical_aberration_nm = new TreeItem ( box3_option_5_1_1 , box3_function_5_1_1_setter, box3_option_5_1_1_edit );
-spherical_aberration_nm->set_fp_data_getter_double_vec( 1, box3_function_5_1_1_getter );
+  spherical_aberration_nm->set_fp_data_getter_double_vec( 1, box3_function_5_1_1_getter );
   spherical_aberration_nm->set_variable_name( "spherical_aberration_nm" );
 
   _aberration_parameters->insertChildren( spherical_aberration_nm );

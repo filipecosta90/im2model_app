@@ -85,7 +85,7 @@ class TDMap  : public QObject {
     /* *
      * SuperCell
      * */
-     SuperCell* tdmap_vis_sim_unit_cell = nullptr;
+    SuperCell* tdmap_vis_sim_unit_cell = nullptr;
     SuperCell* tdmap_roi_sim_super_cell = nullptr;
     SuperCell* tdmap_full_sim_super_cell = nullptr;
     SuperCell* final_full_sim_super_cell = nullptr;
@@ -228,7 +228,13 @@ class TDMap  : public QObject {
 
     // gui var getters
     cv::Point3d get_zone_axis();
+    double get_zone_axis_u();
+    double get_zone_axis_v();
+    double get_zone_axis_w();
     cv::Point3d get_upward_vector();
+    double get_upward_vector_u();
+    double get_upward_vector_v();
+    double get_upward_vector_w();
     cv::Mat get_orientation_matrix();
     std::string get_orientation_matrix_string();
 

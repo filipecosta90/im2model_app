@@ -1,7 +1,8 @@
 #include "base_cell.hpp"
 
 BaseCell::BaseCell(){
-  orientation_matrix.create(3,3, CV_64FC1);
+  orientation_matrix = cv::Mat::eye( 3, 3, cv::DataType<double>::type );
+  inverse_orientation_matrix = orientation_matrix.inv();
   chem_database = Chem_Database();
 }
 
@@ -149,74 +150,62 @@ bool BaseCell::set_upward_vector ( cv::Point3d hkl ){
 }
 
 bool BaseCell::set_upward_vector_u( double u ){
-  if( upward_vector_u != u ){
-    upward_vector_u = u;
-    upward_vector.x = u;
-    _flag_upward_vector_u = true;
-    _flag_upward_vector = _flag_upward_vector_u & _flag_upward_vector_v & _flag_upward_vector_w;
-    emit upward_vector_changed();
-    form_matrix_from_miller_indices();
-  }
+  upward_vector_u = u;
+  upward_vector.x = u;
+  _flag_upward_vector_u = true;
+  _flag_upward_vector = _flag_upward_vector_u & _flag_upward_vector_v & _flag_upward_vector_w;
+  emit upward_vector_changed();
+  form_matrix_from_miller_indices();
   return true;
 }
 
 bool BaseCell::set_upward_vector_v( double v ){
-  if( upward_vector_v != v ){
-    upward_vector_v = v;
-    upward_vector.y = v;
-    _flag_upward_vector_v = true;
-    _flag_upward_vector = _flag_upward_vector_u & _flag_upward_vector_v & _flag_upward_vector_w;
-    emit upward_vector_changed();
-    form_matrix_from_miller_indices();
-  }
+  upward_vector_v = v;
+  upward_vector.y = v;
+  _flag_upward_vector_v = true;
+  _flag_upward_vector = _flag_upward_vector_u & _flag_upward_vector_v & _flag_upward_vector_w;
+  emit upward_vector_changed();
+  form_matrix_from_miller_indices();
   return true;
 }
 
 bool BaseCell::set_upward_vector_w( double w ){
-  if( upward_vector_w != w ){
-    upward_vector_w = w;
-    upward_vector.z = w;
-    _flag_upward_vector_w = true;
-    _flag_upward_vector = _flag_upward_vector_u & _flag_upward_vector_v & _flag_upward_vector_w;
-    emit upward_vector_changed();
-    form_matrix_from_miller_indices();
-  }
+  upward_vector_w = w;
+  upward_vector.z = w;
+  _flag_upward_vector_w = true;
+  _flag_upward_vector = _flag_upward_vector_u & _flag_upward_vector_v & _flag_upward_vector_w;
+  emit upward_vector_changed();
+  form_matrix_from_miller_indices();
   return true;
 }
 
 bool BaseCell::set_zone_axis_u( double u ){
-  if( zone_axis_u != u ){
-    zone_axis_u = u;
-    zone_axis.x = u;
-    _flag_zone_axis_u = true;
-    _flag_zone_axis = _flag_zone_axis_u & _flag_zone_axis_v & _flag_zone_axis_w;
-    emit zone_axis_vector_changed();
-    form_matrix_from_miller_indices();
-  }
+  zone_axis_u = u;
+  zone_axis.x = u;
+  _flag_zone_axis_u = true;
+  _flag_zone_axis = _flag_zone_axis_u & _flag_zone_axis_v & _flag_zone_axis_w;
+  emit zone_axis_vector_changed();
+  form_matrix_from_miller_indices();
   return true;
 }
 
 bool BaseCell::set_zone_axis_v( double v ){
-  if( zone_axis_v != v ){
-    zone_axis_v = v;
-    zone_axis.y = v;
-    _flag_zone_axis_v = true;
-    _flag_zone_axis = _flag_zone_axis_u & _flag_zone_axis_v & _flag_zone_axis_w;
-    emit zone_axis_vector_changed();
-    form_matrix_from_miller_indices();
-  }
+  zone_axis_v = v;
+  zone_axis.y = v;
+  _flag_zone_axis_v = true;
+  _flag_zone_axis = _flag_zone_axis_u & _flag_zone_axis_v & _flag_zone_axis_w;
+  emit zone_axis_vector_changed();
+  form_matrix_from_miller_indices();
   return true;
 }
 
 bool BaseCell::set_zone_axis_w( double w ){
-  if( zone_axis_w != w ){
-    zone_axis_w = w;
-    zone_axis.z = w;
-    _flag_zone_axis_w = true;
-    _flag_zone_axis = _flag_zone_axis_u & _flag_zone_axis_v & _flag_zone_axis_w;
-    emit zone_axis_vector_changed();
-    form_matrix_from_miller_indices();
-  }
+  zone_axis_w = w;
+  zone_axis.z = w;
+  _flag_zone_axis_w = true;
+  _flag_zone_axis = _flag_zone_axis_u & _flag_zone_axis_v & _flag_zone_axis_w;
+  emit zone_axis_vector_changed();
+  form_matrix_from_miller_indices();
   return true;
 }
 
@@ -296,7 +285,7 @@ void BaseCell::print_var_state(){
   if( _flag_logger ){
     std::stringstream message;
     output( message );
-   BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification , message.str() );
+    BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification , message.str() );
   }
 }
 
