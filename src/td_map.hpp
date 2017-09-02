@@ -336,6 +336,7 @@ class TDMap  : public QObject {
     bool set_exp_image_bounds_max_contour_distance_px( int value );
     bool set_full_boundary_polygon_margin_nm( std::string );
     bool accept_tdmap_best_match_position();
+    bool accept_tdmap_best_match_position(int row, int col);
     bool compute_full_super_cell();
 
     /* gui flag getters */

@@ -302,6 +302,8 @@ else(build_cli)
       src/vis/inputcontrols/qtrackballcameracontroller_p.h
       src/vis/unit_cell_view_widget.cpp
       src/vis/unit_cell_view_widget.h
+      src/vis/texture_image.h
+      src/vis/texture_image.cpp
       )
 
 

@@ -132,7 +132,7 @@ MainWindow::MainWindow( ApplicationLog::ApplicationLog* logger , QWidget *parent
       // will quit thread after work done
       connect(sim_super_cell_worker, SIGNAL(SuperCell_edge_finished()), _sim_super_cell_thread, SLOT(quit()), Qt::DirectConnection);
 
-      connect( ui->tdmap_table, SIGNAL(tdmap_best_match( int, int )), this, SLOT( update_tdmap_best_match(int,int)) );
+      //connect( ui->tdmap_table, SIGNAL(tdmap_best_match( int, int )), this, SLOT( update_tdmap_best_match(int,int)) );
       connect(ui->tdmap_table, SIGNAL(cellClicked(int , int )), this, SLOT( update_tdmap_current_selection(int,int)) );
 
       connect(this, SIGNAL(experimental_image_filename_changed()), this, SLOT(update_full_experimental_image()));
@@ -323,6 +323,8 @@ void MainWindow::update_tdmap_best_match( int x,int y ){
 
 void MainWindow::update_tdmap_current_selection(int x,int y){
   if(_core_td_map->get_flag_simulated_images_grid()){
+    tdmap_current_selection_pos.x = x;
+    tdmap_current_selection_pos.y = y;
     cv::Mat _simulated_image = _core_td_map->get_simulated_image_in_grid(x,y);
     double _simulated_image_match = 0.0f;
     const bool correlation_active = _core_td_map->get_run_simgrid_switch();
@@ -424,13 +426,20 @@ void MainWindow::update_super_cell_target_region_shapes(){
 
 void MainWindow::update_full_experimental_image(){
   if( _core_td_map->get_exp_image_properties_flag_full_image() ){
-    cv::Mat full_image = _core_td_map->get_exp_image_properties_full_image();
+    const cv::Mat full_image = _core_td_map->get_exp_image_properties_full_image();
+    const double full_image_height_nm = _core_td_map->get_exp_image_properties_full_ny_size_height_nm();
+    const double full_image_width_nm = _core_td_map->get_exp_image_properties_full_nx_size_width_nm();
+    std::cout << "pixel ratio: " << ui->qgraphics_full_experimental_image->window()->devicePixelRatio() << "\n";
     // update tab 1
     ui->qgraphics_full_experimental_image->setImage( full_image );
     ui->qgraphics_full_experimental_image->show();
+
+    ui->qwidget_qt_scene_view_roi_tdmap_super_cell->add_image_layer( full_image  );
+
     // update tab 3
     this->ui->qgraphics_super_cell_edge_detection->setImage( full_image );
     this->ui->qgraphics_super_cell_edge_detection->show();
+
     update_roi_experimental_image_frame();
   }
 }
@@ -1445,7 +1454,7 @@ void MainWindow::create_box_options(){
   boost::function<double(void)> box2_function_3_1_getter ( boost::bind( &TDMap::get_zone_axis_u, _core_td_map ) );
   zone_axis_u->set_fp_data_getter_int_vec( 1, box2_function_3_1_getter );
   // load the preset data from core constuctor
-  zone_axis_u->load_data_from_getter( 1 );
+  //zone_axis_u->load_data_from_getter( 1 );
   zone_axis->insertChildren( zone_axis_u );
 
   /*group options*/
@@ -1464,7 +1473,7 @@ void MainWindow::create_box_options(){
   boost::function<double(void)> box2_function_3_2_getter ( boost::bind( &TDMap::get_zone_axis_v, _core_td_map ) );
   zone_axis_v->set_fp_data_getter_int_vec( 1, box2_function_3_2_getter );
   // load the preset data from core constuctor
-  zone_axis_v->load_data_from_getter( 1 );
+  //zone_axis_v->load_data_from_getter( 1 );
   zone_axis->insertChildren( zone_axis_v );
 
   /*group options*/
@@ -1484,7 +1493,7 @@ void MainWindow::create_box_options(){
   boost::function<double(void)> box2_function_3_3_getter ( boost::bind( &TDMap::get_zone_axis_w, _core_td_map ) );
   zone_axis_w->set_fp_data_getter_int_vec( 1, box2_function_3_3_getter );
   // load the preset data from core constuctor
-  zone_axis_w->load_data_from_getter( 1 );
+  //zone_axis_w->load_data_from_getter( 1 );
   zone_axis->insertChildren( zone_axis_w );
 
   /*group options*/
@@ -1512,7 +1521,7 @@ void MainWindow::create_box_options(){
   boost::function<double(void)> box2_function_2_1_getter ( boost::bind( &TDMap::get_upward_vector_u, _core_td_map ) );
   upward_vector_u->set_fp_data_getter_int_vec( 1, box2_function_2_1_getter );
   // load the preset data from core constuctor
-  upward_vector_u->load_data_from_getter( 1 );
+  //upward_vector_u->load_data_from_getter( 1 );
   upward_vector->insertChildren( upward_vector_u );
 
   /*group options*/
@@ -1532,7 +1541,7 @@ void MainWindow::create_box_options(){
   boost::function<double(void)> box2_function_2_2_getter ( boost::bind( &TDMap::get_upward_vector_v, _core_td_map ) );
   upward_vector_v->set_fp_data_getter_int_vec( 1, box2_function_2_2_getter );
   // load the preset data from core constuctor
-  upward_vector_v->load_data_from_getter( 1 );
+  //upward_vector_v->load_data_from_getter( 1 );
   upward_vector->insertChildren( upward_vector_v );
 
   /*group options*/
@@ -1552,7 +1561,7 @@ void MainWindow::create_box_options(){
   boost::function<double(void)> box2_function_2_3_getter ( boost::bind( &TDMap::get_upward_vector_w, _core_td_map ) );
   upward_vector_w->set_fp_data_getter_int_vec( 1, box2_function_2_3_getter );
   // load the preset data from core constuctor
-  upward_vector_w->load_data_from_getter( 1 );
+  //upward_vector_w->load_data_from_getter( 1 );
   upward_vector->insertChildren( upward_vector_w );
 
   /*group options*/
@@ -2475,7 +2484,32 @@ void MainWindow::on_qpush_run_tdmap_clicked(){
 
 void MainWindow::on_qbutton_tdmap_accept_clicked(){
   bool result = false;
-  result = _core_td_map->accept_tdmap_best_match_position();
+  if(_core_td_map->get_flag_simulated_images_grid()){
+  cv::Point2i best_match_pos;
+  const bool _calculated_best_match = _core_td_map->get_flag_simgrid_best_match_position();
+  bool accept = true;
+  if( _calculated_best_match ){
+     best_match_pos = _core_td_map->get_simgrid_best_match_position();
+     if( best_match_pos != tdmap_current_selection_pos ){
+       const QMessageBox::StandardButton ret
+         = QMessageBox::warning(this, tr("Application"),
+             tr("The selected cell differs from the automatic best match position.\n"
+               "Do you want to use the current selected thickness value?"),
+             QMessageBox::Yes | QMessageBox::No);
+       switch (ret) {
+         case QMessageBox::No:
+           accept = false;
+           break;
+         default:
+           break;
+       }
+     }
+  }
+  // if the user still wants to accept position
+  if( accept ){
+    result = _core_td_map->accept_tdmap_best_match_position( tdmap_current_selection_pos.x ,tdmap_current_selection_pos.y );
+  }
+}
   if( result ){
     ui->statusBar->showMessage(tr("Accepted TD Map best match position."), 2000);
   }

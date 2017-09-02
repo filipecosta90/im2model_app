@@ -1,7 +1,7 @@
 #include "base_cell.hpp"
 
 BaseCell::BaseCell(){
-  orientation_matrix = cv::Mat::eye( 3, 3, cv::DataType<double>::type );
+  orientation_matrix = cv::Mat::zeros( 3, 3, cv::DataType<double>::type );
   inverse_orientation_matrix = orientation_matrix.inv();
   chem_database = Chem_Database();
 }
@@ -234,7 +234,12 @@ void BaseCell::form_matrix_from_miller_indices(){
       _flag_zone_axis &&
       _flag_upward_vector
     ){
-
+upward_vector.x = upward_vector_u;
+upward_vector.y = upward_vector_v;
+upward_vector.z = upward_vector_w;
+zone_axis.x = zone_axis_u;
+zone_axis.y = zone_axis_v;
+zone_axis.z = zone_axis_w;
     const double norm_uvw = cv::norm( zone_axis );
     const double norm_hkl = cv::norm( upward_vector );
 
@@ -243,7 +248,7 @@ void BaseCell::form_matrix_from_miller_indices(){
     // square root of the sum of the squares: {similar for [uvw]}.
     // This is known as normalization.
     cv::Point3d vector_y_axis_projected = upward_vector / norm_hkl;
-    cv::Point3d vector_z_axis_projected = zone_axis / norm_uvw;
+    cv::Point3d vector_z_axis_projected = zone_axis  / norm_uvw;
 
     // projected x-axis: y cross z
     // projected y-axis: (uvw)
@@ -251,6 +256,7 @@ void BaseCell::form_matrix_from_miller_indices(){
     cv::Mat z_axis_projected_mat ( vector_z_axis_projected , CV_64F);
     cv::Mat y_axis_projected_mat ( vector_y_axis_projected , CV_64F);
 
+// (y axis) x (z axis) = (x axis)
     cv::Mat x_axis_projected_mat = y_axis_projected_mat.cross( z_axis_projected_mat );
     const double norm_x = cv::norm( x_axis_projected_mat );
     cv::Mat mat_x_axis_projected = x_axis_projected_mat / norm_x;
@@ -259,10 +265,28 @@ void BaseCell::form_matrix_from_miller_indices(){
     vector_x_axis_projected.y = mat_x_axis_projected.at<double>(1,0);
     vector_x_axis_projected.z = mat_x_axis_projected.at<double>(2,0);
 
+    //(z axis) x (x axis) = (y axis)
+    cv::Mat yy_axis_projected_mat = z_axis_projected_mat.cross( mat_x_axis_projected );
+    //cv::Mat yyy_axis_projected_mat = (-( y_axis_projected_mat.cross( z_axis_projected_mat ) / cv::norm( z_axis_projected_mat ) )).cross(z_axis_projected_mat) / (cv::norm( z_axis_projected_mat ) * cv::norm( z_axis_projected_mat ));
+
+    const double norm_yy = cv::norm( yy_axis_projected_mat );
+    cv::Mat mat_yy_axis_projected = yy_axis_projected_mat / norm_yy;
+    cv::Point3d vector_yy_axis_projected;
+    vector_yy_axis_projected.x = mat_yy_axis_projected.at<double>(0,0);
+    vector_yy_axis_projected.y = mat_yy_axis_projected.at<double>(1,0);
+    vector_yy_axis_projected.z = mat_yy_axis_projected.at<double>(2,0);
+std::cout << " vector_yy_axis_projected " << vector_yy_axis_projected << std::endl;
+upward_vector = vector_yy_axis_projected;
+cv::Point3d vector_zz_axis_projected;
+vector_zz_axis_projected.x = z_axis_projected_mat.at<double>(0,0);
+vector_zz_axis_projected.y = z_axis_projected_mat.at<double>(1,0);
+vector_zz_axis_projected.z = z_axis_projected_mat.at<double>(2,0);
+zone_axis = vector_zz_axis_projected;
+
     /* insert into matrix */
     std::vector<cv::Point3d> points;
     points.push_back(vector_x_axis_projected);
-    points.push_back(vector_y_axis_projected);
+    points.push_back(vector_yy_axis_projected);
     points.push_back(vector_z_axis_projected);
     orientation_matrix = cv::Mat( points , true );
     orientation_matrix = orientation_matrix.reshape(1);
@@ -270,6 +294,9 @@ void BaseCell::form_matrix_from_miller_indices(){
     _flag_orientation_matrix = true;
     _flag_inverse_orientation_matrix = true;
     emit orientation_matrix_changed();
+    emit upward_vector_changed();
+    emit zone_axis_vector_changed();
+
     std::cout << "NEW orientation matrix: \n" << orientation_matrix << std::endl;
 
     /**

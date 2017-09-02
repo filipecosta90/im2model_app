@@ -218,6 +218,7 @@ signals:
     // tab 2
     TreeModel *tdmap_simulation_setup_model;
     TreeModel *tdmap_running_configuration_model;
+    cv::Point2i tdmap_current_selection_pos;
 
     // tab3
     TreeModel* super_cell_setup_model;

@@ -188,6 +188,8 @@ void TDMap_Table::update_cells(){
   if( _flag_created_cells ){
     if( _flag_simulated_image_grid ){
       cv::Point2i best_match_pos;
+      best_match_pos.x = 0;
+      best_match_pos.y = 0;
       const bool _calculated_best_match = core_tdmap->get_flag_simgrid_best_match_position();
       if( _calculated_best_match ){
          best_match_pos = core_tdmap->get_simgrid_best_match_position();
@@ -212,8 +214,8 @@ void TDMap_Table::update_cells(){
           this->setItem(row, col, new QTableWidgetItem());//used to find it
         }
       }
-      setCurrentCell( 0,0 );
-      emit cellClicked( 0,0 );
+      setCurrentCell( best_match_pos.x,best_match_pos.y );
+      emit cellClicked( best_match_pos.x,best_match_pos.y );
     }
     else{
       //only visualy update cells

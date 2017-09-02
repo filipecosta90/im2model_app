@@ -1743,6 +1743,19 @@ bool TDMap::accept_tdmap_best_match_position(){
   return result;
 }
 
+bool TDMap::accept_tdmap_best_match_position( int row, int col ){
+  bool result = false;
+  if( _td_map_simgrid->get_flag_simgrid_best_match_thickness_nm() ){
+    const double match_thickness = _td_map_simgrid->get_simulated_image_thickness_nm_in_grid(  row,  col );
+    const bool super_cell_result = tdmap_full_sim_super_cell->set_length_c_Nanometers( match_thickness );
+    if( super_cell_result ){
+      emit super_cell_dimensions_c_changed();
+      result = true;
+    }
+  }
+  return result;
+}
+
 bool TDMap::compute_full_super_cell(){
   bool result = false;
   if( tdmap_full_sim_super_cell->get_flag_length() ){

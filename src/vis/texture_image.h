@@ -1,7 +1,19 @@
 
-#ifndef SRC_VIS_UNITCELLVIEWERWINDOW_H__
-#define SRC_VIS_UNITCELLVIEWERWINDOW_H__
+#ifndef SRC_VIS_TEXTUREIMAGE_H__
+#define SRC_VIS_TEXTUREIMAGE_H__
 
+
+#include <QWidget>
+#include <QtWidgets>
+#include <QAbstractItemView>
+#include <QImage>
+#include <QPainter>
+#include <opencv2/opencv.hpp>
+#include <iostream>
+#include <QtGui>
+#include <QColor>
+#include <QHash>
+#include <QWidget>
 
 #include <QMainWindow>
 #include <QtWidgets>
@@ -55,55 +67,29 @@
 #include <Qt3DExtras/QOrbitCameraController>
 #include <Qt3DExtras/QPhongMaterial>
 
+#include <QPaintedTextureImage>
+
 /** END BOOST **/
-#include "inputcontrols/qtrackballcameracontroller.h"
-#include "../qt_scene_supercell.h"
+
 
 #include <QWidget>
 #include <QQuickWidget>
 #include <QQuickView>
 
-QT_FORWARD_DECLARE_CLASS(QRadioButton)
-QT_FORWARD_DECLARE_CLASS(QCheckBox)
-QT_FORWARD_DECLARE_CLASS(QLabel)
-QT_FORWARD_DECLARE_CLASS(QLayout)
+class TextureImage : public Qt3DRender::QPaintedTextureImage
+{
+public:
+    void paint(QPainter* painter);
+    void setImage( const cv::Mat& image );
+  private:
 
-  class UnitCellViewerWindow : public QWidget {
-    Q_OBJECT
-    public:
-      UnitCellViewerWindow(QWidget *parent = 0);
-      void set_super_cell( SuperCell* );
-      bool add_image_layer( cv::Mat layer_image );
-
-      public slots:
-        void init();
-      void update_cameraEntity_zone_axis();
-      void update_cameraEntity_upward_vector();
-      void update_m_cameraEntity_centerDistance();
-      void view_along_ZA_UV();
-      void view_along_a_axis();
-      void view_along_b_axis();
-      void view_along_c_axis();
-
-    protected:
-
-
-    private:
-      //Layout
-      QLayout *m_containerLayout;
-      QWidget *container;
-      QBoxLayout *toolsLayout;
-      QToolBar *toolbar;
-      //Core vis
-      Qt3DCore::QEntity *_m_rootEntity;
-      Qt3DExtras::Qt3DWindow *qt_scene_view;
-      QtSceneSuperCell* qt_scene_super_cell = nullptr;
-      SuperCell* super_cell = nullptr;
-      bool _flag_super_cell = false;
-      Qt3DRender::QCamera *_m_cameraEntity;
-      Qt3DCore::QTransform *_m_lightTransform;
-      double _m_cameraEntity_centerDistance = 10.0f;
-      QVector3D q_zone_axis_vector;
-  };
+        QImage _qimage;
+        cv::Mat _tmp_original, _tmp_current;
+        float scaleFactor = 1.0f;
+        cv::Size original_size;
+        bool _image_set = false;
+        int _container_window_width = 0;
+        int _container_window_height = 0;
+};
 
 #endif

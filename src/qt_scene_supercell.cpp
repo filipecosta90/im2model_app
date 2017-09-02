@@ -17,36 +17,65 @@ static const QColor helperArrowColorY("green");
 static const QColor helperArrowColorZ("blue");
 
 QtSceneSuperCell::QtSceneSuperCell(Qt3DCore::QEntity *rootEntity, Qt3DRender::QCamera *camEntity ) : m_rootEntity(rootEntity) {
-cameraEntity = camEntity;
+  cameraEntity = camEntity;
 
   // Axis
   m_axisEntity = new Qt3DCore::QEntity(m_rootEntity);
- Qt3DRender::QGeometryRenderer *geometryRenderer = new Qt3DRender::QGeometryRenderer(m_axisEntity);
+  Qt3DRender::QGeometryRenderer *geometryRenderer = new Qt3DRender::QGeometryRenderer(m_axisEntity);
   xyz_axis_layer = new Qt3DRender::QLayer(m_axisEntity);
- m_axisEntity->addComponent( geometryRenderer );
+  m_axisEntity->addComponent( geometryRenderer );
   m_axisEntity->addComponent( xyz_axis_layer );
 
   sphere_layer = new Qt3DRender::QLayer(m_rootEntity);
 
   m_helperArrows = new Qt3DCore::QEntity( m_axisEntity );
   m_helperArrows->setEnabled(true);
-   m_helperArrows->setObjectName(QStringLiteral("__internal helper arrows"));
+  m_helperArrows->setObjectName(QStringLiteral("__internal helper arrows"));
 
-   QMatrix4x4 matrix;
+  QMatrix4x4 matrix;
+  matrix.rotate(90.0f, QVector3D(0.0f, 0.0f, 1.0f));
+  Qt3DCore::QEntity *arrow_x = createArrowEntity(helperArrowColorX, m_helperArrows, matrix, helperArrowName);
+  arrow_x->setEnabled(true);
 
-   Qt3DCore::QEntity *arrow_x = createArrowEntity(helperArrowColorY, m_helperArrows, matrix, helperArrowName);
-   arrow_x->setEnabled(true);
+  matrix.rotate(90.0f, QVector3D(0.0f, 0.0f, 1.0f));
+  Qt3DCore::QEntity *arrow_y = createArrowEntity(helperArrowColorY, m_helperArrows, matrix, helperArrowName);
 
-   matrix.rotate(90.0f, QVector3D(1.0f, 0.0f, 0.0f));
-   Qt3DCore::QEntity *arrow_y = createArrowEntity(helperArrowColorZ, m_helperArrows, matrix, helperArrowName);
+  matrix = QMatrix();
+  matrix.rotate(-90.0f, QVector3D(1.0f, 0.0f, 0.0f));
+  Qt3DCore::QEntity *arrow_z = createArrowEntity(helperArrowColorZ, m_helperArrows, matrix, helperArrowName);
+  //createObjectPickerForEntity(arrow);
+  m_helperArrowsTransform = new Qt3DCore::QTransform();
+  m_helperArrows->addComponent(m_helperArrowsTransform);
+  m_helperArrows->setParent(m_axisEntity);
 
-   matrix = QMatrix();
-   matrix.rotate(-90.0f, QVector3D(0.0f, 0.0f, 1.0f));
-   Qt3DCore::QEntity *arrow_z = createArrowEntity(helperArrowColorX, m_helperArrows, matrix, helperArrowName);
-   //createObjectPickerForEntity(arrow);
-   m_helperArrowsTransform = new Qt3DCore::QTransform();
-   m_helperArrows->addComponent(m_helperArrowsTransform);
-   m_helperArrows->setParent(m_axisEntity);
+
+}
+
+bool QtSceneSuperCell::add_image_layer( cv::Mat layer_image ){
+  /*
+    // add the plane that will contain the image
+    Qt3DCore::QEntity* planeEntity = new Qt3DCore::QEntity(m_rootEntity);
+    Qt3DExtras::QPlaneMesh* planeMesh = new Qt3DExtras::QPlaneMesh(planeEntity);
+    planeMesh->setWidth(layer_image.cols );
+    //  rows = height;
+    //  cols = width;
+    planeMesh->setHeight(layer_image.rows);
+    planeEntity->addComponent(planeMesh);
+
+    Qt3DExtras::QDiffuseMapMaterial *material = new Qt3DExtras::QDiffuseMapMaterial();
+  image = new TextureImage; //see below
+  image->setImage( layer_image );
+  image->update();
+
+    material->diffuse()->addTextureImage(image);
+
+    planeEntity->addComponent(material);
+
+    Qt3DCore::QTransform* transform = new Qt3DCore::QTransform(planeEntity);
+  //  transform->setRotation(QQuaternion::fromAxisAndAngle(1,0,0,90));
+    planeEntity->addComponent(transform);
+    */
+    return true;
 }
 
 QtSceneSuperCell::~QtSceneSuperCell(){
@@ -54,34 +83,34 @@ QtSceneSuperCell::~QtSceneSuperCell(){
 
 // Creates a single arrow
 Qt3DRender::QMesh *QtSceneSuperCell::createArrowMesh() {
-	Qt3DRender::QMesh *customMesh = new Qt3DRender::QMesh();
-	QUrl source(QStringLiteral("qrc:///Icons/MeshArrow3d"));
-	if (!source.isValid()) {
-		std::cout << "Invalid URL: " << source.toString().toStdString() << std::endl;
-	}
-	customMesh->setSource(source);
-	std::cout << " load mesh from " << source.toString().toStdString() << " with " << customMesh->vertexCount() << "vertices. " << std::endl;
-	return customMesh;
+  Qt3DRender::QMesh *customMesh = new Qt3DRender::QMesh();
+  QUrl source(QStringLiteral("qrc:///Icons/MeshArrow3d"));
+  if (!source.isValid()) {
+    std::cout << "Invalid URL: " << source.toString().toStdString() << std::endl;
+  }
+  customMesh->setSource(source);
+  std::cout << " load mesh from " << source.toString().toStdString() << " with " << customMesh->vertexCount() << "vertices. " << std::endl;
+  return customMesh;
 }
 
 Qt3DCore::QEntity *QtSceneSuperCell::createArrowEntity(const QColor &color, Qt3DCore::QEntity *parent, const QMatrix4x4 &matrix, const QString &name) {
 
-	Qt3DCore::QEntity *arrow = new Qt3DCore::QEntity(parent);
-	arrow->setObjectName(name);
+  Qt3DCore::QEntity *arrow = new Qt3DCore::QEntity(parent);
+  arrow->setObjectName(name);
 
-	Qt3DRender::QGeometryRenderer *mesh = createArrowMesh();
-	Qt3DExtras::QPhongMaterial *material = new Qt3DExtras::QPhongMaterial();
-	material->setDiffuse(color);
+  Qt3DRender::QGeometryRenderer *mesh = createArrowMesh();
+  Qt3DExtras::QPhongMaterial *material = new Qt3DExtras::QPhongMaterial();
+  material->setDiffuse(color);
 
-	Qt3DCore::QTransform *transform = new Qt3DCore::QTransform();
-	transform->setMatrix(matrix);
-	transform->setScale(3.0f);
+  Qt3DCore::QTransform *transform = new Qt3DCore::QTransform();
+  transform->setMatrix(matrix);
+  transform->setScale(3.0f);
 
-	arrow->addComponent(mesh);
-	arrow->addComponent(material);
-	arrow->addComponent(transform);
-	arrow->setEnabled(true);
-	return arrow;
+  arrow->addComponent(mesh);
+  arrow->addComponent(material);
+  arrow->addComponent(transform);
+  arrow->setEnabled(true);
+  return arrow;
 }
 
 void QtSceneSuperCell::set_super_cell( SuperCell* cell ){

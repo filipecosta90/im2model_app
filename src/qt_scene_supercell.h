@@ -84,6 +84,7 @@
 
 #include "super_cell.hpp"
 #include "vis/components/editorutils.h"
+#include "vis/texture_image.h"
 
 static const QString atomEntityName = QStringLiteral("__internal atom");
 
@@ -94,6 +95,8 @@ class QtSceneSuperCell : public QObject
     explicit QtSceneSuperCell( Qt3DCore::QEntity *rootEntity, Qt3DRender::QCamera *cameraEntity );
     ~QtSceneSuperCell();
     void set_super_cell( SuperCell* cell );
+    bool add_image_layer( cv::Mat layer_image );
+    
     Qt3DRender::QLayer* get_xyz_axis_layer(){ return xyz_axis_layer; }
     Qt3DRender::QLayer* get_sphere_layer(){ return sphere_layer; }
 
@@ -110,6 +113,13 @@ class QtSceneSuperCell : public QObject
     // helper arrows
     Qt3DCore::QEntity *m_helperArrows;
     Qt3DCore::QTransform *m_helperArrowsTransform;
+
+    Qt3DCore::QEntity *m_plane_entity;
+    Qt3DExtras::QPlaneMesh* planeMesh;
+    TextureImage* image;
+    Qt3DExtras::QDiffuseMapMaterial* planeMaterial;
+    Qt3DCore::QTransform *planeTransform;
+
 
     Qt3DCore::QEntity *m_cylinderEntity_x;
     Qt3DCore::QEntity *m_cylinderEntity_y;
