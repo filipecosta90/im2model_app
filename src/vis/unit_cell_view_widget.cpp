@@ -44,11 +44,21 @@ void UnitCellViewerWindow::set_super_cell( SuperCell* cell ){
   QObject::connect( super_cell, SIGNAL(zone_axis_vector_changed()), this, SLOT(update_cameraEntity_zone_axis()) );
   QObject::connect( super_cell, SIGNAL(upward_vector_changed()), this, SLOT(update_cameraEntity_upward_vector()) );
 
+  QObject::connect(_m_cameraEntity, &Qt3DRender::QCamera::viewVectorChanged,this,&UnitCellViewerWindow::update_lightEntity_view_vector);
+
+  //QObject::connect( _m_cameraEntity, SIGNAL(viewVectorChanged( QVector3D* )), this, SLOT(update_lightEntity_view_vector( QVector3D* )) );
+
+
   _flag_super_cell = true;
 }
 
-bool UnitCellViewerWindow::add_image_layer( cv::Mat layer_image ){
-  return qt_scene_super_cell->add_image_layer( layer_image );
+
+void UnitCellViewerWindow::update_lightEntity_view_vector( const QVector3D &viewVector ){
+        _m_lightTransform->setTranslation( -viewVector );
+}
+
+bool UnitCellViewerWindow::add_image_layer( cv::Mat layer_image , int width, int height , Qt3DCore::QTransform* transform ){
+  return qt_scene_super_cell->add_image_layer( layer_image, width, height, transform );
 }
 
 void UnitCellViewerWindow::init(){
@@ -60,6 +70,7 @@ void UnitCellViewerWindow::init(){
   _m_cameraEntity = qt_scene_view->camera();
   int view_size = 200;
   double aspect_ratio = 16.0f/9.0f;
+
   _m_cameraEntity->lens()->setOrthographicProjection(-aspect_ratio*view_size/2.0f, aspect_ratio*view_size/2.0f, -view_size/2.0f, view_size/2.0f, 0.1f, 1000.0f);
   _m_cameraEntity->setProjectionType(Qt3DRender::QCameraLens::OrthographicProjection);
 
@@ -67,16 +78,14 @@ void UnitCellViewerWindow::init(){
   _m_cameraEntity->setUpVector(QVector3D(0, 1, 0));
   _m_cameraEntity->setViewCenter(QVector3D(0, 0, 0));
 
-//  _m_cameraEntity->lens()->setPerspectiveProjection(50.0f, 16.0f/9.0f, 0.1f, 1000.0f);
-
   // Scene SuperCell for TDMAP ROI
   qt_scene_super_cell = new QtSceneSuperCell( _m_rootEntity, _m_cameraEntity );
 
   Qt3DCore::QEntity *lightEntity = new Qt3DCore::QEntity( _m_rootEntity );
-  Qt3DRender::QPointLight *light = new Qt3DRender::QPointLight(lightEntity);
-  light->setColor("white");
-  light->setIntensity(1);
-  lightEntity->addComponent(light);
+  _m_cameraLight = new Qt3DRender::QDirectionalLight(lightEntity);
+  _m_cameraLight->setColor("white");
+  _m_cameraLight->setIntensity(1);
+  lightEntity->addComponent(_m_cameraLight);
 
   _m_lightTransform = new Qt3DCore::QTransform( lightEntity );
   _m_lightTransform->setTranslation( _m_cameraEntity->position() );

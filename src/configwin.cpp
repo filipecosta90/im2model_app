@@ -162,6 +162,17 @@ MainWindow::MainWindow( ApplicationLog::ApplicationLog* logger , QWidget *parent
       if( _flag_im2model_logger ){
         im2model_logger->logEvent( ApplicationLog::notification, "Finished initializing App." );
       }
+
+    /*
+    const cv::Mat full_image = cv::Mat::zeros(222,222,CV_8UC1);
+      const double full_image_height_nm = 1.0;
+      const double full_image_width_nm = 2.0;
+
+          Qt3DCore::QTransform* transform = new Qt3DCore::QTransform();
+          transform->setRotation(QQuaternion::fromAxisAndAngle(1,0,0,90));
+
+      ui->qwidget_qt_scene_view_roi_tdmap_super_cell->add_image_layer( full_image , full_image_width_nm ,  full_image_height_nm , transform );
+*/
     }
   }
 }
@@ -427,15 +438,9 @@ void MainWindow::update_super_cell_target_region_shapes(){
 void MainWindow::update_full_experimental_image(){
   if( _core_td_map->get_exp_image_properties_flag_full_image() ){
     const cv::Mat full_image = _core_td_map->get_exp_image_properties_full_image();
-    const double full_image_height_nm = _core_td_map->get_exp_image_properties_full_ny_size_height_nm();
-    const double full_image_width_nm = _core_td_map->get_exp_image_properties_full_nx_size_width_nm();
-    std::cout << "pixel ratio: " << ui->qgraphics_full_experimental_image->window()->devicePixelRatio() << "\n";
     // update tab 1
     ui->qgraphics_full_experimental_image->setImage( full_image );
     ui->qgraphics_full_experimental_image->show();
-
-    ui->qwidget_qt_scene_view_roi_tdmap_super_cell->add_image_layer( full_image  );
-
     // update tab 3
     this->ui->qgraphics_super_cell_edge_detection->setImage( full_image );
     this->ui->qgraphics_super_cell_edge_detection->show();

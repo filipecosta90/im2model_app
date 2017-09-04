@@ -343,6 +343,9 @@ class TDMap  : public QObject {
     bool get_exp_image_properties_flag_full_image();
     bool get_exp_image_properties_flag_roi_image();
     bool get_exp_image_properties_flag_roi_rectangle();
+    bool get_exp_image_properties_flag_full_n_rows_height_nm();
+    bool get_exp_image_properties_flag_full_n_cols_width_nm();
+
     // var getters
     /* experimantal image boundaries */
     bool get_exp_image_bounds_flag_full_boundary_polygon();

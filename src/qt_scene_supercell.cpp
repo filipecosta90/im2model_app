@@ -51,15 +51,15 @@ QtSceneSuperCell::QtSceneSuperCell(Qt3DCore::QEntity *rootEntity, Qt3DRender::QC
 
 }
 
-bool QtSceneSuperCell::add_image_layer( cv::Mat layer_image ){
-  /*
+bool QtSceneSuperCell::add_image_layer(  cv::Mat layer_image , int width, int height, Qt3DCore::QTransform* transform ){
+
     // add the plane that will contain the image
     Qt3DCore::QEntity* planeEntity = new Qt3DCore::QEntity(m_rootEntity);
     Qt3DExtras::QPlaneMesh* planeMesh = new Qt3DExtras::QPlaneMesh(planeEntity);
-    planeMesh->setWidth(layer_image.cols );
+    planeMesh->setWidth( width );
     //  rows = height;
     //  cols = width;
-    planeMesh->setHeight(layer_image.rows);
+    planeMesh->setHeight( height );
     planeEntity->addComponent(planeMesh);
 
     Qt3DExtras::QDiffuseMapMaterial *material = new Qt3DExtras::QDiffuseMapMaterial();
@@ -70,11 +70,9 @@ bool QtSceneSuperCell::add_image_layer( cv::Mat layer_image ){
     material->diffuse()->addTextureImage(image);
 
     planeEntity->addComponent(material);
-
-    Qt3DCore::QTransform* transform = new Qt3DCore::QTransform(planeEntity);
-  //  transform->setRotation(QQuaternion::fromAxisAndAngle(1,0,0,90));
-    planeEntity->addComponent(transform);
-    */
+if( transform ){
+  planeEntity->addComponent(transform);
+}
     return true;
 }
 

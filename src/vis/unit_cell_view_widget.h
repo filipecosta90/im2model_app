@@ -73,10 +73,11 @@ QT_FORWARD_DECLARE_CLASS(QLayout)
     public:
       UnitCellViewerWindow(QWidget *parent = 0);
       void set_super_cell( SuperCell* );
-      bool add_image_layer( cv::Mat layer_image );
+      bool add_image_layer( cv::Mat layer_image, int width, int height, Qt3DCore::QTransform* transform = nullptr );
 
       public slots:
-        void init();
+      void init();
+      void	update_lightEntity_view_vector(const QVector3D &viewVector);
       void update_cameraEntity_zone_axis();
       void update_cameraEntity_upward_vector();
       void update_m_cameraEntity_centerDistance();
@@ -101,6 +102,8 @@ QT_FORWARD_DECLARE_CLASS(QLayout)
       SuperCell* super_cell = nullptr;
       bool _flag_super_cell = false;
       Qt3DRender::QCamera *_m_cameraEntity;
+      Qt3DRender::QDirectionalLight* _m_cameraLight;
+
       Qt3DCore::QTransform *_m_lightTransform;
       double _m_cameraEntity_centerDistance = 10.0f;
       QVector3D q_zone_axis_vector;

@@ -57,10 +57,8 @@ class BaseImage {
     bool _flag_full_image = false;
 
     int full_n_rows_height = 0;
-    double full_n_rows_height_nm = 0.0f;
     bool _flag_full_n_rows_height = false;
     int full_n_cols_width = 0;
-    double full_n_cols_width_nm = 0;
     bool _flag_full_n_cols_width = false;
 
     // sampling rate and dimensioning
@@ -111,6 +109,9 @@ class BaseImage {
     bool get_flag_full_image(){ return _flag_full_image; }
     bool get_flag_full_n_rows_height (){ return _flag_full_n_rows_height; }
     bool get_flag_full_n_cols_width (){ return _flag_full_n_cols_width; }
+    bool get_flag_full_n_cols_width_nm (){ return _flag_full_nm_size_cols_a; }
+    bool get_flag_full_n_rows_height_nm (){ return _flag_full_nm_size_rows_b; }
+
     bool get_flag_sampling_rate_x_nm_per_pixel(){ return _flag_sampling_rate_x_nm_per_pixel; }
     bool get_flag_sampling_rate_y_nm_per_pixel(){ return _flag_sampling_rate_y_nm_per_pixel; }
     bool get_flag_sampling_rate(){ return _flag_sampling_rate; }
@@ -130,9 +131,9 @@ class BaseImage {
     std::string get_image_extension(){ return image_extension; }
     cv::Mat get_full_image(){ return full_image.clone(); }
     int get_full_n_rows_height(){ return full_n_rows_height; }
-    double get_full_n_rows_height_nm(){ return full_n_rows_height_nm; }
+    double get_full_n_rows_height_nm(){ return full_nm_size_rows_b; }
     int get_full_n_cols_width(){ return full_n_cols_width; }
-    double get_full_n_cols_width_nm(){ return full_n_cols_width_nm; }
+    double get_full_n_cols_width_nm(){ return full_nm_size_cols_a; }
     double get_sampling_rate_x_nm_per_pixel(){ return sampling_rate_x_nm_per_pixel; }
     double get_sampling_rate_y_nm_per_pixel(){ return sampling_rate_y_nm_per_pixel; }
     cv::Mat get_roi_image(){ return roi_image.clone(); }

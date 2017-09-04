@@ -288,6 +288,7 @@ namespace Qt3DExtras {
     // Perform the control based on the input received during the frame
     if (m_camera != nullptr) {
       if (m_leftMouseButtonAction->isActive()) {
+        std::cout << " 3d window size bottom: " << m_camera->lens()->bottom() <<  " top: " << m_camera->lens()->top() << " left " << m_camera->lens()->left() << "right " << m_camera->lens()->right() << std::endl;
         if (m_altKeyAction->isActive()) {
           //Panning mode
           m_camera->translate(m_panSpeed * QVector3D(-m_panXAxis->value(), -m_panYAxis->value(), 0), Qt3DRender::QCamera::TranslateViewCenter);

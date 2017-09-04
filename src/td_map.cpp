@@ -1784,6 +1784,14 @@ bool TDMap::get_exp_image_properties_flag_full_image(){
   return exp_image_properties->get_flag_full_image();
 }
 
+bool TDMap::get_exp_image_properties_flag_full_n_rows_height_nm(){
+  return exp_image_properties->get_flag_full_n_rows_height_nm();
+}
+
+bool TDMap::get_exp_image_properties_flag_full_n_cols_width_nm(){
+  return exp_image_properties->get_flag_full_n_cols_width_nm();
+}
+
 int TDMap::get_exp_image_properties_full_n_cols_width(){
   return exp_image_properties->get_full_n_cols_width();
 }
