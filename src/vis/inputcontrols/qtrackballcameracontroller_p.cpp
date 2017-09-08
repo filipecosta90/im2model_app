@@ -96,7 +96,7 @@ namespace Qt3DExtras {
       , m_trackballCenter(QPoint(0,0))
       , m_trackballRadius(20.0f)
       , m_panSpeed(50.0)
-      , m_zoomSpeed(5.0)
+      , m_zoomSpeed(5.0f)
       , m_rotationSpeed(5.0)
       , m_rotationAngle(5.0)
       , m_rotationAngle_fine(1.0)
@@ -287,8 +287,13 @@ namespace Qt3DExtras {
   {
     // Perform the control based on the input received during the frame
     if (m_camera != nullptr) {
+/*
+      std::cout << " camera position: "<< "x" << m_camera->position().x() << "y" << m_camera->position().y() << "z" << m_camera->position().z() << std::endl;
+      std::cout << " \tcamera view vector: "<< "x" << m_camera->viewVector().x() << "y" << m_camera->viewVector().y() << "z" << m_camera->viewVector().z() << std::endl;
+      std::cout << " \tcamera up vector: "<< "x" << m_camera->upVector().x() << "y" << m_camera->upVector().y() << "z" << m_camera->upVector().z() << std::endl;
+*/
       if (m_leftMouseButtonAction->isActive()) {
-        std::cout << " 3d window size bottom: " << m_camera->lens()->bottom() <<  " top: " << m_camera->lens()->top() << " left " << m_camera->lens()->left() << "right " << m_camera->lens()->right() << std::endl;
+      //  std::cout << " 3d window size bottom: " << m_camera->lens()->bottom() <<  " top: " << m_camera->lens()->top() << " left " << m_camera->lens()->left() << "right " << m_camera->lens()->right() << std::endl;
         if (m_altKeyAction->isActive()) {
           //Panning mode
           m_camera->translate(m_panSpeed * QVector3D(-m_panXAxis->value(), -m_panYAxis->value(), 0), Qt3DRender::QCamera::TranslateViewCenter);
@@ -325,8 +330,8 @@ namespace Qt3DExtras {
         if( m_rightKeyAction->isActive() ){
           m_camera->rotateAboutViewCenter(QQuaternion::fromAxisAndAngle( QVector3D(0, 1, 0), -temp_m_rotationAngle ));
         }
-        else{
-          zoomOnCenter(m_camera->position(), m_zoomSpeed * m_wheelAxis->value(), m_camera->viewCenter() );
+        if( m_wheelAxis->value() != 0 ){
+            zoomOnCenter(m_camera->position(), m_zoomSpeed * m_wheelAxis->value(), m_camera->viewCenter() );
         }
       }
     }
@@ -336,8 +341,8 @@ namespace Qt3DExtras {
     const float distance = (cam_pos - center).length();
     if ( (distance -  value ) > m_zoomCameraLimit){
       m_camera->translate( QVector3D(0, 0, value ), Qt3DRender::QCamera::DontTranslateViewCenter );
-      //Compute the size of the frustum at the view center
-      float size = std::tan(m_camera->fieldOfView())* distance /4.0f;
+      float size = std::abs( std::tan( m_camera->fieldOfView() )* distance );
+      m_camera->lens()->setOrthographicProjection( -size*m_camera->aspectRatio(), size*m_camera->aspectRatio(), -size, size, 0.1f, 1000.0f );
       m_camera->setTop(size);
       m_camera->setBottom(-size);
       m_camera->setLeft(-size*m_camera->aspectRatio());

@@ -2,13 +2,16 @@
 
 void TextureImage::paint (QPainter* painter)
 {
-  int w = painter->device()->width();
+/*  int w = painter->device()->width();
   int h = painter->device()->height();
   /* Clear to white. */
-  painter->fillRect(0, 0, w, h, QColor(255, 255, 255));
+  //painter->fillRect(0, 0, w, h, QColor(255, 255, 255));
+
   if( _image_set ){
     painter->drawImage(QPoint(0,0), _qimage);
     std::cout << " paiting image " << std::endl;
+    bool b = _qimage.save("test2.png");
+    std::cout << " save result 2 " << std::boolalpha << b << std::endl;
   }
 }
 
@@ -16,13 +19,19 @@ void TextureImage::setImage( const cv::Mat& image ){
   // Convert the image to the RGB888 format
   switch (image.type()) {
     case cv::DataType<unsigned char>::type:
+      std::cout << "$$$ cv::DataType<unsigned char>::type " << std::endl;
       cvtColor(image, _tmp_original, CV_GRAY2RGB);
+      cv::imwrite( "_tmp_original_char.png", _tmp_original );
+      cv::imwrite( "image.png", image );
       break;
     case cv::DataType<unsigned short>::type:
       {
         cv::Mat temp;
-        image.convertTo(temp, cv::DataType<unsigned char>::type, 1.0f/255.0f);
+        std::cout << "$$$ cv::DataType<unsigned short>::type " << std::endl;
+        image.convertTo(temp, cv::DataType<unsigned char>::type, 1.0f/255.0f );
         cvtColor(temp, _tmp_original, CV_GRAY2RGB );
+        cv::imwrite( "_tmp_original_short.png", _tmp_original );
+        cv::imwrite( "temp_short.png", temp );
         break;
       }
     case CV_8UC3:
@@ -39,6 +48,7 @@ void TextureImage::setImage( const cv::Mat& image ){
   // has three bytes.
   _qimage = QImage(_tmp_original.data, _tmp_original.cols, _tmp_original.rows, _tmp_original.cols*3, QImage::Format_RGB888);
   this->setSize( QSize( image.cols, image.rows ) );
+  bool b = _qimage.save("test.png");
+  std::cout << " save result " << std::boolalpha << b << std::endl;
   _image_set = true;
-
 }

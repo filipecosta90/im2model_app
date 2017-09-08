@@ -389,6 +389,8 @@ class TDMap  : public QObject {
     double get_exp_image_properties_roi_ny_size_height_nm();
     double get_exp_image_properties_roi_nx_size_width_nm();
     double get_full_boundary_polygon_margin_nm( );
+    double get_sim_image_properties_full_ny_size_height_nm();
+    double get_sim_image_properties_full_nx_size_width_nm();
 
     SuperCell*  get_tdmap_vis_sim_unit_cell(){ return tdmap_vis_sim_unit_cell; }
     SuperCell*  get_tdmap_roi_sim_super_cell(){ return tdmap_roi_sim_super_cell; }

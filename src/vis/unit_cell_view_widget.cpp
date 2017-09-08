@@ -39,26 +39,21 @@ void UnitCellViewerWindow::set_super_cell( SuperCell* cell ){
   qt_scene_super_cell->set_super_cell( super_cell );
   QObject::connect( super_cell, SIGNAL(atom_positions_changed()), qt_scene_super_cell, SLOT(reload_data_from_super_cell()));
   QObject::connect( super_cell, SIGNAL(atom_positions_changed()), this, SLOT(update_m_cameraEntity_centerDistance()));
-  QObject::connect( super_cell, SIGNAL(orientation_matrix_changed()), qt_scene_super_cell, SLOT(orientate_data_from_super_cell()));
-
   QObject::connect( super_cell, SIGNAL(zone_axis_vector_changed()), this, SLOT(update_cameraEntity_zone_axis()) );
   QObject::connect( super_cell, SIGNAL(upward_vector_changed()), this, SLOT(update_cameraEntity_upward_vector()) );
-
-  QObject::connect(_m_cameraEntity, &Qt3DRender::QCamera::viewVectorChanged,this,&UnitCellViewerWindow::update_lightEntity_view_vector);
-
-  //QObject::connect( _m_cameraEntity, SIGNAL(viewVectorChanged( QVector3D* )), this, SLOT(update_lightEntity_view_vector( QVector3D* )) );
-
-
   _flag_super_cell = true;
 }
 
-
 void UnitCellViewerWindow::update_lightEntity_view_vector( const QVector3D &viewVector ){
-        _m_lightTransform->setTranslation( -viewVector );
+  _m_cameraLight->setWorldDirection(viewVector);
 }
 
-bool UnitCellViewerWindow::add_image_layer( cv::Mat layer_image , int width, int height , Qt3DCore::QTransform* transform ){
-  return qt_scene_super_cell->add_image_layer( layer_image, width, height, transform );
+void UnitCellViewerWindow::update_lightEntity_position( const QVector3D &pos ){
+  _m_lightTransform->setTranslation( pos );
+}
+
+bool UnitCellViewerWindow::add_image_layer( cv::Mat layer_image , double width_nm, double height_nm , Qt3DCore::QTransform* transform ){
+  return qt_scene_super_cell->add_image_layer( layer_image, width_nm, height_nm, transform );
 }
 
 void UnitCellViewerWindow::init(){
@@ -68,15 +63,16 @@ void UnitCellViewerWindow::init(){
 
   // Camera
   _m_cameraEntity = qt_scene_view->camera();
-  int view_size = 200;
-  double aspect_ratio = 16.0f/9.0f;
+  QObject::connect(_m_cameraEntity, &Qt3DRender::QCamera::positionChanged,this,&UnitCellViewerWindow::update_m_cameraEntity_frustum);
 
-  _m_cameraEntity->lens()->setOrthographicProjection(-aspect_ratio*view_size/2.0f, aspect_ratio*view_size/2.0f, -view_size/2.0f, view_size/2.0f, 0.1f, 1000.0f);
-  _m_cameraEntity->setProjectionType(Qt3DRender::QCameraLens::OrthographicProjection);
+  QVector3D cam_position(_m_cameraEntity_centerDistance, _m_cameraEntity_centerDistance, _m_cameraEntity_centerDistance );
+  const double aspect_ratio = 16.0f/9.0f;
 
-  _m_cameraEntity->setPosition(QVector3D(0, 0, _m_cameraEntity_centerDistance));
-  _m_cameraEntity->setUpVector(QVector3D(0, 1, 0));
-  _m_cameraEntity->setViewCenter(QVector3D(0, 0, 0));
+  _m_cameraEntity->setViewCenter( QVector3D(0, 0, 0) );
+  _m_cameraEntity->setUpVector( QVector3D(0, 1, 0) );
+  _m_cameraEntity->setPosition( cam_position );
+  _m_cameraEntity->setProjectionType( Qt3DRender::QCameraLens::OrthographicProjection );
+  _m_cameraEntity->setAspectRatio( aspect_ratio );
 
   // Scene SuperCell for TDMAP ROI
   qt_scene_super_cell = new QtSceneSuperCell( _m_rootEntity, _m_cameraEntity );
@@ -91,41 +87,57 @@ void UnitCellViewerWindow::init(){
   _m_lightTransform->setTranslation( _m_cameraEntity->position() );
   lightEntity->addComponent( _m_lightTransform );
 
-  // FrameGraph
-  Qt3DRender::QFrameGraphNode* activeFrameGraph = qt_scene_view->activeFrameGraph();
+  // signals
+  QObject::connect(_m_cameraEntity, &Qt3DRender::QCamera::viewVectorChanged,this,&UnitCellViewerWindow::update_lightEntity_view_vector);
+  QObject::connect(_m_cameraEntity, &Qt3DRender::QCamera::positionChanged,this,&UnitCellViewerWindow::update_lightEntity_position);
+
+    // FrameGraph
+    Qt3DRender::QFrameGraphNode* activeFrameGraph = qt_scene_view->activeFrameGraph();
   QList< QObject* > childrens = activeFrameGraph->children();
   QList< Qt3DRender::QViewport* > childrens_views = activeFrameGraph->findChildren<Qt3DRender::QViewport *>();
 
   Qt3DRender::QViewport *mainViewport = childrens_views[0];
 
-  Qt3DRender::QViewport *topLeftViewport = new Qt3DRender::QViewport( );
-  Qt3DRender::QLayerFilter *layerFilter = new Qt3DRender::QLayerFilter( topLeftViewport );
-  Qt3DRender::QLayer *xyz_scene_layer = qt_scene_super_cell->get_xyz_axis_layer();
-  QList< QObject* > childrens_xyz_scene_layer = xyz_scene_layer->children();
-  std::cout << "childrens_xyz_scene_layer.size() " << childrens_xyz_scene_layer.size() << std::endl;
-  layerFilter->addLayer( xyz_scene_layer );
-
-  topLeftViewport->setNormalizedRect(QRectF(0, 0.8, 0.2, 0.2));
-  Qt3DRender::QCameraSelector *cameraSelector = new Qt3DRender::QCameraSelector(topLeftViewport);
-  Qt3DRender::QCamera *cameraEntitytopLeft = new Qt3DRender::QCamera( _m_cameraEntity );
-  cameraSelector->setCamera( cameraEntitytopLeft );
-
   // For camera controls
   Qt3DExtras::QTrackballCameraController *camController = new Qt3DExtras::QTrackballCameraController(mainViewport);
- camController->setCamera( _m_cameraEntity );
+  camController->setCamera( _m_cameraEntity );
 
   // Set root object of the scene
   qt_scene_view->setRootEntity( _m_rootEntity );
 }
 
+void UnitCellViewerWindow::update_m_cameraEntity_frustum( const QVector3D &pos  ){
+  if( _m_cameraEntity ){
+    const double near = 0.1f;
+    const double far = 1000.0f;
+    const double aspect_ratio = 16.0f/9.0f;
+
+    const float size = std::abs( std::tan( _m_cameraEntity->fieldOfView() )* pos.length() );
+    const double left = -size * aspect_ratio;
+    const double right = aspect_ratio * size;
+    const double bottom = -size;
+    const double top = size;
+
+    _m_cameraEntity->setNearPlane( near );
+    _m_cameraEntity->setFarPlane( far );
+    _m_cameraEntity->setBottom( bottom );
+    _m_cameraEntity->setLeft( left );
+    _m_cameraEntity->setRight( right );
+    _m_cameraEntity->setTop( top );
+    _m_cameraEntity->lens()->setOrthographicProjection( left, right, bottom, top, near, far );
+  }
+}
+
 void UnitCellViewerWindow::update_m_cameraEntity_centerDistance(){
   if( _flag_super_cell ){
-    _m_cameraEntity_centerDistance = 30 * super_cell->get_max_length_abc_Nanometers();
-    QVector3D at_view = _m_cameraEntity->viewVector();
-    at_view.normalize();
-    at_view*= _m_cameraEntity_centerDistance;
-    _m_lightTransform->setTranslation(-at_view);
-    _m_cameraEntity->setPosition(-at_view);
+    if( super_cell->get_flag_length() ){
+      _m_cameraEntity_centerDistance = 2 * super_cell->get_max_length_abc_Nanometers();
+      std::cout << "_m_cameraEntity_centerDistance " << _m_cameraEntity_centerDistance << std::endl;
+      QVector3D at_view = _m_cameraEntity->viewVector();
+      at_view.normalize();
+      at_view *= _m_cameraEntity_centerDistance;
+      _m_cameraEntity->setPosition( at_view );
+    }
   }
 }
 
@@ -135,9 +147,9 @@ void UnitCellViewerWindow::update_cameraEntity_zone_axis(){
       cv::Point3d zone_axis = super_cell->get_zone_axis() ;
       q_zone_axis_vector = QVector3D( zone_axis.x, zone_axis.y, zone_axis.z  );
       q_zone_axis_vector.normalize();
-      q_zone_axis_vector*= _m_cameraEntity_centerDistance;
-      _m_lightTransform->setTranslation(-q_zone_axis_vector);
-      _m_cameraEntity->setPosition(-q_zone_axis_vector);
+      q_zone_axis_vector *= _m_cameraEntity->position().length();
+      _m_cameraEntity->setViewCenter(QVector3D(0, 0, 0));
+      _m_cameraEntity->setPosition( q_zone_axis_vector );
     }
   }
 }
@@ -161,26 +173,26 @@ void UnitCellViewerWindow::view_along_ZA_UV(){
 void UnitCellViewerWindow::view_along_a_axis(){
   q_zone_axis_vector = QVector3D( 1 , 0 , 0 );
   q_zone_axis_vector.normalize();
-  q_zone_axis_vector*= _m_cameraEntity_centerDistance;
-  _m_cameraEntity->setPosition(q_zone_axis_vector);
-  _m_lightTransform->setTranslation(q_zone_axis_vector);
+  q_zone_axis_vector *= _m_cameraEntity->position().length();
+  _m_cameraEntity->setViewCenter(QVector3D(0, 0, 0));
   _m_cameraEntity->setUpVector(QVector3D(0, 0, 1));
+  _m_cameraEntity->setPosition(q_zone_axis_vector);
 }
 
 void UnitCellViewerWindow::view_along_b_axis(){
   q_zone_axis_vector = QVector3D( 0 , 1 , 0 );
   q_zone_axis_vector.normalize();
-  q_zone_axis_vector*= _m_cameraEntity_centerDistance;
+  q_zone_axis_vector *= _m_cameraEntity->position().length();
+  _m_cameraEntity->setViewCenter(QVector3D(0, 0, 0));
+  _m_cameraEntity->setUpVector(QVector3D(1, 0, 0));
   _m_cameraEntity->setPosition(q_zone_axis_vector);
-  _m_lightTransform->setTranslation(q_zone_axis_vector);
-    _m_cameraEntity->setUpVector(QVector3D(1, 0, 0));
 }
 
 void UnitCellViewerWindow::view_along_c_axis(){
   q_zone_axis_vector = QVector3D( 0 , 0 , 1 );
   q_zone_axis_vector.normalize();
-  q_zone_axis_vector*= _m_cameraEntity_centerDistance;
-  _m_cameraEntity->setPosition(q_zone_axis_vector);
-  _m_lightTransform->setTranslation(q_zone_axis_vector);
+  q_zone_axis_vector *= _m_cameraEntity->position().length();
+  _m_cameraEntity->setViewCenter(QVector3D(0, 0, 0));
   _m_cameraEntity->setUpVector(QVector3D(0, 1, 0));
+  _m_cameraEntity->setPosition(q_zone_axis_vector);
 }

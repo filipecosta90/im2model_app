@@ -265,6 +265,7 @@ else(build_cli)
       src/cv_image_widget.h
       src/cv_image_widget.cpp
       src/cv_image_table_frame.h
+      src/cv_cell_table_frame.h
       src/cv_image_frame.h
       src/cv_image_frame.cpp
       src/cv_image_cell_widget.h
@@ -302,6 +303,8 @@ else(build_cli)
       src/vis/inputcontrols/qtrackballcameracontroller_p.h
       src/vis/unit_cell_view_widget.cpp
       src/vis/unit_cell_view_widget.h
+      src/vis/cell_view_widget.cpp
+      src/vis/cell_view_widget.h
       src/vis/texture_image.h
       src/vis/texture_image.cpp
       )

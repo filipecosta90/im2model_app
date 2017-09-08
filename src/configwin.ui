@@ -422,7 +422,7 @@
                </widget>
               </item>
               <item>
-               <widget class="CvImageFrameTableWidget" name="qgraphics_tdmap_selection" native="true">
+               <widget class="CvCellFrameTableWidget" name="qgraphics_tdmap_selection" native="true">
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
                   <horstretch>0</horstretch>
@@ -643,8 +643,8 @@
                 <rect>
                  <x>0</x>
                  <y>0</y>
-                 <width>1204</width>
-                 <height>664</height>
+                 <width>98</width>
+                 <height>198</height>
                 </rect>
                </property>
               </widget>
@@ -1077,6 +1077,12 @@
    <class>UnitCellViewerWindow</class>
    <extends>QWidget</extends>
    <header location="global">vis/unit_cell_view_widget.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>CvCellFrameTableWidget</class>
+   <extends>QWidget</extends>
+   <header location="global">cv_cell_table_frame.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

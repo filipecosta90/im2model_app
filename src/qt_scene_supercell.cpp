@@ -33,46 +33,45 @@ QtSceneSuperCell::QtSceneSuperCell(Qt3DCore::QEntity *rootEntity, Qt3DRender::QC
   m_helperArrows->setObjectName(QStringLiteral("__internal helper arrows"));
 
   QMatrix4x4 matrix;
-  matrix.rotate(90.0f, QVector3D(0.0f, 0.0f, 1.0f));
+  Qt3DCore::QEntity *arrow_y = createArrowEntity(helperArrowColorY, m_helperArrows, matrix, helperArrowName);
+  arrow_y->setEnabled(true);
+
+    matrix.rotate(90.0f, QVector3D(1.0f, 0.0f, 0.0f));
+    Qt3DCore::QEntity *arrow_z = createArrowEntity(helperArrowColorZ, m_helperArrows, matrix, helperArrowName);
+    arrow_z->setEnabled(true);
+
+    matrix = QMatrix();
+  matrix.rotate(-90.0f, QVector3D(0.0f, 0.0f, 1.0f));
   Qt3DCore::QEntity *arrow_x = createArrowEntity(helperArrowColorX, m_helperArrows, matrix, helperArrowName);
   arrow_x->setEnabled(true);
 
-  matrix.rotate(90.0f, QVector3D(0.0f, 0.0f, 1.0f));
-  Qt3DCore::QEntity *arrow_y = createArrowEntity(helperArrowColorY, m_helperArrows, matrix, helperArrowName);
 
-  matrix = QMatrix();
-  matrix.rotate(-90.0f, QVector3D(1.0f, 0.0f, 0.0f));
-  Qt3DCore::QEntity *arrow_z = createArrowEntity(helperArrowColorZ, m_helperArrows, matrix, helperArrowName);
   //createObjectPickerForEntity(arrow);
   m_helperArrowsTransform = new Qt3DCore::QTransform();
   m_helperArrows->addComponent(m_helperArrowsTransform);
   m_helperArrows->setParent(m_axisEntity);
 
-
 }
 
-bool QtSceneSuperCell::add_image_layer(  cv::Mat layer_image , int width, int height, Qt3DCore::QTransform* transform ){
+bool QtSceneSuperCell::add_image_layer(  cv::Mat layer_image , double width_nm, double height_nm, Qt3DCore::QTransform* transform1 ){
 
     // add the plane that will contain the image
     Qt3DCore::QEntity* planeEntity = new Qt3DCore::QEntity(m_rootEntity);
     Qt3DExtras::QPlaneMesh* planeMesh = new Qt3DExtras::QPlaneMesh(planeEntity);
-    planeMesh->setWidth( width );
-    //  rows = height;
-    //  cols = width;
-    planeMesh->setHeight( height );
+    planeMesh->setWidth( width_nm );
+    planeMesh->setHeight( height_nm );
     planeEntity->addComponent(planeMesh);
 
-    Qt3DExtras::QDiffuseMapMaterial *material = new Qt3DExtras::QDiffuseMapMaterial();
+    Qt3DCore::QTransform* transform = new Qt3DCore::QTransform( planeEntity );
+       transform->setRotation(QQuaternion::fromAxisAndAngle(1,0,0,90));
+planeEntity->addComponent(transform);
+
+    Qt3DExtras::QDiffuseMapMaterial *material = new Qt3DExtras::QDiffuseMapMaterial( planeEntity );
   image = new TextureImage; //see below
   image->setImage( layer_image );
   image->update();
-
     material->diffuse()->addTextureImage(image);
-
     planeEntity->addComponent(material);
-if( transform ){
-  planeEntity->addComponent(transform);
-}
     return true;
 }
 
@@ -165,8 +164,4 @@ void QtSceneSuperCell::reload_data_from_super_cell(){
       }
     }
   }
-}
-
-void QtSceneSuperCell::orientate_data_from_super_cell(){
-  std::cout << " orientate_data_from_super_cell" << std::endl;
 }

@@ -164,6 +164,13 @@ void CVImageWidget::cleanRenderAreas(){
 void CVImageWidget::paintEvent(QPaintEvent* event) {
   // Display the image
   QPainter painter(this);
+
+/*  QPixmap pixmap = QPixmap::fromImage(_qimage);
+
+  QSize size = pixmap.size();
+
+  painter.drawPixmap(QRect(QPoint(0,0), size), pixmap.scaled(size, Qt::KeepAspectRatio));
+*/
   painter.drawImage(QPoint(0,0), _qimage);
 
   for( int list_position = 0; list_position < renderAreas.size() ; list_position++ ){

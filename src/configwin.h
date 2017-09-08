@@ -154,7 +154,6 @@ class MainWindow : public QMainWindow {
     void update_tdmap_sim_ostream_wavimg();
     void update_tdmap_sim_ostream_simgrid();
     void clear_tdmap_sim_ostream_containers();
-    void update_tdmap_best_match(int x,int y);
     void update_tdmap_current_selection(int x,int y);
     void update_from_SuperCell_edge_sucess();
     void update_from_SuperCell_edge_failure();

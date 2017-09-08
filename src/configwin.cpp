@@ -132,7 +132,6 @@ MainWindow::MainWindow( ApplicationLog::ApplicationLog* logger , QWidget *parent
       // will quit thread after work done
       connect(sim_super_cell_worker, SIGNAL(SuperCell_edge_finished()), _sim_super_cell_thread, SLOT(quit()), Qt::DirectConnection);
 
-      //connect( ui->tdmap_table, SIGNAL(tdmap_best_match( int, int )), this, SLOT( update_tdmap_best_match(int,int)) );
       connect(ui->tdmap_table, SIGNAL(cellClicked(int , int )), this, SLOT( update_tdmap_current_selection(int,int)) );
 
       connect(this, SIGNAL(experimental_image_filename_changed()), this, SLOT(update_full_experimental_image()));
@@ -163,16 +162,6 @@ MainWindow::MainWindow( ApplicationLog::ApplicationLog* logger , QWidget *parent
         im2model_logger->logEvent( ApplicationLog::notification, "Finished initializing App." );
       }
 
-    /*
-    const cv::Mat full_image = cv::Mat::zeros(222,222,CV_8UC1);
-      const double full_image_height_nm = 1.0;
-      const double full_image_width_nm = 2.0;
-
-          Qt3DCore::QTransform* transform = new Qt3DCore::QTransform();
-          transform->setRotation(QQuaternion::fromAxisAndAngle(1,0,0,90));
-
-      ui->qwidget_qt_scene_view_roi_tdmap_super_cell->add_image_layer( full_image , full_image_width_nm ,  full_image_height_nm , transform );
-*/
     }
   }
 }
@@ -245,6 +234,9 @@ void MainWindow::update_tdmap_simgrid_ended( bool result ){
   if( result ){
     updateProgressBar(0,4,4);
     ui->statusBar->showMessage(tr("Sucessfully ended image correlation step"), 2000);
+    SuperCell* tdmap_roi_sim_super_cell = _core_td_map->get_tdmap_roi_sim_super_cell();
+    ui->qgraphics_tdmap_selection->set_super_cell( tdmap_roi_sim_super_cell , false );
+    ui->qgraphics_tdmap_selection->reload_data_from_super_cell();
   }
   else{
     updateProgressBar(0,4,4, true);
@@ -296,42 +288,6 @@ bool MainWindow::maybeSetPreferences(){
   return false;
 }
 
-void MainWindow::update_tdmap_best_match( int x,int y ){
-  if(_core_td_map->get_flag_simulated_images_grid()){
-    cv::Mat _simulated_image = _core_td_map->get_simulated_image_in_grid(x,y);
-    double _simulated_image_match = 0.0f;
-    const bool correlation_active = _core_td_map->get_run_simgrid_switch();
-    QStandardItem *match_item;
-    if( correlation_active ){
-      _simulated_image_match = _core_td_map->get_simulated_image_match_in_grid(x,y);
-      match_item = new QStandardItem( QString::number( _simulated_image_match ) );
-    }
-    else{
-      match_item = new QStandardItem(tr("N/A"));
-    }
-    const double _simulated_image_thickness = _core_td_map->get_simulated_image_thickness_nm_in_grid(x,y);
-    const double _simulated_image_defocus = _core_td_map->get_simulated_image_defocus_in_grid(x,y);
-
-    QStandardItemModel* model = new QStandardItemModel(3, 2,this);
-    model->setHeaderData(0, Qt::Horizontal, tr("Parameter"));
-    model->setHeaderData(1, Qt::Horizontal, tr("Value"));
-    QStandardItem *label_match_item = new QStandardItem(tr("Match %"));
-    QStandardItem *label_defocus_item = new QStandardItem(tr("Defocus"));
-    QStandardItem *label_thickness_item = new QStandardItem(tr("Thickness"));
-    QStandardItem *defocus_item = new QStandardItem( QString::number( _simulated_image_defocus  ) );
-    QStandardItem *thickness_item = new QStandardItem( QString::number( _simulated_image_thickness ) );
-    model->setItem(0, 0, label_match_item);
-    model->setItem(1, 0, label_thickness_item);
-    model->setItem(2, 0, label_defocus_item);
-    model->setItem(0, 1, match_item);
-    model->setItem(1, 1, thickness_item);
-    model->setItem(2, 1, defocus_item);
-
-    ui->qgraphics_tdmap_selection->setModel(model);
-    ui->qgraphics_tdmap_selection->setImage( _simulated_image );
-  }
-}
-
 void MainWindow::update_tdmap_current_selection(int x,int y){
   if(_core_td_map->get_flag_simulated_images_grid()){
     tdmap_current_selection_pos.x = x;
@@ -366,8 +322,16 @@ void MainWindow::update_tdmap_current_selection(int x,int y){
     model->setItem(0, 1, match_item);
     model->setItem(1, 1, thickness_item);
     model->setItem(2, 1, defocus_item);
+
     ui->qgraphics_tdmap_selection->setModel(model);
-    ui->qgraphics_tdmap_selection->setImage( _simulated_image );
+
+    const double full_image_height_nm = _core_td_map->get_sim_image_properties_full_ny_size_height_nm();
+    const double full_image_width_nm = _core_td_map->get_sim_image_properties_full_nx_size_width_nm();
+
+    std::cout << "full_image_width_nm" << full_image_width_nm << std::endl;
+    std::cout << "full_image_height_nm" << full_image_height_nm << std::endl;
+    ui->qgraphics_tdmap_selection->add_image_layer( _simulated_image , full_image_width_nm ,  full_image_height_nm  );
+
   }
 }
 
@@ -2490,31 +2454,31 @@ void MainWindow::on_qpush_run_tdmap_clicked(){
 void MainWindow::on_qbutton_tdmap_accept_clicked(){
   bool result = false;
   if(_core_td_map->get_flag_simulated_images_grid()){
-  cv::Point2i best_match_pos;
-  const bool _calculated_best_match = _core_td_map->get_flag_simgrid_best_match_position();
-  bool accept = true;
-  if( _calculated_best_match ){
-     best_match_pos = _core_td_map->get_simgrid_best_match_position();
-     if( best_match_pos != tdmap_current_selection_pos ){
-       const QMessageBox::StandardButton ret
-         = QMessageBox::warning(this, tr("Application"),
-             tr("The selected cell differs from the automatic best match position.\n"
-               "Do you want to use the current selected thickness value?"),
-             QMessageBox::Yes | QMessageBox::No);
-       switch (ret) {
-         case QMessageBox::No:
-           accept = false;
-           break;
-         default:
-           break;
-       }
-     }
+    cv::Point2i best_match_pos;
+    const bool _calculated_best_match = _core_td_map->get_flag_simgrid_best_match_position();
+    bool accept = true;
+    if( _calculated_best_match ){
+      best_match_pos = _core_td_map->get_simgrid_best_match_position();
+      if( best_match_pos != tdmap_current_selection_pos ){
+        const QMessageBox::StandardButton ret
+          = QMessageBox::warning(this, tr("Application"),
+              tr("The selected cell differs from the automatic best match position.\n"
+                "Do you want to use the current selected thickness value?"),
+              QMessageBox::Yes | QMessageBox::No);
+        switch (ret) {
+          case QMessageBox::No:
+            accept = false;
+            break;
+          default:
+            break;
+        }
+      }
+    }
+    // if the user still wants to accept position
+    if( accept ){
+      result = _core_td_map->accept_tdmap_best_match_position( tdmap_current_selection_pos.x ,tdmap_current_selection_pos.y );
+    }
   }
-  // if the user still wants to accept position
-  if( accept ){
-    result = _core_td_map->accept_tdmap_best_match_position( tdmap_current_selection_pos.x ,tdmap_current_selection_pos.y );
-  }
-}
   if( result ){
     ui->statusBar->showMessage(tr("Accepted TD Map best match position."), 2000);
   }

@@ -95,7 +95,7 @@ class QtSceneSuperCell : public QObject
     explicit QtSceneSuperCell( Qt3DCore::QEntity *rootEntity, Qt3DRender::QCamera *cameraEntity );
     ~QtSceneSuperCell();
     void set_super_cell( SuperCell* cell );
-    bool add_image_layer( cv::Mat layer_image , int width, int height, Qt3DCore::QTransform* transform = nullptr );
+    bool add_image_layer( cv::Mat layer_image , double width_nm, double height_nm, Qt3DCore::QTransform* transform = nullptr );
 
     Qt3DRender::QLayer* get_xyz_axis_layer(){ return xyz_axis_layer; }
     Qt3DRender::QLayer* get_sphere_layer(){ return sphere_layer; }
@@ -105,7 +105,6 @@ class QtSceneSuperCell : public QObject
 
     public slots:
     void reload_data_from_super_cell();
-    void orientate_data_from_super_cell();
 
   private:
     Qt3DRender::QCamera *cameraEntity;

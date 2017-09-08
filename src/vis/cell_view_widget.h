@@ -1,6 +1,6 @@
 
-#ifndef SRC_VIS_UNITCELLVIEWERWINDOW_H__
-#define SRC_VIS_UNITCELLVIEWERWINDOW_H__
+#ifndef SRC_VIS_CELLVIEWERWINDOW_H__
+#define SRC_VIS_CELLVIEWERWINDOW_H__
 
 
 #include <QMainWindow>
@@ -63,24 +63,22 @@
 #include <QQuickWidget>
 #include <QQuickView>
 
-  QT_FORWARD_DECLARE_CLASS(QRadioButton)
-  QT_FORWARD_DECLARE_CLASS(QCheckBox)
-  QT_FORWARD_DECLARE_CLASS(QLabel)
+QT_FORWARD_DECLARE_CLASS(QRadioButton)
+QT_FORWARD_DECLARE_CLASS(QCheckBox)
+QT_FORWARD_DECLARE_CLASS(QLabel)
 QT_FORWARD_DECLARE_CLASS(QLayout)
 
-  class UnitCellViewerWindow : public QWidget {
+  class CellViewerWindow : public QWidget {
     Q_OBJECT
     public:
-      UnitCellViewerWindow(QWidget *parent = 0);
-      void set_super_cell( SuperCell* );
+      CellViewerWindow(QWidget *parent = 0);
+      void set_super_cell( SuperCell* , bool bind_orientation = true);
+      void reload_data_from_super_cell();
       bool add_image_layer( cv::Mat layer_image, double width_nm, double height_nm, Qt3DCore::QTransform* transform = nullptr );
 
       public slots:
-        void init();
+      void init();
       void update_lightEntity_view_vector(const QVector3D &viewVector);
-      void update_lightEntity_position(const QVector3D &pos);
-      void update_m_cameraEntity_frustum(const QVector3D &pos);
-
       void update_cameraEntity_zone_axis();
       void update_cameraEntity_upward_vector();
       void update_m_cameraEntity_centerDistance();
@@ -90,9 +88,6 @@ QT_FORWARD_DECLARE_CLASS(QLayout)
       void view_along_c_axis();
 
     protected:
-
-
-    private:
       //Layout
       QLayout *m_containerLayout;
       QWidget *container;
@@ -110,6 +105,9 @@ QT_FORWARD_DECLARE_CLASS(QLayout)
       Qt3DCore::QTransform *_m_lightTransform;
       double _m_cameraEntity_centerDistance = 10.0f;
       QVector3D q_zone_axis_vector;
+
+private:
+
   };
 
 #endif
