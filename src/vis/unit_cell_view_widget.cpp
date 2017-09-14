@@ -28,9 +28,10 @@ UnitCellViewerWindow::UnitCellViewerWindow(QWidget *parent) : QWidget(parent) {
 
   toolsLayout->addWidget(container);
   toolsLayout->setStretchFactor(container, 8);
+
   m_containerLayout = new QVBoxLayout;
-  container->setLayout(m_containerLayout);
-  setLayout(toolsLayout);
+  m_containerLayout->addWidget(container);
+  toolsLayout->addLayout(m_containerLayout);
   init();
 }
 
@@ -92,7 +93,7 @@ void UnitCellViewerWindow::init(){
   qt_scene_super_cell = new QtSceneSuperCell( _m_rootEntity, _m_cameraEntity );
 
   Qt3DCore::QEntity *lightEntity = new Qt3DCore::QEntity( _m_rootEntity );
-  _m_cameraLight = new Qt3DRender::QDirectionalLight(lightEntity);
+  _m_cameraLight = new Qt3DRender::QDirectionalLight( lightEntity );
   _m_cameraLight->setColor("white");
   _m_cameraLight->setIntensity(0.0f);
   lightEntity->addComponent(_m_cameraLight);

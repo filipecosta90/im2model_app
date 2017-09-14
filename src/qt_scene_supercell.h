@@ -17,10 +17,10 @@
 #include <Qt3DInput/QInputAspect>
 #include <QFrameGraphNode>
 #include <Qt3DCore/QEntity>
- #include <Qt3DRender/QGeometryRenderer>
- #include <Qt3DRender/QLayer>
- #include <Qt3DRender/QLayerFilter>
- #include <Qt3DRender/QViewport>
+#include <Qt3DRender/QGeometryRenderer>
+#include <Qt3DRender/QLayer>
+#include <Qt3DRender/QLayerFilter>
+#include <Qt3DRender/QViewport>
 
 #include <Qt3DExtras/qtorusmesh.h>
 #include <Qt3DRender/qmesh.h>
@@ -79,6 +79,10 @@
 #include <Qt3DRender/QLayer>
 #include <Qt3DRender/QLayerFilter>
 #include <Qt3DRender/QViewport>
+#include <QPhongAlphaMaterial>
+#include <QNormalDiffuseMapAlphaMaterial>
+#include <QDiffuseSpecularMapMaterial>
+
 
 #include <boost/shared_array.hpp>
 
@@ -101,11 +105,11 @@ class QtSceneSuperCell : public QObject
     Qt3DRender::QLayer* get_xyz_axis_layer(){ return xyz_axis_layer; }
     Qt3DRender::QLayer* get_sphere_layer(){ return sphere_layer; }
 
-	static Qt3DRender::QMesh *createArrowMesh();
-	static Qt3DCore::QEntity *createArrowEntity(const QColor &color, Qt3DCore::QEntity *parent, const QMatrix4x4 &matrix, const QString &name);
+    static Qt3DRender::QMesh *createArrowMesh();
+    static Qt3DCore::QEntity *createArrowEntity(const QColor &color, Qt3DCore::QEntity *parent, const QMatrix4x4 &matrix, const QString &name);
 
     public slots:
-    void reload_data_from_super_cell();
+      void reload_data_from_super_cell();
 
   private:
     Qt3DRender::QCamera *cameraEntity;

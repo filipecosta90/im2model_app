@@ -18,15 +18,13 @@ class CvImageFrameTableWidget : public CvImageFrameWidget
 {
   Q_OBJECT
   public:
-    explicit CvImageFrameTableWidget(QWidget *parent = 0) : CvImageFrameWidget(parent)
-  {
+    explicit CvImageFrameTableWidget(QWidget *parent = 0) : CvImageFrameWidget(parent){
     table_view = new QTableView;
     //disable editing
     table_view->setEditTriggers(QAbstractItemView::NoEditTriggers);
     table_view->setSizeAdjustPolicy(QAbstractScrollArea::AdjustToContents);
     table_view->resizeRowsToContents();
     table_view->setMaximumHeight(0);
-
     contentsLayout->addWidget(table_view);
   }
     public slots:

@@ -330,7 +330,7 @@ void MainWindow::update_tdmap_current_selection(int x,int y){
 
     std::cout << "full_image_width_nm" << full_image_width_nm << std::endl;
     std::cout << "full_image_height_nm" << full_image_height_nm << std::endl;
-    ui->qgraphics_tdmap_selection->add_image_layer( _simulated_image , full_image_width_nm ,  full_image_height_nm );
+    ui->qgraphics_tdmap_selection->update_image_layer( _simulated_image , full_image_width_nm ,  full_image_height_nm );
   }
 }
 

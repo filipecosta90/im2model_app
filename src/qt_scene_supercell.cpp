@@ -36,11 +36,11 @@ QtSceneSuperCell::QtSceneSuperCell(Qt3DCore::QEntity *rootEntity, Qt3DRender::QC
   Qt3DCore::QEntity *arrow_y = createArrowEntity(helperArrowColorY, m_helperArrows, matrix, helperArrowName);
   arrow_y->setEnabled(true);
 
-    matrix.rotate(90.0f, QVector3D(1.0f, 0.0f, 0.0f));
-    Qt3DCore::QEntity *arrow_z = createArrowEntity(helperArrowColorZ, m_helperArrows, matrix, helperArrowName);
-    arrow_z->setEnabled(true);
+  matrix.rotate(90.0f, QVector3D(1.0f, 0.0f, 0.0f));
+  Qt3DCore::QEntity *arrow_z = createArrowEntity(helperArrowColorZ, m_helperArrows, matrix, helperArrowName);
+  arrow_z->setEnabled(true);
 
-    matrix = QMatrix();
+  matrix = QMatrix();
   matrix.rotate(-90.0f, QVector3D(0.0f, 0.0f, 1.0f));
   Qt3DCore::QEntity *arrow_x = createArrowEntity(helperArrowColorX, m_helperArrows, matrix, helperArrowName);
   arrow_x->setEnabled(true);
@@ -53,42 +53,60 @@ QtSceneSuperCell::QtSceneSuperCell(Qt3DCore::QEntity *rootEntity, Qt3DRender::QC
 
 }
 bool QtSceneSuperCell::update_image_layer( cv::Mat layer_image , double width_nm, double height_nm , Qt3DCore::QTransform* transform, std::string layer_name, int layer_number){
-  
+  bool result = false;
+  if( m_plane_entity_vector.size() == 0 ){
+    result = add_image_layer( layer_image, width_nm, height_nm, transform );
+  }
+  else{
+    Qt3DExtras::QPlaneMesh* planeMesh = planeMesh_vector[layer_number-1];
+    planeMesh->setWidth( width_nm );
+    planeMesh->setHeight( height_nm );
+    Qt3DExtras::QDiffuseMapMaterial *material = planeMaterial_vector[layer_number-1];
+    QColor color;
+    color.setRgbF(1.0,1.0,1.0,1.0);
+    material->setAmbient(color);
+    TextureImage* image = image_vector[layer_number-1];
+    image->setImage( layer_image );
+    image->update();
+    material->diffuse()->addTextureImage(image);
+    result = true;
+  }
+  return result;
 }
 
 bool QtSceneSuperCell::add_image_layer(  cv::Mat layer_image , double width_nm, double height_nm, Qt3DCore::QTransform* transform1 ){
 
-    // add the plane that will contain the image
-    Qt3DCore::QEntity* planeEntity = new Qt3DCore::QEntity(m_rootEntity);
-    Qt3DExtras::QPlaneMesh* planeMesh = new Qt3DExtras::QPlaneMesh(planeEntity);
-    planeMesh->setWidth( width_nm );
-    planeMesh->setHeight( height_nm );
-    planeEntity->addComponent(planeMesh);
+  // add the plane that will contain the image
+  Qt3DCore::QEntity* planeEntity = new Qt3DCore::QEntity(m_rootEntity);
+  Qt3DExtras::QPlaneMesh* planeMesh = new Qt3DExtras::QPlaneMesh(planeEntity);
+  planeMesh->setWidth( width_nm );
+  planeMesh->setHeight( height_nm );
+  planeEntity->addComponent(planeMesh);
 
-    Qt3DCore::QTransform* transform = new Qt3DCore::QTransform( planeEntity );
-   transform->setRotation(QQuaternion::fromAxisAndAngle(1,0,0,90));
-   planeEntity->addComponent(transform);
+  Qt3DCore::QTransform* transform = new Qt3DCore::QTransform( planeEntity );
+  transform->setRotation(QQuaternion::fromAxisAndAngle(1,0,0,90));
+  planeEntity->addComponent(transform);
 
-    Qt3DExtras::QDiffuseMapMaterial *material = new Qt3DExtras::QDiffuseMapMaterial( planeEntity );
-    QColor color;
-    color.setRgbF(1.0,1.0,1.0,1.0);
-    material->setAmbient(color);
-
+  Qt3DExtras::QDiffuseMapMaterial *material = new Qt3DExtras::QDiffuseMapMaterial( planeEntity );
+  QColor color;
+  color.setRgbF(1.0,1.0,1.0,1.0);
+  material->setAmbient(color);
+  material->setShininess(0.0f);
   TextureImage* image = new TextureImage;
   image->setImage( layer_image );
   image->update();
 
-    material->diffuse()->addTextureImage(image);
-    planeEntity->addComponent(material);
+  material->diffuse()->addTextureImage(image);
+  planeEntity->addComponent(material);
 
-    //save for later
-    m_plane_entity_vector.push_back( planeEntity );
-    planeMesh_vector.push_back( planeMesh );
-    image_vector.push_back( image );
-    planeMaterial_vector.push_back( material );
-    planeTransform_vector.push_back( transform );
+  //save for later
+  m_plane_entity_vector.push_back( planeEntity );
+  planeMesh_vector.push_back( planeMesh );
+  image_vector.push_back( image );
+  planeMaterial_vector.push_back( material );
+  planeTransform_vector.push_back( transform );
 
-    return true;
+  return true;
 }
 
 QtSceneSuperCell::~QtSceneSuperCell(){
@@ -118,7 +136,6 @@ Qt3DCore::QEntity *QtSceneSuperCell::createArrowEntity(const QColor &color, Qt3D
   Qt3DCore::QTransform *transform = new Qt3DCore::QTransform();
   transform->setMatrix(matrix);
   transform->setScale(3.0f);
-
   arrow->addComponent(mesh);
   arrow->addComponent(material);
   arrow->addComponent(transform);
@@ -157,15 +174,16 @@ void QtSceneSuperCell::reload_data_from_super_cell(){
 
         // Mesh
         Qt3DExtras::QSphereMesh *sphereMesh = new Qt3DExtras::QSphereMesh( sphereEntity );
-        sphereMesh->setRings(5);
-        sphereMesh->setSlices(5);
+        sphereMesh->setRings(20);
+        sphereMesh->setSlices(20);
         sphereMesh->setRadius( atom_empirical_radii );
         sphere_meshes.push_back( sphereMesh );
         sphereEntity->addComponent( sphereMesh );
 
         // Material
-        Qt3DExtras::QGoochMaterial *sphereMaterial = new Qt3DExtras::QGoochMaterial( sphereEntity );
-        sphereMaterial->setDiffuse(QColor::fromRgbF( atom_cpk_rgba_color[0], atom_cpk_rgba_color[1], atom_cpk_rgba_color[2] ) );
+        Qt3DExtras::QPhongAlphaMaterial *sphereMaterial = new Qt3DExtras::QPhongAlphaMaterial( sphereEntity );
+        sphereMaterial->setAlpha( 1.0f );
+        sphereMaterial->setAmbient( QColor::fromRgbF( atom_cpk_rgba_color[0], atom_cpk_rgba_color[1], atom_cpk_rgba_color[2], 0.3f ) );
         sphereEntity->addComponent( sphereMaterial );
 
         // Transform
