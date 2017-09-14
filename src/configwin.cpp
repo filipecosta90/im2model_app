@@ -325,13 +325,12 @@ void MainWindow::update_tdmap_current_selection(int x,int y){
 
     ui->qgraphics_tdmap_selection->setModel(model);
 
-    const double full_image_height_nm = _core_td_map->get_sim_image_properties_full_ny_size_height_nm();
-    const double full_image_width_nm = _core_td_map->get_sim_image_properties_full_nx_size_width_nm();
+    const double full_image_height_nm = _core_td_map->get_sim_image_properties_roi_ny_size_height_nm();
+    const double full_image_width_nm = _core_td_map->get_sim_image_properties_roi_nx_size_width_nm();
 
     std::cout << "full_image_width_nm" << full_image_width_nm << std::endl;
     std::cout << "full_image_height_nm" << full_image_height_nm << std::endl;
-    ui->qgraphics_tdmap_selection->add_image_layer( _simulated_image , full_image_width_nm ,  full_image_height_nm  );
-
+    ui->qgraphics_tdmap_selection->add_image_layer( _simulated_image , full_image_width_nm ,  full_image_height_nm );
   }
 }
 

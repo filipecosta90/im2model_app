@@ -52,6 +52,9 @@ QtSceneSuperCell::QtSceneSuperCell(Qt3DCore::QEntity *rootEntity, Qt3DRender::QC
   m_helperArrows->setParent(m_axisEntity);
 
 }
+bool QtSceneSuperCell::update_image_layer( cv::Mat layer_image , double width_nm, double height_nm , Qt3DCore::QTransform* transform, std::string layer_name, int layer_number){
+  
+}
 
 bool QtSceneSuperCell::add_image_layer(  cv::Mat layer_image , double width_nm, double height_nm, Qt3DCore::QTransform* transform1 ){
 
@@ -63,15 +66,28 @@ bool QtSceneSuperCell::add_image_layer(  cv::Mat layer_image , double width_nm, 
     planeEntity->addComponent(planeMesh);
 
     Qt3DCore::QTransform* transform = new Qt3DCore::QTransform( planeEntity );
-       transform->setRotation(QQuaternion::fromAxisAndAngle(1,0,0,90));
-planeEntity->addComponent(transform);
+   transform->setRotation(QQuaternion::fromAxisAndAngle(1,0,0,90));
+   planeEntity->addComponent(transform);
 
     Qt3DExtras::QDiffuseMapMaterial *material = new Qt3DExtras::QDiffuseMapMaterial( planeEntity );
-  image = new TextureImage; //see below
+    QColor color;
+    color.setRgbF(1.0,1.0,1.0,1.0);
+    material->setAmbient(color);
+
+  TextureImage* image = new TextureImage;
   image->setImage( layer_image );
   image->update();
+
     material->diffuse()->addTextureImage(image);
     planeEntity->addComponent(material);
+
+    //save for later
+    m_plane_entity_vector.push_back( planeEntity );
+    planeMesh_vector.push_back( planeMesh );
+    image_vector.push_back( image );
+    planeMaterial_vector.push_back( material );
+    planeTransform_vector.push_back( transform );
+
     return true;
 }
 
@@ -96,7 +112,7 @@ Qt3DCore::QEntity *QtSceneSuperCell::createArrowEntity(const QColor &color, Qt3D
   arrow->setObjectName(name);
 
   Qt3DRender::QGeometryRenderer *mesh = createArrowMesh();
-  Qt3DExtras::QPhongMaterial *material = new Qt3DExtras::QPhongMaterial();
+  Qt3DExtras::QGoochMaterial *material = new Qt3DExtras::QGoochMaterial();
   material->setDiffuse(color);
 
   Qt3DCore::QTransform *transform = new Qt3DCore::QTransform();

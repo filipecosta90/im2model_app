@@ -38,10 +38,12 @@ class BaseImage {
 
     bool auto_calculate_ignore_edge_pixels();
     bool auto_calculate_dimensions();
-    bool calculate_n_rows_from_a_size_and_sampling_rate();
-    bool calculate_a_size_from_n_rows_and_sampling_rate();
-    bool calculate_n_cols_from_b_size_and_sampling_rate();
-    bool calculate_b_size_from_n_cols_and_sampling_rate();
+    bool calculate_n_rows_from_b_size_and_sampling_rate();
+    bool calculate_b_size_from_n_rows_and_sampling_rate();
+    bool calculate_n_cols_from_a_size_and_sampling_rate();
+    bool calculate_a_size_from_n_cols_and_sampling_rate();
+    bool calculate_roi_b_size_from_n_rows_and_sampling_rate();
+    bool calculate_roi_a_size_from_n_cols_and_sampling_rate();
 
     /* Loggers */
     ApplicationLog::ApplicationLog* logger = nullptr;

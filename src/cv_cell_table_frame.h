@@ -11,13 +11,13 @@
 #include <QBoxLayout>
 #include <QTableView>
 
-#include "vis/cell_view_widget.h"
+#include "vis/unit_cell_view_widget.h"
 
-class CvCellFrameTableWidget : public CellViewerWindow
+class CvCellFrameTableWidget : public UnitCellViewerWindow
 {
   Q_OBJECT
   public:
-    explicit CvCellFrameTableWidget(QWidget *parent = 0) : CellViewerWindow(parent)
+    explicit CvCellFrameTableWidget(QWidget *parent = 0) : UnitCellViewerWindow(parent)
   {
     table_view = new QTableView;
     //disable editing
@@ -25,7 +25,6 @@ class CvCellFrameTableWidget : public CellViewerWindow
     table_view->setSizeAdjustPolicy(QAbstractScrollArea::AdjustToContents);
     table_view->resizeRowsToContents();
     table_view->setMaximumHeight(0);
-
     m_containerLayout->addWidget(table_view);
   }
     public slots:

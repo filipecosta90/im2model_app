@@ -4,7 +4,7 @@
 #include <Qt3DRender/qcamera.h>
 #include <Qt3DCore/qentity.h>
 #include <Qt3DRender/qcameralens.h>
-
+#include <QGoochMaterial>
 #include <QtWidgets/QApplication>
 #include <QtWidgets/QWidget>
 #include <QtWidgets/QHBoxLayout>
@@ -96,6 +96,7 @@ class QtSceneSuperCell : public QObject
     ~QtSceneSuperCell();
     void set_super_cell( SuperCell* cell );
     bool add_image_layer( cv::Mat layer_image , double width_nm, double height_nm, Qt3DCore::QTransform* transform = nullptr );
+    bool update_image_layer( cv::Mat layer_image , double width_nm, double height_nm , Qt3DCore::QTransform* transform = nullptr, std::string layer_name = "Image Layer", int layer_number = 1);
 
     Qt3DRender::QLayer* get_xyz_axis_layer(){ return xyz_axis_layer; }
     Qt3DRender::QLayer* get_sphere_layer(){ return sphere_layer; }
@@ -113,12 +114,11 @@ class QtSceneSuperCell : public QObject
     Qt3DCore::QEntity *m_helperArrows;
     Qt3DCore::QTransform *m_helperArrowsTransform;
 
-    Qt3DCore::QEntity *m_plane_entity;
-    Qt3DExtras::QPlaneMesh* planeMesh;
-    TextureImage* image;
-    Qt3DExtras::QDiffuseMapMaterial* planeMaterial;
-    Qt3DCore::QTransform *planeTransform;
-
+    QVector<Qt3DCore::QEntity*> m_plane_entity_vector;
+    QVector<Qt3DExtras::QPlaneMesh*> planeMesh_vector;
+    QVector<TextureImage*> image_vector;
+    QVector<Qt3DExtras::QDiffuseMapMaterial*> planeMaterial_vector;
+    QVector<Qt3DCore::QTransform*> planeTransform_vector;
 
     Qt3DCore::QEntity *m_cylinderEntity_x;
     Qt3DCore::QEntity *m_cylinderEntity_y;

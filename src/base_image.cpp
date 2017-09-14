@@ -9,23 +9,23 @@ bool BaseImage::auto_calculate_dimensions(){
   bool result = false;
   if( !( (_flag_auto_a_size && _flag_auto_n_rows) || (_flag_auto_b_size && _flag_auto_n_cols) ) ){
     if( _flag_auto_a_size ){
-      calculate_a_size_from_n_rows_and_sampling_rate();
+      calculate_a_size_from_n_cols_and_sampling_rate();
     }
     if( _flag_auto_n_rows ){
-      calculate_n_rows_from_a_size_and_sampling_rate();
+      calculate_n_rows_from_b_size_and_sampling_rate();
     }
     if( _flag_auto_b_size ){
-      calculate_b_size_from_n_cols_and_sampling_rate();
+      calculate_b_size_from_n_rows_and_sampling_rate();
     }
     if( _flag_auto_n_cols ){
-      calculate_n_cols_from_b_size_and_sampling_rate();
+      calculate_n_cols_from_a_size_and_sampling_rate();
     }
   }
   return result;
 }
 
 // calculate methods
-bool BaseImage::calculate_n_rows_from_a_size_and_sampling_rate(){
+bool BaseImage::calculate_n_rows_from_b_size_and_sampling_rate(){
   bool result = false;
   if( _flag_auto_n_rows ){
     if( _flag_full_nm_size_rows_b && _flag_sampling_rate_x_nm_per_pixel ){
@@ -42,8 +42,26 @@ bool BaseImage::calculate_n_rows_from_a_size_and_sampling_rate(){
   return result;
 }
 
+bool BaseImage::calculate_roi_b_size_from_n_rows_and_sampling_rate(){
+  bool result = false;
+  if( _flag_roi_n_rows_height && _flag_sampling_rate_x_nm_per_pixel ){
+    roi_nm_size_rows_b = ( (double) roi_n_rows_height ) * sampling_rate_x_nm_per_pixel;
+    _flag_roi_nm_size_rows_b = true;
+    result = true;
+  }
+}
+
+bool BaseImage::calculate_roi_a_size_from_n_cols_and_sampling_rate(){
+  bool result = false;
+  if( _flag_roi_n_cols_width && _flag_sampling_rate_y_nm_per_pixel ){
+      roi_nm_size_cols_a = (double) ( roi_n_cols_width ) * sampling_rate_y_nm_per_pixel;
+      _flag_roi_nm_size_cols_a = true;
+      result = true;
+    }
+}
+
 // calculate methods
-bool BaseImage::calculate_a_size_from_n_rows_and_sampling_rate(){
+bool BaseImage::calculate_b_size_from_n_rows_and_sampling_rate(){
   bool result = false;
   if( _flag_auto_a_size ){
     if( _flag_full_n_rows_height && _flag_sampling_rate_x_nm_per_pixel ){
@@ -51,16 +69,12 @@ bool BaseImage::calculate_a_size_from_n_rows_and_sampling_rate(){
       _flag_full_nm_size_rows_b = true;
       result = true;
     }
-    if( _flag_roi_n_rows_height && _flag_sampling_rate_x_nm_per_pixel ){
-      roi_nm_size_rows_b = ( (double) roi_n_rows_height ) * sampling_rate_x_nm_per_pixel;
-      _flag_roi_nm_size_rows_b = true;
-      result = true;
-    }
+    calculate_roi_b_size_from_n_rows_and_sampling_rate();
   }
   return result;
 }
 
-bool BaseImage::calculate_n_cols_from_b_size_and_sampling_rate(){
+bool BaseImage::calculate_n_cols_from_a_size_and_sampling_rate(){
   bool result = false;
   if( _flag_auto_n_cols ){
     if( _flag_full_nm_size_cols_a && _flag_sampling_rate_y_nm_per_pixel ){
@@ -73,13 +87,12 @@ bool BaseImage::calculate_n_cols_from_b_size_and_sampling_rate(){
       result = true;
       _flag_roi_n_cols_width = true;
     }
-
   }
   return result;
 }
 
 // calculate methods
-bool BaseImage::calculate_b_size_from_n_cols_and_sampling_rate(){
+bool BaseImage::calculate_a_size_from_n_cols_and_sampling_rate(){
   bool result = false;
   if( _flag_auto_b_size ){
     if( _flag_full_n_cols_width && _flag_sampling_rate_y_nm_per_pixel ){
@@ -87,11 +100,7 @@ bool BaseImage::calculate_b_size_from_n_cols_and_sampling_rate(){
       _flag_full_nm_size_cols_a = true;
       result = true;
     }
-    if( _flag_roi_n_cols_width && _flag_sampling_rate_y_nm_per_pixel ){
-      roi_nm_size_cols_a = (double) ( roi_n_cols_width ) * sampling_rate_y_nm_per_pixel;
-      _flag_roi_nm_size_cols_a = true;
-      result = true;
-    }
+    calculate_roi_a_size_from_n_cols_and_sampling_rate();
   }
   return result;
 }
@@ -191,6 +200,8 @@ void BaseImage::set_roi(){
     roi_rectangle.y = top_left_y;
     roi_rectangle.width = roi_n_cols_width;
     roi_rectangle.height = roi_n_rows_height;
+    calculate_roi_b_size_from_n_rows_and_sampling_rate();
+    calculate_roi_a_size_from_n_cols_and_sampling_rate();
     _flag_roi_rectangle = true;
     if( _flag_full_image ){
       roi_image = full_image( roi_rectangle );

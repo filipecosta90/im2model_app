@@ -72,8 +72,10 @@ QT_FORWARD_DECLARE_CLASS(QLayout)
     Q_OBJECT
     public:
       UnitCellViewerWindow(QWidget *parent = 0);
-      void set_super_cell( SuperCell* );
+      void set_super_cell( SuperCell* , bool bind_orientation = true );
+      bool update_image_layer( cv::Mat layer_image , double width_nm, double height_nm , Qt3DCore::QTransform* transform = nullptr, std::string layer_name = "Image Layer", int layer_number = 1);
       bool add_image_layer( cv::Mat layer_image, double width_nm, double height_nm, Qt3DCore::QTransform* transform = nullptr );
+      void reload_data_from_super_cell();
 
       public slots:
         void init();
@@ -88,11 +90,10 @@ QT_FORWARD_DECLARE_CLASS(QLayout)
       void view_along_a_axis();
       void view_along_b_axis();
       void view_along_c_axis();
+      void fit_model();
 
     protected:
 
-
-    private:
       //Layout
       QLayout *m_containerLayout;
       QWidget *container;
@@ -110,6 +111,9 @@ QT_FORWARD_DECLARE_CLASS(QLayout)
       Qt3DCore::QTransform *_m_lightTransform;
       double _m_cameraEntity_centerDistance = 10.0f;
       QVector3D q_zone_axis_vector;
+
+    private:
+
   };
 
 #endif
