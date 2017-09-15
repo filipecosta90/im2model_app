@@ -95,7 +95,14 @@ QT_FORWARD_DECLARE_CLASS(QLayout)
     protected:
 
       //Layout
+
+      QSplitter *split1;
+      QSplitter *split2;
+      QWidget *split1_container;
+      QWidget *toolbar_and_3d_container;
+      QVBoxLayout *split1_container_layout;
       QLayout *m_containerLayout;
+      QVBoxLayout *full_layout;
       QWidget *container;
       QBoxLayout *toolsLayout;
       QToolBar *toolbar;

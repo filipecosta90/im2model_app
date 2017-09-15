@@ -30,8 +30,38 @@ UnitCellViewerWindow::UnitCellViewerWindow(QWidget *parent) : QWidget(parent) {
   toolsLayout->setStretchFactor(container, 8);
 
   m_containerLayout = new QVBoxLayout;
+  m_containerLayout->setContentsMargins(0, 0, 0, 0);
+
   m_containerLayout->addWidget(container);
   toolsLayout->addLayout(m_containerLayout);
+
+  toolbar_and_3d_container = new QWidget;
+  toolbar_and_3d_container->setLayout(toolsLayout);
+
+  // splitters part
+  split1 = new QSplitter;
+  split2 = new QSplitter;
+
+  split1->setOrientation(Qt::Vertical);
+  split1->addWidget(toolbar_and_3d_container);
+
+  split1_container = new QWidget;
+  split1_container_layout = new QVBoxLayout;
+  split1_container_layout->setContentsMargins(0, 0, 0, 0);
+
+  split1_container_layout->addWidget(split1);
+  split1_container->setLayout(split1_container_layout);
+
+  full_layout = new QVBoxLayout;
+  full_layout->setContentsMargins(0, 0, 0, 0);
+
+  split2->addWidget(split1_container);
+  QTextEdit *editor3 = new QTextEdit;
+
+  split2->addWidget(editor3);
+  full_layout->addWidget(split2);
+
+  this->setLayout( full_layout );
   init();
 }
 
@@ -59,8 +89,8 @@ bool UnitCellViewerWindow::add_image_layer( cv::Mat layer_image , double width_n
 
 void UnitCellViewerWindow::reload_data_from_super_cell( ){
   if( _flag_super_cell ){
-  qt_scene_super_cell->reload_data_from_super_cell(  );
-}
+    qt_scene_super_cell->reload_data_from_super_cell(  );
+  }
 }
 
 void UnitCellViewerWindow::update_lightEntity_view_vector( const QVector3D &viewVector ){
@@ -106,8 +136,8 @@ void UnitCellViewerWindow::init(){
   QObject::connect(_m_cameraEntity, &Qt3DRender::QCamera::viewVectorChanged,this,&UnitCellViewerWindow::update_lightEntity_view_vector);
   QObject::connect(_m_cameraEntity, &Qt3DRender::QCamera::positionChanged,this,&UnitCellViewerWindow::update_lightEntity_position);
 
-    // FrameGraph
-    Qt3DRender::QFrameGraphNode* activeFrameGraph = qt_scene_view->activeFrameGraph();
+  // FrameGraph
+  Qt3DRender::QFrameGraphNode* activeFrameGraph = qt_scene_view->activeFrameGraph();
   QList< QObject* > childrens = activeFrameGraph->children();
   QList< Qt3DRender::QViewport* > childrens_views = activeFrameGraph->findChildren<Qt3DRender::QViewport *>();
 
@@ -145,7 +175,7 @@ void UnitCellViewerWindow::update_m_cameraEntity_frustum( const QVector3D &pos  
 
 void UnitCellViewerWindow::update_m_cameraEntity_centerDistance(){
   if( _flag_super_cell ){
-  if( super_cell->get_flag_length() ){
+    if( super_cell->get_flag_length() ){
       _m_cameraEntity_centerDistance = 2 * super_cell->get_max_length_abc_Nanometers();
       std::cout << "_m_cameraEntity_centerDistance " << _m_cameraEntity_centerDistance << std::endl;
     }
@@ -209,5 +239,5 @@ void UnitCellViewerWindow::view_along_c_axis(){
 }
 
 void UnitCellViewerWindow::fit_model(){
-// TO DO
+  // TO DO
 }
