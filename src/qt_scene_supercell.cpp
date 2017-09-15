@@ -56,6 +56,7 @@ bool QtSceneSuperCell::update_image_layer( cv::Mat layer_image , double width_nm
   bool result = false;
   if( m_plane_entity_vector.size() == 0 ){
     result = add_image_layer( layer_image, width_nm, height_nm, transform );
+    reload_data_from_super_cell();
   }
   else{
     Qt3DExtras::QPlaneMesh* planeMesh = planeMesh_vector[layer_number-1];
@@ -69,6 +70,7 @@ bool QtSceneSuperCell::update_image_layer( cv::Mat layer_image , double width_nm
     image->setImage( layer_image );
     image->update();
     material->diffuse()->addTextureImage(image);
+    reload_data_from_super_cell();
     result = true;
   }
   return result;
@@ -163,7 +165,6 @@ bool QtSceneSuperCell::enable_atom_type( int distinct_atom_pos, bool enabled ){
     if( atom_symbols.size() > distinct_atom_pos ){
       const std::string atom_symbol = atom_symbols[distinct_atom_pos];
       std::cout << "$$$###enable_atom_type " <<  atom_symbol << std::endl;
-
       QString atomTypeEntityName = atomEntityName + QString::fromStdString( atom_symbol );
       EditorUtils::setEnabledExpandedChildEntities(m_rootEntity, atomTypeEntityName, enabled );
       result = true;
