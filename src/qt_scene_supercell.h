@@ -101,7 +101,8 @@ class QtSceneSuperCell : public QObject
     void set_super_cell( SuperCell* cell );
     bool add_image_layer( cv::Mat layer_image , double width_nm, double height_nm, Qt3DCore::QTransform* transform = nullptr );
     bool update_image_layer( cv::Mat layer_image , double width_nm, double height_nm , Qt3DCore::QTransform* transform = nullptr, std::string layer_name = "Image Layer", int layer_number = 1);
-
+    bool enable_atom_type( int distinct_atom_pos, bool enabled );
+    std::vector<std::string> get_atom_symbols_vec();
     Qt3DRender::QLayer* get_xyz_axis_layer(){ return xyz_axis_layer; }
     Qt3DRender::QLayer* get_sphere_layer(){ return sphere_layer; }
 

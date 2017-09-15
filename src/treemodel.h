@@ -39,6 +39,7 @@ class TreeModel : public QAbstractItemModel {
     bool removeColumns(int position, int columns, const QModelIndex &parent = QModelIndex()) override;
     bool insertRows(int position, int rows, const QModelIndex &parent = QModelIndex()) override;
     bool removeRows(int position, int rows, const QModelIndex &parent = QModelIndex()) override;
+    bool insertChildren(TreeItem *item, TreeItem* parent );
 
     void set_data_unique_id( int row, int column, int unique_id );
     bool _was_model_modified();

@@ -58,6 +58,9 @@
 /** END BOOST **/
 #include "inputcontrols/qtrackballcameracontroller.h"
 #include "../qt_scene_supercell.h"
+#include "../treemodel.h"
+#include "../treeitem.h"
+#include "../treeitem_file_delegate.hpp"
 
 #include <QWidget>
 #include <QQuickWidget>
@@ -76,6 +79,7 @@ QT_FORWARD_DECLARE_CLASS(QLayout)
       bool update_image_layer( cv::Mat layer_image , double width_nm, double height_nm , Qt3DCore::QTransform* transform = nullptr, std::string layer_name = "Image Layer", int layer_number = 1);
       bool add_image_layer( cv::Mat layer_image, double width_nm, double height_nm, Qt3DCore::QTransform* transform = nullptr );
       void reload_data_from_super_cell();
+      void create_standard_atom_options();
 
       public slots:
         void init();
@@ -95,7 +99,6 @@ QT_FORWARD_DECLARE_CLASS(QLayout)
     protected:
 
       //Layout
-
       QSplitter *split1;
       QSplitter *split2;
       QWidget *split1_container;
@@ -106,6 +109,10 @@ QT_FORWARD_DECLARE_CLASS(QLayout)
       QWidget *container;
       QBoxLayout *toolsLayout;
       QToolBar *toolbar;
+      QTreeView *atom_info_tree_view;
+          /* Delegates */
+          TreeItemFileDelegate *atom_info_tree_view_delegate;
+
       //Core vis
       Qt3DCore::QEntity *_m_rootEntity;
       Qt3DExtras::Qt3DWindow *qt_scene_view;
@@ -114,10 +121,17 @@ QT_FORWARD_DECLARE_CLASS(QLayout)
       bool _flag_super_cell = false;
       Qt3DRender::QCamera *_m_cameraEntity;
       Qt3DRender::QDirectionalLight* _m_cameraLight;
-
       Qt3DCore::QTransform *_m_lightTransform;
       double _m_cameraEntity_centerDistance = 10.0f;
       QVector3D q_zone_axis_vector;
+      //Atom properties
+      TreeModel *atom_info_fields_model = nullptr;
+      TreeItem* display_root = nullptr;
+      TreeItem* layer_display_root = nullptr;
+      TreeItem* model_display_root = nullptr;
+      TreeItem* atom_properties_root = nullptr;
+      TreeItem* atom_radius_root = nullptr;
+      TreeItem* atom_color_root = nullptr;
 
     private:
 

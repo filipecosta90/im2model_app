@@ -55,6 +55,13 @@ void EditorUtils::setEnabledToSubtree(Qt3DCore::QEntity *entity, bool enable){
   }
 }
 
+void EditorUtils::setEnabledExpandedChildEntities(Qt3DCore::QEntity *entity, const QString &childName, bool enable ){
+  QList<Qt3DCore::QEntity*> childs = entity->findChildren<Qt3DCore::QEntity*>( childName );
+    Q_FOREACH (Qt3DCore::QEntity *childEntity, childs) {
+      setEnabledToSubtree(childEntity,enable);
+    }
+}
+
 Qt3DCore::QEntity *EditorUtils::findEntityByName(Qt3DCore::QEntity *entity, const QString &name){
   if (entity->objectName() == name) {
     return entity;

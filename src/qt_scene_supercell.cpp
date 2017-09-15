@@ -148,6 +148,30 @@ void QtSceneSuperCell::set_super_cell( SuperCell* cell ){
   _flag_super_cell = true;
 }
 
+std::vector<std::string> QtSceneSuperCell::get_atom_symbols_vec(){
+  std::vector<std::string> atom_symbols;
+  if( _flag_super_cell ){
+atom_symbols = super_cell->get_atom_symbols_vec();
+}
+return atom_symbols;
+}
+
+bool QtSceneSuperCell::enable_atom_type( int distinct_atom_pos, bool enabled ){
+  bool result = false;
+  if( _flag_super_cell ){
+    std::vector<std::string> atom_symbols = super_cell->get_atom_symbols_vec();
+    if( atom_symbols.size() > distinct_atom_pos ){
+      const std::string atom_symbol = atom_symbols[distinct_atom_pos];
+      std::cout << "$$$###enable_atom_type " <<  atom_symbol << std::endl;
+
+      QString atomTypeEntityName = atomEntityName + QString::fromStdString( atom_symbol );
+      EditorUtils::setEnabledExpandedChildEntities(m_rootEntity, atomTypeEntityName, enabled );
+      result = true;
+    }
+  }
+  return result;
+}
+
 void QtSceneSuperCell::reload_data_from_super_cell(){
   if( _flag_super_cell ){
 
@@ -156,8 +180,6 @@ void QtSceneSuperCell::reload_data_from_super_cell(){
     std::vector<double> atom_empirical_radiis = super_cell->get_atom_empirical_radiis_vec();
     std::vector<std::string> atom_symbols = super_cell->get_atom_symbols_vec();
 
-    EditorUtils::removeExpandedChildEntities(m_rootEntity,atomEntityName);
-
     for( int distinct_atom_pos = 0; distinct_atom_pos < atom_positions_vec.size(); distinct_atom_pos++ ){
 
       const cv::Vec4d atom_cpk_rgba_color = atom_cpk_rgba_colors[distinct_atom_pos];
@@ -165,6 +187,10 @@ void QtSceneSuperCell::reload_data_from_super_cell(){
 
       const std::vector<cv::Point3d> same_type_atoms = atom_positions_vec[distinct_atom_pos];
       const std::string atom_symbol = atom_symbols[distinct_atom_pos];
+      QString atomTypeEntityName = atomEntityName + QString::fromStdString( atom_symbol );
+
+      EditorUtils::removeExpandedChildEntities(m_rootEntity,atomTypeEntityName);
+
       for( int same_type_pos = 0; same_type_pos < atom_positions_vec[distinct_atom_pos].size(); same_type_pos++ ){
         const cv::Point3d atom_pos = atom_positions_vec[distinct_atom_pos][same_type_pos];
 
@@ -193,10 +219,9 @@ void QtSceneSuperCell::reload_data_from_super_cell(){
         sphereTransform->setTranslation(QVector3D( atom_pos.x, atom_pos.y, atom_pos.z ));
         sphereEntity->addComponent( sphereTransform );
         //create different entity names for each atom type
-        QString atomTypeEntityName = atomEntityName + QString::fromStdString( atom_symbol );
         //Save entity
         sphereEntity->setEnabled( true );
-        sphereEntity->setObjectName( atomEntityName );
+        sphereEntity->setObjectName( atomTypeEntityName );
         sphere_entities.push_back( sphereEntity );
       }
     }

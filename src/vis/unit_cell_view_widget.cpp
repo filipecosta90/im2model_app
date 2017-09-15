@@ -56,13 +56,18 @@ UnitCellViewerWindow::UnitCellViewerWindow(QWidget *parent) : QWidget(parent) {
   full_layout->setContentsMargins(0, 0, 0, 0);
 
   split2->addWidget(split1_container);
-  QTextEdit *editor3 = new QTextEdit;
+  atom_info_tree_view = new QTreeView(this);
+  /*TreeView delegate*/
+  atom_info_tree_view_delegate = new TreeItemFileDelegate(this);
 
-  split2->addWidget(editor3);
+  split2->addWidget(atom_info_tree_view);
+  split2->setStretchFactor(0,5);
+  split2->setStretchFactor(1,5);
   full_layout->addWidget(split2);
-
   this->setLayout( full_layout );
+
   init();
+  create_standard_atom_options();
 }
 
 void UnitCellViewerWindow::set_super_cell( SuperCell* cell , bool bind_orientation ){
@@ -87,10 +92,65 @@ bool UnitCellViewerWindow::add_image_layer( cv::Mat layer_image , double width_n
   this->update();
 }
 
+void UnitCellViewerWindow::create_standard_atom_options(){
+
+  QVector<QVariant> common_header = {"Field","Value"};
+  display_root = new TreeItem ( common_header );
+  display_root->set_variable_name("display_root");
+  atom_info_fields_model = new TreeModel( display_root );
+
+  QVector<QVariant> box1_option_1 = {"Display",""};
+  layer_display_root = new TreeItem ( box1_option_1  );
+  layer_display_root->set_variable_name( "layer_display_root" );
+  display_root->insertChildren( layer_display_root );
+
+    QVector<QVariant> box1_option_1_1 = {"Atomic Model",""};
+    model_display_root = new TreeItem ( box1_option_1_1  );
+    model_display_root->set_variable_name( "model_display_root" );
+    layer_display_root->insertChildren( model_display_root );
+
+  ////////////////
+  // Atom properties
+  ////////////////
+  QVector<QVariant> box1_option_2 = {"Atom properties",""};
+  atom_properties_root = new TreeItem ( box1_option_2  );
+  atom_properties_root->set_variable_name( "atom_properties_root" );
+  display_root->insertChildren( atom_properties_root );
+
+  atom_info_tree_view->setModel(atom_info_fields_model);
+  atom_info_tree_view->setItemDelegate( atom_info_tree_view_delegate );
+  //start editing after one click
+  atom_info_tree_view->setEditTriggers(QAbstractItemView::AllEditTriggers);
+}
+
 void UnitCellViewerWindow::reload_data_from_super_cell( ){
+  std::cout << "### reload_data_from_super_cell" << std::endl;
   if( _flag_super_cell ){
-    qt_scene_super_cell->reload_data_from_super_cell(  );
+    qt_scene_super_cell->reload_data_from_super_cell();
+    std::vector<std::string> atom_symbols = qt_scene_super_cell->get_atom_symbols_vec();
+    std::cout << "reload_data_from_super_cell" << std::endl;
+    for( int distinct_atom_pos = 0; distinct_atom_pos < atom_symbols.size(); distinct_atom_pos++ ){
+      //create a new item for each distinct atom
+      const std::string atom_symbol = atom_symbols[distinct_atom_pos];
+      std::cout << "atom_symbol" << atom_symbol << std::endl;
+      QVector<QVariant> box_option;
+      box_option.push_back( QString::fromStdString( atom_symbol ) );
+      box_option.push_back("");
+      //display
+      QVector<bool> box_option_edit = {false,false};
+      boost::function<bool(bool)> box_option_check_setter ( boost::bind( &QtSceneSuperCell::enable_atom_type, qt_scene_super_cell, distinct_atom_pos, _1 ) );
+      TreeItem* display_atom_item = new TreeItem ( box_option );
+      display_atom_item->set_fp_check_setter(0,box_option_check_setter);
+      atom_info_fields_model->insertChildren( display_atom_item, model_display_root );
+
+      //radius
+      TreeItem* atom_item  = new TreeItem ( box_option );
+      atom_info_fields_model->insertChildren( atom_item, atom_properties_root );
+
+    }
+    atom_info_tree_view->update();
   }
+  this->update();
 }
 
 void UnitCellViewerWindow::update_lightEntity_view_vector( const QVector3D &viewVector ){

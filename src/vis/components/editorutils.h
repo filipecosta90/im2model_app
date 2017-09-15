@@ -129,6 +129,8 @@ class EditorUtils : public QObject
     static void removeExpandedChildEntities(Qt3DCore::QEntity *entity, const QString &childName );
     static Qt3DRender::QObjectPicker *entityPicker(Qt3DCore::QEntity *entity);
     static void setEnabledToSubtree(Qt3DCore::QEntity *entity, bool enable);
+    static void setEnabledExpandedChildEntities(Qt3DCore::QEntity *entity, const QString &childName, bool enable );
+
     static Qt3DCore::QEntity *findEntityByName(Qt3DCore::QEntity *entity, const QString &name);
   private:
     // Private constructor to ensure no actual instance is created

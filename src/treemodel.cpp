@@ -34,6 +34,15 @@ bool TreeModel::load_data_from_property_tree( boost::property_tree::ptree pt_roo
   return true;
 }
 
+
+bool TreeModel::insertChildren(TreeItem *item, TreeItem* parent ){
+  const bool result = parent->insertChildren(item);
+  if( result ){
+    emit layoutChanged();
+  }
+  return result;
+}
+
 int TreeModel::columnCount(const QModelIndex & /* parent */) const{
   return rootItem->columnCount();
 }
