@@ -55,6 +55,12 @@ void EditorUtils::setEnabledToSubtree(Qt3DCore::QEntity *entity, bool enable){
   }
 }
 
+void EditorUtils::updateQSphereMeshRadiusChildEntities(Qt3DCore::QEntity *entity, const QString &childName, boost::function<void(float)> radius_setter ){
+  QList<Qt3DExtras::QSphereMesh*> childs = entity->findChildren<Qt3DExtras::QSphereMesh*>( childName );
+    Q_FOREACH (Qt3DExtras::QSphereMesh *childMesh, childs) {
+    }
+}
+
 void EditorUtils::setEnabledExpandedChildEntities(Qt3DCore::QEntity *entity, const QString &childName, bool enable ){
   QList<Qt3DCore::QEntity*> childs = entity->findChildren<Qt3DCore::QEntity*>( childName );
     Q_FOREACH (Qt3DCore::QEntity *childEntity, childs) {

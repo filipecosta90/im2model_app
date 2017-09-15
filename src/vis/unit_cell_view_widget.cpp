@@ -75,21 +75,41 @@ void UnitCellViewerWindow::set_super_cell( SuperCell* cell , bool bind_orientati
   qt_scene_super_cell->set_super_cell( super_cell );
   QObject::connect( super_cell, SIGNAL(atom_positions_changed()), qt_scene_super_cell, SLOT(reload_data_from_super_cell()));
   QObject::connect( super_cell, SIGNAL(atom_positions_changed()), this, SLOT(update_m_cameraEntity_centerDistance()));
+
   if( bind_orientation ){
     QObject::connect( super_cell, SIGNAL(zone_axis_vector_changed()), this, SLOT(update_cameraEntity_zone_axis()) );
     QObject::connect( super_cell, SIGNAL(upward_vector_changed()), this, SLOT(update_cameraEntity_upward_vector()) );
   }
+
   _flag_super_cell = true;
 }
 
 bool UnitCellViewerWindow::update_image_layer( cv::Mat layer_image , double width_nm, double height_nm , Qt3DCore::QTransform* transform, std::string layer_name, int layer_number ){
-  return qt_scene_super_cell->update_image_layer( layer_image, width_nm, height_nm, transform , layer_name, layer_number );
+  bool result = false;
+  const bool is_update = qt_scene_super_cell->contains_image_layer( layer_name, layer_number );
+  result = qt_scene_super_cell->update_image_layer( layer_image, width_nm, height_nm, transform , layer_name, layer_number );
+  if( result ){
   this->update();
+}
+  if( !is_update ){
+    QVector<QVariant> box_option;
+    box_option.push_back( QString::fromStdString( layer_name ) );
+    box_option.push_back("");
+    TreeItem* display_layer_item = new TreeItem ( box_option );
+    boost::function<bool(bool)> box1_option_setter ( boost::bind( &QtSceneSuperCell::enable_image_layer, qt_scene_super_cell, layer_name, _1 ) );
+    display_layer_item->set_fp_check_setter( 0, box1_option_setter );
+    atom_info_fields_model->insertChildren( display_layer_item, layer_display_root );
+  }
+  return result;
 }
 
 bool UnitCellViewerWindow::add_image_layer( cv::Mat layer_image , double width_nm, double height_nm , Qt3DCore::QTransform* transform ){
-  return qt_scene_super_cell->add_image_layer( layer_image, width_nm, height_nm, transform );
-  this->update();
+  bool result = false;
+  result = qt_scene_super_cell->add_image_layer( layer_image, width_nm, height_nm, transform );
+  if( result ){
+    this->update();
+  }
+  return result;
 }
 
 void UnitCellViewerWindow::create_standard_atom_options(){
@@ -108,6 +128,12 @@ void UnitCellViewerWindow::create_standard_atom_options(){
     model_display_root = new TreeItem ( box1_option_1_1  );
     model_display_root->set_variable_name( "model_display_root" );
     layer_display_root->insertChildren( model_display_root );
+
+    QVector<QVariant> box1_option_1_2 = {"Helper Arrows",""};
+    TreeItem* display_arrows_item = new TreeItem ( box1_option_1_2 );
+    boost::function<bool(bool)> box1_option_1_2_check_setter ( boost::bind( &QtSceneSuperCell::enable_helper_arrows, qt_scene_super_cell, _1 ) );
+    display_arrows_item->set_fp_check_setter( 0, box1_option_1_2_check_setter );
+    layer_display_root->insertChildren( display_arrows_item );
 
   ////////////////
   // Atom properties
@@ -137,18 +163,17 @@ void UnitCellViewerWindow::reload_data_from_super_cell( ){
       box_option.push_back( QString::fromStdString( atom_symbol ) );
       box_option.push_back("");
       //display
-      QVector<bool> box_option_edit = {false,false};
       boost::function<bool(bool)> box_option_check_setter ( boost::bind( &QtSceneSuperCell::enable_atom_type, qt_scene_super_cell, distinct_atom_pos, _1 ) );
       TreeItem* display_atom_item = new TreeItem ( box_option );
-      display_atom_item->set_fp_check_setter(0,box_option_check_setter);
+      display_atom_item->set_fp_check_setter( 0, box_option_check_setter );
       atom_info_fields_model->insertChildren( display_atom_item, model_display_root );
 
       //radius
-      TreeItem* atom_item  = new TreeItem ( box_option );
+      QVector<bool> box_option_edit = {false,true};
+      boost::function<bool(double)> box_function ( boost::bind( &QtSceneSuperCell::updateAtomMeshRadius, qt_scene_super_cell, distinct_atom_pos, _1 ) );
+      TreeItem* atom_item  = new TreeItem  ( box_option , box_function, box_option_edit );
       atom_info_fields_model->insertChildren( atom_item, atom_properties_root );
-
     }
-    atom_info_tree_view->update();
   }
   this->update();
 }

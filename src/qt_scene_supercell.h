@@ -91,6 +91,8 @@
 #include "vis/texture_image.h"
 
 static const QString atomEntityName = QStringLiteral("__internal atom");
+static const QString imageEntityName = QStringLiteral("__internal image layer");
+static const QString atomMeshName = QStringLiteral("__internal atom mesh");
 
 class QtSceneSuperCell : public QObject
 {
@@ -99,9 +101,14 @@ class QtSceneSuperCell : public QObject
     explicit QtSceneSuperCell( Qt3DCore::QEntity *rootEntity, Qt3DRender::QCamera *cameraEntity );
     ~QtSceneSuperCell();
     void set_super_cell( SuperCell* cell );
-    bool add_image_layer( cv::Mat layer_image , double width_nm, double height_nm, Qt3DCore::QTransform* transform = nullptr );
+    bool add_image_layer( cv::Mat layer_image , double width_nm, double height_nm, Qt3DCore::QTransform* transform = nullptr, std::string layer_name = "Image Layer" );
     bool update_image_layer( cv::Mat layer_image , double width_nm, double height_nm , Qt3DCore::QTransform* transform = nullptr, std::string layer_name = "Image Layer", int layer_number = 1);
+    bool enable_image_layer( std::string layer_name, bool enabled );
+    bool updateAtomMeshRadius( int distinct_atom_pos, double radius );
     bool enable_atom_type( int distinct_atom_pos, bool enabled );
+    bool enable_helper_arrows( bool enabled );
+    bool contains_image_layer( std::string layer_name, int layer_number );
+
     std::vector<std::string> get_atom_symbols_vec();
     Qt3DRender::QLayer* get_xyz_axis_layer(){ return xyz_axis_layer; }
     Qt3DRender::QLayer* get_sphere_layer(){ return sphere_layer; }
@@ -131,9 +138,11 @@ class QtSceneSuperCell : public QObject
     Qt3DCore::QEntity *m_axisEntity;
     Qt3DRender::QLayer *xyz_axis_layer;
     Qt3DCore::QEntity *m_modelEntity;
-    std::vector<Qt3DCore::QEntity*> sphere_entities;
     Qt3DRender::QLayer *sphere_layer;
-    std::vector<Qt3DExtras::QSphereMesh*> sphere_meshes;
+
+    std::vector<Qt3DCore::QEntity*> sphere_entities;
+    // one mesh for every distinct atom type
+    std::vector<std::vector<Qt3DExtras::QSphereMesh*>> sphere_meshes;
     SuperCell* super_cell = nullptr;
     bool _flag_super_cell = false;
 };

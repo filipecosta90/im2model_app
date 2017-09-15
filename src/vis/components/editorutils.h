@@ -103,6 +103,8 @@
 #include <Qt3DExtras/QPhongMaterial>
 #include <Qt3DRender/QMesh>
 
+#include <boost/function.hpp>
+
 namespace Qt3DCore {
   class QEntity;
   class QComponent;
@@ -130,6 +132,8 @@ class EditorUtils : public QObject
     static Qt3DRender::QObjectPicker *entityPicker(Qt3DCore::QEntity *entity);
     static void setEnabledToSubtree(Qt3DCore::QEntity *entity, bool enable);
     static void setEnabledExpandedChildEntities(Qt3DCore::QEntity *entity, const QString &childName, bool enable );
+    static void updateQSphereMeshRadiusChildEntities(Qt3DCore::QEntity *entity, const QString &childName, boost::function<void(float)> radius_setter );
+
 
     static Qt3DCore::QEntity *findEntityByName(Qt3DCore::QEntity *entity, const QString &name);
   private:
