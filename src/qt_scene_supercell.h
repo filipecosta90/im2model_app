@@ -125,16 +125,19 @@ class QtSceneSuperCell : public QObject
     void set_super_cell( SuperCell* cell );
     bool add_image_layer( cv::Mat layer_image , double width_nm, double height_nm, Qt3DCore::QTransform* transform = nullptr, std::string layer_name = "Image Layer" );
     bool update_image_layer( cv::Mat layer_image , double width_nm, double height_nm , Qt3DCore::QTransform* transform = nullptr, std::string layer_name = "Image Layer", int layer_number = 1);
-    bool enable_image_layer( std::string layer_name, bool enabled );
+    bool enable_image_layer( std::string layer_name, int layer_number, bool enabled );
     bool updateAtomMeshRadius( int distinct_atom_pos, double radius );
     bool get_enable_atom_type( int distinct_atom_pos );
     bool get_helper_arrows_enable_status();
+    bool get_image_layer_enable_status( int layer_number );
+
     bool enable_atom_type( int distinct_atom_pos, bool enabled );
     bool enable_helper_arrows( bool enabled );
     bool contains_image_layer( std::string layer_name, int layer_number );
     void load_visual_data();
 
     std::vector<std::string> get_atom_symbols_vec();
+    double get_local_atom_empirical_radiis(int distinct_atom_pos);
     Qt3DRender::QLayer* get_xyz_axis_layer(){ return xyz_axis_layer; }
     Qt3DRender::QLayer* get_sphere_layer(){ return sphere_layer; }
 
@@ -175,6 +178,8 @@ class QtSceneSuperCell : public QObject
     std::vector<cv::Vec4d> local_atom_cpk_rgba_colors;
     std::vector<double> local_atom_empirical_radiis;
     std::vector<bool> enabled_atom_types;
+    std::vector<bool> enabled_image_layers;
+
 };
 
 #endif // SCENEMODIFIER_H

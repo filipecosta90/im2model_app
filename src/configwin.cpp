@@ -236,10 +236,12 @@ void MainWindow::update_tdmap_simgrid_ended( bool result ){
     ui->statusBar->showMessage(tr("Sucessfully ended image correlation step"), 2000);
     SuperCell* tdmap_roi_sim_super_cell = _core_td_map->get_tdmap_roi_sim_super_cell();
     ui->qgraphics_tdmap_selection->set_super_cell( tdmap_roi_sim_super_cell , false );
+    ui->qgraphics_tdmap_selection->view_along_c_axis();
     ui->qgraphics_tdmap_selection->reload_data_from_super_cell();
   }
   else{
     updateProgressBar(0,4,4, true);
+    // TO DO: clear ui->qgraphics_tdmap_selection
     ui->statusBar->showMessage(tr("Error while running image correlation step") );
   }
 }
@@ -330,7 +332,10 @@ void MainWindow::update_tdmap_current_selection(int x,int y){
 
     std::cout << "full_image_width_nm" << full_image_width_nm << std::endl;
     std::cout << "full_image_height_nm" << full_image_height_nm << std::endl;
-    ui->qgraphics_tdmap_selection->update_image_layer( _simulated_image , full_image_width_nm ,  full_image_height_nm );
+    Qt3DCore::QTransform* transform = new Qt3DCore::QTransform( );
+    transform->setRotation(QQuaternion::fromAxisAndAngle(1,0,0,90));
+    ui->qgraphics_tdmap_selection->update_image_layer( _simulated_image , full_image_width_nm ,  full_image_height_nm , transform, "Simulated image layer");
+
   }
 }
 

@@ -76,6 +76,16 @@ bool QtSceneSuperCell::update_image_layer( cv::Mat layer_image , double width_nm
   return result;
 }
 
+double QtSceneSuperCell::get_local_atom_empirical_radiis(int distinct_atom_pos){
+  double value = 0.0f;
+  if( _flag_super_cell ){
+    if( local_atom_empirical_radiis.size() > distinct_atom_pos ){
+      value = local_atom_empirical_radiis[distinct_atom_pos];
+    }
+  }
+  return value;
+}
+
 bool QtSceneSuperCell::contains_image_layer( std::string layer_name, int layer_number ){
   bool result = false;
   if( m_plane_entity_vector.size() > (layer_number-1) ){
@@ -84,8 +94,17 @@ bool QtSceneSuperCell::contains_image_layer( std::string layer_name, int layer_n
   return result;
 }
 
-bool QtSceneSuperCell::add_image_layer(  cv::Mat layer_image , double width_nm, double height_nm, Qt3DCore::QTransform* transform1, std::string layer_name ){
+bool QtSceneSuperCell::get_image_layer_enable_status( int layer_number ){
+  bool result = false;
+  if( enabled_image_layers.size() > (layer_number-1) ){
+    result = enabled_image_layers[layer_number-1];
+  }
+  return result;
+}
 
+bool QtSceneSuperCell::add_image_layer(  cv::Mat layer_image , double width_nm, double height_nm, Qt3DCore::QTransform* transform, std::string layer_name ){
+
+  enabled_image_layers.push_back( true );
   // add the plane that will contain the image
   Qt3DCore::QEntity* planeEntity = new Qt3DCore::QEntity(m_rootEntity);
   QString layerTypeEntityName = imageEntityName + QString::fromStdString( layer_name );
@@ -96,9 +115,15 @@ bool QtSceneSuperCell::add_image_layer(  cv::Mat layer_image , double width_nm, 
   planeMesh->setHeight( height_nm );
   planeEntity->addComponent(planeMesh);
 
-  Qt3DCore::QTransform* transform = new Qt3DCore::QTransform( planeEntity );
-  transform->setRotation(QQuaternion::fromAxisAndAngle(1,0,0,90));
+if( transform ){
+  if( _flag_super_cell ){
+    const double length_c_Nanometers = super_cell->get_length_c_Nanometers();
+    const double center_c_padding_nm = length_c_Nanometers / -2.0f;
+    transform->setTranslation(QVector3D( 0.0f, 0.0f, center_c_padding_nm ));
+  }
   planeEntity->addComponent(transform);
+  planeTransform_vector.push_back( transform );
+}
 
   Qt3DExtras::QDiffuseMapMaterial *material = new Qt3DExtras::QDiffuseMapMaterial( planeEntity );
   QColor color;
@@ -117,7 +142,6 @@ bool QtSceneSuperCell::add_image_layer(  cv::Mat layer_image , double width_nm, 
   planeMesh_vector.push_back( planeMesh );
   image_vector.push_back( image );
   planeMaterial_vector.push_back( material );
-  planeTransform_vector.push_back( transform );
   return true;
 }
 
@@ -173,9 +197,10 @@ bool QtSceneSuperCell::enable_helper_arrows( bool enabled ){
   return true;
 }
 
-bool QtSceneSuperCell::enable_image_layer( std::string layer_name, bool enabled ){
+bool QtSceneSuperCell::enable_image_layer( std::string layer_name, int layer_number, bool enabled ){
   QString layerTypeEntityName = imageEntityName + QString::fromStdString( layer_name );
   EditorUtils::setEnabledExpandedChildEntities(m_rootEntity, layerTypeEntityName, enabled );
+  enabled_image_layers[layer_number-1] = enabled;
   return true;
 }
 
