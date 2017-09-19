@@ -150,22 +150,23 @@ void UnitCellViewerWindow::create_standard_atom_options(){
 }
 
 void UnitCellViewerWindow::reload_data_from_super_cell( ){
-  std::cout << "### reload_data_from_super_cell" << std::endl;
   if( _flag_super_cell ){
     qt_scene_super_cell->reload_data_from_super_cell();
     std::vector<std::string> atom_symbols = qt_scene_super_cell->get_atom_symbols_vec();
-    std::cout << "reload_data_from_super_cell" << std::endl;
+
     for( int distinct_atom_pos = 0; distinct_atom_pos < atom_symbols.size(); distinct_atom_pos++ ){
+      
       //create a new item for each distinct atom
       const std::string atom_symbol = atom_symbols[distinct_atom_pos];
-      std::cout << "atom_symbol" << atom_symbol << std::endl;
       QVector<QVariant> box_option;
       box_option.push_back( QString::fromStdString( atom_symbol ) );
       box_option.push_back("");
       //display
       boost::function<bool(bool)> box_option_check_setter ( boost::bind( &QtSceneSuperCell::enable_atom_type, qt_scene_super_cell, distinct_atom_pos, _1 ) );
+      //boost::function<bool(void)> box_option_check_getter ( boost::bind( &QtSceneSuperCell::enable_atom_type, qt_scene_super_cell, distinct_atom_pos ) );
       TreeItem* display_atom_item = new TreeItem ( box_option );
       display_atom_item->set_fp_check_setter( 0, box_option_check_setter );
+      //display_atom_item->set_fp_check_getter( 0, box_option_check_getter );
       atom_info_fields_model->insertChildren( display_atom_item, model_display_root );
 
       //radius

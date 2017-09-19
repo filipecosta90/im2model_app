@@ -110,8 +110,8 @@ QT_FORWARD_DECLARE_CLASS(QLayout)
       QBoxLayout *toolsLayout;
       QToolBar *toolbar;
       QTreeView *atom_info_tree_view;
-          /* Delegates */
-          TreeItemFileDelegate *atom_info_tree_view_delegate;
+      /* Delegates */
+      TreeItemFileDelegate *atom_info_tree_view_delegate;
 
       //Core vis
       Qt3DCore::QEntity *_m_rootEntity;

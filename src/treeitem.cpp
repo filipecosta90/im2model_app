@@ -568,7 +568,7 @@ bool TreeItem::setData(int column, const QVariant &value, int role ){
   if( role == Qt::CheckStateRole ){
     if( itemIsCheckableVec.at(column) == true ){
       const bool _boolean_value = value.toBool();
-      result = fp_checkable_setters.at(column)(_boolean_value);
+      result = fp_checkable_setters.at(column)( _boolean_value );
       itemState[column] = _boolean_value;
     }
   }
@@ -577,14 +577,12 @@ bool TreeItem::setData(int column, const QVariant &value, int role ){
       if( itemData[column] != value ){
         bool setter_result = false;
         //call setter on core im2model
-        std::cout << "call setter on core im2model" << std::endl;
         if( ( _fp_data_setter_col_pos == column )
         && (_flag_fp_data_setter_string
           || _flag_fp_data_setter_bool
           || _flag_fp_data_setter_int
           || _flag_fp_data_setter_double )
         ){
-          std::cout << "\t\t inside call setter on core im2model" << std::endl;
           if( _flag_fp_data_setter_string ){
             std::string t1 = value.toString().toStdString();
             setter_result = fp_data_setter_string( t1 );

@@ -71,7 +71,6 @@ bool QtSceneSuperCell::update_image_layer( cv::Mat layer_image , double width_nm
     image->setImage( layer_image );
     image->update();
     material->diffuse()->addTextureImage(image);
-    reload_data_from_super_cell();
     result = true;
   }
   return result;
@@ -119,7 +118,6 @@ bool QtSceneSuperCell::add_image_layer(  cv::Mat layer_image , double width_nm, 
   image_vector.push_back( image );
   planeMaterial_vector.push_back( material );
   planeTransform_vector.push_back( transform );
-
   return true;
 }
 
@@ -165,8 +163,8 @@ void QtSceneSuperCell::set_super_cell( SuperCell* cell ){
 std::vector<std::string> QtSceneSuperCell::get_atom_symbols_vec(){
   std::vector<std::string> atom_symbols;
   if( _flag_super_cell ){
-atom_symbols = super_cell->get_atom_symbols_vec();
-}
+    atom_symbols = super_cell->get_atom_symbols_vec();
+  }
 return atom_symbols;
 }
 
@@ -197,16 +195,19 @@ bool QtSceneSuperCell::enable_atom_type( int distinct_atom_pos, bool enabled ){
 
 bool QtSceneSuperCell::updateAtomMeshRadius( int distinct_atom_pos, double radius ){
   bool result = false;
-  if( _flag_super_cell && ( sphere_meshes.size() > distinct_atom_pos ) ){
-    std::cout << "updateAtomMeshRadius " << radius << std::endl;
-    std::vector<Qt3DExtras::QSphereMesh*> sphere_meshes_inner = sphere_meshes[distinct_atom_pos];
-    for( int same_type_pos = 0; same_type_pos < sphere_meshes_inner.size(); same_type_pos++ ){
-    Qt3DExtras::QSphereMesh *sphereMesh = sphere_meshes_inner[same_type_pos];
-    if( sphereMesh ){
-      std::cout << "updateAtomMeshRadius to " << (float) radius << " from: "<< sphereMesh->radius() <<  std::endl;
-      sphereMesh->setRadius( (float) radius );
+  const std::vector<std::string> atom_symbols = super_cell->get_atom_symbols_vec();
+
+  if( _flag_super_cell && ( atom_symbols.size() > distinct_atom_pos ) ){
+    const std::string atom_symbol = atom_symbols[distinct_atom_pos];
+    const QString atomTypeEntityName = atomEntityName + QString::fromStdString( atom_symbol );
+
+    QList<Qt3DCore::QEntity*> child_atoms = m_rootEntity->findChildren<Qt3DCore::QEntity*>( atomTypeEntityName );
+    Q_FOREACH (Qt3DCore::QEntity *atom, child_atoms) {
+      Qt3DExtras::QSphereMesh *sphereMesh = atom->findChild<Qt3DExtras::QSphereMesh *>( );
+      if( sphereMesh ){
+        sphereMesh->setRadius( (float) radius );
+      }
     }
-  }
     result = true;
   }
   return result;
@@ -214,37 +215,26 @@ bool QtSceneSuperCell::updateAtomMeshRadius( int distinct_atom_pos, double radiu
 
 void QtSceneSuperCell::reload_data_from_super_cell(){
   if( _flag_super_cell ){
-
     const std::vector< std::vector<cv::Point3d> > atom_positions_vec = super_cell->get_atom_positions_vec();
     const std::vector<cv::Vec4d> atom_cpk_rgba_colors = super_cell->get_atom_cpk_rgba_colors_vec();
     std::vector<double> atom_empirical_radiis = super_cell->get_atom_empirical_radiis_vec();
     std::vector<std::string> atom_symbols = super_cell->get_atom_symbols_vec();
 
-    //reserve space on vec
-    sphere_meshes.reserve( atom_positions_vec.size() );
-
     for( int distinct_atom_pos = 0; distinct_atom_pos < atom_positions_vec.size(); distinct_atom_pos++ ){
+      const std::string atom_symbol = atom_symbols[distinct_atom_pos];
+      QString atomTypeEntityName = atomEntityName + QString::fromStdString( atom_symbol );
+      EditorUtils::removeExpandedChildEntities( m_rootEntity, atomTypeEntityName );
 
       const cv::Vec4d atom_cpk_rgba_color = atom_cpk_rgba_colors[distinct_atom_pos];
       const double atom_empirical_radii = atom_empirical_radiis[distinct_atom_pos];
-
       const std::vector<cv::Point3d> same_type_atoms = atom_positions_vec[distinct_atom_pos];
-      const std::string atom_symbol = atom_symbols[distinct_atom_pos];
-      QString atomTypeEntityName = atomEntityName + QString::fromStdString( atom_symbol );
-      QString atomTypeMeshName = atomMeshName + QString::fromStdString( atom_symbol );
 
-      EditorUtils::removeExpandedChildEntities(m_rootEntity,atomTypeEntityName);
-
-      std::vector<Qt3DExtras::QSphereMesh*> sphere_meshes_inner;
-
-      //reserve space on vec
-      sphere_meshes_inner.reserve( atom_positions_vec[distinct_atom_pos].size() );
 
       for( int same_type_pos = 0; same_type_pos < atom_positions_vec[distinct_atom_pos].size(); same_type_pos++ ){
         const cv::Point3d atom_pos = atom_positions_vec[distinct_atom_pos][same_type_pos];
 
         Qt3DCore::QEntity* sphereEntity = new Qt3DCore::QEntity( m_rootEntity );
-sphereEntity->setParent( m_rootEntity );
+        sphereEntity->setParent( m_rootEntity );
 
         // Mesh
         Qt3DExtras::QSphereMesh *sphereMesh = new Qt3DExtras::QSphereMesh( sphereEntity );
@@ -252,13 +242,11 @@ sphereEntity->setParent( m_rootEntity );
         sphereMesh->setRings(10);
         sphereMesh->setSlices(10);
         sphereMesh->setRadius( atom_empirical_radii );
-        sphereMesh->setObjectName( atomTypeMeshName );
-        sphere_meshes_inner.push_back( sphereMesh );
 
         //Layer
         Qt3DRender::QGeometryRenderer *geometryRenderer = new Qt3DRender::QGeometryRenderer(sphereEntity);
         geometryRenderer->setParent(sphereEntity);
-        
+
         sphereEntity->addComponent( geometryRenderer );
         sphereEntity->addComponent( sphere_layer );
         sphereEntity->addComponent( sphereMesh );
@@ -267,7 +255,7 @@ sphereEntity->setParent( m_rootEntity );
         Qt3DExtras::QGoochMaterial *sphereMaterial = new Qt3DExtras::QGoochMaterial( sphereEntity );
         sphereMaterial->setDiffuse(QColor::fromRgbF( atom_cpk_rgba_color[0], atom_cpk_rgba_color[1], atom_cpk_rgba_color[2] ));
 /*
-TO DO
+TO DO:
         Qt3DExtras::QPhongAlphaMaterial *sphereMaterial = new Qt3DExtras::QPhongAlphaMaterial( sphereEntity );
         sphereMaterial->setAlpha( 1.0f );
         sphereMaterial->setAmbient( QColor::fromRgbF( atom_cpk_rgba_color[0], atom_cpk_rgba_color[1], atom_cpk_rgba_color[2], 0.3f ) );
@@ -284,7 +272,6 @@ TO DO
         sphereEntity->setObjectName( atomTypeEntityName );
         sphere_entities.push_back( sphereEntity );
       }
-      sphere_meshes.push_back( sphere_meshes_inner );
     }
   }
 }

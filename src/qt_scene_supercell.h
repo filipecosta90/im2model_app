@@ -142,7 +142,6 @@ class QtSceneSuperCell : public QObject
 
     std::vector<Qt3DCore::QEntity*> sphere_entities;
     // one mesh for every distinct atom type
-    std::vector<std::vector<Qt3DExtras::QSphereMesh*>> sphere_meshes;
     SuperCell* super_cell = nullptr;
     bool _flag_super_cell = false;
 };
