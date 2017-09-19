@@ -142,37 +142,37 @@ TreeItem::~TreeItem(){
 void TreeItem::load_data_from_getter( int column ){
   if  (column >= 0 && column < itemData.size() ) {
     //call getter on core im2model
-      QVariant value;
-      if( _flag_fp_data_getter_bool_vec[column] == true  ){
-        const bool _bool_value = fp_data_getter_bool_vec[column]();
-        value = QVariant::fromValue( _bool_value );
-        itemData[column] = value;
-        emit dataChanged( column );
-        emit dataChanged( _variable_name );
-      }
-      if( _flag_fp_data_getter_double_vec[column] == true  ){
-        const double _double_value = fp_data_getter_double_vec[column]();
-        value = QVariant::fromValue( _double_value );
-        itemData[column] = value;
-        emit dataChanged( column );
-        emit dataChanged( _variable_name );
-      }
-      if( _flag_fp_data_getter_int_vec[column] == true  ){
-        const int _int_value = fp_data_getter_int_vec[column]();
-        value = QVariant::fromValue( _int_value );
-        itemData[column] = value;
-        emit dataChanged( column );
-        emit dataChanged( _variable_name );
-      }
-      if( _flag_fp_data_getter_string_vec[column] == true  ){
-        std::string _string_value = fp_data_getter_string_vec[column]();
-        std::cout << "\t\tfp_data_getter_string_vec in col "<< column << " value:\n"<< _string_value <<std::endl;
-        //value = QVariant::fromValue( _string_value );
-        itemData[column] = QString::fromStdString(_string_value);
-        emit dataChanged( column );
-        emit dataChanged( _variable_name );
-      }
+    QVariant value;
+    if( _flag_fp_data_getter_bool_vec[column] == true  ){
+      const bool _bool_value = fp_data_getter_bool_vec[column]();
+      value = QVariant::fromValue( _bool_value );
+      itemData[column] = value;
+      emit dataChanged( column );
+      emit dataChanged( _variable_name );
     }
+    if( _flag_fp_data_getter_double_vec[column] == true  ){
+      const double _double_value = fp_data_getter_double_vec[column]();
+      value = QVariant::fromValue( _double_value );
+      itemData[column] = value;
+      emit dataChanged( column );
+      emit dataChanged( _variable_name );
+    }
+    if( _flag_fp_data_getter_int_vec[column] == true  ){
+      const int _int_value = fp_data_getter_int_vec[column]();
+      value = QVariant::fromValue( _int_value );
+      itemData[column] = value;
+      emit dataChanged( column );
+      emit dataChanged( _variable_name );
+    }
+    if( _flag_fp_data_getter_string_vec[column] == true  ){
+      std::string _string_value = fp_data_getter_string_vec[column]();
+      std::cout << "\t\tfp_data_getter_string_vec in col "<< column << " value:\n"<< _string_value <<std::endl;
+      //value = QVariant::fromValue( _string_value );
+      itemData[column] = QString::fromStdString(_string_value);
+      emit dataChanged( column );
+      emit dataChanged( _variable_name );
+    }
+  }
 }
 
 // loads data for all cols
@@ -285,16 +285,16 @@ bool TreeItem::load_data_from_property_tree( boost::property_tree::ptree pt_root
           const std::string child_varname = _child->get_variable_name();
           boost::property_tree::ptree pt_child_node = pt_childs.get_child(child_varname);
           result &= _child->load_data_from_property_tree(pt_child_node);
-        //  std::cout << "result of loading " << child_varname << std::boolalpha << result << std::endl;
+          //  std::cout << "result of loading " << child_varname << std::boolalpha << result << std::endl;
         }
         /*
-        for ( boost::property_tree::ptree::value_type &pt_child_node_v : pt_childs ){
-          boost::property_tree::ptree pt_child_node = pt_child_node_v.second;
-          TreeItem* _child =  childItems.value( child_num );
-          result &= _child->load_data_from_property_tree(pt_child_node);
-          child_num++;
-        }
-        */
+           for ( boost::property_tree::ptree::value_type &pt_child_node_v : pt_childs ){
+           boost::property_tree::ptree pt_child_node = pt_child_node_v.second;
+           TreeItem* _child =  childItems.value( child_num );
+           result &= _child->load_data_from_property_tree(pt_child_node);
+           child_num++;
+           }
+           */
       }
       catch(const boost::property_tree::ptree_error &e){
         std::cout << e.what() << std::endl;
@@ -422,7 +422,7 @@ bool TreeItem::insertChildren(TreeItem *item){
 bool TreeItem::insertChildren(int position, int count, int columns){
   if (position < 0 || position > childItems.size()){
     return false;
-}
+  }
   for (int row = 0; row < count; ++row) {
     QVector< QVariant > data;
     boost::function<bool(std::string)> data_setters;
@@ -474,16 +474,22 @@ bool TreeItem::set_parent( TreeItem* parent ){
   return true;
 }
 
-bool TreeItem::removeChildren(int position, int count){
-  if (position < 0 || position + count > childItems.size()){
-    return false;
-  }
-
-  for (int row = 0; row < count; ++row){
-    delete childItems.takeAt(position);
-  }
-
+bool TreeItem::removeAllChildren(){
+  childItems.clear();
   return true;
+}
+
+bool TreeItem::removeChildren(int position, int count){
+  bool result = false;
+  if (position < 0 || position + count > childItems.size()){
+    result = false;
+  }
+  else{
+    for (int row = 0; row < count; ++row){
+      delete childItems.takeAt(position);
+    }
+  }
+  return result;
 }
 
 bool TreeItem::removeColumns(int position, int columns){
@@ -578,11 +584,11 @@ bool TreeItem::setData(int column, const QVariant &value, int role ){
         bool setter_result = false;
         //call setter on core im2model
         if( ( _fp_data_setter_col_pos == column )
-        && (_flag_fp_data_setter_string
-          || _flag_fp_data_setter_bool
-          || _flag_fp_data_setter_int
-          || _flag_fp_data_setter_double )
-        ){
+            && (_flag_fp_data_setter_string
+              || _flag_fp_data_setter_bool
+              || _flag_fp_data_setter_int
+              || _flag_fp_data_setter_double )
+          ){
           if( _flag_fp_data_setter_string ){
             std::string t1 = value.toString().toStdString();
             setter_result = fp_data_setter_string( t1 );

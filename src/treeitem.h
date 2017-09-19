@@ -56,6 +56,7 @@ class TreeItem : public QObject {
     bool insertColumns(int position, int columns);
     bool set_parent( TreeItem* parent );
     bool removeChildren(int position, int count);
+    bool removeAllChildren();
     bool removeColumns(int position, int columns);
     int childNumber() const;
     bool isItemEditable( int column ) const;
@@ -134,9 +135,9 @@ class TreeItem : public QObject {
 
     public slots:
       void setToolTipText(const QString&);
-      void load_data_from_getter( int column );
-      void load_data_from_getter_double();
-      void load_data_from_getter_string();
+    void load_data_from_getter( int column );
+    void load_data_from_getter_double();
+    void load_data_from_getter_string();
 
 
 signals:

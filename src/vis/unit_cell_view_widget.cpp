@@ -73,9 +73,9 @@ UnitCellViewerWindow::UnitCellViewerWindow(QWidget *parent) : QWidget(parent) {
 void UnitCellViewerWindow::set_super_cell( SuperCell* cell , bool bind_orientation ){
   super_cell = cell;
   qt_scene_super_cell->set_super_cell( super_cell );
-  QObject::connect( super_cell, SIGNAL(atom_positions_changed()), qt_scene_super_cell, SLOT(reload_data_from_super_cell()));
+  QObject::connect( super_cell, SIGNAL(atom_positions_changed()), this, SLOT(reload_data_from_super_cell()));
   QObject::connect( super_cell, SIGNAL(atom_positions_changed()), this, SLOT(update_m_cameraEntity_centerDistance()));
-
+  std::cout << "UnitCellViewerWindow::set_super_cell with bind orientation" << std::boolalpha << bind_orientation << std::endl;
   if( bind_orientation ){
     QObject::connect( super_cell, SIGNAL(zone_axis_vector_changed()), this, SLOT(update_cameraEntity_zone_axis()) );
     QObject::connect( super_cell, SIGNAL(upward_vector_changed()), this, SLOT(update_cameraEntity_upward_vector()) );
@@ -89,8 +89,8 @@ bool UnitCellViewerWindow::update_image_layer( cv::Mat layer_image , double widt
   const bool is_update = qt_scene_super_cell->contains_image_layer( layer_name, layer_number );
   result = qt_scene_super_cell->update_image_layer( layer_image, width_nm, height_nm, transform , layer_name, layer_number );
   if( result ){
-  this->update();
-}
+    this->update();
+  }
   if( !is_update ){
     QVector<QVariant> box_option;
     box_option.push_back( QString::fromStdString( layer_name ) );
@@ -124,16 +124,19 @@ void UnitCellViewerWindow::create_standard_atom_options(){
   layer_display_root->set_variable_name( "layer_display_root" );
   display_root->insertChildren( layer_display_root );
 
-    QVector<QVariant> box1_option_1_1 = {"Atomic Model",""};
-    model_display_root = new TreeItem ( box1_option_1_1  );
-    model_display_root->set_variable_name( "model_display_root" );
-    layer_display_root->insertChildren( model_display_root );
+  QVector<QVariant> box1_option_1_1 = {"Atomic Model",""};
+  model_display_root = new TreeItem ( box1_option_1_1  );
+  model_display_root->set_variable_name( "model_display_root" );
+  layer_display_root->insertChildren( model_display_root );
 
-    QVector<QVariant> box1_option_1_2 = {"Helper Arrows",""};
-    TreeItem* display_arrows_item = new TreeItem ( box1_option_1_2 );
-    boost::function<bool(bool)> box1_option_1_2_check_setter ( boost::bind( &QtSceneSuperCell::enable_helper_arrows, qt_scene_super_cell, _1 ) );
-    display_arrows_item->set_fp_check_setter( 0, box1_option_1_2_check_setter );
-    layer_display_root->insertChildren( display_arrows_item );
+  QVector<QVariant> box1_option_1_2 = {"Helper Arrows",""};
+  TreeItem* display_arrows_item = new TreeItem ( box1_option_1_2 );
+  boost::function<bool(bool)> box1_option_1_2_check_setter ( boost::bind( &QtSceneSuperCell::enable_helper_arrows, qt_scene_super_cell, _1 ) );
+  boost::function<bool(void)> box1_option_1_2_check_getter ( boost::bind( &QtSceneSuperCell::get_helper_arrows_enable_status, qt_scene_super_cell ) );
+  display_arrows_item->set_fp_check_setter( 0, box1_option_1_2_check_setter );
+  display_arrows_item->set_fp_check_getter( 0, box1_option_1_2_check_getter );
+  display_arrows_item->load_check_status_from_getter( 0 );
+  layer_display_root->insertChildren( display_arrows_item );
 
   ////////////////
   // Atom properties
@@ -150,12 +153,17 @@ void UnitCellViewerWindow::create_standard_atom_options(){
 }
 
 void UnitCellViewerWindow::reload_data_from_super_cell( ){
+  std::cout << "RELOAD" << std::endl;
   if( _flag_super_cell ){
+    std::cout << "RELOAD ##" << std::endl;
     qt_scene_super_cell->reload_data_from_super_cell();
     std::vector<std::string> atom_symbols = qt_scene_super_cell->get_atom_symbols_vec();
 
+    model_display_root->removeAllChildren();
+    atom_properties_root->removeAllChildren();
+
     for( int distinct_atom_pos = 0; distinct_atom_pos < atom_symbols.size(); distinct_atom_pos++ ){
-      
+
       //create a new item for each distinct atom
       const std::string atom_symbol = atom_symbols[distinct_atom_pos];
       QVector<QVariant> box_option;
@@ -163,10 +171,11 @@ void UnitCellViewerWindow::reload_data_from_super_cell( ){
       box_option.push_back("");
       //display
       boost::function<bool(bool)> box_option_check_setter ( boost::bind( &QtSceneSuperCell::enable_atom_type, qt_scene_super_cell, distinct_atom_pos, _1 ) );
-      //boost::function<bool(void)> box_option_check_getter ( boost::bind( &QtSceneSuperCell::enable_atom_type, qt_scene_super_cell, distinct_atom_pos ) );
+      boost::function<bool(void)> box_option_check_getter ( boost::bind( &QtSceneSuperCell::get_enable_atom_type, qt_scene_super_cell, distinct_atom_pos ) );
       TreeItem* display_atom_item = new TreeItem ( box_option );
       display_atom_item->set_fp_check_setter( 0, box_option_check_setter );
-      //display_atom_item->set_fp_check_getter( 0, box_option_check_getter );
+      display_atom_item->set_fp_check_getter( 0, box_option_check_getter );
+      display_atom_item->load_check_status_from_getter( 0 );
       atom_info_fields_model->insertChildren( display_atom_item, model_display_root );
 
       //radius

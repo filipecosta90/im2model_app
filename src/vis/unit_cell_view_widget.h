@@ -78,7 +78,6 @@ QT_FORWARD_DECLARE_CLASS(QLayout)
       void set_super_cell( SuperCell* , bool bind_orientation = true );
       bool update_image_layer( cv::Mat layer_image , double width_nm, double height_nm , Qt3DCore::QTransform* transform = nullptr, std::string layer_name = "Image Layer", int layer_number = 1);
       bool add_image_layer( cv::Mat layer_image, double width_nm, double height_nm, Qt3DCore::QTransform* transform = nullptr );
-      void reload_data_from_super_cell();
       void create_standard_atom_options();
 
       public slots:
@@ -95,6 +94,7 @@ QT_FORWARD_DECLARE_CLASS(QLayout)
       void view_along_b_axis();
       void view_along_c_axis();
       void fit_model();
+      void reload_data_from_super_cell();
 
     protected:
 

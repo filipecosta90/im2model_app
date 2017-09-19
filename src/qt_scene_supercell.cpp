@@ -165,7 +165,7 @@ std::vector<std::string> QtSceneSuperCell::get_atom_symbols_vec(){
   if( _flag_super_cell ){
     atom_symbols = super_cell->get_atom_symbols_vec();
   }
-return atom_symbols;
+  return atom_symbols;
 }
 
 bool QtSceneSuperCell::enable_helper_arrows( bool enabled ){
@@ -186,9 +186,28 @@ bool QtSceneSuperCell::enable_atom_type( int distinct_atom_pos, bool enabled ){
     if( atom_symbols.size() > distinct_atom_pos ){
       const std::string atom_symbol = atom_symbols[distinct_atom_pos];
       QString atomTypeEntityName = atomEntityName + QString::fromStdString( atom_symbol );
-      EditorUtils::setEnabledExpandedChildEntities(m_rootEntity, atomTypeEntityName, enabled );
+      EditorUtils::setEnabledExpandedChildEntities( m_rootEntity, atomTypeEntityName, enabled );
       result = true;
+      enabled_atom_types[distinct_atom_pos] = enabled;
     }
+  }
+  return result;
+}
+
+bool QtSceneSuperCell::get_enable_atom_type( int distinct_atom_pos ){
+  bool result = false;
+  if( _flag_super_cell ){
+    if( enabled_atom_types.size() > distinct_atom_pos ){
+      result = enabled_atom_types[distinct_atom_pos];
+    }
+  }
+  return result;
+}
+
+bool QtSceneSuperCell::get_helper_arrows_enable_status(){
+  bool result = false;
+  if( m_helperArrows ){
+    result = m_helperArrows->isEnabled();
   }
   return result;
 }
@@ -199,35 +218,55 @@ bool QtSceneSuperCell::updateAtomMeshRadius( int distinct_atom_pos, double radiu
 
   if( _flag_super_cell && ( atom_symbols.size() > distinct_atom_pos ) ){
     const std::string atom_symbol = atom_symbols[distinct_atom_pos];
-    const QString atomTypeEntityName = atomEntityName + QString::fromStdString( atom_symbol );
-
-    QList<Qt3DCore::QEntity*> child_atoms = m_rootEntity->findChildren<Qt3DCore::QEntity*>( atomTypeEntityName );
-    Q_FOREACH (Qt3DCore::QEntity *atom, child_atoms) {
-      Qt3DExtras::QSphereMesh *sphereMesh = atom->findChild<Qt3DExtras::QSphereMesh *>( );
-      if( sphereMesh ){
-        sphereMesh->setRadius( (float) radius );
-      }
+    const QString atomTypeMeshName = atomMeshName + QString::fromStdString( atom_symbol );
+    QList<Qt3DExtras::QSphereMesh *> child_meshes = m_rootEntity->findChildren<Qt3DExtras::QSphereMesh *>( atomTypeMeshName );
+    Q_FOREACH (Qt3DExtras::QSphereMesh *sphereMesh, child_meshes) {
+      sphereMesh->setRadius( (float) radius );
     }
     result = true;
   }
   return result;
 }
+void QtSceneSuperCell::load_visual_data(){
+  local_atom_cpk_rgba_colors = super_cell->get_atom_cpk_rgba_colors_vec();
+  local_atom_empirical_radiis = super_cell->get_atom_empirical_radiis_vec();
+}
 
 void QtSceneSuperCell::reload_data_from_super_cell(){
   if( _flag_super_cell ){
     const std::vector< std::vector<cv::Point3d> > atom_positions_vec = super_cell->get_atom_positions_vec();
-    const std::vector<cv::Vec4d> atom_cpk_rgba_colors = super_cell->get_atom_cpk_rgba_colors_vec();
-    std::vector<double> atom_empirical_radiis = super_cell->get_atom_empirical_radiis_vec();
     std::vector<std::string> atom_symbols = super_cell->get_atom_symbols_vec();
+    if( atom_symbols.size() != local_atom_cpk_rgba_colors.size() ){
+      load_visual_data();
+    }
+
+    if( atom_positions_vec.size() != enabled_atom_types.size() ){
+      enabled_atom_types.clear();
+      enabled_atom_types.reserve( atom_positions_vec.size() );
+      for( int distinct_atom_pos = 0; distinct_atom_pos < atom_positions_vec.size(); distinct_atom_pos++ ){
+        enabled_atom_types.push_back(true);
+      }
+    }
 
     for( int distinct_atom_pos = 0; distinct_atom_pos < atom_positions_vec.size(); distinct_atom_pos++ ){
+
       const std::string atom_symbol = atom_symbols[distinct_atom_pos];
       QString atomTypeEntityName = atomEntityName + QString::fromStdString( atom_symbol );
       EditorUtils::removeExpandedChildEntities( m_rootEntity, atomTypeEntityName );
 
-      const cv::Vec4d atom_cpk_rgba_color = atom_cpk_rgba_colors[distinct_atom_pos];
-      const double atom_empirical_radii = atom_empirical_radiis[distinct_atom_pos];
+      const cv::Vec4d atom_cpk_rgba_color = local_atom_cpk_rgba_colors[distinct_atom_pos];
+      const double atom_empirical_radii = local_atom_empirical_radiis[distinct_atom_pos];
+
       const std::vector<cv::Point3d> same_type_atoms = atom_positions_vec[distinct_atom_pos];
+
+      // Mesh
+      Qt3DExtras::QSphereMesh *sphereMesh = new Qt3DExtras::QSphereMesh( m_rootEntity );
+      //sphereMesh->setParent(sphereEntity);
+      sphereMesh->setRings(10);
+      sphereMesh->setSlices(10);
+      sphereMesh->setRadius( atom_empirical_radii );
+      QString atomTypeMeshName = atomMeshName + QString::fromStdString( atom_symbol );
+      sphereMesh->setObjectName( atomTypeMeshName );
 
 
       for( int same_type_pos = 0; same_type_pos < atom_positions_vec[distinct_atom_pos].size(); same_type_pos++ ){
@@ -235,13 +274,6 @@ void QtSceneSuperCell::reload_data_from_super_cell(){
 
         Qt3DCore::QEntity* sphereEntity = new Qt3DCore::QEntity( m_rootEntity );
         sphereEntity->setParent( m_rootEntity );
-
-        // Mesh
-        Qt3DExtras::QSphereMesh *sphereMesh = new Qt3DExtras::QSphereMesh( sphereEntity );
-        sphereMesh->setParent(sphereEntity);
-        sphereMesh->setRings(10);
-        sphereMesh->setSlices(10);
-        sphereMesh->setRadius( atom_empirical_radii );
 
         //Layer
         Qt3DRender::QGeometryRenderer *geometryRenderer = new Qt3DRender::QGeometryRenderer(sphereEntity);
@@ -254,12 +286,12 @@ void QtSceneSuperCell::reload_data_from_super_cell(){
         // Material
         Qt3DExtras::QGoochMaterial *sphereMaterial = new Qt3DExtras::QGoochMaterial( sphereEntity );
         sphereMaterial->setDiffuse(QColor::fromRgbF( atom_cpk_rgba_color[0], atom_cpk_rgba_color[1], atom_cpk_rgba_color[2] ));
-/*
-TO DO:
-        Qt3DExtras::QPhongAlphaMaterial *sphereMaterial = new Qt3DExtras::QPhongAlphaMaterial( sphereEntity );
-        sphereMaterial->setAlpha( 1.0f );
-        sphereMaterial->setAmbient( QColor::fromRgbF( atom_cpk_rgba_color[0], atom_cpk_rgba_color[1], atom_cpk_rgba_color[2], 0.3f ) );
-*/
+        /*
+           TO DO:
+           Qt3DExtras::QPhongAlphaMaterial *sphereMaterial = new Qt3DExtras::QPhongAlphaMaterial( sphereEntity );
+           sphereMaterial->setAlpha( 1.0f );
+           sphereMaterial->setAmbient( QColor::fromRgbF( atom_cpk_rgba_color[0], atom_cpk_rgba_color[1], atom_cpk_rgba_color[2], 0.3f ) );
+           */
         sphereEntity->addComponent( sphereMaterial );
 
         // Transform
@@ -268,7 +300,7 @@ TO DO:
         sphereEntity->addComponent( sphereTransform );
         //create different entity names for each atom type
         //Save entity
-        sphereEntity->setEnabled( true );
+        sphereEntity->setEnabled( enabled_atom_types[distinct_atom_pos] );
         sphereEntity->setObjectName( atomTypeEntityName );
         sphere_entities.push_back( sphereEntity );
       }

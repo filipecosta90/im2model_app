@@ -83,6 +83,28 @@
 #include <QNormalDiffuseMapAlphaMaterial>
 #include <QDiffuseSpecularMapMaterial>
 
+#include <opencv2/core/hal/interface.h>  // for CV_8UC1, CV_32F, CV_32FC1
+#include <opencv2/imgproc/imgproc_c.h>   // for cvGetSpatialMoment
+#include <opencv2/imgproc/types_c.h>     // for ::CV_THRESH_BINARY, CvMoments
+#include <opencv2/core.hpp>              // for minMaxLoc, normalize, Exception
+#include <opencv2/core/base.hpp>         // for NormTypes::NORM_MINMAX, Code...
+#include <opencv2/core/cvstd.hpp>        // for Ptr
+#include <opencv2/core/cvstd.inl.hpp>    // for operator<<, String::String
+#include <opencv2/core/ptr.inl.hpp>      // for Ptr::operator->, Ptr::Ptr<T>
+#include <opencv2/core/version.hpp>      // for CV_MAJOR_VERSION
+#include <opencv2/features2d.hpp>        // for SimpleBlobDetector::Params
+#include <opencv2/imgcodecs.hpp>         // for imwrite
+#include <opencv2/imgproc.hpp>           // for Canny, boundingRect, drawCon...
+#include <opencv2/video/tracking.hpp>    // for findTransformECC, ::MOTION_E...
+#include <opencv2/core/mat.hpp>      // for Mat
+#include <opencv2/core/mat.inl.hpp>  // for Mat::~Mat
+#include <opencv2/core/matx.hpp>     // for Vec4d
+#include <opencv2/core/types.hpp>    // for Point3d, Point, Rect, Point2d
+
+#include <opencv2/core/mat.hpp>      // for Mat
+#include <opencv2/core/mat.inl.hpp>  // for Mat::~Mat
+#include <opencv2/core/matx.hpp>     // for Vec4d
+#include <opencv2/core/types.hpp>    // for Point3d
 
 #include <boost/shared_array.hpp>
 
@@ -105,9 +127,12 @@ class QtSceneSuperCell : public QObject
     bool update_image_layer( cv::Mat layer_image , double width_nm, double height_nm , Qt3DCore::QTransform* transform = nullptr, std::string layer_name = "Image Layer", int layer_number = 1);
     bool enable_image_layer( std::string layer_name, bool enabled );
     bool updateAtomMeshRadius( int distinct_atom_pos, double radius );
+    bool get_enable_atom_type( int distinct_atom_pos );
+    bool get_helper_arrows_enable_status();
     bool enable_atom_type( int distinct_atom_pos, bool enabled );
     bool enable_helper_arrows( bool enabled );
     bool contains_image_layer( std::string layer_name, int layer_number );
+    void load_visual_data();
 
     std::vector<std::string> get_atom_symbols_vec();
     Qt3DRender::QLayer* get_xyz_axis_layer(){ return xyz_axis_layer; }
@@ -141,9 +166,15 @@ class QtSceneSuperCell : public QObject
     Qt3DRender::QLayer *sphere_layer;
 
     std::vector<Qt3DCore::QEntity*> sphere_entities;
+
     // one mesh for every distinct atom type
     SuperCell* super_cell = nullptr;
     bool _flag_super_cell = false;
+
+    // vis
+    std::vector<cv::Vec4d> local_atom_cpk_rgba_colors;
+    std::vector<double> local_atom_empirical_radiis;
+    std::vector<bool> enabled_atom_types;
 };
 
 #endif // SCENEMODIFIER_H
