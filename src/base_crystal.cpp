@@ -69,6 +69,9 @@ bool BaseCrystal::calculate_thickness_slice_period(){
 bool BaseCrystal::clean_for_re_run(){
   bool result = false;
 
+  _flag_nz_simulated_partitions = false;
+  nz_simulated_partitions = -1;
+
   slice_params_nm_slice.clear();
   slice_params_accum_nm_slice_vec.clear();
   slice_params_nm_slice_vec.clear();
@@ -94,6 +97,17 @@ bool BaseCrystal::clean_for_re_run(){
       _flag_slice_params_nm_slice_vec == false
     ){
     result = true;
+  }
+  return result;
+}
+
+bool BaseCrystal::sanity_check_from_prm(){
+  bool result = true;
+  if ( nz_simulated_partitions == -1 ){
+    result = false;
+  }
+  if( slice_params_nm_slice_vec.size() != nz_simulated_partitions ){
+    result = false;
   }
   return result;
 }
@@ -127,6 +141,17 @@ int BaseCrystal::get_slice_number_from_nm_ceil( double goal_thickness_nm  ){
   }
   return slice_pos;
 }
+int BaseCrystal::get_nz_simulated_partitions( ){
+  if( !_flag_nz_simulated_partitions ){
+    const bool set_result = set_nz_simulated_partitions_from_prm();
+    if( _flag_logger ){
+      std::stringstream message;
+      message << "_flag_nz_simulated_partitions was false. set_nz_simulated_partitions_from_prm() result: " << std::boolalpha << set_result;
+     BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification , message.str() );
+    }
+  }
+  return nz_simulated_partitions;
+}
 
 bool BaseCrystal::set_nz_simulated_partitions_from_prm(){
   assert( slc_file_name_prefix != "" );
@@ -154,6 +179,12 @@ bool BaseCrystal::set_nz_simulated_partitions_from_prm(){
     std::ifstream infile;
     infile.open ( input_prm_stream.str() , std::ifstream::in);
     if (infile.is_open()) {
+      
+// clear if it has values
+if( slice_params_nm_slice.size() > 0 ){ slice_params_nm_slice.clear(); }
+if( slice_params_accum_nm_slice_vec.size() > 0 ){ slice_params_accum_nm_slice_vec.clear();  }
+if( slice_params_nm_slice_vec.size() > 0 ){ slice_params_nm_slice_vec.clear(); }
+
       std::string line;
       std::getline(infile, line);
       std::istringstream iss(line);

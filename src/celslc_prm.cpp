@@ -108,7 +108,8 @@ void CELSLC_prm::cleanup_thread(){
     if( _flag_logger ){
       std::stringstream message;
       message << "The required Class POINTERS for cleanup_thread() are not setted up.";
-     BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::error , message.str() );
+     BOOST_LOG_FUNCTION();
+     logger->logEvent( ApplicationLog::error , message.str() );
     }
     print_var_state();
   }
@@ -116,9 +117,7 @@ void CELSLC_prm::cleanup_thread(){
 
 bool CELSLC_prm::check_produced_slices(){
   bool result = false;
-  if(
-      _flag_sim_crystal_properties
-    ){
+  if( _flag_sim_crystal_properties ){
     if(
         // BaseCrystal vars
         sim_crystal_properties->get_flag_slc_file_name_prefix() &&
@@ -126,9 +125,11 @@ bool CELSLC_prm::check_produced_slices(){
         _flag_base_bin_start_dir_path &&
         _flag_base_bin_output_dir_path
       ){
+        sim_crystal_properties->sanity_check_from_prm();
       // get const vars from class pointer
       const std::string slc_file_name_prefix = sim_crystal_properties->get_slc_file_name_prefix();
       const int nz_simulated_partitions = sim_crystal_properties->get_nz_simulated_partitions();
+      std::cout << "$$$$$ nz_simulated_partitions " << nz_simulated_partitions << std::endl;
       bool flag_files = true;
       for ( int slice_id = 1 ;
           slice_id <= nz_simulated_partitions && flag_files;
@@ -142,13 +143,13 @@ bool CELSLC_prm::check_produced_slices(){
         if( _flag_logger ){
           std::stringstream message;
           message << "checking if the produced slice file \"" << full_slice_path.string() << "\" exists: " << std::boolalpha << _slice_exists;
-         BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification , message.str() );
+         BOOST_LOG_FUNCTION(); logger->logEvent( ApplicationLog::notification , message.str() );
         }
       }
       if( _flag_logger ){
         std::stringstream message;
         message << "check_produced_slices END RESULT: " << std::boolalpha << flag_files;
-       BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification , message.str() );
+       BOOST_LOG_FUNCTION(); logger->logEvent( ApplicationLog::notification , message.str() );
       }
       result = flag_files;
     }

@@ -384,9 +384,8 @@ bool TDMap::run_tdmap(){
       }
     }
     // if we runned and it was ok, or if we didnt runned and we want to set nz from prm
-    if ( ( _run_celslc_switch & _flag_runned_tdmap_celslc ) || !_run_celslc_switch ){
-      _celslc_stage_ok = sim_crystal_properties->set_nz_simulated_partitions_from_prm();
-    }
+      _celslc_stage_ok = _run_celslc_switch ? ( _run_celslc_switch && _flag_runned_tdmap_celslc ) : sim_crystal_properties->set_nz_simulated_partitions_from_prm();
+
     if( _flag_logger ){
       std::stringstream message;
       message << "Celslc step result: " << std::boolalpha << _celslc_stage_ok;

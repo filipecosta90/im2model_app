@@ -48,7 +48,7 @@ class BaseCrystal {
 
   protected:
 
-    int nz_simulated_partitions = 0;
+    int nz_simulated_partitions = -1;
     bool _flag_nz_simulated_partitions = false;
     bool nz_switch = false;
 
@@ -122,6 +122,7 @@ class BaseCrystal {
     BaseCrystal();
     virtual ~BaseCrystal() {} //Let's not forget to have destructor virtual
 
+    bool sanity_check_from_prm();
     bool clean_for_re_run();
     bool get_flag_nz_simulated_partitions(){ return _flag_nz_simulated_partitions; }
     bool get_flag_ht_accelaration_voltage_KV(){ return _flag_ht_accelaration_voltage_KV; }
@@ -164,7 +165,7 @@ class BaseCrystal {
     bool get_flag_logger(){ return _flag_logger; }
 
     /** getters **/
-    int get_nz_simulated_partitions(){ return nz_simulated_partitions; }
+    int get_nz_simulated_partitions();
     bool get_nz_switch(){ return nz_switch; }
     double get_ht_accelaration_voltage_KV(){ return ht_accelaration_voltage_KV; }
     // [Slice Parameters]
