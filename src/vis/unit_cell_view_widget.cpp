@@ -146,6 +146,11 @@ void UnitCellViewerWindow::create_standard_atom_options(){
   atom_properties_root->set_variable_name( "atom_properties_root" );
   display_root->insertChildren( atom_properties_root );
 
+  QVector<QVariant> box1_option_2_1 = {"Radius",""};
+  atom_radius_root = new TreeItem ( box1_option_2_1  );
+  atom_radius_root->set_variable_name( "atom_radius_root" );
+  atom_properties_root->insertChildren( atom_radius_root );
+
   atom_info_tree_view->setModel(atom_info_fields_model);
   atom_info_tree_view->setItemDelegate( atom_info_tree_view_delegate );
   //start editing after one click
@@ -153,14 +158,12 @@ void UnitCellViewerWindow::create_standard_atom_options(){
 }
 
 void UnitCellViewerWindow::reload_data_from_super_cell( ){
-  std::cout << "RELOAD" << std::endl;
   if( _flag_super_cell ){
-    std::cout << "RELOAD ##" << std::endl;
     qt_scene_super_cell->reload_data_from_super_cell();
     std::vector<std::string> atom_symbols = qt_scene_super_cell->get_atom_symbols_vec();
 
     model_display_root->removeAllChildren();
-    atom_properties_root->removeAllChildren();
+    atom_radius_root->removeAllChildren();
 
     for( int distinct_atom_pos = 0; distinct_atom_pos < atom_symbols.size(); distinct_atom_pos++ ){
 
@@ -182,7 +185,7 @@ void UnitCellViewerWindow::reload_data_from_super_cell( ){
       QVector<bool> box_option_edit = {false,true};
       boost::function<bool(double)> box_function ( boost::bind( &QtSceneSuperCell::updateAtomMeshRadius, qt_scene_super_cell, distinct_atom_pos, _1 ) );
       TreeItem* atom_item  = new TreeItem  ( box_option , box_function, box_option_edit );
-      atom_info_fields_model->insertChildren( atom_item, atom_properties_root );
+      atom_info_fields_model->insertChildren( atom_item, atom_radius_root );
     }
   }
   this->update();
@@ -204,15 +207,19 @@ void UnitCellViewerWindow::init(){
   // Camera
   _m_cameraEntity = qt_scene_view->camera();
   QObject::connect(_m_cameraEntity, &Qt3DRender::QCamera::positionChanged,this,&UnitCellViewerWindow::update_m_cameraEntity_frustum);
+  //update scene view when window updates
+  QObject::connect(qt_scene_view, &Qt3DExtras::Qt3DWindow::widthChanged,this,&UnitCellViewerWindow::update_m_cameraEntity_frustum_to_cam_pos);
+  QObject::connect(qt_scene_view, &Qt3DExtras::Qt3DWindow::heightChanged,this,&UnitCellViewerWindow::update_m_cameraEntity_frustum_to_cam_pos);
 
   QVector3D cam_position(_m_cameraEntity_centerDistance, _m_cameraEntity_centerDistance, _m_cameraEntity_centerDistance );
-  const double aspect_ratio = 16.0f/9.0f;
+  //const double aspect_ratio = 16.0f/9.0f;
 
   _m_cameraEntity->setViewCenter( QVector3D(0, 0, 0) );
   _m_cameraEntity->setUpVector( QVector3D(0, 1, 0) );
-  _m_cameraEntity->setPosition( cam_position );
   _m_cameraEntity->setProjectionType( Qt3DRender::QCameraLens::OrthographicProjection );
-  _m_cameraEntity->setAspectRatio( aspect_ratio );
+  _m_cameraEntity->setPosition( cam_position );
+
+  //_m_cameraEntity->setAspectRatio( aspect_ratio );
 
   // Scene SuperCell for TDMAP ROI
   qt_scene_super_cell = new QtSceneSuperCell( _m_rootEntity, _m_cameraEntity );
@@ -246,11 +253,35 @@ void UnitCellViewerWindow::init(){
   qt_scene_view->setRootEntity( _m_rootEntity );
 }
 
+
+void UnitCellViewerWindow::update_m_cameraEntity_frustum_to_cam_pos(  const int &i ){
+  if( _m_cameraEntity ){
+    const QVector3D pos = _m_cameraEntity->position();
+    const double near = 0.1f;
+    const double far = 1000.0f;
+    const double aspect_ratio = _m_cameraEntity->aspectRatio(); // 16.0f/9.0f;
+
+    const float size = std::abs( std::tan( _m_cameraEntity->fieldOfView() )* pos.length() );
+    const double left = -size * aspect_ratio;
+    const double right = aspect_ratio * size;
+    const double bottom = -size;
+    const double top = size;
+
+    _m_cameraEntity->setNearPlane( near );
+    _m_cameraEntity->setFarPlane( far );
+    _m_cameraEntity->setBottom( bottom );
+    _m_cameraEntity->setLeft( left );
+    _m_cameraEntity->setRight( right );
+    _m_cameraEntity->setTop( top );
+    _m_cameraEntity->lens()->setOrthographicProjection( left, right, bottom, top, near, far );
+  }
+}
+
 void UnitCellViewerWindow::update_m_cameraEntity_frustum( const QVector3D &pos  ){
   if( _m_cameraEntity ){
     const double near = 0.1f;
     const double far = 1000.0f;
-    const double aspect_ratio = 16.0f/9.0f;
+    const double aspect_ratio = _m_cameraEntity->aspectRatio(); // 16.0f/9.0f;
 
     const float size = std::abs( std::tan( _m_cameraEntity->fieldOfView() )* pos.length() );
     const double left = -size * aspect_ratio;
@@ -272,7 +303,6 @@ void UnitCellViewerWindow::update_m_cameraEntity_centerDistance(){
   if( _flag_super_cell ){
     if( super_cell->get_flag_length() ){
       _m_cameraEntity_centerDistance = 2 * super_cell->get_max_length_abc_Nanometers();
-      std::cout << "_m_cameraEntity_centerDistance " << _m_cameraEntity_centerDistance << std::endl;
     }
   }
 }

@@ -85,6 +85,7 @@ QT_FORWARD_DECLARE_CLASS(QLayout)
       void update_lightEntity_view_vector(const QVector3D &viewVector);
       void update_lightEntity_position(const QVector3D &pos);
       void update_m_cameraEntity_frustum(const QVector3D &pos);
+      void update_m_cameraEntity_frustum_to_cam_pos( const int &i);
 
       void update_cameraEntity_zone_axis();
       void update_cameraEntity_upward_vector();
