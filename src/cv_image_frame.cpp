@@ -10,11 +10,40 @@ CvImageFrameWidget::CvImageFrameWidget(QWidget *parent ) : QWidget(parent) {
   //set margins to zero so the toolbar touches the widget's edges
   toolsLayout->setContentsMargins(0, 0, 0, 0);
 
-  toolbar = new QToolBar;
+  toolbar = new QToolBar(this);
   toolbar->addAction("Actual size", image_widget, SLOT(normalSize()) );
   toolbar->addAction("Fit" , image_widget, SLOT(fitToWindow()) );
   toolbar->addAction("Zoom in" ,image_widget, SLOT(zoomIn()) );
   toolbar->addAction("Zoom out", image_widget, SLOT(zoomOut()) );
+
+  const QIcon selectionRectangleIcon = QIcon::fromTheme("rectangle-selection", QIcon(":/Icons/ToolBoxSelectionRectangleIcon"));
+  rectSelectAct = new QAction( selectionRectangleIcon, tr("&Rectangle selection"), this);
+  rectSelectAct->setStatusTip(tr("Create rectangular selections"));
+
+
+  const QIcon selectionFreeIcon = QIcon::fromTheme("free-selection", QIcon(":/Icons/ToolBoxSelectionFreeIcon"));
+  freeSelectAct = new QAction( selectionFreeIcon, tr("&Free selection"), this);
+  freeSelectAct->setStatusTip(tr("Create free selections"));
+
+  const QIcon selectionPathIcon = QIcon::fromTheme("path-selection", QIcon(":/Icons/ToolBoxSelectionPathIcon"));
+  pathSelectAct = new QAction( selectionPathIcon, tr("&Path selection"), this);
+  pathSelectAct->setStatusTip(tr("Create path selections"));
+
+  toolsMenu = new QMenu("Tools");
+  toolsMenu->addAction(rectSelectAct);
+  toolsMenu->addAction(freeSelectAct);
+  toolsMenu->addAction(pathSelectAct);
+
+  toolsButton = new QToolButton();
+  toolsButton->setPopupMode(QToolButton::MenuButtonPopup);
+  toolsButton->setMenu(toolsMenu);
+  toolsButton->setText(toolsMenu->title());
+
+  toolbar->addWidget(toolsButton);
+
+  // set toolsMenu not visible by default
+  toolbar->actions().at(4)->setVisible(false);
+
   toolsLayout->addWidget(toolbar);
 
   //use a different layout for the contents so it has normal margins
@@ -26,6 +55,17 @@ CvImageFrameWidget::CvImageFrameWidget(QWidget *parent ) : QWidget(parent) {
 void CvImageFrameWidget::cleanRenderAreas(){
   image_widget->cleanRenderAreas();
   image_widget->update();
+}
+
+void CvImageFrameWidget::enableRectangleSelection(){
+  // set toolsMenu visible
+  toolbar->actions().at(4)->setVisible(true);
+  connect( rectSelectAct, SIGNAL(triggered()), image_widget, SLOT(startRectangleSelection()) );
+  connect( image_widget, SIGNAL(selectionRectangleChanged(QRect)), this, SLOT(emit_selectionRectangleChanged(QRect)) );
+}
+
+void CvImageFrameWidget::emit_selectionRectangleChanged(QRect rect){
+  emit selectionRectangleChanged( rect );
 }
 
 void CvImageFrameWidget::setImage(const cv::Mat& image) {

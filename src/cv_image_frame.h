@@ -30,6 +30,11 @@ class CvImageFrameWidget : public QWidget
     void addShapeRect( cv::Rect _rectangle, int pen_width, cv::Vec3b pen_color, QString shape_description );
     void addShapePolygon( std::vector<cv::Point2i> polygon , cv::Point2i top_left,  int pen_width, QString shape_description );
     void addShapePolygon( std::vector<cv::Point2i> polygon , cv::Point2i top_left,  int pen_width, cv::Vec3b pen_color, QString shape_description );
+    void enableRectangleSelection();
+    void emit_selectionRectangleChanged( QRect );
+
+    signals:
+      void selectionRectangleChanged(QRect);
 
   protected:
     CVImageWidget *image_widget;
@@ -38,6 +43,13 @@ class CvImageFrameWidget : public QWidget
     QVBoxLayout *contentsLayout;
     QBoxLayout *toolsLayout;
     QToolBar *toolbar;
+
+    QAction *rectSelectAct;
+    QAction *freeSelectAct;
+    QAction *pathSelectAct;
+
+    QMenu *toolsMenu;
+    QToolButton* toolsButton;
 };
 
 #endif

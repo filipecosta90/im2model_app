@@ -6,5 +6,8 @@
 <file alias="MenuIconNew32">resources/new.png</file>
 <file alias="MenuIconOpen32">resources/open.png</file>
 <file alias="MenuIconSave32">resources/save.png</file>
+<file alias="ToolBoxSelectionRectangleIcon">resources/gimp-tool-rect-select.svg</file>
+<file alias="ToolBoxSelectionFreeIcon">resources/gimp-tool-free-select.svg</file>
+<file alias="ToolBoxSelectionPathIcon">resources/gimp-tool-path.svg</file>
 </qresource>
 </RCC>

@@ -28,6 +28,8 @@ class CVImageWidget : public QWidget
 
     public slots:
 
+    void startRectangleSelection();
+
       /* right click context menu */
       void ShowContextMenu(const QPoint &pos);
 
@@ -49,9 +51,13 @@ class CVImageWidget : public QWidget
     void cleanRenderAreas();
 
 signals:
-
+    void selectionRectangleChanged( QRect );
+    
   protected:
     void paintEvent(QPaintEvent* event);
+    void mousePressEvent(QMouseEvent *e);
+void mouseMoveEvent(QMouseEvent *e);
+void mouseReleaseEvent(QMouseEvent *e);
 
   private:
 
@@ -70,6 +76,13 @@ signals:
     bool _image_set = false;
     int _container_window_width = 0;
     int _container_window_height = 0;
-};
+
+    bool _enabled_rectangleSelection = false;
+    bool _started_rectangleSelection = false;
+    bool freeSelection = false;
+    bool pathSelection = false;
+    QRect selectionRect;
+
+    };
 
 #endif

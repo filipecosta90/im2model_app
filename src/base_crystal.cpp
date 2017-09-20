@@ -179,7 +179,7 @@ bool BaseCrystal::set_nz_simulated_partitions_from_prm(){
     std::ifstream infile;
     infile.open ( input_prm_stream.str() , std::ifstream::in);
     if (infile.is_open()) {
-      
+
 // clear if it has values
 if( slice_params_nm_slice.size() > 0 ){ slice_params_nm_slice.clear(); }
 if( slice_params_accum_nm_slice_vec.size() > 0 ){ slice_params_accum_nm_slice_vec.clear();  }
@@ -212,10 +212,10 @@ if( slice_params_nm_slice_vec.size() > 0 ){ slice_params_nm_slice_vec.clear(); }
         std::istringstream iss(line);
         double slice_thickness_nm;
         iss >> slice_thickness_nm;
-        slice_params_nm_slice.insert( std::pair<int,double> (slice_id, slice_thickness_nm));
+        slice_params_nm_slice.insert( std::pair<int,double> (slice_id, slice_thickness_nm) );
         accumulated_thickness += slice_thickness_nm;
         slice_params_accum_nm_slice_vec.push_back( accumulated_thickness );
-        slice_params_nm_slice_vec.push_back(slice_thickness_nm);
+        slice_params_nm_slice_vec.push_back( slice_thickness_nm );
       }
       infile.close();
       result = true;

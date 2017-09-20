@@ -27,7 +27,6 @@ TDMap::TDMap(
   tdmap_full_sim_super_cell = new SuperCell( unit_cell );
   final_full_sim_super_cell = new SuperCell( unit_cell );
 
-
   tdmap_roi_sim_super_cell->set_cel_filename( "tdmap_roi.cel" );
   tdmap_roi_sim_super_cell->set_xyz_filename( "tdmap_roi.xyz" );
   tdmap_roi_sim_super_cell->set_cel_margin_nm( cel_margin_nm );

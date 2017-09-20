@@ -134,6 +134,7 @@ class MainWindow : public QMainWindow {
     void update_tdmap_simgrid_started( );
     void update_tdmap_simgrid_ended( bool result );
     void update_tdmap_no_simgrid_ended( bool result );
+    void update_exp_image_roi_from_rectangle_selection( QRect );
 
   protected:
     void closeEvent(QCloseEvent *event) override;

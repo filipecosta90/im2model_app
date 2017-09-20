@@ -164,15 +164,9 @@ void CVImageWidget::cleanRenderAreas(){
 void CVImageWidget::paintEvent(QPaintEvent* event) {
   // Display the image
   QPainter painter(this);
-
-/*  QPixmap pixmap = QPixmap::fromImage(_qimage);
-
-  QSize size = pixmap.size();
-
-  painter.drawPixmap(QRect(QPoint(0,0), size), pixmap.scaled(size, Qt::KeepAspectRatio));
-*/
   painter.drawImage(QPoint(0,0), _qimage);
 
+  // Draw the paths
   for( int list_position = 0; list_position < renderAreas.size() ; list_position++ ){
     const bool _area_visible = renderAreas_visible.at( list_position );
     if( _area_visible ){
@@ -185,10 +179,49 @@ void CVImageWidget::paintEvent(QPaintEvent* event) {
       painter.translate( _top_left.x, _top_left.y );
       painter.setPen(QPen(_area_pen_color, _area_pen_width, Qt::SolidLine, Qt::FlatCap, Qt::MiterJoin));
       painter.scale( scaleFactor, scaleFactor );
-      // painter.setBrush(QColor(122, 163, 39));
       painter.drawPath(_area);
       painter.restore();
     }
   }
+
+// Draw selection rectangle
+if( _started_rectangleSelection ){
+  painter.setPen(QPen(QBrush(QColor(0,0,0,180)),1,Qt::DashLine));
+  painter.setBrush(QBrush(QColor(255,255,255,120)));
+  painter.drawRect(selectionRect);
+}
+
   painter.end();
+}
+
+void CVImageWidget::startRectangleSelection(){
+  _enabled_rectangleSelection = true;
+  setCursor( Qt::CrossCursor );
+}
+
+void CVImageWidget::mousePressEvent(QMouseEvent *e){
+if ( e->button()==Qt::LeftButton ){
+    if( _enabled_rectangleSelection ){
+      _started_rectangleSelection = true;
+      selectionRect.setTopLeft(e->pos());
+      selectionRect.setBottomRight(e->pos());
+    }
+}
+}
+
+void CVImageWidget::mouseMoveEvent(QMouseEvent *e){
+if ( _started_rectangleSelection ){
+selectionRect.setBottomRight(e->pos());
+repaint();
+}
+}
+
+void CVImageWidget::mouseReleaseEvent(QMouseEvent *e){
+  if( _started_rectangleSelection ){
+    _started_rectangleSelection = false;
+    _enabled_rectangleSelection = false;
+    setCursor( Qt::ArrowCursor );
+    emit selectionRectangleChanged( selectionRect );
+  }
+  repaint();
 }

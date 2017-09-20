@@ -408,9 +408,12 @@ void MainWindow::update_full_experimental_image(){
     const cv::Mat full_image = _core_td_map->get_exp_image_properties_full_image();
     // update tab 1
     ui->qgraphics_full_experimental_image->setImage( full_image );
+    ui->qgraphics_full_experimental_image->enableRectangleSelection();
+    connect(ui->qgraphics_full_experimental_image, SIGNAL(selectionRectangleChanged(QRect)), this, SLOT( update_exp_image_roi_from_rectangle_selection(QRect)) );
     ui->qgraphics_full_experimental_image->show();
     // update tab 3
     this->ui->qgraphics_super_cell_edge_detection->setImage( full_image );
+    this->ui->qgraphics_super_cell_edge_detection->enableRectangleSelection();
     this->ui->qgraphics_super_cell_edge_detection->show();
 
     update_roi_experimental_image_frame();
@@ -1110,6 +1113,10 @@ void MainWindow::setCurrentFile(const QString &fileName){
 
 QString MainWindow::strippedName(const QString &fullFileName){
   return QFileInfo(fullFileName).fileName();
+}
+
+void MainWindow::update_exp_image_roi_from_rectangle_selection( QRect rectangle_selection ){
+  std::cout << " update_exp_image_roi_from_rectangle_selection " << std::endl;
 }
 
 void MainWindow::create_box_options(){
