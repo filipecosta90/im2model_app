@@ -1116,7 +1116,16 @@ QString MainWindow::strippedName(const QString &fullFileName){
 }
 
 void MainWindow::update_exp_image_roi_from_rectangle_selection( QRect rectangle_selection ){
-  std::cout << " update_exp_image_roi_from_rectangle_selection " << std::endl;
+  const int dim_px_x = rectangle_selection.width();
+  const int center_x = dim_px_x / 2.0f + rectangle_selection.x();
+  const int dim_px_y = rectangle_selection.height();
+  const int center_y = dim_px_y / 2.0f + rectangle_selection.y();
+  std::cout << " center x " << center_x << " center y" << center_y << std::endl;
+  std::cout << " dim_px_x " << dim_px_x << " dim_px_y" << dim_px_y << std::endl;
+  project_setup_image_fields_model->setData( experimental_roi_center_x,  1 , QVariant( center_x ), Qt::EditRole );
+  project_setup_image_fields_model->setData( experimental_roi_center_y, 1 , QVariant( center_y ), Qt::EditRole );
+  project_setup_image_fields_model->setData( experimental_roi_dimensions_width_px, 1 , QVariant( dim_px_x ), Qt::EditRole );
+  project_setup_image_fields_model->setData( experimental_roi_dimensions_height_px, 1 , QVariant( dim_px_y ), Qt::EditRole );
 }
 
 void MainWindow::create_box_options(){

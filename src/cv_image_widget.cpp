@@ -38,7 +38,7 @@ void CVImageWidget::fitToWindow(){
   // prevent division by zero
   float w_factor = original_size.width > 0 ? ((float) window_width) / ((float) original_size.width ) : 0.0f;
   float h_factor = original_size.height > 0 ? ((float) window_height) / ((float) original_size.height ) : 0.0f;
-  scaleFactor = std::min(w_factor,h_factor);
+  scaleFactor = std::min( w_factor , h_factor );
   updateImage();
 }
 
@@ -63,7 +63,7 @@ void CVImageWidget::setImage( const cv::Mat& image ){
   // QImage needs the data to be stored continuously in memory
   assert( _tmp_original.isContinuous() );
   original_size = image.size();
-  std::cout << " original size " << original_size << std::endl;
+  current_size = original_size;
   // Assign OpenCV's image buffer to the QImage. Note that the bytesPerLine parameter
   // (http://qt-project.org/doc/qt-4.8/qimage.html#QImage-6) is 3*width because each pixel
   // has three bytes.
@@ -76,8 +76,8 @@ void CVImageWidget::setImage( const cv::Mat& image ){
 void CVImageWidget::updateImage() {
   if( _image_set ){
     // Convert the image to the RGB888 format
-    cv::Size newsize(original_size.width * scaleFactor , original_size.height * scaleFactor);//the _tmp_current image size,e.g.100x100
-    cv::resize(_tmp_original,_tmp_current,newsize);//resize image
+    current_size = cv::Size(original_size.width * scaleFactor , original_size.height * scaleFactor);
+    cv::resize(_tmp_original,_tmp_current,current_size);//resize image
 
     // QImage needs the data to be stored continuously in memory
     assert(_tmp_current.isContinuous());
@@ -90,8 +90,6 @@ void CVImageWidget::updateImage() {
 }
 
 void CVImageWidget::ShowContextMenu(const QPoint &pos){
-  std::cout << "called showContextMenu" << std::endl;
-
   // Handle global position
   QPoint globalPos = this->mapToGlobal(pos);
 
@@ -216,12 +214,34 @@ repaint();
 }
 }
 
+QRect CVImageWidget::mapSelectionRectToOriginalSize(){
+  QRect original_size_selectionRect;
+  original_size_selectionRect.setX( selectionRect.x() / scaleFactor );
+  original_size_selectionRect.setY( selectionRect.y() / scaleFactor );
+  original_size_selectionRect.setWidth( selectionRect.width() / scaleFactor );
+  original_size_selectionRect.setHeight( selectionRect.height() / scaleFactor );
+  return original_size_selectionRect;
+}
+
 void CVImageWidget::mouseReleaseEvent(QMouseEvent *e){
   if( _started_rectangleSelection ){
     _started_rectangleSelection = false;
     _enabled_rectangleSelection = false;
     setCursor( Qt::ArrowCursor );
-    emit selectionRectangleChanged( selectionRect );
+    std::cout << "selectionRect x:" << selectionRect.x() << " y: " << selectionRect.y()
+    << " width: " << selectionRect.width() << " height: " << selectionRect.height() << std::endl;
+
+    //make sure the selection rectangle does not surpases the original image size
+    if( selectionRect.bottom() > current_size.height ){
+      std::cout << "adjusting bottom " << selectionRect.bottom() << " to height limit " << current_size.height << std::endl;
+    selectionRect.setBottom( current_size.height );
+    }
+    if( selectionRect.right() > current_size.width ){
+      std::cout << "adjusting right " << selectionRect.right() << " to width limit " << current_size.width << std::endl;
+    selectionRect.setRight( current_size.width );
+    }
+    const QRect original_size_selectionRect = mapSelectionRectToOriginalSize();
+    emit selectionRectangleChanged( original_size_selectionRect );
   }
   repaint();
 }

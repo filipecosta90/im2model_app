@@ -52,7 +52,7 @@ class CVImageWidget : public QWidget
 
 signals:
     void selectionRectangleChanged( QRect );
-    
+
   protected:
     void paintEvent(QPaintEvent* event);
     void mousePressEvent(QMouseEvent *e);
@@ -60,6 +60,8 @@ void mouseMoveEvent(QMouseEvent *e);
 void mouseReleaseEvent(QMouseEvent *e);
 
   private:
+
+    QRect mapSelectionRectToOriginalSize(); 
 
     QList<QPainterPath> renderAreas;
     QList<int> renderAreas_penWidth;
@@ -73,6 +75,7 @@ void mouseReleaseEvent(QMouseEvent *e);
     cv::Mat _tmp_original, _tmp_current;
     float scaleFactor = 1.0f;
     cv::Size original_size;
+    cv::Size current_size;
     bool _image_set = false;
     int _container_window_width = 0;
     int _container_window_height = 0;

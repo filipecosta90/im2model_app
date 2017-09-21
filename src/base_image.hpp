@@ -93,9 +93,9 @@ class BaseImage {
     double roi_nm_size_cols_a = 0.0f;
     bool _flag_roi_nm_size_cols_a = false;
 
-    int roi_center_x;
+    int roi_center_x = 0;
     bool _flag_roi_center_x = false;
-    int roi_center_y;
+    int roi_center_y = 0;
     bool _flag_roi_center_y = false;
 
     // ignored edge pixels of the full image

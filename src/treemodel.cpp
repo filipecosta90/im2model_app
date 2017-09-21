@@ -29,6 +29,7 @@ boost::property_tree::ptree* TreeModel::save_data_into_property_tree( ){
 
 bool TreeModel::load_data_from_property_tree( boost::property_tree::ptree pt_root ){
   // Load from the property tree object
+  emit layoutAboutToBeChanged();
   rootItem->load_data_from_property_tree( pt_root );
   emit layoutChanged();
   return true;
@@ -190,6 +191,19 @@ bool TreeModel::setData(const QModelIndex &index, const QVariant &value, int rol
   }
   return result;
 }
+
+
+bool TreeModel::setData( TreeItem *item, int column, const QVariant &value, int role ){
+    if ( (role != Qt::EditRole) && ( role != Qt::CheckStateRole ) ){
+      return false;
+    }
+    const bool result = item->setData( column, value, role );
+    if (result){
+      emit layoutChanged();
+    }
+    return result;
+}
+
 
 bool TreeModel::clearData(const QModelIndex &index){
   bool result = false;

@@ -32,6 +32,7 @@ class TreeModel : public QAbstractItemModel {
      */
     Qt::ItemFlags flags(const QModelIndex &index) const override;
     bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole) override;
+    bool setData( TreeItem *item, int column, const QVariant &value, int role = Qt::EditRole);
     bool appendData(const QModelIndex &index, const QVariant &value);
     bool clearData(const QModelIndex &index);
     bool setHeaderData(int section, Qt::Orientation orientation, const QVariant &value, int role = Qt::EditRole) override;
