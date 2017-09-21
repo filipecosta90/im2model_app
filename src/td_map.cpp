@@ -2055,21 +2055,39 @@ double TDMap::get_exp_image_properties_roi_nx_size_width_nm(){
 bool TDMap::calculate_exp_image_boundaries_from_full_image(){
   bool result = false;
   result = exp_image_bounds->calculate_boundaries_from_full_image();
-  if(
-      exp_image_bounds->get_flag_boundary_polygon_length_x_nm() &&
-      exp_image_bounds->get_flag_boundary_polygon_length_y_nm()
-    ){
-    const double full_crystal_a_size = exp_image_bounds->get_boundary_polygon_length_x_nm();
-    const double full_crystal_b_size = exp_image_bounds->get_boundary_polygon_length_y_nm();
-    const bool a_result = tdmap_full_sim_super_cell->set_length_a_Nanometers( full_crystal_a_size );
-    const bool b_result = tdmap_full_sim_super_cell->set_length_b_Nanometers( full_crystal_b_size );
-    const bool super_cell_result = a_result && b_result;
-    std::cout << "full_crystal_a_size " << full_crystal_a_size << " full_crystal_b_size " << full_crystal_b_size << " super_cell_result " << std::boolalpha << super_cell_result << std::endl;
-    if( super_cell_result ){
-      emit super_cell_dimensions_b_changed();
-      emit super_cell_dimensions_a_changed();
-      result = true;
+  if( result ){
+    update_full_crysta_a_b_sizes();
+  }
+  return result;
+}
+
+bool TDMap::update_full_crysta_a_b_sizes(){
+    bool result = false;
+    if(
+        exp_image_bounds->get_flag_boundary_polygon_length_x_nm() &&
+        exp_image_bounds->get_flag_boundary_polygon_length_y_nm()
+      ){
+      const double full_crystal_a_size = exp_image_bounds->get_boundary_polygon_length_x_nm();
+      const double full_crystal_b_size = exp_image_bounds->get_boundary_polygon_length_y_nm();
+      const bool a_result = tdmap_full_sim_super_cell->set_length_a_Nanometers( full_crystal_a_size );
+      const bool b_result = tdmap_full_sim_super_cell->set_length_b_Nanometers( full_crystal_b_size );
+      const bool super_cell_result = a_result && b_result;
+      std::cout << "full_crystal_a_size " << full_crystal_a_size << " full_crystal_b_size " << full_crystal_b_size << " super_cell_result " << std::boolalpha << super_cell_result << std::endl;
+      if( super_cell_result ){
+        emit super_cell_dimensions_b_changed();
+        emit super_cell_dimensions_a_changed();
+        result = true;
+      }
     }
+    return result;
+}
+
+bool TDMap::set_exp_image_bounds_roi_boundary_rect( cv::Rect roi_boundary_rect ){
+  bool result = false;
+  result = exp_image_bounds->set_roi_boundary_rect( roi_boundary_rect );
+  if( result ){
+    std::cout << " update_full_crysta_a_b_sizes " << std::endl;
+    update_full_crysta_a_b_sizes();
   }
   return result;
 }

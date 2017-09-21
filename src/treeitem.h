@@ -20,6 +20,7 @@
 /** END BOOST **/
 
 #include "custom_tool_button.h"
+#include "treemodel.h"
 
 
 class TreeItem : public QObject {
@@ -45,6 +46,7 @@ class TreeItem : public QObject {
     explicit TreeItem( QVector<QVariant> &data, boost::function<bool(std::string)> setter, QVector<bool> editable, TreeItem *parent = 0);
 
     ~TreeItem();
+    TreeModel *model();
     TreeItem *parent();
     TreeItem *child(int number);
     int childCount() const;
@@ -55,6 +57,8 @@ class TreeItem : public QObject {
     bool insertChildren(TreeItem *item);
     bool insertColumns(int position, int columns);
     bool set_parent( TreeItem* parent );
+    bool set_model( TreeModel* parentModel );
+
     bool removeChildren(int position, int count);
     bool removeAllChildren();
     bool removeColumns(int position, int columns);
@@ -147,6 +151,7 @@ signals:
     void highlight_error( int column );
 
   private:
+    TreeModel *parentModel = nullptr;
     TreeItem *parentItem;
     QList<TreeItem*> childItems;
 
@@ -239,6 +244,7 @@ signals:
     std::vector<bool> _flag_highlight_error;
     private slots:
       void clean_highlight_status( int column );
+      void force_layout_change( int column );
 };
 
 Q_DECLARE_METATYPE(std::string)

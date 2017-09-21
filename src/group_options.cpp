@@ -57,7 +57,7 @@ void group_options::set_update_required_from_pipeline( std::string signaling_gro
 }
 
 bool group_options::update_track_var( std::string varname ){
-  //std::cout << " private slot called update_track_var on var: " << varname << std::endl;
+  std::cout << " private slot called update_track_var on var: " << varname << std::endl;
   bool result = false;
   // if var exists both in the variable map and in the current variable map
   if(  variables_map.find( varname ) != variables_map.end() ){

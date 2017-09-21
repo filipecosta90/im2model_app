@@ -116,6 +116,7 @@ class TDMap  : public QObject {
 
     bool set_base_dir_path( boost::filesystem::path path );
     bool update_emd_fields();
+    bool update_full_crysta_a_b_sizes();
 
   public:
     enum RefinementPreset { NO_REFINEMENT, MICROSCOPE_CORRECTED, MICROSCOPE_NON_CORRECTED, USER_DEFINED_PRESET };
@@ -334,6 +335,7 @@ class TDMap  : public QObject {
     bool set_run_simgrid_switch( bool value );
     bool set_exp_image_bounds_hysteresis_threshold( int value );
     bool set_exp_image_bounds_max_contour_distance_px( int value );
+    bool set_exp_image_bounds_roi_boundary_rect( cv::Rect roi_boundary_rect );
     bool set_full_boundary_polygon_margin_nm( std::string );
     bool accept_tdmap_best_match_position();
     bool accept_tdmap_best_match_position(int row, int col);

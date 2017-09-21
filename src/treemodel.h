@@ -46,6 +46,7 @@ class TreeModel : public QAbstractItemModel {
     bool _was_model_modified();
     bool _reset_model_modified();
     bool enable_highlight_error( std::string varname , int column );
+    bool force_layout_change( );
 
     boost::property_tree::ptree* save_data_into_property_tree( );
     bool load_data_from_property_tree( boost::property_tree::ptree pt_root );
@@ -53,6 +54,8 @@ class TreeModel : public QAbstractItemModel {
 
     public slots:
       void set_model_modified();
+      void load_data_from_getter_double( TreeItem *item );
+
   private:
 
     TreeItem *rootItem;

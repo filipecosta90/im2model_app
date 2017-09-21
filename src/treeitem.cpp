@@ -48,6 +48,7 @@ bool TreeItem::enable_highlight_error( std::string varname , int column ){
 }
 
 TreeItem::TreeItem( QVector<QVariant> &data, TreeItem *parent) {
+
   itemData = data;
   parentItem = parent;
   for( int pos = 0; pos < data.size(); pos++ ){
@@ -85,6 +86,15 @@ TreeItem::TreeItem( QVector<QVariant> &data, TreeItem *parent) {
     _flag_highlight_error.push_back( false );
   }
   connect(this, SIGNAL( dataChanged( int ) ) , this, SLOT( clean_highlight_status( int ) ) );
+  connect(this, SIGNAL( dataChanged( int ) ) , this, SLOT( force_layout_change( int ) ) );
+
+}
+
+void TreeItem::force_layout_change( int column ){
+  if( parentModel ){
+    std::cout << "forcing layout change by var " << _variable_name << std::endl;
+    parentModel->force_layout_change();
+  }
 }
 
 void TreeItem::clean_highlight_status( int column ){
@@ -414,6 +424,11 @@ bool TreeItem::isItemCheckable( int column ) const {
 }
 
 bool TreeItem::insertChildren(TreeItem *item){
+  if( parentModel != nullptr ){
+    item->set_model( parentModel );
+    std::cout << "connect " << item->get_variable_name() << " to model " << std::endl;
+    connect(item, SIGNAL( dataChanged( int ) ) , parentModel, SLOT( set_model_modified() ) );
+  }
   item->set_parent(this);
   childItems.push_back(item);
   return true;
@@ -464,6 +479,9 @@ bool TreeItem::insertColumns(int position, int columns){
   }
   return true;
 }
+TreeModel* TreeItem::model(){
+    return parentModel;
+}
 
 TreeItem *TreeItem::parent(){
   return parentItem;
@@ -471,6 +489,11 @@ TreeItem *TreeItem::parent(){
 
 bool TreeItem::set_parent( TreeItem* parent ){
   parentItem = parent;
+  return true;
+}
+
+bool TreeItem::set_model( TreeModel* model ){
+  parentModel = model;
   return true;
 }
 

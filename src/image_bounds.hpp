@@ -132,6 +132,7 @@ class ImageBounds {
     ImageBounds();
 
     bool calculate_boundaries_from_full_image();
+    bool update_roi_images_from_rect();
     /** getters **/
     // flag getters
     bool get_flag_full_boundary_polygon(){ return _flag_full_boundary_polygon; }
@@ -187,6 +188,8 @@ class ImageBounds {
 
     bool set_full_boundary_polygon_margin_x_nm( double value );
     bool set_full_boundary_polygon_margin_y_nm( double value );
+
+    bool set_roi_boundary_rect( cv::Rect );
 
     bool set_base_image( BaseImage* base_image_ptr );
 

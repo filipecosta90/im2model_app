@@ -157,7 +157,7 @@ MainWindow::MainWindow( ApplicationLog::ApplicationLog* logger , QWidget *parent
       connect( _core_td_map, SIGNAL(TDMap_ended_simgrid( bool )), this, SLOT(update_tdmap_simgrid_ended( bool ) ) );
       connect( _core_td_map, SIGNAL(TDMap_no_simgrid( bool )), this, SLOT(update_tdmap_no_simgrid_ended( bool ) ) );
 
-
+      _reset_document_modified_flags();
       if( _flag_im2model_logger ){
         im2model_logger->logEvent( ApplicationLog::notification, "Finished initializing App." );
       }
@@ -414,8 +414,8 @@ void MainWindow::update_full_experimental_image(){
     // update tab 3
     this->ui->qgraphics_super_cell_edge_detection->setImage( full_image );
     this->ui->qgraphics_super_cell_edge_detection->enableRectangleSelection();
+    connect(ui->qgraphics_super_cell_edge_detection, SIGNAL(selectionRectangleChanged(QRect)), this, SLOT( update_tab3_exp_image_bounds_from_rectangle_selection(QRect)) );
     this->ui->qgraphics_super_cell_edge_detection->show();
-
     update_roi_experimental_image_frame();
   }
 }
@@ -459,6 +459,7 @@ bool MainWindow::_reset_document_modified_flags(){
     result |= tdmap_simulation_setup_model->_reset_model_modified();
     result |= tdmap_running_configuration_model->_reset_model_modified();
     result |= super_cell_setup_model->_reset_model_modified();
+    std::cout << " _reset_document_modified_flags REESULT "  << std::boolalpha << result << std::endl;
   }
   return result;
 }
@@ -900,9 +901,13 @@ void MainWindow::writeSettings(){
   settings.setValue("wavimg",_dr_probe_wavimg_bin);
   settings.endGroup();
   settings.setValue("geometry.main_window", saveGeometry() );
+  settings.setValue("windowState", saveState() );
   settings.setValue("geometry.tdmap_splitter", ui->td_map_splitter->saveGeometry() );
   settings.setValue("state.tdmap_splitter", ui->td_map_splitter->saveState() );
-  settings.setValue("windowState", saveState() );
+  settings.setValue("geometry.super_cell_splitter", ui->super_cell_splitter->saveGeometry() );
+  settings.setValue("state.super_cell_splitter", ui->super_cell_splitter->saveState() );
+  settings.setValue("geometry.refinement_splitter", ui->refinement_splitter->saveGeometry() );
+  settings.setValue("state.refinement_splitter", ui->refinement_splitter->saveState() );
 }
 
 bool MainWindow::maybeSave(){
@@ -1056,6 +1061,7 @@ void MainWindow::loadFile(const QString &fileName){
 
   if( result ){
     ui->statusBar->showMessage(tr("Project loaded"), 2000);
+    _reset_document_modified_flags();
   }
   else{
     if( old_version ){
@@ -1126,6 +1132,16 @@ void MainWindow::update_exp_image_roi_from_rectangle_selection( QRect rectangle_
   project_setup_image_fields_model->setData( experimental_roi_center_y, 1 , QVariant( center_y ), Qt::EditRole );
   project_setup_image_fields_model->setData( experimental_roi_dimensions_width_px, 1 , QVariant( dim_px_x ), Qt::EditRole );
   project_setup_image_fields_model->setData( experimental_roi_dimensions_height_px, 1 , QVariant( dim_px_y ), Qt::EditRole );
+}
+
+
+void MainWindow::update_tab3_exp_image_bounds_from_rectangle_selection( QRect rectangle_selection ){
+  cv::Rect cv_rect ( rectangle_selection.x(), rectangle_selection.y(), rectangle_selection.width(), rectangle_selection.height() );
+  const bool result = _core_td_map->set_exp_image_bounds_roi_boundary_rect( cv_rect );
+  if( result ){
+    emit super_cell_target_region_changed();
+  }
+
 }
 
 void MainWindow::create_box_options(){
@@ -2270,7 +2286,7 @@ void MainWindow::create_box_options(){
   }
 
   /*************************
-   * CRYSTALLOGRAPLY
+   * SUPER-CELL
    *************************/
   super_cell_setup_root = new TreeItem ( common_header );
   super_cell_setup_root->set_variable_name( "super_cell_setup_root" );
@@ -2353,7 +2369,7 @@ void MainWindow::create_box_options(){
   // Super-Cell Dimensions
   ////////////////
   QVector<QVariant> box5_option_2 = {"Super-Cell Dimensions",""};
-  super_cell_dimensions = new TreeItem ( box3_option_4 );
+  super_cell_dimensions = new TreeItem ( box5_option_2 );
   super_cell_dimensions->set_variable_name( "super_cell_dimensions" );
   super_cell_setup_root->insertChildren( super_cell_dimensions );
 

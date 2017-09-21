@@ -5,6 +5,7 @@
 
 TreeModel::TreeModel(TreeItem *root,  QObject *parent) : QAbstractItemModel(parent) {
   rootItem = root;
+  rootItem->set_model(this);
   // to know if data changed in model
   connect(this, SIGNAL( dataChanged(QModelIndex,QModelIndex) ) , this, SLOT( set_model_modified() ) );
 
@@ -12,6 +13,11 @@ TreeModel::TreeModel(TreeItem *root,  QObject *parent) : QAbstractItemModel(pare
 
 TreeModel::~TreeModel(){
   delete rootItem;
+}
+
+bool TreeModel::force_layout_change(){
+   emit layoutChanged();
+    return true;
 }
 
 bool TreeModel::enable_highlight_error( std::string varname,  int _item_missing_col ){
@@ -204,6 +210,11 @@ bool TreeModel::setData( TreeItem *item, int column, const QVariant &value, int 
     return result;
 }
 
+void TreeModel::load_data_from_getter_double( TreeItem *item ){
+    item->load_data_from_getter_double();
+      emit layoutChanged();
+    }
+
 
 bool TreeModel::clearData(const QModelIndex &index){
   bool result = false;
@@ -237,5 +248,6 @@ bool TreeModel::_reset_model_modified(){
 }
 
 void TreeModel::set_model_modified(){
+  std::cout << "##### model was modified " << std::endl;
   _flag_model_modified = true;
 }

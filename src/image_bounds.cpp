@@ -151,14 +151,106 @@ bool ImageBounds::calculate_boundaries_from_full_image(){
       hull1.push_back( full_boundary_polygon_w_margin );
       drawContours( temp, hull1, 0, color, 3, 8, std::vector<cv::Vec4i>(), 0, cv::Point() );
 
-      cv::Mat rectangle_cropped_experimental_image;
-
       roi_boundary_rect = boundingRect(contours_merged);
       _flag_roi_boundary_rect = true;
       roi_boundary_rect_w_margin = boundingRect( full_boundary_polygon_w_margin );
       _flag_roi_boundary_rect_w_margin = true;
 
       experimental_image_contours = temp.clone();
+
+      update_roi_images_from_rect();
+
+      update_roi_boundary_polygon_from_full_boundaries();
+      result = true;
+    }
+    else{
+      if( _flag_logger ){
+        std::stringstream message;
+        message << "The required vars for calculate_boundaries_from_full_image() are not setted up.";
+        BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::error , message.str() );
+      }
+      print_var_state();
+    }
+  }
+  else{
+    if( _flag_logger ){
+      std::stringstream message;
+      message << "The required Class POINTERS for calculate_boundaries_from_full_image() are not setted up.";
+      BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::error , message.str() );
+    }
+    print_var_state();
+  }
+  return result;
+}
+
+bool ImageBounds::set_roi_boundary_rect( cv::Rect boundary_rect ){
+  bool result = false;
+  if( _flag_base_image ){
+    if(
+        // BaseImage vars
+        base_image->get_flag_full_image() &&
+        base_image->get_flag_sampling_rate()
+      ){
+      const double sampling_rate_x_nm_per_pixel = base_image->get_sampling_rate_x_nm_per_pixel();
+      const double sampling_rate_y_nm_per_pixel = base_image->get_sampling_rate_y_nm_per_pixel();
+      const cv::Mat full_image = base_image->get_full_image();
+
+      full_boundary_polygon_margin_x_px = full_boundary_polygon_margin_x_nm / sampling_rate_x_nm_per_pixel;
+      full_boundary_polygon_margin_y_px = full_boundary_polygon_margin_y_nm / sampling_rate_y_nm_per_pixel;
+
+      roi_boundary_rect = boundary_rect;
+      _flag_roi_boundary_rect = true;
+      roi_boundary_rect_w_margin = roi_boundary_rect;
+      roi_boundary_rect_w_margin.x -= full_boundary_polygon_margin_x_px;
+      roi_boundary_rect_w_margin.width += (2*full_boundary_polygon_margin_x_px);
+      roi_boundary_rect_w_margin.y -= full_boundary_polygon_margin_y_px;
+      roi_boundary_rect_w_margin.height += (2*full_boundary_polygon_margin_y_px);
+
+      _flag_roi_boundary_rect_w_margin = true;
+      result = update_roi_images_from_rect();
+      std::cout << "set_roi_boundary_rect RESULT "  << std::boolalpha << result << std::endl;
+    }
+    else{
+      if( _flag_logger ){
+        std::stringstream message;
+        message << "The required vars for set_roi_boundary_rect() are not setted up.";
+        BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::error , message.str() );
+      }
+      print_var_state();
+    }
+  }
+  else{
+    if( _flag_logger ){
+      std::stringstream message;
+      message << "The required Class POINTERS for set_roi_boundary_rect() are not setted up.";
+      BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::error , message.str() );
+    }
+    print_var_state();
+  }
+  return result;
+}
+
+bool ImageBounds::update_roi_images_from_rect(){
+  bool result = false;
+  if( _flag_base_image ){
+    if(
+        // BaseImage vars
+        base_image->get_flag_full_image() &&
+        base_image->get_flag_sampling_rate() &&
+
+        _flag_roi_boundary_rect &&
+        _flag_roi_boundary_rect_w_margin
+      ){
+
+        const double sampling_rate_x_nm_per_pixel = base_image->get_sampling_rate_x_nm_per_pixel();
+        const double sampling_rate_y_nm_per_pixel = base_image->get_sampling_rate_y_nm_per_pixel();
+        const cv::Mat full_image = base_image->get_full_image();
+
+      roi_left_padding_px = - roi_boundary_rect.x;
+      roi_top_padding_px = - roi_boundary_rect.y;
+      roi_left_padding_px_w_margin = - roi_boundary_rect_w_margin.x;
+      roi_top_padding_px_w_margin = - roi_boundary_rect_w_margin.y;
+
       roi_boundary_image = full_image( roi_boundary_rect ).clone();
       _flag_roi_boundary_image = true;
       roi_boundary_image_w_margin = full_image( roi_boundary_rect_w_margin ).clone();
@@ -171,14 +263,14 @@ bool ImageBounds::calculate_boundaries_from_full_image(){
       boundary_polygon_length_y_nm = boundary_polygon_length_y_px * sampling_rate_y_nm_per_pixel;
       _flag_boundary_polygon_length_y_nm = true;
 
-      update_roi_boundary_polygon_from_full_boundaries();
       result = true;
+
     }
     else{
       if( _flag_logger ){
         std::stringstream message;
-        message << "The required vars for calculate_boundaries_from_full_image() are not setted up.";
-       BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::error , message.str() );
+        message << "The required vars for update_roi_images_from_rect() are not setted up.";
+        BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::error , message.str() );
       }
       print_var_state();
     }
@@ -186,8 +278,8 @@ bool ImageBounds::calculate_boundaries_from_full_image(){
   else{
     if( _flag_logger ){
       std::stringstream message;
-      message << "The required Class POINTERS for calculate_boundaries_from_full_image() are not setted up.";
-     BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::error , message.str() );
+      message << "The required Class POINTERS for update_roi_images_from_rect() are not setted up.";
+      BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::error , message.str() );
     }
     print_var_state();
   }
@@ -204,11 +296,6 @@ bool ImageBounds::update_roi_boundary_polygon_from_full_boundaries(){
     //clean the roi boundaries vec
     roi_boundary_polygon.clear();
     roi_boundary_polygon_w_margin.clear();
-
-    roi_left_padding_px = - roi_boundary_rect.x;
-    roi_top_padding_px = - roi_boundary_rect.y;
-    roi_left_padding_px_w_margin = - roi_boundary_rect_w_margin.x;
-    roi_top_padding_px_w_margin = - roi_boundary_rect_w_margin.y;
 
     boost::function<cv::Point2i(cv::Point2i)> functor ( boost::bind(&ImageBounds::op_Point2i_padding, this , _1, roi_left_padding_px, roi_top_padding_px ) );
     boost::function<cv::Point2i(cv::Point2i)> functor_w_margin ( boost::bind(&ImageBounds::op_Point2i_padding, this , _1, roi_left_padding_px_w_margin, roi_top_padding_px_w_margin ) );
@@ -231,7 +318,7 @@ bool ImageBounds::update_roi_boundary_polygon_from_full_boundaries(){
     if( _flag_logger ){
       std::stringstream message;
       message << "The required vars for update_roi_boundary_polygon_from_full_boundaries() are not setted up.";
-     BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::error , message.str() );
+      BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::error , message.str() );
     }
     print_var_state();
   }
@@ -253,7 +340,7 @@ bool ImageBounds::generate_boundary_polygon_w_margin_nm(){
         base_image->get_flag_full_image() &&
         base_image->get_flag_sampling_rate()
       ){
-        roi_boundary_polygon_w_margin_nm.clear();
+      roi_boundary_polygon_w_margin_nm.clear();
       const double pixel_size_nm_x = base_image->get_sampling_rate_x_nm_per_pixel();
       const double pixel_size_nm_y = -1.0f * base_image->get_sampling_rate_y_nm_per_pixel();
       // allocate space
@@ -270,7 +357,7 @@ bool ImageBounds::generate_boundary_polygon_w_margin_nm(){
       if( _flag_logger ){
         std::stringstream message;
         message << "The required vars for generate_boundary_polygon_w_margin_nm() are not setted up.";
-       BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::error , message.str() );
+        BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::error , message.str() );
       }
       print_var_state();
     }
@@ -279,7 +366,7 @@ bool ImageBounds::generate_boundary_polygon_w_margin_nm(){
     if( _flag_logger ){
       std::stringstream message;
       message << "The required Class POINTERS for generate_boundary_polygon_w_margin_nm() are not setted up.";
-     BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::error , message.str() );
+      BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::error , message.str() );
     }
     print_var_state();
   }
@@ -322,7 +409,7 @@ cv::Point2i ImageBounds::op_Point2i_padding (cv::Point2d point, const int padd_x
 bool ImageBounds::set_application_logger( ApplicationLog::ApplicationLog* app_logger ){
   logger = app_logger;
   _flag_logger = true;
- BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification, "Application logger setted for ImageBounds class." );
+  BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification, "Application logger setted for ImageBounds class." );
   return true;
 }
 
@@ -330,7 +417,7 @@ void ImageBounds::print_var_state(){
   if( _flag_logger ){
     std::stringstream message;
     output( message );
-   BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification , message.str() );
+    BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification , message.str() );
   }
 }
 
