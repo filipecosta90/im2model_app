@@ -49,6 +49,7 @@ bool BaseImage::calculate_roi_b_size_from_n_rows_and_sampling_rate(){
     _flag_roi_nm_size_rows_b = true;
     result = true;
   }
+  return result;
 }
 
 bool BaseImage::calculate_roi_a_size_from_n_cols_and_sampling_rate(){
@@ -58,6 +59,7 @@ bool BaseImage::calculate_roi_a_size_from_n_cols_and_sampling_rate(){
       _flag_roi_nm_size_cols_a = true;
       result = true;
     }
+  return result;
 }
 
 // calculate methods

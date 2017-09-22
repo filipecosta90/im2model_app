@@ -282,8 +282,8 @@ void UnitCellViewerWindow::update_m_cameraEntity_frustum_to_cam_pos(  const int 
 
 void UnitCellViewerWindow::update_m_cameraEntity_frustum( const QVector3D &pos  ){
   if( _m_cameraEntity ){
-    const double near = 0.1f;
-    const double far = 1000.0f;
+    const double near_v = 0.1f;
+    const double far_v = 1000.0f;
     const double aspect_ratio = _m_cameraEntity->aspectRatio();
 
     const float size = std::abs( std::tan( _m_cameraEntity->fieldOfView() )* pos.length() );
@@ -292,13 +292,13 @@ void UnitCellViewerWindow::update_m_cameraEntity_frustum( const QVector3D &pos  
     const double bottom = -size;
     const double top = size;
 
-    _m_cameraEntity->setNearPlane( near );
-    _m_cameraEntity->setFarPlane( far );
+    _m_cameraEntity->setNearPlane( near_v );
+    _m_cameraEntity->setFarPlane( far_v );
     _m_cameraEntity->setBottom( bottom );
     _m_cameraEntity->setLeft( left );
     _m_cameraEntity->setRight( right );
     _m_cameraEntity->setTop( top );
-    _m_cameraEntity->lens()->setOrthographicProjection( left, right, bottom, top, near, far );
+    _m_cameraEntity->lens()->setOrthographicProjection( left, right, bottom, top, near_v, far_v );
   }
 }
 
