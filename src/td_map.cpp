@@ -45,7 +45,6 @@ TDMap::TDMap(
   exp_image_bounds = new ImageBounds();
   exp_image_bounds->set_base_image( exp_image_properties );
   tdmap_full_sim_super_cell->set_image_bounds( exp_image_bounds );
-  tdmap_full_sim_super_cell->set_calculate_ab_cell_limits_from_image_bounds( true );
   final_full_sim_super_cell->set_image_bounds( exp_image_bounds );
 
   sim_crystal_properties = new BaseCrystal();
@@ -2056,6 +2055,8 @@ bool TDMap::calculate_exp_image_boundaries_from_full_image(){
   bool result = false;
   result = exp_image_bounds->calculate_boundaries_from_full_image();
   if( result ){
+    // only if the boundary calculation was sucessfull we should set this true
+    tdmap_full_sim_super_cell->set_calculate_ab_cell_limits_from_image_bounds( true );
     update_full_crysta_a_b_sizes();
   }
   return result;
