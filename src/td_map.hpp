@@ -147,6 +147,11 @@ class TDMap  : public QObject {
     bool test_clean_run_env();
     bool calculate_exp_image_boundaries_from_full_image();
 
+    bool set_full_sim_super_cell_length_a_nm( double full_crystal_a_size );
+    bool set_full_sim_super_cell_length_b_nm( double full_crystal_b_size );
+    bool set_full_sim_super_cell_length_c_nm( double full_crystal_c_size );
+
+
     // class flag getters
     bool get_flag_project_dir_path(){ return _flag_project_dir_path; };
     bool get_flag_refinement_definition_method(){ return _flag_refinement_definition_method; }

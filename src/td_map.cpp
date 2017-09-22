@@ -2062,6 +2062,30 @@ bool TDMap::calculate_exp_image_boundaries_from_full_image(){
   return result;
 }
 
+bool TDMap::set_full_sim_super_cell_length_a_nm( double full_crystal_a_size ){
+  const bool result = tdmap_full_sim_super_cell->set_length_a_Nanometers( full_crystal_a_size );
+  if( result ){
+    emit super_cell_dimensions_a_changed();
+  }
+return result;
+}
+
+bool TDMap::set_full_sim_super_cell_length_b_nm( double full_crystal_b_size ){
+  const bool result = tdmap_full_sim_super_cell->set_length_b_Nanometers( full_crystal_b_size );
+  if( result ){
+    emit super_cell_dimensions_b_changed();
+  }
+return result;
+}
+
+bool TDMap::set_full_sim_super_cell_length_c_nm( double full_crystal_c_size ){
+  const bool result = tdmap_full_sim_super_cell->set_length_c_Nanometers( full_crystal_c_size );
+  if( result ){
+    emit super_cell_dimensions_c_changed();
+  }
+return result;
+}
+
 bool TDMap::update_full_crysta_a_b_sizes(){
     bool result = false;
     if(

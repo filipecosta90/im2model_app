@@ -2373,12 +2373,17 @@ void MainWindow::create_box_options(){
   super_cell_dimensions->set_variable_name( "super_cell_dimensions" );
   super_cell_setup_root->insertChildren( super_cell_dimensions );
 
+
+
+
   ////////////////
   // Super-Cell Dimensions -- a
   ////////////////
   QVector<QVariant> box5_option_2_1_data = {"a (nm)",""};
+  boost::function<bool(double)> box5_option_2_1_setter ( boost::bind( &TDMap::set_full_sim_super_cell_length_a_nm, _core_td_map, _1 ) );
+  QVector<bool> box5_option_2_1_edit = {false,false};
   boost::function<double(void)> box5_option_2_1_getter ( boost::bind( &TDMap::get_super_cell_dimensions_a,_core_td_map ) );
-  super_cell_dimensions_a = new TreeItem ( box5_option_2_1_data );
+  super_cell_dimensions_a = new TreeItem ( box5_option_2_1_data, box5_option_2_1_setter,  box5_option_2_1_edit);
   super_cell_dimensions_a->set_variable_name( "super_cell_dimensions_a" );
   super_cell_dimensions_a->set_fp_data_getter_double_vec( 1, box5_option_2_1_getter );
   connect( _core_td_map, SIGNAL( super_cell_dimensions_a_changed( )), super_cell_dimensions_a, SLOT( load_data_from_getter_double() ) );
@@ -2388,20 +2393,24 @@ void MainWindow::create_box_options(){
   // Super-Cell Dimensions -- b
   ////////////////
   QVector<QVariant> box5_option_2_2_data = {"b (nm)",""};
+  boost::function<bool(double)> box5_option_2_2_setter ( boost::bind( &TDMap::set_full_sim_super_cell_length_b_nm, _core_td_map, _1 ) );
+  QVector<bool> box5_option_2_2_edit = {false,false};
+
   boost::function<double(void)> box5_option_2_2_getter ( boost::bind( &TDMap::get_super_cell_dimensions_b,_core_td_map ) );
-  super_cell_dimensions_b = new TreeItem ( box5_option_2_2_data );
+  super_cell_dimensions_b = new TreeItem ( box5_option_2_2_data , box5_option_2_2_setter, box5_option_2_2_edit );
   super_cell_dimensions_b->set_variable_name( "super_cell_dimensions_b" );
   super_cell_dimensions_b->set_fp_data_getter_double_vec( 1, box5_option_2_2_getter );
   connect( _core_td_map, SIGNAL( super_cell_dimensions_b_changed( )), super_cell_dimensions_b, SLOT( load_data_from_getter_double() ) );
   super_cell_dimensions->insertChildren( super_cell_dimensions_b );
 
-
   ////////////////
   // Super-Cell Dimensions -- c
   ////////////////
   QVector<QVariant> box5_option_2_3_data = {"c (nm)",""};
+  boost::function<bool(double)> box5_option_2_3_setter ( boost::bind( &TDMap::set_full_sim_super_cell_length_c_nm, _core_td_map, _1 ) );
+  QVector<bool> box5_option_2_3_edit = {false,false};
   boost::function<double(void)> box5_option_2_3_getter ( boost::bind( &TDMap::get_super_cell_dimensions_c,_core_td_map ) );
-  super_cell_dimensions_c = new TreeItem ( box5_option_2_3_data );
+  super_cell_dimensions_c = new TreeItem ( box5_option_2_3_data , box5_option_2_3_setter, box5_option_2_3_edit );
   super_cell_dimensions_c->set_variable_name( "super_cell_dimensions_c" );
   super_cell_dimensions_c->set_fp_data_getter_double_vec( 1, box5_option_2_3_getter );
   connect( _core_td_map, SIGNAL( super_cell_dimensions_c_changed( )), super_cell_dimensions_c, SLOT( load_data_from_getter_double() ) );
