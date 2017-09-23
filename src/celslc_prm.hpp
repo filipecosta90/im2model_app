@@ -62,6 +62,10 @@ class CELSLC_prm : public BaseBin {
     bool auto_equidistant_slices_switch = true;
     bool auto_non_equidistant_slices_switch = false;
 
+    // input ssc
+    std::map<int, boost::process::child> ssc_queue;
+    boost::process::group ssc_group;
+
     bool single_slice_calculation_prepare_bin_runned_switch = false;
     bool single_slice_calculation_nz_switch = false;
     bool single_slice_calculation_enabled_switch = false;
@@ -73,10 +77,11 @@ class CELSLC_prm : public BaseBin {
     void cleanup_thread();
     bool prepare_bin_ssc();
     bool prepare_nz_simulated_partitions_from_ssc_prm();
-
+    bool check_child_exit_code( int _child_exit_code );
   public:
 
     virtual std::ostream& create_bin_args(std::ostream& stream) const;
+
     /** getters **/
     // flag getters
     bool get_flag_logger(){ return _flag_logger; }
@@ -102,9 +107,7 @@ class CELSLC_prm : public BaseBin {
 
     bool cleanup_bin();
 
-    bool call_bin();
-
-    bool call_boost_bin();
+    bool call_boost_bin( bool enable_ssc = false );
 
     bool clean_for_re_run();
 

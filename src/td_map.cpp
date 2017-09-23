@@ -364,7 +364,7 @@ bool TDMap::run_tdmap(){
           const bool cel_generation = tdmap_roi_sim_super_cell->generate_super_cell_file();
           tdmap_roi_sim_super_cell->generate_xyz_file();
           if( cel_generation ){
-            _flag_runned_tdmap_celslc = _tdmap_celslc_parameters->call_boost_bin();
+            _flag_runned_tdmap_celslc = _tdmap_celslc_parameters->call_boost_bin( );
           }
         }
         emit TDMap_ended_celslc( _flag_runned_tdmap_celslc );

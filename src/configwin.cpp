@@ -2416,7 +2416,6 @@ void MainWindow::create_box_options(){
   connect( _core_td_map, SIGNAL( super_cell_dimensions_c_changed( )), super_cell_dimensions_c, SLOT( load_data_from_getter_double() ) );
   super_cell_dimensions->insertChildren( super_cell_dimensions_c );
 
-
   ui->qtree_view_supercell_model_edge_detection_setup->setModel( super_cell_setup_model );
   ui->qtree_view_supercell_model_edge_detection_setup->setItemDelegate( _load_file_delegate );
   //start editing after one click
