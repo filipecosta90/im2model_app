@@ -80,7 +80,7 @@ class CELSLC_prm : public BaseBin {
     bool check_child_exit_code( int _child_exit_code );
   public:
 
-    virtual std::ostream& create_bin_args(std::ostream& stream) const;
+    virtual std::ostream& create_bin_args(std::ostream& stream, bool prepare_ssc = false ) const;
 
     /** getters **/
     // flag getters

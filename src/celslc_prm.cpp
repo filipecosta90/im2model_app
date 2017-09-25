@@ -200,7 +200,7 @@ bool CELSLC_prm::clean_for_re_run(){
   return result;
 }
 
-std::ostream& CELSLC_prm::create_bin_args(std::ostream& args_stream) const {
+std::ostream& CELSLC_prm::create_bin_args(std::ostream& args_stream, bool prepare_ssc ) const {
   if(
       _flag_sim_super_cell &&
       _flag_sim_crystal_properties &&
@@ -225,16 +225,26 @@ std::ostream& CELSLC_prm::create_bin_args(std::ostream& args_stream) const {
     args_stream << " -slc \"" << full_path.string() << "\"";
 
     // input nx string
-    if( sim_image_properties->get_flag_full_n_cols_width() ){
-      const int full_n_cols_width = sim_image_properties->get_full_n_cols_width();
-      args_stream << " -nx " << full_n_cols_width;
+    if( prepare_ssc ){
+      args_stream << " -nx " << "32";
+    }
+    else{
+      if( sim_image_properties->get_flag_full_n_cols_width() ){
+        const int full_n_cols_width = sim_image_properties->get_full_n_cols_width();
+        args_stream << " -nx " << full_n_cols_width;
+      }
     }
 
     // input ny string
+    if( prepare_ssc ){
+      args_stream << " -ny " << "32";
+    }
+    else{
     if( sim_image_properties->get_flag_full_n_rows_height() ){
       const int full_n_rows_height = sim_image_properties->get_full_n_rows_height();
       args_stream << " -ny " << full_n_rows_height;
     }
+  }
 
     // input ht
     if( sim_crystal_properties->get_flag_ht_accelaration_voltage_KV() ){
@@ -242,28 +252,26 @@ std::ostream& CELSLC_prm::create_bin_args(std::ostream& args_stream) const {
       args_stream << " -ht " << ht_accelaration_voltage;
     }
     if(
-        sim_super_cell->get_flag_cif_format() &&
+      //  sim_super_cell->get_flag_cif_format() &&
         sim_super_cell->get_flag_zone_axis() &&
         sim_super_cell->get_flag_upward_vector() &&
         sim_super_cell->get_flag_length()
       ){
       const bool _flag_cif = sim_super_cell->get_flag_cif_format();
       const double zone_axis_u = _flag_cif ? sim_super_cell->get_zone_axis_u() : 0.0f;
-      const double zone_axis_v = _flag_cif ? sim_super_cell->get_zone_axis_v() : 1.0f;
-      const double zone_axis_w = _flag_cif ? sim_super_cell->get_zone_axis_w() : 0.0f;
+      const double zone_axis_v = _flag_cif ? sim_super_cell->get_zone_axis_v() : 0.0f;
+      const double zone_axis_w = _flag_cif ? sim_super_cell->get_zone_axis_w() : 1.0f;
 
       const double upward_vector_u = _flag_cif ? sim_super_cell->get_upward_vector_u() : 0.0f;
-      const double upward_vector_v = _flag_cif ? sim_super_cell->get_upward_vector_v() : 0.0f;
-      const double upward_vector_w = _flag_cif ? sim_super_cell->get_upward_vector_w() : 1.0f;
+      const double upward_vector_v = _flag_cif ? sim_super_cell->get_upward_vector_v() : 1.0f;
+      const double upward_vector_w = _flag_cif ? sim_super_cell->get_upward_vector_w() : 0.0f;
 
       const double super_cell_size_a = sim_super_cell->get_length_a_Nanometers();
       const double super_cell_size_b = sim_super_cell->get_length_b_Nanometers();
       const double super_cell_size_c = sim_super_cell->get_length_c_Nanometers();
 
-      args_stream << " -prj " << (float)  upward_vector_u << "," << (float)  upward_vector_v << "," << (float) upward_vector_w << ","
-
-        << (float) zone_axis_u  << "," << (float) zone_axis_v << "," << (float) zone_axis_w << ","
-
+      args_stream << " -prj " << (float) zone_axis_u  << "," << (float) zone_axis_v << "," << (float) zone_axis_w << ","
+      << (float)  upward_vector_u << "," << (float)  upward_vector_v << "," << (float) upward_vector_w << ","
         << (float) super_cell_size_a << "," << (float) super_cell_size_b << "," << (float) super_cell_size_c;
     }
     /**
@@ -320,7 +328,12 @@ bool CELSLC_prm::call_boost_bin( bool enable_ssc ){
         _flag_base_bin_output_dir_path &&
         // BaseImage vars
         sim_image_properties->get_flag_full_n_rows_height() &&
-        sim_image_properties->get_flag_full_n_cols_width()
+        sim_image_properties->get_flag_full_n_cols_width() &&
+        sim_image_properties->get_flag_full_n_cols_width() //&&
+        // enable_ssc implies that nz is setted
+      //  ( ~a | b )
+      //  !p || q
+      //  sim_crystal_properties->get_nz_simulated_partitions() |
       )
     {
       std::stringstream args_stream;

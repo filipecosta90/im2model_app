@@ -31,8 +31,7 @@ void MC::MC_Driver::parse( const char * const filename ){
 }
 
 void MC::MC_Driver::parse( std::istream &stream ){
-  if( ! stream.good()  && stream.eof() )
-  {
+  if( ! stream.good()  && stream.eof() ){
     return;
   }
   //else
@@ -43,17 +42,14 @@ void MC::MC_Driver::parse( std::istream &stream ){
 void MC::MC_Driver::parse_helper( std::istream &stream ){
 
   delete(scanner);
-  try
-  {
+  try {
     scanner = new MC::MC_Scanner( &stream );
   }
-  catch( std::bad_alloc &ba )
-  {
+  catch( std::bad_alloc &ba ) {
     std::cerr << "Failed to allocate scanner: (" <<
       ba.what() << "), exiting!!\n";
     exit( EXIT_FAILURE );
   }
-
   delete(parser);
   try
   {
