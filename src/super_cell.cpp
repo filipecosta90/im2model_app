@@ -282,7 +282,7 @@ bool SuperCell::update_length_parameters_from_expand_factor(){
       BaseCell::set_length_a_Nanometers( super_cell_length_a_Nanometers );
       BaseCell::set_length_b_Nanometers( super_cell_length_b_Nanometers );
       BaseCell::set_length_c_Nanometers( super_cell_length_c_Nanometers );
-      const double super_cell_volume = ( expand_factor_a * expand_factor_b * expand_factor_c ) * unit_cell->get_volume();
+      const double super_cell_volume = ( expand_factor_a * expand_factor_b * expand_factor_c ) * unit_cell->get_volume_Nanometers();
       result = true;
     }
     else{

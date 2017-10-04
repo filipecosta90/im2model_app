@@ -135,7 +135,7 @@ bool UnitCell::populate_cell( std::map<std::string,std::string> non_looped_items
   if (it != non_looped_items.end()){
     const std::string item_value = it->second;
     const double d_item_value = convert_to_double( item_value );
-    set_cell_volume( d_item_value );
+    set_cell_volume_Angstroms( d_item_value );
   }
   else{
     parse_error = true;

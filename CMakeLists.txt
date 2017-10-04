@@ -1,12 +1,17 @@
 ﻿# the minimum version of CMake required
 cmake_minimum_required(VERSION 3.6.2)
 
-set (CMAKE_CXX_COMPILER "g++" )
-set (CMAKE_C_COMPILER "gcc" )
-set (CMAKE_CXX_STANDARD 14)
-
-set ( VERSION_IM2MODEL "0.2.3" )
+set ( VERSION_IM2MODEL "0.2.5" )
 project( Im2Model VERSION ${VERSION_IM2MODEL} LANGUAGES CXX C )
+
+cmake_policy(VERSION 2.8.11)
+if (${CMAKE_VERSION} VERSION_GREATER 3.0.0)
+ cmake_policy(SET CMP0042 OLD) # OSX RPATH handling
+endif()
+#set (CMAKE_CXX_COMPILER "g++-7" )
+#set (CMAKE_C_COMPILER "gcc-7" )
+set (CMAKE_CXX_STANDARD 11)
+set(CXX_STANDARD_REQUIRED ON)
 
 # Tell CMake to run moc when necessary:
   set(CMAKE_AUTOMOC ON)
@@ -326,6 +331,10 @@ else(build_cli)
     message("META FILES TO INCLUDE: ${META_FILES_TO_INCLUDE}")
     message(" OS BUNDLE: ${OS_BUNDLE}")
 
+
+    #Include Chemfiles dir
+    include_directories(externals/chemfiles)
+
     # compile
     add_executable( ${PROJECT_NAME}
       ${OS_BUNDLE}
@@ -372,12 +381,11 @@ else(build_cli)
     fix_win_compiler()
 endif(build_cli)
 
-
 # Creates app.exe with the listed sources (main.cxx)
 # Adds sources to the Solution Explorer
 
 # Properties->Linker->Input->Additional Dependencies
-target_link_libraries( ${PROJECT_NAME} rapidjson ${OpenCV_LIBS} ${Boost_LIBRARIES} ${HDF5_CXX_LIBRARIES} )
+target_link_libraries( ${PROJECT_NAME} rapidjson ${OpenCV_LIBS} ${Boost_LIBRARIES} ${HDF5_CXX_LIBRARIES} chemfiles )
 
 # Creates a folder "executables" and adds target
 # project (app.vcproj) under it

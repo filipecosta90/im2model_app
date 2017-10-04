@@ -96,6 +96,8 @@
 
 #include "vis/inputcontrols/qtrackballcameracontroller.h"
 
+#include "chemfiles.hpp"
+
 namespace Ui {
   class MainWindow;
 }

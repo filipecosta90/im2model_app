@@ -54,133 +54,16 @@
 
 class BaseCell : public QObject {
   Q_OBJECT
-  private:
-    void update_length_flag();
-
-    /* Loggers */
-    ApplicationLog::ApplicationLog* logger = nullptr;
-    bool _flag_logger = false;
-
-  protected:
-    // Specifies the input super-cell file containing the atomic structure data in CIF file format.
-    std::string cif_path;
-    bool _flag_cif_path = false;
-    bool _flag_cif_format = false;
-
-    std::string cel_filename;
-    std::string cel_path;
-    bool _flag_cel_filename = false;
-    bool _flag_cel_path = false;
-    bool _flag_cel_format = false;
-
-    std::string xyz_filename;
-    bool _flag_xyz_filename = false;
-    std::string xyz_path;
-    bool _flag_xyz_path = false;
-    bool _flag_xyz_format = false;
-
-    double length_a_Angstroms = 0.0f;
-    double length_b_Angstroms = 0.0f;
-    double length_c_Angstroms = 0.0f;
-    double length_a_Nanometers = 0.0f;
-    double length_b_Nanometers = 0.0f;
-    double length_c_Nanometers = 0.0f;
-    bool _flag_length_a = false;
-    bool _flag_length_b = false;
-    bool _flag_length_c = false;
-    bool _flag_length = false;
-
-    double cell_volume = 0.0f;
-
-    double angle_alpha = 0.0f;
-    double angle_beta = 0.0f;
-    double angle_gamma = 0.0f;
-
-    bool _flag_angle_alpha = false;
-    bool _flag_angle_beta = false;
-    bool _flag_angle_gamma = false;
-
-    /** reciprocal-lattice (Miller) indices  **/
-    cv::Point3d vector_t = cv::Point3d( 0.0f, 0.0f, 0.0f );
-
-    /** Upward vector **/
-    // projected z-axis:
-    cv::Point3d upward_vector = cv::Point3d( 0.0f, 0.0f, 0.0f );
-    double upward_vector_u = 0.0f;
-    double upward_vector_v = 0.0f;
-    double upward_vector_w = 0.0f;
-    bool _flag_upward_vector_u = false;
-    bool _flag_upward_vector_v = false;
-    bool _flag_upward_vector_w = false;
-    bool _flag_upward_vector = false;
-
-    /** Zone Axis / Lattice vector **/
-    // projected y-axis
-    cv::Point3d  zone_axis = cv::Point3d( 0.0f, 0.0f, 0.0f );
-    double zone_axis_u = 0.0f;
-    double zone_axis_v = 0.0f;
-    double zone_axis_w = 0.0f;
-    bool _flag_zone_axis_u = false;
-    bool _flag_zone_axis_v = false;
-    bool _flag_zone_axis_w = false;
-    bool _flag_zone_axis = false;
-
-    std::vector< std::vector<cv::Point3d> > atom_positions;
-    std::vector<std::string> atom_symbols;
-    bool _flag_atom_positions = false;
-    std::vector<double> atom_debye_waller_factors;
-    std::vector<cv::Vec4d> atom_cpk_rgba_colors;
-    std::vector<double> atom_occupancies;
-    std::vector<double> atom_empirical_radiis;
-    std::vector<Atom> atoms;
-
-    /** .cel **/
-    std::vector< std::vector<cv::Point3d> > atom_fractional_cell_coordinates;
-    bool _flag_atom_fractional_cell_coordinates = false;
-
-    double fractional_norm_a_atom_pos = 0.0f;
-    double fractional_norm_b_atom_pos = 0.0f;
-    double fractional_norm_c_atom_pos = 0.0f;
-    bool _flag_fractional_norm = false;
-
-    // this margin is used to generate .cel files
-    double cel_margin_Nanometers = 0.0f;
-    double cel_margin_Angstroms = 0.0f;
-    bool _flag_cel_margin = false;
-
-    double ab_margin = 0.0f;
-    int cel_margin_a_px = 0.0f;
-    int cel_margin_b_px = 0.0f;
-
-    int cel_nx_px = 0;
-    int cel_ny_px = 0;
-
-    // used in the simulated super-cell. this is calculated based on _cel_nXY_px - 2 * _cel_margin_AB_px
-    int cel_wout_margin_nx_px;
-    int cel_wout_margin_ny_px;
-
-    cv::Rect ignore_cel_margin_rectangle;
-
-    /** Orientation **/
-    cv::Mat orientation_matrix;
-    bool _flag_orientation_matrix = true;
-    cv::Mat3d inverse_orientation_matrix;
-    bool _flag_inverse_orientation_matrix = false;
-
-    int min_width_px = 0;
-    int min_height_px = 0;
-    int left_padding_w_margin_px = 0;
-    int top_padding_w_margin_px = 0;
-    int left_padding_px = 0;
-    int top_padding_px = 0;
-
-    int width_px = 0;
-    int height_px = 0;
-
-    /** Chem Database **/
-    Chem_Database chem_database;
-
   public:
+
+    /// Possible shapes for the unit cell
+    enum CellShape {
+      /// Orthorhombic cell, with the three angles equals to 90°
+      ORTHORHOMBIC = 0,
+      /// Triclinic cell, with any values for the angles.
+      TRICLINIC = 1
+    };
+
     BaseCell();
 
     //others
@@ -200,7 +83,8 @@ class BaseCell : public QObject {
     bool set_angle_alpha( double alpha );
     bool set_angle_beta( double beta );
     bool set_angle_gamma( double gamma );
-    bool set_cell_volume( double volume );
+    bool set_cell_volume_Angstroms( double volume );
+    bool set_cell_volume_Nanometers( double volume );
     bool set_cel_margin_nm( double margin );
     bool set_zone_axis( cv::Point3d uvw );
     bool set_upward_vector( cv::Point3d hkl );
@@ -220,8 +104,8 @@ class BaseCell : public QObject {
     double get_angle_alpha(){ return angle_alpha; }
     double get_angle_beta(){ return angle_beta; }
     double get_angle_gamma(){ return angle_gamma; }
-    double get_volume(){ return cell_volume; }
-
+    double get_volume_Angstroms(){ return cell_volume_Angstroms; }
+    double get_volume_Nanometers(){ return cell_volume_Nanometers; }
 
     /** reciprocal-lattice (Miller) indices  **/
     bool get_flag_length_a(){ return _flag_length_a; }
@@ -309,6 +193,140 @@ signals:
     void orientation_matrix_changed();
     void upward_vector_changed();
     void zone_axis_vector_changed();
+
+  private:
+    void update_length_flag();
+
+    /* Loggers */
+    ApplicationLog::ApplicationLog* logger = nullptr;
+    bool _flag_logger = false;
+
+  protected:
+    // Specifies the input super-cell file containing the atomic structure data in CIF file format.
+    std::string cif_path;
+    bool _flag_cif_path = false;
+    bool _flag_cif_format = false;
+
+    std::string cel_filename;
+    std::string cel_path;
+    bool _flag_cel_filename = false;
+    bool _flag_cel_path = false;
+    bool _flag_cel_format = false;
+
+    std::string xyz_filename;
+    bool _flag_xyz_filename = false;
+    std::string xyz_path;
+    bool _flag_xyz_path = false;
+    bool _flag_xyz_format = false;
+
+    double length_a_Angstroms = 0.0f;
+    double length_b_Angstroms = 0.0f;
+    double length_c_Angstroms = 0.0f;
+    double length_a_Nanometers = 0.0f;
+    double length_b_Nanometers = 0.0f;
+    double length_c_Nanometers = 0.0f;
+    bool _flag_length_a = false;
+    bool _flag_length_b = false;
+    bool _flag_length_c = false;
+    bool _flag_length = false;
+
+    double cell_volume_Angstroms = 0.0f;
+    double cell_volume_Nanometers = 0.0f;
+    bool _flag_cell_volume =false;
+
+    double angle_alpha = 0.0f;
+    double angle_beta = 0.0f;
+    double angle_gamma = 0.0f;
+
+    bool _flag_angle_alpha = false;
+    bool _flag_angle_beta = false;
+    bool _flag_angle_gamma = false;
+
+    /// Cell type
+    CellShape cell_shape;
+
+    /** reciprocal-lattice (Miller) indices  **/
+    cv::Point3d vector_t = cv::Point3d( 0.0f, 0.0f, 0.0f );
+
+    /** Upward vector **/
+    // projected z-axis:
+    cv::Point3d upward_vector = cv::Point3d( 0.0f, 0.0f, 0.0f );
+    double upward_vector_u = 0.0f;
+    double upward_vector_v = 0.0f;
+    double upward_vector_w = 0.0f;
+    bool _flag_upward_vector_u = false;
+    bool _flag_upward_vector_v = false;
+    bool _flag_upward_vector_w = false;
+    bool _flag_upward_vector = false;
+
+    /** Zone Axis / Lattice vector **/
+    // projected y-axis
+    cv::Point3d  zone_axis = cv::Point3d( 0.0f, 0.0f, 0.0f );
+    double zone_axis_u = 0.0f;
+    double zone_axis_v = 0.0f;
+    double zone_axis_w = 0.0f;
+    bool _flag_zone_axis_u = false;
+    bool _flag_zone_axis_v = false;
+    bool _flag_zone_axis_w = false;
+    bool _flag_zone_axis = false;
+
+    std::vector< std::vector<cv::Point3d> > atom_positions;
+    std::vector<std::string> atom_symbols;
+    bool _flag_atom_positions = false;
+    std::vector<double> atom_debye_waller_factors;
+    std::vector<cv::Vec4d> atom_cpk_rgba_colors;
+    std::vector<double> atom_occupancies;
+    std::vector<double> atom_empirical_radiis;
+    std::vector<Atom> atoms;
+
+    /** .cel **/
+    std::vector< std::vector<cv::Point3d> > atom_fractional_cell_coordinates;
+    bool _flag_atom_fractional_cell_coordinates = false;
+
+    double fractional_norm_a_atom_pos = 0.0f;
+    double fractional_norm_b_atom_pos = 0.0f;
+    double fractional_norm_c_atom_pos = 0.0f;
+    bool _flag_fractional_norm = false;
+
+    // this margin is used to generate .cel files
+    double cel_margin_Nanometers = 0.0f;
+    double cel_margin_Angstroms = 0.0f;
+    bool _flag_cel_margin = false;
+
+    double ab_margin = 0.0f;
+    int cel_margin_a_px = 0.0f;
+    int cel_margin_b_px = 0.0f;
+
+    int cel_nx_px = 0;
+    int cel_ny_px = 0;
+
+    // used in the simulated super-cell. this is calculated based on _cel_nXY_px - 2 * _cel_margin_AB_px
+    int cel_wout_margin_nx_px;
+    int cel_wout_margin_ny_px;
+
+    cv::Rect ignore_cel_margin_rectangle;
+
+    /** Orientation **/
+    cv::Mat orientation_matrix;
+    bool _flag_orientation_matrix = true;
+    cv::Mat3d inverse_orientation_matrix;
+    bool _flag_inverse_orientation_matrix = false;
+
+    int min_width_px = 0;
+    int min_height_px = 0;
+    int left_padding_w_margin_px = 0;
+    int top_padding_w_margin_px = 0;
+    int left_padding_px = 0;
+    int top_padding_px = 0;
+
+    int width_px = 0;
+    int height_px = 0;
+
+    /** Chem Database **/
+    Chem_Database chem_database;
+
+    bool update_volume();
+    bool update_cell_shape();
 };
 
 #endif

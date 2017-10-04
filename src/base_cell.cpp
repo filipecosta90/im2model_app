@@ -1,9 +1,69 @@
 #include "base_cell.hpp"
 
+// Sinus and Cosine for degree values
+constexpr double pi = 3.141592653589793238463;
+inline double deg2rad(double x) {
+  return x * pi / 180.0;
+}
+
+inline double cosd(double theta) {
+  return cos(deg2rad(theta));
+}
+
+inline double sind(double theta) {
+  return sin(deg2rad(theta));
+}
+
 BaseCell::BaseCell(){
   orientation_matrix = cv::Mat::zeros( 3, 3, cv::DataType<double>::type );
   inverse_orientation_matrix = orientation_matrix.inv();
   chem_database = Chem_Database();
+  update_cell_shape();
+}
+
+bool BaseCell::update_cell_shape() {
+  bool result = false;
+  if( _flag_angle_alpha &&
+      _flag_angle_beta &&
+      _flag_angle_gamma ){
+    if (angle_alpha == 90 && angle_alpha == 90 && angle_alpha == 90) {
+      cell_shape = ORTHORHOMBIC;
+      result = true;
+    } else {
+      cell_shape = TRICLINIC;
+      result = true;
+    }
+  }
+  return result;
+}
+
+bool BaseCell::update_volume(){
+  _flag_cell_volume = false;
+
+  if( _flag_length_a &&
+      _flag_length_b &&
+      _flag_length_c &&
+      _flag_angle_alpha &&
+      _flag_angle_beta &&
+      _flag_angle_gamma ){
+
+    cell_volume_Angstroms = length_a_Angstroms * length_b_Angstroms * length_c_Angstroms;
+    cell_volume_Nanometers = length_a_Nanometers * length_b_Nanometers * length_c_Nanometers;
+
+    const double cos_alpha = cos(deg2rad(angle_alpha));
+    const double cos_beta = cos(deg2rad(angle_beta));
+    const double cos_gamma = cos(deg2rad(angle_gamma));
+
+    const double factor = sqrt(
+        1 - cos_alpha * cos_alpha - cos_beta * cos_beta -
+        cos_gamma * cos_gamma + 2 * cos_alpha * cos_beta * cos_gamma
+        );
+
+    cell_volume_Angstroms *= factor;
+    cell_volume_Nanometers *= factor;
+    _flag_cell_volume = true;
+  }
+  return _flag_cell_volume;
 }
 
 bool BaseCell::clear_atom_positions(){
@@ -53,6 +113,7 @@ bool BaseCell::set_length_a_Angstroms( double a ){
   length_a_Nanometers = a / 10.0f;
   _flag_length_a = true;
   update_length_flag();
+  update_volume();
   return true;
 }
 
@@ -61,6 +122,7 @@ bool BaseCell::set_length_b_Angstroms( double b ){
   length_b_Nanometers = b / 10.0f;
   _flag_length_b = true;
   update_length_flag();
+  update_volume();
   return true;
 }
 
@@ -69,6 +131,7 @@ bool BaseCell::set_length_c_Angstroms( double c ){
   length_c_Nanometers = c / 10.0f;
   _flag_length_c = true;
   update_length_flag();
+  update_volume();
   return true;
 }
 
@@ -77,6 +140,7 @@ bool BaseCell::set_length_a_Nanometers( double a ){
   length_a_Nanometers = a;
   _flag_length_a = true;
   update_length_flag();
+  update_volume();
   return true;
 }
 
@@ -85,6 +149,7 @@ bool BaseCell::set_length_b_Nanometers( double b ){
   length_b_Nanometers = b;
   _flag_length_b = true;
   update_length_flag();
+  update_volume();
   return true;
 }
 
@@ -93,6 +158,7 @@ bool BaseCell::set_length_c_Nanometers( double c ){
   length_c_Nanometers = c;
   _flag_length_c = true;
   update_length_flag();
+  update_volume();
   return true;
 }
 
@@ -103,23 +169,33 @@ void BaseCell::update_length_flag(){
 bool BaseCell::set_angle_alpha( double alpha ){
   angle_alpha = alpha;
   _flag_angle_alpha = true;
+  update_volume();
   return true;
 }
 
 bool BaseCell::set_angle_beta( double beta ){
   angle_beta = beta;
   _flag_angle_beta = true;
+  update_volume();
   return true;
 }
 
 bool BaseCell::set_angle_gamma( double gamma ){
   angle_gamma = gamma;
   _flag_angle_gamma = true;
+  update_volume();
   return true;
 }
 
-bool BaseCell::set_cell_volume( double volume ){
-  cell_volume = volume;
+bool BaseCell::set_cell_volume_Angstroms( double volume ){
+  cell_volume_Angstroms = volume;
+  _flag_cell_volume = true;
+  return true;
+}
+
+bool BaseCell::set_cell_volume_Nanometers( double volume ){
+  cell_volume_Nanometers = volume;
+  _flag_cell_volume = true;
   return true;
 }
 
@@ -234,12 +310,12 @@ void BaseCell::form_matrix_from_miller_indices(){
       _flag_zone_axis &&
       _flag_upward_vector
     ){
-upward_vector.x = upward_vector_u;
-upward_vector.y = upward_vector_v;
-upward_vector.z = upward_vector_w;
-zone_axis.x = zone_axis_u;
-zone_axis.y = zone_axis_v;
-zone_axis.z = zone_axis_w;
+    upward_vector.x = upward_vector_u;
+    upward_vector.y = upward_vector_v;
+    upward_vector.z = upward_vector_w;
+    zone_axis.x = zone_axis_u;
+    zone_axis.y = zone_axis_v;
+    zone_axis.z = zone_axis_w;
     const double norm_uvw = cv::norm( zone_axis );
     const double norm_hkl = cv::norm( upward_vector );
 
@@ -256,7 +332,7 @@ zone_axis.z = zone_axis_w;
     cv::Mat z_axis_projected_mat ( vector_z_axis_projected , CV_64F);
     cv::Mat y_axis_projected_mat ( vector_y_axis_projected , CV_64F);
 
-// (y axis) x (z axis) = (x axis)
+    // (y axis) x (z axis) = (x axis)
     cv::Mat x_axis_projected_mat = y_axis_projected_mat.cross( z_axis_projected_mat );
     const double norm_x = cv::norm( x_axis_projected_mat );
     cv::Mat mat_x_axis_projected = x_axis_projected_mat / norm_x;
@@ -275,13 +351,13 @@ zone_axis.z = zone_axis_w;
     vector_yy_axis_projected.x = mat_yy_axis_projected.at<double>(0,0);
     vector_yy_axis_projected.y = mat_yy_axis_projected.at<double>(1,0);
     vector_yy_axis_projected.z = mat_yy_axis_projected.at<double>(2,0);
-std::cout << " vector_yy_axis_projected " << vector_yy_axis_projected << std::endl;
-upward_vector = vector_yy_axis_projected;
-cv::Point3d vector_zz_axis_projected;
-vector_zz_axis_projected.x = z_axis_projected_mat.at<double>(0,0);
-vector_zz_axis_projected.y = z_axis_projected_mat.at<double>(1,0);
-vector_zz_axis_projected.z = z_axis_projected_mat.at<double>(2,0);
-zone_axis = vector_zz_axis_projected;
+    std::cout << " vector_yy_axis_projected " << vector_yy_axis_projected << std::endl;
+    upward_vector = vector_yy_axis_projected;
+    cv::Point3d vector_zz_axis_projected;
+    vector_zz_axis_projected.x = z_axis_projected_mat.at<double>(0,0);
+    vector_zz_axis_projected.y = z_axis_projected_mat.at<double>(1,0);
+    vector_zz_axis_projected.z = z_axis_projected_mat.at<double>(2,0);
+    zone_axis = vector_zz_axis_projected;
 
     /* insert into matrix */
     std::vector<cv::Point3d> points;
@@ -340,7 +416,8 @@ std::ostream& BaseCell::output(std::ostream& stream) const {
     << "\t\t" << "_flag_length_b : " << std::boolalpha << _flag_length_b << "\n"
     << "\t\t" << "_flag_length_c : " << std::boolalpha << _flag_length_c << "\n"
     << "\t\t" << "_flag_length : " << std::boolalpha << _flag_length << "\n"
-    << "\t" << "cell_volume : "  << cell_volume << "\n"
+    << "\t" << "cell_volume : "  << cell_volume_Angstroms << "\n"
+    << "\t\t" << "_flag_cell_volume : " << std::boolalpha << _flag_cell_volume << "\n"
     << "\t" << "angle_alpha : "  << angle_alpha << "\n"
     << "\t" << "angle_beta : "  << angle_beta << "\n"
     << "\t" << "angle_gamma : "  << angle_gamma << "\n"
