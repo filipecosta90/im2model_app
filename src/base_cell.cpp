@@ -114,6 +114,7 @@ bool BaseCell::set_length_a_Angstroms( double a ){
   _flag_length_a = true;
   update_length_flag();
   update_volume();
+  form_matrix_from_lattice_parameters();
   return true;
 }
 
@@ -123,6 +124,7 @@ bool BaseCell::set_length_b_Angstroms( double b ){
   _flag_length_b = true;
   update_length_flag();
   update_volume();
+  form_matrix_from_lattice_parameters();
   return true;
 }
 
@@ -132,6 +134,7 @@ bool BaseCell::set_length_c_Angstroms( double c ){
   _flag_length_c = true;
   update_length_flag();
   update_volume();
+  form_matrix_from_lattice_parameters();
   return true;
 }
 
@@ -141,6 +144,7 @@ bool BaseCell::set_length_a_Nanometers( double a ){
   _flag_length_a = true;
   update_length_flag();
   update_volume();
+  form_matrix_from_lattice_parameters();
   return true;
 }
 
@@ -150,6 +154,7 @@ bool BaseCell::set_length_b_Nanometers( double b ){
   _flag_length_b = true;
   update_length_flag();
   update_volume();
+  form_matrix_from_lattice_parameters();
   return true;
 }
 
@@ -159,6 +164,7 @@ bool BaseCell::set_length_c_Nanometers( double c ){
   _flag_length_c = true;
   update_length_flag();
   update_volume();
+  form_matrix_from_lattice_parameters();
   return true;
 }
 
@@ -170,6 +176,7 @@ bool BaseCell::set_angle_alpha( double alpha ){
   angle_alpha = alpha;
   _flag_angle_alpha = true;
   update_volume();
+  form_matrix_from_lattice_parameters();
   return true;
 }
 
@@ -177,6 +184,7 @@ bool BaseCell::set_angle_beta( double beta ){
   angle_beta = beta;
   _flag_angle_beta = true;
   update_volume();
+  form_matrix_from_lattice_parameters();
   return true;
 }
 
@@ -184,6 +192,7 @@ bool BaseCell::set_angle_gamma( double gamma ){
   angle_gamma = gamma;
   _flag_angle_gamma = true;
   update_volume();
+  form_matrix_from_lattice_parameters();
   return true;
 }
 
@@ -303,6 +312,54 @@ int BaseCell::get_atom_fractional_cell_coordinates_vec_size( ){
     size += ( atom_fractional_cell_coordinates[pos].size() );
   }
   return size;
+}
+void BaseCell::form_matrix_from_lattice_parameters(){
+  if(
+    _flag_length_a &&
+_flag_length_b &&
+_flag_length_c &&
+_flag_angle_alpha &&
+_flag_angle_beta &&
+_flag_angle_gamma
+  ){
+    std::cout << " cos( angle_alpha )" << cos( deg2rad(angle_alpha) ) << std::endl;
+    std::cout << " cos( angle_beta )" << cos( deg2rad(angle_beta) ) << std::endl;
+    std::cout << " cos( angle_gamma )" << cos( deg2rad(angle_gamma) ) << std::endl;
+    std::cout << " sin( angle_alpha )" << sin( deg2rad(angle_alpha) ) << std::endl;
+    std::cout << " sin( angle_beta )" << sin( deg2rad(angle_beta) ) << std::endl;
+    std::cout << " sin( angle_gamma )" << sin( deg2rad(angle_gamma) ) << std::endl;
+    cv::Point3d vector_a_Ang;
+    vector_a_Ang.x = length_a_Angstroms * sin( deg2rad(angle_beta) );
+    vector_a_Ang.y = length_b_Angstroms * sin( deg2rad(angle_alpha) ) * cos( deg2rad(angle_gamma) );
+    vector_a_Ang.z = 0.0;
+
+    cv::Point3d vector_b_Ang;
+    vector_b_Ang.x = 0.0f;
+    vector_b_Ang.y = length_b_Angstroms * sin( deg2rad(angle_alpha) ) * sin( deg2rad(angle_gamma) );
+    vector_b_Ang.z = 0.0f;
+
+    cv::Point3d vector_c_Ang;
+    vector_c_Ang.x = length_a_Angstroms * cos( deg2rad(angle_beta) );
+    vector_c_Ang.y = length_b_Angstroms * cos( deg2rad(angle_alpha) );
+    vector_c_Ang.z = length_c_Angstroms;
+
+    /* insert into matrix */
+    std::vector<cv::Point3d> points;
+    points.push_back(vector_a_Ang);
+    points.push_back(vector_b_Ang);
+    points.push_back(vector_c_Ang);
+    cv::Mat lattice_mapping_matrix_temp = cv::Mat( points , true );
+    lattice_mapping_matrix_Angstroms = lattice_mapping_matrix_temp.reshape(1);
+    lattice_mapping_matrix_Nanometers = lattice_mapping_matrix_Angstroms / 10.0f;
+
+    std::cout << " line 1 " << vector_a_Ang << std::endl;
+    std::cout << " line 2 " << vector_b_Ang << std::endl;
+    std::cout << " line 3 " << vector_c_Ang << std::endl;
+    std::cout <<"lattice_mapping_matrix_Angstroms: \n" << lattice_mapping_matrix_Angstroms << std::endl;
+    std::cout <<"lattice_mapping_matrix_Nanometers: \n" << lattice_mapping_matrix_Nanometers << std::endl;
+  _flag_lattice_mapping_matrix_Nanometers = true;
+  }
+
 }
 
 void BaseCell::form_matrix_from_miller_indices(){

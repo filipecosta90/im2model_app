@@ -313,6 +313,7 @@ bool SuperCell::create_atoms_from_unit_cell(){
         unit_cell->get_flag_parsed_cif() &&
         unit_cell->get_flag_atom_positions_vec() &&
         unit_cell->get_flag_length() &&
+        unit_cell->get_flag_lattice_mapping_matrix_Nanometers() &&
         // SuperCell vars
         _flag_length &&
         _flag_expand_factor &&
@@ -324,9 +325,20 @@ bool SuperCell::create_atoms_from_unit_cell(){
       const double unit_cell_a_nm = unit_cell->get_length_a_Nanometers();
       const double unit_cell_b_nm = unit_cell->get_length_b_Nanometers();
       const double unit_cell_c_nm = unit_cell->get_length_c_Nanometers();
-      const double center_a_padding_nm = ( expand_factor_a * unit_cell_a_nm ) / -2.0f;
-      const double center_b_padding_nm = ( expand_factor_b * unit_cell_b_nm ) / -2.0f;
-      const double center_c_padding_nm = ( expand_factor_c * unit_cell_c_nm ) / -2.0f;
+      const double temp_center_a_padding_nm = ( expand_factor_a ) / -2.0f;
+      const double temp_center_b_padding_nm = ( expand_factor_b ) / -2.0f;
+      const double temp_center_c_padding_nm = ( expand_factor_c ) / -2.0f;
+      const cv::Mat mapping_matrix_Nanometers = unit_cell->get_lattice_mapping_matrix_Nanometers();
+      const cv::Point3d temp_center_abc_padding_nm (temp_center_a_padding_nm, temp_center_b_padding_nm, temp_center_c_padding_nm);
+      const cv::Mat abc_padding_nm_result = mapping_matrix_Nanometers * cv::Mat( temp_center_abc_padding_nm );
+      const cv::Point3d center_abc_padding_nm (abc_padding_nm_result.at<double>(0,0), abc_padding_nm_result.at<double>(1,0), abc_padding_nm_result.at<double>(2,0) );
+    const double center_a_padding_nm = center_abc_padding_nm.x;
+    const double center_b_padding_nm = center_abc_padding_nm.y;
+    const double center_c_padding_nm = center_abc_padding_nm.z;
+    std::cout << "#### temp_center_abc_padding_nm a " << expand_factor_a * unit_cell_a_nm / -2.0f << std::endl;
+    std::cout << "#### temp_center_abc_padding_nm b " << expand_factor_b * unit_cell_b_nm / -2.0f << std::endl;
+    std::cout << "#### temp_center_abc_padding_nm c " << expand_factor_c * unit_cell_c_nm / -2.0f << std::endl;
+std::cout << "$$$$center_abc_padding_nm " << center_abc_padding_nm << std::endl;
 
       atom_positions.reserve(  unit_cell_atoms.size() );
       atom_symbols = unit_cell->get_atom_symbols_vec();
@@ -339,14 +351,24 @@ bool SuperCell::create_atoms_from_unit_cell(){
       std::vector<cv::Point3d> expand_points;
       const int total_expand_points = expand_factor_c * expand_factor_b * expand_factor_a;
       expand_points.reserve( total_expand_points );
+
       for ( size_t c_expand_pos = 0; c_expand_pos < expand_factor_c; c_expand_pos++ ){
         const double c_expand_nanometers = c_expand_pos * unit_cell_c_nm + center_c_padding_nm;
+
         for ( size_t  b_expand_pos = 0; b_expand_pos < expand_factor_b; b_expand_pos++ ){
           const double b_expand_nanometers = b_expand_pos * unit_cell_b_nm + center_b_padding_nm;
+
           for ( size_t a_expand_pos = 0; a_expand_pos < expand_factor_a; a_expand_pos++ ){
             const double a_expand_nanometers = a_expand_pos * unit_cell_a_nm + center_a_padding_nm;
-            const cv::Point3d abc_expand (a_expand_nanometers, b_expand_nanometers, c_expand_nanometers);
-            expand_points.push_back(abc_expand);
+            const cv::Point3d abc_expand_old (a_expand_nanometers, b_expand_nanometers, c_expand_nanometers);
+            const cv::Point3d abc_pos (a_expand_pos, b_expand_pos, c_expand_pos);
+            const cv::Mat result = mapping_matrix_Nanometers * cv::Mat( abc_pos );
+            const cv::Point3d abc_expanded (result.at<double>(0,0) + center_a_padding_nm, result.at<double>(1,0) + center_b_padding_nm, result.at<double>(2,0) + center_c_padding_nm );
+            //std::cout << "mapping_matrix_Nanometers " << mapping_matrix_Nanometers << std::endl;
+            std::cout << "abc_pos " << abc_pos << std::endl;
+            std::cout << "abc_expanded " << abc_expanded << std::endl;
+            std::cout << "abc_old " << abc_expanded << std::endl;
+            expand_points.push_back(abc_expanded);
           }
         }
       }
