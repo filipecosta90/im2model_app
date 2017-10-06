@@ -252,7 +252,8 @@ bool UnitCell::create_atoms_from_site_and_symetry(){
       ( atoms_site_fract_z.size() == atoms_site_type_symbols.size() ) &&
       ( atoms_site_fract_z.size() == atoms_site_occupancy.size() ) &&
       // BaseCell vars
-      _flag_length
+      _flag_length &&
+      _flag_lattice_mapping_matrix_Nanometers
     ){
     int distinct = 0;
     const int distinct_atom_types = atoms_site_type_symbols.size() ;
@@ -323,7 +324,11 @@ bool UnitCell::create_atoms_from_site_and_symetry(){
           const double px = temp_a * length_a_Nanometers;
           const double py = temp_b * length_b_Nanometers;
           const double pz = temp_c * length_c_Nanometers;
-          cv::Point3d atom_pos ( px, py, pz );
+          const cv::Point3d temp_atom_pos ( px, py, pz );
+          std::cout << "temporary_point" << temp_atom_pos << std::endl;
+          const cv::Mat atom_pos_mapped_result = lattice_mapping_matrix_Nanometers * cv::Mat( temporary_point );
+          const cv::Point3d atom_pos (atom_pos_mapped_result.at<double>(0,0), atom_pos_mapped_result.at<double>(1,0), atom_pos_mapped_result.at<double>(2,0) );
+          std::cout << "atom_pos" << atom_pos << std::endl;
           atom_positions[atom_site_pos].push_back( atom_pos );
           distinct++;
         }
