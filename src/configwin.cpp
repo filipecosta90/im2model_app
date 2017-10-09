@@ -154,8 +154,11 @@ MainWindow::MainWindow( ApplicationLog::ApplicationLog* logger , QWidget *parent
       connect( _core_td_map, SIGNAL(TDMap_ended_supercell_celslc( bool )), this, SLOT(update_supercell_celslc_ended( bool ) ) );
 
       connect( _core_td_map, SIGNAL(TDMap_started_msa( )), this, SLOT(update_tdmap_msa_started( ) ) );
+      connect( _core_td_map, SIGNAL(TDMap_started_supercell_msa( )), this, SLOT(update_supercell_msa_started( ) ) );
+
       connect(_core_td_map, SIGNAL(TDMap_started_msa()), this, SLOT(update_tdmap_sim_ostream_msa()));
       connect( _core_td_map, SIGNAL(TDMap_ended_msa( bool )), this, SLOT(update_tdmap_msa_ended( bool ) ) );
+      connect( _core_td_map, SIGNAL(TDMap_ended_supercell_msa( bool )), this, SLOT(update_supercell_msa_ended( bool ) ) );
 
       connect( _core_td_map, SIGNAL(TDMap_started_wavimg( )), this, SLOT(update_tdmap_wavimg_started( ) ) );
       connect(_core_td_map, SIGNAL(TDMap_started_wavimg()), this, SLOT(update_tdmap_sim_ostream_wavimg()));
@@ -217,6 +220,11 @@ void MainWindow::update_tdmap_msa_started( ){
   ui->statusBar->showMessage(tr("Started calculating electron diffraction patterns"), 2000);
 }
 
+void MainWindow::update_supercell_msa_started( ){
+  updateProgressBar(0,1,4);
+  ui->statusBar->showMessage(tr("Started calculating electron diffraction patterns for supercell"), 2000);
+}
+
 void MainWindow::update_tdmap_msa_ended( bool result ){
   // reset pipe
   _sim_tdmap_msa_ostream_buffer.pipe( boost::process::pipe() );
@@ -227,6 +235,19 @@ void MainWindow::update_tdmap_msa_ended( bool result ){
   else{
     updateProgressBar(0,2,4, true);
     ui->statusBar->showMessage(tr("Error while calculating the electron diffraction patterns") );
+  }
+}
+
+void MainWindow::update_supercell_msa_ended( bool result ){
+  // reset pipe
+  _sim_supercell_msa_ostream_buffer.pipe( boost::process::pipe() );
+  if( result ){
+    updateProgressBar(0,2,4);
+    ui->statusBar->showMessage(tr("Sucessfully ended calculating the electron diffraction patterns for supercell"), 2000);
+  }
+  else{
+    updateProgressBar(0,2,4, true);
+    ui->statusBar->showMessage(tr("Error while calculating the electron diffraction patterns for supercell") );
   }
 }
 
@@ -245,6 +266,24 @@ void MainWindow::update_tdmap_wavimg_ended( bool result ){
   else{
     updateProgressBar(0,3,4, true);
     ui->statusBar->showMessage(tr("Error while calculating the image intensity distribuitions") );
+  }
+}
+
+void MainWindow::update_supercell_wavimg_started( ){
+  updateProgressBar(0,2,4);
+  ui->statusBar->showMessage(tr("Started calculating image intensity distribuitions  for supercell"), 2000);
+}
+
+void MainWindow::update_supercell_wavimg_ended( bool result ){
+  // reset pipe
+  _sim_supercell_wavimg_ostream_buffer.pipe( boost::process::pipe() );
+  if( result ){
+    updateProgressBar(0,3,4);
+    ui->statusBar->showMessage(tr("Sucessfully ended calculating the image intensity distribuitions  for supercell"), 2000);
+  }
+  else{
+    updateProgressBar(0,3,4, true);
+    ui->statusBar->showMessage(tr("Error while calculating the image intensity distribuitions  for supercell") );
   }
 }
 

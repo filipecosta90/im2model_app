@@ -94,29 +94,29 @@ TDMap::TDMap(
   _tdmap_wavimg_parameters->set_sim_super_cell ( tdmap_roi_sim_super_cell );
   _tdmap_wavimg_parameters->set_sim_image_properties ( sim_image_properties );
 
+    // set pointers for simgrid
+    _td_map_simgrid->set_wavimg_var( _tdmap_wavimg_parameters );
+    _td_map_simgrid->set_sim_crystal_properties ( sim_crystal_properties );
+    _td_map_simgrid->set_exp_image_properties ( exp_image_properties );
+    _td_map_simgrid->set_sim_image_properties ( sim_image_properties );
+    
   // set pointers for SUPERCELL celslc
   _supercell_celslc_parameters->set_unit_cell ( unit_cell );
-  _supercell_celslc_parameters->set_sim_crystal_properties ( sim_crystal_properties );
+  _supercell_celslc_parameters->set_sim_crystal_properties ( supercell_sim_crystal_properties );
   _supercell_celslc_parameters->set_sim_super_cell ( tdmap_full_sim_super_cell );
   _supercell_celslc_parameters->set_sim_image_properties ( supercell_sim_image_properties );
 
     // set pointers for SUPERCELL  msa
     _supercell_msa_parameters->set_unit_cell ( unit_cell );
-    _supercell_msa_parameters->set_sim_crystal_properties ( sim_crystal_properties );
+    _supercell_msa_parameters->set_sim_crystal_properties ( supercell_sim_crystal_properties );
     _supercell_msa_parameters->set_sim_super_cell ( tdmap_full_sim_super_cell );
     _supercell_msa_parameters->set_sim_image_properties ( supercell_sim_image_properties );
 
     // set pointers for SUPERCELL wavimg
     _supercell_wavimg_parameters->set_unit_cell ( unit_cell );
-    _supercell_wavimg_parameters->set_sim_crystal_properties ( sim_crystal_properties );
+    _supercell_wavimg_parameters->set_sim_crystal_properties ( supercell_sim_crystal_properties );
     _supercell_wavimg_parameters->set_sim_super_cell ( tdmap_full_sim_super_cell );
     _supercell_wavimg_parameters->set_sim_image_properties ( supercell_sim_image_properties );
-
-  // set pointers for simgrid
-  _td_map_simgrid->set_wavimg_var( _tdmap_wavimg_parameters );
-  _td_map_simgrid->set_sim_crystal_properties ( sim_crystal_properties );
-  _td_map_simgrid->set_exp_image_properties ( exp_image_properties );
-  _td_map_simgrid->set_sim_image_properties ( sim_image_properties );
 
   /////////////
   // only for debug. need to add this options like in im2model command line
@@ -128,7 +128,7 @@ TDMap::TDMap(
   set_msa_prm_name( "tdmap_msa_im2model.prm" );
   set_supercell_msa_prm_name( "supercell_msa_im2model.prm" );
   set_wavimg_prm_name( "tdmap_wavimg_im2model.prm" );
-  set_wavimg_prm_name( "supercell_wavimg_im2model.prm" );
+  set_supercell_wavimg_prm_name( "supercell_wavimg_im2model.prm" );
   set_file_name_output_image_wave_function("tdmap_image" );
   set_file_name_output_image_wave_function("supercell_image" );
 
@@ -1930,7 +1930,40 @@ bool TDMap::compute_full_super_cell(){
       }
     }
     emit TDMap_ended_supercell_celslc( _flag_runned_supercell_celslc );
-    result = _flag_runned_supercell_celslc;
+
+
+    const bool prm_status = _supercell_msa_parameters->produce_prm();
+    emit TDMap_started_supercell_msa();
+    if( prm_status ){
+      _flag_runned_supercell_msa = _supercell_msa_parameters->call_bin();
+    }
+    emit TDMap_ended_supercell_msa( _flag_runned_supercell_msa );
+    if( _flag_logger ){
+      std::stringstream message;
+      message << "_flag_runned_supercell_msa: " << std::boolalpha << _flag_runned_supercell_msa;
+      if( _flag_runned_supercell_msa ){
+        BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification , message.str() );
+      }
+      else{
+        BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::error , message.str() );
+      }
+    }
+    emit TDMap_started_supercell_wavimg();
+    const bool wavimg_prm_status = _supercell_wavimg_parameters->produce_prm();
+    if( wavimg_prm_status ){
+      _flag_runned_supercell_wavimg = _supercell_wavimg_parameters->call_bin();
+    }
+    emit TDMap_ended_supercell_wavimg( _flag_runned_supercell_wavimg );
+    if( !_flag_runned_supercell_wavimg ){
+      _tdmap_wavimg_parameters->print_var_state();
+    }
+    if( _flag_logger ){
+      std::stringstream message;
+      message << "_flag_runned_supercell_wavimg: " << std::boolalpha << _flag_runned_supercell_wavimg;
+      ApplicationLog::severity_level _log_type = _flag_runned_supercell_wavimg ? ApplicationLog::notification : ApplicationLog::error;
+      BOOST_LOG_FUNCTION();  logger->logEvent( _log_type , message.str() );
+    }
+    result = _flag_runned_supercell_celslc && _flag_runned_supercell_msa && _flag_runned_supercell_wavimg;
   }
   return result;
 }

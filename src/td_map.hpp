@@ -516,14 +516,18 @@ signals:
     void TDMap_ended_supercell_celslc( bool celslc_status );
 
     void TDMap_started_msa( );
+    void TDMap_started_supercell_msa( );
     void TDMap_inform_msa_n_steps( int number_steps );
     void TDMap_at_msa_step( int step );
     void TDMap_ended_msa( bool msa_status );
+    void TDMap_ended_supercell_msa( bool msa_status );
 
     void TDMap_started_wavimg( );
+    void TDMap_started_supercell_wavimg( );
     void TDMap_inform_wavimg_n_steps( int number_steps );
     void TDMap_at_wavimg_step( int step );
     void TDMap_ended_wavimg( bool wavimg_status );
+    void TDMap_ended_supercell_wavimg( bool wavimg_status );
 
     void TDMap_no_simgrid( bool result );
     void TDMap_started_simgrid( );

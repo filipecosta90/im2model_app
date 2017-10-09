@@ -83,7 +83,7 @@ class WAVIMG_prm : public BaseBin {
     double anisotropic_second_rms_amplitude = 0.0f;
     double azimuth_orientation_angle = 0.0f;
     // line 18
-    int number_image_aberrations_set;
+    int number_image_aberrations_set = 0;
     // line 19
     std::map<int,bool>  aberration_definition_switch;
     std::map<int,double>  aberration_definition_1st_coefficient_value_nm;
@@ -95,7 +95,7 @@ class WAVIMG_prm : public BaseBin {
     double center_x_of_objective_aperture = 0.0f;
     double center_y_of_objective_aperture = 0.0f;
     // line 21
-    int number_parameter_loops;
+    int number_parameter_loops = 0;
     // line 22 + aberration_definition_index_number
     std::vector<int> loop_parameter_class;
     // line 23 + aberration_definition_index_number

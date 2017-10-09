@@ -320,6 +320,7 @@ bool BaseCrystal::set_nm_upper_bound( double upper_bound ){
 /////////////////////////
 // Simulated Defocus info
 /////////////////////////
+
 bool BaseCrystal::set_defocus_samples( int samples ){
   defocus_samples = samples;
   _flag_defocus_samples = true;
@@ -426,6 +427,14 @@ std::ostream& BaseCrystal::output(std::ostream& stream) const {
     << "\t\t" << "_flag_simulated_params_nm_slice_vec : " << std::boolalpha <<  _flag_simulated_params_nm_slice_vec << "\n"
     << "\t" << "simulated_params_nm_defocus_vec.size() : " <<  simulated_params_nm_defocus_vec.size() << "\n"
     << "\t\t" << "_flag_simulated_params_nm_defocus_vec : " << std::boolalpha <<  _flag_simulated_params_nm_defocus_vec << "\n"
+
+    // Intermediate files info
+    << "\t" << "slc_output_target_folder: " <<  slc_output_target_folder << "\n"
+    << "\t\t" << "_flag_slc_output_target_folder : " << std::boolalpha <<  _flag_slc_output_target_folder << "\n"
+    << "\t" << "wav_output_target_folder: " <<  wav_output_target_folder << "\n"
+    << "\t\t" << "_flag_wav_output_target_folder : " << std::boolalpha <<  _flag_wav_output_target_folder << "\n"
+    << "\t" << "dat_output_target_folder: " <<  dat_output_target_folder << "\n"
+    << "\t\t" << "_flag_dat_output_target_folder : " << std::boolalpha <<  _flag_dat_output_target_folder << "\n"
 
     /* Loggers */
     << "\t\t" << "_flag_logger : " << std::boolalpha <<  _flag_logger << "\n"

@@ -135,9 +135,13 @@ class MainWindow : public QMainWindow {
     void update_supercell_celslc_ended( bool result );
     void update_tdmap_celslc_step( int at_step );
     void update_tdmap_msa_started( );
+    void update_supercell_msa_started( );
     void update_tdmap_msa_ended( bool result );
+    void update_supercell_msa_ended( bool result );
     void update_tdmap_wavimg_started( );
+    void update_supercell_wavimg_started( );
     void update_tdmap_wavimg_ended( bool result );
+    void update_supercell_wavimg_ended( bool result );
     void update_tdmap_simgrid_started( );
     void update_tdmap_simgrid_ended( bool result );
     void update_tdmap_no_simgrid_ended( bool result );
