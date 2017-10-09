@@ -105,6 +105,9 @@ std::ostream& BaseBin::output(std::ostream& stream) const {
     << "\t" << "base_bin_start_dir_path : " << base_bin_start_dir_path.string() << "\n"
     << "\t\t" << "_flag_base_bin_start_dir_path : " << std::boolalpha <<  _flag_base_bin_start_dir_path << "\n"
     /* Base bin output dir path */
+    // the default output is the same as input
+    << "\t" << "base_bin_output_dir_path : " << base_bin_output_dir_path.string() << "\n"
+    << "\t\t" << "_flag_base_bin_output_dir_path : " << std::boolalpha <<  _flag_base_bin_output_dir_path << "\n"
     << "\t" << "base_bin_output_target_folder : " << base_bin_output_target_folder.string() << "\n"
     << "\t\t" << "_flag_base_bin_output_target_folder : " << std::boolalpha <<  _flag_base_bin_output_target_folder << "\n"
     /* Runnable dependant binary full bin path */

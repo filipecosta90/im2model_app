@@ -310,8 +310,8 @@ signals:
     int cel_ny_px = 0;
 
     // used in the simulated super-cell. this is calculated based on _cel_nXY_px - 2 * _cel_margin_AB_px
-    int cel_wout_margin_nx_px;
-    int cel_wout_margin_ny_px;
+    int cel_wout_margin_nx_px = 0;
+    int cel_wout_margin_ny_px = 0;
 
     cv::Rect ignore_cel_margin_rectangle;
 

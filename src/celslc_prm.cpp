@@ -315,8 +315,8 @@ std::ostream& CELSLC_prm::create_bin_args(std::ostream& args_stream, bool prepar
 bool CELSLC_prm::call_boost_bin( bool enable_ssc ){
   bool result = false;
   if(
-      _flag_sim_super_cell &&
       _flag_sim_crystal_properties &&
+      _flag_sim_super_cell &&
       _flag_sim_image_properties
     ){
     if(
@@ -328,8 +328,7 @@ bool CELSLC_prm::call_boost_bin( bool enable_ssc ){
         _flag_base_bin_output_dir_path &&
         // BaseImage vars
         sim_image_properties->get_flag_full_n_rows_height() &&
-        sim_image_properties->get_flag_full_n_cols_width() &&
-        sim_image_properties->get_flag_full_n_cols_width() //&&
+        sim_image_properties->get_flag_full_n_cols_width()
         // enable_ssc implies that nz is setted
       //  ( ~a | b )
       //  !p || q
@@ -496,15 +495,18 @@ std::ostream& CELSLC_prm::output(std::ostream& stream) const {
     << "\t\t" << "single_slice_calculation_prepare_bin_runned_switch : " << std::boolalpha << single_slice_calculation_prepare_bin_runned_switch << "\n"
     << "\t\t" << "single_slice_calculation_nz_switch : " << std::boolalpha << single_slice_calculation_nz_switch << "\n"
     << "\t\t" << "single_slice_calculation_enabled_switch : " << std::boolalpha << single_slice_calculation_enabled_switch << "\n"
-    << "\t" << "BaseCrystal Properties : " << "\n";
+    << "\t" << "BaseCrystal Properties : " << "\n"
+    << "\t\t" << "_flag_sim_crystal_properties : " << std::boolalpha << _flag_sim_crystal_properties << "\n";
   if( _flag_sim_crystal_properties ){
     sim_crystal_properties->output( stream );
   }
-  stream << "\t" << "SuperCell Properties : " << "\n";
+  stream << "\t" << "SuperCell Properties : " << "\n"
+  << "\t\t" << "_flag_sim_super_cell : " << std::boolalpha << _flag_sim_super_cell << "\n";
   if( _flag_sim_super_cell ){
     sim_super_cell->output( stream );
   }
-  stream <<  "\t" << "BaseImage Properties : " << "\n";
+  stream <<  "\t" << "BaseImage Properties : " << "\n"
+  << "\t\t" << "_flag_sim_image_properties : " << std::boolalpha << _flag_sim_image_properties << "\n";
   if( _flag_sim_image_properties ){
     sim_image_properties->output( stream );
   }

@@ -146,9 +146,12 @@ MainWindow::MainWindow( ApplicationLog::ApplicationLog* logger , QWidget *parent
       connect(this, SIGNAL(super_cell_target_region_changed()), this, SLOT(update_super_cell_target_region()));
 
       connect( _core_td_map, SIGNAL(TDMap_started_celslc( )), this, SLOT(update_tdmap_celslc_started( ) ) );
+      connect( _core_td_map, SIGNAL(TDMap_started_supercell_celslc( )), this, SLOT(update_supercell_celslc_started( ) ) );
+
       connect(_core_td_map, SIGNAL(TDMap_started_celslc()), this, SLOT(update_tdmap_sim_ostream_celslc()));
       connect( _core_td_map, SIGNAL(TDMap_at_celslc_step( int )), this, SLOT(update_tdmap_celslc_step( int ) ) );
       connect( _core_td_map, SIGNAL(TDMap_ended_celslc( bool )), this, SLOT(update_tdmap_celslc_ended( bool ) ) );
+      connect( _core_td_map, SIGNAL(TDMap_ended_supercell_celslc( bool )), this, SLOT(update_supercell_celslc_ended( bool ) ) );
 
       connect( _core_td_map, SIGNAL(TDMap_started_msa( )), this, SLOT(update_tdmap_msa_started( ) ) );
       connect(_core_td_map, SIGNAL(TDMap_started_msa()), this, SLOT(update_tdmap_sim_ostream_msa()));
@@ -182,6 +185,11 @@ void MainWindow::update_tdmap_celslc_started( ){
   ui->statusBar->showMessage(tr("Started multislice step"), 2000);
 }
 
+void MainWindow::update_supercell_celslc_started( ){
+  updateProgressBar(0,0,4);
+  ui->statusBar->showMessage(tr("Started multislice step for supercell"), 2000);
+}
+
 void MainWindow::update_tdmap_celslc_ended( bool result ){
   // reset pipe
   _sim_tdmap_celslc_ostream_buffer.pipe( boost::process::pipe() );
@@ -190,6 +198,17 @@ void MainWindow::update_tdmap_celslc_ended( bool result ){
   }
   else{
     ui->statusBar->showMessage(tr("Error while running multislice step") );
+  }
+}
+
+void MainWindow::update_supercell_celslc_ended( bool result ){
+  // reset pipe
+  _sim_supercell_celslc_ostream_buffer.pipe( boost::process::pipe() );
+  if( result ){
+    ui->statusBar->showMessage(tr("Sucessfully ended multislice step for supercell"), 2000);
+  }
+  else{
+    ui->statusBar->showMessage(tr("Error while running multislice step for supercell") );
   }
 }
 

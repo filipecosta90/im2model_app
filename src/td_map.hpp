@@ -509,9 +509,11 @@ signals:
     void super_cell_dimensions_c_changed();
 
     void TDMap_started_celslc( );
+    void TDMap_started_supercell_celslc( );
     void TDMap_inform_celslc_n_steps( int number_steps );
     void TDMap_at_celslc_step( int step );
     void TDMap_ended_celslc( bool celslc_status );
+    void TDMap_ended_supercell_celslc( bool celslc_status );
 
     void TDMap_started_msa( );
     void TDMap_inform_msa_n_steps( int number_steps );

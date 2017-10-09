@@ -130,7 +130,9 @@ class MainWindow : public QMainWindow {
     void update_from_TDMap_failure();
     bool _is_initialization_ok();
     void update_tdmap_celslc_started( );
+    void update_supercell_celslc_started( );
     void update_tdmap_celslc_ended( bool result );
+    void update_supercell_celslc_ended( bool result );
     void update_tdmap_celslc_step( int at_step );
     void update_tdmap_msa_started( );
     void update_tdmap_msa_ended( bool result );

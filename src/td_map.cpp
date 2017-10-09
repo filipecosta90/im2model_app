@@ -69,11 +69,12 @@ TDMap::TDMap(
 
   sim_image_properties->set_flag_auto_n_rows( true );
   sim_image_properties->set_flag_auto_n_cols( true );
-
   sim_image_properties->set_flag_auto_roi_from_ignored_edge( true );
-
   sim_image_properties->set_ignore_edge_nm( cel_margin_nm );
 
+  supercell_sim_image_properties->set_flag_auto_n_rows( true );
+  supercell_sim_image_properties->set_flag_auto_n_cols( true );
+  supercell_sim_image_properties->set_ignore_edge_nm( cel_margin_nm );
 
   // set pointers for celslc
   _tdmap_celslc_parameters->set_unit_cell ( unit_cell );
@@ -120,15 +121,24 @@ TDMap::TDMap(
   /////////////
   // only for debug. need to add this options like in im2model command line
   /////////////
-  set_slc_file_name_prefix( "test" );
-  set_wave_function_name( "wave" );
-  set_msa_prm_name( "temporary_msa_im2model.prm" );
-  set_wavimg_prm_name( "temporary_wavimg_im2model.prm" );
-  set_file_name_output_image_wave_function("image" );
+  set_slc_file_name_prefix( "tdmap_slice" );
+  set_supercell_slc_file_name_prefix( "supercell_slice" );
+  set_wave_function_name( "tdmap_wave" );
+  set_supercell_wave_function_name( "supercell_wave" );
+  set_msa_prm_name( "tdmap_msa_im2model.prm" );
+  set_supercell_msa_prm_name( "supercell_msa_im2model.prm" );
+  set_wavimg_prm_name( "tdmap_wavimg_im2model.prm" );
+  set_wavimg_prm_name( "supercell_wavimg_im2model.prm" );
+  set_file_name_output_image_wave_function("tdmap_image" );
+  set_file_name_output_image_wave_function("supercell_image" );
 
   set_slc_output_target_folder("slc");
+  set_supercell_slc_output_target_folder("supercell_slc");
   set_wav_output_target_folder("wav");
+  set_supercell_wav_output_target_folder("supercell_wav");
   set_dat_output_target_folder("dat");
+  set_supercell_dat_output_target_folder("supercell_dat");
+
   /* ******
    * celslc static settings
    */
@@ -1904,20 +1914,23 @@ bool TDMap::accept_tdmap_best_match_position( int row, int col ){
 bool TDMap::compute_full_super_cell(){
   bool result = false;
   if( tdmap_full_sim_super_cell->get_flag_length() ){
+    emit TDMap_started_supercell_celslc();
     const bool unit_cell_update = tdmap_full_sim_super_cell->update_from_unit_cell();
     std::cout << " unit_cell_update result " << std::boolalpha << unit_cell_update << std::endl;
     if( unit_cell_update ){
       const bool cel_generation = tdmap_full_sim_super_cell->generate_super_cell_file();
       std::cout << " cel_generation result " << std::boolalpha << cel_generation << std::endl;
-      if( cel_generation ){
-        const bool xyz_export = tdmap_full_sim_super_cell->generate_xyz_file();
-        std::cout << " xyz_export result " << std::boolalpha << xyz_export << std::endl;
-        const bool super_cell_result = unit_cell_update && cel_generation && xyz_export;
-        if( super_cell_result ){
-          result = true;
-        }
+      const bool xyz_export = tdmap_full_sim_super_cell->generate_xyz_file();
+      std::cout << " xyz_export result " << std::boolalpha << xyz_export << std::endl;
+      const bool super_cell_result = unit_cell_update && cel_generation && xyz_export;
+      std::cout << " super_cell_result " << std::boolalpha << super_cell_result << std::endl;
+      if( super_cell_result ){
+        _flag_runned_supercell_celslc = _supercell_celslc_parameters->call_boost_bin( );
+        std::cout << " _flag_runned_supercell_celslc " << std::boolalpha << _flag_runned_supercell_celslc << std::endl;
       }
     }
+    emit TDMap_ended_supercell_celslc( _flag_runned_supercell_celslc );
+    result = _flag_runned_supercell_celslc;
   }
   return result;
 }
@@ -2214,7 +2227,12 @@ bool TDMap::calculate_exp_image_boundaries_from_full_image(){
 }
 
 bool TDMap::set_full_sim_super_cell_length_a_nm( double full_crystal_a_size ){
-  const bool result = tdmap_full_sim_super_cell->set_length_a_Nanometers( full_crystal_a_size );
+  const bool cell_result = tdmap_full_sim_super_cell->set_length_a_Nanometers( full_crystal_a_size );
+  const double cell_length_a_nm = tdmap_full_sim_super_cell->get_length_a_Nanometers();
+  std::cout << " setting full_sim_super_cell_length_a " << full_crystal_a_size << std::endl;
+  std::cout << " setting full_sim_super_cell_length_a " << cell_length_a_nm << std::endl;
+  const bool image_result = supercell_sim_image_properties->set_full_nm_size_cols_a( cell_length_a_nm );
+  const bool result = cell_result & image_result;
   if( result ){
     emit super_cell_dimensions_a_changed();
   }
@@ -2222,7 +2240,12 @@ return result;
 }
 
 bool TDMap::set_full_sim_super_cell_length_b_nm( double full_crystal_b_size ){
-  const bool result = tdmap_full_sim_super_cell->set_length_b_Nanometers( full_crystal_b_size );
+  const bool cell_result = tdmap_full_sim_super_cell->set_length_b_Nanometers( full_crystal_b_size );
+  const double cell_length_b_nm = tdmap_full_sim_super_cell->get_length_b_Nanometers();
+  std::cout << " setting full_sim_super_cell_length_b " << full_crystal_b_size << std::endl;
+  std::cout << " setting full_sim_super_cell_length_b " << cell_length_b_nm << std::endl;
+  const bool image_result = supercell_sim_image_properties->set_full_nm_size_rows_b( cell_length_b_nm );
+  const bool result = cell_result & image_result;
   if( result ){
     emit super_cell_dimensions_b_changed();
   }
@@ -2247,7 +2270,16 @@ bool TDMap::update_full_crysta_a_b_sizes(){
       const double full_crystal_b_size = exp_image_bounds->get_boundary_polygon_length_y_nm();
       const bool a_result = tdmap_full_sim_super_cell->set_length_a_Nanometers( full_crystal_a_size );
       const bool b_result = tdmap_full_sim_super_cell->set_length_b_Nanometers( full_crystal_b_size );
-      const bool super_cell_result = a_result && b_result;
+
+      const double cell_length_a_nm = tdmap_full_sim_super_cell->get_length_a_Nanometers();
+      std::cout << " setting full_sim_super_cell_length_a " << full_crystal_a_size << std::endl;
+      std::cout << " setting full_sim_super_cell_length_a " << cell_length_a_nm << std::endl;
+      const bool image_result_a = supercell_sim_image_properties->set_full_nm_size_cols_a( cell_length_a_nm );
+      const double cell_length_b_nm = tdmap_full_sim_super_cell->get_length_b_Nanometers();
+      std::cout << " setting full_sim_super_cell_length_b " << full_crystal_b_size << std::endl;
+      std::cout << " setting full_sim_super_cell_length_b " << cell_length_b_nm << std::endl;
+      const bool image_result_b = supercell_sim_image_properties->set_full_nm_size_rows_b( cell_length_b_nm );
+      const bool super_cell_result = a_result && b_result && image_result_a && image_result_b;
       std::cout << "full_crystal_a_size " << full_crystal_a_size << " full_crystal_b_size " << full_crystal_b_size << " super_cell_result " << std::boolalpha << super_cell_result << std::endl;
       if( super_cell_result ){
         emit super_cell_dimensions_b_changed();
