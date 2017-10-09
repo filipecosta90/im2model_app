@@ -78,6 +78,30 @@ class TDMap  : public QObject {
     bool _run_simgrid_switch = true;
 
     /* *
+     * SUPERCELL CELSLC
+     * */
+    CELSLC_prm* _supercell_celslc_parameters;
+    bool _flag_runned_supercell_celslc = false;
+    bool _run_supercell_celslc_switch = true;
+    int _run_supercell_celslc_exec_log_level = ExecLogMode::FULL_LOG;
+
+    /* *
+     * SUPERCELL MSA
+     * */
+    MSA_prm* _supercell_msa_parameters;
+    bool _flag_runned_supercell_msa = false;
+    bool _run_supercell_msa_switch = true;
+    int _run_supercell_msa_exec_log_level = ExecLogMode::FULL_LOG;
+
+    /* *
+     * SUPERCELL WAVIMG
+     * */
+    WAVIMG_prm* _supercell_wavimg_parameters;
+    bool _flag_runned_supercell_wavimg = false;
+    bool _run_supercell_wavimg_switch = true;
+    int _run_supercell_wavimg_exec_log_level = ExecLogMode::FULL_LOG;
+
+    /* *
      * UnitCell
      * */
     UnitCell* unit_cell = nullptr;
@@ -93,11 +117,16 @@ class TDMap  : public QObject {
     BaseImage* sim_image_properties = nullptr;
     BaseImage* exp_image_properties = nullptr;
 
+    //tab4
+    BaseImage* supercell_sim_image_properties = nullptr;
+
     EMDWrapper* emd_wrapper = nullptr;
 
     ImageBounds* exp_image_bounds = nullptr;
 
     BaseCrystal* sim_crystal_properties = nullptr;
+    BaseCrystal* supercell_sim_crystal_properties = nullptr;
+
 
     /* Loggers */
     ApplicationLog::ApplicationLog* logger = nullptr;
@@ -126,13 +155,19 @@ class TDMap  : public QObject {
     TDMap( boost::process::ipstream& ostream_celslc_buffer,
         boost::process::ipstream& ostream_msa_buffer,
         boost::process::ipstream& ostream_wavimg_buffer,
-        boost::process::ipstream& ostream_simgrid_buffer );
+        boost::process::ipstream& ostream_simgrid_buffer,
+        boost::process::ipstream& ostream_supercell_celslc_buffer,
+        boost::process::ipstream& ostream_supercell_msa_buffer,
+        boost::process::ipstream& ostream_supercell_wavimg_buffer );
 
     /* constructor with logger */
     TDMap( boost::process::ipstream& ostream_celslc_buffer,
         boost::process::ipstream& ostream_msa_buffer,
         boost::process::ipstream& ostream_wavimg_buffer,
         boost::process::ipstream& ostream_simgrid_buffer,
+        boost::process::ipstream& ostream_supercell_celslc_buffer,
+        boost::process::ipstream& ostream_supercell_msa_buffer,
+        boost::process::ipstream& ostream_supercell_wavimg_buffer,
         ApplicationLog::ApplicationLog* app_logger );
 
     /** others **/
@@ -275,15 +310,29 @@ class TDMap  : public QObject {
     bool set_exp_image_properties_roi_center_x( std::string s_center_x );
     bool set_exp_image_properties_roi_center_y( std::string s_center_y );
     bool set_slc_file_name_prefix( std::string );
+    bool set_supercell_slc_file_name_prefix( std::string );
+
     bool set_wave_function_name( std::string  );
+    bool set_supercell_wave_function_name( std::string  );
+
     bool set_file_name_output_image_wave_function( std::string );
+    bool set_supercell_file_name_output_image_wave_function( std::string );
 
     bool set_slc_output_target_folder( std::string folder );
+    bool set_supercell_slc_output_target_folder( std::string folder );
+
     bool set_wav_output_target_folder( std::string folder );
+    bool set_supercell_wav_output_target_folder( std::string folder );
+
     bool set_dat_output_target_folder( std::string folder );
+    bool set_supercell_dat_output_target_folder( std::string folder );
 
     bool set_msa_prm_name( std::string  );
+    bool set_supercell_msa_prm_name( std::string  );
+
     bool set_wavimg_prm_name( std::string  );
+    bool set_supercell_wavimg_prm_name( std::string  );
+
     bool set_super_cell_size_a( std::string size_a );
     bool set_super_cell_size_b( std::string size_b );
     bool set_super_cell_size_c( std::string size_c );

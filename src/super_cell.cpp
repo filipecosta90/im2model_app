@@ -58,12 +58,15 @@ bool SuperCell::update_from_unit_cell(){
       }
       std::cout << " update_from_unit_cell $$" << std::endl;
       const bool angle_result = update_angle_parameters_from_unit_cell();
+      std::cout << " angle_result result " << std::boolalpha << angle_result << std::endl;
+      std::cout << " _flag_auto_calculate_expand_factor " << std::boolalpha << _flag_auto_calculate_expand_factor << std::endl;
+
       const bool expand_result = _flag_auto_calculate_expand_factor ? calculate_expand_factor() : _flag_expand_factor;
+      std::cout << " expand_result result " << std::boolalpha << expand_result << std::endl;
+
       if( !_flag_auto_calculate_expand_factor ){
         update_length_parameters_from_expand_factor();
       }
-      std::cout << " angle_result result " << std::boolalpha << angle_result << std::endl;
-      std::cout << " expand_result result " << std::boolalpha << expand_result << std::endl;
 
       if( angle_result && expand_result ){
         const bool create_result = create_atoms_from_unit_cell();
@@ -143,6 +146,7 @@ bool SuperCell::calculate_expand_factor(){
         unit_cell->get_flag_parsed_cif() &&
         unit_cell->get_flag_atom_positions_vec() &&
         unit_cell->get_flag_length() &&
+        unit_cell->get_flag_lattice_mapping_matrix() &&
         // SuperCell vars
         !inverse_orientation_matrix.empty() &&
         _flag_min_size_nm
@@ -152,10 +156,15 @@ bool SuperCell::calculate_expand_factor(){
 
       cv::Point3d _a,_b,_c,_d,_e,_f,_g,_h;
       cv::Point3d _sim_a,_sim_b,_sim_c,_sim_d,_sim_e,_sim_f,_sim_g,_sim_h;
+      cv::Mat lattice_mapping_factors_mx = unit_cell->get_lattice_mapping_matrix_factors();
 
       const double r_a = a_min_size_nm / 2.0f;
       const double r_b = b_min_size_nm / 2.0f;
       const double r_c = c_min_size_nm / 2.0f;
+
+      std::cout << "r_a " << r_a << " a_min_size_nm" << a_min_size_nm / 2.0f<< std::endl;
+      std::cout << "r_b " << r_b << " b_min_size_nm" << b_min_size_nm / 2.0f<< std::endl;
+      std::cout << "r_c " << r_c << " c_min_size_nm" << c_min_size_nm / 2.0f<< std::endl;
 
       _a = cv::Point3d( -r_a, -r_b, -r_c );
       _b = cv::Point3d( r_a, -r_b, -r_c );
@@ -171,21 +180,21 @@ bool SuperCell::calculate_expand_factor(){
       std::vector<double> _sim_y_component;
       std::vector<double> _sim_z_component;
 
-      cv::Mat _m_a = inverse_orientation_matrix * cv::Mat( _a );
+      cv::Mat _m_a = lattice_mapping_factors_mx * ( inverse_orientation_matrix * cv::Mat( _a ) );
       _sim_a = cv::Point3d(_m_a.at<double>(0,0), _m_a.at<double>(1,0), _m_a.at<double>(2,0));
-      cv::Mat _m_b = inverse_orientation_matrix * cv::Mat(_b);
+      cv::Mat _m_b = lattice_mapping_factors_mx * ( inverse_orientation_matrix * cv::Mat(_b) );
       _sim_b = cv::Point3d(_m_b.at<double>(0,0), _m_b.at<double>(1,0), _m_b.at<double>(2,0));
-      cv::Mat _m_c = inverse_orientation_matrix * cv::Mat(_c);
+      cv::Mat _m_c = lattice_mapping_factors_mx * ( inverse_orientation_matrix * cv::Mat(_c) );
       _sim_c = cv::Point3d(_m_c.at<double>(0,0), _m_c.at<double>(1,0), _m_c.at<double>(2,0));
-      cv::Mat _m_d = inverse_orientation_matrix * cv::Mat(_d);
+      cv::Mat _m_d = lattice_mapping_factors_mx * ( inverse_orientation_matrix * cv::Mat(_d) );
       _sim_d = cv::Point3d(_m_d.at<double>(0,0), _m_d.at<double>(1,0), _m_d.at<double>(2,0));
-      cv::Mat _m_e = inverse_orientation_matrix * cv::Mat(_e);
+      cv::Mat _m_e = lattice_mapping_factors_mx * ( inverse_orientation_matrix * cv::Mat(_e) );
       _sim_e = cv::Point3d(_m_e.at<double>(0,0), _m_e.at<double>(1,0), _m_e.at<double>(2,0));
-      cv::Mat _m_f = inverse_orientation_matrix * cv::Mat(_f);
+      cv::Mat _m_f = lattice_mapping_factors_mx * ( inverse_orientation_matrix * cv::Mat(_f) );
       _sim_f = cv::Point3d(_m_f.at<double>(0,0), _m_f.at<double>(1,0), _m_f.at<double>(2,0));
-      cv::Mat _m_g = inverse_orientation_matrix * cv::Mat(_g);
+      cv::Mat _m_g = lattice_mapping_factors_mx * ( inverse_orientation_matrix * cv::Mat(_g) );
       _sim_g = cv::Point3d(_m_g.at<double>(0,0), _m_g.at<double>(1,0), _m_g.at<double>(2,0));
-      cv::Mat _m_h = inverse_orientation_matrix * cv::Mat(_h);
+      cv::Mat _m_h = lattice_mapping_factors_mx * ( inverse_orientation_matrix * cv::Mat(_h) );
       _sim_h = cv::Point3d(_m_h.at<double>(0,0), _m_h.at<double>(1,0), _m_h.at<double>(2,0));
 
       _sim_x_component.push_back( _sim_a.x );

@@ -5,7 +5,10 @@ TDMap::TDMap(
     boost::process::ipstream& ostream_celslc_buffer,
     boost::process::ipstream& ostream_msa_buffer,
     boost::process::ipstream& ostream_wavimg_buffer,
-    boost::process::ipstream& ostream_simgrid_buffer
+    boost::process::ipstream& ostream_simgrid_buffer,
+    boost::process::ipstream& ostream_supercell_celslc_buffer,
+    boost::process::ipstream& ostream_supercell_msa_buffer,
+    boost::process::ipstream& ostream_supercell_wavimg_buffer
     )
 {
   /* base unit cell info */
@@ -38,6 +41,7 @@ TDMap::TDMap(
 
   sim_image_properties = new BaseImage();
   exp_image_properties = new BaseImage();
+  supercell_sim_image_properties = new BaseImage();
 
   emd_wrapper = new EMDWrapper();
   exp_image_properties->set_emd_wrapper( emd_wrapper );
@@ -48,10 +52,16 @@ TDMap::TDMap(
   final_full_sim_super_cell->set_image_bounds( exp_image_bounds );
 
   sim_crystal_properties = new BaseCrystal();
+  supercell_sim_crystal_properties = new BaseCrystal();
 
   _tdmap_celslc_parameters = new CELSLC_prm( ostream_celslc_buffer );
   _tdmap_msa_parameters = new MSA_prm( ostream_msa_buffer );
   _tdmap_wavimg_parameters = new WAVIMG_prm( ostream_wavimg_buffer );
+
+  _supercell_celslc_parameters = new CELSLC_prm( ostream_supercell_celslc_buffer );
+  _supercell_msa_parameters = new MSA_prm( ostream_supercell_msa_buffer );
+  _supercell_wavimg_parameters = new WAVIMG_prm( ostream_supercell_wavimg_buffer );
+
   _td_map_simgrid = new SimGrid( ostream_simgrid_buffer );
 
   exp_image_properties->set_flag_auto_a_size( true );
@@ -83,6 +93,24 @@ TDMap::TDMap(
   _tdmap_wavimg_parameters->set_sim_super_cell ( tdmap_roi_sim_super_cell );
   _tdmap_wavimg_parameters->set_sim_image_properties ( sim_image_properties );
 
+  // set pointers for SUPERCELL celslc
+  _supercell_celslc_parameters->set_unit_cell ( unit_cell );
+  _supercell_celslc_parameters->set_sim_crystal_properties ( sim_crystal_properties );
+  _supercell_celslc_parameters->set_sim_super_cell ( tdmap_full_sim_super_cell );
+  _supercell_celslc_parameters->set_sim_image_properties ( supercell_sim_image_properties );
+
+    // set pointers for SUPERCELL  msa
+    _supercell_msa_parameters->set_unit_cell ( unit_cell );
+    _supercell_msa_parameters->set_sim_crystal_properties ( sim_crystal_properties );
+    _supercell_msa_parameters->set_sim_super_cell ( tdmap_full_sim_super_cell );
+    _supercell_msa_parameters->set_sim_image_properties ( supercell_sim_image_properties );
+
+    // set pointers for SUPERCELL wavimg
+    _supercell_wavimg_parameters->set_unit_cell ( unit_cell );
+    _supercell_wavimg_parameters->set_sim_crystal_properties ( sim_crystal_properties );
+    _supercell_wavimg_parameters->set_sim_super_cell ( tdmap_full_sim_super_cell );
+    _supercell_wavimg_parameters->set_sim_image_properties ( supercell_sim_image_properties );
+
   // set pointers for simgrid
   _td_map_simgrid->set_wavimg_var( _tdmap_wavimg_parameters );
   _td_map_simgrid->set_sim_crystal_properties ( sim_crystal_properties );
@@ -112,6 +140,12 @@ TDMap::TDMap(
   _tdmap_msa_parameters->set_number_frozen_lattice_variants_considered_per_slice( 1 );
   _tdmap_msa_parameters->set_minimum_number_frozen_phonon_configurations_used_generate_wave_functions ( 1 );
   _tdmap_msa_parameters->set_period_readout_or_detection_in_units_of_slices ( 1 ); // bug
+
+  _supercell_msa_parameters->set_internal_repeat_factor_of_super_cell_along_x ( 1 );
+  _supercell_msa_parameters->set_internal_repeat_factor_of_super_cell_along_y ( 1 );
+  _supercell_msa_parameters->set_number_frozen_lattice_variants_considered_per_slice( 1 );
+  _supercell_msa_parameters->set_minimum_number_frozen_phonon_configurations_used_generate_wave_functions ( 1 );
+  _supercell_msa_parameters->set_period_readout_or_detection_in_units_of_slices ( 1 ); // bug
   /* ******
    * wavimg static settings
    */
@@ -131,6 +165,11 @@ TDMap::TDMap(
   _tdmap_wavimg_parameters->set_image_vacuum_mean_intensity( 1.0f );
   _tdmap_wavimg_parameters->set_conversion_rate( 1.0f );
   _tdmap_wavimg_parameters->set_readout_noise_rms_amplitude( 0.0f );
+
+  _supercell_wavimg_parameters->set_image_data_type( 0 );
+  _supercell_wavimg_parameters->set_image_vacuum_mean_intensity( 1.0f );
+  _supercell_wavimg_parameters->set_conversion_rate( 1.0f );
+  _supercell_wavimg_parameters->set_readout_noise_rms_amplitude( 0.0f );
   // setters line 9
   // NOT USED
   // setters line 10
@@ -141,6 +180,7 @@ TDMap::TDMap(
   // NOT USED
   // setters line 13
   _tdmap_wavimg_parameters->set_switch_coherence_model( 1 );
+  _supercell_wavimg_parameters->set_switch_coherence_model( 1 );
   // setters line 14
   //_tdmap_wavimg_parameters->set_partial_temporal_coherence_switch( 1 );
   //_tdmap_wavimg_parameters->set_partial_temporal_coherence_focus_spread( 4.0f );
@@ -158,9 +198,14 @@ TDMap::TDMap(
   // SIMULATION DEPENDENT
   // setters line 19 + aberration_definition_index_number
   _tdmap_wavimg_parameters->set_objective_aperture_radius( 5500.0f );
+  _supercell_wavimg_parameters->set_objective_aperture_radius( 5500.0f );
   // setters line 20 + aberration_definition_index_number
   _tdmap_wavimg_parameters->set_center_x_of_objective_aperture( 0.0f );
   _tdmap_wavimg_parameters->set_center_y_of_objective_aperture( 0.0f );
+
+  _supercell_wavimg_parameters->set_center_x_of_objective_aperture( 0.0f );
+  _supercell_wavimg_parameters->set_center_y_of_objective_aperture( 0.0f );
+
   // setters line 21 + aberration_definition_index_number
   // SIMULATION DEPENDENT
 }
@@ -169,8 +214,11 @@ TDMap::TDMap( boost::process::ipstream& ostream_celslc_buffer,
     boost::process::ipstream& ostream_msa_buffer,
     boost::process::ipstream& ostream_wavimg_buffer,
     boost::process::ipstream& ostream_simgrid_buffer,
+    boost::process::ipstream& ostream_supercell_celslc_buffer,
+    boost::process::ipstream& ostream_supercell_msa_buffer,
+    boost::process::ipstream& ostream_supercell_wavimg_buffer,
     ApplicationLog::ApplicationLog* app_logger ) :
-  TDMap::TDMap( ostream_celslc_buffer, ostream_msa_buffer, ostream_wavimg_buffer, ostream_simgrid_buffer ) {
+  TDMap::TDMap( ostream_celslc_buffer, ostream_msa_buffer, ostream_wavimg_buffer, ostream_simgrid_buffer, ostream_supercell_celslc_buffer, ostream_supercell_msa_buffer, ostream_supercell_wavimg_buffer  ) {
     set_application_logger( app_logger );
   }
 
@@ -860,10 +908,22 @@ bool TDMap::set_slc_file_name_prefix( std::string prefix ){
   return sim_crystal_properties->set_slc_file_name_prefix( prefix );
 }
 
+bool TDMap::set_supercell_slc_file_name_prefix( std::string prefix ){
+  return supercell_sim_crystal_properties->set_slc_file_name_prefix( prefix );
+}
+
 bool TDMap::set_wave_function_name( std::string name ){
   bool result = false;
   const bool msa_result = _tdmap_msa_parameters->set_wave_function_name( name );
   const bool wavimg_result = _tdmap_wavimg_parameters->set_file_name_input_wave_function( name );
+  result =  msa_result & wavimg_result;
+  return result;
+}
+
+bool TDMap::set_supercell_wave_function_name( std::string name ){
+  bool result = false;
+  const bool msa_result = _supercell_msa_parameters->set_wave_function_name( name );
+  const bool wavimg_result = _supercell_wavimg_parameters->set_file_name_input_wave_function( name );
   result =  msa_result & wavimg_result;
   return result;
 }
@@ -875,9 +935,24 @@ bool TDMap::set_file_name_output_image_wave_function( std::string image_wave ){
   return result;
 }
 
+bool TDMap::set_supercell_file_name_output_image_wave_function( std::string image_wave ){
+  bool result = false;
+  const bool wavimg_result = _supercell_wavimg_parameters->set_file_name_output_image_wave_function( image_wave );
+  result =  wavimg_result;
+  return result;
+}
+
 bool TDMap::set_slc_output_target_folder( std::string folder ){
   const bool celslc_result = _tdmap_celslc_parameters->set_base_bin_output_target_folder( folder );
   const bool crystal_result = sim_crystal_properties->set_slc_output_target_folder( folder );
+  const bool result = celslc_result && crystal_result;
+  return result;
+}
+
+
+bool TDMap::set_supercell_slc_output_target_folder( std::string folder ){
+  const bool celslc_result = _supercell_celslc_parameters->set_base_bin_output_target_folder( folder );
+  const bool crystal_result = supercell_sim_crystal_properties->set_slc_output_target_folder( folder );
   const bool result = celslc_result && crystal_result;
   return result;
 }
@@ -889,11 +964,27 @@ bool TDMap::set_wav_output_target_folder( std::string folder ){
   return result;
 }
 
+
+bool TDMap::set_supercell_wav_output_target_folder( std::string folder ){
+  const bool msa_result = _supercell_msa_parameters->set_base_bin_output_target_folder( folder );
+  const bool crystal_result = supercell_sim_crystal_properties->set_wav_output_target_folder( folder );
+  const bool result = msa_result && crystal_result;
+  return result;
+}
+
 bool TDMap::set_dat_output_target_folder( std::string folder ){
   const bool wavimg_result = _tdmap_wavimg_parameters->set_base_bin_output_target_folder( folder );
   const bool crystal_result = sim_crystal_properties->set_dat_output_target_folder( folder );
   const bool result = wavimg_result && crystal_result;
-  return sim_crystal_properties->set_dat_output_target_folder( folder );
+  return result;
+}
+
+
+bool TDMap::set_supercell_dat_output_target_folder( std::string folder ){
+  const bool wavimg_result = _supercell_wavimg_parameters->set_base_bin_output_target_folder( folder );
+  const bool crystal_result = supercell_sim_crystal_properties->set_dat_output_target_folder( folder );
+  const bool result = wavimg_result && crystal_result;
+  return result;
 }
 
 bool TDMap::set_msa_prm_name(  std::string prm_name  ){
@@ -903,9 +994,25 @@ bool TDMap::set_msa_prm_name(  std::string prm_name  ){
   return result;
 }
 
+
+bool TDMap::set_supercell_msa_prm_name(  std::string prm_name  ){
+  bool result = false;
+  const bool msa_result = _supercell_msa_parameters->set_prm_file_name( prm_name );
+  result =  msa_result;
+  return result;
+}
+
 bool TDMap::set_wavimg_prm_name(  std::string prm_name  ){
   bool result = false;
   const bool wavimg_result = _tdmap_wavimg_parameters->set_prm_file_name( prm_name );
+  result =  wavimg_result;
+  return result;
+}
+
+
+bool TDMap::set_supercell_wavimg_prm_name(  std::string prm_name  ){
+  bool result = false;
+  const bool wavimg_result = _supercell_wavimg_parameters->set_prm_file_name( prm_name );
   result =  wavimg_result;
   return result;
 }
@@ -1005,6 +1112,11 @@ bool TDMap::set_base_dir_path( boost::filesystem::path path ){
   result &= _tdmap_wavimg_parameters->set_base_bin_start_dir_path( path );
   result &= tdmap_roi_sim_super_cell->set_base_bin_start_dir_path( path );
   result &= tdmap_full_sim_super_cell->set_base_bin_start_dir_path( path );
+  //tab 4
+  result &= supercell_sim_crystal_properties->set_base_dir_path( path );
+  result &= _supercell_celslc_parameters->set_base_bin_start_dir_path( path );
+  result &= _supercell_msa_parameters->set_base_bin_start_dir_path( path );
+  result &= _supercell_wavimg_parameters->set_base_bin_start_dir_path( path );
   return result;
 }
 
@@ -1023,6 +1135,9 @@ bool TDMap::set_application_logger( ApplicationLog::ApplicationLog* app_logger )
   _tdmap_msa_parameters->set_application_logger( app_logger );
   _tdmap_wavimg_parameters->set_application_logger( app_logger );
   _td_map_simgrid->set_application_logger(app_logger);
+  _supercell_celslc_parameters->set_application_logger( app_logger );
+  _supercell_msa_parameters->set_application_logger( app_logger );
+  _supercell_wavimg_parameters->set_application_logger( app_logger );
   /* Classes with sim properties */
   //unit_cell->set_application_logger(app_logger);
   tdmap_roi_sim_super_cell->set_application_logger(app_logger);
@@ -1030,13 +1145,17 @@ bool TDMap::set_application_logger( ApplicationLog::ApplicationLog* app_logger )
   final_full_sim_super_cell->set_application_logger(app_logger);
   sim_image_properties->set_application_logger(app_logger);
   exp_image_properties->set_application_logger(app_logger);
+  supercell_sim_image_properties->set_application_logger(app_logger);
   exp_image_bounds->set_application_logger(app_logger);
   sim_crystal_properties->set_application_logger(app_logger);
+  supercell_sim_crystal_properties->set_application_logger(app_logger);
   return true;
 }
 
 bool TDMap::set_dr_probe_celslc_execname( std::string celslc_execname ){
-  const bool result = _tdmap_celslc_parameters->set_bin_execname(celslc_execname);
+  const bool step2_result = _tdmap_celslc_parameters->set_bin_execname(celslc_execname);
+  const bool step4_result = _supercell_celslc_parameters->set_bin_execname(celslc_execname);
+  const bool result = step2_result && step4_result;
   if( _flag_logger ){
     std::stringstream message;
     message << "Set_dr_probe_celslc_execname result: " << std::boolalpha << result;
@@ -1046,7 +1165,9 @@ bool TDMap::set_dr_probe_celslc_execname( std::string celslc_execname ){
 }
 
 bool TDMap::set_dr_probe_msa_execname( std::string msa_execname ){
-  const bool result = _tdmap_msa_parameters->set_bin_execname(msa_execname);
+  const bool step2_result = _tdmap_msa_parameters->set_bin_execname(msa_execname);
+  const bool step4_result = _supercell_msa_parameters->set_bin_execname(msa_execname);
+  const bool result = step2_result && step4_result;
   if( _flag_logger ){
     std::stringstream message;
     message << "Set_dr_probe_msa_execname result: " << result;
@@ -1056,7 +1177,9 @@ bool TDMap::set_dr_probe_msa_execname( std::string msa_execname ){
 }
 
 bool TDMap::set_dr_probe_wavimg_execname( std::string wavimg_execname ){
-  const bool result =  _tdmap_wavimg_parameters->set_bin_execname( wavimg_execname );
+  const bool step2_result = _tdmap_wavimg_parameters->set_bin_execname(wavimg_execname);
+  const bool step4_result = _supercell_wavimg_parameters->set_bin_execname(wavimg_execname);
+  const bool result = step2_result && step4_result;
   if( _flag_logger ){
     std::stringstream message;
     message << " set_dr_probe_wavimg_execname result: " << result;
@@ -1134,25 +1257,29 @@ bool TDMap::set_exp_image_properties_roi_center_y( std::string s_center_y ){
 bool TDMap::set_image_properties_sampling_rate_x_m_per_pixel( const double s_rate_x ){
   const bool exp_result = exp_image_properties->set_pixel_size_height_x_m( s_rate_x );
   const bool sim_result = sim_image_properties->set_pixel_size_height_x_m( s_rate_x );
-  return exp_result && sim_result;
+  const bool supercell_sim_result = supercell_sim_image_properties->set_pixel_size_height_x_m( s_rate_x );
+  return exp_result && sim_result && supercell_sim_result;
 }
 
 bool TDMap::set_image_properties_sampling_rate_y_m_per_pixel( const double s_rate_y ){
   const bool exp_result = exp_image_properties->set_pixel_size_width_y_m( s_rate_y );
   const bool sim_result = sim_image_properties->set_pixel_size_width_y_m( s_rate_y );
-  return exp_result && sim_result;
+  const bool supercell_sim_result = supercell_sim_image_properties->set_pixel_size_width_y_m( s_rate_y );
+  return exp_result && sim_result && supercell_sim_result;
 }
 
 bool TDMap::set_image_properties_sampling_rate_x_nm_per_pixel( const double s_rate_x ){
   const bool exp_result = exp_image_properties->set_sampling_rate_x_nm_per_pixel( s_rate_x );
   const bool sim_result = sim_image_properties->set_sampling_rate_x_nm_per_pixel( s_rate_x );
-  return exp_result && sim_result;
+  const bool supercell_sim_result = supercell_sim_image_properties->set_sampling_rate_x_nm_per_pixel( s_rate_x );
+  return exp_result && sim_result && supercell_sim_result;
 }
 
 bool TDMap::set_image_properties_sampling_rate_y_nm_per_pixel( const double s_rate_y ){
   const bool exp_result = exp_image_properties->set_sampling_rate_y_nm_per_pixel( s_rate_y );
   const bool sim_result = sim_image_properties->set_sampling_rate_y_nm_per_pixel( s_rate_y );
-  return exp_result && sim_result;
+  const bool supercell_sim_result = supercell_sim_image_properties->set_sampling_rate_y_nm_per_pixel( s_rate_y );
+  return exp_result && sim_result && supercell_sim_result;
 }
 
 bool TDMap::set_exp_image_properties_sampling_rate_x_nm_per_pixel( std::string sampling_x ){
@@ -1535,6 +1662,7 @@ bool TDMap::set_accelaration_voltage_kv( std::string accelaration_voltage ){
   try {
     const double _ht_accelaration_voltage = boost::lexical_cast<double>( accelaration_voltage );
     result = sim_crystal_properties->set_ht_accelaration_voltage_KV( _ht_accelaration_voltage );
+    result &= supercell_sim_crystal_properties->set_ht_accelaration_voltage_KV( _ht_accelaration_voltage );
   }
   catch(boost::bad_lexical_cast&  ex) {
     // pass it up
@@ -1553,6 +1681,7 @@ bool TDMap::set_envelop_parameters_vibrational_damping_method ( int method ){
   bool result = false;
   if( _tdmap_wavimg_parameters != nullptr ){
     _tdmap_wavimg_parameters->set_simulation_image_spread_envelope_switch( method );
+    _supercell_wavimg_parameters->set_simulation_image_spread_envelope_switch( method );
     result = true;
   }
   return result;
@@ -1562,6 +1691,7 @@ bool TDMap::set_envelop_parameters_vibrational_damping_isotropic_one_rms_amplitu
   bool result = false;
   if( _tdmap_wavimg_parameters != nullptr ){
     _tdmap_wavimg_parameters->set_isotropic_one_rms_amplitude( amplitude );
+    _supercell_wavimg_parameters->set_isotropic_one_rms_amplitude( amplitude );
     result = true;
   }
   return result;
@@ -1571,6 +1701,7 @@ bool TDMap::set_envelop_parameters_vibrational_damping_anisotropic_second_rms_am
   bool result = false;
   if( _tdmap_wavimg_parameters != nullptr ){
     _tdmap_wavimg_parameters->set_anisotropic_second_rms_amplitude( amplitude );
+    _supercell_wavimg_parameters->set_anisotropic_second_rms_amplitude( amplitude );
     result = true;
   }
   return result;
@@ -1580,6 +1711,7 @@ bool TDMap::set_envelop_parameters_vibrational_damping_azimuth_orientation_angle
   bool result = false;
   if( _tdmap_wavimg_parameters != nullptr ){
     _tdmap_wavimg_parameters->set_azimuth_orientation_angle( angle );
+    _supercell_wavimg_parameters->set_azimuth_orientation_angle( angle );
     result = true;
   }
   return result;
@@ -1610,8 +1742,10 @@ int TDMap::get_envelop_parameters_vibrational_damping_method(){
 
 bool TDMap::set_mtf_filename( std::string file_name ){
   bool result = _tdmap_wavimg_parameters->set_mtf_filename( file_name );
+  result &= _supercell_wavimg_parameters->set_mtf_filename( file_name );
   if( result ){
     _tdmap_wavimg_parameters->set_mtf_simulation_switch( true );
+    _supercell_wavimg_parameters->set_mtf_simulation_switch( true );
   }
   return result;
 }
@@ -1621,7 +1755,9 @@ bool TDMap::set_spherical_aberration ( std::string _string_cs ){
   try {
     const double _cs = boost::lexical_cast<double>( _string_cs );
     _tdmap_wavimg_parameters->set_aberration_definition( WAVIMG_prm::AberrationDefinition::SphericalAberration , 2 , 0.0f );
-    result =  _tdmap_wavimg_parameters->set_aberration_definition( WAVIMG_prm::AberrationDefinition::SphericalAberration , 1 , _cs );
+    _supercell_wavimg_parameters->set_aberration_definition( WAVIMG_prm::AberrationDefinition::SphericalAberration , 2 , 0.0f );
+    result = _tdmap_wavimg_parameters->set_aberration_definition( WAVIMG_prm::AberrationDefinition::SphericalAberration , 1 , _cs );
+    result &= _supercell_wavimg_parameters->set_aberration_definition( WAVIMG_prm::AberrationDefinition::SphericalAberration , 1 , _cs );
   }
   catch(boost::bad_lexical_cast&  ex) {
     // pass it up
@@ -1631,11 +1767,15 @@ bool TDMap::set_spherical_aberration ( std::string _string_cs ){
 }
 
 bool TDMap::set_spherical_aberration_switch( bool cs_switch ){
-  return _tdmap_wavimg_parameters->set_aberration_definition_switch( WAVIMG_prm::AberrationDefinition::SphericalAberration, cs_switch );
+  const bool step2_result = _tdmap_wavimg_parameters->set_aberration_definition_switch( WAVIMG_prm::AberrationDefinition::SphericalAberration, cs_switch );
+  const bool step4_result = _supercell_wavimg_parameters->set_aberration_definition_switch( WAVIMG_prm::AberrationDefinition::SphericalAberration, cs_switch );
+  return step2_result && step4_result;
 }
 
 bool TDMap::set_partial_temporal_coherence_switch( bool tc_switch ){
-  return _tdmap_wavimg_parameters->set_partial_temporal_coherence_switch( tc_switch );
+  const bool step2_result = _tdmap_wavimg_parameters->set_partial_temporal_coherence_switch( tc_switch );
+  const bool step4_result = _supercell_wavimg_parameters->set_partial_temporal_coherence_switch( tc_switch );
+  return step2_result && step4_result;
 }
 
 bool TDMap::set_partial_temporal_coherence_focus_spread ( std::string _string_fs ){
@@ -1643,6 +1783,7 @@ bool TDMap::set_partial_temporal_coherence_focus_spread ( std::string _string_fs
   try {
     const double _fs = boost::lexical_cast<double>( _string_fs );
     result = _tdmap_wavimg_parameters->set_partial_temporal_coherence_focus_spread( _fs );
+    result &= _supercell_wavimg_parameters->set_partial_temporal_coherence_focus_spread( _fs );
   }
   catch(boost::bad_lexical_cast&  ex) {
     // pass it up
@@ -1652,14 +1793,18 @@ bool TDMap::set_partial_temporal_coherence_focus_spread ( std::string _string_fs
 }
 
 bool TDMap::set_partial_spatial_coherence_switch( bool sc_switch ){
-  return _tdmap_wavimg_parameters->set_partial_spatial_coherence_switch( sc_switch );
+  const bool step2_result = _tdmap_wavimg_parameters->set_partial_spatial_coherence_switch( sc_switch );
+  const bool step4_result = _supercell_wavimg_parameters->set_partial_spatial_coherence_switch( sc_switch );
+  return step2_result && step4_result;
 }
 
 bool TDMap::set_partial_spatial_coherence_semi_convergence_angle ( std::string _string_ca ){
   bool result = false;
   try {
     const double _ca = boost::lexical_cast<double>( _string_ca );
-    result = _tdmap_wavimg_parameters->set_partial_spatial_coherence_semi_convergence_angle( _ca );
+    const bool step2_result = _tdmap_wavimg_parameters->set_partial_spatial_coherence_semi_convergence_angle( _ca );
+    const bool step4_result = _supercell_wavimg_parameters->set_partial_spatial_coherence_semi_convergence_angle( _ca );
+    result = step2_result && step4_result;
   }
   catch(boost::bad_lexical_cast&  ex) {
     // pass it up
@@ -1669,7 +1814,10 @@ bool TDMap::set_partial_spatial_coherence_semi_convergence_angle ( std::string _
 }
 
 bool TDMap::set_mtf_switch( bool value ){
-  return _tdmap_wavimg_parameters->set_mtf_simulation_switch( value );
+  const bool step2_result = _tdmap_wavimg_parameters->set_mtf_simulation_switch( value );
+  const bool step4_result = _supercell_wavimg_parameters->set_mtf_simulation_switch( value );
+  const bool result = step2_result && step4_result;
+  return result;
 }
 
 int TDMap::get_image_correlation_matching_method(){
@@ -1757,10 +1905,13 @@ bool TDMap::compute_full_super_cell(){
   bool result = false;
   if( tdmap_full_sim_super_cell->get_flag_length() ){
     const bool unit_cell_update = tdmap_full_sim_super_cell->update_from_unit_cell();
+    std::cout << " unit_cell_update result " << std::boolalpha << unit_cell_update << std::endl;
     if( unit_cell_update ){
       const bool cel_generation = tdmap_full_sim_super_cell->generate_super_cell_file();
-      if( unit_cell_update ){
+      std::cout << " cel_generation result " << std::boolalpha << cel_generation << std::endl;
+      if( cel_generation ){
         const bool xyz_export = tdmap_full_sim_super_cell->generate_xyz_file();
+        std::cout << " xyz_export result " << std::boolalpha << xyz_export << std::endl;
         const bool super_cell_result = unit_cell_update && cel_generation && xyz_export;
         if( super_cell_result ){
           result = true;

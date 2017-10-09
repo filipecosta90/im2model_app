@@ -365,18 +365,39 @@ bool BaseImage::auto_calculate_ignore_edge_pixels(){
   if( _flag_auto_roi_from_ignored_edge ){
     if( _flag_sampling_rate && _flag_ignore_edge_nm ){
       const int calculated_ignore_edge_pixels = (int) ( ignore_edge_nm / sampling_rate_x_nm_per_pixel );
+      if( _flag_logger ){
+        std::stringstream message;
+        message << "calculated_ignore_edge_pixels " << calculated_ignore_edge_pixels;
+        ApplicationLog::severity_level _log_type = ApplicationLog::normal;
+       BOOST_LOG_FUNCTION();
+       logger->logEvent( _log_type , message.str() );
+      }
       result = set_ignore_edge_pixels( calculated_ignore_edge_pixels );
       if( _flag_full_n_cols_width ){
         const int roi_cols = full_n_cols_width - 2 * ignore_edge_pixels;
         result &= set_roi_n_cols_width( roi_cols );
         const int center_x = full_n_cols_width / 2;
         result &= set_roi_center_x( center_x );
+        if( _flag_logger ){
+          std::stringstream message;
+          message << "called BaseImage::set_roi_n_cols_width() with value " << roi_cols << ", called BaseImage::set_roi_center_x() with value " << roi_center_x;
+          ApplicationLog::severity_level _log_type = ApplicationLog::normal;
+         BOOST_LOG_FUNCTION();
+         logger->logEvent( _log_type , message.str() );
+        }
       }
       if( _flag_full_n_rows_height ){
         const int roi_rows = full_n_rows_height - 2 * ignore_edge_pixels;
         result &= set_roi_n_rows_height( roi_rows );
         const int center_y = full_n_rows_height / 2;
         result &= set_roi_center_y( center_y );
+        if( _flag_logger ){
+          std::stringstream message;
+          message << "called BaseImage::set_roi_n_rows_height() with value " << roi_rows << ", called BaseImage::set_roi_center_y() with value " << center_y;
+          ApplicationLog::severity_level _log_type = ApplicationLog::normal;
+         BOOST_LOG_FUNCTION();
+         logger->logEvent( _log_type , message.str() );
+        }
       }
     }
   }

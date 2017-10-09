@@ -328,22 +328,41 @@ _flag_angle_gamma
     std::cout << " sin( angle_alpha )" << sin( deg2rad(angle_alpha) ) << std::endl;
     std::cout << " sin( angle_beta )" << sin( deg2rad(angle_beta) ) << std::endl;
     std::cout << " sin( angle_gamma )" << sin( deg2rad(angle_gamma) ) << std::endl;
+    cv::Point3d vector_a_factor;
     cv::Point3d vector_a_Ang;
-    vector_a_Ang.x = length_a_Angstroms * sin( deg2rad(angle_beta) );
-    vector_a_Ang.y = length_b_Angstroms * sin( deg2rad(angle_alpha) ) * cos( deg2rad(angle_gamma) );
-    vector_a_Ang.z = 0.0;
+    vector_a_factor.x = sin( deg2rad(angle_beta) );
+    vector_a_Ang.x = length_a_Angstroms * vector_a_factor.x ;
+    vector_a_factor.y = sin( deg2rad(angle_alpha) ) * cos( deg2rad(angle_gamma) );
+    vector_a_Ang.y = length_b_Angstroms * vector_a_factor.y;
+    vector_a_factor.z = 0.0f;
+    vector_a_Ang.z = 0.0f;
 
+    cv::Point3d vector_b_factor;
     cv::Point3d vector_b_Ang;
+    vector_b_factor.x = 0.0f;
     vector_b_Ang.x = 0.0f;
-    vector_b_Ang.y = length_b_Angstroms * sin( deg2rad(angle_alpha) ) * sin( deg2rad(angle_gamma) );
+    vector_b_factor.y = sin( deg2rad(angle_alpha) ) * sin( deg2rad(angle_gamma) );
+    vector_b_Ang.y = length_b_Angstroms * vector_b_factor.y;
+    vector_b_factor.z = 0.0f;
     vector_b_Ang.z = 0.0f;
 
+    cv::Point3d vector_c_factor;
     cv::Point3d vector_c_Ang;
-    vector_c_Ang.x = length_a_Angstroms * cos( deg2rad(angle_beta) );
-    vector_c_Ang.y = length_b_Angstroms * cos( deg2rad(angle_alpha) );
+    vector_c_factor.x = cos( deg2rad(angle_beta) );
+    vector_c_Ang.x = length_a_Angstroms * vector_c_factor.x;
+    vector_c_factor.y = cos( deg2rad(angle_alpha) );
+    vector_c_Ang.y = length_b_Angstroms * vector_c_factor.y;
+    vector_c_factor.z = 1.0f;
     vector_c_Ang.z = length_c_Angstroms;
 
     /* insert into matrix */
+    std::vector<cv::Point3d> factor_points;
+    factor_points.push_back(vector_a_factor);
+    factor_points.push_back(vector_b_factor);
+    factor_points.push_back(vector_c_factor);
+    cv::Mat lattice_mapping_matrix_factor_temp = cv::Mat( factor_points , true );
+    lattice_mapping_matrix_factors = lattice_mapping_matrix_factor_temp.reshape(1);
+
     std::vector<cv::Point3d> points;
     points.push_back(vector_a_Ang);
     points.push_back(vector_b_Ang);
@@ -355,11 +374,19 @@ _flag_angle_gamma
     std::cout << " line 1 " << vector_a_Ang << std::endl;
     std::cout << " line 2 " << vector_b_Ang << std::endl;
     std::cout << " line 3 " << vector_c_Ang << std::endl;
+    std::cout <<"lattice_mapping_matrix_factors: \n" << lattice_mapping_matrix_factors << std::endl;
     std::cout <<"lattice_mapping_matrix_Angstroms: \n" << lattice_mapping_matrix_Angstroms << std::endl;
     std::cout <<"lattice_mapping_matrix_Nanometers: \n" << lattice_mapping_matrix_Nanometers << std::endl;
   _flag_lattice_mapping_matrix_Nanometers = true;
   }
 
+}
+
+cv::Point3d BaseCell::get_lattice_mapping_dimension_vector_Nanometers(){
+  const cv::Point3d unit_vector (1.0f, 1.0f, 1.0f);
+  const cv::Mat lattice_mapping_dimension_matrix_Nanometers = lattice_mapping_matrix_Nanometers * cv::Mat( unit_vector );
+  const cv::Point3d lattice_mapping_dimension_vector_Nanometers (lattice_mapping_dimension_matrix_Nanometers.at<double>(0,0), lattice_mapping_dimension_matrix_Nanometers.at<double>(1,0), lattice_mapping_dimension_matrix_Nanometers.at<double>(2,0) );
+  return lattice_mapping_dimension_vector_Nanometers;
 }
 
 void BaseCell::form_matrix_from_miller_indices(){

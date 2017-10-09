@@ -129,6 +129,7 @@ class BaseCell : public QObject {
     bool get_flag_atom_positions_vec(){ return _flag_atom_positions; }
     bool get_flag_orientation_matrix(){ return _flag_orientation_matrix; }
     bool get_flag_inverse_orientation_matrix(){ return _flag_inverse_orientation_matrix; }
+    bool get_flag_lattice_mapping_matrix(){ return _flag_lattice_mapping_matrix_Nanometers; }
     bool get_flag_lattice_mapping_matrix_Nanometers(){ return _flag_lattice_mapping_matrix_Nanometers; }
     bool get_flag_fractional_norm(){ return _flag_fractional_norm; }
 
@@ -137,8 +138,11 @@ class BaseCell : public QObject {
 
     cv::Mat get_orientation_matrix(){ return orientation_matrix; }
     cv::Mat get_inverse_orientation_matrix(){ return inverse_orientation_matrix; }
+
+    cv::Mat get_lattice_mapping_matrix_factors(){ return lattice_mapping_matrix_factors; }
     cv::Mat get_lattice_mapping_matrix_Nanometers(){ return lattice_mapping_matrix_Nanometers; }
     cv::Mat get_lattice_mapping_matrix_Angstroms(){ return lattice_mapping_matrix_Angstroms; }
+    cv::Point3d get_lattice_mapping_dimension_vector_Nanometers();
 
     /** getters **/
     double get_length_a_Angstroms(){ return ( length_a_Angstroms + (2 * cel_margin_Angstroms) ); }
@@ -317,6 +321,7 @@ signals:
     cv::Mat3d inverse_orientation_matrix;
     bool _flag_inverse_orientation_matrix = false;
 
+cv::Mat lattice_mapping_matrix_factors;
     cv::Mat lattice_mapping_matrix_Angstroms;
     cv::Mat lattice_mapping_matrix_Nanometers;
     bool _flag_lattice_mapping_matrix_Nanometers = false;

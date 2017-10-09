@@ -121,6 +121,9 @@ class MainWindow : public QMainWindow {
     boost::process::ipstream _sim_tdmap_msa_ostream_buffer;
     boost::process::ipstream _sim_tdmap_wavimg_ostream_buffer;
     boost::process::ipstream _sim_tdmap_simgrid_ostream_buffer;
+    boost::process::ipstream _sim_supercell_celslc_ostream_buffer;
+    boost::process::ipstream _sim_supercell_msa_ostream_buffer;
+    boost::process::ipstream _sim_supercell_wavimg_ostream_buffer;
 
     public slots:
       void update_from_TDMap_sucess();

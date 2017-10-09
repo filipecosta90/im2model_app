@@ -63,7 +63,10 @@ MainWindow::MainWindow( ApplicationLog::ApplicationLog* logger , QWidget *parent
         _sim_tdmap_celslc_ostream_buffer,
         _sim_tdmap_msa_ostream_buffer,
         _sim_tdmap_wavimg_ostream_buffer,
-        _sim_tdmap_simgrid_ostream_buffer );
+        _sim_tdmap_simgrid_ostream_buffer,
+        _sim_supercell_celslc_ostream_buffer,
+        _sim_supercell_msa_ostream_buffer,
+        _sim_supercell_wavimg_ostream_buffer );
 
     SuperCell* tdmap_vis_sim_unit_cell = _core_td_map->get_tdmap_vis_sim_unit_cell();
     SuperCell* tdmap_full_sim_super_cell = _core_td_map->get_tdmap_full_sim_super_cell();
