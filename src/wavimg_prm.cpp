@@ -423,14 +423,14 @@ bool WAVIMG_prm::call_bin(){
 #if defined(BOOST_WINDOWS_API)
     if( _flag_logger ){
       std::stringstream message;
-      message << "(EXIT_SUCCESS == _child_exit_code) "<< (EXIT_SUCCESS == _child_exit_code);
+      message << "(EXIT_SUCCESS == _child_exit_code) "<< std::boolalpha << (EXIT_SUCCESS == _child_exit_code);
      BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification , message.str() );
     }
     _exit_sucess_flag = ((EXIT_SUCCESS == _child_exit_code));
 #elif defined(BOOST_POSIX_API)
     if( _flag_logger ){
       std::stringstream message;
-      message << "(EXIT_SUCCESS == WEXITSTATUS(_child_exit_code)) "<< (EXIT_SUCCESS == WEXITSTATUS(_child_exit_code));
+      message << "(EXIT_SUCCESS == WEXITSTATUS(_child_exit_code)) "<< std::boolalpha << (EXIT_SUCCESS == WEXITSTATUS(_child_exit_code));
      BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification , message.str() );
     }
     _exit_sucess_flag = ((EXIT_SUCCESS == WEXITSTATUS(_child_exit_code)));
@@ -479,6 +479,25 @@ bool WAVIMG_prm::check_produced_dat(){
       }
     }
     result = status;
+  }
+  else if(
+    sim_crystal_properties->get_flag_thickness_parameter_loop() == false &&
+    sim_crystal_properties->get_flag_defocus_parameter_loop() == false &&
+number_parameter_loops == 0 &&
+( loop_range_n.size() == 0 )
+){
+    boost::filesystem::path output_wave_function ( file_name_output_image_wave_function );
+    boost::filesystem::path output_wave_function_full_path = base_bin_output_dir_path / output_wave_function;
+    std::stringstream  output_prefix_stream;
+    output_prefix_stream << output_wave_function_full_path.string() << ".dat";
+    boost::filesystem::path dat_file ( output_prefix_stream.str() );
+    const bool _dat_exists = boost::filesystem::exists( dat_file );
+    result = _dat_exists;
+    if( _flag_logger ){
+      std::stringstream message;
+      message << "Checking if the produced dat file exists: " << dat_file.string() << " result: " << std::boolalpha << _dat_exists;
+     BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification , message.str() );
+    }
   }
   return result;
 }
