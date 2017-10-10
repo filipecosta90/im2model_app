@@ -4,55 +4,68 @@ BaseCrystal::BaseCrystal( ) {
 }
 
 bool BaseCrystal::calculate_defocus_period(){
+  bool result = false;
   if(
-      _flag_defocus_lower_bound &&
       _flag_defocus_upper_bound &&
       _flag_defocus_samples
     ){
-    defocus_period = ( defocus_upper_bound - defocus_lower_bound) / ( defocus_samples - 1 );
-    _flag_defocus_period = true;
-
+      // only calculate defocus period if we are going for a parameter loop
+      if( _flag_defocus_lower_bound && defocus_parameter_loop ){
+        defocus_period = ( defocus_upper_bound - defocus_lower_bound) / ( defocus_samples - 1 );
+        _flag_defocus_period = true;
+      }
     /////////////////////////
     // Simulation Points for Defocus
     /////////////////////////
     if( !_flag_simulated_params_nm_defocus_vec ){
       simulated_params_nm_defocus_vec.reserve(defocus_samples);
-      for( int defocus_pos = 0; defocus_pos < defocus_samples; defocus_pos++ ){
-        const double at_defocus = defocus_lower_bound + (defocus_pos * defocus_period);
-        simulated_params_nm_defocus_vec.push_back( at_defocus );
+      // only if it is a paramenter loop
+      if( thickness_parameter_loop ){
+        for( int defocus_pos = 0; defocus_pos < (defocus_samples-1); defocus_pos++ ){
+          const double at_defocus = defocus_lower_bound + (defocus_pos * defocus_period);
+          simulated_params_nm_defocus_vec.push_back( at_defocus );
+        }
       }
+      simulated_params_nm_defocus_vec.push_back( defocus_upper_bound );
       _flag_simulated_params_nm_defocus_vec = true;
     }
-
+    result = true;
   }
-  return _flag_defocus_period;
+  return result;
 }
 
 bool BaseCrystal::calculate_thickness_slice_period(){
   bool result = false;
-  if ( _flag_slices_lower_bound &&
+  if (
       _flag_slices_upper_bound  &&
       _flag_slice_samples &&
       _flag_nz_simulated_partitions &&
       _flag_slice_params_accum_nm_slice_vec &&
       ( slice_params_accum_nm_slice_vec.size() == nz_simulated_partitions )
      ){
-    int slice_interval = slices_upper_bound - slices_lower_bound;
-    std::div_t divresult;
-    divresult = div (slice_interval, (slice_samples -1) );
-    slice_period = divresult.quot;
-    _flag_slice_period = true;
+       // only calculate slice period if we are going for a parameter loop
+       if( _flag_slices_lower_bound && thickness_parameter_loop ){
+         int slice_interval = slices_upper_bound - slices_lower_bound;
+         std::div_t divresult;
+         divresult = div (slice_interval, (slice_samples -1) );
+         slice_period = divresult.quot;
+         _flag_slice_period = true;
+       }
     /////////////////////////
     // Simulation Points for Thickness ( Slice# and Thickness)
     /////////////////////////
     if( !_flag_simulated_params_nm_slice_vec ){
       simulated_params_slice_vec.reserve( slice_samples );
       simulated_params_nm_slice_vec.reserve( slice_samples );
-      for( int slice_pos = 0; slice_pos < (slice_samples-1); slice_pos++ ){
-        const int at_slice = slices_lower_bound + (slice_pos * slice_period);
-        simulated_params_slice_vec.push_back( at_slice );
-        const double at_thickness = slice_params_accum_nm_slice_vec.at( at_slice - 1 );
-        simulated_params_nm_slice_vec.push_back( at_thickness );
+
+      // only if it is a paramenter loop
+      if( thickness_parameter_loop ){
+        for( int slice_pos = 0; slice_pos < (slice_samples-1); slice_pos++ ){
+          const int at_slice = slices_lower_bound + (slice_pos * slice_period);
+          simulated_params_slice_vec.push_back( at_slice );
+          const double at_thickness = slice_params_accum_nm_slice_vec.at( at_slice - 1 );
+          simulated_params_nm_slice_vec.push_back( at_thickness );
+        }
       }
       const double top_thickness = slice_params_accum_nm_slice_vec.at( slices_upper_bound - 1);
       simulated_params_slice_vec.push_back( slices_upper_bound );
@@ -223,11 +236,15 @@ if( slice_params_nm_slice_vec.size() > 0 ){ slice_params_nm_slice_vec.clear(); }
       _flag_slice_params_nm_slice_vec = true;
       _flag_nz_simulated_partitions = true;
 
-      slices_lower_bound = get_slice_number_from_nm_ceil( nm_lower_bound );
-      _flag_slices_lower_bound = true;
-      if (slices_lower_bound == 0){
-        slices_lower_bound = 1;
-      }
+      // only update slice lower bound number if its nm its set ( we can now have non looped )
+if( _flag_nm_lower_bound ){
+  slices_lower_bound = get_slice_number_from_nm_ceil( nm_lower_bound );
+  _flag_slices_lower_bound = true;
+  if (slices_lower_bound == 0){
+    slices_lower_bound = 1;
+  }
+}
+
       slices_upper_bound = nz_simulated_partitions; //get_slice_number_from_nm_floor( nm_upper_bound );
       _flag_slices_upper_bound = true;
       calculate_thickness_slice_period();
@@ -299,6 +316,9 @@ bool BaseCrystal::set_dat_output_target_folder( std::string folder ){
 bool BaseCrystal::set_slice_samples( int samples ){
   slice_samples = samples;
   _flag_slice_samples = true;
+  if( samples > 1 ){
+    thickness_parameter_loop = true;
+  }
   calculate_thickness_slice_period();
   return true;
 }
@@ -306,6 +326,7 @@ bool BaseCrystal::set_slice_samples( int samples ){
 bool BaseCrystal::set_nm_lower_bound( double lower_bound ){
   nm_lower_bound = lower_bound;
   _flag_nm_lower_bound = true;
+  thickness_parameter_loop = true;
   calculate_thickness_slice_period();
   return true;
 }
@@ -313,6 +334,9 @@ bool BaseCrystal::set_nm_lower_bound( double lower_bound ){
 bool BaseCrystal::set_nm_upper_bound( double upper_bound ){
   nm_upper_bound = upper_bound;
   _flag_nm_upper_bound = true;
+  if( _flag_nm_lower_bound ){
+    thickness_parameter_loop = true;
+  }
   calculate_thickness_slice_period();
   return true;
 }
@@ -324,6 +348,7 @@ bool BaseCrystal::set_nm_upper_bound( double upper_bound ){
 bool BaseCrystal::set_defocus_samples( int samples ){
   defocus_samples = samples;
   _flag_defocus_samples = true;
+  defocus_parameter_loop = (samples > 1) ? true : false;
   calculate_defocus_period();
   return true;
 }
@@ -331,6 +356,7 @@ bool BaseCrystal::set_defocus_samples( int samples ){
 bool BaseCrystal::set_defocus_lower_bound( double lower_bound ){
   defocus_lower_bound = lower_bound;
   _flag_defocus_lower_bound = true;
+  defocus_parameter_loop = true;
   calculate_defocus_period();
   return true;
 }
@@ -338,6 +364,9 @@ bool BaseCrystal::set_defocus_lower_bound( double lower_bound ){
 bool BaseCrystal::set_defocus_upper_bound( double upper_bound ){
   defocus_upper_bound = upper_bound;
   _flag_defocus_upper_bound = true;
+  if( _flag_defocus_lower_bound ){
+    defocus_parameter_loop = true;
+  }
   calculate_defocus_period();
   return true;
 }
@@ -392,6 +421,7 @@ std::ostream& BaseCrystal::output(std::ostream& stream) const {
     // Simulated Thickness info
     /////////////////////////
     // user defined
+    << "\t\t" << "thickness_parameter_loop : " << std::boolalpha <<  thickness_parameter_loop << "\n"
     << "\t" << "slice_samples : " <<  slice_samples << "\n"
     << "\t\t" << "_flag_slice_samples : " << std::boolalpha <<  _flag_slice_samples << "\n"
     << "\t" << "nm_lower_bound : " <<  nm_lower_bound << "\n"
@@ -409,6 +439,8 @@ std::ostream& BaseCrystal::output(std::ostream& stream) const {
     /////////////////////////
     // Simulated Defocus info
     /////////////////////////
+
+    << "\t\t" << "defocus_parameter_loop : " << std::boolalpha <<  defocus_parameter_loop << "\n"
     << "\t" << "defocus_samples : " <<  defocus_samples << "\n"
     << "\t\t" << "_flag_defocus_samples : " << std::boolalpha <<  _flag_defocus_samples << "\n"
     << "\t" << "defocus_lower_bound : " <<  defocus_lower_bound << "\n"

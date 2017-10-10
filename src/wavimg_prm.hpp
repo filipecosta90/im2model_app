@@ -108,6 +108,7 @@ class WAVIMG_prm : public BaseBin {
     std::vector<int> loop_range_n;
     // line 26 + aberration_definition_index_number
     std::vector<std::string> loop_string_indentifier;
+  
 
     // runnable execv info
     std::string prm_filename;

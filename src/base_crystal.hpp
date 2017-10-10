@@ -91,6 +91,7 @@ class BaseCrystal {
     bool _flag_slices_lower_bound = false;
     int slices_upper_bound = 0;
     bool _flag_slices_upper_bound = false;
+    bool thickness_parameter_loop = false;
 
     /////////////////////////
     // Simulated Defocus info
@@ -103,6 +104,7 @@ class BaseCrystal {
     bool _flag_defocus_upper_bound = false;
     double defocus_period = 0.0f;
     bool _flag_defocus_period = false;
+    bool defocus_parameter_loop = false;
 
     /////////////////////////
     // Simulation Points for Thickness and Defocus
@@ -142,6 +144,7 @@ class BaseCrystal {
     bool get_flag_nm_lower_bound(){ return _flag_nm_lower_bound;}
     bool get_flag_nm_upper_bound(){ return _flag_nm_upper_bound;}
     bool get_flag_slice_period(){ return _flag_slice_period;}
+    bool get_flag_thickness_parameter_loop(){ return thickness_parameter_loop; }
     /////////////////////////
     // Simulated Defocus info
     /////////////////////////
@@ -149,6 +152,8 @@ class BaseCrystal {
     bool get_flag_defocus_lower_bound(){ return _flag_defocus_lower_bound;}
     bool get_flag_defocus_upper_bound(){ return _flag_defocus_upper_bound;}
     bool get_flag_defocus_period(){ return _flag_defocus_period;}
+    bool get_flag_defocus_parameter_loop(){ return defocus_parameter_loop; }
+
     /////////////////////////
     // Simulation Points for Thickness and Defocus
     /////////////////////////

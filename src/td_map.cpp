@@ -99,7 +99,7 @@ TDMap::TDMap(
     _td_map_simgrid->set_sim_crystal_properties ( sim_crystal_properties );
     _td_map_simgrid->set_exp_image_properties ( exp_image_properties );
     _td_map_simgrid->set_sim_image_properties ( sim_image_properties );
-    
+
   // set pointers for SUPERCELL celslc
   _supercell_celslc_parameters->set_unit_cell ( unit_cell );
   _supercell_celslc_parameters->set_sim_crystal_properties ( supercell_sim_crystal_properties );
@@ -130,8 +130,8 @@ TDMap::TDMap(
   set_wavimg_prm_name( "tdmap_wavimg_im2model.prm" );
   set_supercell_wavimg_prm_name( "supercell_wavimg_im2model.prm" );
   set_file_name_output_image_wave_function("tdmap_image" );
-  set_file_name_output_image_wave_function("supercell_image" );
-
+  set_supercell_file_name_output_image_wave_function("supercell_image" );
+  
   set_slc_output_target_folder("slc");
   set_supercell_slc_output_target_folder("supercell_slc");
   set_wav_output_target_folder("wav");
@@ -1888,8 +1888,13 @@ bool TDMap::set_full_boundary_polygon_margin_nm( std::string s_margin ){
 bool TDMap::accept_tdmap_best_match_position(){
   bool result = false;
   if( _td_map_simgrid->get_flag_simgrid_best_match_thickness_nm() ){
-    const double full_crystal_thickness = _td_map_simgrid->get_simgrid_best_match_thickness_nm();
-    const bool super_cell_result = tdmap_full_sim_super_cell->set_length_c_Nanometers( full_crystal_thickness );
+    const double match_thickness = _td_map_simgrid->get_simgrid_best_match_thickness_nm();
+    // supercell
+  const bool set_result = tdmap_full_sim_super_cell->set_length_c_Nanometers( match_thickness );
+  // crystal
+      const bool supercell_set_result = supercell_sim_crystal_properties->set_nm_upper_bound( match_thickness );
+    const bool super_cell_samples_result = supercell_sim_crystal_properties->set_slice_samples( 1 );
+    const bool super_cell_result = set_result && supercell_set_result && super_cell_samples_result;
     if( super_cell_result ){
       emit super_cell_dimensions_c_changed();
       result = true;
@@ -1902,7 +1907,12 @@ bool TDMap::accept_tdmap_best_match_position( int row, int col ){
   bool result = false;
   if( _td_map_simgrid->get_flag_simgrid_best_match_thickness_nm() ){
     const double match_thickness = _td_map_simgrid->get_simulated_image_thickness_nm_in_grid(  row,  col );
-    const bool super_cell_result = tdmap_full_sim_super_cell->set_length_c_Nanometers( match_thickness );
+      // supercell
+    const bool set_result = tdmap_full_sim_super_cell->set_length_c_Nanometers( match_thickness );
+    // crystal
+    const bool supercell_set_result = supercell_sim_crystal_properties->set_nm_upper_bound( match_thickness );
+    const bool super_cell_samples_result = supercell_sim_crystal_properties->set_slice_samples( 1 );
+    const bool super_cell_result = set_result && supercell_set_result && super_cell_samples_result;
     if( super_cell_result ){
       emit super_cell_dimensions_c_changed();
       result = true;

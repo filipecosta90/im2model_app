@@ -41,16 +41,37 @@ bool WAVIMG_prm::produce_prm ( ) {
         sim_crystal_properties->get_flag_base_dir_path() &&
         sim_crystal_properties->get_flag_ht_accelaration_voltage_KV() &&
         sim_crystal_properties->get_flag_wav_output_target_folder() &&
+        sim_crystal_properties->get_flag_slice_samples() &&
+        sim_crystal_properties->get_flag_nm_upper_bound() &&
+        (
+        (
+        sim_crystal_properties->get_flag_defocus_parameter_loop() &&
         sim_crystal_properties->get_flag_defocus_lower_bound() &&
         sim_crystal_properties->get_flag_defocus_upper_bound() &&
         sim_crystal_properties->get_flag_defocus_samples() &&
-        sim_crystal_properties->get_flag_nm_lower_bound() &&
-        sim_crystal_properties->get_flag_nm_upper_bound() &&
-        sim_crystal_properties->get_flag_slice_samples() &&
-        // extra info
-        sim_crystal_properties->get_flag_simulated_params_nm_defocus_vec() &&
-        sim_crystal_properties->get_flag_simulated_params_slice_vec() &&
-        sim_crystal_properties->get_flag_simulated_params_nm_slice_vec() &&
+        sim_crystal_properties->get_flag_simulated_params_nm_defocus_vec()
+        )
+        ||
+        (
+        sim_crystal_properties->get_flag_defocus_parameter_loop() == false
+        // no extra constraint if no defocus loop since we can have no defocus aberration
+        )
+      )
+      &&
+      (
+        (
+      sim_crystal_properties->get_flag_thickness_parameter_loop() &&
+      sim_crystal_properties->get_flag_nm_lower_bound()
+      )
+      ||
+      (
+      sim_crystal_properties->get_flag_thickness_parameter_loop() == false
+      // no extra constraint if no defocus loop since we can have no defocus aberration
+      )
+    )
+    &&
+    sim_crystal_properties->get_flag_simulated_params_slice_vec() &&
+    sim_crystal_properties->get_flag_simulated_params_nm_slice_vec()  &&
         // BaseImage vars
         sim_image_properties->get_flag_full_n_cols_width() &&
         sim_image_properties->get_flag_full_n_rows_height() &&
@@ -61,27 +82,19 @@ bool WAVIMG_prm::produce_prm ( ) {
           const boost::filesystem::path base_dir_path = sim_crystal_properties->get_base_dir_path();
           const double ht_accelaration_voltage = sim_crystal_properties->get_ht_accelaration_voltage_KV();
           const std::string wav_output_target_folder = sim_crystal_properties->get_wav_output_target_folder();
-          const double defocus_lower_bound = sim_crystal_properties->get_defocus_lower_bound();
-          const double defocus_upper_bound = sim_crystal_properties->get_defocus_upper_bound();
-          const int defocus_samples = sim_crystal_properties->get_defocus_samples();
-          const int slices_lower_bound = sim_crystal_properties->get_slices_lower_bound();
-          const int slices_upper_bound = sim_crystal_properties->get_slices_upper_bound();
-          const int slice_samples = sim_crystal_properties->get_slice_samples();
-          const std::vector<double> simulated_params_nm_defocus_vec = sim_crystal_properties->get_simulated_params_nm_defocus_vec();
-          const std::vector<int> simulated_params_slice_vec = sim_crystal_properties->get_simulated_params_slice_vec();
-          const std::vector<double> simulated_params_nm_slice_vec = sim_crystal_properties->get_simulated_params_nm_slice_vec();
           const int full_n_cols_width = sim_image_properties->get_full_n_cols_width();
           const int full_n_rows_height = sim_image_properties->get_full_n_rows_height();
           const double sampling_rate_x_nm_per_pixel = sim_image_properties->get_sampling_rate_x_nm_per_pixel();
           const double sampling_rate_y_nm_per_pixel = sim_image_properties->get_sampling_rate_y_nm_per_pixel();
 
+          const std::vector<int> simulated_params_slice_vec = sim_crystal_properties->get_simulated_params_slice_vec();
+          const std::vector<double> simulated_params_nm_slice_vec = sim_crystal_properties->get_simulated_params_nm_slice_vec();
+          const int slice_samples = sim_crystal_properties->get_slice_samples();
+          const int slices_upper_bound = sim_crystal_properties->get_slices_upper_bound();
+
           if( _flag_logger ){
             std::stringstream message;
-            message << "Will simulate " << defocus_samples << " defocus samples: { ";
-            for(auto& def : simulated_params_nm_defocus_vec){
-              message << def << " ";
-            }
-            message << "}, and " << slice_samples << " thikness samples: {" ;
+            message << "Will simulate " << slice_samples << " thikness samples: {" ;
             for(int slice_id = 0 ; slice_id <  simulated_params_slice_vec.size(); slice_id++ ){
               message << simulated_params_nm_slice_vec[slice_id] << " (sli# "<< simulated_params_slice_vec[slice_id] << "), ";
             }
@@ -99,7 +112,11 @@ bool WAVIMG_prm::produce_prm ( ) {
           boost::filesystem::path wav_input_dir ( wav_output_target_folder );
           boost::filesystem::path input_wave_function_full_path = base_dir_path / wav_input_dir / input_wave_function;
           std::stringstream  input_prefix_stream ;
-          input_prefix_stream << "'" << input_wave_function_full_path.string() << "_sl.wav"<< "'";
+          input_prefix_stream << "'" << input_wave_function_full_path.string() << "_sl";
+          if( slice_samples == 1 ){
+            input_prefix_stream <<   std::setw(3) << std::setfill('0') << std::to_string( slices_upper_bound );
+          }
+          input_prefix_stream << ".wav"<< "'";
           outfile  << input_prefix_stream.str() << "\t\t! Wave function file name string used to locate existing wave functions. Use quotation marks to secure the input including space characters." << std::endl;
           // line 2
           outfile <<  full_n_cols_width << ", " <<  full_n_rows_height << "\t\t! Dimension of the wave data in pixels, <nx> = number of horizontal wave pixels, <ny>  = number of vertical wave pixels." << std::endl;
@@ -160,9 +177,29 @@ bool WAVIMG_prm::produce_prm ( ) {
           outfile <<  center_x_of_objective_aperture << ", " << center_y_of_objective_aperture << "\t\t! Center of the objective aperture with respect to the zero beam [mrad]." << std::endl;
           // line 21
 
-          set_number_parameter_loops(2);
-          add_parameter_loop ( 1 , 1 , 1, defocus_lower_bound, defocus_upper_bound, defocus_samples, "'foc'" );
-          add_parameter_loop ( 3 , 1 , 1, slices_lower_bound, slices_upper_bound, slice_samples, "'_sl'" );
+          //set_number_parameter_loops(2);
+          if( sim_crystal_properties->get_flag_defocus_parameter_loop() ){
+            const double defocus_lower_bound = sim_crystal_properties->get_defocus_lower_bound();
+            const double defocus_upper_bound = sim_crystal_properties->get_defocus_upper_bound();
+            const int defocus_samples = sim_crystal_properties->get_defocus_samples();
+            const std::vector<double> simulated_params_nm_defocus_vec = sim_crystal_properties->get_simulated_params_nm_defocus_vec();
+            if( _flag_logger ){
+              std::stringstream message;
+              message << "Will simulate " << defocus_samples << " defocus samples: { ";
+              for(auto& def : simulated_params_nm_defocus_vec){
+                message << def << " ";
+              }
+              message << " }";
+             BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification , message.str() );
+            }
+            number_parameter_loops++;
+            add_parameter_loop ( 1 , 1 , 1, defocus_lower_bound, defocus_upper_bound, defocus_samples, "'foc'" );
+          }
+          if( sim_crystal_properties->get_flag_thickness_parameter_loop() ){
+                      const int slices_lower_bound = sim_crystal_properties->get_slices_lower_bound();
+            number_parameter_loops++;
+            add_parameter_loop ( 3 , 1 , 1, slices_lower_bound, slices_upper_bound, slice_samples, "'_sl'" );
+          }
 
           outfile <<  number_parameter_loops << "\t\t! Number variable of loop definitions following below." << std::endl;
           for ( int pos = 0 ; pos < number_parameter_loops ; pos++){
