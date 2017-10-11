@@ -55,10 +55,10 @@ bool BaseImage::calculate_roi_b_size_from_n_rows_and_sampling_rate(){
 bool BaseImage::calculate_roi_a_size_from_n_cols_and_sampling_rate(){
   bool result = false;
   if( _flag_roi_n_cols_width && _flag_sampling_rate_y_nm_per_pixel ){
-      roi_nm_size_cols_a = (double) ( roi_n_cols_width ) * sampling_rate_y_nm_per_pixel;
-      _flag_roi_nm_size_cols_a = true;
-      result = true;
-    }
+    roi_nm_size_cols_a = (double) ( roi_n_cols_width ) * sampling_rate_y_nm_per_pixel;
+    _flag_roi_nm_size_cols_a = true;
+    result = true;
+  }
   return result;
 }
 
@@ -134,13 +134,27 @@ bool BaseImage::set_flag_auto_roi_from_ignored_edge( bool value ){
 
 bool BaseImage::set_emd_wrapper( EMDWrapper* wrapper ){
   emd_wrapper = wrapper;
-   _flag_emd_wrapper = true;
-return true;
+  _flag_emd_wrapper = true;
+  return true;
+}
+
+bool BaseImage::set_full_image( cv::Mat image ){
+  if( ! image.empty() ){
+    // full_image is a deep copy of image. (has its own copy of the pixels)
+    image.copyTo(full_image);
+    full_n_rows_height = full_image.rows;
+    _flag_full_n_rows_height = true;
+    full_n_cols_width = full_image.cols;
+    _flag_full_n_cols_width = true;
+    _flag_full_image = true;
+    set_roi();
+  }
+  return _flag_full_image;
 }
 
 bool BaseImage::set_full_image( std::string image_path ){
   if ( boost::filesystem::exists( image_path ) ){
-  image_extension = boost::filesystem::extension( image_path );
+    image_extension = boost::filesystem::extension( image_path );
 
     if( image_extension == ".emd" ){
       const bool emd_result = emd_wrapper->read_emd(image_path);
@@ -181,13 +195,11 @@ bool BaseImage::set_full_image( std::string image_path ){
         std::stringstream message;
         message << "Sucessfully read image with type " << type2str( full_image.type() );
         ApplicationLog::severity_level _log_type = ApplicationLog::normal;
-       BOOST_LOG_FUNCTION();
-       logger->logEvent( _log_type , message.str() );
+        BOOST_LOG_FUNCTION();
+        logger->logEvent( _log_type , message.str() );
       }
     }
-
   }
-
   return _flag_full_image;
 }
 
@@ -369,8 +381,8 @@ bool BaseImage::auto_calculate_ignore_edge_pixels(){
         std::stringstream message;
         message << "calculated_ignore_edge_pixels " << calculated_ignore_edge_pixels;
         ApplicationLog::severity_level _log_type = ApplicationLog::normal;
-       BOOST_LOG_FUNCTION();
-       logger->logEvent( _log_type , message.str() );
+        BOOST_LOG_FUNCTION();
+        logger->logEvent( _log_type , message.str() );
       }
       result = set_ignore_edge_pixels( calculated_ignore_edge_pixels );
       if( _flag_full_n_cols_width ){
@@ -382,8 +394,8 @@ bool BaseImage::auto_calculate_ignore_edge_pixels(){
           std::stringstream message;
           message << "called BaseImage::set_roi_n_cols_width() with value " << roi_cols << ", called BaseImage::set_roi_center_x() with value " << roi_center_x;
           ApplicationLog::severity_level _log_type = ApplicationLog::normal;
-         BOOST_LOG_FUNCTION();
-         logger->logEvent( _log_type , message.str() );
+          BOOST_LOG_FUNCTION();
+          logger->logEvent( _log_type , message.str() );
         }
       }
       if( _flag_full_n_rows_height ){
@@ -395,8 +407,8 @@ bool BaseImage::auto_calculate_ignore_edge_pixels(){
           std::stringstream message;
           message << "called BaseImage::set_roi_n_rows_height() with value " << roi_rows << ", called BaseImage::set_roi_center_y() with value " << center_y;
           ApplicationLog::severity_level _log_type = ApplicationLog::normal;
-         BOOST_LOG_FUNCTION();
-         logger->logEvent( _log_type , message.str() );
+          BOOST_LOG_FUNCTION();
+          logger->logEvent( _log_type , message.str() );
         }
       }
     }
@@ -408,7 +420,7 @@ bool BaseImage::auto_calculate_ignore_edge_pixels(){
 bool BaseImage::set_application_logger( ApplicationLog::ApplicationLog* app_logger ){
   logger = app_logger;
   _flag_logger = true;
- BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification, "Application logger setted for BaseImage class." );
+  BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification, "Application logger setted for BaseImage class." );
   return true;
 }
 
@@ -417,7 +429,7 @@ void BaseImage::print_var_state(){
     std::stringstream message;
     // using overloaded operator<<
     output( message );
-   BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification , message.str() );
+    BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification , message.str() );
   }
 }
 

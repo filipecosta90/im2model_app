@@ -165,6 +165,8 @@ set(CORE_SOURCE_FILES
   src/base_cell.cpp
   src/image_bounds.cpp
   src/image_bounds.hpp
+  src/intensity_columns.hpp
+  src/intensity_columns.cpp
   ## FEI EMD
   src/emd_object.h
   src/emd_object.cpp

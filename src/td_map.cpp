@@ -63,6 +63,7 @@ TDMap::TDMap(
   _supercell_wavimg_parameters = new WAVIMG_prm( ostream_supercell_wavimg_buffer );
 
   _td_map_simgrid = new SimGrid( ostream_simgrid_buffer );
+sim_image_intensity_columns = new IntensityColumns();
 
   exp_image_properties->set_flag_auto_a_size( true );
   exp_image_properties->set_flag_auto_b_size( true );
@@ -118,6 +119,12 @@ TDMap::TDMap(
     _supercell_wavimg_parameters->set_sim_super_cell ( tdmap_full_sim_super_cell );
     _supercell_wavimg_parameters->set_sim_image_properties ( supercell_sim_image_properties );
 
+    // set pointers for simgrid
+    sim_image_intensity_columns->set_wavimg_var( _supercell_wavimg_parameters );
+    sim_image_intensity_columns->set_sim_crystal_properties ( supercell_sim_crystal_properties );
+    sim_image_intensity_columns->set_exp_image_properties ( exp_image_properties );
+    sim_image_intensity_columns->set_sim_image_properties ( supercell_sim_image_properties );
+
   /////////////
   // only for debug. need to add this options like in im2model command line
   /////////////
@@ -131,7 +138,7 @@ TDMap::TDMap(
   set_supercell_wavimg_prm_name( "supercell_wavimg_im2model.prm" );
   set_file_name_output_image_wave_function("tdmap_image" );
   set_supercell_file_name_output_image_wave_function("supercell_image" );
-  
+
   set_slc_output_target_folder("slc");
   set_supercell_slc_output_target_folder("supercell_slc");
   set_wav_output_target_folder("wav");
@@ -1206,6 +1213,11 @@ bool TDMap::set_exp_image_properties_full_image( std::string path ){
   return result;
 }
 
+bool TDMap::set_sim_image_intensity_columns( IntensityColumns* int_cols ){
+  bool result = false;
+  return result;
+}
+
 bool TDMap::update_emd_fields(){
   bool result = false;
   if( exp_image_properties->get_image_extension() == ".emd" ){
@@ -1973,6 +1985,8 @@ bool TDMap::compute_full_super_cell(){
       ApplicationLog::severity_level _log_type = _flag_runned_supercell_wavimg ? ApplicationLog::notification : ApplicationLog::error;
       BOOST_LOG_FUNCTION();  logger->logEvent( _log_type , message.str() );
     }
+
+    //sim_image_intensity_columns->read_image_from_dat_file();
     result = _flag_runned_supercell_celslc && _flag_runned_supercell_msa && _flag_runned_supercell_wavimg;
   }
   return result;

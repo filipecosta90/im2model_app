@@ -108,7 +108,7 @@ class WAVIMG_prm : public BaseBin {
     std::vector<int> loop_range_n;
     // line 26 + aberration_definition_index_number
     std::vector<std::string> loop_string_indentifier;
-  
+
 
     // runnable execv info
     std::string prm_filename;
@@ -243,6 +243,9 @@ class WAVIMG_prm : public BaseBin {
      int get_simulation_image_spread_envelope_switch(){ return simulation_image_spread_envelope_switch; }
 
     double get_aberration_definition( WAVIMG_prm::AberrationDefinition aberration_index, int coefficient );
+
+    std::string get_file_name_output_image_wave_function(){ return file_name_output_image_wave_function; }
+
 
     /* Loggers */
     bool set_application_logger( ApplicationLog::ApplicationLog* logger );

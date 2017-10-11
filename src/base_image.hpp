@@ -167,6 +167,7 @@ class BaseImage {
 
     // full frame
     bool set_full_image( std::string path );
+    bool set_full_image( cv::Mat full_image );
     bool set_full_n_rows_height( int full_n_rows_height );
     bool set_full_n_cols_width( int full_n_cols_width );
     bool set_sampling_rate_x_nm_per_pixel( double );

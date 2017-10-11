@@ -164,6 +164,7 @@ bool SimGrid::check_produced_dat(){
       const int slice_samples = sim_crystal_properties->get_slice_samples();
       const int defocus_samples = sim_crystal_properties->get_defocus_samples();
       const std::string dat_output_target_folder = sim_crystal_properties->get_dat_output_target_folder();
+      const std::string file_name_output_image_wave_function = wavimg_parameters->get_file_name_output_image_wave_function();
 
       bool files_result = true;
       boost::filesystem::path dat_input_dir ( dat_output_target_folder );
@@ -174,7 +175,7 @@ bool SimGrid::check_produced_dat(){
           // get the defocus value
           // get the .dat image name
           std::stringstream output_dat_name_stream;
-          output_dat_name_stream << "image_" << std::setw(3) << std::setfill('0') << std::to_string(thickness) << "_" << std::setw(3) << std::setfill('0') << std::to_string(defocus) << ".dat";
+          output_dat_name_stream << file_name_output_image_wave_function << "_" << std::setw(3) << std::setfill('0') << std::to_string(thickness) << "_" << std::setw(3) << std::setfill('0') << std::to_string(defocus) << ".dat";
           boost::filesystem::path dat_file ( output_dat_name_stream.str() );
           boost::filesystem::path full_dat_path = base_dir_path / dat_input_dir / dat_file;
           const bool _dat_exists = boost::filesystem::exists( full_dat_path );
@@ -245,7 +246,7 @@ bool SimGrid::read_grid_from_dat_files(){
         const int default_full_n_rows_height = sim_image_properties->get_full_n_rows_height();
         const int default_full_n_cols_width = sim_image_properties->get_full_n_cols_width();
         const std::string dat_output_target_folder = sim_crystal_properties->get_dat_output_target_folder();
-
+        const std::string file_name_output_image_wave_function = wavimg_parameters->get_file_name_output_image_wave_function();
         boost::filesystem::path dat_input_dir ( dat_output_target_folder );
 
         for (int thickness = 1; thickness <= slice_samples ; thickness++ ){
@@ -255,7 +256,7 @@ bool SimGrid::read_grid_from_dat_files(){
           for (int defocus = 1; defocus <= defocus_samples ; defocus ++ ){
             // get the .dat image name
             std::stringstream output_dat_name_stream;
-            output_dat_name_stream << "image_" << std::setw(3) << std::setfill('0') << std::to_string(thickness) << "_" << std::setw(3) << std::setfill('0') << std::to_string(defocus) << ".dat";
+            output_dat_name_stream << file_name_output_image_wave_function << "_" << std::setw(3) << std::setfill('0') << std::to_string(thickness) << "_" << std::setw(3) << std::setfill('0') << std::to_string(defocus) << ".dat";
             boost::filesystem::path dat_file ( output_dat_name_stream.str() );
             boost::filesystem::path full_dat_path = base_dir_path / dat_input_dir / dat_file;
             int full_n_rows_height = default_full_n_rows_height;

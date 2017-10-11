@@ -851,6 +851,7 @@ std::ostream& operator<<(std::ostream& stream, const WAVIMG_prm& var) {
 std::ostream& WAVIMG_prm::output(std::ostream& stream) const {
   stream << "WAVIMG_prm vars:\n"
     << "\t" << "file_name_input_wave_function : " << file_name_input_wave_function << "\n"
+    << "\t" << "file_name_output_image_wave_function : " << file_name_output_image_wave_function << "\n"
     // more vars here
     // ...
     << "\t" << "BaseCrystal Properties : " << "\n";

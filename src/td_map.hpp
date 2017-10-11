@@ -21,6 +21,7 @@
 #include "group_options.h"
 #include "super_cell.hpp"
 #include "unit_cell.hpp"
+#include "intensity_columns.hpp"
 #include "application_log.hpp"
 
 class TDMap  : public QObject {
@@ -123,6 +124,7 @@ class TDMap  : public QObject {
     EMDWrapper* emd_wrapper = nullptr;
 
     ImageBounds* exp_image_bounds = nullptr;
+    IntensityColumns* sim_image_intensity_columns = nullptr;
 
     BaseCrystal* sim_crystal_properties = nullptr;
     BaseCrystal* supercell_sim_crystal_properties = nullptr;
@@ -185,7 +187,7 @@ class TDMap  : public QObject {
     bool set_full_sim_super_cell_length_a_nm( double full_crystal_a_size );
     bool set_full_sim_super_cell_length_b_nm( double full_crystal_b_size );
     bool set_full_sim_super_cell_length_c_nm( double full_crystal_c_size );
-
+    bool set_sim_image_intensity_columns( IntensityColumns* int_cols );
 
     // class flag getters
     bool get_flag_project_dir_path(){ return _flag_project_dir_path; };
