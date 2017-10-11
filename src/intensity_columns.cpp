@@ -26,7 +26,7 @@ bool IntensityColumns::set_sim_image_properties ( BaseImage* sim_prop ){
   return true;
 }
 
-bool IntensityColumns::read_image_from_dat_file(){
+bool IntensityColumns::read_simulated_image_from_dat_file(){
   bool result = false;
   if( _flag_sim_crystal_properties ){
     if(
@@ -67,8 +67,11 @@ bool IntensityColumns::read_image_from_dat_file(){
           }
         }
         mmap.close();
-        sim_image_properties->set_full_image( raw_simulated_image );
-        imwrite("intensity_columns_base", raw_simulated_image);
+        const bool set_result = sim_image_properties->set_full_image( raw_simulated_image );
+        if( set_result ){
+          imwrite("intensity_columns_base.png", raw_simulated_image);
+          result = true;
+        }
       }
       catch(const std::ios_base::failure & e) {
         _mmap_ok = false;

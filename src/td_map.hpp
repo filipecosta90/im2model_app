@@ -124,7 +124,9 @@ class TDMap  : public QObject {
     EMDWrapper* emd_wrapper = nullptr;
 
     ImageBounds* exp_image_bounds = nullptr;
+
     IntensityColumns* sim_image_intensity_columns = nullptr;
+    bool _flag_read_simulated_supercell_image = false;
 
     BaseCrystal* sim_crystal_properties = nullptr;
     BaseCrystal* supercell_sim_crystal_properties = nullptr;
@@ -536,6 +538,10 @@ signals:
     void TDMap_inform_simgrid_n_steps( int number_steps );
     void TDMap_at_simgrid_step( int step );
     void TDMap_ended_simgrid( bool simgrid_status );
+
+    void TDMap_started_supercell_read_simulated_image( );
+    void TDMap_ended_supercell_read_simulated_image( bool status );
+
 };
 
 #endif

@@ -66,7 +66,7 @@ class IntensityColumns {
   public:
 
     IntensityColumns();
-    bool read_image_from_dat_file();
+    bool read_simulated_image_from_dat_file();
 
     /** getters **/
 

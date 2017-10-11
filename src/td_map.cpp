@@ -1166,6 +1166,7 @@ bool TDMap::set_application_logger( ApplicationLog::ApplicationLog* app_logger )
   exp_image_bounds->set_application_logger(app_logger);
   sim_crystal_properties->set_application_logger(app_logger);
   supercell_sim_crystal_properties->set_application_logger(app_logger);
+  sim_image_intensity_columns->set_application_logger(app_logger);
   return true;
 }
 
@@ -1985,9 +1986,18 @@ bool TDMap::compute_full_super_cell(){
       ApplicationLog::severity_level _log_type = _flag_runned_supercell_wavimg ? ApplicationLog::notification : ApplicationLog::error;
       BOOST_LOG_FUNCTION();  logger->logEvent( _log_type , message.str() );
     }
-
-    //sim_image_intensity_columns->read_image_from_dat_file();
-    result = _flag_runned_supercell_celslc && _flag_runned_supercell_msa && _flag_runned_supercell_wavimg;
+    if( _flag_runned_supercell_wavimg ){
+      emit TDMap_started_supercell_read_simulated_image();
+      _flag_read_simulated_supercell_image = sim_image_intensity_columns->read_simulated_image_from_dat_file();
+      emit TDMap_ended_supercell_read_simulated_image( _flag_read_simulated_supercell_image );
+      if( _flag_logger ){
+        std::stringstream message;
+        message << "_flag_read_simulated_supercell_image: " << std::boolalpha << _flag_read_simulated_supercell_image;
+        ApplicationLog::severity_level _log_type = _flag_read_simulated_supercell_image ? ApplicationLog::notification : ApplicationLog::error;
+        BOOST_LOG_FUNCTION();  logger->logEvent( _log_type , message.str() );
+      }
+    }
+    result = _flag_runned_supercell_celslc && _flag_runned_supercell_msa && _flag_runned_supercell_wavimg && _flag_read_simulated_supercell_image;
   }
   return result;
 }
