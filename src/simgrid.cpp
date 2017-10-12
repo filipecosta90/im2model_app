@@ -277,6 +277,7 @@ bool SimGrid::read_grid_from_dat_files(){
                 }
               }
               mmap.close();
+              imwrite("raw_simulated_image.png", raw_simulated_image);
               raw_simulated_images_row.push_back( raw_simulated_image );
             }
             catch(const std::ios_base::failure & e) {

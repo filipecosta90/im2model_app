@@ -147,6 +147,9 @@ bool BaseImage::set_full_image( cv::Mat image ){
     full_n_cols_width = full_image.cols;
     _flag_full_n_cols_width = true;
     _flag_full_image = true;
+    imwrite("set_image.png" , image );
+    imwrite("set_full_image.png" , full_image );
+
     set_roi();
   }
   return _flag_full_image;

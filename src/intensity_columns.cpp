@@ -49,45 +49,66 @@ bool IntensityColumns::read_simulated_image_from_dat_file(){
       output_dat_name_stream << file_name_output_image_wave_function << ".dat";
       boost::filesystem::path dat_file ( output_dat_name_stream.str() );
       boost::filesystem::path full_dat_path = base_dir_path / dat_input_dir / dat_file;
-      int full_n_rows_height = default_full_n_rows_height;
-      int full_n_cols_width = default_full_n_cols_width;
-      bool _mmap_ok = false;
-      float* p;
-      try {
-        boost::iostreams::mapped_file_source mmap( full_dat_path );
-        _mmap_ok = true;
-        p = (float*) mmap.data();
-        cv::Mat raw_simulated_image ( full_n_rows_height , full_n_cols_width , CV_32FC1);
-        int pos = 0;
-        float *pixel;
-        for (int row = 0; row < full_n_rows_height; row++) {
-          for (int col = 0; col < full_n_cols_width; col++) {
-            raw_simulated_image.at<float>(row, full_n_cols_width - col -1) = (float) p[pos] ;
-            pos++;
+
+      const bool _dat_exists = boost::filesystem::exists( full_dat_path );
+      if( _flag_logger ){
+        std::stringstream message;
+        message << " Opening \"" << full_dat_path.string() << "\", exists: " << std::boolalpha << _dat_exists;
+        if( _dat_exists ){
+         BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification , message.str() );
+        }
+        else{
+         BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::error , message.str() );
+        }
+      }
+      if( _dat_exists ){
+        int full_n_rows_height = default_full_n_rows_height;
+        int full_n_cols_width = default_full_n_cols_width;
+        bool _mmap_ok = false;
+        float* p;
+        try {
+          boost::iostreams::mapped_file_source mmap( full_dat_path );
+          _mmap_ok = true;
+          p = (float*) mmap.data();
+          cv::Mat raw_simulated_image ( full_n_rows_height , full_n_cols_width , CV_32FC1 );
+          int pos = 0;
+          for (int row = 0; row < full_n_rows_height; row++) {
+            for (int col = 0; col < full_n_cols_width; col++) {
+              raw_simulated_image.at<float>(row, full_n_cols_width - col -1) = (float) p[pos] ;
+              pos++;
+            }
+          }
+          mmap.close();
+          cv::Mat normalized_simulated_image;
+          double min, max;
+          cv::minMaxLoc(raw_simulated_image, &min, &max);
+          raw_simulated_image.convertTo(normalized_simulated_image, cv::DataType<unsigned char>::type , 255.0f/(max - min), -min * 255.0f/(max - min));
+
+          const bool set_result = sim_image_properties->set_full_image( normalized_simulated_image );
+          if( set_result ){
+            imwrite("intensity_columns_base.png", sim_image_properties->get_full_image() );
+            result = true;
           }
         }
-        mmap.close();
-        const bool set_result = sim_image_properties->set_full_image( raw_simulated_image );
-        if( set_result ){
-          imwrite("intensity_columns_base.png", raw_simulated_image);
-          result = true;
+        catch(const std::ios_base::failure & e) {
+          _mmap_ok = false;
+          if( _flag_logger ){
+            std::stringstream message;
+            message << "Caught std::ios_base::failure: " << typeid(e).name();
+            BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::error , message.str() );
+          }
+        }
+        catch(const std::exception & e) {
+          _mmap_ok = false;
+          if( _flag_logger ){
+            std::stringstream message;
+            message << "Caught std::exception: " << typeid(e).name();
+            BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::error , message.str() );
+          }
         }
       }
-      catch(const std::ios_base::failure & e) {
-        _mmap_ok = false;
-        if( _flag_logger ){
-          std::stringstream message;
-          message << "Caught std::ios_base::failure: " << typeid(e).name();
-          BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::error , message.str() );
-        }
-      }
-      catch(const std::exception & e) {
-        _mmap_ok = false;
-        if( _flag_logger ){
-          std::stringstream message;
-          message << "Caught std::exception: " << typeid(e).name();
-          BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::error , message.str() );
-        }
+      else{
+        result = false;
       }
     }
     else {

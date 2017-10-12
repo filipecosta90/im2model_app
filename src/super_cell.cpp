@@ -57,7 +57,7 @@ bool SuperCell::update_from_unit_cell(){
         clean_for_re_run();
       }
       std::cout << " update_from_unit_cell $$" << std::endl;
-      const bool angle_result = update_angle_parameters_from_unit_cell();
+      const bool angle_result = true; //update_angle_parameters_from_unit_cell();
       std::cout << " angle_result result " << std::boolalpha << angle_result << std::endl;
       std::cout << " _flag_auto_calculate_expand_factor " << std::boolalpha << _flag_auto_calculate_expand_factor << std::endl;
 
@@ -454,14 +454,15 @@ bool SuperCell::create_fractional_positions_atoms(){
     fractional_norm_c_atom_pos = get_length_c_Nanometers();
     _flag_fractional_norm = true;
 
-    const double fractional_factor_a_Nanometers = (1 / fractional_norm_a_atom_pos );
-    const double fractional_factor_b_Nanometers = (1 / fractional_norm_b_atom_pos );
-    const double fractional_factor_c_Nanometers = (1 / fractional_norm_c_atom_pos );
+    const double fractional_factor_a_Nanometers = (1.0f / fractional_norm_a_atom_pos );
+    const double fractional_factor_b_Nanometers = (1.0f / fractional_norm_b_atom_pos );
+    const double fractional_factor_c_Nanometers = (1.0f / fractional_norm_c_atom_pos );
     const cv::Point3d fractional_factor( fractional_factor_a_Nanometers, fractional_factor_b_Nanometers, fractional_factor_c_Nanometers);
 
-    const double halft_norm_a = -0.5f * fractional_norm_a_atom_pos;
-    const double halft_norm_b = -0.5f * fractional_norm_b_atom_pos;
-    const double halft_norm_c = -0.5f * fractional_norm_c_atom_pos;
+std::cout << "fractional_factor " << fractional_factor << std::endl;
+    const double halft_norm_a = 0.5f * fractional_norm_a_atom_pos;
+    const double halft_norm_b = 0.5f * fractional_norm_b_atom_pos;
+    const double halft_norm_c = 0.5f * fractional_norm_c_atom_pos;
     const cv::Point3d half_norm( halft_norm_a, halft_norm_b, halft_norm_c);
     atom_fractional_cell_coordinates.reserve( atom_positions.size() );
     boost::function<cv::Point3d(cv::Point3d)> functor ( boost::bind(&SuperCell::op_Point3d_a_plus_b_times_c, this , _1, half_norm, fractional_factor) );
