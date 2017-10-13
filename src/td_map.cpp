@@ -1856,6 +1856,21 @@ bool TDMap::set_mtf_switch( bool value ){
   return result;
 }
 
+bool TDMap::set_full_supercell_defocus( double defocus ){
+  bool result = false;
+  result = _supercell_wavimg_parameters->set_aberration_definition( WAVIMG_prm::AberrationDefinition::Defocus , 1 , defocus );
+  result &= _supercell_wavimg_parameters->set_aberration_definition( WAVIMG_prm::AberrationDefinition::Defocus , 2 , 0.0f );
+  result &= _supercell_wavimg_parameters->set_aberration_definition_switch( WAVIMG_prm::AberrationDefinition::Defocus , true );
+  if( _flag_logger ){
+    std::stringstream message;
+    message << "set_full_supercell_defocus value " << defocus << ", result: " << std::boolalpha << result;
+    ApplicationLog::severity_level _log_type = result ? ApplicationLog::notification : ApplicationLog::error;
+    BOOST_LOG_FUNCTION();  logger->logEvent( _log_type , message.str() );
+  }
+
+  return result;
+}
+
 int TDMap::get_image_correlation_matching_method(){
   return _td_map_simgrid->get_image_correlation_matching_method();
 }
@@ -1913,14 +1928,28 @@ bool TDMap::set_full_boundary_polygon_margin_nm( std::string s_margin ){
 
 bool TDMap::accept_tdmap_best_match_position(){
   bool result = false;
-  if( _td_map_simgrid->get_flag_simgrid_best_match_thickness_nm() ){
+  if(
+    _td_map_simgrid->get_flag_simgrid_best_match_thickness_nm() &&
+    _td_map_simgrid->get_flag_simgrid_best_match_defocus_nm()
+){
     const double match_thickness = _td_map_simgrid->get_simgrid_best_match_thickness_nm();
+    const double match_defocus_nm = _td_map_simgrid->get_simgrid_best_match_defocus_nm();
     // supercell
     const bool set_result = tdmap_full_sim_super_cell->set_length_c_Nanometers( match_thickness );
     // crystal
     const bool supercell_set_result = supercell_sim_crystal_properties->set_nm_upper_bound( match_thickness );
     const bool super_cell_samples_result = supercell_sim_crystal_properties->set_slice_samples( 1 );
-    const bool super_cell_result = set_result && supercell_set_result && super_cell_samples_result;
+    // wavimg
+    const bool wavimg_result = set_full_supercell_defocus( match_defocus_nm );
+    const bool super_cell_result = set_result && supercell_set_result && super_cell_samples_result && wavimg_result;
+
+    if( _flag_logger ){
+      std::stringstream message;
+      message << "accept_tdmap_best_match_position with thickness " << match_thickness << " and defocus " << match_defocus_nm << ", super_cell_result: " << std::boolalpha << super_cell_result;
+      ApplicationLog::severity_level _log_type = super_cell_result ? ApplicationLog::notification : ApplicationLog::error;
+      BOOST_LOG_FUNCTION();  logger->logEvent( _log_type , message.str() );
+    }
+
     if( super_cell_result ){
       emit super_cell_dimensions_c_changed();
       result = true;
@@ -1933,12 +1962,23 @@ bool TDMap::accept_tdmap_best_match_position( int row, int col ){
   bool result = false;
   if( _td_map_simgrid->get_flag_simgrid_best_match_thickness_nm() ){
     const double match_thickness = _td_map_simgrid->get_simulated_image_thickness_nm_in_grid(  row,  col );
+    const double match_defocus_nm = _td_map_simgrid->get_simulated_image_defocus_in_grid(  row,  col );
     // supercell
     const bool set_result = tdmap_full_sim_super_cell->set_length_c_Nanometers( match_thickness );
     // crystal
     const bool supercell_set_result = supercell_sim_crystal_properties->set_nm_upper_bound( match_thickness );
     const bool super_cell_samples_result = supercell_sim_crystal_properties->set_slice_samples( 1 );
-    const bool super_cell_result = set_result && supercell_set_result && super_cell_samples_result;
+    // wavimg
+    const bool wavimg_result = set_full_supercell_defocus( match_defocus_nm );
+    const bool super_cell_result = set_result && supercell_set_result && super_cell_samples_result && wavimg_result;
+
+    if( _flag_logger ){
+      std::stringstream message;
+      message << "accept_tdmap_best_match_position( "<< row << " , " << col << " ) with thickness " << match_thickness << " and defocus " << match_defocus_nm << ", super_cell_result: " << std::boolalpha << super_cell_result;
+      ApplicationLog::severity_level _log_type = super_cell_result ? ApplicationLog::notification : ApplicationLog::error;
+      BOOST_LOG_FUNCTION();  logger->logEvent( _log_type , message.str() );
+    }
+
     if( super_cell_result ){
       emit super_cell_dimensions_c_changed();
       result = true;

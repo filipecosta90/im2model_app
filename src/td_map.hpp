@@ -340,6 +340,7 @@ class TDMap  : public QObject {
     bool set_super_cell_size_a( std::string size_a );
     bool set_super_cell_size_b( std::string size_b );
     bool set_super_cell_size_c( std::string size_c );
+    bool set_full_supercell_defocus( double defocus );
 
     bool set_application_logger( ApplicationLog::ApplicationLog* app_logger );
     void set_group_options( group_options* celslc_step, group_options* msa_step, group_options* wavimg_step, group_options* simgrid_step );
