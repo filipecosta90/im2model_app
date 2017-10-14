@@ -104,6 +104,13 @@ class BaseImage {
     double ignore_edge_nm = 0.0f;
     bool _flag_ignore_edge_nm = false;
 
+    cv::Mat roi_image_statistical;
+    bool _flag_roi_image_statistical = false;
+    cv::Rect roi_rectangle_statistical;
+    bool _flag_roi_rectangle_statistical = false;
+    cv::Scalar mean_image_statistical;
+    cv::Scalar stddev_image_statistical;
+
   public:
     BaseImage();
     /** getters **/
@@ -184,6 +191,9 @@ class BaseImage {
     bool set_roi_center_y( int roi_center_y );
     bool set_ignore_edge_pixels( int ignore_edge_pixels );
     bool set_ignore_edge_nm( double ignore_edge_nm );
+
+    bool set_roi_rectangle_statistical( cv::Rect );
+
 
 static std::string type2str(int type);
     /* Loggers */

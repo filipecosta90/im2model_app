@@ -395,6 +395,7 @@ class TDMap  : public QObject {
     bool set_exp_image_bounds_hysteresis_threshold( int value );
     bool set_exp_image_bounds_max_contour_distance_px( int value );
     bool set_exp_image_bounds_roi_boundary_rect( cv::Rect roi_boundary_rect );
+    bool set_exp_image_properties_roi_rectangle_statistical( cv::Rect roi_rectangle_statistical );
     bool set_full_boundary_polygon_margin_nm( std::string );
     bool accept_tdmap_best_match_position();
     bool accept_tdmap_best_match_position(int row, int col);

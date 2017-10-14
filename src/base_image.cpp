@@ -227,6 +227,30 @@ void BaseImage::set_roi(){
   }
 }
 
+bool BaseImage::set_roi_rectangle_statistical( cv::Rect boundary_rect ){
+  bool result = false;
+  if( _flag_full_image ){
+      roi_rectangle_statistical = boundary_rect;
+      _flag_roi_rectangle_statistical = true;
+      roi_image_statistical = full_image( roi_rectangle_statistical ).clone();
+      _flag_roi_image_statistical = true;
+      cv::meanStdDev(roi_image_statistical,mean_image_statistical,stddev_image_statistical,cv::Mat());
+      std::cout<<"Mean : "<<mean_image_statistical.val[0]<<std::endl;
+      std::cout<<"Standard deviation: "<<stddev_image_statistical.val[0]<<std::endl;
+      std::cout << "set_roi_rectangle_statistical RESULT "  << std::boolalpha << result << std::endl;
+      result = true;
+    }
+    else{
+      if( _flag_logger ){
+        std::stringstream message;
+        message << "The required vars for set_roi_rectangle_statistical() are not setted up.";
+        BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::error , message.str() );
+      }
+      print_var_state();
+    }
+  return result;
+}
+
 bool BaseImage::set_full_n_rows_height(  int n_rows ){
   full_n_rows_height = n_rows;
   _flag_full_n_rows_height = true;

@@ -182,12 +182,19 @@ void CVImageWidget::paintEvent(QPaintEvent* event) {
     }
   }
 
-// Draw selection rectangle
-if( _started_rectangleSelection ){
-  painter.setPen(QPen(QBrush(QColor(0,0,0,180)),1,Qt::DashLine));
-  painter.setBrush(QBrush(QColor(255,255,255,120)));
-  painter.drawRect(selectionRect);
-}
+  // Draw selection rectangle
+  if( _started_rectangleSelection ){
+    painter.setPen(QPen(QBrush(QColor(0,0,0,180)),1,Qt::DashLine));
+    painter.setBrush(QBrush(QColor(255,255,255,120)));
+    painter.drawRect(selectionRect);
+  }
+
+  // Draw statistical selection rectangle
+  if( _started_rectangleSelectionStatistical ){
+    painter.setPen(QPen(QBrush(QColor(0,0,0,180)),1,Qt::DashLine));
+    painter.setBrush(QBrush(QColor(255,255,255,120)));
+    painter.drawRect(selectionStatisticalRect);
+  }
 
   painter.end();
 }
@@ -197,21 +204,36 @@ void CVImageWidget::startRectangleSelection(){
   setCursor( Qt::CrossCursor );
 }
 
+
+void CVImageWidget::startStatisticalRectangleSelection(){
+  _enabled_rectangleSelectionStatistical = true;
+  setCursor( Qt::CrossCursor );
+}
+
 void CVImageWidget::mousePressEvent(QMouseEvent *e){
-if ( e->button()==Qt::LeftButton ){
+  if ( e->button()==Qt::LeftButton ){
     if( _enabled_rectangleSelection ){
       _started_rectangleSelection = true;
       selectionRect.setTopLeft(e->pos());
       selectionRect.setBottomRight(e->pos());
     }
-}
+    if( _enabled_rectangleSelectionStatistical ){
+      _started_rectangleSelectionStatistical = true;
+      selectionStatisticalRect.setTopLeft(e->pos());
+      selectionStatisticalRect.setBottomRight(e->pos());
+    }
+  }
 }
 
 void CVImageWidget::mouseMoveEvent(QMouseEvent *e){
-if ( _started_rectangleSelection ){
-selectionRect.setBottomRight(e->pos());
-repaint();
-}
+  if ( _started_rectangleSelection ){
+    selectionRect.setBottomRight(e->pos());
+    repaint();
+  }
+  if ( _started_rectangleSelectionStatistical ){
+    selectionStatisticalRect.setBottomRight(e->pos());
+    repaint();
+  }
 }
 
 QRect CVImageWidget::mapSelectionRectToOriginalSize(){
@@ -223,25 +245,47 @@ QRect CVImageWidget::mapSelectionRectToOriginalSize(){
   return original_size_selectionRect;
 }
 
+QRect CVImageWidget::mapSelectionStatisticalRectToOriginalSize(){
+  QRect original_size_selectionRect;
+  original_size_selectionRect.setX( selectionStatisticalRect.x() / scaleFactor );
+  original_size_selectionRect.setY( selectionStatisticalRect.y() / scaleFactor );
+  original_size_selectionRect.setWidth( selectionStatisticalRect.width() / scaleFactor );
+  original_size_selectionRect.setHeight( selectionStatisticalRect.height() / scaleFactor );
+  return original_size_selectionRect;
+}
+
 void CVImageWidget::mouseReleaseEvent(QMouseEvent *e){
   if( _started_rectangleSelection ){
     _started_rectangleSelection = false;
     _enabled_rectangleSelection = false;
     setCursor( Qt::ArrowCursor );
-    std::cout << "selectionRect x:" << selectionRect.x() << " y: " << selectionRect.y()
-    << " width: " << selectionRect.width() << " height: " << selectionRect.height() << std::endl;
 
     //make sure the selection rectangle does not surpases the original image size
     if( selectionRect.bottom() > current_size.height ){
-      std::cout << "adjusting bottom " << selectionRect.bottom() << " to height limit " << current_size.height << std::endl;
-    selectionRect.setBottom( current_size.height );
+      selectionRect.setBottom( current_size.height );
     }
     if( selectionRect.right() > current_size.width ){
-      std::cout << "adjusting right " << selectionRect.right() << " to width limit " << current_size.width << std::endl;
-    selectionRect.setRight( current_size.width );
+      selectionRect.setRight( current_size.width );
     }
     const QRect original_size_selectionRect = mapSelectionRectToOriginalSize();
     emit selectionRectangleChanged( original_size_selectionRect );
   }
+
+  if( _started_rectangleSelectionStatistical ){
+    _started_rectangleSelectionStatistical = false;
+    _enabled_rectangleSelectionStatistical = false;
+    setCursor( Qt::ArrowCursor );
+
+    //make sure the selection rectangle does not surpases the original image size
+    if( selectionStatisticalRect.bottom() > current_size.height ){
+      selectionStatisticalRect.setBottom( current_size.height );
+    }
+    if( selectionStatisticalRect.right() > current_size.width ){
+      selectionStatisticalRect.setRight( current_size.width );
+    }
+    const QRect original_size_selectionStatisticalRect = mapSelectionStatisticalRectToOriginalSize();
+    emit selectionStatisticalRectangleChanged( original_size_selectionStatisticalRect );
+  }
+
   repaint();
 }

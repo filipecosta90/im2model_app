@@ -1867,7 +1867,6 @@ bool TDMap::set_full_supercell_defocus( double defocus ){
     ApplicationLog::severity_level _log_type = result ? ApplicationLog::notification : ApplicationLog::error;
     BOOST_LOG_FUNCTION();  logger->logEvent( _log_type , message.str() );
   }
-
   return result;
 }
 
@@ -2414,7 +2413,15 @@ bool TDMap::set_exp_image_bounds_roi_boundary_rect( cv::Rect roi_boundary_rect )
   bool result = false;
   result = exp_image_bounds->set_roi_boundary_rect( roi_boundary_rect );
   if( result ){
-    std::cout << " update_full_crysta_a_b_sizes " << std::endl;
+    update_full_crysta_a_b_sizes();
+  }
+  return result;
+}
+
+bool TDMap::set_exp_image_properties_roi_rectangle_statistical( cv::Rect roi_rectangle_statistical ){
+  bool result = false;
+  result = exp_image_properties->set_roi_rectangle_statistical( roi_rectangle_statistical );
+  if( result ){
     update_full_crysta_a_b_sizes();
   }
   return result;

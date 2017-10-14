@@ -20,7 +20,6 @@ CvImageFrameWidget::CvImageFrameWidget(QWidget *parent ) : QWidget(parent) {
   rectSelectAct = new QAction( selectionRectangleIcon, tr("&Rectangle selection"), this);
   rectSelectAct->setStatusTip(tr("Create rectangular selections"));
 
-
   const QIcon selectionFreeIcon = QIcon::fromTheme("free-selection", QIcon(":/Icons/ToolBoxSelectionFreeIcon"));
   freeSelectAct = new QAction( selectionFreeIcon, tr("&Free selection"), this);
   freeSelectAct->setStatusTip(tr("Create free selections"));
@@ -29,10 +28,24 @@ CvImageFrameWidget::CvImageFrameWidget(QWidget *parent ) : QWidget(parent) {
   pathSelectAct = new QAction( selectionPathIcon, tr("&Path selection"), this);
   pathSelectAct->setStatusTip(tr("Create path selections"));
 
+  statistical_rectSelectAct = new QAction( selectionRectangleIcon, tr("&Mean and std. dev. from rectangle selection"), this);
+  statistical_rectSelectAct->setStatusTip(tr("Extract mean and standard deviation features from rectangular selection"));
+
   toolsMenu = new QMenu("Tools");
-  toolsMenu->addAction(rectSelectAct);
-  toolsMenu->addAction(freeSelectAct);
-  toolsMenu->addAction(pathSelectAct);
+  selectionMenu = new QMenu("Selection");
+  dataCollectionMenu = new QMenu("Data collection");
+  statisticalMenu = new QMenu("Statistical");
+
+    selectionMenu->addAction(rectSelectAct);
+    selectionMenu->addAction(freeSelectAct);
+    selectionMenu->addAction(pathSelectAct);
+
+  toolsMenu->addMenu(selectionMenu);
+  toolsMenu->addMenu(dataCollectionMenu);
+  dataCollectionMenu->addMenu(statisticalMenu);
+  statisticalMenu->addAction(statistical_rectSelectAct);
+
+  //statisticalMenu->addAction(pathSelectAct);
 
   toolsButton = new QToolButton();
   toolsButton->setPopupMode(QToolButton::MenuButtonPopup);
@@ -62,10 +75,17 @@ void CvImageFrameWidget::enableRectangleSelection(){
   toolbar->actions().at(4)->setVisible(true);
   connect( rectSelectAct, SIGNAL(triggered()), image_widget, SLOT(startRectangleSelection()) );
   connect( image_widget, SIGNAL(selectionRectangleChanged(QRect)), this, SLOT(emit_selectionRectangleChanged(QRect)) );
+
+  connect( statistical_rectSelectAct, SIGNAL(triggered()), image_widget, SLOT(startStatisticalRectangleSelection()) );
+  connect( image_widget, SIGNAL(selectionStatisticalRectangleChanged(QRect)), this, SLOT(emit_selectionStatisticalRectangleChanged(QRect)) );
 }
 
 void CvImageFrameWidget::emit_selectionRectangleChanged(QRect rect){
   emit selectionRectangleChanged( rect );
+}
+
+void CvImageFrameWidget::emit_selectionStatisticalRectangleChanged(QRect rect){
+  emit selectionStatisticalRectangleChanged( rect );
 }
 
 void CvImageFrameWidget::setImage(const cv::Mat& image) {
@@ -74,7 +94,7 @@ void CvImageFrameWidget::setImage(const cv::Mat& image) {
   scrollArea->show();
 
   int leftM,rightM,topM,bottomM;
-  this->getContentsMargins(&leftM,&topM,&rightM,&bottomM);
+  this->getContentsMargins( &leftM,&topM,&rightM,&bottomM );
 
   const int _avail_width = scrollArea->width() - leftM - rightM - 2* (scrollArea->frameWidth());
   const int _avail_heigth = scrollArea->height() - topM - bottomM - 2* (scrollArea->frameWidth());

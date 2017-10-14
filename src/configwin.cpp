@@ -479,6 +479,7 @@ void MainWindow::update_full_experimental_image(){
     this->ui->qgraphics_super_cell_edge_detection->setImage( full_image );
     this->ui->qgraphics_super_cell_edge_detection->enableRectangleSelection();
     connect(ui->qgraphics_super_cell_edge_detection, SIGNAL(selectionRectangleChanged(QRect)), this, SLOT( update_tab3_exp_image_bounds_from_rectangle_selection(QRect)) );
+    connect(ui->qgraphics_super_cell_edge_detection, SIGNAL(selectionStatisticalRectangleChanged(QRect)), this, SLOT( update_exp_image_properties_roi_rectangle_statistical_from_rectangle_selection(QRect)) );
     this->ui->qgraphics_super_cell_edge_detection->show();
     update_roi_experimental_image_frame();
   }
@@ -1205,7 +1206,14 @@ void MainWindow::update_tab3_exp_image_bounds_from_rectangle_selection( QRect re
   if( result ){
     emit super_cell_target_region_changed();
   }
+}
 
+void MainWindow::update_exp_image_properties_roi_rectangle_statistical_from_rectangle_selection( QRect rectangle_selection ){
+  cv::Rect cv_rect ( rectangle_selection.x(), rectangle_selection.y(), rectangle_selection.width(), rectangle_selection.height() );
+  const bool result = _core_td_map->set_exp_image_properties_roi_rectangle_statistical( cv_rect );
+  if( result ){
+    //emit super_cell_target_region_changed();
+  }
 }
 
 void MainWindow::create_box_options(){
