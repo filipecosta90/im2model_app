@@ -235,6 +235,8 @@ bool BaseImage::set_roi_rectangle_statistical( cv::Rect boundary_rect ){
       roi_image_statistical = full_image( roi_rectangle_statistical ).clone();
       _flag_roi_image_statistical = true;
       cv::meanStdDev(roi_image_statistical,mean_image_statistical,stddev_image_statistical,cv::Mat());
+      _flag_stddev_image_statistical = true;
+      _flag_mean_image_statistical = true;
       std::cout<<"Mean : "<<mean_image_statistical.val[0]<<std::endl;
       std::cout<<"Standard deviation: "<<stddev_image_statistical.val[0]<<std::endl;
       std::cout << "set_roi_rectangle_statistical RESULT "  << std::boolalpha << result << std::endl;
@@ -248,6 +250,22 @@ bool BaseImage::set_roi_rectangle_statistical( cv::Rect boundary_rect ){
       }
       print_var_state();
     }
+  return result;
+}
+
+bool BaseImage::set_mean_image_statistical( cv::Scalar mean ){
+  bool result = false;
+  mean_image_statistical = mean;
+  _flag_mean_image_statistical = true;
+  result = true;
+  return result;
+}
+
+bool BaseImage::set_stddev_image_statistical( cv::Scalar stddev ){
+  bool result = false;
+  stddev_image_statistical = stddev;
+  _flag_stddev_image_statistical = true;
+  result = true;
   return result;
 }
 

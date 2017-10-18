@@ -1,5 +1,5 @@
-
-#pragma once
+#ifndef SRC_GUI_SIM_UPDATER_H__
+#define SRC_GUI_SIM_UPDATER_H__
 
 #include <QFileDialog>
 #include <QFileSystemModel>
@@ -16,107 +16,6 @@
 
 class GuiSimOutUpdater : public QObject {
   Q_OBJECT
-
-  public:
-    explicit GuiSimOutUpdater(TDMap* core_tdmap ,  QObject *parent = 0 ) : QObject(parent) {
-      _working =false;
-      _abort = false;
-      tdmap = core_tdmap;
-    }
-
-    public slots:
-
-      void newSuperCellEdge() {
-        std::cout << "Slave thread " << QThread::currentThreadId() << std::endl;
-        qDebug()<<"Starting worker process in Thread "<<thread()->currentThreadId();
-
-        bool result = tdmap->calculate_exp_image_boundaries_from_full_image();
-        if ( result ){
-          std::cout << "emiting sucess" << std::endl;
-          emit SuperCell_edge_sucess();
-        }
-        else {
-          std::cout << "emiting failure" << std::endl;
-          emit SuperCell_edge_failure();
-        }
-        // Set _working to false, meaning the process can't be aborted anymore.
-        mutex.lock();
-        _working = false;
-        mutex.unlock();
-        std::cout << "emiting finished" << std::endl;
-        emit SuperCell_edge_finished();
-
-      }
-
-    void newTDMapSim() {
-      std::cout << "Slave thread " << QThread::currentThreadId() << std::endl;
-      qDebug()<<"Starting worker process in Thread "<<thread()->currentThreadId();
-
-      const bool _vars_setted_up = tdmap->test_run_config();
-      if ( _vars_setted_up ) {
-        emit  TDMap_started();
-        bool result = tdmap->run_tdmap();
-        if ( result ){
-          if( tdmap->get_run_simgrid_switch() ){
-            emit TDMap_sucess();
-          }
-          else{
-            emit TDMap_sucess_no_correlation();
-          }
-        }
-      }
-      else {
-        emit TDMap_failure();
-      }
-
-      // Set _working to false, meaning the process can't be aborted anymore.
-      mutex.lock();
-      _working = false;
-      mutex.unlock();
-      emit TDMap_finished();
-
-    }
-
-    void requestTDMap(){
-      mutex.lock();
-      _working = true;
-      _abort = false;
-      qDebug()<<"Request worker start in Thread "<<thread()->currentThreadId();
-      mutex.unlock();
-      emit TDMap_request();
-    }
-
-    void requestSuperCellEdge(){
-      mutex.lock();
-      _working = true;
-      _abort = false;
-      qDebug()<<"Request worker start in Thread "<<thread()->currentThreadId();
-      mutex.unlock();
-      emit SuperCell_edge_request();
-    }
-
-    void abort()
-    {
-      mutex.lock();
-      if (_working) {
-        _abort = true;
-        qDebug()<<"Request worker aborting in Thread "<<thread()->currentThreadId();
-      }
-      mutex.unlock();
-    }
-
-signals:
-    void TDMap_request();
-    void TDMap_started();
-    void TDMap_sucess();
-    void TDMap_sucess_no_correlation();
-    void TDMap_failure();
-    void TDMap_finished();
-
-    void SuperCell_edge_request();
-    void SuperCell_edge_sucess();
-    void SuperCell_edge_failure();
-    void SuperCell_edge_finished();
 
   private:
     /**
@@ -137,4 +36,36 @@ signals:
      */
     TDMap* tdmap;
 
+  public:
+    GuiSimOutUpdater(TDMap* core_tdmap ,  QObject *parent = 0 );
+
+    public slots:
+      void newSuperCellFull();
+    void newSuperCellEdge();
+    void newTDMapSim();
+    void requestTDMap();
+    void requestSuperCellEdge();
+    void requestFullSuperCell();
+    void abort();
+
+signals:
+    void TDMap_request();
+    void TDMap_started();
+    void TDMap_sucess();
+    void TDMap_sucess_no_correlation();
+    void TDMap_failure();
+    void TDMap_finished();
+
+    void SuperCell_edge_request();
+    void SuperCell_edge_sucess();
+    void SuperCell_edge_failure();
+    void SuperCell_edge_finished();
+
+    void SuperCell_full_request();
+    void SuperCell_full_sucess();
+    void SuperCell_full_failure();
+    void SuperCell_full_finished();
+
 };
+
+#endif

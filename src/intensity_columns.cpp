@@ -26,6 +26,114 @@ bool IntensityColumns::set_sim_image_properties ( BaseImage* sim_prop ){
   return true;
 }
 
+bool IntensityColumns::set_stddev_threshold_factor( double factor ){
+  stddev_threshold_factor = factor;
+  _flag_stddev_threshold_factor = true;
+  return true;
+}
+
+bool IntensityColumns::auto_calculate_threshold_value( ){
+  bool result = false;
+  if( _flag_sim_image_properties ){
+    if( _flag_stddev_threshold_factor &&
+      sim_image_properties->get_flag_stddev_image_statistical() &&
+      sim_image_properties->get_flag_mean_image_statistical()
+    ){
+      const cv::Scalar mean = sim_image_properties->get_mean_image_statistical();
+      const cv::Scalar stddev = sim_image_properties->get_stddev_image_statistical();
+      threshold_value = mean[0] + (int)( ( (double) stddev[0] ) * stddev_threshold_factor );
+      _flag_threshold_value = true;
+      result = true;
+    }
+  }
+  return result;
+}
+
+bool IntensityColumns::segmentate_image(){
+  bool result = false;
+  auto_calculate_threshold_value();
+  if( _flag_sim_image_properties && _flag_threshold_value ){
+
+    cv::Mat src = sim_image_properties->get_full_image( );
+
+
+
+    Mat kernel = (Mat_<float>(3,3) <<
+           1,  1, 1,
+           1, -8, 1,
+           1,  1, 1); // an approximation of second derivative, a quite strong kernel
+   // do the laplacian filtering as it is
+   // well, we need to convert everything in something more deeper then CV_8U
+   // because the kernel has some negative values,
+   // and we can expect in general to have a Laplacian image with negative values
+   // BUT a 8bits unsigned int (the one we are working with) can contain values from 0 to 255
+   // so the possible negative number will be truncated
+   cv::Mat imgLaplacian;
+   cv::Mat sharp = src; // copy source image to another temporary one
+   filter2D(sharp, imgLaplacian, CV_32F, kernel);
+   src.convertTo(sharp, CV_32F);
+   cv::Mat imgResult = sharp - imgLaplacian;
+   // convert back to 8bits gray scale
+   imgResult.convertTo(imgResult, CV_8UC3);
+   imgLaplacian.convertTo(imgLaplacian, CV_8UC3);
+   // imshow( "Laplace Filtered Image", imgLaplacian );
+   imwrite( "NewSharpedImage.png", imgResult );
+
+    cv::Mat bw;
+    src = imgResult; // copy back
+
+    cvtColor(src, bw, CV_BGR2GRAY);
+
+    cv::threshold(bw, bw, threshold_value, 255, CV_THRESH_BINARY | CV_THRESH_OTSU);
+    imwrite("BinaryImage.png", bw);
+
+    // Perform the distance transform algorithm
+       cv::Mat dist;
+       distanceTransform(bw, dist, CV_DIST_L2, 3);
+
+       // Normalize the distance image for range = {0.0, 1.0}
+    // so we can visualize and threshold it
+    cv::normalize(dist, dist, 0, 1., NORM_MINMAX);
+    imwrite("DistanceTransformImage.png", dist);
+    // Threshold to obtain the peaks
+    // This will be the markers for the foreground objects
+    threshold(dist, dist, .4, 1., CV_THRESH_BINARY);
+
+    // Dilate a bit the dist image
+    cv::Mat kernel1 = Mat::ones(3, 3, CV_8UC1);
+    dilate(dist, dist, kernel1);
+    imwrite("Peaks.png", dist);
+
+    // Create the CV_8U version of the distance image
+        // It is needed for findContours()
+        cv::Mat dist_8u;
+        dist.convertTo(dist_8u, CV_8U);
+        imwrite("dist_8u.png", dist_8u);
+
+        // Find total markers
+        vector<vector<Point> > contours;
+        findContours(dist_8u, contours, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
+        // Create the marker image for the watershed algorithm
+        cv::Mat markers = Mat::zeros(dist.size(), CV_32SC1);
+        // Draw the foreground markers
+        for (size_t i = 0; i < contours.size(); i++)
+            drawContours(markers, contours, static_cast<int>(i), Scalar::all(static_cast<int>(i)+1), -1);
+        // Draw the background marker
+        circle(markers, Point(5,5), 3, CV_RGB(255,255,255), -1);
+        imwrite("Markers.png", markers*10000);
+
+        // Perform the watershed algorithm
+    watershed(src, markers);
+    std::cout << "out of watershed" << std::endl;
+    cv::Mat mark = Mat::zeros(markers.size(), CV_8UC1);
+    markers.convertTo(mark, CV_8UC1);
+    bitwise_not(mark, mark);
+    imwrite("Markers_v2.png", mark); // uncomment this if you want to see how the mark
+                                  // image looks like at that point
+
+}
+}
+
 bool IntensityColumns::read_simulated_image_from_dat_file(){
   bool result = false;
   if( _flag_sim_crystal_properties ){

@@ -57,16 +57,30 @@ class IntensityColumns {
     BaseImage* sim_image_properties = nullptr;
     bool _flag_sim_image_properties = false;
 
+    double  stddev_threshold_factor = 1.0f;
+    bool _flag_stddev_threshold_factor = true;
+    int threshold_value = 0;
+    bool _flag_threshold_value = false;
+
     WAVIMG_prm* wavimg_parameters = nullptr;
 
     /* Loggers */
     ApplicationLog::ApplicationLog* logger = nullptr;
     bool _flag_logger = false;
+/*
+    cv::Mat bw_image;
+    bool _flag_bw_image = false;
+    cv:Mat dist_image;
+    bool _flag_dist_image = false;
+
+*/
+    bool auto_calculate_threshold_value();
 
   public:
 
     IntensityColumns();
     bool read_simulated_image_from_dat_file();
+    bool segmentate_image();
 
     /** getters **/
 
@@ -86,6 +100,7 @@ class IntensityColumns {
     bool set_exp_image_properties ( BaseImage* exp_image_properties );
     bool set_sim_image_properties ( BaseImage* sim_image_properties );
     bool set_wavimg_var( WAVIMG_prm *wavimg_var );
+    bool set_stddev_threshold_factor( double factor );
 
     void print_var_state();
 

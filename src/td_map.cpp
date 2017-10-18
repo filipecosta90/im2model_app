@@ -2041,6 +2041,8 @@ bool TDMap::compute_full_super_cell(){
     if( _flag_runned_supercell_wavimg ){
       emit TDMap_started_supercell_read_simulated_image();
       _flag_read_simulated_supercell_image = sim_image_intensity_columns->read_simulated_image_from_dat_file();
+      _flag_read_simulated_supercell_image &= sim_image_intensity_columns->segmentate_image();
+
       emit TDMap_ended_supercell_read_simulated_image( _flag_read_simulated_supercell_image );
       if( _flag_logger ){
         std::stringstream message;
@@ -2421,8 +2423,15 @@ bool TDMap::set_exp_image_bounds_roi_boundary_rect( cv::Rect roi_boundary_rect )
 bool TDMap::set_exp_image_properties_roi_rectangle_statistical( cv::Rect roi_rectangle_statistical ){
   bool result = false;
   result = exp_image_properties->set_roi_rectangle_statistical( roi_rectangle_statistical );
-  if( result ){
-    update_full_crysta_a_b_sizes();
+  if(
+    result &&
+    exp_image_properties->get_flag_mean_image_statistical() &&
+    exp_image_properties->get_flag_stddev_image_statistical()
+  ){
+cv::Scalar mean = exp_image_properties->get_mean_image_statistical();
+supercell_sim_image_properties->set_mean_image_statistical(mean);
+cv::Scalar stddev = exp_image_properties->get_stddev_image_statistical();
+supercell_sim_image_properties->set_stddev_image_statistical(stddev);
   }
   return result;
 }

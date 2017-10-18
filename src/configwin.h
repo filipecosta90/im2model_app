@@ -126,6 +126,7 @@ class MainWindow : public QMainWindow {
     boost::process::ipstream _sim_supercell_wavimg_ostream_buffer;
 
     public slots:
+    void echo_sc();
       void update_from_TDMap_sucess();
     void update_from_TDMap_failure();
     bool _is_initialization_ok();
@@ -148,6 +149,8 @@ class MainWindow : public QMainWindow {
     void update_exp_image_roi_from_rectangle_selection( QRect );
     void update_tab3_exp_image_bounds_from_rectangle_selection( QRect rectangle_selection );
     void update_exp_image_properties_roi_rectangle_statistical_from_rectangle_selection( QRect rectangle_selection );
+    void update_from_full_SuperCell_sucess();
+    void update_from_full_SuperCell_failure();
 
   protected:
     void closeEvent(QCloseEvent *event) override;
@@ -245,8 +248,8 @@ signals:
     GuiSimOutUpdater *sim_super_cell_worker;
     QThread *_sim_super_cell_thread;
 
-    GuiSimOutUpdater *sim_tdmap_output_worker;
-    QThread *_sim_tdmap_output_thread;
+    GuiSimOutUpdater *full_sim_super_cell_worker;
+    QThread *full_sim_super_cell_thread;
 
     /* Delegates */
     TreeItemFileDelegate *_load_file_delegate;

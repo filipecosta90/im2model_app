@@ -109,7 +109,9 @@ class BaseImage {
     cv::Rect roi_rectangle_statistical;
     bool _flag_roi_rectangle_statistical = false;
     cv::Scalar mean_image_statistical;
+    bool _flag_mean_image_statistical = false;
     cv::Scalar stddev_image_statistical;
+    bool _flag_stddev_image_statistical = false;
 
   public:
     BaseImage();
@@ -156,6 +158,10 @@ class BaseImage {
     // rectangle without the ignored edge pixels of the full image
     int get_ignore_edge_pixels(){ return ignore_edge_pixels; }
     int get_ignore_edge_nm(){ return ignore_edge_nm; }
+cv::Scalar get_mean_image_statistical(){ return mean_image_statistical; }
+bool get_flag_mean_image_statistical(){ return _flag_mean_image_statistical; }
+cv::Scalar get_stddev_image_statistical(){ return stddev_image_statistical; }
+bool get_flag_stddev_image_statistical(){ return _flag_stddev_image_statistical; }
 
     /** getters **/
     // flag getters
@@ -193,6 +199,8 @@ class BaseImage {
     bool set_ignore_edge_nm( double ignore_edge_nm );
 
     bool set_roi_rectangle_statistical( cv::Rect );
+    bool set_mean_image_statistical( cv::Scalar );
+    bool set_stddev_image_statistical( cv::Scalar );
 
 
 static std::string type2str(int type);

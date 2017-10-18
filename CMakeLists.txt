@@ -287,6 +287,7 @@ else(build_cli)
       src/gui_tdmap_table.h
       src/gui_tdmap_table.cpp
       src/gui_sim_updater.hpp
+      src/gui_sim_updater.cpp
       src/gui_stream.hpp
       src/qt_file_push_button.h
       src/qt_file_push_button.cpp

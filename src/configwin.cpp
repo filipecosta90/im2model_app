@@ -117,12 +117,28 @@ MainWindow::MainWindow( ApplicationLog::ApplicationLog* logger , QWidget *parent
 
       // will only start thread when needed
       connect(sim_tdmap_worker, SIGNAL(TDMap_request()), _sim_tdmap_thread, SLOT(start()));
-      connect(_sim_tdmap_thread, SIGNAL(started()), sim_tdmap_worker, SLOT(newTDMapSim()));
+      connect(_sim_tdmap_thread, &QThread::started, sim_tdmap_worker, &GuiSimOutUpdater::newTDMapSim );
       connect(sim_tdmap_worker, SIGNAL(TDMap_sucess()), this, SLOT(update_from_TDMap_sucess( )));
       connect(sim_tdmap_worker, SIGNAL(TDMap_sucess_no_correlation()), this, SLOT(update_from_TDMap_sucess( )));
       connect(sim_tdmap_worker, SIGNAL(TDMap_failure()), this, SLOT(update_from_TDMap_failure()));
       // will quit thread after work done
       connect(sim_tdmap_worker, SIGNAL(TDMap_finished()), _sim_tdmap_thread, SLOT(quit()), Qt::DirectConnection);
+
+      /* Super-Cell Full simulation  thread */
+      full_sim_super_cell_thread = new QThread( this );
+      full_sim_super_cell_worker = new GuiSimOutUpdater( _core_td_map );
+      full_sim_super_cell_worker->moveToThread( full_sim_super_cell_thread );
+
+      // will only start thread when needed
+      connect( full_sim_super_cell_worker, SIGNAL(SuperCell_full_request()), this, SLOT(echo_sc()) );
+      connect( full_sim_super_cell_worker, SIGNAL(SuperCell_full_request()), full_sim_super_cell_thread, SLOT(start()) );
+      connect(full_sim_super_cell_thread, &QThread::started, full_sim_super_cell_worker, &GuiSimOutUpdater::newSuperCellFull );
+
+      connect(full_sim_super_cell_worker, SIGNAL(SuperCell_full_sucess()), this, SLOT(update_from_full_SuperCell_sucess()));
+      connect(full_sim_super_cell_worker, SIGNAL(SuperCell_full_failure()), this, SLOT(update_from_full_SuperCell_failure()));
+      // will quit thread after work done
+      connect(full_sim_super_cell_worker, SIGNAL(SuperCell_full_finished()), full_sim_super_cell_thread, SLOT(quit()), Qt::DirectConnection);
+    //  connect(full_sim_super_cell_worker, SIGNAL(error(QString)), this, SLOT(errorString(QString)));
 
       /* Super-Cell Edge Detection  thread */
       _sim_super_cell_thread = new QThread( this );
@@ -131,7 +147,7 @@ MainWindow::MainWindow( ApplicationLog::ApplicationLog* logger , QWidget *parent
 
       // will only start thread when needed
       connect( sim_super_cell_worker, SIGNAL(SuperCell_edge_request()), _sim_super_cell_thread, SLOT(start()));
-      connect(_sim_super_cell_thread, SIGNAL(started()), sim_super_cell_worker, SLOT(newSuperCellEdge()));
+      connect(_sim_super_cell_thread, &QThread::started, sim_super_cell_worker, &GuiSimOutUpdater::newSuperCellEdge );
 
       connect(sim_super_cell_worker, SIGNAL(SuperCell_edge_sucess()), this, SLOT(update_from_SuperCell_edge_sucess()));
       connect(sim_super_cell_worker, SIGNAL(SuperCell_edge_failure()), this, SLOT(update_from_SuperCell_edge_failure()));
@@ -173,10 +189,15 @@ MainWindow::MainWindow( ApplicationLog::ApplicationLog* logger , QWidget *parent
       if( _flag_im2model_logger ){
         im2model_logger->logEvent( ApplicationLog::notification, "Finished initializing App." );
       }
-
     }
   }
 }
+
+
+void MainWindow::echo_sc( ){
+std::cout << "echo_sc" << std::endl;
+}
+
 
 void MainWindow::setApplicationVersion( std::string app_version ){
   application_version = app_version;
@@ -527,6 +548,16 @@ bool MainWindow::_reset_document_modified_flags(){
     std::cout << " _reset_document_modified_flags REESULT "  << std::boolalpha << result << std::endl;
   }
   return result;
+}
+
+void MainWindow::update_from_full_SuperCell_failure( ){
+  ui->statusBar->showMessage(tr("Error while running Full-Super-Cell simulation") );
+  updateProgressBar(0,4,4);
+}
+
+void MainWindow::update_from_full_SuperCell_sucess( ){
+  ui->statusBar->showMessage(tr("Sucessfully runned Full-Super-Cell simulation"), 2000);
+  updateProgressBar(0,4,4);
 }
 
 void MainWindow::update_from_TDMap_sucess( ){
@@ -2605,11 +2636,6 @@ void MainWindow::on_qbutton_tdmap_accept_clicked(){
 
 void MainWindow::on_qpush_compute_full_super_cell_clicked(){
   bool result = false;
-  result = _core_td_map->compute_full_super_cell();
-  if( result ){
-    ui->statusBar->showMessage(tr("Sucessufully created full-crystal super-cell from parameters."), 2000);
-  }
-  else{
-    ui->statusBar->showMessage(tr("Error while creating full-crystal super-cell from parameters.") );
-  }
+  ui->statusBar->showMessage(tr("Requesting a Full-Super-Cell worker thread."), 2000);
+  full_sim_super_cell_worker->requestFullSuperCell();
 }
