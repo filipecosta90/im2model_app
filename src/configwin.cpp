@@ -138,7 +138,7 @@ MainWindow::MainWindow( ApplicationLog::ApplicationLog* logger , QWidget *parent
       connect(full_sim_super_cell_worker, SIGNAL(SuperCell_full_failure()), this, SLOT(update_from_full_SuperCell_failure()));
       // will quit thread after work done
       connect(full_sim_super_cell_worker, SIGNAL(SuperCell_full_finished()), full_sim_super_cell_thread, SLOT(quit()), Qt::DirectConnection);
-    //  connect(full_sim_super_cell_worker, SIGNAL(error(QString)), this, SLOT(errorString(QString)));
+      //  connect(full_sim_super_cell_worker, SIGNAL(error(QString)), this, SLOT(errorString(QString)));
 
       /* Super-Cell Edge Detection  thread */
       _sim_super_cell_thread = new QThread( this );
@@ -195,7 +195,7 @@ MainWindow::MainWindow( ApplicationLog::ApplicationLog* logger , QWidget *parent
 
 
 void MainWindow::echo_sc( ){
-std::cout << "echo_sc" << std::endl;
+  std::cout << "echo_sc" << std::endl;
 }
 
 
@@ -1247,7 +1247,7 @@ void MainWindow::update_exp_image_properties_roi_rectangle_statistical_from_rect
   }
 }
 
-void MainWindow::create_box_options(){
+void MainWindow::create_box_options_tab1_exp_image(){
 
   QVector<QVariant> common_header = {"Field","Value"};
 
@@ -1438,6 +1438,16 @@ void MainWindow::create_box_options(){
   ui->qtree_view_project_setup_image->setItemDelegate( _load_file_delegate );
   //start editing after one click
   ui->qtree_view_project_setup_image->setEditTriggers(QAbstractItemView::AllEditTriggers);
+  ui->qtree_view_project_setup_image->expandAll();
+
+  for (int column = 0; column < project_setup_image_fields_model->columnCount(); ++column){
+    ui->qtree_view_project_setup_image->resizeColumnToContents(column);
+  }
+}
+
+void MainWindow::create_box_options_tab1_crystallography(){
+
+  QVector<QVariant> common_header = {"Field","Value"};
 
   /*************************
    * CRYSTALLOGRAPLY
@@ -1702,16 +1712,17 @@ void MainWindow::create_box_options(){
   //start editing after one click
   ui->qtree_view_project_setup_crystallography->setEditTriggers(QAbstractItemView::AllEditTriggers);
 
-  ui->qtree_view_project_setup_image->expandAll();
   ui->qtree_view_project_setup_crystallography->expandAll();
-
-  for (int column = 0; column < project_setup_image_fields_model->columnCount(); ++column){
-    ui->qtree_view_project_setup_image->resizeColumnToContents(column);
-  }
 
   for (int column = 0; column < project_setup_crystalographic_fields_model->columnCount(); ++column){
     ui->qtree_view_project_setup_crystallography->resizeColumnToContents(column);
   }
+
+}
+
+void MainWindow::create_box_options_tab2_sim_config(){
+
+  QVector<QVariant> common_header = {"Field","Value"};
 
   /*************************
    * TD MAP
@@ -2184,6 +2195,9 @@ void MainWindow::create_box_options(){
 
   ui->tdmap_table->connect_thickness_range_number_samples_changes(  thickness_range_number_samples, 1 );
   ui->tdmap_table->connect_defocus_range_number_samples_changes(  defocus_range_number_samples, 1 );
+}
+
+void MainWindow::create_box_options_tab2_run_config(){
 
   /*************************
    * Running configuration
@@ -2387,6 +2401,11 @@ void MainWindow::create_box_options(){
   for (int column = 0; column < tdmap_simulation_setup_model->columnCount(); ++column){
     ui->qtree_view_tdmap_running_configuration->resizeColumnToContents(column);
   }
+}
+
+void MainWindow::create_box_options_tab3_supercell(){
+
+  QVector<QVariant> common_header = {"Field","Value"};
 
   /*************************
    * SUPER-CELL
@@ -2476,9 +2495,6 @@ void MainWindow::create_box_options(){
   super_cell_dimensions->set_variable_name( "super_cell_dimensions" );
   super_cell_setup_root->insertChildren( super_cell_dimensions );
 
-
-
-
   ////////////////
   // Super-Cell Dimensions -- a
   ////////////////
@@ -2528,6 +2544,22 @@ void MainWindow::create_box_options(){
   for (int column = 0; column < super_cell_setup_model->columnCount(); ++column){
     ui->qtree_view_supercell_model_edge_detection_setup->resizeColumnToContents(column);
   }
+}
+
+void MainWindow::create_box_options(){
+
+  // tab1
+  create_box_options_tab1_exp_image();
+  create_box_options_tab1_crystallography();
+
+  // tab2
+  create_box_options_tab2_sim_config();
+  create_box_options_tab2_run_config();
+
+  // tab3
+  create_box_options_tab3_supercell();
+
+  // tab4
 
 }
 

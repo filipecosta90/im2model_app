@@ -20,10 +20,10 @@
 #include <Qt3DInput/QInputAspect>
 #include <QFrameGraphNode>
 #include <Qt3DCore/QEntity>
- #include <Qt3DRender/QGeometryRenderer>
- #include <Qt3DRender/QLayer>
- #include <Qt3DRender/QLayerFilter>
- #include <Qt3DRender/QViewport>
+#include <Qt3DRender/QGeometryRenderer>
+#include <Qt3DRender/QLayer>
+#include <Qt3DRender/QLayerFilter>
+#include <Qt3DRender/QViewport>
 
 #include <Qt3DExtras/qtorusmesh.h>
 #include <Qt3DRender/qmesh.h>
@@ -126,8 +126,8 @@ class MainWindow : public QMainWindow {
     boost::process::ipstream _sim_supercell_wavimg_ostream_buffer;
 
     public slots:
-    void echo_sc();
-      void update_from_TDMap_sucess();
+      void echo_sc();
+    void update_from_TDMap_sucess();
     void update_from_TDMap_failure();
     bool _is_initialization_ok();
     void update_tdmap_celslc_started( );
@@ -211,7 +211,14 @@ signals:
     void createProgressBar();
 
     bool create_3d_widgets( QMainWindow *parent , SuperCell* tdmap_roi_sim_super_cell, SuperCell* tdmap_full_sim_super_cell );
+
+    void create_box_options_tab1_exp_image();
+    void create_box_options_tab1_crystallography();
+    void create_box_options_tab2_sim_config();
+    void create_box_options_tab2_run_config();
+    void create_box_options_tab3_supercell();
     void create_box_options();
+
     bool readSettings();
     void writeSettings();
     bool maybeSave();

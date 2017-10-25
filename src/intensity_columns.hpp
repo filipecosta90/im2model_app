@@ -67,11 +67,11 @@ class IntensityColumns {
     /* Loggers */
     ApplicationLog::ApplicationLog* logger = nullptr;
     bool _flag_logger = false;
-/*
-    cv::Mat bw_image;
-    bool _flag_bw_image = false;
-    cv:Mat dist_image;
-    bool _flag_dist_image = false;
+    /*
+       cv::Mat bw_image;
+       bool _flag_bw_image = false;
+cv:Mat dist_image;
+bool _flag_dist_image = false;
 
 */
     bool auto_calculate_threshold_value();
