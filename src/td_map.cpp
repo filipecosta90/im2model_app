@@ -1928,9 +1928,9 @@ bool TDMap::set_full_boundary_polygon_margin_nm( std::string s_margin ){
 bool TDMap::accept_tdmap_best_match_position(){
   bool result = false;
   if(
-    _td_map_simgrid->get_flag_simgrid_best_match_thickness_nm() &&
-    _td_map_simgrid->get_flag_simgrid_best_match_defocus_nm()
-){
+      _td_map_simgrid->get_flag_simgrid_best_match_thickness_nm() &&
+      _td_map_simgrid->get_flag_simgrid_best_match_defocus_nm()
+    ){
     const double match_thickness = _td_map_simgrid->get_simgrid_best_match_thickness_nm();
     const double match_defocus_nm = _td_map_simgrid->get_simgrid_best_match_defocus_nm();
     // supercell
@@ -2424,15 +2424,38 @@ bool TDMap::set_exp_image_properties_roi_rectangle_statistical( cv::Rect roi_rec
   bool result = false;
   result = exp_image_properties->set_roi_rectangle_statistical( roi_rectangle_statistical );
   if(
-    result &&
-    exp_image_properties->get_flag_mean_image_statistical() &&
-    exp_image_properties->get_flag_stddev_image_statistical()
-  ){
-cv::Scalar mean = exp_image_properties->get_mean_image_statistical();
-supercell_sim_image_properties->set_mean_image_statistical(mean);
-cv::Scalar stddev = exp_image_properties->get_stddev_image_statistical();
-supercell_sim_image_properties->set_stddev_image_statistical(stddev);
+      result &&
+      exp_image_properties->get_flag_mean_image_statistical() &&
+      exp_image_properties->get_flag_stddev_image_statistical()
+    ){
+
+    cv::Scalar mean = exp_image_properties->get_mean_image_statistical();
+    supercell_sim_image_properties->set_mean_image_statistical(mean);
+    emit exp_image_properties_noise_carbon_statistical_mean_changed();
+    cv::Scalar stddev = exp_image_properties->get_stddev_image_statistical();
+    supercell_sim_image_properties->set_stddev_image_statistical(stddev);
+    emit exp_image_properties_noise_carbon_statistical_stddev_changed();
   }
+  return result;
+}
+
+int TDMap::get_exp_image_properties_roi_rectangle_statistical_mean(){
+  int result = -1;
+  if( exp_image_properties->get_flag_mean_image_statistical() ){
+    const cv::Scalar mean = exp_image_properties->get_mean_image_statistical();
+    result = mean[0];
+  }
+  std::cout << " get_exp_image_properties_roi_rectangle_statistical_mean " <<  result << std::endl;
+  return result;
+}
+
+int TDMap::get_exp_image_properties_roi_rectangle_statistical_stddev(){
+  int result = -1;
+  if( exp_image_properties->get_flag_stddev_image_statistical() ){
+    const cv::Scalar stddev = exp_image_properties->get_stddev_image_statistical();
+    result = stddev[0];
+  }
+  std::cout << " get_exp_image_properties_roi_rectangle_statistical_stddev " <<  result << std::endl;
   return result;
 }
 

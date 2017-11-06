@@ -420,6 +420,9 @@ class TDMap  : public QObject {
     bool get_exp_image_bounds_flag_roi_boundary_image_w_margin();
     int get_exp_image_bounds_hysteresis_threshold();
     int get_exp_image_bounds_max_contour_distance_px();
+    int get_exp_image_properties_roi_rectangle_statistical_mean();
+    int get_exp_image_properties_roi_rectangle_statistical_stddev();
+
     // threshold limits
     int get_exp_image_bounds_hysteresis_threshold_range_bottom_limit();
     int get_exp_image_bounds_hysteresis_threshold_range_top_limit();
@@ -513,6 +516,8 @@ signals:
     void super_cell_dimensions_a_changed();
     void super_cell_dimensions_b_changed();
     void super_cell_dimensions_c_changed();
+    void exp_image_properties_noise_carbon_statistical_mean_changed();
+    void exp_image_properties_noise_carbon_statistical_stddev_changed();
 
     void TDMap_started_celslc( );
     void TDMap_started_supercell_celslc( );

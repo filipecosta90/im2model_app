@@ -21,7 +21,7 @@
     <item>
      <widget class="QTabWidget" name="tabWidget">
       <property name="currentIndex">
-       <number>2</number>
+       <number>3</number>
       </property>
       <widget class="QWidget" name="image_crystal_tab">
        <attribute name="title">
@@ -637,7 +637,7 @@
                  </widget>
                 </item>
                 <item>
-                 <widget class="QTreeView" name="qtree_view_tdmap_simulation_setup_2"/>
+                 <widget class="QTreeView" name="qtree_view_refinement_full_simulation"/>
                 </item>
                 <item>
                  <layout class="QHBoxLayout" name="horizontalLayout_20">

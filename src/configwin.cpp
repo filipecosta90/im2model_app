@@ -2535,6 +2535,38 @@ void MainWindow::create_box_options_tab3_supercell(){
   connect( _core_td_map, SIGNAL( super_cell_dimensions_c_changed( )), super_cell_dimensions_c, SLOT( load_data_from_getter_double() ) );
   super_cell_dimensions->insertChildren( super_cell_dimensions_c );
 
+  ////////////////
+  // Noise/Carbon ROI Statistical analysis
+  ////////////////
+  QVector<QVariant> box5_option_3 = {"Noise/Carbon ROI Statistical analysis",""};
+  noise_carbon_roi_statistical_analysis = new TreeItem ( box5_option_3 );
+  noise_carbon_roi_statistical_analysis->set_variable_name( "noise_carbon_roi_statistical_analysis" );
+  super_cell_setup_root->insertChildren( noise_carbon_roi_statistical_analysis );
+
+  ////////////////
+  // Noise/Carbon ROI Statistical analysis -- Mean
+  ////////////////
+  QVector<QVariant> box5_option_3_1_data = {"Mean",""};
+  QVector<bool> box5_option_3_1_edit = {false,false};
+  boost::function<double(void)> box5_option_3_1_getter ( boost::bind( &TDMap::get_exp_image_properties_roi_rectangle_statistical_mean,_core_td_map ) );
+  exp_image_properties_noise_carbon_statistical_mean = new TreeItem ( box5_option_3_1_data,  box5_option_3_1_edit);
+  exp_image_properties_noise_carbon_statistical_mean->set_variable_name( "exp_image_properties_noise_carbon_statistical_mean" );
+  exp_image_properties_noise_carbon_statistical_mean->set_fp_data_getter_int_vec( 1, box5_option_3_1_getter );
+  connect( _core_td_map, SIGNAL( exp_image_properties_noise_carbon_statistical_mean_changed( )), exp_image_properties_noise_carbon_statistical_mean, SLOT( load_data_from_getter_int() ) );
+  noise_carbon_roi_statistical_analysis->insertChildren( exp_image_properties_noise_carbon_statistical_mean );
+
+  ////////////////
+  // Noise/Carbon ROI Statistical analysis -- Std dev
+  ////////////////
+  QVector<QVariant> box5_option_3_2_data = {"Std deviation",""};
+  QVector<bool> box5_option_3_2_edit = {false,false};
+  boost::function<double(void)> box5_option_3_2_getter ( boost::bind( &TDMap::get_exp_image_properties_roi_rectangle_statistical_stddev,_core_td_map ) );
+  exp_image_properties_noise_carbon_statistical_stddev = new TreeItem ( box5_option_3_2_data,  box5_option_3_2_edit);
+  exp_image_properties_noise_carbon_statistical_stddev->set_variable_name( "exp_image_properties_noise_carbon_statistical_stddev" );
+  exp_image_properties_noise_carbon_statistical_stddev->set_fp_data_getter_int_vec( 1, box5_option_3_2_getter );
+  connect( _core_td_map, SIGNAL( exp_image_properties_noise_carbon_statistical_stddev_changed( )), exp_image_properties_noise_carbon_statistical_stddev, SLOT( load_data_from_getter_int() ) );
+  noise_carbon_roi_statistical_analysis->insertChildren( exp_image_properties_noise_carbon_statistical_stddev );
+
   ui->qtree_view_supercell_model_edge_detection_setup->setModel( super_cell_setup_model );
   ui->qtree_view_supercell_model_edge_detection_setup->setItemDelegate( _load_file_delegate );
   //start editing after one click
@@ -2544,6 +2576,36 @@ void MainWindow::create_box_options_tab3_supercell(){
   for (int column = 0; column < super_cell_setup_model->columnCount(); ++column){
     ui->qtree_view_supercell_model_edge_detection_setup->resizeColumnToContents(column);
   }
+}
+
+void MainWindow::create_box_options_tab4_intensity_peaks(){
+
+    QVector<QVariant> common_header = {"Field","Value"};
+
+    /*************************
+     * INTENSITY PEAKS
+     *************************/
+    intensity_peaks_root = new TreeItem ( common_header );
+    intensity_peaks_root->set_variable_name( "intensity_peaks_root" );
+    intensity_peaks_model = new TreeModel( intensity_peaks_root );
+
+    ////////////////
+    // Edge detection
+    ////////////////
+    QVector<QVariant> box6_option_1 = {"Intensity peaks",""};
+    intensity_peaks_analysis  = new TreeItem ( box6_option_1 );
+    intensity_peaks_analysis->set_variable_name( "intensity_peaks_analysis" );
+    intensity_peaks_root->insertChildren( intensity_peaks_analysis );
+
+    ui->qtree_view_refinement_full_simulation->setModel( intensity_peaks_model );
+    ui->qtree_view_refinement_full_simulation->setItemDelegate( _load_file_delegate );
+    //start editing after one click
+    ui->qtree_view_refinement_full_simulation->setEditTriggers( QAbstractItemView::AllEditTriggers );
+    ui->qtree_view_refinement_full_simulation->expandAll();
+
+    for (int column = 0; column < super_cell_setup_model->columnCount(); ++column){
+      ui->qtree_view_refinement_full_simulation->resizeColumnToContents(column);
+    }
 }
 
 void MainWindow::create_box_options(){
@@ -2560,7 +2622,7 @@ void MainWindow::create_box_options(){
   create_box_options_tab3_supercell();
 
   // tab4
-
+  create_box_options_tab4_intensity_peaks();
 }
 
 bool MainWindow::set_dr_probe_path( QString path ){

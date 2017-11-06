@@ -118,13 +118,71 @@ bool IntensityColumns::segmentate_image(){
     dist.convertTo(dist_8u, CV_8U);
 
     // Find total markers
-    vector<vector<Point> > intensity_columns;
+    vector< vector<Point> > intensity_columns;
     findContours(dist_8u, intensity_columns, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
     // Create the marker image for the watershed algorithm
     cv::Mat markers = Mat::zeros(dist.size(), CV_32SC1);
     cv::Mat column_positions = src_bgr_const.clone();
     // Draw the foreground markers
     std::cout << "detected " << intensity_columns.size() << "potential intensity columns " << std::endl;
+
+    // Set up the detector with default parameters.
+SimpleBlobDetector::Params params;
+
+// Change thresholds
+params.minThreshold = 10;
+params.maxThreshold = 200;
+
+// Filter by Area.
+params.filterByArea = true;
+params.minArea = 1500;
+
+// Filter by Circularity
+params.filterByCircularity = true;
+params.minCircularity = 0.1;
+
+// Filter by Convexity
+params.filterByConvexity = true;
+params.minConvexity = 0.87;
+
+// Filter by Inertia
+params.filterByInertia = true;
+params.minInertiaRatio = 0.01;
+
+// Detect blobs.
+std::vector<KeyPoint> keypoints;
+
+#if CV_MAJOR_VERSION < 3   // If you are using OpenCV 2
+std::cout << " CV_MAJOR_VERSION < 3 " <<  std::endl;
+
+  // Set up detector with params
+  SimpleBlobDetector detector;
+  SimpleBlobDetector detector(params);
+
+  // You can use the detector this way
+  detector.detect( imgResult, keypoints);
+
+#else
+
+  // Set up detector with params
+  std::cout << " CV_MAJOR_VERSION >= 3 " <<  std::endl;
+
+  Ptr<SimpleBlobDetector> detector = SimpleBlobDetector::create(params);
+
+  // SimpleBlobDetector::create creates a smart pointer.
+  // So you need to use arrow ( ->) instead of dot ( . )
+  detector->detect( imgResult, keypoints);
+
+#endif
+
+
+std::cout << " keypoints size " << keypoints.size() <<  std::endl;
+Mat im_with_keypoints;
+drawKeypoints( src_bgr, keypoints, im_with_keypoints, Scalar(0,0,255), DrawMatchesFlags::DRAW_RICH_KEYPOINTS );
+
+// Show blobs
+//imshow( "im_with_keypoints", im_with_keypoints );
+
     for (size_t i = 0; i < intensity_columns.size(); i++){
 
       /** Lets find the centroid of the exp. image boundary poligon **/

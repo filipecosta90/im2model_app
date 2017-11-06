@@ -193,6 +193,13 @@ void TreeItem::load_data_from_getter_double( ){
 }
 
 // loads data for all cols
+void TreeItem::load_data_from_getter_int( ){
+  for(int col = 0; col < fp_data_getter_int_vec.size(); col++ ){
+    load_data_from_getter( col );
+  }
+}
+
+// loads data for all cols
 void TreeItem::load_data_from_getter_string( ){
   std::cout << "##### load_data_from_getter_string()" << std::endl;
   for(int col = 0; col < fp_data_getter_string_vec.size(); col++ ){

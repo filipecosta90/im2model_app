@@ -217,6 +217,7 @@ signals:
     void create_box_options_tab2_sim_config();
     void create_box_options_tab2_run_config();
     void create_box_options_tab3_supercell();
+    void create_box_options_tab4_intensity_peaks();
     void create_box_options();
 
     bool readSettings();
@@ -245,6 +246,9 @@ signals:
 
     // tab3
     TreeModel* super_cell_setup_model;
+
+    // tab4
+    TreeModel* intensity_peaks_model;
 
     QModelIndex project_setup_image_fields_model_index;
 
@@ -363,6 +367,13 @@ signals:
     TreeItem* super_cell_dimensions_a = nullptr;
     TreeItem* super_cell_dimensions_b = nullptr;
     TreeItem* super_cell_dimensions_c = nullptr;
+    TreeItem* noise_carbon_roi_statistical_analysis = nullptr;
+    TreeItem* exp_image_properties_noise_carbon_statistical_mean = nullptr;
+    TreeItem* exp_image_properties_noise_carbon_statistical_stddev = nullptr;
+
+    // tab4
+    TreeItem* intensity_peaks_root = nullptr;
+    TreeItem* intensity_peaks_analysis = nullptr;
 
     /* simulation outputs */
     TreeItem* _multislice_phase_granting_output;

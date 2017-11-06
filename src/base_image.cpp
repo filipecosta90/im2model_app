@@ -239,8 +239,8 @@ bool BaseImage::set_roi_rectangle_statistical( cv::Rect boundary_rect ){
       _flag_mean_image_statistical = true;
       std::cout<<"Mean : "<<mean_image_statistical.val[0]<<std::endl;
       std::cout<<"Standard deviation: "<<stddev_image_statistical.val[0]<<std::endl;
-      std::cout << "set_roi_rectangle_statistical RESULT "  << std::boolalpha << result << std::endl;
       result = true;
+      std::cout << "set_roi_rectangle_statistical RESULT "  << std::boolalpha << result << std::endl;
     }
     else{
       if( _flag_logger ){
