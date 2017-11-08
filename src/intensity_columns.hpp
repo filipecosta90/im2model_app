@@ -67,6 +67,11 @@ class IntensityColumns {
     /* Loggers */
     ApplicationLog::ApplicationLog* logger = nullptr;
     bool _flag_logger = false;
+
+    float intensity_columns_keypoint_diameter = 1.0f;
+    std::vector<cv::KeyPoint> keypoints;
+    std::vector< std::vector<cv::Point> > intensity_columns;
+
     /*
        cv::Mat bw_image;
        bool _flag_bw_image = false;

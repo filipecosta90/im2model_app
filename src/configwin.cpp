@@ -2548,7 +2548,7 @@ void MainWindow::create_box_options_tab3_supercell(){
   ////////////////
   QVector<QVariant> box5_option_3_1_data = {"Mean",""};
   QVector<bool> box5_option_3_1_edit = {false,false};
-  boost::function<double(void)> box5_option_3_1_getter ( boost::bind( &TDMap::get_exp_image_properties_roi_rectangle_statistical_mean,_core_td_map ) );
+  boost::function<int(void)> box5_option_3_1_getter ( boost::bind( &TDMap::get_exp_image_properties_roi_rectangle_statistical_mean,_core_td_map ) );
   exp_image_properties_noise_carbon_statistical_mean = new TreeItem ( box5_option_3_1_data,  box5_option_3_1_edit);
   exp_image_properties_noise_carbon_statistical_mean->set_variable_name( "exp_image_properties_noise_carbon_statistical_mean" );
   exp_image_properties_noise_carbon_statistical_mean->set_fp_data_getter_int_vec( 1, box5_option_3_1_getter );
@@ -2560,7 +2560,7 @@ void MainWindow::create_box_options_tab3_supercell(){
   ////////////////
   QVector<QVariant> box5_option_3_2_data = {"Std deviation",""};
   QVector<bool> box5_option_3_2_edit = {false,false};
-  boost::function<double(void)> box5_option_3_2_getter ( boost::bind( &TDMap::get_exp_image_properties_roi_rectangle_statistical_stddev,_core_td_map ) );
+  boost::function<int(void)> box5_option_3_2_getter ( boost::bind( &TDMap::get_exp_image_properties_roi_rectangle_statistical_stddev,_core_td_map ) );
   exp_image_properties_noise_carbon_statistical_stddev = new TreeItem ( box5_option_3_2_data,  box5_option_3_2_edit);
   exp_image_properties_noise_carbon_statistical_stddev->set_variable_name( "exp_image_properties_noise_carbon_statistical_stddev" );
   exp_image_properties_noise_carbon_statistical_stddev->set_fp_data_getter_int_vec( 1, box5_option_3_2_getter );
