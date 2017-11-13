@@ -137,6 +137,10 @@ TDMap::TDMap(
   sim_image_intensity_columns->set_exp_image_properties ( exp_image_properties );
   sim_image_intensity_columns->set_sim_image_properties ( supercell_sim_image_properties );
 
+  connect( sim_image_intensity_columns, SIGNAL( sim_image_intensity_columns_changed( )), this, SLOT(update_super_cell_sim_image_intensity_columns_changed() ) );
+
+  
+
   /////////////
   // only for debug. need to add this options like in im2model command line
   /////////////
@@ -250,6 +254,10 @@ TDMap::TDMap( boost::process::ipstream& ostream_celslc_buffer,
   ApplicationLog::ApplicationLog* app_logger ) :
 TDMap::TDMap( ostream_celslc_buffer, ostream_msa_buffer, ostream_wavimg_buffer, ostream_simgrid_buffer, ostream_supercell_celslc_buffer, ostream_supercell_msa_buffer, ostream_supercell_wavimg_buffer  ) {
   set_application_logger( app_logger );
+}
+
+void TDMap::update_super_cell_sim_image_intensity_columns_changed(){
+  emit supercell_full_simulated_image_intensity_columns_changed();
 }
 
 bool TDMap::test_clean_run_env(){
@@ -1294,6 +1302,8 @@ bool TDMap::set_image_properties_sampling_rate_x_m_per_pixel( const double s_rat
   const bool exp_result = exp_image_properties->set_pixel_size_height_x_m( s_rate_x );
   const bool sim_result = sim_image_properties->set_pixel_size_height_x_m( s_rate_x );
   const bool supercell_sim_result = supercell_sim_image_properties->set_pixel_size_height_x_m( s_rate_x );
+   // const bool supercell_sim_result = supercell_exp_image_properties->set_pixel_size_height_x_m( s_rate_x );
+
   return exp_result && sim_result && supercell_sim_result;
 }
 
@@ -2045,7 +2055,7 @@ bool TDMap::set_thickness_user_estimated_nm( std::string s_estimated ){
             emit TDMap_started_supercell_read_simulated_image();
             _flag_read_simulated_supercell_image = sim_image_intensity_columns->read_simulated_image_from_dat_file();
             if( _flag_read_simulated_supercell_image ){
-              emit TDMap_supercell_full_simulated_image_changed();
+              emit supercell_full_simulated_image_changed();
             }
             emit TDMap_ended_supercell_read_simulated_image( _flag_read_simulated_supercell_image );
             std::cout << "read_simulated_image_from_dat_file: " << std::boolalpha << _flag_read_simulated_supercell_image << std::endl;
@@ -2349,6 +2359,10 @@ double TDMap::get_exp_image_properties_roi_nx_size_width_nm(){
 
 cv::Mat TDMap::get_super_cell_sim_image_properties_full_image(){
   return supercell_sim_image_properties->get_full_image();
+}
+
+std::vector<cv::KeyPoint> TDMap::get_super_cell_sim_image_properties_keypoints(){
+  return sim_image_intensity_columns->get_sim_image_keypoints();
 }
 
 bool TDMap::get_flag_super_cell_sim_image_properties_full_image(){

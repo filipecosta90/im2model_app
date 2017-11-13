@@ -42,8 +42,8 @@
 #include "base_image.hpp"
 #include "application_log.hpp"
 
-class IntensityColumns {
-
+class IntensityColumns : public QObject {
+  Q_OBJECT
   private:
 
     // // // // //
@@ -69,8 +69,8 @@ class IntensityColumns {
     bool _flag_logger = false;
 
     float intensity_columns_keypoint_diameter = 1.0f;
-    std::vector<cv::KeyPoint> keypoints;
-    std::vector< std::vector<cv::Point> > intensity_columns;
+    std::vector<cv::KeyPoint> sim_image_keypoints;
+    std::vector< std::vector<cv::Point> > sim_image_intensity_columns;
 
     /*
        cv::Mat bw_image;
@@ -95,6 +95,7 @@ bool _flag_dist_image = false;
     bool get_flag_sim_crystal_properties(){ return _flag_sim_crystal_properties; }
     bool get_flag_exp_image_properties(){ return _flag_exp_image_properties; }
     bool get_flag_sim_image_properties(){ return _flag_sim_image_properties; }
+    std::vector<cv::KeyPoint> get_sim_image_keypoints(){ return sim_image_keypoints; } 
 
     /* Loggers */
     ApplicationLog::ApplicationLog* get_logger(){ return logger; }
@@ -113,6 +114,9 @@ bool _flag_dist_image = false;
     bool set_application_logger( ApplicationLog::ApplicationLog* logger );
     virtual std::ostream& output(std::ostream& stream) const;
 
+    signals:
+    void sim_image_intensity_columns_changed();
+    void sim_image_intensity_keypoints_changed();
 
 };
 

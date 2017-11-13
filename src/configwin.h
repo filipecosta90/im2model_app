@@ -104,7 +104,7 @@ namespace Ui {
 
 class MainWindow : public QMainWindow {
   Q_OBJECT
-  public:
+public:
     //  MainWindow(QWidget *parent = 0);
     MainWindow( ApplicationLog::ApplicationLog* logger, QWidget *parent = 0 );
 
@@ -126,7 +126,7 @@ class MainWindow : public QMainWindow {
     boost::process::ipstream _sim_supercell_wavimg_ostream_buffer;
 
     public slots:
-      void echo_sc();
+    void echo_sc();
     void update_from_TDMap_sucess();
     void update_from_TDMap_failure();
     bool _is_initialization_ok();
@@ -152,16 +152,17 @@ class MainWindow : public QMainWindow {
     void update_from_full_SuperCell_sucess();
     void update_from_full_SuperCell_failure();
 
-  protected:
+protected:
     void closeEvent(QCloseEvent *event) override;
     bool _was_document_modified();
     bool _reset_document_modified_flags();
 
     private slots:
-      bool update_qline_image_path( std::string fileName );
+    bool update_qline_image_path( std::string fileName );
     void update_full_experimental_image();
     void update_roi_experimental_image_frame();
     void update_roi_full_experimental_image_frame();
+    void update_supercell_simulated_image_intensity_columns();
     void update_super_cell_sim_image_full_image();
     void on_qpush_run_tdmap_clicked();
     void update_simgrid_frame( );
@@ -192,13 +193,13 @@ class MainWindow : public QMainWindow {
     void on_qbutton_tdmap_accept_clicked();
     void on_qpush_compute_full_super_cell_clicked();
 
-signals:
+    signals:
     void experimental_image_filename_changed();
     void simulated_grid_changed( );
     void super_cell_target_region_changed();
     void force_close();
 
-  private:
+private:
 
     // preferences methods
     bool maybeSetPreferences();
@@ -219,6 +220,7 @@ signals:
     void create_box_options_tab2_run_config();
     void create_box_options_tab3_supercell();
     void create_box_options_tab4_intensity_peaks();
+    void create_box_options_tab4_intensity_columns_listing();
     void create_box_options();
 
     bool readSettings();
@@ -250,6 +252,7 @@ signals:
 
     // tab4
     TreeModel* intensity_peaks_model;
+    TreeModel* intensity_columns_listing_model;
 
     QModelIndex project_setup_image_fields_model_index;
 
@@ -372,9 +375,13 @@ signals:
     TreeItem* exp_image_properties_noise_carbon_statistical_mean = nullptr;
     TreeItem* exp_image_properties_noise_carbon_statistical_stddev = nullptr;
 
-    // tab4
+    // tab 4 - 1
     TreeItem* intensity_peaks_root = nullptr;
     TreeItem* intensity_peaks_analysis = nullptr;
+
+    // tab 4 - 2
+    TreeItem* intensity_columns_listing_root = nullptr;
+    TreeItem* super_cell_sim_image_intensity_columns = nullptr;
 
     /* simulation outputs */
     TreeItem* _multislice_phase_granting_output;

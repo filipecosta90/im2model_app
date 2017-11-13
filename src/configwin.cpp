@@ -185,7 +185,8 @@ MainWindow::MainWindow( ApplicationLog::ApplicationLog* logger , QWidget *parent
       connect( _core_td_map, SIGNAL(TDMap_ended_simgrid( bool )), this, SLOT(update_tdmap_simgrid_ended( bool ) ) );
       connect( _core_td_map, SIGNAL(TDMap_no_simgrid( bool )), this, SLOT(update_tdmap_no_simgrid_ended( bool ) ) );
       
-      connect( _core_td_map, SIGNAL(TDMap_supercell_full_simulated_image_changed( )), this, SLOT(update_super_cell_sim_image_full_image() ) );
+      connect( _core_td_map, SIGNAL(supercell_full_simulated_image_changed( )), this, SLOT(update_super_cell_sim_image_full_image() ) );
+      connect( _core_td_map, SIGNAL(supercell_full_simulated_image_intensity_columns_changed( )), this, SLOT(update_supercell_simulated_image_intensity_columns() ) );
 
       _reset_document_modified_flags();
       if( _flag_im2model_logger ){
@@ -524,6 +525,22 @@ void MainWindow::update_roi_full_experimental_image_frame(){
     ui->qgraphics_full_experimental_image->cleanRenderAreas();
     ui->qgraphics_full_experimental_image->addShapeRect( _roi_rect, 10 , tr("ROI boundary") );
     ui->qgraphics_full_experimental_image->show();
+  }
+}
+
+//update tab 4
+void MainWindow::update_supercell_simulated_image_intensity_columns(){
+
+  ////////////////
+  // Noise/Carbon ROI Statistical analysis
+  ////////////////
+  QVector<QVariant> box7_option_1 = {"Simulated image intensity columns",""};
+  super_cell_sim_image_intensity_columns = new TreeItem ( box7_option_1 );
+
+  std::vector<cv::KeyPoint> sim_image_keypoints = _core_td_map->get_super_cell_sim_image_properties_keypoints();
+  for( int keypoint_pos = 0; keypoint_pos < sim_image_keypoints.size(); keypoint_pos++ ){
+    std::cout << "keypoint " << sim_image_keypoints[keypoint_pos].pt
+ << std::endl;
   }
 }
 
@@ -2619,6 +2636,32 @@ void MainWindow::create_box_options_tab4_intensity_peaks(){
   }
 }
 
+void MainWindow::create_box_options_tab4_intensity_columns_listing(){
+
+  QVector<QVariant> common_header = {"Field","Value"};
+
+    /*************************
+     * INTENSITY PEAKS
+     *************************/
+  intensity_columns_listing_root = new TreeItem ( common_header );
+  intensity_columns_listing_root->set_variable_name( "intensity_columns_listing_root" );
+  intensity_columns_listing_model = new TreeModel( intensity_columns_listing_root );
+
+  update_supercell_simulated_image_intensity_columns();
+  super_cell_sim_image_intensity_columns->set_variable_name( "super_cell_sim_image_intensity_columns" );
+  intensity_columns_listing_root->insertChildren( super_cell_sim_image_intensity_columns );
+
+  ui->qtree_view_refinement_full_simulation_intensity_columns->setModel( intensity_columns_listing_model );
+  ui->qtree_view_refinement_full_simulation_intensity_columns->setItemDelegate( _load_file_delegate );
+    //start editing after one click
+  ui->qtree_view_refinement_full_simulation_intensity_columns->setEditTriggers( QAbstractItemView::AllEditTriggers );
+  ui->qtree_view_refinement_full_simulation_intensity_columns->expandAll();
+
+  for (int column = 0; column < super_cell_setup_model->columnCount(); ++column){
+    ui->qtree_view_refinement_full_simulation_intensity_columns->resizeColumnToContents(column);
+  }
+}
+
 void MainWindow::create_box_options(){
 
   // tab1
@@ -2634,6 +2677,7 @@ void MainWindow::create_box_options(){
 
   // tab4
   create_box_options_tab4_intensity_peaks();
+  create_box_options_tab4_intensity_columns_listing();
 }
 
 bool MainWindow::set_dr_probe_path( QString path ){

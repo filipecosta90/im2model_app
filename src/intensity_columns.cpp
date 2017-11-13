@@ -101,14 +101,14 @@ bool IntensityColumns::segmentate_image(){
     dist.convertTo(dist_8u, CV_8U);
 
     // Find total markers
-    findContours(dist_8u, intensity_columns, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
+    findContours(dist_8u, sim_image_intensity_columns, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
     
     // Draw the foreground markers
-    std::cout << "detected " << intensity_columns.size() << "potential intensity columns " << std::endl;
+    std::cout << "detected " << sim_image_intensity_columns.size() << "potential intensity columns " << std::endl;
     
-    for (size_t i = 0; i < intensity_columns.size(); i++){
+    for (size_t i = 0; i < sim_image_intensity_columns.size(); i++){
       /** Lets find the centroid of the exp. image boundary poligon **/
-      CvMoments moments = cv::moments( intensity_columns[i] );
+      CvMoments moments = cv::moments( sim_image_intensity_columns[i] );
       const double M00 = cvGetSpatialMoment(&moments,0,0);
       const double M10 = cvGetSpatialMoment(&moments,1,0);
       const double M01 = cvGetSpatialMoment(&moments,0,1);
@@ -116,9 +116,11 @@ bool IntensityColumns::segmentate_image(){
       const int _experimental_image_boundary_polygon_center_y = (int)(M01/M00);
       const cv::Point boundary_polygon_center( _experimental_image_boundary_polygon_center_x, _experimental_image_boundary_polygon_center_y );
       cv::KeyPoint kpoint = cv::KeyPoint( (float)_experimental_image_boundary_polygon_center_x, (float)_experimental_image_boundary_polygon_center_y, intensity_columns_keypoint_diameter );
-      keypoints.push_back( kpoint );
+      sim_image_keypoints.push_back( kpoint );
     }
     result = true;
+    emit sim_image_intensity_columns_changed();
+    emit sim_image_intensity_keypoints_changed();
   }
   return result;
 }

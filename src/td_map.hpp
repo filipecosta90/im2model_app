@@ -150,6 +150,7 @@ private:
     bool set_base_dir_path( boost::filesystem::path path );
     bool update_emd_fields();
     bool update_full_crysta_a_b_sizes();
+    void update_super_cell_sim_image_intensity_columns_changed();
 
 public:
     enum RefinementPreset { NO_REFINEMENT, MICROSCOPE_CORRECTED, MICROSCOPE_NON_CORRECTED, USER_DEFINED_PRESET };
@@ -248,6 +249,7 @@ public:
     double get_super_cell_dimensions_b();
     double get_super_cell_dimensions_c();
     cv::Mat get_super_cell_sim_image_properties_full_image();
+    std::vector<cv::KeyPoint> get_super_cell_sim_image_properties_keypoints();
 
     // gui flag getters
     bool get_flag_celslc_io_ap_pipe_out();
@@ -512,6 +514,7 @@ public:
     double get_full_boundary_polygon_margin_nm_top_limit();
 
     signals:
+    void supercell_full_simulated_image_intensity_columns_changed();
     void exp_image_properties_sampling_rate_x_nm_per_pixel_changed();
     void exp_image_properties_sampling_rate_y_nm_per_pixel_changed();
     void accelaration_voltage_kv_changed();
@@ -552,7 +555,7 @@ public:
     void TDMap_ended_supercell_read_simulated_image( bool status );
     void TDMap_started_supercell_segmentate_image( );
     void TDMap_ended_supercell_segmentate_image( bool status );
-    void TDMap_supercell_full_simulated_image_changed();
+    void supercell_full_simulated_image_changed();
 
 };
 
