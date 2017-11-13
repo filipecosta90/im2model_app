@@ -60,13 +60,13 @@ MainWindow::MainWindow( ApplicationLog::ApplicationLog* logger , QWidget *parent
   else{
 
     _core_td_map = new TDMap(
-        _sim_tdmap_celslc_ostream_buffer,
-        _sim_tdmap_msa_ostream_buffer,
-        _sim_tdmap_wavimg_ostream_buffer,
-        _sim_tdmap_simgrid_ostream_buffer,
-        _sim_supercell_celslc_ostream_buffer,
-        _sim_supercell_msa_ostream_buffer,
-        _sim_supercell_wavimg_ostream_buffer );
+      _sim_tdmap_celslc_ostream_buffer,
+      _sim_tdmap_msa_ostream_buffer,
+      _sim_tdmap_wavimg_ostream_buffer,
+      _sim_tdmap_simgrid_ostream_buffer,
+      _sim_supercell_celslc_ostream_buffer,
+      _sim_supercell_msa_ostream_buffer,
+      _sim_supercell_wavimg_ostream_buffer );
 
     SuperCell* tdmap_vis_sim_unit_cell = _core_td_map->get_tdmap_vis_sim_unit_cell();
     SuperCell* tdmap_full_sim_super_cell = _core_td_map->get_tdmap_full_sim_super_cell();
@@ -162,28 +162,30 @@ MainWindow::MainWindow( ApplicationLog::ApplicationLog* logger , QWidget *parent
       connect(this, SIGNAL(super_cell_target_region_changed()), this, SLOT(update_super_cell_target_region()));
 
       connect( _core_td_map, SIGNAL(TDMap_started_celslc( )), this, SLOT(update_tdmap_celslc_started( ) ) );
-      connect( _core_td_map, SIGNAL(TDMap_started_supercell_celslc( )), this, SLOT(update_supercell_celslc_started( ) ) );
-
       connect(_core_td_map, SIGNAL(TDMap_started_celslc()), this, SLOT(update_tdmap_sim_ostream_celslc()));
+      connect( _core_td_map, SIGNAL(TDMap_started_supercell_celslc( )), this, SLOT(update_supercell_celslc_started( ) ) );
       connect( _core_td_map, SIGNAL(TDMap_at_celslc_step( int )), this, SLOT(update_tdmap_celslc_step( int ) ) );
       connect( _core_td_map, SIGNAL(TDMap_ended_celslc( bool )), this, SLOT(update_tdmap_celslc_ended( bool ) ) );
       connect( _core_td_map, SIGNAL(TDMap_ended_supercell_celslc( bool )), this, SLOT(update_supercell_celslc_ended( bool ) ) );
 
       connect( _core_td_map, SIGNAL(TDMap_started_msa( )), this, SLOT(update_tdmap_msa_started( ) ) );
-      connect( _core_td_map, SIGNAL(TDMap_started_supercell_msa( )), this, SLOT(update_supercell_msa_started( ) ) );
-
       connect(_core_td_map, SIGNAL(TDMap_started_msa()), this, SLOT(update_tdmap_sim_ostream_msa()));
+      connect( _core_td_map, SIGNAL(TDMap_started_supercell_msa( )), this, SLOT(update_supercell_msa_started( ) ) );
       connect( _core_td_map, SIGNAL(TDMap_ended_msa( bool )), this, SLOT(update_tdmap_msa_ended( bool ) ) );
       connect( _core_td_map, SIGNAL(TDMap_ended_supercell_msa( bool )), this, SLOT(update_supercell_msa_ended( bool ) ) );
 
       connect( _core_td_map, SIGNAL(TDMap_started_wavimg( )), this, SLOT(update_tdmap_wavimg_started( ) ) );
       connect(_core_td_map, SIGNAL(TDMap_started_wavimg()), this, SLOT(update_tdmap_sim_ostream_wavimg()));
+      connect( _core_td_map, SIGNAL(TDMap_started_supercell_wavimg( )), this, SLOT(update_supercell_wavimg_started( ) ) );
       connect( _core_td_map, SIGNAL(TDMap_ended_wavimg( bool )), this, SLOT(update_tdmap_wavimg_ended( bool ) ) );
+      connect( _core_td_map, SIGNAL(TDMap_ended_supercell_wavimg( bool )), this, SLOT(update_supercell_wavimg_ended( bool ) ) );
 
       connect( _core_td_map, SIGNAL(TDMap_started_simgrid( )), this, SLOT(update_tdmap_simgrid_started( ) ) );
       connect(_core_td_map, SIGNAL(TDMap_started_simgrid()), this, SLOT(update_tdmap_sim_ostream_simgrid()));
       connect( _core_td_map, SIGNAL(TDMap_ended_simgrid( bool )), this, SLOT(update_tdmap_simgrid_ended( bool ) ) );
       connect( _core_td_map, SIGNAL(TDMap_no_simgrid( bool )), this, SLOT(update_tdmap_no_simgrid_ended( bool ) ) );
+      
+      connect( _core_td_map, SIGNAL(TDMap_supercell_full_simulated_image_changed( )), this, SLOT(update_super_cell_sim_image_full_image() ) );
 
       _reset_document_modified_flags();
       if( _flag_im2model_logger ){
@@ -360,17 +362,17 @@ bool MainWindow::_is_initialization_ok(){
 
 bool MainWindow::maybeSetPreferences(){
   const QMessageBox::StandardButton ret
-    = QMessageBox::warning(this, tr("Application"),
-        tr("The saved prefences file is incomplete.\n""To use Im2Model all preferences vars must be setted.\n"
-          "Do you want to open the preferences panel?"),
-        QMessageBox::Yes | QMessageBox::Close);
+  = QMessageBox::warning(this, tr("Application"),
+    tr("The saved prefences file is incomplete.\n""To use Im2Model all preferences vars must be setted.\n"
+      "Do you want to open the preferences panel?"),
+    QMessageBox::Yes | QMessageBox::Close);
   switch (ret) {
     case QMessageBox::Yes:
-      return edit_preferences();
+    return edit_preferences();
     case QMessageBox::Close:
-      return false;
+    return false;
     default:
-      break;
+    break;
   }
   return false;
 }
@@ -522,6 +524,15 @@ void MainWindow::update_roi_full_experimental_image_frame(){
     ui->qgraphics_full_experimental_image->cleanRenderAreas();
     ui->qgraphics_full_experimental_image->addShapeRect( _roi_rect, 10 , tr("ROI boundary") );
     ui->qgraphics_full_experimental_image->show();
+  }
+}
+
+void MainWindow::update_super_cell_sim_image_full_image(){
+  if( _core_td_map->get_flag_super_cell_sim_image_properties_full_image() ){
+    const cv::Mat full_image = _core_td_map->get_super_cell_sim_image_properties_full_image();
+    // update tab 4
+    ui->qgraphics_super_cell_refinement->setImage( full_image );
+    ui->qgraphics_super_cell_refinement->show();
   }
 }
 
@@ -807,9 +818,9 @@ bool MainWindow::edit_preferences(){
 
 void MainWindow::about(){
   QMessageBox::about(this, tr("Im2Model"),
-      tr("<b>Im2Model</b> combines transmission electron microscopy, image correlation and matching procedures,"
-        "enabling the determination of a three-dimensional atomic structure based strictly on a single high-resolution experimental image."
-        "Partialy financiated as part of the protocol between UTAustin I Portugal - UTA-P."));
+    tr("<b>Im2Model</b> combines transmission electron microscopy, image correlation and matching procedures,"
+      "enabling the determination of a three-dimensional atomic structure based strictly on a single high-resolution experimental image."
+      "Partialy financiated as part of the protocol between UTAustin I Portugal - UTA-P."));
 }
 
 void MainWindow::documentWasModified(){
@@ -1012,21 +1023,21 @@ bool MainWindow::maybeSave(){
     return  true;
   }
   const QMessageBox::StandardButton ret
-    = QMessageBox::warning(this, tr("Application"),
-        tr("The document has been modified.\n"
-          "Do you want to save your changes?"),
-        QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
+  = QMessageBox::warning(this, tr("Application"),
+    tr("The document has been modified.\n"
+      "Do you want to save your changes?"),
+    QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
   switch (ret) {
     case QMessageBox::Save:
-      {
-        return save();
-      }
+    {
+      return save();
+    }
     case QMessageBox::Cancel:
-      {
-        return false;
-      }
+    {
+      return false;
+    }
     default:
-      break;
+    break;
   }
   return true;
 }
@@ -1039,26 +1050,26 @@ bool MainWindow::maybeSetProject(){
   }
   else{
     const QMessageBox::StandardButton ret
-      = QMessageBox::warning(this, tr("Application"),
-          tr("In order to Run Im2Model you need to set the project.\n"
-            "Do you want to set the project?"),
-          QMessageBox::Yes  | QMessageBox::Cancel);
+    = QMessageBox::warning(this, tr("Application"),
+      tr("In order to Run Im2Model you need to set the project.\n"
+        "Do you want to set the project?"),
+      QMessageBox::Yes  | QMessageBox::Cancel);
     switch (ret) {
       case QMessageBox::Yes:
-        {
-          result = save();
-          break;
-        }
+      {
+        result = save();
+        break;
+      }
       case QMessageBox::Cancel:
-        {
-          result = false;
-          break;
-        }
+      {
+        result = false;
+        break;
+      }
       default:
-        {
-          result = false;
-          break;
-        }
+      {
+        result = false;
+        break;
+      }
     }
   }
   return result;
@@ -2580,32 +2591,32 @@ void MainWindow::create_box_options_tab3_supercell(){
 
 void MainWindow::create_box_options_tab4_intensity_peaks(){
 
-    QVector<QVariant> common_header = {"Field","Value"};
+  QVector<QVariant> common_header = {"Field","Value"};
 
     /*************************
      * INTENSITY PEAKS
      *************************/
-    intensity_peaks_root = new TreeItem ( common_header );
-    intensity_peaks_root->set_variable_name( "intensity_peaks_root" );
-    intensity_peaks_model = new TreeModel( intensity_peaks_root );
+  intensity_peaks_root = new TreeItem ( common_header );
+  intensity_peaks_root->set_variable_name( "intensity_peaks_root" );
+  intensity_peaks_model = new TreeModel( intensity_peaks_root );
 
     ////////////////
     // Edge detection
     ////////////////
-    QVector<QVariant> box6_option_1 = {"Intensity peaks",""};
-    intensity_peaks_analysis  = new TreeItem ( box6_option_1 );
-    intensity_peaks_analysis->set_variable_name( "intensity_peaks_analysis" );
-    intensity_peaks_root->insertChildren( intensity_peaks_analysis );
+  QVector<QVariant> box6_option_1 = {"Intensity peaks",""};
+  intensity_peaks_analysis  = new TreeItem ( box6_option_1 );
+  intensity_peaks_analysis->set_variable_name( "intensity_peaks_analysis" );
+  intensity_peaks_root->insertChildren( intensity_peaks_analysis );
 
-    ui->qtree_view_refinement_full_simulation->setModel( intensity_peaks_model );
-    ui->qtree_view_refinement_full_simulation->setItemDelegate( _load_file_delegate );
+  ui->qtree_view_refinement_full_simulation->setModel( intensity_peaks_model );
+  ui->qtree_view_refinement_full_simulation->setItemDelegate( _load_file_delegate );
     //start editing after one click
-    ui->qtree_view_refinement_full_simulation->setEditTriggers( QAbstractItemView::AllEditTriggers );
-    ui->qtree_view_refinement_full_simulation->expandAll();
+  ui->qtree_view_refinement_full_simulation->setEditTriggers( QAbstractItemView::AllEditTriggers );
+  ui->qtree_view_refinement_full_simulation->expandAll();
 
-    for (int column = 0; column < super_cell_setup_model->columnCount(); ++column){
-      ui->qtree_view_refinement_full_simulation->resizeColumnToContents(column);
-    }
+  for (int column = 0; column < super_cell_setup_model->columnCount(); ++column){
+    ui->qtree_view_refinement_full_simulation->resizeColumnToContents(column);
+  }
 }
 
 void MainWindow::create_box_options(){
@@ -2702,16 +2713,16 @@ void MainWindow::on_qbutton_tdmap_accept_clicked(){
       best_match_pos = _core_td_map->get_simgrid_best_match_position();
       if( best_match_pos != tdmap_current_selection_pos ){
         const QMessageBox::StandardButton ret
-          = QMessageBox::warning(this, tr("Application"),
-              tr("The selected cell differs from the automatic best match position.\n"
-                "Do you want to use the current selected thickness value?"),
-              QMessageBox::Yes | QMessageBox::No);
+        = QMessageBox::warning(this, tr("Application"),
+          tr("The selected cell differs from the automatic best match position.\n"
+            "Do you want to use the current selected thickness value?"),
+          QMessageBox::Yes | QMessageBox::No);
         switch (ret) {
           case QMessageBox::No:
-            accept = false;
-            break;
+          accept = false;
+          break;
           default:
-            break;
+          break;
         }
       }
     }

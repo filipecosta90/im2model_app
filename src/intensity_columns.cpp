@@ -120,6 +120,7 @@ bool IntensityColumns::segmentate_image(){
     }
     result = true;
   }
+  return result;
 }
 
 bool IntensityColumns::read_simulated_image_from_dat_file(){
@@ -162,6 +163,7 @@ bool IntensityColumns::read_simulated_image_from_dat_file(){
       int full_n_cols_width = default_full_n_cols_width;
       bool _mmap_ok = false;
       float* p;
+
       try {
         boost::iostreams::mapped_file_source mmap( full_dat_path );
         _mmap_ok = true;

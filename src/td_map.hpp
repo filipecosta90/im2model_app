@@ -26,7 +26,7 @@
 
 class TDMap  : public QObject {
   Q_OBJECT
-  private:
+private:
 
     //int image_correlation_matching_method = CV_TM_CCOEFF_NORMED;
     //bool _flag_image_correlation_matching_method = true;
@@ -151,7 +151,7 @@ class TDMap  : public QObject {
     bool update_emd_fields();
     bool update_full_crysta_a_b_sizes();
 
-  public:
+public:
     enum RefinementPreset { NO_REFINEMENT, MICROSCOPE_CORRECTED, MICROSCOPE_NON_CORRECTED, USER_DEFINED_PRESET };
     enum ExecLogMode {FULL_LOG, DEBUG_MODE, SILENT_MODE, USER_DEFINED_LOG_MODE };
 
@@ -247,6 +247,7 @@ class TDMap  : public QObject {
     double get_super_cell_dimensions_a();
     double get_super_cell_dimensions_b();
     double get_super_cell_dimensions_c();
+    cv::Mat get_super_cell_sim_image_properties_full_image();
 
     // gui flag getters
     bool get_flag_celslc_io_ap_pipe_out();
@@ -270,6 +271,7 @@ class TDMap  : public QObject {
     bool get_flag_slice_params_accum_nm_slice_vec();
     bool get_flag_simulated_images_grid();
     bool get_flag_raw_simulated_images_grid();
+    bool get_flag_super_cell_sim_image_properties_full_image();
 
     // gui var getters
     cv::Point3d get_zone_axis();
@@ -509,7 +511,7 @@ class TDMap  : public QObject {
     double get_full_boundary_polygon_margin_nm_bottom_limit();
     double get_full_boundary_polygon_margin_nm_top_limit();
 
-signals:
+    signals:
     void exp_image_properties_sampling_rate_x_nm_per_pixel_changed();
     void exp_image_properties_sampling_rate_y_nm_per_pixel_changed();
     void accelaration_voltage_kv_changed();
@@ -548,6 +550,9 @@ signals:
 
     void TDMap_started_supercell_read_simulated_image( );
     void TDMap_ended_supercell_read_simulated_image( bool status );
+    void TDMap_started_supercell_segmentate_image( );
+    void TDMap_ended_supercell_segmentate_image( bool status );
+    void TDMap_supercell_full_simulated_image_changed();
 
 };
 
