@@ -162,11 +162,12 @@ protected:
     void update_full_experimental_image();
     void update_roi_experimental_image_frame();
     void update_roi_full_experimental_image_frame();
-    void update_supercell_simulated_image_intensity_columns();
+    void update_super_cell_simulated_image_intensity_columns();
     void update_super_cell_sim_image_full_image();
     void on_qpush_run_tdmap_clicked();
     void update_simgrid_frame( );
     void update_super_cell_target_region();
+    void update_super_cell_target_region_image();
     void update_super_cell_target_region_shapes();
     void update_tdmap_sim_ostream_celslc();
     void update_tdmap_sim_ostream_msa();

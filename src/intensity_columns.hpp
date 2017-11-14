@@ -44,7 +44,7 @@
 
 class IntensityColumns : public QObject {
   Q_OBJECT
-  private:
+private:
 
     // // // // //
     // simulation parameters
@@ -81,7 +81,7 @@ bool _flag_dist_image = false;
 */
     bool auto_calculate_threshold_value();
 
-  public:
+public:
 
     IntensityColumns();
     bool read_simulated_image_from_dat_file();

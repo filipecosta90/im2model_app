@@ -49,6 +49,7 @@ class CVImageWidget : public QWidget
     void addRect( cv::Rect _area_rect, int penWidth, cv::Vec3b penColor , QString description );
     void addShapePolygon( std::vector<cv::Point2i> polygon , cv::Point2i top_left,  int penWidth, QString description );
     void addShapePolygon( std::vector<cv::Point2i> polygon , cv::Point2i top_left,  int penWidth, cv::Vec3b penColor, QString description );
+    void addRenderPoints( std::vector<cv::Point2i> points , int penWidth, cv::Vec3b penColor, QString description );
     void cleanRenderAreas();
 
 signals:
@@ -73,6 +74,7 @@ signals:
     QList<QColor> renderAreas_penColor;
     std::vector<cv::Point2i> renderAreas_top_left;
     cv::Vec3b renderAreas_default_color = cv::Vec3b(255,0,0);
+    std::vector<QPoint> renderPoints;
 
     QImage _qimage;
     cv::Mat _tmp_original, _tmp_current;

@@ -36,9 +36,9 @@ CvImageFrameWidget::CvImageFrameWidget(QWidget *parent ) : QWidget(parent) {
   dataCollectionMenu = new QMenu("Data collection");
   statisticalMenu = new QMenu("Statistical");
 
-    selectionMenu->addAction(rectSelectAct);
-    selectionMenu->addAction(freeSelectAct);
-    selectionMenu->addAction(pathSelectAct);
+  selectionMenu->addAction(rectSelectAct);
+  selectionMenu->addAction(freeSelectAct);
+  selectionMenu->addAction(pathSelectAct);
 
   toolsMenu->addMenu(selectionMenu);
   toolsMenu->addMenu(dataCollectionMenu);
@@ -119,6 +119,12 @@ void CvImageFrameWidget::addShapePolygon( std::vector<cv::Point2i> polygon , cv:
 
 void CvImageFrameWidget::addShapePolygon( std::vector<cv::Point2i> polygon , cv::Point2i top_left,  int pen_width, cv::Vec3b pen_color, QString shape_description ){
   image_widget->addShapePolygon( polygon, top_left, pen_width , pen_color , shape_description);
+  image_widget->update();
+}
+
+
+void CvImageFrameWidget::addRenderPoints( std::vector<cv::Point2i> points , int penWidth, cv::Vec3b penColor, QString description ){
+  image_widget->addRenderPoints( points , penWidth, penColor, description );
   image_widget->update();
 }
 

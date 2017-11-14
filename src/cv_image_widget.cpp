@@ -46,18 +46,18 @@ void CVImageWidget::setImage( const cv::Mat& image ){
   // Convert the image to the RGB888 format
   switch (image.type()) {
     case cv::DataType<unsigned char>::type:
-      cvtColor(image, _tmp_original, CV_GRAY2RGB);
-      break;
+    cvtColor(image, _tmp_original, CV_GRAY2RGB);
+    break;
     case cv::DataType<unsigned short>::type:
-      {
-        cv::Mat temp;
-        image.convertTo(temp, cv::DataType<unsigned char>::type, 1.0f/255.0f);
-        cvtColor(temp, _tmp_original, CV_GRAY2RGB );
-        break;
-      }
-    case CV_8UC3:
-      cvtColor(image, _tmp_original, CV_BGR2RGB);
+    {
+      cv::Mat temp;
+      image.convertTo(temp, cv::DataType<unsigned char>::type, 1.0f/255.0f);
+      cvtColor(temp, _tmp_original, CV_GRAY2RGB );
       break;
+    }
+    case CV_8UC3:
+    cvtColor(image, _tmp_original, CV_BGR2RGB);
+    break;
   }
 
   // QImage needs the data to be stored continuously in memory
@@ -152,6 +152,14 @@ void CVImageWidget::addShapePolygon( std::vector<cv::Point2i> polygon , cv::Poin
   renderAreas_penColor.push_back( QColor(penColor[0], penColor[1], penColor[2]) );
 }
 
+
+void CVImageWidget::addRenderPoints( std::vector<cv::Point2i> points , int penWidth, cv::Vec3b penColor, QString description ){
+  for( auto pt : points ) { 
+    renderPoints.push_back( QPoint (pt.x, pt.y) );
+  }
+}
+
+
 void CVImageWidget::cleanRenderAreas(){
   renderAreas.clear();
   renderAreas_penWidth.clear();
@@ -195,6 +203,8 @@ void CVImageWidget::paintEvent(QPaintEvent* event) {
     painter.setBrush(QBrush(QColor(255,255,255,120)));
     painter.drawRect(selectionStatisticalRect);
   }
+
+  painter.drawPolyline(renderPoints.data(), static_cast<int>(renderPoints.size()));
 
   painter.end();
 }

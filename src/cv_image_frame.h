@@ -33,6 +33,7 @@ class CvImageFrameWidget : public QWidget
     void enableRectangleSelection();
     void emit_selectionRectangleChanged( QRect );
     void emit_selectionStatisticalRectangleChanged( QRect );
+    void addRenderPoints( std::vector<cv::Point2i> points , int penWidth, cv::Vec3b penColor, QString description );
 
     signals:
       void selectionRectangleChanged(QRect);

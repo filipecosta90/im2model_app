@@ -186,7 +186,7 @@ MainWindow::MainWindow( ApplicationLog::ApplicationLog* logger , QWidget *parent
       connect( _core_td_map, SIGNAL(TDMap_no_simgrid( bool )), this, SLOT(update_tdmap_no_simgrid_ended( bool ) ) );
       
       connect( _core_td_map, SIGNAL(supercell_full_simulated_image_changed( )), this, SLOT(update_super_cell_sim_image_full_image() ) );
-      connect( _core_td_map, SIGNAL(supercell_full_simulated_image_intensity_columns_changed( )), this, SLOT(update_supercell_simulated_image_intensity_columns() ) );
+      connect( _core_td_map, SIGNAL(supercell_full_simulated_image_intensity_columns_changed( )), this, SLOT(update_super_cell_simulated_image_intensity_columns() ) );
 
       _reset_document_modified_flags();
       if( _flag_im2model_logger ){
@@ -464,6 +464,15 @@ void MainWindow::update_super_cell_target_region(){
   this->ui->qgraphics_super_cell_edge_detection->cleanRenderAreas();
   update_super_cell_target_region_shapes();
   this->ui->qgraphics_super_cell_edge_detection->show();
+  update_super_cell_target_region_image();
+}
+
+void MainWindow::update_super_cell_target_region_image(){
+  if( _core_td_map->get_exp_image_bounds_flag_roi_boundary_image_w_margin() ){
+    const cv::Mat super_cell_target_region_image_w_margin = _core_td_map->get_exp_image_bounds_roi_boundary_image_w_margin();
+    //ui->qgraphics_super_cell_edge_detection->addShapeRect( _rect_boundary_polygon, 10 , tr("Target region bounding rectangle") );
+  }
+  
 }
 
 void MainWindow::update_super_cell_target_region_shapes(){
@@ -529,19 +538,21 @@ void MainWindow::update_roi_full_experimental_image_frame(){
 }
 
 //update tab 4
-void MainWindow::update_supercell_simulated_image_intensity_columns(){
-
-  ////////////////
-  // Noise/Carbon ROI Statistical analysis
-  ////////////////
+void MainWindow::update_super_cell_simulated_image_intensity_columns(){
+  std::cout << " inside update_supercell_simulated_image_intensity_columns " << std::endl;
   QVector<QVariant> box7_option_1 = {"Simulated image intensity columns",""};
   super_cell_sim_image_intensity_columns = new TreeItem ( box7_option_1 );
 
   std::vector<cv::KeyPoint> sim_image_keypoints = _core_td_map->get_super_cell_sim_image_properties_keypoints();
+  std::vector<cv::Point2i> sim_image_renderPoints;
   for( int keypoint_pos = 0; keypoint_pos < sim_image_keypoints.size(); keypoint_pos++ ){
     std::cout << "keypoint " << sim_image_keypoints[keypoint_pos].pt
- << std::endl;
+    << std::endl;
+    sim_image_renderPoints.push_back( sim_image_keypoints[keypoint_pos].pt );
   }
+  ui->qgraphics_super_cell_refinement->addRenderPoints( sim_image_renderPoints , 10, cv::Vec3b(255,0,0), tr("Simulated image intensity columns") );
+  ui->qgraphics_super_cell_refinement->show();
+
 }
 
 void MainWindow::update_super_cell_sim_image_full_image(){
@@ -2647,7 +2658,7 @@ void MainWindow::create_box_options_tab4_intensity_columns_listing(){
   intensity_columns_listing_root->set_variable_name( "intensity_columns_listing_root" );
   intensity_columns_listing_model = new TreeModel( intensity_columns_listing_root );
 
-  update_supercell_simulated_image_intensity_columns();
+  update_super_cell_simulated_image_intensity_columns();
   super_cell_sim_image_intensity_columns->set_variable_name( "super_cell_sim_image_intensity_columns" );
   intensity_columns_listing_root->insertChildren( super_cell_sim_image_intensity_columns );
 

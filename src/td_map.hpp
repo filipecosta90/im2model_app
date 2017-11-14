@@ -150,7 +150,6 @@ private:
     bool set_base_dir_path( boost::filesystem::path path );
     bool update_emd_fields();
     bool update_full_crysta_a_b_sizes();
-    void update_super_cell_sim_image_intensity_columns_changed();
 
 public:
     enum RefinementPreset { NO_REFINEMENT, MICROSCOPE_CORRECTED, MICROSCOPE_NON_CORRECTED, USER_DEFINED_PRESET };
@@ -512,6 +511,9 @@ public:
 
     double get_full_boundary_polygon_margin_nm_bottom_limit();
     double get_full_boundary_polygon_margin_nm_top_limit();
+    
+    public slots:
+    void update_super_cell_sim_image_intensity_columns_changed();
 
     signals:
     void supercell_full_simulated_image_intensity_columns_changed();
