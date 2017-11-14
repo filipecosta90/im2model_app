@@ -46,17 +46,17 @@ void CVImageWidget::setImage( const cv::Mat& image ){
   // Convert the image to the RGB888 format
   switch (image.type()) {
     case cv::DataType<unsigned char>::type:
-    cvtColor(image, _tmp_original, CV_GRAY2RGB);
+    cvtColor(image, _tmp_original, CV_GRAY2RGBA);
     break;
     case cv::DataType<unsigned short>::type:
     {
       cv::Mat temp;
       image.convertTo(temp, cv::DataType<unsigned char>::type, 1.0f/255.0f);
-      cvtColor(temp, _tmp_original, CV_GRAY2RGB );
+      cvtColor(temp, _tmp_original, CV_GRAY2RGBA );
       break;
     }
     case CV_8UC3:
-    cvtColor(image, _tmp_original, CV_BGR2RGB);
+    cvtColor(image, _tmp_original, CV_BGR2RGBA );
     break;
   }
 
@@ -67,7 +67,7 @@ void CVImageWidget::setImage( const cv::Mat& image ){
   // Assign OpenCV's image buffer to the QImage. Note that the bytesPerLine parameter
   // (http://qt-project.org/doc/qt-4.8/qimage.html#QImage-6) is 3*width because each pixel
   // has three bytes.
-  _qimage = QImage(_tmp_original.data, _tmp_original.cols, _tmp_original.rows, _tmp_original.cols*3, QImage::Format_RGB888);
+  _qimage = QImage(_tmp_original.data, _tmp_original.cols, _tmp_original.rows, _tmp_original.cols*4, QImage::Format_RGBA8888  );
   this->setFixedSize(image.cols, image.rows);
   _image_set = true;
 
@@ -84,7 +84,7 @@ void CVImageWidget::updateImage() {
     // Assign OpenCV's image buffer to the QImage. Note that the bytesPerLine parameter
     // (http://qt-project.org/doc/qt-4.8/qimage.html#QImage-6) is 3*width because each pixel
     // has three bytes.
-    _qimage = QImage(_tmp_current.data, _tmp_current.cols, _tmp_current.rows, _tmp_current.cols*3, QImage::Format_RGB888);
+    _qimage = QImage(_tmp_current.data, _tmp_current.cols, _tmp_current.rows, _tmp_current.cols*4, QImage::Format_RGBA8888);
     this->setFixedSize(_tmp_current.cols, _tmp_current.rows);
   }
 }
@@ -204,7 +204,11 @@ void CVImageWidget::paintEvent(QPaintEvent* event) {
     painter.drawRect(selectionStatisticalRect);
   }
 
-  painter.drawPolyline(renderPoints.data(), static_cast<int>(renderPoints.size()));
+  painter.save();
+  painter.setPen(QPen(QBrush(QColor(0,0,0,180)),1,Qt::DashLine));
+  painter.setBrush(QBrush(QColor(255,0,0,120)));
+  painter.drawPoints(renderPoints.data(), static_cast<int>(renderPoints.size()));
+  painter.restore();
 
   painter.end();
 }
