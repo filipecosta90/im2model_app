@@ -379,6 +379,11 @@ private:
     // tab 4 - 1
     TreeItem* intensity_peaks_root = nullptr;
     TreeItem* intensity_peaks_analysis = nullptr;
+    TreeItem* intensity_peaks_display = nullptr;
+    TreeItem* intensity_peaks_display_simulated_img = nullptr;
+    TreeItem* intensity_peaks_display_simulated_img_alpha = nullptr;
+    TreeItem* intensity_peaks_display_experimental_img = nullptr;
+    TreeItem* intensity_peaks_display_experimental_img_alpha = nullptr;
 
     // tab 4 - 2
     TreeItem* intensity_columns_listing_root = nullptr;

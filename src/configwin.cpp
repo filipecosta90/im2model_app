@@ -470,9 +470,8 @@ void MainWindow::update_super_cell_target_region(){
 void MainWindow::update_super_cell_target_region_image(){
   if( _core_td_map->get_exp_image_bounds_flag_roi_boundary_image_w_margin() ){
     const cv::Mat super_cell_target_region_image_w_margin = _core_td_map->get_exp_image_bounds_roi_boundary_image_w_margin();
-    //ui->qgraphics_super_cell_edge_detection->addShapeRect( _rect_boundary_polygon, 10 , tr("Target region bounding rectangle") );
+    ui->qgraphics_super_cell_refinement->setImage( super_cell_target_region_image_w_margin, 1 , tr("Super-cell experimental image target region") );
   }
-  
 }
 
 void MainWindow::update_super_cell_target_region_shapes(){
@@ -559,7 +558,7 @@ void MainWindow::update_super_cell_sim_image_full_image(){
   if( _core_td_map->get_flag_super_cell_sim_image_properties_full_image() ){
     const cv::Mat full_image = _core_td_map->get_super_cell_sim_image_properties_full_image();
     // update tab 4
-    ui->qgraphics_super_cell_refinement->setImage( full_image );
+    ui->qgraphics_super_cell_refinement->setImage( full_image, 0, "Full super-cell simulated image" );
     ui->qgraphics_super_cell_refinement->show();
   }
 }
@@ -2631,10 +2630,68 @@ void MainWindow::create_box_options_tab4_intensity_peaks(){
     ////////////////
     // Edge detection
     ////////////////
+
+  int alpha_bottom_limit = 0;
+  int alpha_top_limit = 255;
+
   QVector<QVariant> box6_option_1 = {"Intensity peaks",""};
   intensity_peaks_analysis  = new TreeItem ( box6_option_1 );
   intensity_peaks_analysis->set_variable_name( "intensity_peaks_analysis" );
   intensity_peaks_root->insertChildren( intensity_peaks_analysis );
+
+  QVector<QVariant> box6_option_2 = {"Display",""};
+  intensity_peaks_display  = new TreeItem ( box6_option_2 );
+  intensity_peaks_display->set_variable_name( "intensity_peaks_display" );
+  intensity_peaks_root->insertChildren( intensity_peaks_display );
+
+  QVector<QVariant> box6_option_2_1 = {"Simulated image",""};
+  intensity_peaks_display_simulated_img  = new TreeItem ( box6_option_2_1 );
+  intensity_peaks_display_simulated_img->set_variable_name( "intensity_peaks_display_simulated_img" );
+  intensity_peaks_display->insertChildren( intensity_peaks_display_simulated_img );
+
+  QVector<QVariant> box6_option_2_1_1 = {"Alpha channel",""};
+  boost::function<int(void)> box6_option_2_1_1_getter ( boost::bind( &CvImageFrameWidget::get_image_layer_alpha_channel, ui->qgraphics_super_cell_refinement , 0 ) );
+  boost::function<bool(int)> box6_option_2_1_1_setter ( boost::bind( &CvImageFrameWidget::set_image_layer_alpha_channel, ui->qgraphics_super_cell_refinement, 0, _1 ) );
+  QVector<bool> box6_option_2_1_1_edit = {false,true};
+  intensity_peaks_display_simulated_img_alpha  = new TreeItem ( box6_option_2_1_1 , box6_option_2_1_1_setter, box6_option_2_1_1_edit );
+  intensity_peaks_display_simulated_img_alpha->set_fp_data_getter_int_vec( 1, box6_option_2_1_1_getter );
+  
+  // load the preset data from core constuctor
+  intensity_peaks_display_simulated_img_alpha->load_data_from_getter( 1 );
+
+  intensity_peaks_display_simulated_img_alpha->set_variable_name( "intensity_peaks_display_simulated_img_alpha" );
+  intensity_peaks_display_simulated_img_alpha->set_item_delegate_type( TreeItem::_delegate_SLIDER_INT );
+
+  intensity_peaks_display_simulated_img->insertChildren( intensity_peaks_display_simulated_img_alpha );
+  
+  intensity_peaks_display_simulated_img_alpha->set_slider_int_range_min( alpha_bottom_limit );
+  intensity_peaks_display_simulated_img_alpha->set_slider_int_range_max( alpha_top_limit );
+
+
+  QVector<QVariant> box6_option_2_2 = {"Experimental image",""};
+  intensity_peaks_display_experimental_img  = new TreeItem ( box6_option_2_2 );
+  intensity_peaks_display_experimental_img->set_variable_name( "intensity_peaks_display_experimental_img" );
+  intensity_peaks_display->insertChildren( intensity_peaks_display_experimental_img );
+
+
+  QVector<QVariant> box6_option_2_2_1 = {"Alpha channel",""};
+  boost::function<int(void)> box6_option_2_2_1_getter ( boost::bind( &CvImageFrameWidget::get_image_layer_alpha_channel, ui->qgraphics_super_cell_refinement , 1 ) );
+  boost::function<bool(int)> box6_option_2_2_1_setter ( boost::bind( &CvImageFrameWidget::set_image_layer_alpha_channel, ui->qgraphics_super_cell_refinement, 1, _1 ) );
+  QVector<bool> box6_option_2_2_1_edit = {false,true};
+  intensity_peaks_display_experimental_img_alpha  = new TreeItem ( box6_option_2_2_1 , box6_option_2_2_1_setter, box6_option_2_2_1_edit );
+  intensity_peaks_display_experimental_img_alpha->set_fp_data_getter_int_vec( 1, box6_option_2_2_1_getter );
+  
+  // load the preset data from core constuctor
+  intensity_peaks_display_experimental_img_alpha->load_data_from_getter( 1 );
+
+  intensity_peaks_display_experimental_img_alpha->set_variable_name( "intensity_peaks_display_experimental_img_alpha" );
+  intensity_peaks_display_experimental_img_alpha->set_item_delegate_type( TreeItem::_delegate_SLIDER_INT );
+
+  intensity_peaks_display_experimental_img->insertChildren( intensity_peaks_display_experimental_img_alpha );
+
+  intensity_peaks_display_experimental_img_alpha->set_slider_int_range_min( alpha_bottom_limit );
+  intensity_peaks_display_experimental_img_alpha->set_slider_int_range_max( alpha_top_limit );
+  connect( intensity_peaks_display_experimental_img_alpha, SIGNAL(dataChanged(int)), ui->qgraphics_super_cell_refinement, SLOT(update()) );
 
   ui->qtree_view_refinement_full_simulation->setModel( intensity_peaks_model );
   ui->qtree_view_refinement_full_simulation->setItemDelegate( _load_file_delegate );

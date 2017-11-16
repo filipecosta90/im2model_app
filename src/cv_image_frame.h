@@ -15,15 +15,17 @@
 class CvImageFrameWidget : public QWidget
 {
   Q_OBJECT
-  public:
+public:
     explicit CvImageFrameWidget(QWidget *parent = 0);
 
     public slots:
 
       /* image widget */
-      void setImage(const cv::Mat& image);
-    void setImageWidget( CVImageWidget* widget );
+    //void setImage(const cv::Mat& image);
+    void setImage(const cv::Mat& image, int layer_number = 0, QString ImageDescription = "" );
 
+    void setImageWidget( CVImageWidget* widget );
+    int addImageLayer( const cv::Mat& image );
     /* shapes in image widget */
     void cleanRenderAreas();
     void addShapeRect( cv::Rect _rectangle, int pen_width, QString shape_description );
@@ -34,12 +36,14 @@ class CvImageFrameWidget : public QWidget
     void emit_selectionRectangleChanged( QRect );
     void emit_selectionStatisticalRectangleChanged( QRect );
     void addRenderPoints( std::vector<cv::Point2i> points , int penWidth, cv::Vec3b penColor, QString description );
+    int get_image_layer_alpha_channel( int layer_number );
+    bool set_image_layer_alpha_channel( int layer_number, int value );
 
     signals:
-      void selectionRectangleChanged(QRect);
-      void selectionStatisticalRectangleChanged(QRect);
+    void selectionRectangleChanged(QRect);
+    void selectionStatisticalRectangleChanged(QRect);
 
-  protected:
+protected:
     CVImageWidget *image_widget;
     QWidget *parentWidget;
     QScrollArea* scrollArea;

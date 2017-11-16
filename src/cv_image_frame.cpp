@@ -88,8 +88,8 @@ void CvImageFrameWidget::emit_selectionStatisticalRectangleChanged(QRect rect){
   emit selectionStatisticalRectangleChanged( rect );
 }
 
-void CvImageFrameWidget::setImage(const cv::Mat& image) {
-  image_widget->setImage(image);
+void CvImageFrameWidget::setImage(const cv::Mat& image, int layer_number, QString ImageDescription ) {
+  image_widget->setImage( image, layer_number, ImageDescription );
   scrollArea->setWidget(image_widget);
   scrollArea->show();
 
@@ -100,6 +100,30 @@ void CvImageFrameWidget::setImage(const cv::Mat& image) {
   const int _avail_heigth = scrollArea->height() - topM - bottomM - 2* (scrollArea->frameWidth());
   image_widget->set_container_window_size( _avail_width , _avail_heigth );
   image_widget->update();
+}
+
+int CvImageFrameWidget::addImageLayer( const cv::Mat& image ){
+  int result = -1;
+  if( image_widget != nullptr ){
+    result = image_widget->addImageLayer(image);
+  }
+  return result;
+}
+
+int CvImageFrameWidget::get_image_layer_alpha_channel( int layer_number ){
+  int result = -1;
+  if( image_widget != nullptr ){
+    result = image_widget->get_image_layer_alpha_channel(layer_number);
+  }
+  return result;
+}
+
+bool CvImageFrameWidget::set_image_layer_alpha_channel( int layer_number, int value ){
+  bool result = false;
+  if( image_widget != nullptr ){
+    result = image_widget->set_image_layer_alpha_channel(layer_number, value);
+  }
+  return result;
 }
 
 void CvImageFrameWidget::addShapeRect( cv::Rect _rectangle, int pen_width, QString shape_description ){

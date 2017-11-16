@@ -18,7 +18,7 @@
 class CVImageWidget : public QWidget
 {
   Q_OBJECT
-  public:
+public:
     explicit CVImageWidget(QWidget *parent = 0);
 
     QSize sizeHint() const;
@@ -28,7 +28,7 @@ class CVImageWidget : public QWidget
 
     public slots:
 
-      void startRectangleSelection();
+    void startRectangleSelection();
     void startStatisticalRectangleSelection();
 
     /* right click context menu */
@@ -41,8 +41,11 @@ class CVImageWidget : public QWidget
     void fitToWindow();
 
     /*image setters*/
-    void setImage(const cv::Mat& image);
+    void setImage(const cv::Mat& image, int layer_number = 0, QString ImageDescription = "");
+    int addImageLayer( const cv::Mat& image );
     void updateImage();
+    int get_image_layer_alpha_channel( int layer_number );
+    bool set_image_layer_alpha_channel( int layer_number, int value );
 
     /*shape setters*/
     void addRect( cv::Rect _area_rect, int penWidth , QString description );
@@ -52,17 +55,17 @@ class CVImageWidget : public QWidget
     void addRenderPoints( std::vector<cv::Point2i> points , int penWidth, cv::Vec3b penColor, QString description );
     void cleanRenderAreas();
 
-signals:
+    signals:
     void selectionRectangleChanged( QRect );
     void selectionStatisticalRectangleChanged( QRect );
 
-  protected:
+protected:
     void paintEvent(QPaintEvent* event);
     void mousePressEvent(QMouseEvent *e);
     void mouseMoveEvent(QMouseEvent *e);
     void mouseReleaseEvent(QMouseEvent *e);
 
-  private:
+private:
 
     QRect mapSelectionRectToOriginalSize();
     QRect mapSelectionStatisticalRectToOriginalSize();
@@ -76,12 +79,16 @@ signals:
     cv::Vec3b renderAreas_default_color = cv::Vec3b(255,0,0);
     std::vector<QPoint> renderPoints;
 
-    QImage _qimage;
-    cv::Mat _tmp_original, _tmp_current;
+    std::vector<int> alpha_channels;
+    std::vector<QImage> images;
+    std::vector<cv::Mat> _tmp_originals;
+    std::vector<cv::Mat> _tmp_currents;
+    std::vector<cv::Size> original_sizes;
+    std::vector<cv::Size> current_sizes;
+    std::vector<bool> images_set;
+
+
     float scaleFactor = 1.0f;
-    cv::Size original_size;
-    cv::Size current_size;
-    bool _image_set = false;
     int _container_window_width = 0;
     int _container_window_height = 0;
 

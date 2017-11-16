@@ -1,16 +1,23 @@
 #include "cv_image_widget.h"
 
-CVImageWidget::CVImageWidget(QWidget *parent ) : QWidget(parent) , scaleFactor(1), _tmp_original(cv::Mat()), _tmp_current(cv::Mat()) {
+CVImageWidget::CVImageWidget(QWidget *parent ) : QWidget(parent) , scaleFactor(1) {
   this->setContextMenuPolicy(Qt::CustomContextMenu);
   connect(this, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(ShowContextMenu(const QPoint &)));
 }
 
-
 QSize CVImageWidget::sizeHint() const {
-  return _qimage.size();
+  QSize returnSize;
+  if( images.size() > 0){
+    returnSize = images[0].size();
+  }
+  return returnSize;
 }
 QSize CVImageWidget::minimumSizeHint() const {
-  return _qimage.size();
+  QSize returnSize;
+  if( images.size() > 0){
+    returnSize = images[0].size();
+  }
+  return returnSize;
 }
 
 void CVImageWidget::set_container_window_size( const int width , const int height ){
@@ -35,6 +42,10 @@ void CVImageWidget::normalSize(){
 void CVImageWidget::fitToWindow(){
   int window_width = _container_window_width;
   int window_height = _container_window_height;
+  cv::Size original_size(0,0);
+  if( original_sizes.size() > 0 ){
+    original_size = original_sizes[0];
+  } 
   // prevent division by zero
   float w_factor = original_size.width > 0 ? ((float) window_width) / ((float) original_size.width ) : 0.0f;
   float h_factor = original_size.height > 0 ? ((float) window_height) / ((float) original_size.height ) : 0.0f;
@@ -42,8 +53,11 @@ void CVImageWidget::fitToWindow(){
   updateImage();
 }
 
-void CVImageWidget::setImage( const cv::Mat& image ){
+void CVImageWidget::setImage( const cv::Mat& image, int layer_number, QString ImageDescription ){
   // Convert the image to the RGB888 format
+  cv::Mat _tmp_original, _tmp_current;
+  cv::Size original_size, current_size;
+
   switch (image.type()) {
     case cv::DataType<unsigned char>::type:
     cvtColor(image, _tmp_original, CV_GRAY2RGBA);
@@ -60,33 +74,52 @@ void CVImageWidget::setImage( const cv::Mat& image ){
     break;
   }
 
-  // QImage needs the data to be stored continuously in memory
-  assert( _tmp_original.isContinuous() );
   original_size = image.size();
   current_size = original_size;
   // Assign OpenCV's image buffer to the QImage. Note that the bytesPerLine parameter
   // (http://qt-project.org/doc/qt-4.8/qimage.html#QImage-6) is 3*width because each pixel
   // has three bytes.
-  _qimage = QImage(_tmp_original.data, _tmp_original.cols, _tmp_original.rows, _tmp_original.cols*4, QImage::Format_RGBA8888  );
+  QImage _qimage = QImage(_tmp_original.data, _tmp_original.cols, _tmp_original.rows, _tmp_original.cols*4, QImage::Format_RGBA8888  );
   this->setFixedSize(image.cols, image.rows);
-  _image_set = true;
 
+  for( int images_pos = images_set.size(); images_pos <= layer_number;images_pos++ ){
+    images_set.push_back(false);
+    alpha_channels.push_back( 255 );
+    images.push_back(  QImage() );
+    _tmp_originals.push_back(  cv::Mat() );
+    _tmp_currents.push_back(  cv::Mat() );
+    original_sizes.push_back(  cv::Size(0,0) );
+    current_sizes.push_back(  cv::Size(0,0) );
+  }
+  images_set[layer_number] = true;
+  alpha_channels[ layer_number ] = 255;
+  images[ layer_number ] =  _qimage ;
+  _tmp_originals[ layer_number ] = _tmp_original ;
+  _tmp_currents[ layer_number ] =  _tmp_current ;
+  original_sizes[ layer_number ] =  original_size ;
+  current_sizes[ layer_number ] =  current_size ;
 }
 
 void CVImageWidget::updateImage() {
-  if( _image_set ){
-    // Convert the image to the RGB888 format
-    current_size = cv::Size(original_size.width * scaleFactor , original_size.height * scaleFactor);
-    cv::resize(_tmp_original,_tmp_current,current_size);//resize image
+      int largest_cols = 0;
+    int largest_rows = 0;
+  for( int pos = 0; pos < images.size(); pos++ ){
 
-    // QImage needs the data to be stored continuously in memory
-    assert(_tmp_current.isContinuous());
-    // Assign OpenCV's image buffer to the QImage. Note that the bytesPerLine parameter
-    // (http://qt-project.org/doc/qt-4.8/qimage.html#QImage-6) is 3*width because each pixel
-    // has three bytes.
-    _qimage = QImage(_tmp_current.data, _tmp_current.cols, _tmp_current.rows, _tmp_current.cols*4, QImage::Format_RGBA8888);
-    this->setFixedSize(_tmp_current.cols, _tmp_current.rows);
+    if( images_set[pos] ){
+      const cv::Mat _tmp_original = _tmp_originals[pos];
+      cv::Mat _tmp_current;
+      const cv::Size original_size = original_sizes[pos];
+      cv::Size current_size = cv::Size(original_size.width * scaleFactor , original_size.height * scaleFactor);
+    cv::resize(_tmp_original,_tmp_current,current_size);//resize image
+        largest_cols =  ( largest_cols > _tmp_current.cols ) ? largest_cols : _tmp_current.cols;
+        largest_rows =  ( largest_rows > _tmp_current.rows ) ? largest_rows : _tmp_current.rows;
+
+    images[pos] = QImage(_tmp_current.data, _tmp_current.cols, _tmp_current.rows, _tmp_current.cols*4, QImage::Format_RGBA8888);
+    current_sizes[pos]=current_size;
+    _tmp_currents[pos]=_tmp_current;
   }
+}
+    this->setFixedSize(largest_cols, largest_rows);
 }
 
 void CVImageWidget::ShowContextMenu(const QPoint &pos){
@@ -167,11 +200,44 @@ void CVImageWidget::cleanRenderAreas(){
   renderAreas_top_left.clear();
 }
 
+int CVImageWidget::addImageLayer( const cv::Mat& image ){
+  alpha_channels.push_back( 255 );
+  return -1;
+}
+
+
+int CVImageWidget::get_image_layer_alpha_channel( int layer_number ){
+  int result = -1;
+  if( layer_number >= 0 && layer_number < alpha_channels.size() ){
+    result = alpha_channels[layer_number];
+  }
+  return result;
+}
+
+bool CVImageWidget::set_image_layer_alpha_channel( int layer_number, int value ){
+  bool result = false;
+  if( layer_number >= 0 && layer_number < alpha_channels.size() ){
+    alpha_channels[layer_number] = value;
+    result = true;
+  }
+  return result;
+}
+
+
 void CVImageWidget::paintEvent(QPaintEvent* event) {
   // Display the image
   QPainter painter(this);
-  painter.drawImage(QPoint(0,0), _qimage);
 
+  for( int pos = 0; pos < images.size(); pos++ ){
+    if( images_set[pos] ){
+      painter.save();
+      double dopacity = alpha_channels[pos] / 255.0f;
+      painter.setOpacity( dopacity ); 
+      painter.drawImage( QPoint(0,0), images[pos] );
+      painter.restore();
+    }
+  }
+  
   // Draw the paths
   for( int list_position = 0; list_position < renderAreas.size() ; list_position++ ){
     const bool _area_visible = renderAreas_visible.at( list_position );
@@ -205,8 +271,9 @@ void CVImageWidget::paintEvent(QPaintEvent* event) {
   }
 
   painter.save();
-  painter.setPen(QPen(QBrush(QColor(0,0,0,180)),1,Qt::DashLine));
+  painter.setPen(QPen(QBrush(QColor(255,0,0,120)),5,Qt::DashLine));
   painter.setBrush(QBrush(QColor(255,0,0,120)));
+  painter.scale( scaleFactor, scaleFactor );
   painter.drawPoints(renderPoints.data(), static_cast<int>(renderPoints.size()));
   painter.restore();
 
@@ -269,6 +336,11 @@ QRect CVImageWidget::mapSelectionStatisticalRectToOriginalSize(){
 }
 
 void CVImageWidget::mouseReleaseEvent(QMouseEvent *e){
+  cv::Size current_size(0,0);
+  if( current_sizes.size() > 0 ){
+    current_size = current_sizes[0];
+  }
+
   if( _started_rectangleSelection ){
     _started_rectangleSelection = false;
     _enabled_rectangleSelection = false;
