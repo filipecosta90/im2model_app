@@ -6,16 +6,26 @@ CVImageWidget::CVImageWidget(QWidget *parent ) : QWidget(parent) , scaleFactor(1
 }
 
 QSize CVImageWidget::sizeHint() const {
-  QSize returnSize;
-  if( images.size() > 0){
-    returnSize = images[0].size();
-  }
-  return returnSize;
+  return largestImageLayerSize();
 }
+
 QSize CVImageWidget::minimumSizeHint() const {
+  return largestImageLayerSize();
+}
+
+QSize CVImageWidget::largestImageLayerSize() const {
   QSize returnSize;
-  if( images.size() > 0){
-    returnSize = images[0].size();
+  for( int image_pos = 0; image_pos < images.size(); image_pos++ ){
+    if( images_set[image_pos] ){
+      const int total_height = images[image_pos].size().height() + margin_points[image_pos].y;
+      const int total_width = images[image_pos].size().width() + margin_points[image_pos].x;
+      if ( total_height > returnSize.height() ){
+        returnSize.setHeight( total_height );
+      }
+      if ( total_width > returnSize.width() ){
+        returnSize.setWidth( total_width );
+      }
+    }
   }
   return returnSize;
 }
@@ -53,7 +63,7 @@ void CVImageWidget::fitToWindow(){
   updateImage();
 }
 
-void CVImageWidget::setImage( const cv::Mat& image, int layer_number, QString ImageDescription ){
+void CVImageWidget::setImage( const cv::Mat& image, int layer_number, QString ImageDescription , cv::Point2i margin_point ){
   // Convert the image to the RGB888 format
   cv::Mat _tmp_original, _tmp_current;
   cv::Size original_size, current_size;
@@ -80,7 +90,6 @@ void CVImageWidget::setImage( const cv::Mat& image, int layer_number, QString Im
   // (http://qt-project.org/doc/qt-4.8/qimage.html#QImage-6) is 3*width because each pixel
   // has three bytes.
   QImage _qimage = QImage(_tmp_original.data, _tmp_original.cols, _tmp_original.rows, _tmp_original.cols*4, QImage::Format_RGBA8888  );
-  this->setFixedSize(image.cols, image.rows);
 
   for( int images_pos = images_set.size(); images_pos <= layer_number;images_pos++ ){
     images_set.push_back(false);
@@ -90,6 +99,7 @@ void CVImageWidget::setImage( const cv::Mat& image, int layer_number, QString Im
     _tmp_currents.push_back(  cv::Mat() );
     original_sizes.push_back(  cv::Size(0,0) );
     current_sizes.push_back(  cv::Size(0,0) );
+    margin_points.push_back( cv::Point2i(0,0) );
   }
   images_set[layer_number] = true;
   alpha_channels[ layer_number ] = 255;
@@ -98,11 +108,16 @@ void CVImageWidget::setImage( const cv::Mat& image, int layer_number, QString Im
   _tmp_currents[ layer_number ] =  _tmp_current ;
   original_sizes[ layer_number ] =  original_size ;
   current_sizes[ layer_number ] =  current_size ;
+  std::cout << "MARGIN POINT " << margin_point;
+  margin_points[ layer_number] = margin_point;
+
+  this->setFixedSize( largestImageLayerSize() );
+
 }
 
 void CVImageWidget::updateImage() {
-      int largest_cols = 0;
-    int largest_rows = 0;
+  int largest_cols = 0;
+  int largest_rows = 0;
   for( int pos = 0; pos < images.size(); pos++ ){
 
     if( images_set[pos] ){
@@ -111,15 +126,16 @@ void CVImageWidget::updateImage() {
       const cv::Size original_size = original_sizes[pos];
       cv::Size current_size = cv::Size(original_size.width * scaleFactor , original_size.height * scaleFactor);
     cv::resize(_tmp_original,_tmp_current,current_size);//resize image
-        largest_cols =  ( largest_cols > _tmp_current.cols ) ? largest_cols : _tmp_current.cols;
-        largest_rows =  ( largest_rows > _tmp_current.rows ) ? largest_rows : _tmp_current.rows;
+    largest_cols =  ( largest_cols > _tmp_current.cols ) ? largest_cols : _tmp_current.cols;
+    largest_rows =  ( largest_rows > _tmp_current.rows ) ? largest_rows : _tmp_current.rows;
 
     images[pos] = QImage(_tmp_current.data, _tmp_current.cols, _tmp_current.rows, _tmp_current.cols*4, QImage::Format_RGBA8888);
     current_sizes[pos]=current_size;
     _tmp_currents[pos]=_tmp_current;
   }
+  
 }
-    this->setFixedSize(largest_cols, largest_rows);
+this->setFixedSize( largestImageLayerSize() );
 }
 
 void CVImageWidget::ShowContextMenu(const QPoint &pos){
@@ -230,10 +246,12 @@ void CVImageWidget::paintEvent(QPaintEvent* event) {
 
   for( int pos = 0; pos < images.size(); pos++ ){
     if( images_set[pos] ){
+      cv::Point2i margin_point = margin_points[pos];
       painter.save();
       double dopacity = alpha_channels[pos] / 255.0f;
       painter.setOpacity( dopacity ); 
-      painter.drawImage( QPoint(0,0), images[pos] );
+      std::cout << "margin_point " << margin_point  << std::endl;
+      painter.drawImage( QPoint(margin_point.x,margin_point.y), images[pos] );
       painter.restore();
     }
   }

@@ -87,6 +87,7 @@ TDMap::TDMap(
 
   supercell_sim_image_properties->set_flag_auto_n_rows( true );
   supercell_sim_image_properties->set_flag_auto_n_cols( true );
+    supercell_sim_image_properties->set_flag_auto_roi_from_ignored_edge( true );
   supercell_sim_image_properties->set_ignore_edge_nm( cel_margin_nm );
 
   // set pointers for celslc
@@ -2359,6 +2360,10 @@ double TDMap::get_exp_image_properties_roi_nx_size_width_nm(){
 
 cv::Mat TDMap::get_super_cell_sim_image_properties_full_image(){
   return supercell_sim_image_properties->get_full_image();
+}
+
+int TDMap::get_super_cell_sim_image_properties_ignore_edge_pixels(){
+  return supercell_sim_image_properties->get_ignore_edge_pixels();
 }
 
 std::vector<cv::KeyPoint> TDMap::get_super_cell_sim_image_properties_keypoints(){

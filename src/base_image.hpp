@@ -28,7 +28,7 @@
 #include "emd_wrapper.h"
 
 class BaseImage {
-  private:
+private:
 
     bool _flag_auto_n_rows = false;
     bool _flag_auto_n_cols = false;
@@ -52,7 +52,7 @@ class BaseImage {
     EMDWrapper* emd_wrapper = nullptr;
     bool _flag_emd_wrapper = false;
 
-  protected:
+protected:
     // FULL IMAGE
     std::string image_extension;
     cv::Mat full_image;
@@ -113,7 +113,7 @@ class BaseImage {
     cv::Scalar stddev_image_statistical;
     bool _flag_stddev_image_statistical = false;
 
-  public:
+public:
     BaseImage();
     /** getters **/
     // flag getters
@@ -158,10 +158,10 @@ class BaseImage {
     // rectangle without the ignored edge pixels of the full image
     int get_ignore_edge_pixels(){ return ignore_edge_pixels; }
     int get_ignore_edge_nm(){ return ignore_edge_nm; }
-cv::Scalar get_mean_image_statistical(){ return mean_image_statistical; }
-bool get_flag_mean_image_statistical(){ return _flag_mean_image_statistical; }
-cv::Scalar get_stddev_image_statistical(){ return stddev_image_statistical; }
-bool get_flag_stddev_image_statistical(){ return _flag_stddev_image_statistical; }
+    cv::Scalar get_mean_image_statistical(){ return mean_image_statistical; }
+    bool get_flag_mean_image_statistical(){ return _flag_mean_image_statistical; }
+    cv::Scalar get_stddev_image_statistical(){ return stddev_image_statistical; }
+    bool get_flag_stddev_image_statistical(){ return _flag_stddev_image_statistical; }
 
     /** getters **/
     // flag getters
@@ -203,7 +203,7 @@ bool get_flag_stddev_image_statistical(){ return _flag_stddev_image_statistical;
     bool set_stddev_image_statistical( cv::Scalar );
 
 
-static std::string type2str(int type);
+    static std::string type2str(int type);
     /* Loggers */
     bool set_application_logger( ApplicationLog::ApplicationLog* logger );
 

@@ -248,6 +248,7 @@ public:
     double get_super_cell_dimensions_b();
     double get_super_cell_dimensions_c();
     cv::Mat get_super_cell_sim_image_properties_full_image();
+    int get_super_cell_sim_image_properties_ignore_edge_pixels();
     std::vector<cv::KeyPoint> get_super_cell_sim_image_properties_keypoints();
 
     // gui flag getters

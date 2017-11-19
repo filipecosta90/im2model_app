@@ -470,7 +470,10 @@ void MainWindow::update_super_cell_target_region(){
 void MainWindow::update_super_cell_target_region_image(){
   if( _core_td_map->get_exp_image_bounds_flag_roi_boundary_image_w_margin() ){
     const cv::Mat super_cell_target_region_image_w_margin = _core_td_map->get_exp_image_bounds_roi_boundary_image_w_margin();
-    ui->qgraphics_super_cell_refinement->setImage( super_cell_target_region_image_w_margin, 1 , tr("Super-cell experimental image target region") );
+    const int margin_point_px = _core_td_map->get_super_cell_sim_image_properties_ignore_edge_pixels();
+    std::cout << " margin_point_px " << margin_point_px << std::endl; 
+    const cv::Point2i top_right_corner_margin ( margin_point_px , margin_point_px );
+    ui->qgraphics_super_cell_refinement->setImage( super_cell_target_region_image_w_margin, 1 , tr("Super-cell experimental image target region"), top_right_corner_margin );
   }
 }
 
@@ -539,16 +542,19 @@ void MainWindow::update_roi_full_experimental_image_frame(){
 //update tab 4
 void MainWindow::update_super_cell_simulated_image_intensity_columns(){
   std::cout << " inside update_supercell_simulated_image_intensity_columns " << std::endl;
-  QVector<QVariant> box7_option_1 = {"Simulated image intensity columns",""};
-  super_cell_sim_image_intensity_columns = new TreeItem ( box7_option_1 );
 
   std::vector<cv::KeyPoint> sim_image_keypoints = _core_td_map->get_super_cell_sim_image_properties_keypoints();
   std::vector<cv::Point2i> sim_image_renderPoints;
   for( int keypoint_pos = 0; keypoint_pos < sim_image_keypoints.size(); keypoint_pos++ ){
-    std::cout << "keypoint " << sim_image_keypoints[keypoint_pos].pt
-    << std::endl;
+    QVector<QVariant> keypoint_option = {"# " + QString::number( keypoint_pos ),""};
+    TreeItem* keypoint_item  = new TreeItem ( keypoint_option );
+  //intensity_peaks_display_experimental_img->set_variable_name( "intensity_peaks_display_experimental_img" );
+    super_cell_sim_image_intensity_columns->insertChildren( keypoint_item );
+
+    std::cout << "keypoint " << sim_image_keypoints[keypoint_pos].pt << std::endl;
     sim_image_renderPoints.push_back( sim_image_keypoints[keypoint_pos].pt );
   }
+  intensity_columns_listing_model->force_layout_change();
   ui->qgraphics_super_cell_refinement->addRenderPoints( sim_image_renderPoints , 10, cv::Vec3b(255,0,0), tr("Simulated image intensity columns") );
   ui->qgraphics_super_cell_refinement->show();
 
@@ -557,8 +563,11 @@ void MainWindow::update_super_cell_simulated_image_intensity_columns(){
 void MainWindow::update_super_cell_sim_image_full_image(){
   if( _core_td_map->get_flag_super_cell_sim_image_properties_full_image() ){
     const cv::Mat full_image = _core_td_map->get_super_cell_sim_image_properties_full_image();
+    const int margin_px = _core_td_map->get_super_cell_sim_image_properties_ignore_edge_pixels();
+    const cv::Point2i margin_point_px ( margin_px , margin_px );
+    std::cout << " margin_px " << margin_px << std::endl; 
     // update tab 4
-    ui->qgraphics_super_cell_refinement->setImage( full_image, 0, "Full super-cell simulated image" );
+    ui->qgraphics_super_cell_refinement->setImage( full_image, 0, "Full super-cell simulated image", margin_point_px );
     ui->qgraphics_super_cell_refinement->show();
   }
 }
@@ -2715,9 +2724,14 @@ void MainWindow::create_box_options_tab4_intensity_columns_listing(){
   intensity_columns_listing_root->set_variable_name( "intensity_columns_listing_root" );
   intensity_columns_listing_model = new TreeModel( intensity_columns_listing_root );
 
-  update_super_cell_simulated_image_intensity_columns();
+  //update_super_cell_simulated_image_intensity_columns();
+
+
+  QVector<QVariant> box7_option_1 = {"Simulated image intensity columns",""};
+  super_cell_sim_image_intensity_columns = new TreeItem ( box7_option_1 );
   super_cell_sim_image_intensity_columns->set_variable_name( "super_cell_sim_image_intensity_columns" );
   intensity_columns_listing_root->insertChildren( super_cell_sim_image_intensity_columns );
+
 
   ui->qtree_view_refinement_full_simulation_intensity_columns->setModel( intensity_columns_listing_model );
   ui->qtree_view_refinement_full_simulation_intensity_columns->setItemDelegate( _load_file_delegate );
@@ -2725,7 +2739,7 @@ void MainWindow::create_box_options_tab4_intensity_columns_listing(){
   ui->qtree_view_refinement_full_simulation_intensity_columns->setEditTriggers( QAbstractItemView::AllEditTriggers );
   ui->qtree_view_refinement_full_simulation_intensity_columns->expandAll();
 
-  for (int column = 0; column < super_cell_setup_model->columnCount(); ++column){
+  for (int column = 0; column < intensity_columns_listing_model->columnCount(); ++column){
     ui->qtree_view_refinement_full_simulation_intensity_columns->resizeColumnToContents(column);
   }
 }

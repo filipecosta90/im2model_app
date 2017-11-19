@@ -23,7 +23,7 @@ public:
 
     QSize sizeHint() const;
     QSize minimumSizeHint() const;
-
+    QSize largestImageLayerSize() const;
     void set_container_window_size( const int width , const int height );
 
     public slots:
@@ -41,7 +41,7 @@ public:
     void fitToWindow();
 
     /*image setters*/
-    void setImage(const cv::Mat& image, int layer_number = 0, QString ImageDescription = "");
+    void setImage(const cv::Mat& image, int layer_number = 0, QString ImageDescription = "", cv::Point2i margin_point = cv::Point2i(0,0) );
     int addImageLayer( const cv::Mat& image );
     void updateImage();
     int get_image_layer_alpha_channel( int layer_number );
@@ -86,6 +86,7 @@ private:
     std::vector<cv::Size> original_sizes;
     std::vector<cv::Size> current_sizes;
     std::vector<bool> images_set;
+    std::vector<cv::Point2i> margin_points;
 
 
     float scaleFactor = 1.0f;

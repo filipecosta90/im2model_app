@@ -165,10 +165,9 @@ bool IntensityColumns::read_simulated_image_from_dat_file(){
       int full_n_cols_width = default_full_n_cols_width;
       bool _mmap_ok = false;
       float* p;
-
       try {
+        print_var_state();
         boost::iostreams::mapped_file_source mmap( full_dat_path );
-        _mmap_ok = true;
         p = (float*) mmap.data();
         cv::Mat raw_simulated_image ( full_n_rows_height , full_n_cols_width , CV_32FC1 );
         int pos = 0;
@@ -179,6 +178,14 @@ bool IntensityColumns::read_simulated_image_from_dat_file(){
           }
         }
         mmap.close();
+        _mmap_ok = true;
+
+
+        if( _flag_logger ){
+          std::stringstream message;
+          message << " Finished mmap";
+          BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification , message.str() );
+        }
         cv::Mat normalized_simulated_image;
         double min, max;
         cv::minMaxLoc(raw_simulated_image, &min, &max);
@@ -196,14 +203,31 @@ bool IntensityColumns::read_simulated_image_from_dat_file(){
           std::stringstream message;
           message << "Caught std::ios_base::failure: " << typeid(e).name();
           BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::error , message.str() );
+          print_var_state();
+
         }
       }
       catch(const std::exception & e) {
         _mmap_ok = false;
         if( _flag_logger ){
           std::stringstream message;
-          message << "Caught std::exception: " << typeid(e).name();
+          message << "Caught std::exception: " << typeid(e).name() << " : " << e.what();; 
           BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::error , message.str() );
+          print_var_state();
+
+        }
+      }
+      if( _flag_logger ){
+        std::stringstream message;
+        message << " Finished mmap with result: " << std::boolalpha << _mmap_ok;
+        if( _mmap_ok ){
+          BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification , message.str() );
+          print_var_state();
+        }
+        else{
+          BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::error , message.str() );
+          print_var_state();
+
         }
       }
     }
@@ -259,8 +283,31 @@ void IntensityColumns::print_var_state(){
 }
 
 std::ostream& IntensityColumns::output(std::ostream& stream) const {
-  stream << "IntensityColumns vars:\n";
+  stream << "IntensityColumns vars:\n"
   // simulated images
-
+  << "\t\t" << "_flag_sim_crystal_properties : " << std::boolalpha <<  _flag_sim_crystal_properties << "\n";
+  if( _flag_sim_crystal_properties ){
+    stream << "sim_crystal_properties vars:\n";
+    sim_crystal_properties->output(stream);
+  }
+  stream << "\t\t" << "_flag_exp_image_properties : " << std::boolalpha <<  _flag_exp_image_properties << "\n";
+  if( _flag_exp_image_properties ){
+    stream << "exp_image_properties vars:\n";
+    exp_image_properties->output(stream);
+  }
+  stream << "\t\t" << "_flag_sim_image_properties : " << std::boolalpha <<  _flag_sim_image_properties << "\n";
+  if( _flag_sim_image_properties ){
+    stream << "sim_image_properties vars:\n";
+    sim_image_properties->output(stream);
+  }
+  stream << "\t\t" << "_flag_stddev_threshold_factor : " << std::boolalpha <<  _flag_stddev_threshold_factor << "\n"
+  << "\t" << "stddev_threshold_factor : " << stddev_threshold_factor << "\n"
+  << "\t\t" << "_flag_threshold_value : " << std::boolalpha <<  _flag_threshold_value << "\n"
+  << "\t" << "threshold_value : " << threshold_value << "\n"
+  << "\t" << "intensity_columns_keypoint_diameter : " << intensity_columns_keypoint_diameter << "\n"
+  << "\t" << "sim_image_keypoints.size() : " << sim_image_keypoints.size() << "\n"
+  << "\t" << "sim_image_intensity_columns.size() : " << sim_image_intensity_columns.size() << "\n";
   return stream;
 }
+
+

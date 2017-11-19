@@ -88,8 +88,8 @@ void CvImageFrameWidget::emit_selectionStatisticalRectangleChanged(QRect rect){
   emit selectionStatisticalRectangleChanged( rect );
 }
 
-void CvImageFrameWidget::setImage(const cv::Mat& image, int layer_number, QString ImageDescription ) {
-  image_widget->setImage( image, layer_number, ImageDescription );
+void CvImageFrameWidget::setImage(const cv::Mat& image, int layer_number, QString ImageDescription,  cv::Point2i margin_point ) {
+  image_widget->setImage( image, layer_number, ImageDescription, margin_point );
   scrollArea->setWidget(image_widget);
   scrollArea->show();
 
@@ -98,6 +98,7 @@ void CvImageFrameWidget::setImage(const cv::Mat& image, int layer_number, QStrin
 
   const int _avail_width = scrollArea->width() - leftM - rightM - 2* (scrollArea->frameWidth());
   const int _avail_heigth = scrollArea->height() - topM - bottomM - 2* (scrollArea->frameWidth());
+  std::cout << "setting _avail_width " << _avail_width <<  " _avail_heigth " << _avail_heigth << std::endl;
   image_widget->set_container_window_size( _avail_width , _avail_heigth );
   image_widget->update();
 }

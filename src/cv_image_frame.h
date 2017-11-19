@@ -22,7 +22,7 @@ public:
 
       /* image widget */
     //void setImage(const cv::Mat& image);
-    void setImage(const cv::Mat& image, int layer_number = 0, QString ImageDescription = "" );
+    void setImage(const cv::Mat& image, int layer_number = 0, QString ImageDescription = "", cv::Point2i margin_point = cv::Point2i(0,0) );
 
     void setImageWidget( CVImageWidget* widget );
     int addImageLayer( const cv::Mat& image );
