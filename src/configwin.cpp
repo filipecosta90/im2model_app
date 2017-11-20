@@ -2676,6 +2676,14 @@ void MainWindow::create_box_options_tab4_intensity_peaks(){
   intensity_peaks_display_simulated_img_alpha->set_slider_int_range_min( alpha_bottom_limit );
   intensity_peaks_display_simulated_img_alpha->set_slider_int_range_max( alpha_top_limit );
 
+  QVector<QVariant> box6_option_2_1_2 = {"Distance transform algorithm alpha channel",""};
+  intensity_peaks_display_simulated_img_distance_transform_alpha  = new TreeItem ( box6_option_2_1_2 );
+  intensity_peaks_display_simulated_img->insertChildren( intensity_peaks_display_simulated_img_distance_transform_alpha );
+
+  QVector<QVariant> box6_option_2_1_3 = {"Intensity peaks alpha channel",""};
+  intensity_peaks_display_simulated_img_alpha_channel  = new TreeItem ( box6_option_2_1_3 );
+  intensity_peaks_display_simulated_img->insertChildren( intensity_peaks_display_simulated_img_alpha_channel );
+
 
   QVector<QVariant> box6_option_2_2 = {"Experimental image",""};
   intensity_peaks_display_experimental_img  = new TreeItem ( box6_option_2_2 );
@@ -2701,6 +2709,16 @@ void MainWindow::create_box_options_tab4_intensity_peaks(){
   intensity_peaks_display_experimental_img_alpha->set_slider_int_range_min( alpha_bottom_limit );
   intensity_peaks_display_experimental_img_alpha->set_slider_int_range_max( alpha_top_limit );
   connect( intensity_peaks_display_experimental_img_alpha, SIGNAL(dataChanged(int)), ui->qgraphics_super_cell_refinement, SLOT(update()) );
+
+
+  QVector<QVariant> box6_option_2_2_2 = {"Distance transform algorithm alpha channel",""};
+  intensity_peaks_display_experimental_img_distance_transform_alpha  = new TreeItem ( box6_option_2_2_2 );
+    intensity_peaks_display_experimental_img->insertChildren( intensity_peaks_display_experimental_img_distance_transform_alpha );
+
+  
+  QVector<QVariant> box6_option_2_2_3 = {"Intensity peaks alpha channel",""};
+  intensity_peaks_display_experimental_img_alpha_channel  = new TreeItem ( box6_option_2_2_3 );
+    intensity_peaks_display_experimental_img->insertChildren( intensity_peaks_display_experimental_img_alpha_channel );
 
   ui->qtree_view_refinement_full_simulation->setModel( intensity_peaks_model );
   ui->qtree_view_refinement_full_simulation->setItemDelegate( _load_file_delegate );

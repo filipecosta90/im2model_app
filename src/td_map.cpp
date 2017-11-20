@@ -82,12 +82,12 @@ TDMap::TDMap(
 
   sim_image_properties->set_flag_auto_n_rows( true );
   sim_image_properties->set_flag_auto_n_cols( true );
-  sim_image_properties->set_flag_auto_roi_from_ignored_edge( true );
+  sim_image_properties->set_flag_auto_roi_from_ignored_edge( false );
   sim_image_properties->set_ignore_edge_nm( cel_margin_nm );
 
   supercell_sim_image_properties->set_flag_auto_n_rows( true );
   supercell_sim_image_properties->set_flag_auto_n_cols( true );
-    supercell_sim_image_properties->set_flag_auto_roi_from_ignored_edge( true );
+  supercell_sim_image_properties->set_flag_auto_roi_from_ignored_edge( true );
   supercell_sim_image_properties->set_ignore_edge_nm( cel_margin_nm );
 
   // set pointers for celslc

@@ -81,11 +81,11 @@ bool IntensityColumns::segmentate_image(){
 
     // Perform the distance transform algorithm
     cv::Mat dist;
-    distanceTransform(bw, dist, CV_DIST_L2, 3);
+    distanceTransform(bw, exp_image_dist_transform, CV_DIST_L2, 3);
 
     // Normalize the distance image for range = {0.0, 1.0}
     // so we can visualize and threshold it
-    cv::normalize(dist, dist, 0, 1., NORM_MINMAX);
+    cv::normalize(exp_image_dist_transform, dist, 0, 1., NORM_MINMAX);
 
     // Threshold to obtain the peaks
     // This will be the markers for the foreground objects

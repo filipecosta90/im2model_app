@@ -52,13 +52,18 @@ private:
 
     BaseCrystal* sim_crystal_properties = nullptr;
     bool _flag_sim_crystal_properties = false;
+    
     BaseImage* exp_image_properties = nullptr;
     bool _flag_exp_image_properties = false;
+    cv::Mat exp_image_dist_transform; 
+
     BaseImage* sim_image_properties = nullptr;
     bool _flag_sim_image_properties = false;
+    cv::Mat sim_image_dist_transform; 
 
     double  stddev_threshold_factor = 1.0f;
     bool _flag_stddev_threshold_factor = true;
+
     int threshold_value = 0;
     bool _flag_threshold_value = false;
 
