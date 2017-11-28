@@ -262,6 +262,9 @@ bool ImageBounds::update_roi_images_from_rect(){
       boundary_polygon_length_y_px = roi_boundary_rect_w_margin.height;
       boundary_polygon_length_y_nm = boundary_polygon_length_y_px * sampling_rate_y_nm_per_pixel;
       _flag_boundary_polygon_length_y_nm = true;
+      
+      // update the image itself
+      base_image->set_roi_rectangle( roi_boundary_rect_w_margin );
 
       result = true;
 

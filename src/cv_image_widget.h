@@ -52,7 +52,7 @@ public:
     void addRect( cv::Rect _area_rect, int penWidth, cv::Vec3b penColor , QString description );
     void addShapePolygon( std::vector<cv::Point2i> polygon , cv::Point2i top_left,  int penWidth, QString description );
     void addShapePolygon( std::vector<cv::Point2i> polygon , cv::Point2i top_left,  int penWidth, cv::Vec3b penColor, QString description );
-    void addRenderPoints( std::vector<cv::Point2i> points , int penWidth, cv::Vec3b penColor, QString description );
+    void addRenderPoints( std::vector<cv::Point2i> points , int penWidth, cv::Vec3b penColor, QString description, cv::Point2i margin_point = cv::Point2i(0,0) );
     void cleanRenderAreas();
 
     signals:
@@ -87,6 +87,7 @@ private:
     std::vector<cv::Size> current_sizes;
     std::vector<bool> images_set;
     std::vector<cv::Point2i> margin_points;
+    std::vector<cv::Point2i> renderPoints_margin_points;
 
 
     float scaleFactor = 1.0f;

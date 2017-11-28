@@ -418,6 +418,17 @@ bool BaseImage::set_emd_wrapper( EMDWrapper* wrapper ){
   return true;
 }
 
+
+bool BaseImage::set_roi_rectangle( cv::Rect rect ){
+  bool result = true;
+  roi_rectangle = rect;
+  result &= set_roi_center_x( roi_rectangle.x + (roi_rectangle.width / 2) );
+  result &= set_roi_center_y( roi_rectangle.y + (roi_rectangle.height / 2) );
+  result &= set_roi_n_cols_width( roi_rectangle.width );
+  result &= set_roi_n_rows_height( roi_rectangle.height );
+  return result;
+}
+
 bool BaseImage::set_full_image( cv::Mat image ){
   bool result = false;
   if( ! image.empty() ){

@@ -36,7 +36,8 @@ bool IntensityColumns::set_stddev_threshold_factor( double factor ){
 bool IntensityColumns::auto_calculate_threshold_value( ){
   bool result = false;
   if( _flag_sim_image_properties ){
-    if( _flag_stddev_threshold_factor &&
+    if( 
+      _flag_stddev_threshold_factor &&
       sim_image_properties->get_flag_stddev_image_statistical() &&
       sim_image_properties->get_flag_mean_image_statistical()
       ){
@@ -46,6 +47,19 @@ bool IntensityColumns::auto_calculate_threshold_value( ){
     _flag_threshold_value = true;
     result = true;
   }
+}
+if( _flag_exp_image_properties ){
+  if( 
+    _flag_stddev_threshold_factor &&
+    exp_image_properties->get_flag_stddev_image_statistical() &&
+    exp_image_properties->get_flag_mean_image_statistical()
+    ){
+    const cv::Scalar mean = exp_image_properties->get_mean_image_statistical();
+  const cv::Scalar stddev = exp_image_properties->get_stddev_image_statistical();
+  threshold_value = mean[0] + (int)( ( (double) stddev[0] ) * stddev_threshold_factor );
+  _flag_threshold_value = true;
+  result = true;
+}
 }
 return result;
 }
@@ -129,9 +143,11 @@ bool IntensityColumns::segmentate_sim_image(){
 bool IntensityColumns::segmentate_exp_image(){
   bool result = false;
   auto_calculate_threshold_value();
-  if( _flag_exp_image_properties && _flag_threshold_value ){
-
-    cv::Mat src = exp_image_properties->get_full_image( );
+  if( _flag_exp_image_properties ){
+    if( _flag_threshold_value && 
+      exp_image_properties->get_flag_roi_image()
+      ){
+      cv::Mat src = exp_image_properties->get_roi_image( );
     cv::Mat src_bgr_const;
 
     const cv::Mat kernel = (Mat_<float>(3,3) <<
@@ -200,7 +216,25 @@ bool IntensityColumns::segmentate_exp_image(){
     emit exp_image_intensity_columns_changed();
     emit exp_image_intensity_keypoints_changed();
   }
-  return result;
+  else {
+    result = false;
+    if( _flag_logger ){
+      std::stringstream message;
+      message << "The required vars for segmentate_exp_image() are not setted up.";
+      BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::error , message.str() );
+    }
+    print_var_state();
+  }
+}
+else{
+  if( _flag_logger ){
+    std::stringstream message;
+    message << "The required Class POINTERS for segmentate_exp_image() are not setted up.";
+    BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::error , message.str() );
+  }
+  print_var_state();
+}
+return result;
 }
 
 bool IntensityColumns::read_simulated_image_from_dat_file(){
@@ -293,7 +327,7 @@ bool IntensityColumns::read_simulated_image_from_dat_file(){
       }
       if( _flag_logger ){
         std::stringstream message;
-          message << " Finished mmap with result: " << std::boolalpha << result;
+        message << " Finished mmap with result: " << std::boolalpha << result;
         if( result ){
           BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification , message.str() );
           print_var_state();

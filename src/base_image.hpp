@@ -200,6 +200,7 @@ public:
     bool set_full_nm_size_rows_b( double size );
     bool set_full_nm_size_cols_a( double size );
     // ROI FRAME
+    bool set_roi_rectangle( cv::Rect rect );
     bool set_roi_n_rows_height( int roi_n_rows_height );
     bool set_roi_n_cols_width( int roi_n_cols_width );
     bool set_roi_center_x( int roi_center_x );
@@ -209,7 +210,6 @@ public:
 
     bool set_ignore_edge_pixels( int ignore_edge_pixels );
     bool set_ignore_edge_nm( double ignore_edge_nm );
-
     bool set_roi_rectangle_statistical( cv::Rect );
     bool set_mean_image_statistical( cv::Scalar );
     bool set_stddev_image_statistical( cv::Scalar );

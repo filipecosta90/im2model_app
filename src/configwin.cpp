@@ -537,6 +537,7 @@ void MainWindow::update_roi_experimental_image_frame(){
   }
 }
 
+//update tab 4 ROI experimental image
 void MainWindow::update_roi_full_experimental_image_frame(){
   if( _core_td_map->get_exp_image_properties_flag_roi_rectangle() ){
     cv::Rect _roi_rect = _core_td_map->get_exp_image_properties_roi_rectangle();
@@ -549,12 +550,17 @@ void MainWindow::update_roi_full_experimental_image_frame(){
 //update tab 4
 void MainWindow::update_super_cell_experimental_image_intensity_columns(){
   std::cout << " update_super_cell_experimental_image_intensity_columns " << std::endl;
+  const int margin_point_px = _core_td_map->get_super_cell_sim_image_properties_ignore_edge_pixels();
+    std::cout << " margin_point_px " << margin_point_px << std::endl; 
+    const cv::Point2i top_right_corner_margin ( margin_point_px , margin_point_px );
+    
   std::vector<cv::KeyPoint> exp_image_keypoints = _core_td_map->get_super_cell_exp_image_properties_keypoints();
   std::vector<cv::Point2i> exp_image_renderPoints;
+
   for( int keypoint_pos = 0; keypoint_pos < exp_image_keypoints.size(); keypoint_pos++ ){
    exp_image_renderPoints.push_back( exp_image_keypoints[keypoint_pos].pt );
  }
- ui->qgraphics_super_cell_refinement->addRenderPoints( exp_image_renderPoints , 10, cv::Vec3b(0,255,0), tr("Experimental image intensity columns") );
+ ui->qgraphics_super_cell_refinement->addRenderPoints( exp_image_renderPoints , 10, cv::Vec3b(0,255,0), tr("Experimental image intensity columns") , top_right_corner_margin);
  ui->qgraphics_super_cell_refinement->show();
 }
 

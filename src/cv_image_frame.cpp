@@ -147,9 +147,8 @@ void CvImageFrameWidget::addShapePolygon( std::vector<cv::Point2i> polygon , cv:
   image_widget->update();
 }
 
-
-void CvImageFrameWidget::addRenderPoints( std::vector<cv::Point2i> points , int penWidth, cv::Vec3b penColor, QString description ){
-  image_widget->addRenderPoints( points , penWidth, penColor, description );
+void CvImageFrameWidget::addRenderPoints( std::vector<cv::Point2i> points , int penWidth, cv::Vec3b penColor, QString description, cv::Point2i margin_point ){
+  image_widget->addRenderPoints( points , penWidth, penColor, description, margin_point );
   image_widget->update();
 }
 

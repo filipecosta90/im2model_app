@@ -202,9 +202,10 @@ void CVImageWidget::addShapePolygon( std::vector<cv::Point2i> polygon , cv::Poin
 }
 
 
-void CVImageWidget::addRenderPoints( std::vector<cv::Point2i> points , int penWidth, cv::Vec3b penColor, QString description ){
+void CVImageWidget::addRenderPoints( std::vector<cv::Point2i> points , int penWidth, cv::Vec3b penColor, QString description  , cv::Point2i margin_point ){
   for( auto pt : points ) { 
     renderPoints.push_back( QPoint (pt.x, pt.y) );
+    renderPoints_margin_points.push_back( margin_point );
   }
 }
 
@@ -251,7 +252,7 @@ void CVImageWidget::paintEvent(QPaintEvent* event) {
       double dopacity = alpha_channels[pos] / 255.0f;
       painter.setOpacity( dopacity ); 
       std::cout << "margin_point " << margin_point  << std::endl;
-      painter.drawImage( QPoint(margin_point.x,margin_point.y), images[pos] );
+      painter.drawImage( QPoint(margin_point.x * scaleFactor ,margin_point.y * scaleFactor), images[pos] );
       painter.restore();
     }
   }
@@ -292,7 +293,12 @@ void CVImageWidget::paintEvent(QPaintEvent* event) {
   painter.setPen(QPen(QBrush(QColor(255,0,0,120)),5,Qt::DashLine));
   painter.setBrush(QBrush(QColor(255,0,0,120)));
   painter.scale( scaleFactor, scaleFactor );
-  painter.drawPoints(renderPoints.data(), static_cast<int>(renderPoints.size()));
+  for( int point_n = 0; point_n < renderPoints.size(); point_n++ ){
+    cv::Point2i cv_margin = renderPoints_margin_points[point_n];
+    QPoint point_w_margin =  renderPoints[point_n];
+    point_w_margin  += QPoint( cv_margin.x, cv_margin.y );
+    painter.drawPoint( point_w_margin );
+  }
   painter.restore();
 
   painter.end();
