@@ -251,6 +251,7 @@ public:
     cv::Mat get_super_cell_sim_image_properties_full_image();
     int get_super_cell_sim_image_properties_ignore_edge_pixels();
     std::vector<cv::KeyPoint> get_super_cell_sim_image_properties_keypoints();
+    std::vector<cv::KeyPoint> get_super_cell_exp_image_properties_keypoints();
 
     // gui flag getters
     bool get_flag_celslc_io_ap_pipe_out();

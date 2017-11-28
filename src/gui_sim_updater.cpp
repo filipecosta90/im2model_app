@@ -14,7 +14,7 @@ void GuiSimOutUpdater::newSuperCellFull_intensity_cols(){
   bool result = tdmap->compute_full_super_cell_intensity_cols();
   if ( result ){
     std::cout << "emiting sucess" << std::endl;
-    emit SuperCell_full_intensity_cols_request();
+    emit SuperCell_full_intensity_cols_sucess();
   }
   else {
     std::cout << "emiting failure" << std::endl;

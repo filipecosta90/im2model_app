@@ -97,6 +97,7 @@ public:
     bool get_flag_exp_image_properties(){ return _flag_exp_image_properties; }
     bool get_flag_sim_image_properties(){ return _flag_sim_image_properties; }
     std::vector<cv::KeyPoint> get_sim_image_keypoints(){ return sim_image_keypoints; } 
+    std::vector<cv::KeyPoint> get_exp_image_keypoints(){ return exp_image_keypoints; } 
 
     /* Loggers */
     ApplicationLog::ApplicationLog* get_logger(){ return logger; }

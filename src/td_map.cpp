@@ -2404,6 +2404,10 @@ std::vector<cv::KeyPoint> TDMap::get_super_cell_sim_image_properties_keypoints()
   return sim_image_intensity_columns->get_sim_image_keypoints();
 }
 
+std::vector<cv::KeyPoint> TDMap::get_super_cell_exp_image_properties_keypoints(){
+  return sim_image_intensity_columns->get_exp_image_keypoints();
+}
+
 bool TDMap::get_flag_super_cell_sim_image_properties_full_image(){
   return supercell_sim_image_properties->get_flag_full_image();
 }

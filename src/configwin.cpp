@@ -145,9 +145,7 @@ MainWindow::MainWindow( ApplicationLog::ApplicationLog* logger , QWidget *parent
 
       // will only start thread when needed
       QMetaObject::Connection c1 = connect( full_sim_super_cell_intensity_cols_worker, SIGNAL(SuperCell_full_intensity_cols_request()), full_sim_super_cell_intensity_cols_thread, SLOT(start()) );
-      std::cout << " Connection " << c1 << std::endl;
       QMetaObject::Connection c2 = connect( full_sim_super_cell_intensity_cols_thread, &QThread::started, full_sim_super_cell_intensity_cols_worker, &GuiSimOutUpdater::newSuperCellFull_intensity_cols );
-      std::cout << " Connection " << c2 << std::endl;
 
       connect(full_sim_super_cell_intensity_cols_worker, SIGNAL(SuperCell_full_intensity_cols_sucess()), this, SLOT(update_from_full_SuperCell_intensity_cols_sucess()));
       connect(full_sim_super_cell_intensity_cols_worker, SIGNAL(SuperCell_full_intensity_cols_failure()), this, SLOT(update_from_full_SuperCell_intensity_cols_failure()));
@@ -550,7 +548,8 @@ void MainWindow::update_roi_full_experimental_image_frame(){
 
 //update tab 4
 void MainWindow::update_super_cell_experimental_image_intensity_columns(){
-  std::vector<cv::KeyPoint> exp_image_keypoints = _core_td_map->get_super_cell_sim_image_properties_keypoints();
+  std::cout << " update_super_cell_experimental_image_intensity_columns " << std::endl;
+  std::vector<cv::KeyPoint> exp_image_keypoints = _core_td_map->get_super_cell_exp_image_properties_keypoints();
   std::vector<cv::Point2i> exp_image_renderPoints;
   for( int keypoint_pos = 0; keypoint_pos < exp_image_keypoints.size(); keypoint_pos++ ){
    exp_image_renderPoints.push_back( exp_image_keypoints[keypoint_pos].pt );
