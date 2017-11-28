@@ -77,7 +77,11 @@ private:
     QList<QColor> renderAreas_penColor;
     std::vector<cv::Point2i> renderAreas_top_left;
     cv::Vec3b renderAreas_default_color = cv::Vec3b(255,0,0);
+
     std::vector<QPoint> renderPoints;
+    std::vector<QColor> renderPoints_penColor;
+    std::vector<int> renderPoints_penWidth;
+    std::vector<QPoint> renderPoints_margin_points;
 
     std::vector<int> alpha_channels;
     std::vector<QImage> images;
@@ -87,8 +91,6 @@ private:
     std::vector<cv::Size> current_sizes;
     std::vector<bool> images_set;
     std::vector<cv::Point2i> margin_points;
-    std::vector<cv::Point2i> renderPoints_margin_points;
-
 
     float scaleFactor = 1.0f;
     int _container_window_width = 0;

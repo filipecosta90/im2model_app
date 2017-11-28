@@ -201,11 +201,13 @@ void CVImageWidget::addShapePolygon( std::vector<cv::Point2i> polygon , cv::Poin
   renderAreas_penColor.push_back( QColor(penColor[0], penColor[1], penColor[2]) );
 }
 
-
 void CVImageWidget::addRenderPoints( std::vector<cv::Point2i> points , int penWidth, cv::Vec3b penColor, QString description  , cv::Point2i margin_point ){
   for( auto pt : points ) { 
+    QColor point_penColor(penColor[0], penColor[1], penColor[2] );
+    renderPoints_penColor.push_back(point_penColor);
+    renderPoints_penWidth.push_back( penWidth );
     renderPoints.push_back( QPoint (pt.x, pt.y) );
-    renderPoints_margin_points.push_back( margin_point );
+    renderPoints_margin_points.push_back( QPoint( margin_point.x, margin_point.y ) );
   }
 }
 
@@ -290,13 +292,14 @@ void CVImageWidget::paintEvent(QPaintEvent* event) {
   }
 
   painter.save();
-  painter.setPen(QPen(QBrush(QColor(255,0,0,120)),5,Qt::DashLine));
-  painter.setBrush(QBrush(QColor(255,0,0,120)));
+  
   painter.scale( scaleFactor, scaleFactor );
   for( int point_n = 0; point_n < renderPoints.size(); point_n++ ){
-    cv::Point2i cv_margin = renderPoints_margin_points[point_n];
-    QPoint point_w_margin =  renderPoints[point_n];
-    point_w_margin  += QPoint( cv_margin.x, cv_margin.y );
+    QPoint point_w_margin = renderPoints_margin_points[point_n] + renderPoints[point_n];
+    QColor point_penColor = renderPoints_penColor[point_n];
+    int point_penWidth = renderPoints_penWidth[point_n];
+    painter.setPen(QPen(QBrush( point_penColor ),point_penWidth,Qt::DashLine));
+    painter.setBrush(QBrush( point_penColor ));
     painter.drawPoint( point_w_margin );
   }
   painter.restore();

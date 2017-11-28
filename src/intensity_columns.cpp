@@ -237,6 +237,7 @@ else{
 return result;
 }
 
+
 bool IntensityColumns::read_simulated_image_from_dat_file(){
   bool result = false;
   if( _flag_sim_crystal_properties ){

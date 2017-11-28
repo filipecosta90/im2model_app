@@ -560,7 +560,7 @@ void MainWindow::update_super_cell_experimental_image_intensity_columns(){
   for( int keypoint_pos = 0; keypoint_pos < exp_image_keypoints.size(); keypoint_pos++ ){
    exp_image_renderPoints.push_back( exp_image_keypoints[keypoint_pos].pt );
  }
- ui->qgraphics_super_cell_refinement->addRenderPoints( exp_image_renderPoints , 10, cv::Vec3b(0,255,0), tr("Experimental image intensity columns") , top_right_corner_margin);
+ ui->qgraphics_super_cell_refinement->addRenderPoints( exp_image_renderPoints , 5, cv::Vec3b(0,255,0), tr("Experimental image intensity columns") , top_right_corner_margin);
  ui->qgraphics_super_cell_refinement->show();
 }
 
