@@ -1,6 +1,20 @@
 #ifndef SRC_BASEIMAGE_H__
 #define SRC_BASEIMAGE_H__
 
+
+#include <QMainWindow>
+#include <QtWidgets>
+
+#include <Qt3DCore/qentity.h>
+
+#include <QtWidgets/QApplication>
+#include <QtWidgets/QWidget>
+#include <QtWidgets/QHBoxLayout>
+#include <QtWidgets/QCheckBox>
+#include <QtWidgets/QCommandLinkButton>
+#include <QMenu>
+#include <QAction>
+
 /* BEGIN BOOST */
 #include <boost/process.hpp>
 #include <boost/filesystem/operations.hpp>                // for directory_iterator
@@ -27,7 +41,8 @@
 #include "application_log.hpp"
 #include "emd_wrapper.h"
 
-class BaseImage {
+class BaseImage : public QObject {
+  Q_OBJECT
 private:
 
     bool _flag_auto_n_rows = false;
@@ -35,15 +50,6 @@ private:
     bool _flag_auto_a_size = false;
     bool _flag_auto_b_size = false;
     bool _flag_auto_roi_from_ignored_edge = false;
-
-    bool auto_calculate_ignore_edge_pixels();
-    bool auto_calculate_dimensions();
-    bool calculate_n_rows_from_b_size_and_sampling_rate();
-    bool calculate_b_size_from_n_rows_and_sampling_rate();
-    bool calculate_n_cols_from_a_size_and_sampling_rate();
-    bool calculate_a_size_from_n_cols_and_sampling_rate();
-    bool calculate_roi_b_size_from_n_rows_and_sampling_rate();
-    bool calculate_roi_a_size_from_n_cols_and_sampling_rate();
 
     /* Loggers */
     ApplicationLog::ApplicationLog* logger = nullptr;
@@ -101,8 +107,10 @@ protected:
     // ignored edge pixels of the full image
     int ignore_edge_pixels = 0;
     bool _flag_ignore_edge_pixels = false;
+    bool _flag_auto_ignore_edge_pixels = false;
     double ignore_edge_nm = 0.0f;
     bool _flag_ignore_edge_nm = false;
+    bool _flag_auto_ignore_edge_nm = false;
 
     cv::Mat roi_image_statistical;
     bool _flag_roi_image_statistical = false;
@@ -175,6 +183,8 @@ public:
     bool set_flag_auto_a_size( bool value );
     bool set_flag_auto_b_size( bool value );
     bool set_flag_auto_roi_from_ignored_edge( bool value );
+    bool set_flag_auto_ignore_edge_pixels( bool value );
+    bool set_flag_auto_ignore_edge_nm( bool value );
 
     bool set_emd_wrapper( EMDWrapper* wrapper );
 
@@ -190,11 +200,13 @@ public:
     bool set_full_nm_size_rows_b( double size );
     bool set_full_nm_size_cols_a( double size );
     // ROI FRAME
-    void set_roi();
     bool set_roi_n_rows_height( int roi_n_rows_height );
     bool set_roi_n_cols_width( int roi_n_cols_width );
     bool set_roi_center_x( int roi_center_x );
     bool set_roi_center_y( int roi_center_y );
+    bool set_roi_nm_size_cols_a( double size );
+    bool set_roi_nm_size_rows_b( double size );
+
     bool set_ignore_edge_pixels( int ignore_edge_pixels );
     bool set_ignore_edge_nm( double ignore_edge_nm );
 
@@ -210,6 +222,51 @@ public:
     void print_var_state();
     friend std::ostream& operator<< (std::ostream& stream, const BaseImage& image);
     virtual std::ostream& output(std::ostream& stream) const;
+
+    public slots:
+
+    void calculate_ignore_edge_pixels();
+    void calculate_ignore_edge_nm();
+    void calculate_roi_n_cols_from_full_n_cols_and_ignored_edge();
+    void calculate_roi_n_rows_from_full_n_rows_and_ignored_edge();
+
+    void calculate_full_n_rows_from_b_size_and_sampling_rate();
+    void calculate_roi_n_rows_from_b_size_and_sampling_rate();
+
+    void calculate_full_n_cols_from_a_size_and_sampling_rate();
+    void calculate_roi_n_cols_from_a_size_and_sampling_rate();
+
+    void calculate_full_b_size_from_n_rows_and_sampling_rate();
+    void calculate_roi_b_size_from_n_rows_and_sampling_rate();
+
+    void calculate_full_a_size_from_n_cols_and_sampling_rate();
+    void calculate_roi_a_size_from_n_cols_and_sampling_rate();
+    void calculate_roi_rectangle_and_roi_image();
+
+    signals:
+    void full_n_rows_height_changed();
+    void roi_n_rows_height_changed();
+    void full_n_cols_width_changed();
+    void roi_n_cols_width_changed();
+    void sampling_rate_x_nm_per_pixel_changed();
+    void sampling_rate_y_nm_per_pixel_changed();
+    void roi_nm_size_rows_b_changed();
+    void full_nm_size_rows_b_changed();
+    void roi_nm_size_cols_a_changed();
+    void full_nm_size_cols_a_changed();
+    void roi_center_x_changed();
+    void roi_center_y_changed();
+    void ignore_edge_pixels_changed();
+    void ignore_edge_nm_changed();
+    void full_image_changed();
+
+    void flag_auto_roi_from_ignored_edge_changed();
+    void flag_auto_n_rows_changed();
+    void flag_auto_n_cols_changed();
+    void flag_auto_b_size_changed();
+    void flag_auto_a_size_changed();
+    void flag_auto_ignore_edge_pixels_changed();
+    void flag_auto_ignore_edge_nm_changed();
 
 };
 

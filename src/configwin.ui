@@ -655,7 +655,7 @@
                    </spacer>
                   </item>
                   <item>
-                   <widget class="QPushButton" name="qpush_run_refinement_step_1">
+                   <widget class="QPushButton" name="qpush_run_compute_intensity_columns">
                     <property name="text">
                      <string>Compute intensity columns</string>
                     </property>

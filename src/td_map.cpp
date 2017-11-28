@@ -54,12 +54,14 @@ TDMap::TDMap(
   sim_image_properties = new BaseImage();
   exp_image_properties = new BaseImage();
   supercell_sim_image_properties = new BaseImage();
+  supercell_exp_image_properties = new BaseImage();
 
   emd_wrapper = new EMDWrapper();
   exp_image_properties->set_emd_wrapper( emd_wrapper );
+  supercell_exp_image_properties->set_emd_wrapper( emd_wrapper );
 
   exp_image_bounds = new ImageBounds();
-  exp_image_bounds->set_base_image( exp_image_properties );
+  exp_image_bounds->set_base_image( supercell_exp_image_properties );
   tdmap_full_sim_super_cell->set_image_bounds( exp_image_bounds );
   final_full_sim_super_cell->set_image_bounds( exp_image_bounds );
 
@@ -79,15 +81,22 @@ TDMap::TDMap(
 
   exp_image_properties->set_flag_auto_a_size( true );
   exp_image_properties->set_flag_auto_b_size( true );
+  exp_image_properties->set_flag_auto_ignore_edge_pixels( true );
+
+  supercell_exp_image_properties->set_flag_auto_a_size( true );
+  supercell_exp_image_properties->set_flag_auto_b_size( true );
+  //supercell_exp_image_properties->set_flag_auto_ignore_edge_pixels( true );
 
   sim_image_properties->set_flag_auto_n_rows( true );
   sim_image_properties->set_flag_auto_n_cols( true );
   sim_image_properties->set_flag_auto_roi_from_ignored_edge( false );
+  sim_image_properties->set_flag_auto_ignore_edge_pixels( true );
   sim_image_properties->set_ignore_edge_nm( cel_margin_nm );
 
   supercell_sim_image_properties->set_flag_auto_n_rows( true );
   supercell_sim_image_properties->set_flag_auto_n_cols( true );
-  supercell_sim_image_properties->set_flag_auto_roi_from_ignored_edge( true );
+  //supercell_sim_image_properties->set_flag_auto_roi_from_ignored_edge( true );
+  supercell_sim_image_properties->set_flag_auto_ignore_edge_pixels( true );
   supercell_sim_image_properties->set_ignore_edge_nm( cel_margin_nm );
 
   // set pointers for celslc
@@ -135,12 +144,11 @@ TDMap::TDMap(
   // set pointers for simgrid
   sim_image_intensity_columns->set_wavimg_var( _supercell_wavimg_parameters );
   sim_image_intensity_columns->set_sim_crystal_properties ( supercell_sim_crystal_properties );
-  sim_image_intensity_columns->set_exp_image_properties ( exp_image_properties );
+  sim_image_intensity_columns->set_exp_image_properties ( supercell_exp_image_properties );
   sim_image_intensity_columns->set_sim_image_properties ( supercell_sim_image_properties );
 
   connect( sim_image_intensity_columns, SIGNAL( sim_image_intensity_columns_changed( )), this, SLOT(update_super_cell_sim_image_intensity_columns_changed() ) );
-
-  
+  connect( sim_image_intensity_columns, SIGNAL( exp_image_intensity_columns_changed( )), this, SLOT(update_super_cell_exp_image_intensity_columns_changed() ) );
 
   /////////////
   // only for debug. need to add this options like in im2model command line
@@ -259,6 +267,10 @@ TDMap::TDMap( ostream_celslc_buffer, ostream_msa_buffer, ostream_wavimg_buffer, 
 
 void TDMap::update_super_cell_sim_image_intensity_columns_changed(){
   emit supercell_full_simulated_image_intensity_columns_changed();
+}
+
+void TDMap::update_super_cell_exp_image_intensity_columns_changed(){
+  emit supercell_full_experimental_image_intensity_columns_changed();
 }
 
 bool TDMap::test_clean_run_env(){
@@ -1185,6 +1197,7 @@ bool TDMap::set_application_logger( ApplicationLog::ApplicationLog* app_logger )
   sim_image_properties->set_application_logger(app_logger);
   exp_image_properties->set_application_logger(app_logger);
   supercell_sim_image_properties->set_application_logger(app_logger);
+  supercell_exp_image_properties->set_application_logger(app_logger);
   exp_image_bounds->set_application_logger(app_logger);
   sim_crystal_properties->set_application_logger(app_logger);
   supercell_sim_crystal_properties->set_application_logger(app_logger);
@@ -1229,7 +1242,9 @@ bool TDMap::set_dr_probe_wavimg_execname( std::string wavimg_execname ){
 }
 
 bool TDMap::set_exp_image_properties_full_image( std::string path ){
-  const bool result = exp_image_properties->set_full_image( path );
+  bool result = exp_image_properties->set_full_image( path );
+  result &= supercell_exp_image_properties->set_full_image( path );
+
   if( result && exp_image_properties->get_image_extension() == ".emd" ){
     update_emd_fields();
   }
@@ -1301,32 +1316,34 @@ bool TDMap::set_exp_image_properties_roi_center_y( std::string s_center_y ){
 
 bool TDMap::set_image_properties_sampling_rate_x_m_per_pixel( const double s_rate_x ){
   const bool exp_result = exp_image_properties->set_pixel_size_height_x_m( s_rate_x );
+  const bool super_exp_result = supercell_exp_image_properties->set_pixel_size_height_x_m( s_rate_x );
   const bool sim_result = sim_image_properties->set_pixel_size_height_x_m( s_rate_x );
   const bool supercell_sim_result = supercell_sim_image_properties->set_pixel_size_height_x_m( s_rate_x );
-   // const bool supercell_sim_result = supercell_exp_image_properties->set_pixel_size_height_x_m( s_rate_x );
-
-  return exp_result && sim_result && supercell_sim_result;
+  return exp_result && super_exp_result && sim_result && supercell_sim_result;
 }
 
 bool TDMap::set_image_properties_sampling_rate_y_m_per_pixel( const double s_rate_y ){
   const bool exp_result = exp_image_properties->set_pixel_size_width_y_m( s_rate_y );
+  const bool super_exp_result = supercell_exp_image_properties->set_pixel_size_width_y_m( s_rate_y );
   const bool sim_result = sim_image_properties->set_pixel_size_width_y_m( s_rate_y );
   const bool supercell_sim_result = supercell_sim_image_properties->set_pixel_size_width_y_m( s_rate_y );
-  return exp_result && sim_result && supercell_sim_result;
+  return exp_result && super_exp_result && sim_result && supercell_sim_result;
 }
 
 bool TDMap::set_image_properties_sampling_rate_x_nm_per_pixel( const double s_rate_x ){
   const bool exp_result = exp_image_properties->set_sampling_rate_x_nm_per_pixel( s_rate_x );
+  const bool super_exp_result = supercell_exp_image_properties->set_sampling_rate_x_nm_per_pixel( s_rate_x );
   const bool sim_result = sim_image_properties->set_sampling_rate_x_nm_per_pixel( s_rate_x );
   const bool supercell_sim_result = supercell_sim_image_properties->set_sampling_rate_x_nm_per_pixel( s_rate_x );
-  return exp_result && sim_result && supercell_sim_result;
+  return exp_result && super_exp_result && sim_result && supercell_sim_result;
 }
 
 bool TDMap::set_image_properties_sampling_rate_y_nm_per_pixel( const double s_rate_y ){
   const bool exp_result = exp_image_properties->set_sampling_rate_y_nm_per_pixel( s_rate_y );
+  const bool super_exp_result = supercell_exp_image_properties->set_sampling_rate_y_nm_per_pixel( s_rate_y );
   const bool sim_result = sim_image_properties->set_sampling_rate_y_nm_per_pixel( s_rate_y );
   const bool supercell_sim_result = supercell_sim_image_properties->set_sampling_rate_y_nm_per_pixel( s_rate_y );
-  return exp_result && sim_result && supercell_sim_result;
+  return exp_result && super_exp_result && sim_result && supercell_sim_result;
 }
 
 bool TDMap::set_exp_image_properties_sampling_rate_x_nm_per_pixel( std::string sampling_x ){
@@ -2062,7 +2079,8 @@ bool TDMap::set_thickness_user_estimated_nm( std::string s_estimated ){
             std::cout << "read_simulated_image_from_dat_file: " << std::boolalpha << _flag_read_simulated_supercell_image << std::endl;
 
             emit TDMap_started_supercell_segmentate_image();
-            _flag_read_simulated_supercell_image &= sim_image_intensity_columns->segmentate_image();
+            _flag_read_simulated_supercell_image &= sim_image_intensity_columns->segmentate_sim_image();
+            _flag_read_simulated_supercell_image &= sim_image_intensity_columns->segmentate_exp_image();
             emit TDMap_ended_supercell_segmentate_image( _flag_read_simulated_supercell_image );
             std::cout << "_flag_read_simulated_supercell_image: " << std::boolalpha << _flag_read_simulated_supercell_image << std::endl;
 
@@ -2075,6 +2093,22 @@ bool TDMap::set_thickness_user_estimated_nm( std::string s_estimated ){
           }
           result = _flag_runned_supercell_celslc && _flag_runned_supercell_msa && _flag_runned_supercell_wavimg && _flag_read_simulated_supercell_image;
         }
+        return result;
+      }
+
+      bool TDMap::compute_full_super_cell_intensity_cols(){
+        bool result = false;
+        emit TDMap_started_supercell_segmentate_image();
+        //_flag_read_simulated_supercell_image &= sim_image_intensity_columns->segmentate_sim_image();
+        _flag_read_simulated_supercell_image = sim_image_intensity_columns->segmentate_exp_image();
+        emit TDMap_ended_supercell_segmentate_image( _flag_read_simulated_supercell_image );
+        if( _flag_logger ){
+          std::stringstream message;
+          message << "_flag_read_simulated_supercell_image: " << std::boolalpha << _flag_read_simulated_supercell_image;
+          ApplicationLog::severity_level _log_type = _flag_read_simulated_supercell_image ? ApplicationLog::notification : ApplicationLog::error;
+          BOOST_LOG_FUNCTION();  logger->logEvent( _log_type , message.str() );
+        }
+        result = _flag_read_simulated_supercell_image;
         return result;
       }
 
@@ -2460,17 +2494,17 @@ bool TDMap::set_exp_image_bounds_roi_boundary_rect( cv::Rect roi_boundary_rect )
 
 bool TDMap::set_exp_image_properties_roi_rectangle_statistical( cv::Rect roi_rectangle_statistical ){
   bool result = false;
-  result = exp_image_properties->set_roi_rectangle_statistical( roi_rectangle_statistical );
+  result = supercell_exp_image_properties->set_roi_rectangle_statistical( roi_rectangle_statistical );
   if(
     result &&
-    exp_image_properties->get_flag_mean_image_statistical() &&
-    exp_image_properties->get_flag_stddev_image_statistical()
+    supercell_exp_image_properties->get_flag_mean_image_statistical() &&
+    supercell_exp_image_properties->get_flag_stddev_image_statistical()
     ){
 
-    cv::Scalar mean = exp_image_properties->get_mean_image_statistical();
+    cv::Scalar mean = supercell_exp_image_properties->get_mean_image_statistical();
   supercell_sim_image_properties->set_mean_image_statistical(mean);
   emit exp_image_properties_noise_carbon_statistical_mean_changed();
-  cv::Scalar stddev = exp_image_properties->get_stddev_image_statistical();
+  cv::Scalar stddev = supercell_exp_image_properties->get_stddev_image_statistical();
   supercell_sim_image_properties->set_stddev_image_statistical(stddev);
   emit exp_image_properties_noise_carbon_statistical_stddev_changed();
 }
@@ -2479,21 +2513,19 @@ return result;
 
 int TDMap::get_exp_image_properties_roi_rectangle_statistical_mean(){
   int result = -1;
-  if( exp_image_properties->get_flag_mean_image_statistical() ){
-    const cv::Scalar mean = exp_image_properties->get_mean_image_statistical();
+  if( supercell_exp_image_properties->get_flag_mean_image_statistical() ){
+    const cv::Scalar mean = supercell_exp_image_properties->get_mean_image_statistical();
     result = mean[0];
   }
-  std::cout << " get_exp_image_properties_roi_rectangle_statistical_mean " <<  result << std::endl;
   return result;
 }
 
 int TDMap::get_exp_image_properties_roi_rectangle_statistical_stddev(){
   int result = -1;
-  if( exp_image_properties->get_flag_stddev_image_statistical() ){
-    const cv::Scalar stddev = exp_image_properties->get_stddev_image_statistical();
+  if( supercell_exp_image_properties->get_flag_stddev_image_statistical() ){
+    const cv::Scalar stddev = supercell_exp_image_properties->get_stddev_image_statistical();
     result = stddev[0];
   }
-  std::cout << " get_exp_image_properties_roi_rectangle_statistical_stddev " <<  result << std::endl;
   return result;
 }
 

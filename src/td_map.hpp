@@ -120,6 +120,7 @@ private:
 
     //tab4
     BaseImage* supercell_sim_image_properties = nullptr;
+    BaseImage* supercell_exp_image_properties = nullptr;
 
     EMDWrapper* emd_wrapper = nullptr;
 
@@ -404,6 +405,7 @@ public:
     bool accept_tdmap_best_match_position();
     bool accept_tdmap_best_match_position(int row, int col);
     bool compute_full_super_cell();
+    bool compute_full_super_cell_intensity_cols();
 
     /* gui flag getters */
     bool get_exp_image_properties_flag_full_image();
@@ -515,8 +517,10 @@ public:
     
     public slots:
     void update_super_cell_sim_image_intensity_columns_changed();
+    void update_super_cell_exp_image_intensity_columns_changed();
 
     signals:
+        void supercell_full_experimental_image_intensity_columns_changed();
     void supercell_full_simulated_image_intensity_columns_changed();
     void exp_image_properties_sampling_rate_x_nm_per_pixel_changed();
     void exp_image_properties_sampling_rate_y_nm_per_pixel_changed();

@@ -116,13 +116,13 @@ MainWindow::MainWindow( ApplicationLog::ApplicationLog* logger , QWidget *parent
       sim_tdmap_worker->moveToThread( _sim_tdmap_thread );
 
       // will only start thread when needed
-      connect(sim_tdmap_worker, SIGNAL(TDMap_request()), _sim_tdmap_thread, SLOT(start()));
-      connect(_sim_tdmap_thread, &QThread::started, sim_tdmap_worker, &GuiSimOutUpdater::newTDMapSim );
+      connect(sim_tdmap_worker, SIGNAL(TDMap_request()), _sim_tdmap_thread, SLOT( start() ));
+      connect(_sim_tdmap_thread, SIGNAL( started() ), sim_tdmap_worker, SLOT( newTDMapSim() ) );
       connect(sim_tdmap_worker, SIGNAL(TDMap_sucess()), this, SLOT(update_from_TDMap_sucess( )));
       connect(sim_tdmap_worker, SIGNAL(TDMap_sucess_no_correlation()), this, SLOT(update_from_TDMap_sucess( )));
       connect(sim_tdmap_worker, SIGNAL(TDMap_failure()), this, SLOT(update_from_TDMap_failure()));
       // will quit thread after work done
-      connect(sim_tdmap_worker, SIGNAL(TDMap_finished()), _sim_tdmap_thread, SLOT(quit()), Qt::DirectConnection);
+      connect(sim_tdmap_worker, SIGNAL( TDMap_finished() ), _sim_tdmap_thread, SLOT(quit()), Qt::DirectConnection);
 
       /* Super-Cell Full simulation  thread */
       full_sim_super_cell_thread = new QThread( this );
@@ -130,15 +130,29 @@ MainWindow::MainWindow( ApplicationLog::ApplicationLog* logger , QWidget *parent
       full_sim_super_cell_worker->moveToThread( full_sim_super_cell_thread );
 
       // will only start thread when needed
-      connect( full_sim_super_cell_worker, SIGNAL(SuperCell_full_request()), this, SLOT(echo_sc()) );
       connect( full_sim_super_cell_worker, SIGNAL(SuperCell_full_request()), full_sim_super_cell_thread, SLOT(start()) );
-      connect(full_sim_super_cell_thread, &QThread::started, full_sim_super_cell_worker, &GuiSimOutUpdater::newSuperCellFull );
+      connect(full_sim_super_cell_thread, SIGNAL( started() ), full_sim_super_cell_worker, SLOT( newSuperCellFull() ) );
 
       connect(full_sim_super_cell_worker, SIGNAL(SuperCell_full_sucess()), this, SLOT(update_from_full_SuperCell_sucess()));
       connect(full_sim_super_cell_worker, SIGNAL(SuperCell_full_failure()), this, SLOT(update_from_full_SuperCell_failure()));
       // will quit thread after work done
       connect(full_sim_super_cell_worker, SIGNAL(SuperCell_full_finished()), full_sim_super_cell_thread, SLOT(quit()), Qt::DirectConnection);
-      //  connect(full_sim_super_cell_worker, SIGNAL(error(QString)), this, SLOT(errorString(QString)));
+
+      /* Super-Cell Full simulation  thread */
+      full_sim_super_cell_intensity_cols_thread = new QThread( this );
+      full_sim_super_cell_intensity_cols_worker = new GuiSimOutUpdater( _core_td_map );
+      full_sim_super_cell_intensity_cols_worker->moveToThread( full_sim_super_cell_intensity_cols_thread );
+
+      // will only start thread when needed
+      QMetaObject::Connection c1 = connect( full_sim_super_cell_intensity_cols_worker, SIGNAL(SuperCell_full_intensity_cols_request()), full_sim_super_cell_intensity_cols_thread, SLOT(start()) );
+      std::cout << " Connection " << c1 << std::endl;
+      QMetaObject::Connection c2 = connect( full_sim_super_cell_intensity_cols_thread, &QThread::started, full_sim_super_cell_intensity_cols_worker, &GuiSimOutUpdater::newSuperCellFull_intensity_cols );
+      std::cout << " Connection " << c2 << std::endl;
+
+      connect(full_sim_super_cell_intensity_cols_worker, SIGNAL(SuperCell_full_intensity_cols_sucess()), this, SLOT(update_from_full_SuperCell_intensity_cols_sucess()));
+      connect(full_sim_super_cell_intensity_cols_worker, SIGNAL(SuperCell_full_intensity_cols_failure()), this, SLOT(update_from_full_SuperCell_intensity_cols_failure()));
+      // will quit thread after work done
+      connect(full_sim_super_cell_intensity_cols_worker, SIGNAL(SuperCell_full_intensity_cols_finished()), full_sim_super_cell_intensity_cols_thread, SLOT(quit()), Qt::DirectConnection);
 
       /* Super-Cell Edge Detection  thread */
       _sim_super_cell_thread = new QThread( this );
@@ -147,7 +161,7 @@ MainWindow::MainWindow( ApplicationLog::ApplicationLog* logger , QWidget *parent
 
       // will only start thread when needed
       connect( sim_super_cell_worker, SIGNAL(SuperCell_edge_request()), _sim_super_cell_thread, SLOT(start()));
-      connect(_sim_super_cell_thread, &QThread::started, sim_super_cell_worker, &GuiSimOutUpdater::newSuperCellEdge );
+      connect(_sim_super_cell_thread, SIGNAL( started() ), sim_super_cell_worker, SLOT( newSuperCellEdge() ) );
 
       connect(sim_super_cell_worker, SIGNAL(SuperCell_edge_sucess()), this, SLOT(update_from_SuperCell_edge_sucess()));
       connect(sim_super_cell_worker, SIGNAL(SuperCell_edge_failure()), this, SLOT(update_from_SuperCell_edge_failure()));
@@ -187,6 +201,7 @@ MainWindow::MainWindow( ApplicationLog::ApplicationLog* logger , QWidget *parent
       
       connect( _core_td_map, SIGNAL(supercell_full_simulated_image_changed( )), this, SLOT(update_super_cell_sim_image_full_image() ) );
       connect( _core_td_map, SIGNAL(supercell_full_simulated_image_intensity_columns_changed( )), this, SLOT(update_super_cell_simulated_image_intensity_columns() ) );
+      connect( _core_td_map, SIGNAL(supercell_full_experimental_image_intensity_columns_changed( )), this, SLOT(update_super_cell_experimental_image_intensity_columns() ) );
 
       _reset_document_modified_flags();
       if( _flag_im2model_logger ){
@@ -195,12 +210,6 @@ MainWindow::MainWindow( ApplicationLog::ApplicationLog* logger , QWidget *parent
     }
   }
 }
-
-
-void MainWindow::echo_sc( ){
-  std::cout << "echo_sc" << std::endl;
-}
-
 
 void MainWindow::setApplicationVersion( std::string app_version ){
   application_version = app_version;
@@ -540,24 +549,29 @@ void MainWindow::update_roi_full_experimental_image_frame(){
 }
 
 //update tab 4
-void MainWindow::update_super_cell_simulated_image_intensity_columns(){
-  std::cout << " inside update_supercell_simulated_image_intensity_columns " << std::endl;
+void MainWindow::update_super_cell_experimental_image_intensity_columns(){
+  std::vector<cv::KeyPoint> exp_image_keypoints = _core_td_map->get_super_cell_sim_image_properties_keypoints();
+  std::vector<cv::Point2i> exp_image_renderPoints;
+  for( int keypoint_pos = 0; keypoint_pos < exp_image_keypoints.size(); keypoint_pos++ ){
+   exp_image_renderPoints.push_back( exp_image_keypoints[keypoint_pos].pt );
+ }
+ ui->qgraphics_super_cell_refinement->addRenderPoints( exp_image_renderPoints , 10, cv::Vec3b(0,255,0), tr("Experimental image intensity columns") );
+ ui->qgraphics_super_cell_refinement->show();
+}
 
+//update tab 4
+void MainWindow::update_super_cell_simulated_image_intensity_columns(){
   std::vector<cv::KeyPoint> sim_image_keypoints = _core_td_map->get_super_cell_sim_image_properties_keypoints();
   std::vector<cv::Point2i> sim_image_renderPoints;
   for( int keypoint_pos = 0; keypoint_pos < sim_image_keypoints.size(); keypoint_pos++ ){
     QVector<QVariant> keypoint_option = {"# " + QString::number( keypoint_pos ),""};
     TreeItem* keypoint_item  = new TreeItem ( keypoint_option );
-  //intensity_peaks_display_experimental_img->set_variable_name( "intensity_peaks_display_experimental_img" );
     super_cell_sim_image_intensity_columns->insertChildren( keypoint_item );
-
-    std::cout << "keypoint " << sim_image_keypoints[keypoint_pos].pt << std::endl;
     sim_image_renderPoints.push_back( sim_image_keypoints[keypoint_pos].pt );
   }
   intensity_columns_listing_model->force_layout_change();
   ui->qgraphics_super_cell_refinement->addRenderPoints( sim_image_renderPoints , 10, cv::Vec3b(255,0,0), tr("Simulated image intensity columns") );
   ui->qgraphics_super_cell_refinement->show();
-
 }
 
 void MainWindow::update_super_cell_sim_image_full_image(){
@@ -567,7 +581,7 @@ void MainWindow::update_super_cell_sim_image_full_image(){
     const cv::Point2i margin_point_px ( margin_px , margin_px );
     std::cout << " margin_px " << margin_px << std::endl; 
     // update tab 4
-    ui->qgraphics_super_cell_refinement->setImage( full_image, 0, "Full super-cell simulated image", margin_point_px );
+    ui->qgraphics_super_cell_refinement->setImage( full_image, 0, "Full super-cell simulated image"  );
     ui->qgraphics_super_cell_refinement->show();
   }
 }
@@ -597,13 +611,24 @@ bool MainWindow::_reset_document_modified_flags(){
   return result;
 }
 
+
 void MainWindow::update_from_full_SuperCell_failure( ){
   ui->statusBar->showMessage(tr("Error while running Full-Super-Cell simulation") );
   updateProgressBar(0,4,4);
 }
 
+void MainWindow::update_from_full_SuperCell_intensity_cols_failure( ){
+  ui->statusBar->showMessage(tr("Error while running Full-Super-Cell image segmentation") );
+  updateProgressBar(0,4,4);
+}
+
 void MainWindow::update_from_full_SuperCell_sucess( ){
   ui->statusBar->showMessage(tr("Sucessfully runned Full-Super-Cell simulation"), 2000);
+  updateProgressBar(0,4,4);
+}
+
+void MainWindow::update_from_full_SuperCell_intensity_cols_sucess( ){
+  ui->statusBar->showMessage(tr("Sucessfully runned Full-Super-Cell image segmentation"), 2000);
   updateProgressBar(0,4,4);
 }
 
@@ -2713,12 +2738,12 @@ void MainWindow::create_box_options_tab4_intensity_peaks(){
 
   QVector<QVariant> box6_option_2_2_2 = {"Distance transform algorithm alpha channel",""};
   intensity_peaks_display_experimental_img_distance_transform_alpha  = new TreeItem ( box6_option_2_2_2 );
-    intensity_peaks_display_experimental_img->insertChildren( intensity_peaks_display_experimental_img_distance_transform_alpha );
+  intensity_peaks_display_experimental_img->insertChildren( intensity_peaks_display_experimental_img_distance_transform_alpha );
 
-  
+
   QVector<QVariant> box6_option_2_2_3 = {"Intensity peaks alpha channel",""};
   intensity_peaks_display_experimental_img_alpha_channel  = new TreeItem ( box6_option_2_2_3 );
-    intensity_peaks_display_experimental_img->insertChildren( intensity_peaks_display_experimental_img_alpha_channel );
+  intensity_peaks_display_experimental_img->insertChildren( intensity_peaks_display_experimental_img_alpha_channel );
 
   ui->qtree_view_refinement_full_simulation->setModel( intensity_peaks_model );
   ui->qtree_view_refinement_full_simulation->setItemDelegate( _load_file_delegate );
@@ -2884,7 +2909,12 @@ void MainWindow::on_qbutton_tdmap_accept_clicked(){
 }
 
 void MainWindow::on_qpush_compute_full_super_cell_clicked(){
-  bool result = false;
   ui->statusBar->showMessage(tr("Requesting a Full-Super-Cell worker thread."), 2000);
   full_sim_super_cell_worker->requestFullSuperCell();
 }
+
+void MainWindow::on_qpush_run_compute_intensity_columns_clicked(){
+  ui->statusBar->showMessage(tr("Requesting a Full-Super-Cell worker thread to compute intensity columns."), 2000);
+  full_sim_super_cell_intensity_cols_worker->requestFullSuperCellComputeIntensityCols();
+}
+

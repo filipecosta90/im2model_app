@@ -344,7 +344,7 @@
       include_directories(externals/googletest)
 
       #Adding the directory with our (future) tests to toplevel CMakeLists.txt:
-      option (BUILD_TESTS "build tests" ON)
+      option (BUILD_TESTS "build tests" OFF)
 
   if (BUILD_TESTS)
 

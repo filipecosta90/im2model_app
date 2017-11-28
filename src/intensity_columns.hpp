@@ -75,22 +75,18 @@ private:
 
     float intensity_columns_keypoint_diameter = 1.0f;
     std::vector<cv::KeyPoint> sim_image_keypoints;
+    std::vector<cv::KeyPoint> exp_image_keypoints;
     std::vector< std::vector<cv::Point> > sim_image_intensity_columns;
+    std::vector< std::vector<cv::Point> > exp_image_intensity_columns;
 
-    /*
-       cv::Mat bw_image;
-       bool _flag_bw_image = false;
-cv:Mat dist_image;
-bool _flag_dist_image = false;
-
-*/
     bool auto_calculate_threshold_value();
 
 public:
 
     IntensityColumns();
     bool read_simulated_image_from_dat_file();
-    bool segmentate_image();
+    bool segmentate_sim_image();
+    bool segmentate_exp_image();
 
     /** getters **/
 
@@ -122,6 +118,8 @@ public:
     signals:
     void sim_image_intensity_columns_changed();
     void sim_image_intensity_keypoints_changed();
+    void exp_image_intensity_columns_changed();
+    void exp_image_intensity_keypoints_changed();
 
 };
 

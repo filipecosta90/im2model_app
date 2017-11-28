@@ -126,7 +126,7 @@ public:
     boost::process::ipstream _sim_supercell_wavimg_ostream_buffer;
 
     public slots:
-    void echo_sc();
+   // void echo_sc();
     void update_from_TDMap_sucess();
     void update_from_TDMap_failure();
     bool _is_initialization_ok();
@@ -151,6 +151,8 @@ public:
     void update_exp_image_properties_roi_rectangle_statistical_from_rectangle_selection( QRect rectangle_selection );
     void update_from_full_SuperCell_sucess();
     void update_from_full_SuperCell_failure();
+    void update_from_full_SuperCell_intensity_cols_sucess();
+    void update_from_full_SuperCell_intensity_cols_failure();
 
 protected:
     void closeEvent(QCloseEvent *event) override;
@@ -162,6 +164,7 @@ protected:
     void update_full_experimental_image();
     void update_roi_experimental_image_frame();
     void update_roi_full_experimental_image_frame();
+    void update_super_cell_experimental_image_intensity_columns();
     void update_super_cell_simulated_image_intensity_columns();
     void update_super_cell_sim_image_full_image();
     void on_qpush_run_tdmap_clicked();
@@ -193,6 +196,7 @@ protected:
     void on_qpush_test_tdmap_clicked();
     void on_qbutton_tdmap_accept_clicked();
     void on_qpush_compute_full_super_cell_clicked();
+    void on_qpush_run_compute_intensity_columns_clicked();
 
     signals:
     void experimental_image_filename_changed();
@@ -266,6 +270,10 @@ private:
 
     GuiSimOutUpdater *full_sim_super_cell_worker;
     QThread *full_sim_super_cell_thread;
+
+    GuiSimOutUpdater *full_sim_super_cell_intensity_cols_worker;
+    QThread *full_sim_super_cell_intensity_cols_thread;
+
 
     /* Delegates */
     TreeItemFileDelegate *_load_file_delegate;

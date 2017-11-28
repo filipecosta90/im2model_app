@@ -40,12 +40,15 @@ class GuiSimOutUpdater : public QObject {
     GuiSimOutUpdater(TDMap* core_tdmap ,  QObject *parent = 0 );
 
     public slots:
-      void newSuperCellFull();
+    void newSuperCellFull();
     void newSuperCellEdge();
+    void newSuperCellFull_intensity_cols();
     void newTDMapSim();
     void requestTDMap();
     void requestSuperCellEdge();
     void requestFullSuperCell();
+    void requestFullSuperCellComputeIntensityCols();
+
     void abort();
 
 signals:
@@ -65,6 +68,11 @@ signals:
     void SuperCell_full_sucess();
     void SuperCell_full_failure();
     void SuperCell_full_finished();
+
+    void SuperCell_full_intensity_cols_request();
+    void SuperCell_full_intensity_cols_sucess();
+    void SuperCell_full_intensity_cols_failure();
+    void SuperCell_full_intensity_cols_finished();
 
 };
 
