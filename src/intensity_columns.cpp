@@ -256,75 +256,51 @@ bool IntensityColumns::feature_match(){
 
       //-- Step 3: Matching descriptor vectors using FLANN matcher
     BFMatcher::BFMatcher matcher(NORM_L2, true );
+
+  //-- Draw only "good" matches
+  cv::Mat sim_src = sim_image_properties->get_full_image( );
+  cv::Mat exp_src = exp_image_properties->get_roi_image( );
+
     //FlannBasedMatcher matcher;
   std::vector< DMatch > matches;
-  matcher.radiusMatch( sim_image_descriptor, exp_image_descriptor, matches , 20.0f );
+  matcher.radiusMatch(sim_image_descriptor, exp_image_descriptor, matches, 20.0f );
+
+  //matcher.radiusMatch( sim_image_descriptor, exp_image_descriptor, matches , 20.0f );
   imwrite("sim_image_descriptor.png", sim_image_descriptor);
   imwrite("exp_image_descriptor.png", exp_image_descriptor);
 
-  double max_dist = 0; double min_dist = 1;
+  std::vector<DMatch> match1;
 
-  //-- Quick calculation of max and min distances between keypoints
-  for( int i = 0; i < sim_image_descriptor.rows; i++ )
-    { double dist = matches[i].distance;
-      if( dist < min_dist ) min_dist = dist;
-      if( dist > max_dist ) max_dist = dist;
-    }
-
-    std::cout << "-- Max dist " << max_dist  << std::endl;
-    std::cout << "-- Min dist " << min_dist  << std::endl;
-
-  //-- Draw only "good" matches (i.e. whose distance is less than 2*min_dist,
-  //-- or a small arbitary value ( 0.02 ) in the event that min_dist is very
-  //-- small)
-  //-- PS.- radiusMatch can also be used here.
-    std::vector< DMatch > good_matches;
-
-
-
-
-    for( int i = 0; i < sim_image_descriptor.rows; i++ )
-      { if( matches[i].distance <= max(2*min_dist, 0.02) )
-        { good_matches.push_back( matches[i]); }
-      }
-
-  //-- Draw only "good" matches
-      cv::Mat sim_src = sim_image_properties->get_full_image( );
-      cv::Mat exp_src = exp_image_properties->get_roi_image( );
-
-      Mat img_matches;
-      drawMatches( sim_src, sim_image_keypoints, exp_src, exp_image_keypoints,
-       good_matches, img_matches, Scalar::all(-1), Scalar::all(-1),
-       vector<char>(), DrawMatchesFlags::NOT_DRAW_SINGLE_POINTS );
-
-      imwrite("img_matches.png", img_matches);
-
-  //-- Show detected matches
-      imshow( "Good Matches", img_matches );
-      waitKey(0);
-
-
-      result = true;
-    }
-    else {
-      result = false;
-      if( _flag_logger ){
-        std::stringstream message;
-        message << "The required vars for feature_match() are not setted up.";
-        BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::error , message.str() );
-      }
-      print_var_state();
-    }
+  for(int i=0; i<matches.size(); i++)
+  {
+    match1.push_back(matches[i]);
   }
-  else{
-    if( _flag_logger ){
-      std::stringstream message;
-      message << "The required Class POINTERS for feature_match() are not setted up.";
-      BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::error , message.str() );
-    }
-    print_var_state();
+
+  Mat img_matches1, img_matches2;
+  drawMatches(sim_src, sim_image_keypoints, exp_src, exp_image_keypoints, match1, img_matches1);
+  imwrite("img_matches1.png", img_matches1);
+
+  result = true;
+}
+else {
+  result = false;
+  if( _flag_logger ){
+    std::stringstream message;
+    message << "The required vars for feature_match() are not setted up.";
+    BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::error , message.str() );
   }
-  return result;
+  print_var_state();
+}
+}
+else{
+  if( _flag_logger ){
+    std::stringstream message;
+    message << "The required Class POINTERS for feature_match() are not setted up.";
+    BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::error , message.str() );
+  }
+  print_var_state();
+}
+return result;
 }
 
 bool IntensityColumns::read_simulated_image_from_dat_file(){
