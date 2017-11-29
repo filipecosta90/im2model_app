@@ -1,6 +1,7 @@
 #include "intensity_columns.hpp"
 
 IntensityColumns::IntensityColumns( ){
+  f2d = xfeatures2d::SIFT::create();
 }
 
 bool IntensityColumns::set_wavimg_var( WAVIMG_prm *wavimg_var ){
@@ -65,6 +66,7 @@ return result;
 }
 
 bool IntensityColumns::segmentate_sim_image(){
+     //-- Step 1.1: Detect the keypoints for simulated image
   bool result = false;
   auto_calculate_threshold_value();
   if( _flag_sim_image_properties && _flag_threshold_value ){
@@ -134,6 +136,9 @@ bool IntensityColumns::segmentate_sim_image(){
       sim_image_keypoints.push_back( kpoint );
     }
     result = true;
+    _flag_sim_image_keypoints = true;
+    //-- Step 2.1: Calculate descriptors (feature vectors) for sim image keypoints
+    f2d->compute( dist_8u, sim_image_keypoints, sim_image_descriptor );
     emit sim_image_intensity_columns_changed();
     emit sim_image_intensity_keypoints_changed();
   }
@@ -141,6 +146,7 @@ bool IntensityColumns::segmentate_sim_image(){
 }
 
 bool IntensityColumns::segmentate_exp_image(){
+   //-- Step 1.2: Detect the keypoints for experimental image
   bool result = false;
   auto_calculate_threshold_value();
   if( _flag_exp_image_properties ){
@@ -213,6 +219,9 @@ bool IntensityColumns::segmentate_exp_image(){
       exp_image_keypoints.push_back( kpoint );
     }
     result = true;
+    _flag_exp_image_keypoints = true;
+      //-- Step 2.2: Calculate descriptors (feature vectors) for exp image keypoints
+    f2d->compute( dist_8u, exp_image_keypoints, exp_image_descriptor );
     emit exp_image_intensity_columns_changed();
     emit exp_image_intensity_keypoints_changed();
   }
@@ -237,6 +246,86 @@ else{
 return result;
 }
 
+bool IntensityColumns::feature_match(){
+ bool result = false;
+ auto_calculate_threshold_value();
+ if( _flag_exp_image_properties ){
+  if( _flag_exp_image_keypoints && 
+    _flag_sim_image_keypoints
+    ){
+
+      //-- Step 3: Matching descriptor vectors using FLANN matcher
+    BFMatcher::BFMatcher matcher(NORM_L2, true );
+    //FlannBasedMatcher matcher;
+  std::vector< DMatch > matches;
+  matcher.radiusMatch( sim_image_descriptor, exp_image_descriptor, matches , 20.0f );
+  imwrite("sim_image_descriptor.png", sim_image_descriptor);
+  imwrite("exp_image_descriptor.png", exp_image_descriptor);
+
+  double max_dist = 0; double min_dist = 1;
+
+  //-- Quick calculation of max and min distances between keypoints
+  for( int i = 0; i < sim_image_descriptor.rows; i++ )
+    { double dist = matches[i].distance;
+      if( dist < min_dist ) min_dist = dist;
+      if( dist > max_dist ) max_dist = dist;
+    }
+
+    std::cout << "-- Max dist " << max_dist  << std::endl;
+    std::cout << "-- Min dist " << min_dist  << std::endl;
+
+  //-- Draw only "good" matches (i.e. whose distance is less than 2*min_dist,
+  //-- or a small arbitary value ( 0.02 ) in the event that min_dist is very
+  //-- small)
+  //-- PS.- radiusMatch can also be used here.
+    std::vector< DMatch > good_matches;
+
+
+
+
+    for( int i = 0; i < sim_image_descriptor.rows; i++ )
+      { if( matches[i].distance <= max(2*min_dist, 0.02) )
+        { good_matches.push_back( matches[i]); }
+      }
+
+  //-- Draw only "good" matches
+      cv::Mat sim_src = sim_image_properties->get_full_image( );
+      cv::Mat exp_src = exp_image_properties->get_roi_image( );
+
+      Mat img_matches;
+      drawMatches( sim_src, sim_image_keypoints, exp_src, exp_image_keypoints,
+       good_matches, img_matches, Scalar::all(-1), Scalar::all(-1),
+       vector<char>(), DrawMatchesFlags::NOT_DRAW_SINGLE_POINTS );
+
+      imwrite("img_matches.png", img_matches);
+
+  //-- Show detected matches
+      imshow( "Good Matches", img_matches );
+      waitKey(0);
+
+
+      result = true;
+    }
+    else {
+      result = false;
+      if( _flag_logger ){
+        std::stringstream message;
+        message << "The required vars for feature_match() are not setted up.";
+        BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::error , message.str() );
+      }
+      print_var_state();
+    }
+  }
+  else{
+    if( _flag_logger ){
+      std::stringstream message;
+      message << "The required Class POINTERS for feature_match() are not setted up.";
+      BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::error , message.str() );
+    }
+    print_var_state();
+  }
+  return result;
+}
 
 bool IntensityColumns::read_simulated_image_from_dat_file(){
   bool result = false;

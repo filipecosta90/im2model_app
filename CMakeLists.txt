@@ -87,11 +87,15 @@
 
   else()
     message(status "Setting GCC flags")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}  -fexceptions -g -fno-omit-frame-pointer ")#-fsanitize=address -fsanitize=undefined -fsanitize=integer")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}  -fexceptions -g -fno-omit-frame-pointer")#-fsanitize=address -fsanitize=undefined -fsanitize=integer")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -std=c++14")
   endif(WIN32)
 
-  find_package(OpenCV  3.0.0 REQUIRED)
+  find_package(OpenCV  3.0.0 REQUIRED  )
+  message ( status )
+  message(status "OpenCV lib components: ${OpenCV_LIB_COMPONENTS}")
+
+      message(status "OPENCV_EXTRA_MODULES_PATH: ${OPENCV_EXTRA_MODULES_PATH}")
   if(WIN32)
     message(status "OpenCV lib components: ${OpenCV_LIB_COMPONENTS}")
   endif(WIN32)

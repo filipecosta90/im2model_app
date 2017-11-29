@@ -41,6 +41,15 @@
 #include "base_crystal.hpp"
 #include "base_image.hpp"
 #include "application_log.hpp"
+#include "opencv2/core.hpp"
+#include "opencv2/features2d.hpp"
+#include "opencv2/imgcodecs.hpp"
+#include "opencv2/highgui.hpp"
+#include "opencv2/xfeatures2d.hpp"
+#include "opencv2/features2d/features2d.hpp"
+//#include <opencv2/nonfree/features2d.hpp>
+
+
 
 class IntensityColumns : public QObject {
   Q_OBJECT
@@ -74,8 +83,18 @@ private:
     bool _flag_logger = false;
 
     float intensity_columns_keypoint_diameter = 1.0f;
+
+
+    cv::Ptr<Feature2D> f2d;
+
+    cv::Mat sim_image_descriptor;
     std::vector<cv::KeyPoint> sim_image_keypoints;
+    bool _flag_sim_image_keypoints = false;
+
+    cv::Mat exp_image_descriptor;
     std::vector<cv::KeyPoint> exp_image_keypoints;
+    bool _flag_exp_image_keypoints = false;
+
     std::vector< std::vector<cv::Point> > sim_image_intensity_columns;
     std::vector< std::vector<cv::Point> > exp_image_intensity_columns;
 
@@ -87,6 +106,7 @@ public:
     bool read_simulated_image_from_dat_file();
     bool segmentate_sim_image();
     bool segmentate_exp_image();
+    bool feature_match();
 
     /** getters **/
 
