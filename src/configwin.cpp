@@ -475,12 +475,14 @@ void MainWindow::update_super_cell_target_region(){
 }
 
 void MainWindow::update_super_cell_target_region_image(){
-  if( _core_td_map->get_exp_image_bounds_flag_roi_boundary_image_w_margin() ){
-    const cv::Mat super_cell_target_region_image_w_margin = _core_td_map->get_exp_image_bounds_roi_boundary_image_w_margin();
+  if( _core_td_map->get_exp_image_bounds_flag_roi_boundary_image() ){
+    const cv::Mat super_cell_target_region_image = _core_td_map->get_exp_image_bounds_roi_boundary_image();
+    const int full_boundary_polygon_margin_x_px = _core_td_map->get_exp_image_bounds_full_boundary_polygon_margin_x_px();
+    const int full_boundary_polygon_margin_y_px = _core_td_map->get_exp_image_bounds_full_boundary_polygon_margin_y_px();
     const int margin_point_px = _core_td_map->get_super_cell_sim_image_properties_ignore_edge_pixels();
-    std::cout << " margin_point_px " << margin_point_px << std::endl; 
-    const cv::Point2i top_right_corner_margin ( margin_point_px , margin_point_px );
-    ui->qgraphics_super_cell_refinement->setImage( super_cell_target_region_image_w_margin, 1 , tr("Super-cell experimental image target region"), top_right_corner_margin );
+    const cv::Point2i top_right_corner_margin ( margin_point_px + full_boundary_polygon_margin_x_px, margin_point_px + full_boundary_polygon_margin_y_px);
+        std::cout << " top_right_corner_margin " << top_right_corner_margin << std::endl; 
+    ui->qgraphics_super_cell_refinement->setImage( super_cell_target_region_image, 1 , tr("Super-cell experimental image target region"), top_right_corner_margin );
   }
 }
 
@@ -550,9 +552,11 @@ void MainWindow::update_roi_full_experimental_image_frame(){
 //update tab 4
 void MainWindow::update_super_cell_experimental_image_intensity_columns(){
   std::cout << " update_super_cell_experimental_image_intensity_columns " << std::endl;
-  const int margin_point_px = _core_td_map->get_super_cell_sim_image_properties_ignore_edge_pixels();
-  const cv::Point2i top_right_corner_margin ( margin_point_px , margin_point_px );
-  std::vector<cv::KeyPoint> exp_image_keypoints = _core_td_map->get_super_cell_exp_image_properties_keypoints();
+  const int full_boundary_polygon_margin_x_px = _core_td_map->get_exp_image_bounds_full_boundary_polygon_margin_x_px();
+    const int full_boundary_polygon_margin_y_px = _core_td_map->get_exp_image_bounds_full_boundary_polygon_margin_y_px();
+    const int margin_point_px = _core_td_map->get_super_cell_sim_image_properties_ignore_edge_pixels();
+    const cv::Point2i top_right_corner_margin ( margin_point_px + full_boundary_polygon_margin_x_px, margin_point_px + full_boundary_polygon_margin_y_px);
+     std::vector<cv::KeyPoint> exp_image_keypoints = _core_td_map->get_super_cell_exp_image_properties_keypoints();
   std::vector<cv::Point2i> exp_image_renderPoints;
 
   for( int keypoint_pos = 0; keypoint_pos < exp_image_keypoints.size(); keypoint_pos++ ){

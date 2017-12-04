@@ -12,6 +12,8 @@
 #include <QColor>
 #include <QHash>
 #include <QWidget>
+#include <map>
+
 
 #include "renderarea.h"
 
@@ -78,10 +80,10 @@ private:
     std::vector<cv::Point2i> renderAreas_top_left;
     cv::Vec3b renderAreas_default_color = cv::Vec3b(255,0,0);
 
-    std::vector<QPoint> renderPoints;
-    std::vector<QColor> renderPoints_penColor;
-    std::vector<int> renderPoints_penWidth;
-    std::vector<QPoint> renderPoints_margin_points;
+    std::map< QString,std::vector<QPoint> > renderPoints_map;
+    std::map< QString,std::vector<QColor> > renderPoints_penColor_map;
+    std::map< QString,std::vector<int> > renderPoints_penWidth_map;
+    std::map< QString,std::vector<QPoint> > renderPoints_margin_points_map;
 
     std::vector<int> alpha_channels;
     std::vector<QImage> images;
