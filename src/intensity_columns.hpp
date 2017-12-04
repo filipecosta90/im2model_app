@@ -97,6 +97,7 @@ private:
 
     std::vector< std::vector<cv::Point> > sim_image_intensity_columns;
     std::vector< std::vector<cv::Point> > exp_image_intensity_columns;
+    cv::Point2i exp_image_delta_factor_constant;
 
     bool auto_calculate_threshold_value();
 
@@ -136,11 +137,21 @@ public:
     bool set_application_logger( ApplicationLog::ApplicationLog* logger );
     virtual std::ostream& output(std::ostream& stream) const;
 
+    /* extra */
+    cv::Point op_Point2i_padding (cv::Point point, const cv::Point padd );
+    cv::KeyPoint op_KeyPoint_padding ( cv::KeyPoint point, const cv::Point2f padd );
+    std::vector<cv::Point> op_contour_padding ( std::vector<cv::Point> vec, const cv::Point padd );
+
+
+    public slots:
+    void apply_exp_image_delta_factor();
+
     signals:
     void sim_image_intensity_columns_changed();
     void sim_image_intensity_keypoints_changed();
     void exp_image_intensity_columns_changed();
     void exp_image_intensity_keypoints_changed();
+    void exp_image_delta_factor_constant_changed();
 
 };
 

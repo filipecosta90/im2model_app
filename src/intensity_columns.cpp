@@ -1,7 +1,8 @@
 #include "intensity_columns.hpp"
 
 IntensityColumns::IntensityColumns( ){
-  f2d = xfeatures2d::SIFT::create();
+  exp_image_delta_factor_constant = cv::Point2i(0,0);
+  connect( this, SIGNAL( exp_image_delta_factor_constant_changed( )), this, SLOT(apply_exp_image_delta_factor() ) );
 }
 
 bool IntensityColumns::set_wavimg_var( WAVIMG_prm *wavimg_var ){
@@ -71,8 +72,7 @@ bool IntensityColumns::segmentate_sim_image(){
   auto_calculate_threshold_value();
   if( _flag_sim_image_properties && _flag_threshold_value ){
 
-    cv::Mat src = sim_image_properties->get_full_image( );
-    cv::Mat src_bgr_const;
+    const cv::Mat src = sim_image_properties->get_full_image( );
 
     const cv::Mat kernel = (Mat_<float>(3,3) <<
       1,  1, 1,
@@ -80,49 +80,41 @@ bool IntensityColumns::segmentate_sim_image(){
       1,  1, 1);
 
     cv::Mat imgLaplacian;
-    cv::Mat sharp = src; // copy source image to another temporary one
+    cv::Mat sharp; 
 
-    filter2D(sharp, imgLaplacian, CV_32F, kernel);
+    filter2D(src, imgLaplacian, CV_32F, kernel);
     src.convertTo(sharp, CV_32F);
     cv::Mat imgResult = sharp - imgLaplacian;
-
+    
     // convert back to 8bits gray scale
     imgResult.convertTo(imgResult, CV_8UC1);
-    imgLaplacian.convertTo(imgLaplacian, CV_8UC1);
 
-    cv::Mat bw;
-    src = imgResult; // copy back
-    bw = imgResult;
+    cv::threshold(imgResult, imgResult, threshold_value, 255, CV_THRESH_BINARY | CV_THRESH_OTSU);
 
-    cv::threshold(bw, bw, threshold_value, 255, CV_THRESH_BINARY | CV_THRESH_OTSU);
-
-    // Perform the distance transform algorithm
-    cv::Mat dist;
-    distanceTransform(bw, sim_image_dist_transform, CV_DIST_L2, 3);
+    distanceTransform(imgResult, sim_image_dist_transform, CV_DIST_L2, 3);
 
     // Normalize the distance image for range = {0.0, 1.0}
     // so we can visualize and threshold it
-    cv::normalize(sim_image_dist_transform, dist, 0, 1., NORM_MINMAX);
+    cv::normalize(sim_image_dist_transform, sim_image_dist_transform, 0, 1., NORM_MINMAX);
 
     // Threshold to obtain the peaks
     // This will be the markers for the foreground objects
-    threshold(dist, dist, .4, 1., CV_THRESH_BINARY);
+    threshold(sim_image_dist_transform, sim_image_dist_transform, .4, 1., CV_THRESH_BINARY);
 
     // Dilate a bit the dist image
     cv::Mat kernel1 = Mat::ones(3, 3, CV_8UC1);
-    dilate(dist, dist, kernel1);
+    dilate(sim_image_dist_transform, sim_image_dist_transform, kernel1);
 
     // Create the CV_8U version of the distance image
     // It is needed for findContours()
-    cv::Mat dist_8u;
-    dist.convertTo(dist_8u, CV_8U);
+    sim_image_dist_transform.convertTo(sim_image_dist_transform, CV_8UC1);
 
     // Find total markers
-    findContours(dist_8u, sim_image_intensity_columns, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
+    findContours(sim_image_dist_transform, sim_image_intensity_columns, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
     
     // Draw the foreground markers
     std::cout << "detected " << sim_image_intensity_columns.size() << "potential intensity columns " << std::endl;
-    
+
     for (size_t i = 0; i < sim_image_intensity_columns.size(); i++){
       /** Lets find the centroid of the exp. image boundary poligon **/
       CvMoments moments = cv::moments( sim_image_intensity_columns[i] );
@@ -137,8 +129,9 @@ bool IntensityColumns::segmentate_sim_image(){
     }
     result = true;
     _flag_sim_image_keypoints = true;
-    //-- Step 2.1: Calculate descriptors (feature vectors) for sim image keypoints
-    f2d->compute( dist_8u, sim_image_keypoints, sim_image_descriptor );
+    cv::normalize(sim_image_dist_transform, sim_image_dist_transform, 0, 255, NORM_MINMAX);
+    imwrite("sim_image_dist_transform.png", sim_image_dist_transform);
+
     emit sim_image_intensity_columns_changed();
     emit sim_image_intensity_keypoints_changed();
   }
@@ -154,7 +147,6 @@ bool IntensityColumns::segmentate_exp_image(){
       exp_image_properties->get_flag_roi_image()
       ){
       cv::Mat src = exp_image_properties->get_roi_image( );
-    cv::Mat src_bgr_const;
 
     const cv::Mat kernel = (Mat_<float>(3,3) <<
       1,  1, 1,
@@ -162,49 +154,37 @@ bool IntensityColumns::segmentate_exp_image(){
       1,  1, 1);
 
     cv::Mat imgLaplacian;
-    cv::Mat sharp = src; // copy source image to another temporary one
+    cv::Mat sharp; 
 
-    filter2D(sharp, imgLaplacian, CV_32F, kernel);
+    filter2D(src, imgLaplacian, CV_32F, kernel);
     src.convertTo(sharp, CV_32F);
     cv::Mat imgResult = sharp - imgLaplacian;
-
+    
     // convert back to 8bits gray scale
     imgResult.convertTo(imgResult, CV_8UC1);
-    imgLaplacian.convertTo(imgLaplacian, CV_8UC1);
 
-    cv::Mat bw;
-    src = imgResult; // copy back
-    bw = imgResult;
+    cv::threshold(imgResult, imgResult, threshold_value, 255, CV_THRESH_BINARY | CV_THRESH_OTSU);
 
-    cv::threshold(bw, bw, threshold_value, 255, CV_THRESH_BINARY | CV_THRESH_OTSU);
-
-    // Perform the distance transform algorithm
-    cv::Mat dist;
-    distanceTransform(bw, exp_image_dist_transform, CV_DIST_L2, 3);
+    distanceTransform(imgResult, exp_image_dist_transform, CV_DIST_L2, 3);
 
     // Normalize the distance image for range = {0.0, 1.0}
     // so we can visualize and threshold it
-    cv::normalize(exp_image_dist_transform, dist, 0, 1., NORM_MINMAX);
+    cv::normalize(exp_image_dist_transform, exp_image_dist_transform, 0, 1., NORM_MINMAX);
 
     // Threshold to obtain the peaks
     // This will be the markers for the foreground objects
-    threshold(dist, dist, .4, 1., CV_THRESH_BINARY);
+    threshold(exp_image_dist_transform, exp_image_dist_transform, .4, 1., CV_THRESH_BINARY);
 
     // Dilate a bit the dist image
     cv::Mat kernel1 = Mat::ones(3, 3, CV_8UC1);
-    dilate(dist, dist, kernel1);
-    imwrite("exp_dist.png", dist);
+    dilate(exp_image_dist_transform, exp_image_dist_transform, kernel1);
 
     // Create the CV_8U version of the distance image
     // It is needed for findContours()
-    cv::Mat dist_8u;
-    dist.convertTo(dist_8u, CV_8U);
+    exp_image_dist_transform.convertTo(exp_image_dist_transform, CV_8UC1);
 
     // Find total markers
-    findContours(dist_8u, exp_image_intensity_columns, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
-    imwrite("exp_dist_8u.png", dist_8u);
-    // Draw the foreground markers
-    std::cout << "EXP detected " << exp_image_intensity_columns.size() << "potential intensity columns " << std::endl;
+    findContours(exp_image_dist_transform, exp_image_intensity_columns, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
     
     for (size_t i = 0; i < exp_image_intensity_columns.size(); i++){
       /** Lets find the centroid of the exp. image boundary poligon **/
@@ -220,8 +200,8 @@ bool IntensityColumns::segmentate_exp_image(){
     }
     result = true;
     _flag_exp_image_keypoints = true;
-      //-- Step 2.2: Calculate descriptors (feature vectors) for exp image keypoints
-    f2d->compute( dist_8u, exp_image_keypoints, exp_image_descriptor );
+    cv::normalize(exp_image_dist_transform, exp_image_dist_transform, 0, 255, NORM_MINMAX);
+    imwrite("exp_image_dist_transform.png", exp_image_dist_transform);
     emit exp_image_intensity_columns_changed();
     emit exp_image_intensity_keypoints_changed();
   }
@@ -253,34 +233,35 @@ bool IntensityColumns::feature_match(){
   if( _flag_exp_image_keypoints && 
     _flag_sim_image_keypoints
     ){
-
-      //-- Step 3: Matching descriptor vectors using FLANN matcher
-    BFMatcher::BFMatcher matcher(NORM_L2, true );
-
-  //-- Draw only "good" matches
-  cv::Mat sim_src = sim_image_properties->get_full_image( );
-  cv::Mat exp_src = exp_image_properties->get_roi_image( );
-
-    //FlannBasedMatcher matcher;
-  std::vector< DMatch > matches;
-  matcher.radiusMatch(sim_image_descriptor, exp_image_descriptor, matches, 20.0f );
-
-  //matcher.radiusMatch( sim_image_descriptor, exp_image_descriptor, matches , 20.0f );
-  imwrite("sim_image_descriptor.png", sim_image_descriptor);
-  imwrite("exp_image_descriptor.png", exp_image_descriptor);
-
-  std::vector<DMatch> match1;
-
-  for(int i=0; i<matches.size(); i++)
-  {
-    match1.push_back(matches[i]);
+    double minVal, maxVal, matchVal;
+  cv::Point minLoc, maxLoc, matchLoc;
+          // vars to export
+  double match_factor;
+  try{
+            /// Create the result matrix
+    const int result_cols =  sim_image_dist_transform.cols - exp_image_dist_transform.cols + 1;
+    const int result_rows = sim_image_dist_transform.rows - exp_image_dist_transform.rows + 1;
+    cv::Mat result_mat( result_rows, result_cols, cv::DataType<unsigned char>::type );
+    const int delta_center_cols = exp_image_dist_transform.cols / 2;
+    const int delta_center_rows = exp_image_dist_transform.rows / 2;
+    const cv::Point delta_centerPos ( delta_center_rows, delta_center_cols  );
+            
+            //: normalized correlation, non-normalized correlation and sum-absolute-difference
+    cv::matchTemplate( sim_image_dist_transform , exp_image_dist_transform, result_mat, CV_TM_CCOEFF_NORMED );
+    cv::minMaxLoc( result_mat, &minVal, &maxVal, &minLoc, &maxLoc, cv::Mat() );
+    matchVal = maxVal;
+    exp_image_delta_factor_constant =  maxLoc - delta_centerPos;
+    match_factor = matchVal * 100.0;
+    std::cout << "match_factor " << match_factor << ", deltaPos " << exp_image_delta_factor_constant << " maxLoc " <<  maxLoc << " delta_centerPos " << delta_centerPos << std::endl;
+    emit exp_image_delta_factor_constant_changed();
+  } catch ( const std::exception& e ){
+    if( _flag_logger ){
+      std::stringstream message;
+      message << "A standard exception was caught, while running feature_match: " << e.what();
+      ApplicationLog::severity_level _log_type = ApplicationLog::error;
+      BOOST_LOG_FUNCTION();  logger->logEvent( _log_type , message.str() );
+    }
   }
-
-  Mat img_matches1, img_matches2;
-  drawMatches(sim_src, sim_image_keypoints, exp_src, exp_image_keypoints, match1, img_matches1);
-  imwrite("img_matches1.png", img_matches1);
-
-  result = true;
 }
 else {
   result = false;
@@ -301,6 +282,31 @@ else{
   print_var_state();
 }
 return result;
+}
+
+
+std::vector<cv::Point> IntensityColumns::op_contour_padding ( std::vector<cv::Point> vec, const cv::Point padd ){
+  boost::function<cv::Point(cv::Point)> functor ( boost::bind(&IntensityColumns::op_Point2i_padding, this , _1, padd ) );
+  std::transform( vec.begin(), vec.end(), vec.begin() , functor );
+  return vec;
+}
+
+cv::Point IntensityColumns::op_Point2i_padding ( cv::Point point, const cv::Point padd ){
+  return point + padd;
+}
+
+cv::KeyPoint IntensityColumns::op_KeyPoint_padding ( cv::KeyPoint point, const cv::Point2f padd ){
+  point.pt += padd;
+  return point;
+}
+
+void IntensityColumns::apply_exp_image_delta_factor(){
+  boost::function<std::vector<cv::Point>(std::vector<cv::Point>)> functor ( boost::bind(&IntensityColumns::op_contour_padding, this , _1, exp_image_delta_factor_constant ) );
+  std::transform( exp_image_intensity_columns.begin(), exp_image_intensity_columns.end(), exp_image_intensity_columns.begin() , functor );
+  boost::function<cv::KeyPoint(cv::KeyPoint)> functorKeypoint ( boost::bind(&IntensityColumns::op_KeyPoint_padding, this , _1, cv::Point2f( (float) exp_image_delta_factor_constant.x, (float) exp_image_delta_factor_constant.y  ) ) );
+   std::transform( exp_image_keypoints.begin(), exp_image_keypoints.end(), exp_image_keypoints.begin() , functorKeypoint );
+  emit exp_image_intensity_columns_changed();
+  emit exp_image_intensity_keypoints_changed();
 }
 
 bool IntensityColumns::read_simulated_image_from_dat_file(){

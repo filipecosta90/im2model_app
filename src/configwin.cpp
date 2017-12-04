@@ -551,9 +551,7 @@ void MainWindow::update_roi_full_experimental_image_frame(){
 void MainWindow::update_super_cell_experimental_image_intensity_columns(){
   std::cout << " update_super_cell_experimental_image_intensity_columns " << std::endl;
   const int margin_point_px = _core_td_map->get_super_cell_sim_image_properties_ignore_edge_pixels();
-    std::cout << " margin_point_px " << margin_point_px << std::endl; 
-    const cv::Point2i top_right_corner_margin ( margin_point_px , margin_point_px );
-    
+  const cv::Point2i top_right_corner_margin ( margin_point_px , margin_point_px );
   std::vector<cv::KeyPoint> exp_image_keypoints = _core_td_map->get_super_cell_exp_image_properties_keypoints();
   std::vector<cv::Point2i> exp_image_renderPoints;
 
