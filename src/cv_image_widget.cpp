@@ -201,7 +201,7 @@ void CVImageWidget::addShapePolygon( std::vector<cv::Point2i> polygon , cv::Poin
   renderAreas_penColor.push_back( QColor(penColor[0], penColor[1], penColor[2]) );
 }
 
-void CVImageWidget::addRenderPoints( std::vector<cv::Point2i> points , int penWidth, cv::Vec3b penColor, QString description_key  , cv::Point2i margin_point ){
+void CVImageWidget::addRenderPoints( std::vector<cv::Point2i> points , int penWidth, cv::Vec3b penColor, QString description_key  , cv::Point2i margin_point, int alpha_channel_value ){
   std::map< QString,std::vector<QPoint> >::iterator it = renderPoints_map.find( description_key );
   if ( it != renderPoints_map.end() ){
     renderPoints_map.erase (it);
@@ -210,6 +210,7 @@ void CVImageWidget::addRenderPoints( std::vector<cv::Point2i> points , int penWi
   std::vector<QColor>renderPoints_penColor = std::vector<QColor>();
   std::vector<int> renderPoints_penWidth = std::vector<int>();
   std::vector<QPoint> renderPoints_margin_points = std::vector<QPoint>();
+  std::vector<int> renderPoints_alpha_channel = std::vector<int>();
 
   for( auto pt : points ) { 
     QColor point_penColor(penColor[0], penColor[1], penColor[2] );
@@ -217,11 +218,14 @@ void CVImageWidget::addRenderPoints( std::vector<cv::Point2i> points , int penWi
     renderPoints_penWidth.push_back( penWidth );
     renderPoints.push_back( QPoint (pt.x, pt.y) );
     renderPoints_margin_points.push_back( QPoint( margin_point.x, margin_point.y ) );
+    renderPoints_alpha_channel.push_back( alpha_channel_value );
+
   }
   renderPoints_map.insert ( std::pair< QString,std::vector<QPoint> >( description_key , renderPoints ) );
   renderPoints_penColor_map.insert ( std::pair< QString,std::vector<QColor> >( description_key , renderPoints_penColor ) );
   renderPoints_penWidth_map.insert ( std::pair< QString,std::vector<int> >( description_key , renderPoints_penWidth ) );
   renderPoints_margin_points_map.insert ( std::pair< QString,std::vector<QPoint> >( description_key , renderPoints_margin_points ) );
+  renderPoints_alpha_channel_map.insert ( std::pair< QString,std::vector<int> >( description_key , renderPoints_alpha_channel ) );
 }
 
 
@@ -235,11 +239,10 @@ void CVImageWidget::cleanRenderAreas(){
 int CVImageWidget::addImageLayer( const cv::Mat& image ){
   alpha_channels.push_back( 255 );
   return -1;
-}
-
+} 
 
 int CVImageWidget::get_image_layer_alpha_channel( int layer_number ){
-  int result = -1;
+  int result = 255;
   if( layer_number >= 0 && layer_number < alpha_channels.size() ){
     result = alpha_channels[layer_number];
   }
@@ -255,6 +258,28 @@ bool CVImageWidget::set_image_layer_alpha_channel( int layer_number, int value )
   return result;
 }
 
+int CVImageWidget::get_renderPoints_alpha_channels_map( QString description_key ) {
+  int result = 255;
+  std::map< QString,std::vector<int> >::iterator it_alpha = renderPoints_alpha_channel_map.find( description_key );
+    if ( it_alpha != renderPoints_alpha_channel_map.end() ){
+      std::vector<int> vec = it_alpha->second;
+      result = vec[0];
+    }
+    return result;
+}
+
+bool CVImageWidget::set_renderPoints_alpha_channels_map( QString description_key, int value ) {
+  bool result = false;
+  std::map< QString,std::vector<int> >::iterator it_alpha = renderPoints_alpha_channel_map.find( description_key );
+    if ( it_alpha != renderPoints_alpha_channel_map.end() ){
+      for( std::vector<int>::iterator it = it_alpha->second.begin(); it != it_alpha->second.end(); ++it ){
+        *it = value;
+      }
+      std::cout << "set_renderPoints_alpha_channels_map" << std::endl;
+      result = true;
+    }
+    return result;
+}
 
 void CVImageWidget::paintEvent(QPaintEvent* event) {
   // Display the image
@@ -291,16 +316,21 @@ void CVImageWidget::paintEvent(QPaintEvent* event) {
 
   // Draw selection rectangle
   if( _started_rectangleSelection ){
+    painter.save();
     painter.setPen(QPen(QBrush(QColor(0,0,0,180)),1,Qt::DashLine));
     painter.setBrush(QBrush(QColor(255,255,255,120)));
     painter.drawRect(selectionRect);
+    painter.restore();
+
   }
 
   // Draw statistical selection rectangle
   if( _started_rectangleSelectionStatistical ){
+    painter.save();
     painter.setPen(QPen(QBrush(QColor(0,0,0,180)),1,Qt::DashLine));
     painter.setBrush(QBrush(QColor(255,255,255,120)));
     painter.drawRect(selectionStatisticalRect);
+    painter.restore();
   }
 
   painter.save();
@@ -312,27 +342,34 @@ void CVImageWidget::paintEvent(QPaintEvent* event) {
     std::map< QString,std::vector<QColor> >::iterator it_colors = renderPoints_penColor_map.find( key );
     std::map< QString,std::vector<int> >::iterator it_width = renderPoints_penWidth_map.find( key );
     std::map< QString,std::vector<QPoint> >::iterator it_margin = renderPoints_margin_points_map.find( key );
-    if (  it_colors != renderPoints_penColor_map.end() &&  it_width != renderPoints_penWidth_map.end() && it_margin != renderPoints_margin_points_map.end() ){
+    std::map< QString,std::vector<int> >::iterator it_alpha = renderPoints_alpha_channel_map.find( key );
+    if (  it_colors != renderPoints_penColor_map.end() &&  
+      it_width != renderPoints_penWidth_map.end() &&
+      it_margin != renderPoints_margin_points_map.end() && 
+      it_alpha != renderPoints_alpha_channel_map.end() 
+      ){
       const std::vector<QPoint> renderPoints = it->second;
-      const std::vector<QColor>renderPoints_penColor = it_colors->second;
-      const std::vector<int> renderPoints_penWidth = it_width->second;
-      const std::vector<QPoint> renderPoints_margin_points = it_margin->second;
+    const std::vector<QColor>renderPoints_penColor = it_colors->second;
+    const std::vector<int> renderPoints_penWidth = it_width->second;
+    const std::vector<QPoint> renderPoints_margin_points = it_margin->second;
+    const std::vector<int> render_points_alpha_channel = it_alpha->second;
 
-      for( int point_n = 0; point_n < renderPoints.size(); point_n++ ){
-        QPoint point_w_margin = renderPoints_margin_points[point_n] + renderPoints[point_n];
-        QColor point_penColor = renderPoints_penColor[point_n];
-        int point_penWidth = renderPoints_penWidth[point_n];
-
-        painter.setPen(QPen(QBrush( point_penColor ),point_penWidth,Qt::DashLine));
-        painter.setBrush(QBrush( point_penColor ));
-        painter.drawPoint( point_w_margin );
-      }
+    for( int point_n = 0; point_n < renderPoints.size(); point_n++ ){
+      QPoint point_w_margin = renderPoints_margin_points[point_n] + renderPoints[point_n];
+      QColor point_penColor = renderPoints_penColor[point_n];
+      int point_penWidth = renderPoints_penWidth[point_n];
+      double dopacity = render_points_alpha_channel[point_n] / 255.0f;
+      painter.setOpacity( dopacity ); 
+      painter.setPen(QPen(QBrush( point_penColor ),point_penWidth,Qt::DashLine));
+      painter.setBrush(QBrush( point_penColor ));
+      painter.drawPoint( point_w_margin );
     }
   }
+}
 
-  painter.restore();
+painter.restore();
 
-  painter.end();
+painter.end();
 }
 
 void CVImageWidget::startRectangleSelection(){

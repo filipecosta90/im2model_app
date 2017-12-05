@@ -48,13 +48,15 @@ public:
     void updateImage();
     int get_image_layer_alpha_channel( int layer_number );
     bool set_image_layer_alpha_channel( int layer_number, int value );
+    bool set_renderPoints_alpha_channels_map( QString key_string, int value );
+int get_renderPoints_alpha_channels_map( QString description_key );
 
     /*shape setters*/
     void addRect( cv::Rect _area_rect, int penWidth , QString description );
     void addRect( cv::Rect _area_rect, int penWidth, cv::Vec3b penColor , QString description );
     void addShapePolygon( std::vector<cv::Point2i> polygon , cv::Point2i top_left,  int penWidth, QString description );
     void addShapePolygon( std::vector<cv::Point2i> polygon , cv::Point2i top_left,  int penWidth, cv::Vec3b penColor, QString description );
-    void addRenderPoints( std::vector<cv::Point2i> points , int penWidth, cv::Vec3b penColor, QString description, cv::Point2i margin_point = cv::Point2i(0,0) );
+    void addRenderPoints( std::vector<cv::Point2i> points , int penWidth, cv::Vec3b penColor, QString key_string, cv::Point2i margin_point = cv::Point2i(0,0), int alpha_channel_value = 255 );
     void cleanRenderAreas();
 
     signals:
@@ -84,6 +86,7 @@ private:
     std::map< QString,std::vector<QColor> > renderPoints_penColor_map;
     std::map< QString,std::vector<int> > renderPoints_penWidth_map;
     std::map< QString,std::vector<QPoint> > renderPoints_margin_points_map;
+    std::map< QString,std::vector<int> > renderPoints_alpha_channel_map;
 
     std::vector<int> alpha_channels;
     std::vector<QImage> images;

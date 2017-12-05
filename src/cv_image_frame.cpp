@@ -127,6 +127,21 @@ bool CvImageFrameWidget::set_image_layer_alpha_channel( int layer_number, int va
   return result;
 }
 
+int CvImageFrameWidget::get_renderPoints_alpha_channels_map( QString key ){
+  bool result = false;
+  if( image_widget != nullptr ){
+    result = image_widget->get_renderPoints_alpha_channels_map( key );
+  }
+  return result;
+}
+bool CvImageFrameWidget::set_renderPoints_alpha_channels_map( QString key, int value ){
+  bool result = false;
+  if( image_widget != nullptr ){
+    result = image_widget->set_renderPoints_alpha_channels_map( key, value );
+  }
+  return result;
+}
+
 void CvImageFrameWidget::addShapeRect( cv::Rect _rectangle, int pen_width, QString shape_description ){
   image_widget->addRect( _rectangle, pen_width , shape_description);
   image_widget->update();

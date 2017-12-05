@@ -17,6 +17,7 @@ class CvImageFrameWidget : public QWidget
   Q_OBJECT
 public:
     explicit CvImageFrameWidget(QWidget *parent = 0);
+    CVImageWidget *image_widget;
 
     public slots:
 
@@ -38,13 +39,14 @@ public:
     void addRenderPoints( std::vector<cv::Point2i> points , int penWidth, cv::Vec3b penColor, QString description , cv::Point2i margin_point = cv::Point2i(0,0) );
     int get_image_layer_alpha_channel( int layer_number );
     bool set_image_layer_alpha_channel( int layer_number, int value );
+    int get_renderPoints_alpha_channels_map( QString key );
+    bool set_renderPoints_alpha_channels_map( QString key, int value );
 
     signals:
     void selectionRectangleChanged(QRect);
     void selectionStatisticalRectangleChanged(QRect);
 
 protected:
-    CVImageWidget *image_widget;
     QWidget *parentWidget;
     QScrollArea* scrollArea;
     QVBoxLayout *contentsLayout;

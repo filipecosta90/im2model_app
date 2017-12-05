@@ -31,61 +31,61 @@ void TreeItemFileDelegate::paint(QPainter * painter, const QStyleOptionViewItem 
   switch( item->get_item_delegate_type() )
   {
     case TreeItem::_delegate_DROP:
-      {
-        if( item->get_dropdown_column() == index.column() ){
-          const QVector<QVariant> drop_data = item->get_dropdown_data();
-          const QVector<QVariant> drop_enum = item->get_dropdown_enum();
-          QVariant value = index.model()->data(index, Qt::EditRole);
-          QString _option_text;
-          for( int enum_pos = 0; enum_pos < drop_enum.size(); enum_pos++ ){
-            if( drop_enum[enum_pos] == value ){
-              _option_text = drop_data[enum_pos].toString();
-            }
+    {
+      if( item->get_dropdown_column() == index.column() ){
+        const QVector<QVariant> drop_data = item->get_dropdown_data();
+        const QVector<QVariant> drop_enum = item->get_dropdown_enum();
+        QVariant value = index.model()->data(index, Qt::EditRole);
+        QString _option_text;
+        for( int enum_pos = 0; enum_pos < drop_enum.size(); enum_pos++ ){
+          if( drop_enum[enum_pos] == value ){
+            _option_text = drop_data[enum_pos].toString();
           }
-          QStyleOptionViewItem itemOption(option);
-          initStyleOption(&itemOption, index);
+        }
+        QStyleOptionViewItem itemOption(option);
+        initStyleOption(&itemOption, index);
           // override text
-          itemOption.text = _option_text;
-          QApplication::style()->drawControl(QStyle::CE_ItemViewItem, &itemOption, painter);
-        }
-        else{
-          QStyledItemDelegate::paint( painter, option,  index);
-        }
-        break;
+        itemOption.text = _option_text;
+        QApplication::style()->drawControl(QStyle::CE_ItemViewItem, &itemOption, painter);
       }
-    case TreeItem::_delegate_SLIDER_INT:
-      {
+      else{
         QStyledItemDelegate::paint( painter, option,  index);
-        break;
       }
+      break;
+    }
+    case TreeItem::_delegate_SLIDER_INT:
+    {
+      QStyledItemDelegate::paint( painter, option,  index);
+      break;
+    }
     case TreeItem::_delegate_ACTION_CHECK:
     case TreeItem::_delegate_TEXT_DOCUMENT:
-      {
-        QStyleOptionViewItemV4 options = option;
-        initStyleOption(&options, index);
-        painter->save();
-        QTextDocument doc;
-        doc.setHtml(options.text);
-        QSizeF size(200, 200);
-        doc.setPageSize(size);
+    {
+      QStyleOptionViewItemV4 options = option;
+      initStyleOption(&options, index);
+      painter->save();
+      QTextDocument doc;
+      doc.setHtml(options.text);
+      QSizeF size(200, 200);
+      doc.setPageSize(size);
         // options.text = "";
-        options.widget->style()->drawControl(QStyle::CE_ItemViewItem, &options, painter);
+      options.widget->style()->drawControl(QStyle::CE_ItemViewItem, &options, painter);
 
-        painter->translate(options.rect.left(), options.rect.top());
-        QRect clip(0, 0, options.rect.width(), options.rect.height());
-        doc.drawContents(painter, clip);
-        painter->restore();
-        break;
-      }
+      painter->translate(options.rect.left(), options.rect.top());
+      QRect clip(0, 0, options.rect.width(), options.rect.height());
+      doc.drawContents(painter, clip);
+      painter->restore();
+      break;
+    }
     case TreeItem::_delegate_TEXT_BROWSER:
     case TreeItem::_delegate_TEXT_ACTION:
     case TreeItem::_delegate_FILE:
     case TreeItem::_delegate_DIR:
     case TreeItem::_delegate_TEXT:
-      {
-        QStyledItemDelegate::paint( painter, option,  index);
-        break;
-      }
+    {
+      QStyledItemDelegate::paint( painter, option,  index);
+      break;
+    }
   }
 }
 
@@ -95,181 +95,182 @@ QWidget *TreeItemFileDelegate::createEditor( QWidget *parent, const QStyleOption
   switch( item->get_item_delegate_type() )
   {
     case TreeItem::_delegate_SLIDER_INT:
-      {
-        if( item->get_slider_column() == index.column() ){
-          int _slider_value = index.model()->data(index, Qt::EditRole).toInt();
-          int _range_min = item->get_slider_int_range_min();
-          int _range_max = item->get_slider_int_range_max();
+    {
+      if( item->get_slider_column() == index.column() ){
+        int _slider_value = index.model()->data(index, Qt::EditRole).toInt();
+        int _range_min = item->get_slider_int_range_min();
+        int _range_max = item->get_slider_int_range_max();
 
-          QSlider *slider = new QSlider(Qt::Horizontal, parent);
-          slider->setRange(_range_min, _range_max);
-          slider->setValue(_slider_value);
-          slider->setTickPosition(QSlider::TicksRight);
-          connect(slider, SIGNAL(valueChanged(int)), this, SLOT(emitCommitData()));
-          return slider;
-        }
-        else{
-          editor = QStyledItemDelegate::createEditor(parent,option,index);
-        }
-        break;
+        QSlider *slider = new QSlider(Qt::Horizontal, parent);
+        slider->setRange(_range_min, _range_max);
+        slider->setValue(_slider_value);
+        slider->setTickPosition(QSlider::TicksRight);
+        connect(slider, SIGNAL(sliderMoved(int)), this, SLOT(emitCommitData()));
+        connect(slider, SIGNAL(valueChanged(int)), this, SLOT(emitCommitData()));
+        return slider;
       }
+      else{
+        editor = QStyledItemDelegate::createEditor(parent,option,index);
+      }
+      break;
+    }
     case TreeItem::_delegate_FILE :
     case TreeItem::_delegate_DIR :
-      {
-        editor = new QWidget(parent);
-        QVariant::Type t = static_cast<QVariant::Type>(index.data(Qt::EditRole).userType());
-        QWidget* text_editor = QItemEditorFactory().createEditor(t,parent);
-        QHBoxLayout* editor_layout = new QHBoxLayout( editor );
-        editor_layout->setMargin(0);
-        editor_layout->setContentsMargins(QMargins(0,0,0,0));
-        editor_layout->setSpacing(0);
-        editor_layout->setAlignment(Qt::AlignRight);
-        QString _button_text = "...";
-        FilePushButton *button = new FilePushButton( _button_text, editor );
+    {
+      editor = new QWidget(parent);
+      QVariant::Type t = static_cast<QVariant::Type>(index.data(Qt::EditRole).userType());
+      QWidget* text_editor = QItemEditorFactory().createEditor(t,parent);
+      QHBoxLayout* editor_layout = new QHBoxLayout( editor );
+      editor_layout->setMargin(0);
+      editor_layout->setContentsMargins(QMargins(0,0,0,0));
+      editor_layout->setSpacing(0);
+      editor_layout->setAlignment(Qt::AlignRight);
+      QString _button_text = "...";
+      FilePushButton *button = new FilePushButton( _button_text, editor );
 
-        if( item->get_item_delegate_type() ==  TreeItem::_delegate_FILE ){
-          connect(button, SIGNAL(onClick(QWidget*)), this, SLOT(get_filename_slot(QWidget*)));
-        }
-        else{
-          connect(button, SIGNAL(onClick(QWidget*)), this, SLOT(get_dirname_slot(QWidget*)));
-        }
-        QSizePolicy spLeft(QSizePolicy::Expanding, QSizePolicy::Expanding);
-        spLeft.setHorizontalStretch(3);
-        text_editor->setSizePolicy(spLeft);
-        editor_layout->addWidget(text_editor);
-        QSizePolicy spRight(QSizePolicy::Preferred, QSizePolicy::Preferred);
-        spRight.setHorizontalStretch(1);
-        button->setFixedWidth( button->fontMetrics().width( " ... " ) );
-        editor_layout->addWidget(button);
-        break;
+      if( item->get_item_delegate_type() ==  TreeItem::_delegate_FILE ){
+        connect(button, SIGNAL(onClick(QWidget*)), this, SLOT(get_filename_slot(QWidget*)));
       }
+      else{
+        connect(button, SIGNAL(onClick(QWidget*)), this, SLOT(get_dirname_slot(QWidget*)));
+      }
+      QSizePolicy spLeft(QSizePolicy::Expanding, QSizePolicy::Expanding);
+      spLeft.setHorizontalStretch(3);
+      text_editor->setSizePolicy(spLeft);
+      editor_layout->addWidget(text_editor);
+      QSizePolicy spRight(QSizePolicy::Preferred, QSizePolicy::Preferred);
+      spRight.setHorizontalStretch(1);
+      button->setFixedWidth( button->fontMetrics().width( " ... " ) );
+      editor_layout->addWidget(button);
+      break;
+    }
     case TreeItem::_delegate_DROP:
-      {
-        if( item->get_dropdown_column() == index.column() ){
-          editor = new QWidget(parent);
-          int value = index.model()->data(index, Qt::EditRole).toInt();
-          QHBoxLayout *layout = new QHBoxLayout( editor );
-          layout->setMargin(0);
-          layout->setContentsMargins(0, 0, 0, 0);
-          QSizePolicy sizePol(QSizePolicy::Expanding,QSizePolicy::Expanding);
+    {
+      if( item->get_dropdown_column() == index.column() ){
+        editor = new QWidget(parent);
+        int value = index.model()->data(index, Qt::EditRole).toInt();
+        QHBoxLayout *layout = new QHBoxLayout( editor );
+        layout->setMargin(0);
+        layout->setContentsMargins(0, 0, 0, 0);
+        QSizePolicy sizePol(QSizePolicy::Expanding,QSizePolicy::Expanding);
 
-          QComboBox* combo = new QComboBox(editor);
-          combo->setContentsMargins(0,0,0,0);
+        QComboBox* combo = new QComboBox(editor);
+        combo->setContentsMargins(0,0,0,0);
 
           // combo commands
-          QStringList commands;
-          const QVector<QVariant> drop_data = item->get_dropdown_data();
-          const QVector<QVariant> drop_enum = item->get_dropdown_enum();
+        QStringList commands;
+        const QVector<QVariant> drop_data = item->get_dropdown_data();
+        const QVector<QVariant> drop_enum = item->get_dropdown_enum();
 
-          foreach (const QVariant var_command, drop_data) {
-            commands << var_command.toString();
-          }
+        foreach (const QVariant var_command, drop_data) {
+          commands << var_command.toString();
+        }
 
-          for( int enum_pos = 0; enum_pos < drop_enum.size(); enum_pos++ ){
-            if( drop_enum[enum_pos] == value ){
-              combo->setCurrentIndex(enum_pos);
-            }
+        for( int enum_pos = 0; enum_pos < drop_enum.size(); enum_pos++ ){
+          if( drop_enum[enum_pos] == value ){
+            combo->setCurrentIndex(enum_pos);
           }
+        }
           // fill combo
-          combo->addItems(commands);
-          layout->addWidget(combo);
-          editor->setLayout(layout);
-          editor->setSizePolicy(sizePol);
-          editor->setFocusProxy( combo );
-        }
-        else{
-          editor = QStyledItemDelegate::createEditor(parent,option,index);
-        }
-        break;
+        combo->addItems(commands);
+        layout->addWidget(combo);
+        editor->setLayout(layout);
+        editor->setSizePolicy(sizePol);
+        editor->setFocusProxy( combo );
       }
+      else{
+        editor = QStyledItemDelegate::createEditor(parent,option,index);
+      }
+      break;
+    }
     case TreeItem::_delegate_TEXT_ACTION:
-      {
-        editor = new QWidget(parent);
-        QVariant::Type t = static_cast<QVariant::Type>(index.data(Qt::EditRole).userType());
-        QWidget* text_editor = QItemEditorFactory().createEditor(t,parent);
-        QHBoxLayout* editor_layout = new QHBoxLayout( editor );
-        connect(text_editor, SIGNAL(textChanged(const QString&)), this, SLOT(emitCommitData( )));
-        editor_layout->setMargin(0);
-        editor_layout->setContentsMargins(QMargins(0,0,0,0));
-        editor_layout->setSpacing(0);
-        editor_layout->setAlignment(Qt::AlignRight);
+    {
+      editor = new QWidget(parent);
+      QVariant::Type t = static_cast<QVariant::Type>(index.data(Qt::EditRole).userType());
+      QWidget* text_editor = QItemEditorFactory().createEditor(t,parent);
+      QHBoxLayout* editor_layout = new QHBoxLayout( editor );
+      connect(text_editor, SIGNAL(textChanged(const QString&)), this, SLOT(emitCommitData( )));
+      editor_layout->setMargin(0);
+      editor_layout->setContentsMargins(QMargins(0,0,0,0));
+      editor_layout->setSpacing(0);
+      editor_layout->setAlignment(Qt::AlignRight);
 
-        QMenu* alignMenu = new QMenu();
-        CustomToolButton* alignToolButton = new CustomToolButton();
-        alignToolButton->setMenu(alignMenu);
+      QMenu* alignMenu = new QMenu();
+      CustomToolButton* alignToolButton = new CustomToolButton();
+      alignToolButton->setMenu(alignMenu);
 
         /* get actions */
-        if( item->_is_toolbar_defined() ){
-          QVector<QVariant> _actions_description = item->get_toolbar_actions_description();
-          std::vector<boost::function<bool()>> _actions = item->get_toolbar_actions();
-          std::vector<QAction*> _actions_vec;
-          assert( _actions_description.size() == _actions.size() );
-          for( int _n_action = 0; _n_action < _actions.size(); _n_action++ ){
-            QString _act_description = _actions_description.at(_n_action).toString();
-            QAction* action = new QAction( _act_description);
+      if( item->_is_toolbar_defined() ){
+        QVector<QVariant> _actions_description = item->get_toolbar_actions_description();
+        std::vector<boost::function<bool()>> _actions = item->get_toolbar_actions();
+        std::vector<QAction*> _actions_vec;
+        assert( _actions_description.size() == _actions.size() );
+        for( int _n_action = 0; _n_action < _actions.size(); _n_action++ ){
+          QString _act_description = _actions_description.at(_n_action).toString();
+          QAction* action = new QAction( _act_description);
             //connect(action, &QAction::triggered, this, commit_and_call( editor, _actions.at(_n_action)) );
-            connect(action, &QAction::triggered, item,  _actions.at( _n_action ) );
+          connect(action, &QAction::triggered, item,  _actions.at( _n_action ) );
             // more work here
             //   connect(action, &QAction::triggered, this, SLOT(commit_and_call(  editor, _actions.at(_n_action))  ) );
-            _actions_vec.push_back(action);
-            alignMenu->addAction(action);
-          }
-          if( _actions_vec.size() > 0 ){
-            alignToolButton->setDefaultAction(_actions_vec.at(0));
-          }
+          _actions_vec.push_back(action);
+          alignMenu->addAction(action);
         }
-
-
-        QSizePolicy spLeft(QSizePolicy::Expanding, QSizePolicy::Expanding);
-        spLeft.setHorizontalStretch(3);
-        text_editor->setSizePolicy(spLeft);
-        editor_layout->addWidget(text_editor);
-
-        QSizePolicy spRight(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
-        spRight.setHorizontalStretch(1);
-        alignToolButton->setSizePolicy(spRight);
-        editor_layout->addWidget(alignToolButton);
-
-        break;
+        if( _actions_vec.size() > 0 ){
+          alignToolButton->setDefaultAction(_actions_vec.at(0));
+        }
       }
+
+
+      QSizePolicy spLeft(QSizePolicy::Expanding, QSizePolicy::Expanding);
+      spLeft.setHorizontalStretch(3);
+      text_editor->setSizePolicy(spLeft);
+      editor_layout->addWidget(text_editor);
+
+      QSizePolicy spRight(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
+      spRight.setHorizontalStretch(1);
+      alignToolButton->setSizePolicy(spRight);
+      editor_layout->addWidget(alignToolButton);
+
+      break;
+    }
     case TreeItem::_delegate_TEXT_BROWSER:
-      {
-        editor = new QWidget(parent);
-        QHBoxLayout* editor_layout = new QHBoxLayout( parent );
-        editor_layout->setMargin(0);
-        editor_layout->setContentsMargins(QMargins(0,0,0,0));
-        editor_layout->setSpacing(0);
-        editor_layout->setAlignment(Qt::AlignRight);
-        QTextBrowser* browser = new QTextBrowser( editor );
-        QString value  = index.model()->data(index, Qt::EditRole).toString();
-        browser->setText( value );
-        browser->moveCursor (QTextCursor::End);
-        editor_layout->addWidget(browser);
-        editor->setLayout( editor_layout );
-        break;
-      }
+    {
+      editor = new QWidget(parent);
+      QHBoxLayout* editor_layout = new QHBoxLayout( parent );
+      editor_layout->setMargin(0);
+      editor_layout->setContentsMargins(QMargins(0,0,0,0));
+      editor_layout->setSpacing(0);
+      editor_layout->setAlignment(Qt::AlignRight);
+      QTextBrowser* browser = new QTextBrowser( editor );
+      QString value  = index.model()->data(index, Qt::EditRole).toString();
+      browser->setText( value );
+      browser->moveCursor (QTextCursor::End);
+      editor_layout->addWidget(browser);
+      editor->setLayout( editor_layout );
+      break;
+    }
     case TreeItem::_delegate_ACTION_CHECK:
-      {
-        editor = QStyledItemDelegate::createEditor(parent,option,index);
-        break;
-      }
+    {
+      editor = QStyledItemDelegate::createEditor(parent,option,index);
+      break;
+    }
     case TreeItem::_delegate_TEXT:
-      {
-        QLineEditToolTip* text_editor = new QLineEditToolTip( parent );
-        if( text_editor ){
+    {
+      QLineEditToolTip* text_editor = new QLineEditToolTip( parent );
+      if( text_editor ){
         if( item->get_flag_validatable_int( index.column() ) ){
-            QIntValidatorReporter * int_validator = new QIntValidatorReporter;
-            QObject::connect(int_validator,  SIGNAL(setError(const QString&) ),text_editor, SLOT(setToolTipText(const QString&)) );
-            if( item->get_flag_validatable_int_top( index.column() ) ){
-              const int top_limit = item->get_validator_value_int_top( index.column() );
-              int_validator->setTop( top_limit );
-            }
-            if( item->get_flag_validatable_int_bottom( index.column() ) ){
-              const int bottom_limit = item->get_validator_value_int_bottom( index.column() );
-              int_validator->setBottom( bottom_limit );
-            }
-            text_editor->setValidator( int_validator );
+          QIntValidatorReporter * int_validator = new QIntValidatorReporter;
+          QObject::connect(int_validator,  SIGNAL(setError(const QString&) ),text_editor, SLOT(setToolTipText(const QString&)) );
+          if( item->get_flag_validatable_int_top( index.column() ) ){
+            const int top_limit = item->get_validator_value_int_top( index.column() );
+            int_validator->setTop( top_limit );
           }
+          if( item->get_flag_validatable_int_bottom( index.column() ) ){
+            const int bottom_limit = item->get_validator_value_int_bottom( index.column() );
+            int_validator->setBottom( bottom_limit );
+          }
+          text_editor->setValidator( int_validator );
+        }
         else if( item->get_flag_validatable_double( index.column() ) ){
           QDoubleValidatorReporter * double_validator = new QDoubleValidatorReporter;
           QObject::connect(double_validator,  SIGNAL(setError(const QString&) ),text_editor, SLOT(setToolTipText(const QString&)) );
@@ -287,15 +288,15 @@ QWidget *TreeItemFileDelegate::createEditor( QWidget *parent, const QStyleOption
           text_editor->setValidator( double_validator );
 
         }
-        }
-        return text_editor;
-        break;
       }
+      return text_editor;
+      break;
+    }
     default:
-      {
-        editor = QStyledItemDelegate::createEditor(parent,option,index);
-        break;
-      }
+    {
+      editor = QStyledItemDelegate::createEditor(parent,option,index);
+      break;
+    }
   }
   return editor;
 }
@@ -305,64 +306,64 @@ void TreeItemFileDelegate::setEditorData(QWidget *editor, const QModelIndex &ind
   switch(item->get_item_delegate_type())
   {
     case TreeItem::_delegate_SLIDER_INT:
-      {
-        if( item->get_slider_column() == index.column() ){
+    {
+      if( item->get_slider_column() == index.column() ){
 
-          int _slider_value = index.model()->data(index, Qt::EditRole).toInt();
+        int _slider_value = index.model()->data(index, Qt::EditRole).toInt();
 
-          QSlider *slider = static_cast<QSlider*>(editor);
-          slider->setValue(_slider_value);
-        }
-        else{
-          QStyledItemDelegate::setEditorData(editor,index);
-        }
-        break;
+        QSlider *slider = static_cast<QSlider*>(editor);
+        slider->setValue(_slider_value);
       }
+      else{
+        QStyledItemDelegate::setEditorData(editor,index);
+      }
+      break;
+    }
     case TreeItem::_delegate_DROP:
-      {
-        if( item->get_dropdown_column() == index.column() ){
-          QComboBox* combo = editor->findChild<QComboBox*>();
-          QVariant value = index.model()->data(index, Qt::EditRole);
-          const QVector<QVariant> drop_data = item->get_dropdown_data();
-          QString drop_string;
-          const QVector<QVariant> drop_enum = item->get_dropdown_enum();
-          for( int enum_pos = 0; enum_pos < drop_enum.size(); enum_pos++ ){
-            if( drop_enum[enum_pos] == value ){
-              combo->setCurrentIndex(enum_pos);
-            }
+    {
+      if( item->get_dropdown_column() == index.column() ){
+        QComboBox* combo = editor->findChild<QComboBox*>();
+        QVariant value = index.model()->data(index, Qt::EditRole);
+        const QVector<QVariant> drop_data = item->get_dropdown_data();
+        QString drop_string;
+        const QVector<QVariant> drop_enum = item->get_dropdown_enum();
+        for( int enum_pos = 0; enum_pos < drop_enum.size(); enum_pos++ ){
+          if( drop_enum[enum_pos] == value ){
+            combo->setCurrentIndex(enum_pos);
           }
         }
-        break;
       }
+      break;
+    }
     case TreeItem::_delegate_FILE  :
     case TreeItem::_delegate_DIR  :
-      {
-        QLineEdit* line = editor->findChild<QLineEdit*>();
-        QString value = index.model()->data(index, Qt::EditRole).toString();
-        line->setText(value);
-        QStyledItemDelegate::setEditorData(editor,index);
-        break;
-      }
+    {
+      QLineEdit* line = editor->findChild<QLineEdit*>();
+      QString value = index.model()->data(index, Qt::EditRole).toString();
+      line->setText(value);
+      QStyledItemDelegate::setEditorData(editor,index);
+      break;
+    }
     case TreeItem::_delegate_TEXT_BROWSER:
-      {
-        QTextBrowser* browser = editor->findChild<QTextBrowser*>();
-        QString value  = index.model()->data(index, Qt::EditRole).toString();
-        browser->setText( value );
-        browser->moveCursor (QTextCursor::End);
-        break;
-      }
+    {
+      QTextBrowser* browser = editor->findChild<QTextBrowser*>();
+      QString value  = index.model()->data(index, Qt::EditRole).toString();
+      browser->setText( value );
+      browser->moveCursor (QTextCursor::End);
+      break;
+    }
     case TreeItem::_delegate_TEXT_ACTION:
-      {
-        QLineEdit* line = editor->findChild<QLineEdit*>();
-        QString value =  index.model()->data(index, Qt::EditRole).toString();
-        line->setText(  value );
-        break;
-      }
+    {
+      QLineEdit* line = editor->findChild<QLineEdit*>();
+      QString value =  index.model()->data(index, Qt::EditRole).toString();
+      line->setText(  value );
+      break;
+    }
     default  :
-      {
-        QStyledItemDelegate::setEditorData(editor,index);
-        break;
-      }
+    {
+      QStyledItemDelegate::setEditorData(editor,index);
+      break;
+    }
   }
 }
 
@@ -376,63 +377,63 @@ void TreeItemFileDelegate::setModelData(QWidget *editor, QAbstractItemModel *mod
   switch(item->get_item_delegate_type())
   {
     case TreeItem::_delegate_SLIDER_INT:
-      {
-        if( item->get_slider_column() == index.column() ){
-          QSlider *slider = static_cast<QSlider*>(editor);
-          int int_value = slider->value();
-          const QVariant value (int_value);
-          model->setData(index, value , Qt::EditRole);
-          model->setData(index, value, Qt::UserRole);
-        }
-        else{
-          QStyledItemDelegate::setModelData(editor,model,index);
-        }
-        break;
+    {
+      if( item->get_slider_column() == index.column() ){
+        QSlider *slider = static_cast<QSlider*>(editor);
+        int int_value = slider->value();
+        const QVariant value (int_value);
+        model->setData(index, value , Qt::EditRole);
+        model->setData(index, value, Qt::UserRole);
       }
+      else{
+        QStyledItemDelegate::setModelData(editor,model,index);
+      }
+      break;
+    }
     case TreeItem::_delegate_DROP:
-      {
-        if( item->get_dropdown_column() == index.column() ){
-          QComboBox* combo = editor->findChild<QComboBox*>();
-          int pos = combo->currentIndex();
-          const QVector<QVariant> drop_enum = item->get_dropdown_enum();
-          const QVariant value = drop_enum[pos];
-          model->setData(index, value , Qt::EditRole);
-          model->setData(index, value, Qt::UserRole);
-        }
-        else{
-          QStyledItemDelegate::setModelData(editor,model,index);
-        }
-        break;
+    {
+      if( item->get_dropdown_column() == index.column() ){
+        QComboBox* combo = editor->findChild<QComboBox*>();
+        int pos = combo->currentIndex();
+        const QVector<QVariant> drop_enum = item->get_dropdown_enum();
+        const QVariant value = drop_enum[pos];
+        model->setData(index, value , Qt::EditRole);
+        model->setData(index, value, Qt::UserRole);
       }
+      else{
+        QStyledItemDelegate::setModelData(editor,model,index);
+      }
+      break;
+    }
     case TreeItem::_delegate_FILE:
     case TreeItem::_delegate_DIR:
-      {
-        QLineEdit* line = editor->findChild<QLineEdit*>();
-        QString value = line->text();
-        model->setData(index,value, Qt::EditRole);
-        model->setData(index, value, Qt::UserRole);
+    {
+      QLineEdit* line = editor->findChild<QLineEdit*>();
+      QString value = line->text();
+      model->setData(index,value, Qt::EditRole);
+      model->setData(index, value, Qt::UserRole);
 
-        break;
-      }
+      break;
+    }
     case TreeItem::_delegate_TEXT_ACTION:
-      {
-        QLineEdit* line = editor->findChild<QLineEdit*>();
-        QVariant value = QVariant::fromValue( line->text() );
-        model->setData(index,value, Qt::EditRole);
-        model->setData(index, value, Qt::UserRole);
-        break;
-      }
+    {
+      QLineEdit* line = editor->findChild<QLineEdit*>();
+      QVariant value = QVariant::fromValue( line->text() );
+      model->setData(index,value, Qt::EditRole);
+      model->setData(index, value, Qt::UserRole);
+      break;
+    }
     case TreeItem::_delegate_TEXT_BROWSER:
-      {
-        QStyledItemDelegate::setModelData(editor,model,index);
-        break;
-      }
+    {
+      QStyledItemDelegate::setModelData(editor,model,index);
+      break;
+    }
 
     default:
-      {
-        QStyledItemDelegate::setModelData(editor,model,index);
-        break;
-      }
+    {
+      QStyledItemDelegate::setModelData(editor,model,index);
+      break;
+    }
   }
 }
 
@@ -441,10 +442,10 @@ void TreeItemFileDelegate::updateEditorGeometry(QWidget *editor, const QStyleOpt
   switch(item->get_item_delegate_type())
   {
     default:
-      {
-        QStyledItemDelegate::updateEditorGeometry(editor,option,index);
-        break;
-      }
+    {
+      QStyledItemDelegate::updateEditorGeometry(editor,option,index);
+      break;
+    }
   }
 }
 
@@ -454,31 +455,31 @@ QSize TreeItemFileDelegate::sizeHint ( const QStyleOptionViewItem & option, cons
   switch(item->get_item_delegate_type())
   {
     case TreeItem::_delegate_TEXT_DOCUMENT:
-      {
-        QStyleOptionViewItemV4 options = option;
-        initStyleOption(&options, index);
-        QString value = index.model()->data(index, Qt::EditRole).toString();
+    {
+      QStyleOptionViewItemV4 options = option;
+      initStyleOption(&options, index);
+      QString value = index.model()->data(index, Qt::EditRole).toString();
 
-        int lines_count = value.count("\n") +1 ;
+      int lines_count = value.count("\n") +1 ;
 
-        QTextDocument doc;
-        doc.setHtml(options.text);
-        QFontMetricsF fm(doc.defaultFont());
-        auto const _line_height = fm.height() + fm.leading();
-        int _ideal_doc_heigth = lines_count * _line_height;
-        return QSize(doc.idealWidth(), _ideal_doc_heigth );
-        break;
-      }
+      QTextDocument doc;
+      doc.setHtml(options.text);
+      QFontMetricsF fm(doc.defaultFont());
+      auto const _line_height = fm.height() + fm.leading();
+      int _ideal_doc_heigth = lines_count * _line_height;
+      return QSize(doc.idealWidth(), _ideal_doc_heigth );
+      break;
+    }
     case TreeItem::_delegate_TEXT_BROWSER:
-      {
-        return QSize( option.rect.width(), 100 );
-        break;
-      }
+    {
+      return QSize( option.rect.width(), 100 );
+      break;
+    }
     default:
-      {
-        return QStyledItemDelegate::sizeHint(option,index);
-        break;
-      }
+    {
+      return QStyledItemDelegate::sizeHint(option,index);
+      break;
+    }
   }
 }
 
@@ -486,10 +487,10 @@ QSize TreeItemFileDelegate::sizeHint ( const QStyleOptionViewItem & option, cons
 void TreeItemFileDelegate::get_filename_slot( QWidget *editor ) const {
   QLineEdit* line = editor->findChild<QLineEdit*>();
   QString fileName = QFileDialog::getOpenFileName( editor,
-      tr("Open File"),
-      tr(".")
+    tr("Open File"),
+    tr(".")
       //, tr("Text Files")
-      );
+    );
   if( ! (fileName.isNull()) ){
     line->setText(fileName);
   }
@@ -502,10 +503,10 @@ void TreeItemFileDelegate::showToolTipText( QWidget *editor ) const {
 void TreeItemFileDelegate::get_dirname_slot( QWidget *editor ) {
   QLineEdit* line = editor->findChild<QLineEdit*>();
   QString dirName = QFileDialog::getExistingDirectory(editor,
-      tr("Open Directory"),
-      tr("."),
-      QFileDialog::ShowDirsOnly
-      | QFileDialog::DontResolveSymlinks);
+    tr("Open Directory"),
+    tr("."),
+    QFileDialog::ShowDirsOnly
+    | QFileDialog::DontResolveSymlinks);
   if( ! (dirName.isNull()) ){
     line->setText(dirName);
   }

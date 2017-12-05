@@ -146,7 +146,7 @@ bool IntensityColumns::segmentate_exp_image(){
     if( _flag_threshold_value && 
       exp_image_properties->get_flag_roi_image()
       ){
-      cv::Mat src = exp_image_properties->get_roi_image( );
+      cv::Mat src = exp_image_properties->get_roi_image();
 
     const cv::Mat kernel = (Mat_<float>(3,3) <<
       1,  1, 1,
