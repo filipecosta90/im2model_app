@@ -261,24 +261,24 @@ bool CVImageWidget::set_image_layer_alpha_channel( int layer_number, int value )
 int CVImageWidget::get_renderPoints_alpha_channels_map( QString description_key ) {
   int result = 255;
   std::map< QString,std::vector<int> >::iterator it_alpha = renderPoints_alpha_channel_map.find( description_key );
-    if ( it_alpha != renderPoints_alpha_channel_map.end() ){
-      std::vector<int> vec = it_alpha->second;
-      result = vec[0];
-    }
-    return result;
+  if ( it_alpha != renderPoints_alpha_channel_map.end() ){
+    std::vector<int> vec = it_alpha->second;
+    result = vec[0];
+  }
+  return result;
 }
 
 bool CVImageWidget::set_renderPoints_alpha_channels_map( QString description_key, int value ) {
   bool result = false;
   std::map< QString,std::vector<int> >::iterator it_alpha = renderPoints_alpha_channel_map.find( description_key );
-    if ( it_alpha != renderPoints_alpha_channel_map.end() ){
-      for( std::vector<int>::iterator it = it_alpha->second.begin(); it != it_alpha->second.end(); ++it ){
-        *it = value;
-      }
-      std::cout << "set_renderPoints_alpha_channels_map" << std::endl;
-      result = true;
+  if ( it_alpha != renderPoints_alpha_channel_map.end() ){
+    for( std::vector<int>::iterator it = it_alpha->second.begin(); it != it_alpha->second.end(); ++it ){
+      *it = value;
     }
-    return result;
+    std::cout << "set_renderPoints_alpha_channels_map" << std::endl;
+    result = true;
+  }
+  return result;
 }
 
 void CVImageWidget::paintEvent(QPaintEvent* event) {
@@ -300,12 +300,12 @@ void CVImageWidget::paintEvent(QPaintEvent* event) {
   for( int list_position = 0; list_position < renderAreas.size() ; list_position++ ){
     const bool _area_visible = renderAreas_visible.at( list_position );
     if( _area_visible ){
+      painter.save();
       cv::Point2i _top_left = renderAreas_top_left.at( list_position );
       _top_left *= scaleFactor;
       QPainterPath _area = renderAreas.at(list_position);
       const int _area_pen_width = renderAreas_penWidth.at(list_position);
       QColor _area_pen_color = renderAreas_penColor.at(list_position);
-      painter.save();
       painter.translate( _top_left.x, _top_left.y );
       painter.setPen(QPen(_area_pen_color, _area_pen_width, Qt::SolidLine, Qt::FlatCap, Qt::MiterJoin));
       painter.scale( scaleFactor, scaleFactor );
@@ -333,9 +333,7 @@ void CVImageWidget::paintEvent(QPaintEvent* event) {
     painter.restore();
   }
 
-  painter.save();
   
-  painter.scale( scaleFactor, scaleFactor );
 
   for ( std::map< QString,std::vector<QPoint>>::iterator it=renderPoints_map.begin(); it!=renderPoints_map.end(); ++it){
     const QString key = it->first;
@@ -359,15 +357,17 @@ void CVImageWidget::paintEvent(QPaintEvent* event) {
       QColor point_penColor = renderPoints_penColor[point_n];
       int point_penWidth = renderPoints_penWidth[point_n];
       double dopacity = render_points_alpha_channel[point_n] / 255.0f;
+      painter.save();
       painter.setOpacity( dopacity ); 
       painter.setPen(QPen(QBrush( point_penColor ),point_penWidth,Qt::DashLine));
       painter.setBrush(QBrush( point_penColor ));
+      painter.scale( scaleFactor, scaleFactor );
       painter.drawPoint( point_w_margin );
+      painter.restore();
     }
   }
 }
 
-painter.restore();
 
 painter.end();
 }

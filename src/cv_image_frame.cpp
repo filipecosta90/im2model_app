@@ -112,7 +112,7 @@ int CvImageFrameWidget::addImageLayer( const cv::Mat& image ){
 }
 
 int CvImageFrameWidget::get_image_layer_alpha_channel( int layer_number ){
-  int result = -1;
+  int result = 255;
   if( image_widget != nullptr ){
     result = image_widget->get_image_layer_alpha_channel(layer_number);
   }
@@ -128,12 +128,13 @@ bool CvImageFrameWidget::set_image_layer_alpha_channel( int layer_number, int va
 }
 
 int CvImageFrameWidget::get_renderPoints_alpha_channels_map( QString key ){
-  bool result = false;
+  int result = 255;
   if( image_widget != nullptr ){
     result = image_widget->get_renderPoints_alpha_channels_map( key );
   }
   return result;
 }
+
 bool CvImageFrameWidget::set_renderPoints_alpha_channels_map( QString key, int value ){
   bool result = false;
   if( image_widget != nullptr ){
