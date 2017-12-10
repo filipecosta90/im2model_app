@@ -2022,6 +2022,8 @@ bool TDMap::set_thickness_user_estimated_nm( std::string s_estimated ){
           std::cout << " unit_cell_update result " << std::boolalpha << unit_cell_update << std::endl;
           if( unit_cell_update ){
             const bool cel_generation = tdmap_full_sim_super_cell->generate_super_cell_file();
+            tdmap_full_sim_super_cell->get_atom_positions_cols_vec();
+            tdmap_full_sim_super_cell->save_atom_positions_cols_vec_keys();
             std::cout << " cel_generation result " << std::boolalpha << cel_generation << std::endl;
             const bool xyz_export = tdmap_full_sim_super_cell->generate_xyz_file();
             std::cout << " xyz_export result " << std::boolalpha << xyz_export << std::endl;
@@ -2080,7 +2082,7 @@ bool TDMap::set_thickness_user_estimated_nm( std::string s_estimated ){
 
             emit TDMap_started_supercell_segmentate_image();
             _flag_read_simulated_supercell_image &= sim_image_intensity_columns->segmentate_sim_image();
-            _flag_read_simulated_supercell_image &= sim_image_intensity_columns->segmentate_exp_image();
+            //_flag_read_simulated_supercell_image &= sim_image_intensity_columns->segmentate_exp_image();
             sim_image_intensity_columns->feature_match();
             emit TDMap_ended_supercell_segmentate_image( _flag_read_simulated_supercell_image );
             std::cout << "_flag_read_simulated_supercell_image: " << std::boolalpha << _flag_read_simulated_supercell_image << std::endl;

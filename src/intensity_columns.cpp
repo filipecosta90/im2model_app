@@ -230,8 +230,9 @@ bool IntensityColumns::feature_match(){
  bool result = false;
  auto_calculate_threshold_value();
  if( _flag_exp_image_properties ){
-  if( _flag_exp_image_keypoints && 
-    _flag_sim_image_keypoints
+  if(  
+    sim_image_properties->get_flag_full_image( ) && 
+    exp_image_properties->get_flag_roi_image()
     ){
     double minVal, maxVal, matchVal;
   cv::Point minLoc, maxLoc, matchLoc;
@@ -239,15 +240,19 @@ bool IntensityColumns::feature_match(){
   double match_factor;
   try{
             /// Create the result matrix
-    const int result_cols =  sim_image_dist_transform.cols - exp_image_dist_transform.cols + 1;
-    const int result_rows = sim_image_dist_transform.rows - exp_image_dist_transform.rows + 1;
+    const cv::Mat src_sim = sim_image_properties->get_full_image( );
+    const cv::Mat src_exp = exp_image_properties->get_roi_image();
+
+    const int result_cols =  src_sim.cols - src_exp.cols + 1;
+    const int result_rows = src_sim.rows - src_exp.rows + 1;
+
     cv::Mat result_mat( result_rows, result_cols, cv::DataType<unsigned char>::type );
-    const int delta_center_cols = exp_image_dist_transform.cols / 2;
-    const int delta_center_rows = exp_image_dist_transform.rows / 2;
+    const int delta_center_cols = result_cols / 2;
+    const int delta_center_rows = result_rows / 2;
     const cv::Point delta_centerPos ( delta_center_rows, delta_center_cols  );
-            
+
             //: normalized correlation, non-normalized correlation and sum-absolute-difference
-    cv::matchTemplate( sim_image_dist_transform , exp_image_dist_transform, result_mat, CV_TM_CCOEFF_NORMED );
+    cv::matchTemplate( src_sim , src_exp, result_mat, CV_TM_CCOEFF_NORMED );
     cv::minMaxLoc( result_mat, &minVal, &maxVal, &minLoc, &maxLoc, cv::Mat() );
     matchVal = maxVal;
     exp_image_delta_factor_constant =  maxLoc - delta_centerPos;
@@ -304,7 +309,7 @@ void IntensityColumns::apply_exp_image_delta_factor(){
   boost::function<std::vector<cv::Point>(std::vector<cv::Point>)> functor ( boost::bind(&IntensityColumns::op_contour_padding, this , _1, exp_image_delta_factor_constant ) );
   std::transform( exp_image_intensity_columns.begin(), exp_image_intensity_columns.end(), exp_image_intensity_columns.begin() , functor );
   boost::function<cv::KeyPoint(cv::KeyPoint)> functorKeypoint ( boost::bind(&IntensityColumns::op_KeyPoint_padding, this , _1, cv::Point2f( (float) exp_image_delta_factor_constant.x, (float) exp_image_delta_factor_constant.y  ) ) );
-   std::transform( exp_image_keypoints.begin(), exp_image_keypoints.end(), exp_image_keypoints.begin() , functorKeypoint );
+  std::transform( exp_image_keypoints.begin(), exp_image_keypoints.end(), exp_image_keypoints.begin() , functorKeypoint );
   emit exp_image_intensity_columns_changed();
   emit exp_image_intensity_keypoints_changed();
 }

@@ -104,6 +104,11 @@ protected:
     int roi_center_y = 0;
     bool _flag_roi_center_y = false;
 
+    // centroid
+
+    cv::Point2i centroid_translation_px; 
+    bool _flag_centroid_translation_px = false;
+
     // ignored edge pixels of the full image
     int ignore_edge_pixels = 0;
     bool _flag_ignore_edge_pixels = false;
@@ -134,6 +139,11 @@ public:
     bool get_flag_sampling_rate_x_nm_per_pixel(){ return _flag_sampling_rate_x_nm_per_pixel; }
     bool get_flag_sampling_rate_y_nm_per_pixel(){ return _flag_sampling_rate_y_nm_per_pixel; }
     bool get_flag_sampling_rate(){ return _flag_sampling_rate; }
+
+    cv::Point2i get_centroid_translation_px(){ return centroid_translation_px; }
+    bool get_flag_centroid_translation_px(){ return _flag_centroid_translation_px; }
+    bool apply_centroid_translation_px( int cols_a = 0, int rows_b = 0 );
+    bool apply_centroid_translation_px( cv::Point2i translation_px );
 
     // ROI FRAME
     bool get_flag_roi_image(){ return _flag_roi_image; }

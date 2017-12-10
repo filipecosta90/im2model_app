@@ -5,6 +5,8 @@
 #include <boost/iostreams/device/mapped_file.hpp> // for mmap
 #include <boost/iostreams/stream.hpp>             // for stream
 #include <boost/math/constants/constants.hpp>
+
+
 /* END BOOST */
 
 #include <math.h>                        // for fabs, ceil, pow, M_PI
@@ -53,9 +55,16 @@
 #include "symbcalc.hpp"
 #include "application_log.hpp"
 
+
+struct cmpPoint3dOnlyByXY {
+    bool operator()(const cv::Point3d& a, const cv::Point3d& b) const {
+        return (( a.x < b.x ) && (a.x < b.x) );
+    }
+};
+
 class BaseCell : public QObject {
   Q_OBJECT
-  public:
+public:
 
     /// Possible shapes for the unit cell
     enum CellShape {
@@ -63,154 +72,158 @@ class BaseCell : public QObject {
       ORTHORHOMBIC = 0,
       /// Triclinic cell, with any values for the angles.
       TRICLINIC = 1
-    };
+  };
 
-    BaseCell();
+  BaseCell();
 
     //others
-    void extract_space_group();
-    bool clear_atom_positions();
+  void extract_space_group();
+  bool clear_atom_positions();
 
     //setters
-    bool set_cif_path( std::string path );
-    bool set_cel_filename( std::string filename );
-    bool set_xyz_filename( std::string filename );
-    bool set_length_a_Angstroms( double a );
-    bool set_length_b_Angstroms( double b );
-    bool set_length_c_Angstroms( double c );
-    bool set_length_a_Nanometers( double a );
-    bool set_length_b_Nanometers( double b );
-    bool set_length_c_Nanometers( double c );
-    bool set_angle_alpha( double alpha );
-    bool set_angle_beta( double beta );
-    bool set_angle_gamma( double gamma );
-    bool set_cell_volume_Angstroms( double volume );
-    bool set_cell_volume_Nanometers( double volume );
-    bool set_cel_margin_nm( double margin );
-    bool set_zone_axis( cv::Point3d uvw );
-    bool set_upward_vector( cv::Point3d hkl );
-    bool set_upward_vector_u( double u );
-    bool set_upward_vector_v( double v );
-    bool set_upward_vector_w( double w );
-    bool set_zone_axis_u( double u );
-    bool set_zone_axis_v( double v );
-    bool set_zone_axis_w( double w );
+  bool set_cif_path( std::string path );
+  bool set_cel_filename( std::string filename );
+  bool set_xyz_filename( std::string filename );
+  bool set_length_a_Angstroms( double a );
+  bool set_length_b_Angstroms( double b );
+  bool set_length_c_Angstroms( double c );
+  bool set_length_a_Nanometers( double a );
+  bool set_length_b_Nanometers( double b );
+  bool set_length_c_Nanometers( double c );
+  bool set_angle_alpha( double alpha );
+  bool set_angle_beta( double beta );
+  bool set_angle_gamma( double gamma );
+  bool set_cell_volume_Angstroms( double volume );
+  bool set_cell_volume_Nanometers( double volume );
+  bool set_cel_margin_nm( double margin );
+  bool set_zone_axis( cv::Point3d uvw );
+  bool set_upward_vector( cv::Point3d hkl );
+  bool set_upward_vector_u( double u );
+  bool set_upward_vector_v( double v );
+  bool set_upward_vector_w( double w );
+  bool set_zone_axis_u( double u );
+  bool set_zone_axis_v( double v );
+  bool set_zone_axis_w( double w );
 
     //getters
-    std::string get_cif_path(){ return cif_path; }
-    bool get_flag_cif_path(){ return _flag_cif_path; }
-    bool get_flag_cif_format(){ return _flag_cif_format; }
-    bool get_flag_cel_format(){ return _flag_cel_format; }
-    std::string get_cel_path(){ return cel_path; }
-    double get_angle_alpha(){ return angle_alpha; }
-    double get_angle_beta(){ return angle_beta; }
-    double get_angle_gamma(){ return angle_gamma; }
-    double get_volume_Angstroms(){ return cell_volume_Angstroms; }
-    double get_volume_Nanometers(){ return cell_volume_Nanometers; }
+  std::string get_cif_path(){ return cif_path; }
+  bool get_flag_cif_path(){ return _flag_cif_path; }
+  bool get_flag_cif_format(){ return _flag_cif_format; }
+  bool get_flag_cel_format(){ return _flag_cel_format; }
+  std::string get_cel_path(){ return cel_path; }
+  double get_angle_alpha(){ return angle_alpha; }
+  double get_angle_beta(){ return angle_beta; }
+  double get_angle_gamma(){ return angle_gamma; }
+  double get_volume_Angstroms(){ return cell_volume_Angstroms; }
+  double get_volume_Nanometers(){ return cell_volume_Nanometers; }
 
     /** reciprocal-lattice (Miller) indices  **/
-    bool get_flag_length_a(){ return _flag_length_a; }
-    bool get_flag_length_b(){ return _flag_length_b; }
-    bool get_flag_length_c(){ return _flag_length_c; }
-    bool get_flag_length(){ return _flag_length; }
+  bool get_flag_length_a(){ return _flag_length_a; }
+  bool get_flag_length_b(){ return _flag_length_b; }
+  bool get_flag_length_c(){ return _flag_length_c; }
+  bool get_flag_length(){ return _flag_length; }
 
-    bool get_flag_angle_alpha(){ return _flag_angle_alpha; }
-    bool get_flag_angle_beta(){ return _flag_angle_beta; }
-    bool get_flag_angle_gamma(){ return _flag_angle_gamma; }
+  bool get_flag_angle_alpha(){ return _flag_angle_alpha; }
+  bool get_flag_angle_beta(){ return _flag_angle_beta; }
+  bool get_flag_angle_gamma(){ return _flag_angle_gamma; }
 
-    bool get_flag_upward_vector_u(){ return _flag_upward_vector_u; }
-    bool get_flag_upward_vector_v(){ return _flag_upward_vector_v; }
-    bool get_flag_upward_vector_w(){ return _flag_upward_vector_w; }
-    bool get_flag_upward_vector(){ return _flag_upward_vector; }
-    bool get_flag_zone_axis_u(){ return _flag_zone_axis_u; }
-    bool get_flag_zone_axis_v(){ return _flag_zone_axis_v; }
-    bool get_flag_zone_axis_w(){ return _flag_zone_axis_w; }
-    bool get_flag_zone_axis(){ return _flag_zone_axis; }
-    bool get_flag_atom_positions_vec(){ return _flag_atom_positions; }
-    bool get_flag_orientation_matrix(){ return _flag_orientation_matrix; }
-    bool get_flag_inverse_orientation_matrix(){ return _flag_inverse_orientation_matrix; }
-    bool get_flag_lattice_mapping_matrix(){ return _flag_lattice_mapping_matrix_Nanometers; }
-    bool get_flag_lattice_mapping_matrix_Nanometers(){ return _flag_lattice_mapping_matrix_Nanometers; }
-    bool get_flag_fractional_norm(){ return _flag_fractional_norm; }
+  bool get_flag_upward_vector_u(){ return _flag_upward_vector_u; }
+  bool get_flag_upward_vector_v(){ return _flag_upward_vector_v; }
+  bool get_flag_upward_vector_w(){ return _flag_upward_vector_w; }
+  bool get_flag_upward_vector(){ return _flag_upward_vector; }
+  bool get_flag_zone_axis_u(){ return _flag_zone_axis_u; }
+  bool get_flag_zone_axis_v(){ return _flag_zone_axis_v; }
+  bool get_flag_zone_axis_w(){ return _flag_zone_axis_w; }
+  bool get_flag_zone_axis(){ return _flag_zone_axis; }
+  bool get_flag_atom_positions_vec(){ return _flag_atom_positions; }
+  bool get_flag_orientation_matrix(){ return _flag_orientation_matrix; }
+  bool get_flag_inverse_orientation_matrix(){ return _flag_inverse_orientation_matrix; }
+  bool get_flag_lattice_mapping_matrix(){ return _flag_lattice_mapping_matrix_Nanometers; }
+  bool get_flag_lattice_mapping_matrix_Nanometers(){ return _flag_lattice_mapping_matrix_Nanometers; }
+  bool get_flag_fractional_norm(){ return _flag_fractional_norm; }
+  void save_atom_positions_cols_vec_keys();
 
-    void form_matrix_from_miller_indices();
-    void form_matrix_from_lattice_parameters();
+  std::vector<cv::Point3d> get_atom_positions_cols_vec_keys();
 
-    cv::Mat get_orientation_matrix(){ return orientation_matrix; }
-    cv::Mat get_inverse_orientation_matrix(){ return inverse_orientation_matrix; }
+  void form_matrix_from_miller_indices();
+  void form_matrix_from_lattice_parameters();
 
-    cv::Mat get_lattice_mapping_matrix_factors(){ return lattice_mapping_matrix_factors; }
-    cv::Mat get_lattice_mapping_matrix_Nanometers(){ return lattice_mapping_matrix_Nanometers; }
-    cv::Mat get_lattice_mapping_matrix_Angstroms(){ return lattice_mapping_matrix_Angstroms; }
-    cv::Point3d get_lattice_mapping_dimension_vector_Nanometers();
+  cv::Mat get_orientation_matrix(){ return orientation_matrix; }
+  cv::Mat get_inverse_orientation_matrix(){ return inverse_orientation_matrix; }
+
+  cv::Mat get_lattice_mapping_matrix_factors(){ return lattice_mapping_matrix_factors; }
+  cv::Mat get_lattice_mapping_matrix_Nanometers(){ return lattice_mapping_matrix_Nanometers; }
+  cv::Mat get_lattice_mapping_matrix_Angstroms(){ return lattice_mapping_matrix_Angstroms; }
+  cv::Point3d get_lattice_mapping_dimension_vector_Nanometers();
 
     /** getters **/
-    double get_length_a_Angstroms(){ return ( length_a_Angstroms + (2 * cel_margin_Angstroms) ); }
-    double get_length_b_Angstroms(){ return ( length_b_Angstroms + (2 * cel_margin_Angstroms) ); }
-    double get_length_c_Angstroms(){ return  length_c_Angstroms; }
-    double get_length_a_Nanometers(){ return ( length_a_Nanometers + (2 * cel_margin_Nanometers) ); }
-    double get_length_b_Nanometers(){ return ( length_b_Nanometers + (2 * cel_margin_Nanometers) ); }
-    double get_length_c_Nanometers(){ return length_c_Nanometers; }
-    double get_max_length_abc_Nanometers();
+  double get_length_a_Angstroms(){ return ( length_a_Angstroms + (2 * cel_margin_Angstroms) ); }
+  double get_length_b_Angstroms(){ return ( length_b_Angstroms + (2 * cel_margin_Angstroms) ); }
+  double get_length_c_Angstroms(){ return  length_c_Angstroms; }
+  double get_length_a_Nanometers(){ return ( length_a_Nanometers + (2 * cel_margin_Nanometers) ); }
+  double get_length_b_Nanometers(){ return ( length_b_Nanometers + (2 * cel_margin_Nanometers) ); }
+  double get_length_c_Nanometers(){ return length_c_Nanometers; }
+  double get_max_length_abc_Nanometers();
 
     /** vector t **/
     // project x axis
-    cv::Point3d get_vector_t(){ return vector_t; }
+  cv::Point3d get_vector_t(){ return vector_t; }
 
     /** Zone Axis / Lattice vector **/
     // project y axis
-    cv::Point3d get_zone_axis(){ return zone_axis; }
-    double get_zone_axis_u(){ return  zone_axis_u; }
-    double get_zone_axis_v(){ return zone_axis_v; }
-    double get_zone_axis_w(){ return zone_axis_w; }
+  cv::Point3d get_zone_axis(){ return zone_axis; }
+  double get_zone_axis_u(){ return  zone_axis_u; }
+  double get_zone_axis_v(){ return zone_axis_v; }
+  double get_zone_axis_w(){ return zone_axis_w; }
 
     /** Upward vector  **/
     // project z axis
-    cv::Point3d get_upward_vector(){ return upward_vector; }
-    double get_upward_vector_u(){ return upward_vector_u; }
-    double get_upward_vector_v(){ return upward_vector_v; }
-    double get_upward_vector_w(){ return upward_vector_w; }
+  cv::Point3d get_upward_vector(){ return upward_vector; }
+  double get_upward_vector_u(){ return upward_vector_u; }
+  double get_upward_vector_v(){ return upward_vector_v; }
+  double get_upward_vector_w(){ return upward_vector_w; }
 
-    double get_fractional_norm_a_atom_pos_Nanometers(){ return fractional_norm_a_atom_pos; }
-    double get_fractional_norm_b_atom_pos_Nanometers(){ return fractional_norm_b_atom_pos; }
-    double get_fractional_norm_c_atom_pos_Nanometers(){ return fractional_norm_c_atom_pos; }
+  double get_fractional_norm_a_atom_pos_Nanometers(){ return fractional_norm_a_atom_pos; }
+  double get_fractional_norm_b_atom_pos_Nanometers(){ return fractional_norm_b_atom_pos; }
+  double get_fractional_norm_c_atom_pos_Nanometers(){ return fractional_norm_c_atom_pos; }
 
-    double get_cel_margin_nm(){ return cel_margin_Nanometers; }
+  double get_cel_margin_nm(){ return cel_margin_Nanometers; }
 
-    std::vector< std::vector<cv::Point3d> > get_atom_positions_vec( ){ return atom_positions; }
-    int get_atom_positions_vec_size();
-    int get_atom_fractional_cell_coordinates_vec_size();
-    std::vector<std::string> get_atom_symbols_vec(){ return atom_symbols; }
-    std::vector<cv::Vec4d> get_atom_cpk_rgba_colors_vec( ){ return atom_cpk_rgba_colors; }
-    std::vector<double> get_atom_empirical_radiis_vec(){ return atom_empirical_radiis; }
-    std::vector<double> get_atom_occupancies_vec(){ return atom_occupancies; }
-    std::vector<double> get_atom_debye_waller_factors_vec(){ return atom_debye_waller_factors; }
-    std::vector<Atom> get_atoms_vec(){ return atoms;}
+  std::vector< std::vector<cv::Point3d> > get_atom_positions_vec( ){ get_atom_positions_cols_vec(); return atom_positions; }
+  std::map<cv::Point3d, std::vector< std::vector<cv::Point3d> > , cmpPoint3dOnlyByXY> get_atom_positions_cols_vec();
+  int get_atom_positions_vec_size();
+  int get_atom_fractional_cell_coordinates_vec_size();
+  std::vector<std::string> get_atom_symbols_vec(){ return atom_symbols; }
+  std::vector<cv::Vec4d> get_atom_cpk_rgba_colors_vec( ){ return atom_cpk_rgba_colors; }
+  std::vector<double> get_atom_empirical_radiis_vec(){ return atom_empirical_radiis; }
+  std::vector<double> get_atom_occupancies_vec(){ return atom_occupancies; }
+  std::vector<double> get_atom_debye_waller_factors_vec(){ return atom_debye_waller_factors; }
+  std::vector<Atom> get_atoms_vec(){ return atoms;}
 
-    int get_nx_px(){ return cel_nx_px; }
-    int get_ny_px(){ return cel_ny_px; }
+  int get_nx_px(){ return cel_nx_px; }
+  int get_ny_px(){ return cel_ny_px; }
 
     /* Loggers */
-    bool set_application_logger( ApplicationLog::ApplicationLog* logger );
-    void print_var_state();
+  bool set_application_logger( ApplicationLog::ApplicationLog* logger );
+  void print_var_state();
     // friend std::ostream& operator<< (std::ostream& stream, const SuperCell::SuperCell& image);
-    virtual std::ostream& output(std::ostream& stream) const;
+  virtual std::ostream& output(std::ostream& stream) const;
 
-signals:
-    void atom_positions_changed();
-    void atom_orientation_changed();
-    void orientation_matrix_changed();
-    void upward_vector_changed();
-    void zone_axis_vector_changed();
+  signals:
+  void atom_positions_changed();
+  void atom_orientation_changed();
+  void orientation_matrix_changed();
+  void upward_vector_changed();
+  void zone_axis_vector_changed();
 
-  private:
+private:
     void update_length_flag();
 
     /* Loggers */
     ApplicationLog::ApplicationLog* logger = nullptr;
     bool _flag_logger = false;
 
-  protected:
+protected:
     // Specifies the input super-cell file containing the atomic structure data in CIF file format.
     std::string cif_path;
     bool _flag_cif_path = false;
@@ -279,6 +292,7 @@ signals:
     bool _flag_zone_axis_w = false;
     bool _flag_zone_axis = false;
 
+    std::map< cv::Point3d, std::vector< std::vector<cv::Point3d> > , cmpPoint3dOnlyByXY > atom_positions_cols;
     std::vector< std::vector<cv::Point3d> > atom_positions;
     std::vector<std::string> atom_symbols;
     bool _flag_atom_positions = false;
@@ -321,7 +335,7 @@ signals:
     cv::Mat3d inverse_orientation_matrix;
     bool _flag_inverse_orientation_matrix = false;
 
-cv::Mat lattice_mapping_matrix_factors;
+    cv::Mat lattice_mapping_matrix_factors;
     cv::Mat lattice_mapping_matrix_Angstroms;
     cv::Mat lattice_mapping_matrix_Nanometers;
     bool _flag_lattice_mapping_matrix_Nanometers = false;

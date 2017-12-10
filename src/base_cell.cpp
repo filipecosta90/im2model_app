@@ -24,8 +24,8 @@ BaseCell::BaseCell(){
 bool BaseCell::update_cell_shape() {
   bool result = false;
   if( _flag_angle_alpha &&
-      _flag_angle_beta &&
-      _flag_angle_gamma ){
+    _flag_angle_beta &&
+    _flag_angle_gamma ){
     if (angle_alpha == 90 && angle_alpha == 90 && angle_alpha == 90) {
       cell_shape = ORTHORHOMBIC;
       result = true;
@@ -41,29 +41,29 @@ bool BaseCell::update_volume(){
   _flag_cell_volume = false;
 
   if( _flag_length_a &&
-      _flag_length_b &&
-      _flag_length_c &&
-      _flag_angle_alpha &&
-      _flag_angle_beta &&
-      _flag_angle_gamma ){
+    _flag_length_b &&
+    _flag_length_c &&
+    _flag_angle_alpha &&
+    _flag_angle_beta &&
+    _flag_angle_gamma ){
 
     cell_volume_Angstroms = length_a_Angstroms * length_b_Angstroms * length_c_Angstroms;
-    cell_volume_Nanometers = length_a_Nanometers * length_b_Nanometers * length_c_Nanometers;
+  cell_volume_Nanometers = length_a_Nanometers * length_b_Nanometers * length_c_Nanometers;
 
-    const double cos_alpha = cos(deg2rad(angle_alpha));
-    const double cos_beta = cos(deg2rad(angle_beta));
-    const double cos_gamma = cos(deg2rad(angle_gamma));
+  const double cos_alpha = cos(deg2rad(angle_alpha));
+  const double cos_beta = cos(deg2rad(angle_beta));
+  const double cos_gamma = cos(deg2rad(angle_gamma));
 
-    const double factor = sqrt(
-        1 - cos_alpha * cos_alpha - cos_beta * cos_beta -
-        cos_gamma * cos_gamma + 2 * cos_alpha * cos_beta * cos_gamma
-        );
+  const double factor = sqrt(
+    1 - cos_alpha * cos_alpha - cos_beta * cos_beta -
+    cos_gamma * cos_gamma + 2 * cos_alpha * cos_beta * cos_gamma
+    );
 
-    cell_volume_Angstroms *= factor;
-    cell_volume_Nanometers *= factor;
-    _flag_cell_volume = true;
-  }
-  return _flag_cell_volume;
+  cell_volume_Angstroms *= factor;
+  cell_volume_Nanometers *= factor;
+  _flag_cell_volume = true;
+}
+return _flag_cell_volume;
 }
 
 bool BaseCell::clear_atom_positions(){
@@ -316,70 +316,69 @@ int BaseCell::get_atom_fractional_cell_coordinates_vec_size( ){
 void BaseCell::form_matrix_from_lattice_parameters(){
   if(
     _flag_length_a &&
-_flag_length_b &&
-_flag_length_c &&
-_flag_angle_alpha &&
-_flag_angle_beta &&
-_flag_angle_gamma
-  ){
+    _flag_length_b &&
+    _flag_length_c &&
+    _flag_angle_alpha &&
+    _flag_angle_beta &&
+    _flag_angle_gamma
+    ){
     std::cout << " cos( angle_alpha )" << cos( deg2rad(angle_alpha) ) << std::endl;
-    std::cout << " cos( angle_beta )" << cos( deg2rad(angle_beta) ) << std::endl;
-    std::cout << " cos( angle_gamma )" << cos( deg2rad(angle_gamma) ) << std::endl;
-    std::cout << " sin( angle_alpha )" << sin( deg2rad(angle_alpha) ) << std::endl;
-    std::cout << " sin( angle_beta )" << sin( deg2rad(angle_beta) ) << std::endl;
-    std::cout << " sin( angle_gamma )" << sin( deg2rad(angle_gamma) ) << std::endl;
-    cv::Point3d vector_a_factor;
-    cv::Point3d vector_a_Ang;
-    vector_a_factor.x = sin( deg2rad(angle_beta) );
-    vector_a_Ang.x = length_a_Angstroms * vector_a_factor.x ;
-    vector_a_factor.y = sin( deg2rad(angle_alpha) ) * cos( deg2rad(angle_gamma) );
-    vector_a_Ang.y = length_b_Angstroms * vector_a_factor.y;
-    vector_a_factor.z = 0.0f;
-    vector_a_Ang.z = 0.0f;
+  std::cout << " cos( angle_beta )" << cos( deg2rad(angle_beta) ) << std::endl;
+  std::cout << " cos( angle_gamma )" << cos( deg2rad(angle_gamma) ) << std::endl;
+  std::cout << " sin( angle_alpha )" << sin( deg2rad(angle_alpha) ) << std::endl;
+  std::cout << " sin( angle_beta )" << sin( deg2rad(angle_beta) ) << std::endl;
+  std::cout << " sin( angle_gamma )" << sin( deg2rad(angle_gamma) ) << std::endl;
+  cv::Point3d vector_a_factor;
+  cv::Point3d vector_a_Ang;
+  vector_a_factor.x = sin( deg2rad(angle_beta) );
+  vector_a_Ang.x = length_a_Angstroms * vector_a_factor.x ;
+  vector_a_factor.y = sin( deg2rad(angle_alpha) ) * cos( deg2rad(angle_gamma) );
+  vector_a_Ang.y = length_b_Angstroms * vector_a_factor.y;
+  vector_a_factor.z = 0.0f;
+  vector_a_Ang.z = 0.0f;
 
-    cv::Point3d vector_b_factor;
-    cv::Point3d vector_b_Ang;
-    vector_b_factor.x = 0.0f;
-    vector_b_Ang.x = 0.0f;
-    vector_b_factor.y = sin( deg2rad(angle_alpha) ) * sin( deg2rad(angle_gamma) );
-    vector_b_Ang.y = length_b_Angstroms * vector_b_factor.y;
-    vector_b_factor.z = 0.0f;
-    vector_b_Ang.z = 0.0f;
+  cv::Point3d vector_b_factor;
+  cv::Point3d vector_b_Ang;
+  vector_b_factor.x = 0.0f;
+  vector_b_Ang.x = 0.0f;
+  vector_b_factor.y = sin( deg2rad(angle_alpha) ) * sin( deg2rad(angle_gamma) );
+  vector_b_Ang.y = length_b_Angstroms * vector_b_factor.y;
+  vector_b_factor.z = 0.0f;
+  vector_b_Ang.z = 0.0f;
 
-    cv::Point3d vector_c_factor;
-    cv::Point3d vector_c_Ang;
-    vector_c_factor.x = cos( deg2rad(angle_beta) );
-    vector_c_Ang.x = length_a_Angstroms * vector_c_factor.x;
-    vector_c_factor.y = cos( deg2rad(angle_alpha) );
-    vector_c_Ang.y = length_b_Angstroms * vector_c_factor.y;
-    vector_c_factor.z = 1.0f;
-    vector_c_Ang.z = length_c_Angstroms;
+  cv::Point3d vector_c_factor;
+  cv::Point3d vector_c_Ang;
+  vector_c_factor.x = cos( deg2rad(angle_beta) );
+  vector_c_Ang.x = length_a_Angstroms * vector_c_factor.x;
+  vector_c_factor.y = cos( deg2rad(angle_alpha) );
+  vector_c_Ang.y = length_b_Angstroms * vector_c_factor.y;
+  vector_c_factor.z = 1.0f;
+  vector_c_Ang.z = length_c_Angstroms;
 
     /* insert into matrix */
-    std::vector<cv::Point3d> factor_points;
-    factor_points.push_back(vector_a_factor);
-    factor_points.push_back(vector_b_factor);
-    factor_points.push_back(vector_c_factor);
-    cv::Mat lattice_mapping_matrix_factor_temp = cv::Mat( factor_points , true );
-    lattice_mapping_matrix_factors = lattice_mapping_matrix_factor_temp.reshape(1);
+  std::vector<cv::Point3d> factor_points;
+  factor_points.push_back(vector_a_factor);
+  factor_points.push_back(vector_b_factor);
+  factor_points.push_back(vector_c_factor);
+  cv::Mat lattice_mapping_matrix_factor_temp = cv::Mat( factor_points , true );
+  lattice_mapping_matrix_factors = lattice_mapping_matrix_factor_temp.reshape(1);
 
-    std::vector<cv::Point3d> points;
-    points.push_back(vector_a_Ang);
-    points.push_back(vector_b_Ang);
-    points.push_back(vector_c_Ang);
-    cv::Mat lattice_mapping_matrix_temp = cv::Mat( points , true );
-    lattice_mapping_matrix_Angstroms = lattice_mapping_matrix_temp.reshape(1);
-    lattice_mapping_matrix_Nanometers = lattice_mapping_matrix_Angstroms / 10.0f;
+  std::vector<cv::Point3d> points;
+  points.push_back(vector_a_Ang);
+  points.push_back(vector_b_Ang);
+  points.push_back(vector_c_Ang);
+  cv::Mat lattice_mapping_matrix_temp = cv::Mat( points , true );
+  lattice_mapping_matrix_Angstroms = lattice_mapping_matrix_temp.reshape(1);
+  lattice_mapping_matrix_Nanometers = lattice_mapping_matrix_Angstroms / 10.0f;
 
-    std::cout << " line 1 " << vector_a_Ang << std::endl;
-    std::cout << " line 2 " << vector_b_Ang << std::endl;
-    std::cout << " line 3 " << vector_c_Ang << std::endl;
-    std::cout <<"lattice_mapping_matrix_factors: \n" << lattice_mapping_matrix_factors << std::endl;
-    std::cout <<"lattice_mapping_matrix_Angstroms: \n" << lattice_mapping_matrix_Angstroms << std::endl;
-    std::cout <<"lattice_mapping_matrix_Nanometers: \n" << lattice_mapping_matrix_Nanometers << std::endl;
+  std::cout << " line 1 " << vector_a_Ang << std::endl;
+  std::cout << " line 2 " << vector_b_Ang << std::endl;
+  std::cout << " line 3 " << vector_c_Ang << std::endl;
+  std::cout <<"lattice_mapping_matrix_factors: \n" << lattice_mapping_matrix_factors << std::endl;
+  std::cout <<"lattice_mapping_matrix_Angstroms: \n" << lattice_mapping_matrix_Angstroms << std::endl;
+  std::cout <<"lattice_mapping_matrix_Nanometers: \n" << lattice_mapping_matrix_Nanometers << std::endl;
   _flag_lattice_mapping_matrix_Nanometers = true;
-  }
-
+}
 }
 
 cv::Point3d BaseCell::get_lattice_mapping_dimension_vector_Nanometers(){
@@ -389,75 +388,119 @@ cv::Point3d BaseCell::get_lattice_mapping_dimension_vector_Nanometers(){
   return lattice_mapping_dimension_vector_Nanometers;
 }
 
+std::map<cv::Point3d, std::vector< std::vector< cv::Point3d> > , cmpPoint3dOnlyByXY> BaseCell::get_atom_positions_cols_vec(){
+  //std::map<cv::Point3d, std::vector< std::vector<cv::Point3d> > , cmpPoint3dOnlyByXY > colmap;
+  const int different_atoms = atom_positions.size();
+  for ( int outter_pos = 0; outter_pos < different_atoms; outter_pos++ ){
+    std::vector<cv::Point3d> inner_vec = atom_positions[outter_pos];
+    for (  std::vector<cv::Point3d>::iterator inner_it = inner_vec.begin(); inner_it!= inner_vec.end(); inner_it++ ){
+      cv::Point3d point = *inner_it;
+      //std::cout << point << std::endl;
+      std::map<cv::Point3d, std::vector< std::vector<cv::Point3d> > , cmpPoint3dOnlyByXY >::iterator map_it = atom_positions_cols.find( point );
+      
+      // if we dont have the column already
+      if( map_it == atom_positions_cols.end() ){
+        // create the atom pos vec aggregator
+        std::vector< std::vector<cv::Point3d> > col_atom_positions = std::vector< std::vector<cv::Point3d> >();
+        for ( int pos = 0; pos < different_atoms; pos++ ){
+          std::vector<cv::Point3d> col_atom_positions_type = std::vector<cv::Point3d>();
+          col_atom_positions.push_back( col_atom_positions_type );
+        }
+        atom_positions_cols.insert( std::pair< cv::Point3d, std::vector< std::vector<cv::Point3d> > >( point, col_atom_positions ) );
+      }
+      atom_positions_cols[point][outter_pos].push_back( point );
+    }
+  }
+  std::cout << "#### BaseCell model contains " << atom_positions_cols.size() << " distinct columns" << std::endl;
+  return atom_positions_cols;
+}
+
+void BaseCell::save_atom_positions_cols_vec_keys(){
+  std::fstream outputFile;
+  outputFile.open( "basecell_model_col_points.csv", std::ios::out );
+  for(auto const& imap: atom_positions_cols){
+   outputFile << imap.first.x << " , " << imap.first.y <<std::endl;
+ }
+ outputFile.close( );
+}
+
+std::vector<cv::Point3d> BaseCell::get_atom_positions_cols_vec_keys(){
+  std::vector<cv::Point3d> vpoints;
+  for(auto const& imap: atom_positions_cols){
+    vpoints.push_back(imap.first);
+  }
+  return vpoints;
+}
+
 void BaseCell::form_matrix_from_miller_indices(){
   if(
-      _flag_zone_axis &&
-      _flag_upward_vector
+    _flag_zone_axis &&
+    _flag_upward_vector
     ){
     upward_vector.x = upward_vector_u;
-    upward_vector.y = upward_vector_v;
-    upward_vector.z = upward_vector_w;
-    zone_axis.x = zone_axis_u;
-    zone_axis.y = zone_axis_v;
-    zone_axis.z = zone_axis_w;
-    const double norm_uvw = cv::norm( zone_axis );
-    const double norm_hkl = cv::norm( upward_vector );
+  upward_vector.y = upward_vector_v;
+  upward_vector.z = upward_vector_w;
+  zone_axis.x = zone_axis_u;
+  zone_axis.y = zone_axis_v;
+  zone_axis.z = zone_axis_w;
+  const double norm_uvw = cv::norm( zone_axis );
+  const double norm_hkl = cv::norm( upward_vector );
 
     // Miller indices [integer representation of direction cosines]
     // can be converted to a unit vector, n, by dividing by the
     // square root of the sum of the squares: {similar for [uvw]}.
     // This is known as normalization.
-    cv::Point3d vector_y_axis_projected = upward_vector / norm_hkl;
-    cv::Point3d vector_z_axis_projected = zone_axis  / norm_uvw;
+  cv::Point3d vector_y_axis_projected = upward_vector / norm_hkl;
+  cv::Point3d vector_z_axis_projected = zone_axis  / norm_uvw;
 
     // projected x-axis: y cross z
     // projected y-axis: (uvw)
     // projected z-axis: (hkl)
-    cv::Mat z_axis_projected_mat ( vector_z_axis_projected , CV_64F);
-    cv::Mat y_axis_projected_mat ( vector_y_axis_projected , CV_64F);
+  cv::Mat z_axis_projected_mat ( vector_z_axis_projected , CV_64F);
+  cv::Mat y_axis_projected_mat ( vector_y_axis_projected , CV_64F);
 
     // (y axis) x (z axis) = (x axis)
-    cv::Mat x_axis_projected_mat = y_axis_projected_mat.cross( z_axis_projected_mat );
-    const double norm_x = cv::norm( x_axis_projected_mat );
-    cv::Mat mat_x_axis_projected = x_axis_projected_mat / norm_x;
-    cv::Point3d vector_x_axis_projected;
-    vector_x_axis_projected.x = mat_x_axis_projected.at<double>(0,0);
-    vector_x_axis_projected.y = mat_x_axis_projected.at<double>(1,0);
-    vector_x_axis_projected.z = mat_x_axis_projected.at<double>(2,0);
+  cv::Mat x_axis_projected_mat = y_axis_projected_mat.cross( z_axis_projected_mat );
+  const double norm_x = cv::norm( x_axis_projected_mat );
+  cv::Mat mat_x_axis_projected = x_axis_projected_mat / norm_x;
+  cv::Point3d vector_x_axis_projected;
+  vector_x_axis_projected.x = mat_x_axis_projected.at<double>(0,0);
+  vector_x_axis_projected.y = mat_x_axis_projected.at<double>(1,0);
+  vector_x_axis_projected.z = mat_x_axis_projected.at<double>(2,0);
 
     //(z axis) x (x axis) = (y axis)
-    cv::Mat yy_axis_projected_mat = z_axis_projected_mat.cross( mat_x_axis_projected );
+  cv::Mat yy_axis_projected_mat = z_axis_projected_mat.cross( mat_x_axis_projected );
     //cv::Mat yyy_axis_projected_mat = (-( y_axis_projected_mat.cross( z_axis_projected_mat ) / cv::norm( z_axis_projected_mat ) )).cross(z_axis_projected_mat) / (cv::norm( z_axis_projected_mat ) * cv::norm( z_axis_projected_mat ));
 
-    const double norm_yy = cv::norm( yy_axis_projected_mat );
-    cv::Mat mat_yy_axis_projected = yy_axis_projected_mat / norm_yy;
-    cv::Point3d vector_yy_axis_projected;
-    vector_yy_axis_projected.x = mat_yy_axis_projected.at<double>(0,0);
-    vector_yy_axis_projected.y = mat_yy_axis_projected.at<double>(1,0);
-    vector_yy_axis_projected.z = mat_yy_axis_projected.at<double>(2,0);
-    std::cout << " vector_yy_axis_projected " << vector_yy_axis_projected << std::endl;
-    upward_vector = vector_yy_axis_projected;
-    cv::Point3d vector_zz_axis_projected;
-    vector_zz_axis_projected.x = z_axis_projected_mat.at<double>(0,0);
-    vector_zz_axis_projected.y = z_axis_projected_mat.at<double>(1,0);
-    vector_zz_axis_projected.z = z_axis_projected_mat.at<double>(2,0);
-    zone_axis = vector_zz_axis_projected;
+  const double norm_yy = cv::norm( yy_axis_projected_mat );
+  cv::Mat mat_yy_axis_projected = yy_axis_projected_mat / norm_yy;
+  cv::Point3d vector_yy_axis_projected;
+  vector_yy_axis_projected.x = mat_yy_axis_projected.at<double>(0,0);
+  vector_yy_axis_projected.y = mat_yy_axis_projected.at<double>(1,0);
+  vector_yy_axis_projected.z = mat_yy_axis_projected.at<double>(2,0);
+  std::cout << " vector_yy_axis_projected " << vector_yy_axis_projected << std::endl;
+  upward_vector = vector_yy_axis_projected;
+  cv::Point3d vector_zz_axis_projected;
+  vector_zz_axis_projected.x = z_axis_projected_mat.at<double>(0,0);
+  vector_zz_axis_projected.y = z_axis_projected_mat.at<double>(1,0);
+  vector_zz_axis_projected.z = z_axis_projected_mat.at<double>(2,0);
+  zone_axis = vector_zz_axis_projected;
 
     /* insert into matrix */
-    std::vector<cv::Point3d> points;
-    points.push_back(vector_x_axis_projected);
-    points.push_back(vector_yy_axis_projected);
-    points.push_back(vector_z_axis_projected);
-    orientation_matrix = cv::Mat( points , true );
-    orientation_matrix = orientation_matrix.reshape(1);
-    inverse_orientation_matrix = orientation_matrix.inv();
-    _flag_orientation_matrix = true;
-    _flag_inverse_orientation_matrix = true;
-    emit orientation_matrix_changed();
-    emit upward_vector_changed();
-    emit zone_axis_vector_changed();
+  std::vector<cv::Point3d> points;
+  points.push_back(vector_x_axis_projected);
+  points.push_back(vector_yy_axis_projected);
+  points.push_back(vector_z_axis_projected);
+  orientation_matrix = cv::Mat( points , true );
+  orientation_matrix = orientation_matrix.reshape(1);
+  inverse_orientation_matrix = orientation_matrix.inv();
+  _flag_orientation_matrix = true;
+  _flag_inverse_orientation_matrix = true;
+  emit orientation_matrix_changed();
+  emit upward_vector_changed();
+  emit zone_axis_vector_changed();
 
-    std::cout << "NEW orientation matrix: \n" << orientation_matrix << std::endl;
+  std::cout << "NEW orientation matrix: \n" << orientation_matrix << std::endl;
 
     /**
      * R is normalized: the squares of the elements in any row or column sum to 1.
@@ -465,7 +508,7 @@ void BaseCell::form_matrix_from_miller_indices(){
      * The rows of R represent the coordinates in the original space of unit vectors along the coordinate axes of the rotated space.
      * The columns of R represent the coordinates in the rotated space of unit vectors along the axes of the original space.
      * **/
-  }
+}
 }
 
 void BaseCell::print_var_state(){
@@ -483,88 +526,88 @@ std::ostream& operator<<(std::ostream& stream, const BaseCell& var) {
 
 std::ostream& BaseCell::output(std::ostream& stream) const {
   stream << "BaseCell vars:\n"
-    << "\t" << "cif_path : "  << cif_path << "\n"
-    << "\t\t" << "_flag_cif_path : " << std::boolalpha << _flag_cif_path << "\n"
-    << "\t\t" << "_flag_cif_path : " << std::boolalpha << _flag_cif_path << "\n"
-    << "\t" << "cel_path : "  << cel_path << "\n"
-    << "\t\t" << "_flag_cel_filename : " << std::boolalpha << _flag_cel_filename << "\n"
-    << "\t\t" << "_flag_cel_path : " << std::boolalpha << _flag_cel_path << "\n"
-    << "\t\t" << "_flag_cel_format : " << std::boolalpha << _flag_cel_path << "\n"
-    << "\t" << "length_a_Angstroms : "  << length_a_Angstroms << "\n"
-    << "\t" << "length_b_Angstroms : "  << length_b_Angstroms << "\n"
-    << "\t" << "length_c_Angstroms : "  << length_c_Angstroms << "\n"
-    << "\t" << "length_a_Nanometers : "  << length_a_Nanometers << "\n"
-    << "\t" << "length_b_Nanometers : "  << length_b_Nanometers << "\n"
-    << "\t" << "length_c_Nanometers : "  << length_c_Nanometers << "\n"
-    << "\t\t" << "_flag_length_a : " << std::boolalpha << _flag_length_a << "\n"
-    << "\t\t" << "_flag_length_b : " << std::boolalpha << _flag_length_b << "\n"
-    << "\t\t" << "_flag_length_c : " << std::boolalpha << _flag_length_c << "\n"
-    << "\t\t" << "_flag_length : " << std::boolalpha << _flag_length << "\n"
-    << "\t" << "cell_volume : "  << cell_volume_Angstroms << "\n"
-    << "\t\t" << "_flag_cell_volume : " << std::boolalpha << _flag_cell_volume << "\n"
-    << "\t" << "angle_alpha : "  << angle_alpha << "\n"
-    << "\t" << "angle_beta : "  << angle_beta << "\n"
-    << "\t" << "angle_gamma : "  << angle_gamma << "\n"
+  << "\t" << "cif_path : "  << cif_path << "\n"
+  << "\t\t" << "_flag_cif_path : " << std::boolalpha << _flag_cif_path << "\n"
+  << "\t\t" << "_flag_cif_path : " << std::boolalpha << _flag_cif_path << "\n"
+  << "\t" << "cel_path : "  << cel_path << "\n"
+  << "\t\t" << "_flag_cel_filename : " << std::boolalpha << _flag_cel_filename << "\n"
+  << "\t\t" << "_flag_cel_path : " << std::boolalpha << _flag_cel_path << "\n"
+  << "\t\t" << "_flag_cel_format : " << std::boolalpha << _flag_cel_path << "\n"
+  << "\t" << "length_a_Angstroms : "  << length_a_Angstroms << "\n"
+  << "\t" << "length_b_Angstroms : "  << length_b_Angstroms << "\n"
+  << "\t" << "length_c_Angstroms : "  << length_c_Angstroms << "\n"
+  << "\t" << "length_a_Nanometers : "  << length_a_Nanometers << "\n"
+  << "\t" << "length_b_Nanometers : "  << length_b_Nanometers << "\n"
+  << "\t" << "length_c_Nanometers : "  << length_c_Nanometers << "\n"
+  << "\t\t" << "_flag_length_a : " << std::boolalpha << _flag_length_a << "\n"
+  << "\t\t" << "_flag_length_b : " << std::boolalpha << _flag_length_b << "\n"
+  << "\t\t" << "_flag_length_c : " << std::boolalpha << _flag_length_c << "\n"
+  << "\t\t" << "_flag_length : " << std::boolalpha << _flag_length << "\n"
+  << "\t" << "cell_volume : "  << cell_volume_Angstroms << "\n"
+  << "\t\t" << "_flag_cell_volume : " << std::boolalpha << _flag_cell_volume << "\n"
+  << "\t" << "angle_alpha : "  << angle_alpha << "\n"
+  << "\t" << "angle_beta : "  << angle_beta << "\n"
+  << "\t" << "angle_gamma : "  << angle_gamma << "\n"
     /** reciprocal-lattice (Miller) indices  **/
-    << "\t" << "vector_t : "  << vector_t << "\n"
+  << "\t" << "vector_t : "  << vector_t << "\n"
     // projected z-axis:
-    << "\t" << "upward_vector : "  << upward_vector << "\n"
-    << "\t" << "upward_vector_u : "  << upward_vector_u << "\n"
-    << "\t" << "upward_vector_v : "  << upward_vector_v << "\n"
-    << "\t" << "upward_vector_w : "  << upward_vector_w << "\n"
-    << "\t\t" << "_flag_upward_vector_u : " << std::boolalpha << _flag_upward_vector_u << "\n"
-    << "\t\t" << "_flag_upward_vector_v : " << std::boolalpha << _flag_upward_vector_v << "\n"
-    << "\t\t" << "_flag_upward_vector_w : " << std::boolalpha << _flag_upward_vector_w << "\n"
-    << "\t\t" << "_flag_upward_vector : " << std::boolalpha << _flag_upward_vector << "\n"
+  << "\t" << "upward_vector : "  << upward_vector << "\n"
+  << "\t" << "upward_vector_u : "  << upward_vector_u << "\n"
+  << "\t" << "upward_vector_v : "  << upward_vector_v << "\n"
+  << "\t" << "upward_vector_w : "  << upward_vector_w << "\n"
+  << "\t\t" << "_flag_upward_vector_u : " << std::boolalpha << _flag_upward_vector_u << "\n"
+  << "\t\t" << "_flag_upward_vector_v : " << std::boolalpha << _flag_upward_vector_v << "\n"
+  << "\t\t" << "_flag_upward_vector_w : " << std::boolalpha << _flag_upward_vector_w << "\n"
+  << "\t\t" << "_flag_upward_vector : " << std::boolalpha << _flag_upward_vector << "\n"
     /** Zone Axis / Lattice vector **/
     // projected y-axis
-    << "\t" << "zone_axis : "  << zone_axis << "\n"
-    << "\t" << "zone_axis_u : "  << zone_axis_u << "\n"
-    << "\t" << "zone_axis_v : "  << zone_axis_v << "\n"
-    << "\t" << "zone_axis_w : "  << zone_axis_w << "\n"
-    << "\t\t" << "_flag_zone_axis_u : " << std::boolalpha << _flag_zone_axis_u << "\n"
-    << "\t\t" << "_flag_zone_axis_v : " << std::boolalpha << _flag_zone_axis_v << "\n"
-    << "\t\t" << "_flag_zone_axis_w : " << std::boolalpha << _flag_zone_axis_w << "\n"
-    << "\t\t" << "_flag_zone_axis : " << std::boolalpha << _flag_zone_axis << "\n"
-    << "\t" << "#### VECTORS: \n"
-    << "\t" << "atoms.size() : "  << atoms.size() << "\n"
-    << "\t" << "atom_positions.size() : "  << atom_positions.size() << "\n"
+  << "\t" << "zone_axis : "  << zone_axis << "\n"
+  << "\t" << "zone_axis_u : "  << zone_axis_u << "\n"
+  << "\t" << "zone_axis_v : "  << zone_axis_v << "\n"
+  << "\t" << "zone_axis_w : "  << zone_axis_w << "\n"
+  << "\t\t" << "_flag_zone_axis_u : " << std::boolalpha << _flag_zone_axis_u << "\n"
+  << "\t\t" << "_flag_zone_axis_v : " << std::boolalpha << _flag_zone_axis_v << "\n"
+  << "\t\t" << "_flag_zone_axis_w : " << std::boolalpha << _flag_zone_axis_w << "\n"
+  << "\t\t" << "_flag_zone_axis : " << std::boolalpha << _flag_zone_axis << "\n"
+  << "\t" << "#### VECTORS: \n"
+  << "\t" << "atoms.size() : "  << atoms.size() << "\n"
+  << "\t" << "atom_positions.size() : "  << atom_positions.size() << "\n"
     //<< "\t" << "get_atom_positions_vec_size : "  << BaseCell::get_atom_positions_vec_size() << "\n"
-    << "\t\t" << "_flag_atom_positions : " << std::boolalpha << _flag_atom_positions << "\n"
-    << "\t" << "atom_symbols.size() : "  << atom_symbols.size() << "\n"
-    << "\t" << "atom_debye_waller_factors.size() : "  << atom_debye_waller_factors.size() << "\n"
-    << "\t" << "atom_cpk_rgba_colors.size() : "  << atom_cpk_rgba_colors.size() << "\n"
-    << "\t" << "atom_empirical_radiis.size() : "  << atom_empirical_radiis.size() << "\n"
-    << "\t" << "atom_fractional_cell_coordinates.size() : "  << atom_fractional_cell_coordinates.size() << "\n"
-    << "\t\t" << "_flag_atom_fractional_cell_coordinates : " << std::boolalpha << _flag_atom_fractional_cell_coordinates << "\n"
+  << "\t\t" << "_flag_atom_positions : " << std::boolalpha << _flag_atom_positions << "\n"
+  << "\t" << "atom_symbols.size() : "  << atom_symbols.size() << "\n"
+  << "\t" << "atom_debye_waller_factors.size() : "  << atom_debye_waller_factors.size() << "\n"
+  << "\t" << "atom_cpk_rgba_colors.size() : "  << atom_cpk_rgba_colors.size() << "\n"
+  << "\t" << "atom_empirical_radiis.size() : "  << atom_empirical_radiis.size() << "\n"
+  << "\t" << "atom_fractional_cell_coordinates.size() : "  << atom_fractional_cell_coordinates.size() << "\n"
+  << "\t\t" << "_flag_atom_fractional_cell_coordinates : " << std::boolalpha << _flag_atom_fractional_cell_coordinates << "\n"
     /** .cel **/
-    << "\t" << "fractional_norm_a_atom_pos : "  << fractional_norm_a_atom_pos << "\n"
-    << "\t" << "fractional_norm_b_atom_pos : "  << fractional_norm_b_atom_pos << "\n"
-    << "\t" << "fractional_norm_c_atom_pos : "  << fractional_norm_c_atom_pos << "\n"
-    << "\t\t" << "_flag_fractional_norm : " << std::boolalpha << _flag_fractional_norm << "\n"
-    << "\t" << "cel_margin_nm : "  << cel_margin_Nanometers << "\n"
-    << "\t\t" << "_flag_cel_margin : " << std::boolalpha << _flag_cel_margin << "\n"
-    << "\t" << "ab_margin : "  << ab_margin << "\n"
-    << "\t" << "cel_margin_a_px : "  << cel_margin_a_px << "\n"
-    << "\t" << "cel_margin_b_px : "  << cel_margin_b_px << "\n"
-    << "\t" << "cel_nx_px : "  << cel_nx_px << "\n"
-    << "\t" << "cel_ny_px : "  << cel_ny_px << "\n"
+  << "\t" << "fractional_norm_a_atom_pos : "  << fractional_norm_a_atom_pos << "\n"
+  << "\t" << "fractional_norm_b_atom_pos : "  << fractional_norm_b_atom_pos << "\n"
+  << "\t" << "fractional_norm_c_atom_pos : "  << fractional_norm_c_atom_pos << "\n"
+  << "\t\t" << "_flag_fractional_norm : " << std::boolalpha << _flag_fractional_norm << "\n"
+  << "\t" << "cel_margin_nm : "  << cel_margin_Nanometers << "\n"
+  << "\t\t" << "_flag_cel_margin : " << std::boolalpha << _flag_cel_margin << "\n"
+  << "\t" << "ab_margin : "  << ab_margin << "\n"
+  << "\t" << "cel_margin_a_px : "  << cel_margin_a_px << "\n"
+  << "\t" << "cel_margin_b_px : "  << cel_margin_b_px << "\n"
+  << "\t" << "cel_nx_px : "  << cel_nx_px << "\n"
+  << "\t" << "cel_ny_px : "  << cel_ny_px << "\n"
     // used in the simulated super-cell. this is calculated based on _cel_nXY_px - 2 * _cel_margin_AB_px
-    << "\t" << "cel_wout_margin_nx_px : "  << cel_wout_margin_nx_px << "\n"
-    << "\t" << "cel_wout_margin_ny_px : "  << cel_wout_margin_ny_px << "\n"
-    << "\t" << "ignore_cel_margin_rectangle : \n"  << ignore_cel_margin_rectangle << "\n"
+  << "\t" << "cel_wout_margin_nx_px : "  << cel_wout_margin_nx_px << "\n"
+  << "\t" << "cel_wout_margin_ny_px : "  << cel_wout_margin_ny_px << "\n"
+  << "\t" << "ignore_cel_margin_rectangle : \n"  << ignore_cel_margin_rectangle << "\n"
     /** Orientation **/
-    << "\t" << "orientation_matrix : \n"  << orientation_matrix << "\n"
-    << "\t\t" << "_flag_orientation_matrix : " << std::boolalpha << _flag_orientation_matrix << "\n"
-    << "\t" << "inverse_orientation_matrix : \n"  << inverse_orientation_matrix << "\n"
-    << "\t\t" << "_flag_inverse_orientation_matrix : " << std::boolalpha << _flag_inverse_orientation_matrix << "\n"
-    << "\t" << "min_width_px : "  << min_width_px << "\n"
-    << "\t" << "min_height_px : "  << min_height_px << "\n"
-    << "\t" << "left_padding_w_margin_px : "  << left_padding_w_margin_px << "\n"
-    << "\t" << "top_padding_w_margin_px : "  << top_padding_w_margin_px << "\n"
-    << "\t" << "left_padding_px : "  << left_padding_px << "\n"
-    << "\t" << "top_padding_px : "  << top_padding_px << "\n"
-    << "\t" << "width_px : "  << width_px << "\n"
-    << "\t" << "height_px : "  << height_px << "\n";
+  << "\t" << "orientation_matrix : \n"  << orientation_matrix << "\n"
+  << "\t\t" << "_flag_orientation_matrix : " << std::boolalpha << _flag_orientation_matrix << "\n"
+  << "\t" << "inverse_orientation_matrix : \n"  << inverse_orientation_matrix << "\n"
+  << "\t\t" << "_flag_inverse_orientation_matrix : " << std::boolalpha << _flag_inverse_orientation_matrix << "\n"
+  << "\t" << "min_width_px : "  << min_width_px << "\n"
+  << "\t" << "min_height_px : "  << min_height_px << "\n"
+  << "\t" << "left_padding_w_margin_px : "  << left_padding_w_margin_px << "\n"
+  << "\t" << "top_padding_w_margin_px : "  << top_padding_w_margin_px << "\n"
+  << "\t" << "left_padding_px : "  << left_padding_px << "\n"
+  << "\t" << "top_padding_px : "  << top_padding_px << "\n"
+  << "\t" << "width_px : "  << width_px << "\n"
+  << "\t" << "height_px : "  << height_px << "\n";
   return stream;
 }

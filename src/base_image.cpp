@@ -2,6 +2,7 @@
 
 BaseImage::BaseImage() {
 
+  centroid_translation_px = cv::Point2i(0,0);
   // full n rows
   connect(this, SIGNAL(full_n_rows_height_changed()), this, SLOT(calculate_full_b_size_from_n_rows_and_sampling_rate()));
   connect(this, SIGNAL(full_n_rows_height_changed()), this, SLOT(calculate_roi_n_rows_from_full_n_rows_and_ignored_edge()));
@@ -83,7 +84,7 @@ BaseImage::BaseImage() {
   connect(this, SIGNAL(flag_auto_ignore_edge_pixels_changed()), this, SLOT(calculate_ignore_edge_pixels()));
 
   // _flag_auto_ignore_edge_nm
-    connect(this, SIGNAL(flag_auto_ignore_edge_nm_changed()), this, SLOT(calculate_ignore_edge_nm()));
+  connect(this, SIGNAL(flag_auto_ignore_edge_nm_changed()), this, SLOT(calculate_ignore_edge_nm()));
 
 }
 
@@ -597,6 +598,19 @@ void BaseImage::calculate_ignore_edge_pixels(){
   }
 }
 
+bool BaseImage::apply_centroid_translation_px( int cols_a, int rows_b ){
+  bool result = true;
+  centroid_translation_px.x += cols_a;
+  centroid_translation_px.y += rows_b;
+  return result;
+}
+
+bool BaseImage::apply_centroid_translation_px( cv::Point2i translation ){
+  bool result = true;
+  centroid_translation_px += translation;
+  return result;
+}
+
 /* Loggers */
 bool BaseImage::set_application_logger( ApplicationLog::ApplicationLog* app_logger ){
   logger = app_logger;
@@ -663,6 +677,8 @@ std::ostream& BaseImage::output(std::ostream& stream) const {
   << "\t\t" << "_flag_roi_center_x : " << std::boolalpha << _flag_roi_center_x << "\n"
   << "\t" << "roi_center_y : " <<  roi_center_y << "\n"
   << "\t\t" << "_flag_roi_center_y : " << std::boolalpha << _flag_roi_center_y << "\n"
+   << "\t" << "centroid_translation_px : " <<  centroid_translation_px << "\n"
+  << "\t\t" << "_flag_centroid_translation_px : " << std::boolalpha << _flag_centroid_translation_px << "\n"
     // rectangle without the ignored edge pixels of the full image
   << "\t" << "ignore_edge_nm : " <<  ignore_edge_nm << "\n"
   << "\t\t" << "_flag_ignore_edge_nm : " << std::boolalpha << _flag_ignore_edge_nm << "\n"
