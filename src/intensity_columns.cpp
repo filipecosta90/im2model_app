@@ -306,12 +306,13 @@ cv::KeyPoint IntensityColumns::op_KeyPoint_padding ( cv::KeyPoint point, const c
 }
 
 void IntensityColumns::apply_exp_image_delta_factor(){
-  boost::function<std::vector<cv::Point>(std::vector<cv::Point>)> functor ( boost::bind(&IntensityColumns::op_contour_padding, this , _1, exp_image_delta_factor_constant ) );
-  std::transform( exp_image_intensity_columns.begin(), exp_image_intensity_columns.end(), exp_image_intensity_columns.begin() , functor );
-  boost::function<cv::KeyPoint(cv::KeyPoint)> functorKeypoint ( boost::bind(&IntensityColumns::op_KeyPoint_padding, this , _1, cv::Point2f( (float) exp_image_delta_factor_constant.x, (float) exp_image_delta_factor_constant.y  ) ) );
-  std::transform( exp_image_keypoints.begin(), exp_image_keypoints.end(), exp_image_keypoints.begin() , functorKeypoint );
-  emit exp_image_intensity_columns_changed();
-  emit exp_image_intensity_keypoints_changed();
+  exp_image_properties->apply_centroid_translation_px( exp_image_delta_factor_constant );
+  //boost::function<std::vector<cv::Point>(std::vector<cv::Point>)> functor ( boost::bind(&IntensityColumns::op_contour_padding, this , _1, exp_image_delta_factor_constant ) );
+  //std::transform( exp_image_intensity_columns.begin(), exp_image_intensity_columns.end(), exp_image_intensity_columns.begin() , functor );
+  //boost::function<cv::KeyPoint(cv::KeyPoint)> functorKeypoint ( boost::bind(&IntensityColumns::op_KeyPoint_padding, this , _1, cv::Point2f( (float) exp_image_delta_factor_constant.x, (float) exp_image_delta_factor_constant.y  ) ) );
+  //std::transform( exp_image_keypoints.begin(), exp_image_keypoints.end(), exp_image_keypoints.begin() , functorKeypoint );
+  //emit exp_image_intensity_columns_changed();
+  //emit exp_image_intensity_keypoints_changed();
 }
 
 bool IntensityColumns::read_simulated_image_from_dat_file(){

@@ -277,6 +277,7 @@ public:
     void flag_auto_a_size_changed();
     void flag_auto_ignore_edge_pixels_changed();
     void flag_auto_ignore_edge_nm_changed();
+    void centroid_translation_changed( cv::Point2i );
 
 };
 

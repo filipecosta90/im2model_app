@@ -599,15 +599,13 @@ void BaseImage::calculate_ignore_edge_pixels(){
 }
 
 bool BaseImage::apply_centroid_translation_px( int cols_a, int rows_b ){
-  bool result = true;
-  centroid_translation_px.x += cols_a;
-  centroid_translation_px.y += rows_b;
-  return result;
+  return apply_centroid_translation_px( cv::Point2i( cols_a, rows_b ));
 }
 
 bool BaseImage::apply_centroid_translation_px( cv::Point2i translation ){
   bool result = true;
   centroid_translation_px += translation;
+  emit centroid_translation_changed( centroid_translation_px );
   return result;
 }
 

@@ -252,6 +252,7 @@ public:
     int get_super_cell_sim_image_properties_ignore_edge_pixels();
     std::vector<cv::KeyPoint> get_super_cell_sim_image_properties_keypoints();
     std::vector<cv::KeyPoint> get_super_cell_exp_image_properties_keypoints();
+    cv::Point2i get_super_cell_exp_image_properties_centroid_translation_px();
 
     // gui flag getters
     bool get_flag_celslc_io_ap_pipe_out();
@@ -519,10 +520,13 @@ public:
     public slots:
     void update_super_cell_sim_image_intensity_columns_changed();
     void update_super_cell_exp_image_intensity_columns_changed();
+    void update_super_cell_exp_image_centroid_translation_changed( cv::Point2i trans );
 
     signals:
         void supercell_full_experimental_image_intensity_columns_changed();
     void supercell_full_simulated_image_intensity_columns_changed();
+    void supercell_full_experimental_image_centroid_translation_changed( );
+
     void exp_image_properties_sampling_rate_x_nm_per_pixel_changed();
     void exp_image_properties_sampling_rate_y_nm_per_pixel_changed();
     void accelaration_voltage_kv_changed();

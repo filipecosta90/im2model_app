@@ -85,6 +85,8 @@ TDMap::TDMap(
 
   supercell_exp_image_properties->set_flag_auto_a_size( true );
   supercell_exp_image_properties->set_flag_auto_b_size( true );
+  connect( supercell_exp_image_properties, SIGNAL( centroid_translation_changed( cv::Point2i )), this, SLOT(update_super_cell_exp_image_centroid_translation_changed( cv::Point2i ) ) );
+
   //supercell_exp_image_properties->set_flag_auto_ignore_edge_pixels( true );
 
   sim_image_properties->set_flag_auto_n_rows( true );
@@ -150,6 +152,7 @@ TDMap::TDMap(
   connect( sim_image_intensity_columns, SIGNAL( sim_image_intensity_columns_changed( )), this, SLOT(update_super_cell_sim_image_intensity_columns_changed() ) );
   connect( sim_image_intensity_columns, SIGNAL( exp_image_intensity_columns_changed( )), this, SLOT(update_super_cell_exp_image_intensity_columns_changed() ) );
 
+  
   /////////////
   // only for debug. need to add this options like in im2model command line
   /////////////
@@ -271,6 +274,10 @@ void TDMap::update_super_cell_sim_image_intensity_columns_changed(){
 
 void TDMap::update_super_cell_exp_image_intensity_columns_changed(){
   emit supercell_full_experimental_image_intensity_columns_changed();
+}
+
+void TDMap::update_super_cell_exp_image_centroid_translation_changed( cv::Point2i trans ){
+  emit supercell_full_experimental_image_centroid_translation_changed();
 }
 
 bool TDMap::test_clean_run_env(){
@@ -2410,6 +2417,10 @@ std::vector<cv::KeyPoint> TDMap::get_super_cell_sim_image_properties_keypoints()
 std::vector<cv::KeyPoint> TDMap::get_super_cell_exp_image_properties_keypoints(){
   return sim_image_intensity_columns->get_exp_image_keypoints();
 }
+
+    cv::Point2i TDMap::get_super_cell_exp_image_properties_centroid_translation_px(){
+      return supercell_exp_image_properties->get_centroid_translation_px();
+    }
 
 bool TDMap::get_flag_super_cell_sim_image_properties_full_image(){
   return supercell_sim_image_properties->get_flag_full_image();

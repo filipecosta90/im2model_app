@@ -108,7 +108,7 @@ void CVImageWidget::setImage( const cv::Mat& image, int layer_number, QString Im
   _tmp_currents[ layer_number ] =  _tmp_current ;
   original_sizes[ layer_number ] =  original_size ;
   current_sizes[ layer_number ] =  current_size ;
-  std::cout << "MARGIN POINT " << margin_point;
+  //std::cout << "MARGIN POINT " << margin_point;
   margin_points[ layer_number] = margin_point;
 
   this->setFixedSize( largestImageLayerSize() );

@@ -199,7 +199,7 @@ MainWindow::MainWindow( ApplicationLog::ApplicationLog* logger , QWidget *parent
       
       connect( _core_td_map, SIGNAL(supercell_full_simulated_image_changed( )), this, SLOT(update_super_cell_sim_image_full_image() ) );
       connect( _core_td_map, SIGNAL(supercell_full_simulated_image_intensity_columns_changed( )), this, SLOT(update_super_cell_simulated_image_intensity_columns() ) );
-      connect( _core_td_map, SIGNAL(supercell_full_experimental_image_intensity_columns_changed( )), this, SLOT(update_super_cell_experimental_image_intensity_columns() ) );
+      connect( _core_td_map, SIGNAL(supercell_full_experimental_image_centroid_translation_changed( )), this, SLOT(update_super_cell_target_region()) );
 
       _reset_document_modified_flags();
       if( _flag_im2model_logger ){
@@ -480,9 +480,9 @@ void MainWindow::update_super_cell_target_region_image(){
     const int full_boundary_polygon_margin_x_px = _core_td_map->get_exp_image_bounds_full_boundary_polygon_margin_x_px();
     const int full_boundary_polygon_margin_y_px = _core_td_map->get_exp_image_bounds_full_boundary_polygon_margin_y_px();
     const int margin_point_px = _core_td_map->get_super_cell_sim_image_properties_ignore_edge_pixels();
+    const cv::Point2i centroid_translation_px = _core_td_map->get_super_cell_exp_image_properties_centroid_translation_px();
     const cv::Point2i top_right_corner_margin ( margin_point_px + full_boundary_polygon_margin_x_px, margin_point_px + full_boundary_polygon_margin_y_px);
-    std::cout << " top_right_corner_margin " << top_right_corner_margin << std::endl; 
-    ui->qgraphics_super_cell_refinement->setImage( super_cell_target_region_image, 1 , tr("Super-cell experimental image target region"), top_right_corner_margin );
+    ui->qgraphics_super_cell_refinement->setImage( super_cell_target_region_image, 1 , tr("Super-cell experimental image target region"), top_right_corner_margin + centroid_translation_px );
   }
 }
 
@@ -2757,12 +2757,11 @@ void MainWindow::create_box_options_tab4_intensity_peaks(){
   intensity_peaks_display_experimental_img_alpha->set_slider_int_range_max( alpha_top_limit );
   connect( intensity_peaks_display_experimental_img_alpha, SIGNAL(dataChanged(int)), ui->qgraphics_super_cell_refinement->image_widget, SLOT(repaint()) );
 
-
   QVector<QVariant> box6_option_2_2_2 = {"Distance transform algorithm alpha channel",""};
   intensity_peaks_display_experimental_img_distance_transform_alpha  = new TreeItem ( box6_option_2_2_2 );
   intensity_peaks_display_experimental_img->insertChildren( intensity_peaks_display_experimental_img_distance_transform_alpha );
 
-
+  /*
   QVector<QVariant> box6_option_2_2_3 = {"Intensity peaks alpha channel",""};
   boost::function<int(void)> box6_option_2_2_3_getter ( boost::bind( &CvImageFrameWidget::get_renderPoints_alpha_channels_map, ui->qgraphics_super_cell_refinement , tr("Experimental image intensity columns") ) );
   boost::function<bool(int)> box6_option_2_2_3_setter ( boost::bind( &CvImageFrameWidget::set_renderPoints_alpha_channels_map, ui->qgraphics_super_cell_refinement, tr("Experimental image intensity columns"), _1 ) );
@@ -2778,7 +2777,7 @@ void MainWindow::create_box_options_tab4_intensity_peaks(){
   intensity_peaks_display_experimental_img->insertChildren( intensity_peaks_display_experimental_img_alpha_channel );
   intensity_peaks_display_experimental_img_alpha_channel->set_slider_int_range_min( alpha_bottom_limit );
   intensity_peaks_display_experimental_img_alpha_channel->set_slider_int_range_max( alpha_top_limit );
-
+  */
   ui->qtree_view_refinement_full_simulation->setModel( intensity_peaks_model );
   ui->qtree_view_refinement_full_simulation->setItemDelegate( _load_file_delegate );
     //start editing after one click
