@@ -82,13 +82,14 @@ private:
     ApplicationLog::ApplicationLog* logger = nullptr;
     bool _flag_logger = false;
 
-    float intensity_columns_keypoint_diameter = 1.0f;
+    float intensity_columns_keypoint_diameter = 16.0f;
 
 
     cv::Ptr<Feature2D> f2d;
 
     cv::Mat sim_image_descriptor;
     std::vector<cv::KeyPoint> sim_image_keypoints;
+    std::vector<cv::Point2i> sim_image_intensity_columns_center;
     bool _flag_sim_image_keypoints = false;
 
     cv::Mat exp_image_descriptor;
@@ -100,6 +101,7 @@ private:
     cv::Point2i exp_image_delta_factor_constant;
 
     bool auto_calculate_threshold_value();
+    std::string GetMatType(const cv::Mat& mat);
 
 public:
 
@@ -108,6 +110,7 @@ public:
     bool segmentate_sim_image();
     bool segmentate_exp_image();
     bool feature_match();
+    bool map_sim_intensity_cols_to_exp_image();
 
     /** getters **/
 

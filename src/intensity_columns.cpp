@@ -66,13 +66,62 @@ if( _flag_exp_image_properties ){
 return result;
 }
 
-bool IntensityColumns::segmentate_sim_image(){
+std::string IntensityColumns::GetMatType(const cv::Mat& mat)
+{
+  const int mtype = mat.type();
+
+  switch (mtype)
+  {
+    case CV_8UC1:  return "CV_8UC1";
+    case CV_8UC2:  return "CV_8UC2";
+    case CV_8UC3:  return "CV_8UC3";
+    case CV_8UC4:  return "CV_8UC4";
+
+    case CV_8SC1:  return "CV_8SC1";
+    case CV_8SC2:  return "CV_8SC2";
+    case CV_8SC3:  return "CV_8SC3";
+    case CV_8SC4:  return "CV_8SC4";
+
+    case CV_16UC1: return "CV_16UC1";
+    case CV_16UC2: return "CV_16UC2";
+    case CV_16UC3: return "CV_16UC3";
+    case CV_16UC4: return "CV_16UC4";
+
+    case CV_16SC1: return "CV_16SC1";
+    case CV_16SC2: return "CV_16SC2";
+    case CV_16SC3: return "CV_16SC3";
+    case CV_16SC4: return "CV_16SC4";
+
+    case CV_32SC1: return "CV_32SC1";
+    case CV_32SC2: return "CV_32SC2";
+    case CV_32SC3: return "CV_32SC3";
+    case CV_32SC4: return "CV_32SC4";
+
+    case CV_32FC1: return "CV_32FC1";
+    case CV_32FC2: return "CV_32FC2";
+    case CV_32FC3: return "CV_32FC3";
+    case CV_32FC4: return "CV_32FC4";
+
+    case CV_64FC1: return "CV_64FC1";
+    case CV_64FC2: return "CV_64FC2";
+    case CV_64FC3: return "CV_64FC3";
+    case CV_64FC4: return "CV_64FC4";
+
+    default:
+    return "Invalid type of matrix!";
+  }
+}
+
+bool IntensityColumns::segmentate_sim_image()
+{
      //-- Step 1.1: Detect the keypoints for simulated image
   bool result = false;
   auto_calculate_threshold_value();
-  if( _flag_sim_image_properties && _flag_threshold_value ){
-
-    const cv::Mat src = sim_image_properties->get_full_image( );
+  if( _flag_sim_image_properties ){
+    if( _flag_threshold_value && 
+      exp_image_properties->get_flag_roi_image()
+      ){
+      const cv::Mat src = sim_image_properties->get_roi_image();
 
     const cv::Mat kernel = (Mat_<float>(3,3) <<
       1,  1, 1,
@@ -82,16 +131,23 @@ bool IntensityColumns::segmentate_sim_image(){
     cv::Mat imgLaplacian;
     cv::Mat sharp; 
 
-    filter2D(src, imgLaplacian, CV_32F, kernel);
-    src.convertTo(sharp, CV_32F);
+    filter2D( src, imgLaplacian, CV_32F, kernel );
+    src.convertTo( sharp, CV_32F );
     cv::Mat imgResult = sharp - imgLaplacian;
     
     // convert back to 8bits gray scale
-    imgResult.convertTo(imgResult, CV_8UC1);
+    imgResult.convertTo( imgResult, CV_8UC1 );
 
-    cv::threshold(imgResult, imgResult, threshold_value, 255, CV_THRESH_BINARY | CV_THRESH_OTSU);
+    cv::threshold( imgResult, imgResult, threshold_value, 255, CV_THRESH_BINARY | CV_THRESH_OTSU );
+    imwrite( "imgResult.png", imgResult );
+    cv::Mat C;
+    bitwise_not(imgResult,C);
+    imwrite( "bitwise_not_imgResult.png", C );
 
     distanceTransform(imgResult, sim_image_dist_transform, CV_DIST_L2, 3);
+    std::cout << " sim_image_dist_transform type: " << GetMatType(sim_image_dist_transform) << std::endl;
+
+    imwrite( "sim_image_dist_transform.png", sim_image_dist_transform );
 
     // Normalize the distance image for range = {0.0, 1.0}
     // so we can visualize and threshold it
@@ -107,35 +163,106 @@ bool IntensityColumns::segmentate_sim_image(){
 
     // Create the CV_8U version of the distance image
     // It is needed for findContours()
-    sim_image_dist_transform.convertTo(sim_image_dist_transform, CV_8UC1);
+    sim_image_dist_transform.convertTo(sim_image_dist_transform, CV_8U);
 
     // Find total markers
     findContours(sim_image_dist_transform, sim_image_intensity_columns, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
-    
+
+    // Create the marker image for the watershed algorithm
+    //CV_32S - 32-bit signed integers ( -2147483648..2147483647 )
+    //CV_32S 4 12  20  28
+    cv::Mat markers = Mat::zeros(sim_image_dist_transform.size(), CV_32SC1);
+
+
     // Draw the foreground markers
-    std::cout << "detected " << sim_image_intensity_columns.size() << "potential intensity columns " << std::endl;
-
     for (size_t i = 0; i < sim_image_intensity_columns.size(); i++){
-      /** Lets find the centroid of the exp. image boundary poligon **/
-      CvMoments moments = cv::moments( sim_image_intensity_columns[i] );
-      const double M00 = cvGetSpatialMoment(&moments,0,0);
-      const double M10 = cvGetSpatialMoment(&moments,1,0);
-      const double M01 = cvGetSpatialMoment(&moments,0,1);
-      const int _sim_image_boundary_polygon_center_x = (int)(M10/M00);
-      const int _sim_image_boundary_polygon_center_y = (int)(M01/M00);
-      const cv::Point boundary_polygon_center( _sim_image_boundary_polygon_center_x, _sim_image_boundary_polygon_center_y );
-      cv::KeyPoint kpoint = cv::KeyPoint( (float)_sim_image_boundary_polygon_center_x, (float)_sim_image_boundary_polygon_center_y, intensity_columns_keypoint_diameter );
-      sim_image_keypoints.push_back( kpoint );
-    }
-    result = true;
-    _flag_sim_image_keypoints = true;
-    cv::normalize(sim_image_dist_transform, sim_image_dist_transform, 0, 255, NORM_MINMAX);
-    imwrite("sim_image_dist_transform.png", sim_image_dist_transform);
+     drawContours(markers, sim_image_intensity_columns, static_cast<int>(i), Scalar::all(static_cast<int>(i)+1), -1);
+   }
+   imwrite( "markers_v0.png", markers );
 
-    emit sim_image_intensity_columns_changed();
-    emit sim_image_intensity_keypoints_changed();
+ // Perform the watershed algorithm
+   // CV_8U OR CV_16U  
+   cv::Mat src_converted = sim_image_dist_transform;
+   std::cout << " src mat type: " << GetMatType(src) << std::endl;
+
+   if( src_converted.type() != (((0) & ((1 << 3) - 1)) + (((3)-1) << 3)) ){
+    std::cout << "not correct type " << std::endl;
+    cvtColor(src_converted,src_converted,CV_GRAY2BGR,3);
+    imwrite( "src_converted.png", src_converted );
+
   }
-  return result;
+  bitwise_not(src_converted, src_converted);
+  imwrite( "src_converted_bit.png", src_converted );
+
+  watershed(src_converted, markers);
+  Mat mark = Mat::zeros(markers.size(), CV_8UC1);
+  markers.convertTo(mark, CV_8UC1);
+  imwrite( "markers.png", markers );
+  imwrite( "mark.png", mark );
+
+  bitwise_not(mark, mark);
+  imwrite( "mark_bit.png", mark );
+
+//    imshow("Markers_v2", mark); // uncomment this if you want to see how the mark
+                                  // image looks like at that point
+  //computing the watershed transform of the distance transform of bw, and then looking for the watershed ridge lines (DL == 0) of the result.
+  Mat1b mask_borders = (markers == 0);
+  cv::normalize(mask_borders, mask_borders, 0, 255, NORM_MINMAX);
+  imwrite( "mask_borders.png", mask_borders );
+
+  for (int seed = 1; seed <= sim_image_intensity_columns.size(); ++seed)
+  {
+    Mat1b mask = (markers == seed);
+    Mat test = (Mat)mask.clone();
+
+    cv::normalize(test, test, 0, 255, NORM_MINMAX);
+
+    std::stringstream sstream1;
+    sstream1 << "seed_";
+    sstream1 <<   std::setw(3) << std::setfill('0') << std::to_string( seed );
+    sstream1 << "_mask.png";
+    imwrite ( sstream1.str(), test );
+  }
+
+  for (size_t i = 0; i < sim_image_intensity_columns.size(); i++){
+      /** Lets find the centroid of the exp. image boundary poligon **/
+    CvMoments moments = cv::moments( sim_image_intensity_columns[i] );
+    const double M00 = cvGetSpatialMoment(&moments,0,0);
+    const double M10 = cvGetSpatialMoment(&moments,1,0);
+    const double M01 = cvGetSpatialMoment(&moments,0,1);
+    const int _sim_image_boundary_polygon_center_x = (int)(M10/M00);
+    const int _sim_image_boundary_polygon_center_y = (int)(M01/M00);
+    const cv::Point boundary_polygon_center( _sim_image_boundary_polygon_center_x, _sim_image_boundary_polygon_center_y );
+    sim_image_intensity_columns_center.push_back( boundary_polygon_center );
+    cv::KeyPoint kpoint = cv::KeyPoint( (float)_sim_image_boundary_polygon_center_x, (float)_sim_image_boundary_polygon_center_y, intensity_columns_keypoint_diameter );
+    sim_image_keypoints.push_back( kpoint );
+  }
+  result = true;
+  _flag_sim_image_keypoints = true;
+  cv::normalize(sim_image_dist_transform, sim_image_dist_transform, 0, 255, NORM_MINMAX);
+
+  emit sim_image_intensity_columns_changed();
+  emit sim_image_intensity_keypoints_changed();
+}
+else {
+  result = false;
+  if( _flag_logger ){
+    std::stringstream message;
+    message << "The required vars for segmentate_sim_image() are not setted up.";
+    BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::error , message.str() );
+  }
+  print_var_state();
+}
+}
+else{
+  if( _flag_logger ){
+    std::stringstream message;
+    message << "The required Class POINTERS for segmentate_sim_image() are not setted up.";
+    BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::error , message.str() );
+  }
+  print_var_state();
+}
+return result;
 }
 
 bool IntensityColumns::segmentate_exp_image(){
@@ -194,7 +321,7 @@ bool IntensityColumns::segmentate_exp_image(){
       const double M01 = cvGetSpatialMoment(&moments,0,1);
       const int _exp_image_boundary_polygon_center_x = (int)(M10/M00);
       const int _exp_image_boundary_polygon_center_y = (int)(M01/M00);
-      const cv::Point boundary_polygon_center( _exp_image_boundary_polygon_center_x, _exp_image_boundary_polygon_center_y );
+      const cv::Point2i boundary_polygon_center( _exp_image_boundary_polygon_center_x, _exp_image_boundary_polygon_center_y );
       cv::KeyPoint kpoint = cv::KeyPoint( (float)_exp_image_boundary_polygon_center_x, (float)_exp_image_boundary_polygon_center_y, intensity_columns_keypoint_diameter );
       exp_image_keypoints.push_back( kpoint );
     }
@@ -240,7 +367,7 @@ bool IntensityColumns::feature_match(){
   double match_factor;
   try{
             /// Create the result matrix
-    const cv::Mat src_sim = sim_image_properties->get_full_image( );
+    const cv::Mat src_sim = sim_image_properties->get_full_image();
     const cv::Mat src_exp = exp_image_properties->get_roi_image();
 
     const int result_cols =  src_sim.cols - src_exp.cols + 1;
@@ -255,7 +382,7 @@ bool IntensityColumns::feature_match(){
     cv::matchTemplate( src_sim , src_exp, result_mat, CV_TM_CCOEFF_NORMED );
     cv::minMaxLoc( result_mat, &minVal, &maxVal, &minLoc, &maxLoc, cv::Mat() );
     matchVal = maxVal;
-    exp_image_delta_factor_constant =  maxLoc - delta_centerPos;
+    exp_image_delta_factor_constant =  delta_centerPos - maxLoc;
     match_factor = matchVal * 100.0;
     std::cout << "match_factor " << match_factor << ", deltaPos " << exp_image_delta_factor_constant << " maxLoc " <<  maxLoc << " delta_centerPos " << delta_centerPos << std::endl;
     emit exp_image_delta_factor_constant_changed();
@@ -282,6 +409,100 @@ else{
   if( _flag_logger ){
     std::stringstream message;
     message << "The required Class POINTERS for feature_match() are not setted up.";
+    BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::error , message.str() );
+  }
+  print_var_state();
+}
+return result;
+}
+
+bool IntensityColumns::map_sim_intensity_cols_to_exp_image(){
+ bool result = false;
+ auto_calculate_threshold_value();
+ if( _flag_exp_image_properties ){
+  if(  
+    sim_image_properties->get_flag_full_image( ) && 
+    exp_image_properties->get_flag_roi_image()
+    ){
+    try{
+      const cv::Point2i exp_image_centroid = exp_image_properties->get_centroid_translation_px( );
+      const cv::Point2i sim_image_centroid = sim_image_properties->get_centroid_translation_px( );
+      const cv::Mat src_sim = sim_image_properties->get_full_image();
+      const cv::Mat src_exp = exp_image_properties->get_roi_image();
+      imwrite("src_exp.png",src_exp);
+      imwrite("src_sim.png",src_sim);
+      cv::Point2i sim_exp_diff = cv::Point2i( src_sim.cols - src_exp.cols, src_sim.rows - src_exp.cols ) / 2;
+      cv::Point2i exp_map_sim_top_left = sim_exp_diff + ( sim_image_centroid - exp_image_centroid );
+      cv::Mat exp_mapped_matrix = cv::Mat::zeros( src_sim.rows, src_sim.cols, src_sim.type() );
+      src_exp.copyTo(exp_mapped_matrix(Rect(exp_map_sim_top_left.x, exp_map_sim_top_left.y, src_exp.cols, src_exp.rows)));
+      imwrite("exp_mapped_matrix.png",exp_mapped_matrix);
+
+      for (size_t i = 0; i < sim_image_keypoints.size(); i++){
+        //std::cout << "sim_image_keypoints " << i << std::endl;
+        /** Lets find the centroid of the exp. image boundary poligon **/
+        const cv::KeyPoint kpoint = sim_image_keypoints[i] ;
+        //Define the destination image
+        const int kpoint_size = ( int ) kpoint.size;
+        const cv::Point2i kpoint_half_dim( kpoint_size / 2, kpoint_size / 2 );
+        const cv::Point2i center_kpoint = sim_image_intensity_columns_center[i];
+        const cv::Point2i top_left_kpoint = center_kpoint - kpoint_half_dim;
+        const cv::Rect rect_kpoint(top_left_kpoint.x, top_left_kpoint.y, kpoint_size, kpoint_size );
+        //std::cout << "\t\trect_kpoint " << rect_kpoint << std::endl;
+
+        cv::Mat mask = cv::Mat::zeros(kpoint_size, kpoint_size, src_sim.type());
+
+        cv::Mat dstImageSim = cv::Mat::zeros( kpoint_size, kpoint_size, src_sim.type());    
+        cv::Mat dstImageExp = cv::Mat::zeros( kpoint_size, kpoint_size, src_sim.type());    
+
+        // draw circle 
+        cv::circle(mask, cv::Point(mask.rows/2, mask.cols/2), kpoint_size / 2, cv::Scalar(255, 0, 0), -1, 8, 0);
+        
+        // copy source image to destination image with masking
+        src_sim(rect_kpoint).copyTo(dstImageSim, mask);
+        exp_mapped_matrix(rect_kpoint).copyTo(dstImageExp, mask);
+
+        std::stringstream sstream;
+        sstream << "dstImageSim_" << "KeyPoint_";
+        sstream <<   std::setw(3) << std::setfill('0') << std::to_string( i );
+        sstream << ".png";
+        imwrite ( sstream.str(), dstImageSim );
+
+        std::stringstream sstream1;
+        sstream1 << "dstImageExp_" << "Mapped_KeyPoint_";
+        sstream1 <<   std::setw(3) << std::setfill('0') << std::to_string( i );
+        sstream1 << ".png";
+        imwrite ( sstream1.str(), dstImageExp );
+        double sum_dstImageExp = cv::sum(dstImageExp)[0];
+        double sum_dstImageSim = cv::sum(dstImageSim)[0];
+        std::cout << "keypoint "<< i << " sum_dstImageExp " << sum_dstImageExp << "\t sum_dstImageSim " << sum_dstImageSim << std::endl;
+      }
+
+      result = true;
+    } catch ( const std::exception& e ){
+      if( _flag_logger ){
+        std::stringstream message;
+        message << "A standard exception was caught, while running map_sim_intensity_cols_to_exp_image: " << e.what();
+        ApplicationLog::severity_level _log_type = ApplicationLog::error;
+        BOOST_LOG_FUNCTION();  logger->logEvent( _log_type , message.str() );
+      }
+    }
+  }
+  else {
+    result = false;
+
+
+    if( _flag_logger ){
+      std::stringstream message;
+      message << "The required vars for map_sim_intensity_cols_to_exp_image() are not setted up.";
+      BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::error , message.str() );
+    }
+    print_var_state();
+  }
+}
+else{
+  if( _flag_logger ){
+    std::stringstream message;
+    message << "The required Class POINTERS for map_sim_intensity_cols_to_exp_image() are not setted up.";
     BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::error , message.str() );
   }
   print_var_state();

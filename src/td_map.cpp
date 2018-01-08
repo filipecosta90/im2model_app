@@ -91,13 +91,13 @@ TDMap::TDMap(
 
   sim_image_properties->set_flag_auto_n_rows( true );
   sim_image_properties->set_flag_auto_n_cols( true );
-  sim_image_properties->set_flag_auto_roi_from_ignored_edge( false );
+  sim_image_properties->set_flag_auto_roi_from_ignored_edge( true );
   sim_image_properties->set_flag_auto_ignore_edge_pixels( true );
   sim_image_properties->set_ignore_edge_nm( cel_margin_nm );
 
   supercell_sim_image_properties->set_flag_auto_n_rows( true );
   supercell_sim_image_properties->set_flag_auto_n_cols( true );
-  //supercell_sim_image_properties->set_flag_auto_roi_from_ignored_edge( true );
+  supercell_sim_image_properties->set_flag_auto_roi_from_ignored_edge( true );
   supercell_sim_image_properties->set_flag_auto_ignore_edge_pixels( true );
   supercell_sim_image_properties->set_ignore_edge_nm( cel_margin_nm );
 
@@ -151,7 +151,6 @@ TDMap::TDMap(
 
   connect( sim_image_intensity_columns, SIGNAL( sim_image_intensity_columns_changed( )), this, SLOT(update_super_cell_sim_image_intensity_columns_changed() ) );
   connect( sim_image_intensity_columns, SIGNAL( exp_image_intensity_columns_changed( )), this, SLOT(update_super_cell_exp_image_intensity_columns_changed() ) );
-
   
   /////////////
   // only for debug. need to add this options like in im2model command line
@@ -2091,6 +2090,7 @@ bool TDMap::set_thickness_user_estimated_nm( std::string s_estimated ){
             _flag_read_simulated_supercell_image &= sim_image_intensity_columns->segmentate_sim_image();
             //_flag_read_simulated_supercell_image &= sim_image_intensity_columns->segmentate_exp_image();
             sim_image_intensity_columns->feature_match();
+            sim_image_intensity_columns->map_sim_intensity_cols_to_exp_image();
             emit TDMap_ended_supercell_segmentate_image( _flag_read_simulated_supercell_image );
             std::cout << "_flag_read_simulated_supercell_image: " << std::boolalpha << _flag_read_simulated_supercell_image << std::endl;
 
@@ -2418,9 +2418,9 @@ std::vector<cv::KeyPoint> TDMap::get_super_cell_exp_image_properties_keypoints()
   return sim_image_intensity_columns->get_exp_image_keypoints();
 }
 
-    cv::Point2i TDMap::get_super_cell_exp_image_properties_centroid_translation_px(){
-      return supercell_exp_image_properties->get_centroid_translation_px();
-    }
+cv::Point2i TDMap::get_super_cell_exp_image_properties_centroid_translation_px(){
+  return supercell_exp_image_properties->get_centroid_translation_px();
+}
 
 bool TDMap::get_flag_super_cell_sim_image_properties_full_image(){
   return supercell_sim_image_properties->get_flag_full_image();
@@ -2479,6 +2479,8 @@ bool TDMap::update_full_crysta_a_b_sizes(){
     ){
     const double full_crystal_a_size = exp_image_bounds->get_boundary_polygon_length_x_nm();
   const double full_crystal_b_size = exp_image_bounds->get_boundary_polygon_length_y_nm();
+  const int ignore_edge_pixels = exp_image_bounds->get_full_boundary_polygon_margin_y_px();
+  
   const bool a_result = tdmap_full_sim_super_cell->set_length_a_Nanometers( full_crystal_a_size );
   const bool b_result = tdmap_full_sim_super_cell->set_length_b_Nanometers( full_crystal_b_size );
 
@@ -2490,6 +2492,10 @@ bool TDMap::update_full_crysta_a_b_sizes(){
   std::cout << " setting full_sim_super_cell_length_b " << full_crystal_b_size << std::endl;
   std::cout << " setting full_sim_super_cell_length_b " << cell_length_b_nm << std::endl;
   const bool image_result_b = supercell_sim_image_properties->set_full_nm_size_rows_b( cell_length_b_nm );
+
+  const bool image_ignore_pixels_result = supercell_sim_image_properties->set_ignore_edge_pixels( ignore_edge_pixels );
+  std::cout << "image_ignore_pixels_result " << image_ignore_pixels_result << " ignore_edge_pixels " << ignore_edge_pixels << std::endl;
+
   const bool super_cell_result = a_result && b_result && image_result_a && image_result_b;
   std::cout << "full_crystal_a_size " << full_crystal_a_size << " full_crystal_b_size " << full_crystal_b_size << " super_cell_result " << std::boolalpha << super_cell_result << std::endl;
   if( super_cell_result ){
