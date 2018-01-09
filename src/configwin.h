@@ -167,6 +167,7 @@ protected:
     void update_super_cell_experimental_image_intensity_columns();
     void update_super_cell_simulated_image_intensity_columns();
     void update_super_cell_sim_image_full_image();
+    void update_super_cell_sim_image_roi_image();
     void on_qpush_run_tdmap_clicked();
     void update_simgrid_frame( );
     void update_super_cell_target_region();

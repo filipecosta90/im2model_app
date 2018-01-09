@@ -2081,7 +2081,7 @@ bool TDMap::set_thickness_user_estimated_nm( std::string s_estimated ){
             emit TDMap_started_supercell_read_simulated_image();
             _flag_read_simulated_supercell_image = sim_image_intensity_columns->read_simulated_image_from_dat_file();
             if( _flag_read_simulated_supercell_image ){
-              emit supercell_full_simulated_image_changed();
+              emit supercell_roi_simulated_image_changed();
             }
             emit TDMap_ended_supercell_read_simulated_image( _flag_read_simulated_supercell_image );
             std::cout << "read_simulated_image_from_dat_file: " << std::boolalpha << _flag_read_simulated_supercell_image << std::endl;
@@ -2089,10 +2089,10 @@ bool TDMap::set_thickness_user_estimated_nm( std::string s_estimated ){
             emit TDMap_started_supercell_segmentate_image();
             _flag_read_simulated_supercell_image &= sim_image_intensity_columns->segmentate_sim_image();
             //_flag_read_simulated_supercell_image &= sim_image_intensity_columns->segmentate_exp_image();
-            sim_image_intensity_columns->feature_match();
-            sim_image_intensity_columns->map_sim_intensity_cols_to_exp_image();
-            emit TDMap_ended_supercell_segmentate_image( _flag_read_simulated_supercell_image );
+            _flag_read_simulated_supercell_image &= sim_image_intensity_columns->feature_match();
+            _flag_read_simulated_supercell_image &= sim_image_intensity_columns->map_sim_intensity_cols_to_exp_image();
             std::cout << "_flag_read_simulated_supercell_image: " << std::boolalpha << _flag_read_simulated_supercell_image << std::endl;
+            emit TDMap_ended_supercell_segmentate_image( _flag_read_simulated_supercell_image );
 
             if( _flag_logger ){
               std::stringstream message;
@@ -2402,6 +2402,10 @@ double TDMap::get_exp_image_properties_roi_nx_size_width_nm(){
   return exp_image_properties->get_roi_n_cols_width_nm();
 }
 
+cv::Mat TDMap::get_super_cell_sim_image_properties_roi_image(){
+  return supercell_sim_image_properties->get_roi_image();
+}
+
 cv::Mat TDMap::get_super_cell_sim_image_properties_full_image(){
   return supercell_sim_image_properties->get_full_image();
 }
@@ -2420,6 +2424,10 @@ std::vector<cv::KeyPoint> TDMap::get_super_cell_exp_image_properties_keypoints()
 
 cv::Point2i TDMap::get_super_cell_exp_image_properties_centroid_translation_px(){
   return supercell_exp_image_properties->get_centroid_translation_px();
+}
+
+bool TDMap::get_flag_super_cell_sim_image_properties_roi_image(){
+  return supercell_sim_image_properties->get_flag_roi_image();
 }
 
 bool TDMap::get_flag_super_cell_sim_image_properties_full_image(){

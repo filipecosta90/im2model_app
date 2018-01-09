@@ -196,8 +196,8 @@ MainWindow::MainWindow( ApplicationLog::ApplicationLog* logger , QWidget *parent
       connect(_core_td_map, SIGNAL(TDMap_started_simgrid()), this, SLOT(update_tdmap_sim_ostream_simgrid()));
       connect( _core_td_map, SIGNAL(TDMap_ended_simgrid( bool )), this, SLOT(update_tdmap_simgrid_ended( bool ) ) );
       connect( _core_td_map, SIGNAL(TDMap_no_simgrid( bool )), this, SLOT(update_tdmap_no_simgrid_ended( bool ) ) );
-      
-      connect( _core_td_map, SIGNAL(supercell_full_simulated_image_changed( )), this, SLOT(update_super_cell_sim_image_full_image() ) );
+
+      connect( _core_td_map, SIGNAL(supercell_roi_simulated_image_changed( )), this, SLOT(update_super_cell_roi_image_full_image() ) );
       connect( _core_td_map, SIGNAL(supercell_full_simulated_image_intensity_columns_changed( )), this, SLOT(update_super_cell_simulated_image_intensity_columns() ) );
       connect( _core_td_map, SIGNAL(supercell_full_experimental_image_centroid_translation_changed( )), this, SLOT(update_super_cell_target_region()) );
 
@@ -479,9 +479,9 @@ void MainWindow::update_super_cell_target_region_image(){
     const cv::Mat super_cell_target_region_image = _core_td_map->get_exp_image_bounds_roi_boundary_image();
     const int full_boundary_polygon_margin_x_px = _core_td_map->get_exp_image_bounds_full_boundary_polygon_margin_x_px();
     const int full_boundary_polygon_margin_y_px = _core_td_map->get_exp_image_bounds_full_boundary_polygon_margin_y_px();
-    const int margin_point_px = _core_td_map->get_super_cell_sim_image_properties_ignore_edge_pixels();
+    //const int margin_point_px = _core_td_map->get_super_cell_sim_image_properties_ignore_edge_pixels();
     const cv::Point2i centroid_translation_px = _core_td_map->get_super_cell_exp_image_properties_centroid_translation_px();
-    const cv::Point2i top_right_corner_margin ( margin_point_px + full_boundary_polygon_margin_x_px, margin_point_px + full_boundary_polygon_margin_y_px);
+    const cv::Point2i top_right_corner_margin ( full_boundary_polygon_margin_x_px, full_boundary_polygon_margin_y_px);
     ui->qgraphics_super_cell_refinement->setImage( super_cell_target_region_image, 1 , tr("Super-cell experimental image target region"), top_right_corner_margin + centroid_translation_px );
   }
 }
@@ -554,8 +554,8 @@ void MainWindow::update_super_cell_experimental_image_intensity_columns(){
   std::cout << " update_super_cell_experimental_image_intensity_columns " << std::endl;
   const int full_boundary_polygon_margin_x_px = _core_td_map->get_exp_image_bounds_full_boundary_polygon_margin_x_px();
   const int full_boundary_polygon_margin_y_px = _core_td_map->get_exp_image_bounds_full_boundary_polygon_margin_y_px();
-  const int margin_point_px = _core_td_map->get_super_cell_sim_image_properties_ignore_edge_pixels();
-  const cv::Point2i top_right_corner_margin ( margin_point_px + full_boundary_polygon_margin_x_px, margin_point_px + full_boundary_polygon_margin_y_px);
+  //const int margin_point_px = _core_td_map->get_super_cell_sim_image_properties_ignore_edge_pixels();
+  const cv::Point2i top_right_corner_margin ( full_boundary_polygon_margin_x_px, full_boundary_polygon_margin_y_px);
   std::vector<cv::KeyPoint> exp_image_keypoints = _core_td_map->get_super_cell_exp_image_properties_keypoints();
   std::vector<cv::Point2i> exp_image_renderPoints;
 
@@ -581,12 +581,18 @@ void MainWindow::update_super_cell_simulated_image_intensity_columns(){
   ui->qgraphics_super_cell_refinement->show();
 }
 
+void MainWindow::update_super_cell_sim_image_roi_image(){
+  if( _core_td_map->get_flag_super_cell_sim_image_properties_roi_image() ){
+    const cv::Mat roi_image = _core_td_map->get_super_cell_sim_image_properties_roi_image();
+    // update tab 4
+    ui->qgraphics_super_cell_refinement->setImage( roi_image, 0, "ROI super-cell simulated image"  );
+    ui->qgraphics_super_cell_refinement->show();
+  }
+}
+
 void MainWindow::update_super_cell_sim_image_full_image(){
   if( _core_td_map->get_flag_super_cell_sim_image_properties_full_image() ){
     const cv::Mat full_image = _core_td_map->get_super_cell_sim_image_properties_full_image();
-    const int margin_px = _core_td_map->get_super_cell_sim_image_properties_ignore_edge_pixels();
-    const cv::Point2i margin_point_px ( margin_px , margin_px );
-    std::cout << " margin_px " << margin_px << std::endl; 
     // update tab 4
     ui->qgraphics_super_cell_refinement->setImage( full_image, 0, "Full super-cell simulated image"  );
     ui->qgraphics_super_cell_refinement->show();

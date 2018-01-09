@@ -10,6 +10,7 @@ BaseImage::BaseImage() {
   // roi n rows
   connect(this, SIGNAL(roi_n_rows_height_changed()), this, SLOT(calculate_roi_b_size_from_n_rows_and_sampling_rate()));
   connect(this, SIGNAL(roi_n_rows_height_changed()), this, SLOT(calculate_roi_rectangle_and_roi_image()));
+  connect(this, SIGNAL(roi_n_rows_height_changed()) , this, SLOT(update_flag_roi_rectangle()));
 
   // full n cols
   connect(this, SIGNAL(full_n_cols_width_changed()), this, SLOT(calculate_full_a_size_from_n_cols_and_sampling_rate()));
@@ -18,6 +19,7 @@ BaseImage::BaseImage() {
   // roi n cols
   connect(this, SIGNAL(roi_n_cols_width_changed()), this, SLOT(calculate_roi_a_size_from_n_cols_and_sampling_rate()));
   connect(this, SIGNAL(roi_n_cols_width_changed()), this, SLOT(calculate_roi_rectangle_and_roi_image()));
+  connect(this, SIGNAL(roi_n_cols_width_changed()) , this, SLOT(update_flag_roi_rectangle()));
 
 
 // sampling_rate_x_nm_per_pixel
@@ -49,9 +51,11 @@ BaseImage::BaseImage() {
 
   // roi_center_x
   connect(this, SIGNAL(roi_center_x_changed()), this, SLOT(calculate_roi_rectangle_and_roi_image()));
+  connect(this, SIGNAL( roi_center_x_changed() ) , this, SLOT(update_flag_roi_rectangle()));
 
   // roi_center_y 
   connect(this, SIGNAL(roi_center_y_changed()), this, SLOT(calculate_roi_rectangle_and_roi_image()));
+  connect(this, SIGNAL( roi_center_y_changed() ) , this, SLOT(update_flag_roi_rectangle()));
 
   // ignore_edge_pixels
   connect(this, SIGNAL(ignore_edge_pixels_changed()), this, SLOT(calculate_roi_n_rows_from_full_n_rows_and_ignored_edge()));
@@ -69,23 +73,25 @@ BaseImage::BaseImage() {
   connect(this, SIGNAL(flag_auto_n_rows_changed()), this, SLOT(calculate_roi_n_rows_from_b_size_and_sampling_rate()));
 
 // _flag_auto_n_cols
-  connect(this, SIGNAL(flag_auto_n_cols_changed()), this, SLOT(calculate_full_n_cols_from_a_size_and_sampling_rate()));
-  connect(this, SIGNAL(flag_auto_n_cols_changed()), this, SLOT(calculate_roi_n_cols_from_a_size_and_sampling_rate()));
+  connect(this, SIGNAL( flag_auto_n_cols_changed()), this, SLOT(calculate_full_n_cols_from_a_size_and_sampling_rate()));
+  connect(this, SIGNAL( flag_auto_n_cols_changed()), this, SLOT(calculate_roi_n_cols_from_a_size_and_sampling_rate()));
 
         // _flag_auto_b_size
-  connect(this, SIGNAL(flag_auto_b_size_changed()), this, SLOT(calculate_full_b_size_from_n_rows_and_sampling_rate()));
-  connect(this, SIGNAL(flag_auto_b_size_changed()), this, SLOT(calculate_roi_b_size_from_n_rows_and_sampling_rate()));
+  connect(this, SIGNAL( flag_auto_b_size_changed()), this, SLOT(calculate_full_b_size_from_n_rows_and_sampling_rate()));
+  connect(this, SIGNAL( flag_auto_b_size_changed()), this, SLOT(calculate_roi_b_size_from_n_rows_and_sampling_rate()));
 
 // _flag_auto_a_size
-  connect(this, SIGNAL(flag_auto_a_size_changed()), this, SLOT(calculate_full_a_size_from_n_cols_and_sampling_rate()));
-  connect(this, SIGNAL(flag_auto_a_size_changed()), this, SLOT(calculate_roi_a_size_from_n_cols_and_sampling_rate()));
+  connect(this, SIGNAL( flag_auto_a_size_changed()), this, SLOT(calculate_full_a_size_from_n_cols_and_sampling_rate()));
+  connect(this, SIGNAL( flag_auto_a_size_changed()), this, SLOT(calculate_roi_a_size_from_n_cols_and_sampling_rate()));
 
   // _flag_auto_ignore_edge_pixels
-  connect(this, SIGNAL(flag_auto_ignore_edge_pixels_changed()), this, SLOT(calculate_ignore_edge_pixels()));
+  connect(this, SIGNAL( flag_auto_ignore_edge_pixels_changed()), this, SLOT(calculate_ignore_edge_pixels()));
 
   // _flag_auto_ignore_edge_nm
-  connect(this, SIGNAL(flag_auto_ignore_edge_nm_changed()), this, SLOT(calculate_ignore_edge_nm()));
+  connect(this, SIGNAL( flag_auto_ignore_edge_nm_changed()), this, SLOT(calculate_ignore_edge_nm()));
 
+  connect(this, SIGNAL( full_image_changed() ) , this, SLOT(update_roi_image_from_full_image_and_roi_rectangle()));
+  connect(this, SIGNAL( roi_rectangle_changed() ) , this, SLOT(update_roi_image_from_full_image_and_roi_rectangle()));
 }
 
 void BaseImage::calculate_roi_n_cols_from_full_n_cols_and_ignored_edge(){
@@ -268,6 +274,13 @@ bool BaseImage::set_roi_n_rows_height(  int n_rows ){
   return result;
 }
 
+void BaseImage::update_flag_roi_rectangle(){
+  if( _flag_roi_n_cols_width && _flag_roi_n_rows_height && _flag_roi_center_x && _flag_roi_center_y && !_flag_roi_rectangle ){
+    _flag_roi_rectangle = true;
+    emit roi_rectangle_changed();
+  }
+}
+
 bool BaseImage::set_full_n_cols_width( int width ){
  bool result = false;
  if( width != full_n_cols_width || ( _flag_full_n_cols_width == false ) ){
@@ -446,7 +459,17 @@ bool BaseImage::set_full_image( cv::Mat image ){
   return result;
 }
 
-bool BaseImage::set_full_image( std::string image_path ){
+void BaseImage::update_roi_image_from_full_image_and_roi_rectangle(){
+  std::cout <<  " update_roi_image_from_full_image_and_roi_rectangle " << std::endl;
+  if( _flag_full_image && _flag_roi_rectangle ){
+    roi_image = full_image( roi_rectangle );
+    _flag_roi_image = true;
+    std::cout << " _flag_roi_image " << std::boolalpha << _flag_roi_image << std::endl;
+    emit roi_image_changed();
+  }
+}
+
+bool BaseImage::set_full_image( std::string image_path, bool normalize ){
   bool result = false;
   if ( boost::filesystem::exists( image_path ) ){
     image_extension = boost::filesystem::extension( image_path );
@@ -491,17 +514,25 @@ void BaseImage::calculate_roi_rectangle_and_roi_image(){
     _flag_roi_center_y &&
     _flag_roi_n_rows_height &&
     _flag_roi_n_cols_width ) {
+
     const int top_left_x = roi_center_x - ( roi_n_cols_width  / 2 );
   const int top_left_y = roi_center_y - ( roi_n_rows_height / 2 );
+
   if( top_left_x >= 0 && top_left_y >= 0 ){
+
    roi_rectangle.x = top_left_x;
    roi_rectangle.y = top_left_y;
    roi_rectangle.width = roi_n_cols_width;
    roi_rectangle.height = roi_n_rows_height;
    _flag_roi_rectangle = true;
-   if( _flag_full_image ){
-    roi_image = full_image( roi_rectangle );
-    _flag_roi_image = true;
+   emit roi_rectangle_changed();
+
+ }
+ else{
+   if( _flag_logger ){
+    std::stringstream message;
+    message << "ERROR: top_left_x " << top_left_x << " top_left_y " << top_left_y;
+    BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::error , message.str() );
   }
 }
 }
@@ -675,7 +706,7 @@ std::ostream& BaseImage::output(std::ostream& stream) const {
   << "\t\t" << "_flag_roi_center_x : " << std::boolalpha << _flag_roi_center_x << "\n"
   << "\t" << "roi_center_y : " <<  roi_center_y << "\n"
   << "\t\t" << "_flag_roi_center_y : " << std::boolalpha << _flag_roi_center_y << "\n"
-   << "\t" << "centroid_translation_px : " <<  centroid_translation_px << "\n"
+  << "\t" << "centroid_translation_px : " <<  centroid_translation_px << "\n"
   << "\t\t" << "_flag_centroid_translation_px : " << std::boolalpha << _flag_centroid_translation_px << "\n"
     // rectangle without the ignored edge pixels of the full image
   << "\t" << "ignore_edge_nm : " <<  ignore_edge_nm << "\n"

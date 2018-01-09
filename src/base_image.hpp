@@ -199,7 +199,7 @@ public:
     bool set_emd_wrapper( EMDWrapper* wrapper );
 
     // full frame
-    bool set_full_image( std::string path );
+    bool set_full_image( std::string path, bool normalize = false );
     bool set_full_image( cv::Mat full_image );
     bool set_full_n_rows_height( int full_n_rows_height );
     bool set_full_n_cols_width( int full_n_cols_width );
@@ -252,6 +252,8 @@ public:
     void calculate_full_a_size_from_n_cols_and_sampling_rate();
     void calculate_roi_a_size_from_n_cols_and_sampling_rate();
     void calculate_roi_rectangle_and_roi_image();
+    void update_roi_image_from_full_image_and_roi_rectangle();
+    void update_flag_roi_rectangle();
 
     signals:
     void full_n_rows_height_changed();
@@ -269,6 +271,8 @@ public:
     void ignore_edge_pixels_changed();
     void ignore_edge_nm_changed();
     void full_image_changed();
+    void roi_image_changed();
+    void roi_rectangle_changed();
 
     void flag_auto_roi_from_ignored_edge_changed();
     void flag_auto_n_rows_changed();

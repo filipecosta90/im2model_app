@@ -119,7 +119,7 @@ bool IntensityColumns::segmentate_sim_image()
   auto_calculate_threshold_value();
   if( _flag_sim_image_properties ){
     if( _flag_threshold_value && 
-      exp_image_properties->get_flag_roi_image()
+      sim_image_properties->get_flag_roi_image()
       ){
       const cv::Mat src = sim_image_properties->get_roi_image();
 
@@ -152,14 +152,16 @@ bool IntensityColumns::segmentate_sim_image()
     // Normalize the distance image for range = {0.0, 1.0}
     // so we can visualize and threshold it
     cv::normalize(sim_image_dist_transform, sim_image_dist_transform, 0, 1., NORM_MINMAX);
+    imwrite( "sim_image_dist_transform_v0.png", sim_image_dist_transform );
 
     // Threshold to obtain the peaks
     // This will be the markers for the foreground objects
     threshold(sim_image_dist_transform, sim_image_dist_transform, .4, 1., CV_THRESH_BINARY);
+    imwrite( "sim_image_dist_transform_v1.png", sim_image_dist_transform );
 
     // Dilate a bit the dist image
     cv::Mat kernel1 = Mat::ones(3, 3, CV_8UC1);
-    dilate(sim_image_dist_transform, sim_image_dist_transform, kernel1);
+    //dilate(sim_image_dist_transform, sim_image_dist_transform, kernel1);
 
     // Create the CV_8U version of the distance image
     // It is needed for findContours()
@@ -358,7 +360,7 @@ bool IntensityColumns::feature_match(){
  auto_calculate_threshold_value();
  if( _flag_exp_image_properties ){
   if(  
-    sim_image_properties->get_flag_full_image( ) && 
+    sim_image_properties->get_flag_roi_image( ) && 
     exp_image_properties->get_flag_roi_image()
     ){
     double minVal, maxVal, matchVal;
@@ -367,7 +369,8 @@ bool IntensityColumns::feature_match(){
   double match_factor;
   try{
             /// Create the result matrix
-    const cv::Mat src_sim = sim_image_properties->get_full_image();
+    const cv::Mat src_sim = sim_image_properties->get_roi_image();
+
     const cv::Mat src_exp = exp_image_properties->get_roi_image();
 
     const int result_cols =  src_sim.cols - src_exp.cols + 1;
@@ -421,16 +424,19 @@ bool IntensityColumns::map_sim_intensity_cols_to_exp_image(){
  auto_calculate_threshold_value();
  if( _flag_exp_image_properties ){
   if(  
-    sim_image_properties->get_flag_full_image( ) && 
+    sim_image_properties->get_flag_roi_image( ) && 
     exp_image_properties->get_flag_roi_image()
     ){
     try{
       const cv::Point2i exp_image_centroid = exp_image_properties->get_centroid_translation_px( );
       const cv::Point2i sim_image_centroid = sim_image_properties->get_centroid_translation_px( );
-      const cv::Mat src_sim = sim_image_properties->get_full_image();
+      const cv::Mat src_sim = sim_image_properties->get_roi_image();
       const cv::Mat src_exp = exp_image_properties->get_roi_image();
       imwrite("src_exp.png",src_exp);
       imwrite("src_sim.png",src_sim);
+      const cv::Mat src_sim_roi = sim_image_properties->get_roi_image();
+      imwrite("src_sim_roi.png",src_sim_roi);
+
       cv::Point2i sim_exp_diff = cv::Point2i( src_sim.cols - src_exp.cols, src_sim.rows - src_exp.cols ) / 2;
       cv::Point2i exp_map_sim_top_left = sim_exp_diff + ( sim_image_centroid - exp_image_centroid );
       cv::Mat exp_mapped_matrix = cv::Mat::zeros( src_sim.rows, src_sim.cols, src_sim.type() );

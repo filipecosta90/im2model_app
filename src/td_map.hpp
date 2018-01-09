@@ -248,6 +248,7 @@ public:
     double get_super_cell_dimensions_a();
     double get_super_cell_dimensions_b();
     double get_super_cell_dimensions_c();
+    cv::Mat get_super_cell_sim_image_properties_roi_image();
     cv::Mat get_super_cell_sim_image_properties_full_image();
     int get_super_cell_sim_image_properties_ignore_edge_pixels();
     std::vector<cv::KeyPoint> get_super_cell_sim_image_properties_keypoints();
@@ -277,6 +278,7 @@ public:
     bool get_flag_simulated_images_grid();
     bool get_flag_raw_simulated_images_grid();
     bool get_flag_super_cell_sim_image_properties_full_image();
+    bool get_flag_super_cell_sim_image_properties_roi_image();
 
     // gui var getters
     cv::Point3d get_zone_axis();
@@ -568,6 +570,7 @@ public:
     void TDMap_started_supercell_segmentate_image( );
     void TDMap_ended_supercell_segmentate_image( bool status );
     void supercell_full_simulated_image_changed();
+    void supercell_roi_simulated_image_changed();
 
 };
 
