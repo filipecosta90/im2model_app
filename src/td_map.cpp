@@ -2086,14 +2086,8 @@ bool TDMap::set_thickness_user_estimated_nm( std::string s_estimated ){
             emit TDMap_ended_supercell_read_simulated_image( _flag_read_simulated_supercell_image );
             std::cout << "read_simulated_image_from_dat_file: " << std::boolalpha << _flag_read_simulated_supercell_image << std::endl;
 
-            emit TDMap_started_supercell_segmentate_image();
-            _flag_read_simulated_supercell_image &= sim_image_intensity_columns->segmentate_sim_image();
-            //_flag_read_simulated_supercell_image &= sim_image_intensity_columns->segmentate_exp_image();
-            _flag_read_simulated_supercell_image &= sim_image_intensity_columns->feature_match();
-            _flag_read_simulated_supercell_image &= sim_image_intensity_columns->map_sim_intensity_cols_to_exp_image();
-            std::cout << "_flag_read_simulated_supercell_image: " << std::boolalpha << _flag_read_simulated_supercell_image << std::endl;
-            emit TDMap_ended_supercell_segmentate_image( _flag_read_simulated_supercell_image );
-
+            compute_full_super_cell_intensity_cols();
+            
             if( _flag_logger ){
               std::stringstream message;
               message << "_flag_read_simulated_supercell_image: " << std::boolalpha << _flag_read_simulated_supercell_image;
@@ -2110,7 +2104,10 @@ bool TDMap::set_thickness_user_estimated_nm( std::string s_estimated ){
         bool result = false;
         emit TDMap_started_supercell_segmentate_image();
         //_flag_read_simulated_supercell_image &= sim_image_intensity_columns->segmentate_sim_image();
-        _flag_read_simulated_supercell_image = sim_image_intensity_columns->segmentate_exp_image();
+        _flag_read_simulated_supercell_image = sim_image_intensity_columns->segmentate_sim_image();
+        _flag_read_simulated_supercell_image &= sim_image_intensity_columns->feature_match();
+        _flag_read_simulated_supercell_image &= sim_image_intensity_columns->map_sim_intensity_cols_to_exp_image();
+        
         emit TDMap_ended_supercell_segmentate_image( _flag_read_simulated_supercell_image );
         if( _flag_logger ){
           std::stringstream message;
@@ -2559,6 +2556,14 @@ int TDMap::get_exp_image_properties_roi_rectangle_statistical_stddev(){
     result = stddev[0];
   }
   return result;
+}
+
+bool TDMap::set_exp_image_properties_roi_rectangle_statistical_mean( int value ){
+  return supercell_exp_image_properties->set_mean_image_statistical(value);
+}
+
+bool TDMap::set_exp_image_properties_roi_rectangle_statistical_stddev( int value ){
+  return supercell_exp_image_properties->set_stddev_image_statistical(value);
 }
 
 bool TDMap::set_exp_image_bounds_hysteresis_threshold( int value ){

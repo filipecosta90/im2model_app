@@ -431,7 +431,9 @@ public:
     int get_exp_image_bounds_hysteresis_threshold();
     int get_exp_image_bounds_max_contour_distance_px();
     int get_exp_image_properties_roi_rectangle_statistical_mean();
-    int get_exp_image_properties_roi_rectangle_statistical_stddev();
+        bool set_exp_image_properties_roi_rectangle_statistical_mean( int );
+    int get_exp_image_properties_roi_rectangle_statistical_stddev(  );
+    bool set_exp_image_properties_roi_rectangle_statistical_stddev( int );
 
     // threshold limits
     int get_exp_image_bounds_hysteresis_threshold_range_bottom_limit();

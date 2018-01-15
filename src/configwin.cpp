@@ -197,7 +197,7 @@ MainWindow::MainWindow( ApplicationLog::ApplicationLog* logger , QWidget *parent
       connect( _core_td_map, SIGNAL(TDMap_ended_simgrid( bool )), this, SLOT(update_tdmap_simgrid_ended( bool ) ) );
       connect( _core_td_map, SIGNAL(TDMap_no_simgrid( bool )), this, SLOT(update_tdmap_no_simgrid_ended( bool ) ) );
 
-      connect( _core_td_map, SIGNAL(supercell_roi_simulated_image_changed( )), this, SLOT(update_super_cell_roi_image_full_image() ) );
+      connect( _core_td_map, SIGNAL(supercell_roi_simulated_image_changed( )), this, SLOT(update_super_cell_simulated_image_roi_image() ) );
       connect( _core_td_map, SIGNAL(supercell_full_simulated_image_intensity_columns_changed( )), this, SLOT(update_super_cell_simulated_image_intensity_columns() ) );
       connect( _core_td_map, SIGNAL(supercell_full_experimental_image_centroid_translation_changed( )), this, SLOT(update_super_cell_target_region()) );
 
@@ -581,7 +581,7 @@ void MainWindow::update_super_cell_simulated_image_intensity_columns(){
   ui->qgraphics_super_cell_refinement->show();
 }
 
-void MainWindow::update_super_cell_sim_image_roi_image(){
+void MainWindow::update_super_cell_simulated_image_roi_image(){
   if( _core_td_map->get_flag_super_cell_sim_image_properties_roi_image() ){
     const cv::Mat roi_image = _core_td_map->get_super_cell_sim_image_properties_roi_image();
     // update tab 4
@@ -590,7 +590,7 @@ void MainWindow::update_super_cell_sim_image_roi_image(){
   }
 }
 
-void MainWindow::update_super_cell_sim_image_full_image(){
+void MainWindow::update_super_cell_simulated_image_full_image(){
   if( _core_td_map->get_flag_super_cell_sim_image_properties_full_image() ){
     const cv::Mat full_image = _core_td_map->get_super_cell_sim_image_properties_full_image();
     // update tab 4
@@ -2633,8 +2633,9 @@ void MainWindow::create_box_options_tab3_supercell(){
   ////////////////
   QVector<QVariant> box5_option_3_1_data = {"Mean",""};
   QVector<bool> box5_option_3_1_edit = {false,false};
+  boost::function<bool(int)> box5_option_3_1_setter ( boost::bind( &TDMap::set_exp_image_properties_roi_rectangle_statistical_mean, _core_td_map, _1 ) );
   boost::function<int(void)> box5_option_3_1_getter ( boost::bind( &TDMap::get_exp_image_properties_roi_rectangle_statistical_mean,_core_td_map ) );
-  exp_image_properties_noise_carbon_statistical_mean = new TreeItem ( box5_option_3_1_data,  box5_option_3_1_edit);
+  exp_image_properties_noise_carbon_statistical_mean = new TreeItem ( box5_option_3_1_data, box5_option_3_1_setter, box5_option_3_1_edit);
   exp_image_properties_noise_carbon_statistical_mean->set_variable_name( "exp_image_properties_noise_carbon_statistical_mean" );
   exp_image_properties_noise_carbon_statistical_mean->set_fp_data_getter_int_vec( 1, box5_option_3_1_getter );
   connect( _core_td_map, SIGNAL( exp_image_properties_noise_carbon_statistical_mean_changed( )), exp_image_properties_noise_carbon_statistical_mean, SLOT( load_data_from_getter_int() ) );
@@ -2645,8 +2646,9 @@ void MainWindow::create_box_options_tab3_supercell(){
   ////////////////
   QVector<QVariant> box5_option_3_2_data = {"Std deviation",""};
   QVector<bool> box5_option_3_2_edit = {false,false};
+  boost::function<bool(int)> box5_option_3_2_setter ( boost::bind( &TDMap::set_exp_image_properties_roi_rectangle_statistical_stddev, _core_td_map, _1 ) );
   boost::function<int(void)> box5_option_3_2_getter ( boost::bind( &TDMap::get_exp_image_properties_roi_rectangle_statistical_stddev,_core_td_map ) );
-  exp_image_properties_noise_carbon_statistical_stddev = new TreeItem ( box5_option_3_2_data,  box5_option_3_2_edit);
+  exp_image_properties_noise_carbon_statistical_stddev = new TreeItem ( box5_option_3_2_data, box5_option_3_2_setter, box5_option_3_2_edit);
   exp_image_properties_noise_carbon_statistical_stddev->set_variable_name( "exp_image_properties_noise_carbon_statistical_stddev" );
   exp_image_properties_noise_carbon_statistical_stddev->set_fp_data_getter_int_vec( 1, box5_option_3_2_getter );
   connect( _core_td_map, SIGNAL( exp_image_properties_noise_carbon_statistical_stddev_changed( )), exp_image_properties_noise_carbon_statistical_stddev, SLOT( load_data_from_getter_int() ) );

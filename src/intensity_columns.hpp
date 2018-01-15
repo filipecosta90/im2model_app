@@ -97,6 +97,7 @@ private:
     bool _flag_exp_image_keypoints = false;
 
     std::vector< std::vector<cv::Point> > sim_image_intensity_columns;
+    std::vector< cv::Mat1b > sim_image_intensity_columns_masks;
     std::vector< std::vector<cv::Point> > exp_image_intensity_columns;
     cv::Point2i exp_image_delta_factor_constant;
 
@@ -130,7 +131,7 @@ public:
 
     bool set_sim_crystal_properties ( BaseCrystal* crystal_prop );
     bool set_exp_image_properties ( BaseImage* exp_image_properties );
-    bool set_sim_image_properties ( BaseImage* sim_image_properties );
+    bool set_sim_image_properties ( BaseImage* sim_image_properties , bool auto_segmentate = false );
     bool set_wavimg_var( WAVIMG_prm *wavimg_var );
     bool set_stddev_threshold_factor( double factor );
 
