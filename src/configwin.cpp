@@ -479,10 +479,9 @@ void MainWindow::update_super_cell_target_region_image(){
     const cv::Mat super_cell_target_region_image = _core_td_map->get_exp_image_bounds_roi_boundary_image();
     const int full_boundary_polygon_margin_x_px = _core_td_map->get_exp_image_bounds_full_boundary_polygon_margin_x_px();
     const int full_boundary_polygon_margin_y_px = _core_td_map->get_exp_image_bounds_full_boundary_polygon_margin_y_px();
-    //const int margin_point_px = _core_td_map->get_super_cell_sim_image_properties_ignore_edge_pixels();
     const cv::Point2i centroid_translation_px = _core_td_map->get_super_cell_exp_image_properties_centroid_translation_px();
     const cv::Point2i top_right_corner_margin ( full_boundary_polygon_margin_x_px, full_boundary_polygon_margin_y_px);
-    ui->qgraphics_super_cell_refinement->setImage( super_cell_target_region_image, 1 , tr("Super-cell experimental image target region"), top_right_corner_margin + centroid_translation_px );
+    ui->qgraphics_super_cell_refinement->setImage( super_cell_target_region_image, 1 , tr("Super-cell experimental image target region"), centroid_translation_px + top_right_corner_margin );
   }
 }
 
@@ -554,7 +553,8 @@ void MainWindow::update_super_cell_experimental_image_intensity_columns(){
   std::cout << " update_super_cell_experimental_image_intensity_columns " << std::endl;
   const int full_boundary_polygon_margin_x_px = _core_td_map->get_exp_image_bounds_full_boundary_polygon_margin_x_px();
   const int full_boundary_polygon_margin_y_px = _core_td_map->get_exp_image_bounds_full_boundary_polygon_margin_y_px();
-  //const int margin_point_px = _core_td_map->get_super_cell_sim_image_properties_ignore_edge_pixels();
+  
+  const int margin_point_px = _core_td_map->get_super_cell_sim_image_properties_ignore_edge_pixels();
   const cv::Point2i top_right_corner_margin ( full_boundary_polygon_margin_x_px, full_boundary_polygon_margin_y_px);
   std::vector<cv::KeyPoint> exp_image_keypoints = _core_td_map->get_super_cell_exp_image_properties_keypoints();
   std::vector<cv::Point2i> exp_image_renderPoints;

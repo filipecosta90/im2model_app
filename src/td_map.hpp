@@ -431,7 +431,7 @@ public:
     int get_exp_image_bounds_hysteresis_threshold();
     int get_exp_image_bounds_max_contour_distance_px();
     int get_exp_image_properties_roi_rectangle_statistical_mean();
-        bool set_exp_image_properties_roi_rectangle_statistical_mean( int );
+    bool set_exp_image_properties_roi_rectangle_statistical_mean( int );
     int get_exp_image_properties_roi_rectangle_statistical_stddev(  );
     bool set_exp_image_properties_roi_rectangle_statistical_stddev( int );
 
@@ -466,6 +466,7 @@ public:
     double get_exp_image_properties_roi_ny_size_height_nm();
     double get_exp_image_properties_roi_nx_size_width_nm();
     double get_full_boundary_polygon_margin_nm( );
+    int get_full_boundary_polygon_margin_px();
     double get_sim_image_properties_full_ny_size_height_nm();
     double get_sim_image_properties_full_nx_size_width_nm();
     double get_sim_image_properties_roi_ny_size_height_nm();
@@ -474,7 +475,6 @@ public:
     SuperCell*  get_tdmap_vis_sim_unit_cell(){ return tdmap_vis_sim_unit_cell; }
     SuperCell*  get_tdmap_roi_sim_super_cell(){ return tdmap_roi_sim_super_cell; }
     SuperCell*  get_tdmap_full_sim_super_cell(){ return tdmap_full_sim_super_cell; }
-
 
     /* gui validator limits getters */
     double get_exp_image_properties_sampling_rate_nm_per_pixel_bottom_limit();

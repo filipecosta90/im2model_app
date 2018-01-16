@@ -640,6 +640,13 @@ bool BaseImage::apply_centroid_translation_px( cv::Point2i translation ){
   return result;
 }
 
+bool BaseImage::set_centroid_translation_px( cv::Point2i translation_set ){
+  bool result = true;
+  centroid_translation_px = translation_set;
+  emit centroid_translation_changed( centroid_translation_px );
+  return result;
+}
+
 /* Loggers */
 bool BaseImage::set_application_logger( ApplicationLog::ApplicationLog* app_logger ){
   logger = app_logger;

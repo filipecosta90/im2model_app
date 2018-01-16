@@ -165,7 +165,7 @@ bool IntensityColumns::segmentate_sim_image()
 
     Mat1b mask_borders = ((dist_8u > 0));
     if( sim_image_intensity_columns.size() > 0 ){
-sim_image_intensity_columns.clear();
+      sim_image_intensity_columns.clear();
       //vector<T>().swap(sim_image_intensity_columns);
     }
 
@@ -282,12 +282,24 @@ bool IntensityColumns::feature_match(){
     const int delta_center_cols = result_cols / 2;
     const int delta_center_rows = result_rows / 2;
     const cv::Point delta_centerPos ( delta_center_rows, delta_center_cols  );
+    
+    std::cout << " delta_centerPos " << delta_centerPos << std::endl;
+    std::cout << " src_exp " << src_exp.size() << std::endl;
+    std::cout << " src_sim " << src_sim.size() << std::endl;
+    std::cout << " result_mat " << result_mat.size() << std::endl;
 
             //: normalized correlation, non-normalized correlation and sum-absolute-difference
     cv::matchTemplate( src_sim , src_exp, result_mat, CV_TM_CCOEFF_NORMED );
     cv::minMaxLoc( result_mat, &minVal, &maxVal, &minLoc, &maxLoc, cv::Mat() );
+
+    ofstream myfile;
+    myfile.open ("result_mat.txt");
+    myfile << "\n\nresult_mat = " << result_mat << "\n\n";
+    myfile.close();
+
     matchVal = maxVal;
-    exp_image_delta_factor_constant =  delta_centerPos - maxLoc;
+    exp_image_delta_factor_constant =  maxLoc - delta_centerPos;
+    _flag_exp_image_delta_factor_constant = true;
     match_factor = matchVal * 100.0;
     std::cout << "match_factor " << match_factor << ", deltaPos " << exp_image_delta_factor_constant << " maxLoc " <<  maxLoc << " delta_centerPos " << delta_centerPos << std::endl;
     emit exp_image_delta_factor_constant_changed();
@@ -327,20 +339,25 @@ bool IntensityColumns::map_sim_intensity_cols_to_exp_image(){
  if( _flag_exp_image_properties ){
   if(  
     sim_image_properties->get_flag_roi_image( ) && 
-    exp_image_properties->get_flag_roi_image()
+    exp_image_properties->get_flag_roi_image() &&
+    _flag_exp_image_delta_factor_constant
     ){
     try{
-      const cv::Point2i exp_image_centroid = exp_image_properties->get_centroid_translation_px( );
-      const cv::Point2i sim_image_centroid = sim_image_properties->get_centroid_translation_px( );
+
       const cv::Mat src_sim = sim_image_properties->get_roi_image();
       const cv::Mat src_exp = exp_image_properties->get_roi_image();
+
+      const int result_cols =  src_sim.cols - src_exp.cols + 1;
+      const int result_rows = src_sim.rows - src_exp.rows + 1;
+
+      const int delta_center_cols = result_cols / 2;
+      const int delta_center_rows = result_rows / 2;
+      const cv::Point delta_centerPos ( delta_center_rows, delta_center_cols  );
+      const cv::Point exp_map_sim_top_left = delta_centerPos + exp_image_delta_factor_constant;
+
       imwrite("src_exp.png",src_exp);
       imwrite("src_sim.png",src_sim);
-      const cv::Mat src_sim_roi = sim_image_properties->get_roi_image();
-      imwrite("src_sim_roi.png",src_sim_roi);
 
-      cv::Point2i sim_exp_diff = cv::Point2i( src_sim.cols - src_exp.cols, src_sim.rows - src_exp.cols ) / 2;
-      cv::Point2i exp_map_sim_top_left = sim_exp_diff + ( sim_image_centroid - exp_image_centroid );
       cv::Mat exp_mapped_matrix = cv::Mat::zeros( src_sim.rows, src_sim.cols, src_sim.type() );
       src_exp.copyTo(exp_mapped_matrix(Rect(exp_map_sim_top_left.x, exp_map_sim_top_left.y, src_exp.cols, src_exp.rows)));
       imwrite("exp_mapped_matrix.png",exp_mapped_matrix);
@@ -421,13 +438,9 @@ cv::KeyPoint IntensityColumns::op_KeyPoint_padding ( cv::KeyPoint point, const c
 }
 
 void IntensityColumns::apply_exp_image_delta_factor(){
+
+  exp_image_properties->set_centroid_translation_px( cv::Point2i(0,0) );
   exp_image_properties->apply_centroid_translation_px( exp_image_delta_factor_constant );
-  //boost::function<std::vector<cv::Point>(std::vector<cv::Point>)> functor ( boost::bind(&IntensityColumns::op_contour_padding, this , _1, exp_image_delta_factor_constant ) );
-  //std::transform( exp_image_intensity_columns.begin(), exp_image_intensity_columns.end(), exp_image_intensity_columns.begin() , functor );
-  //boost::function<cv::KeyPoint(cv::KeyPoint)> functorKeypoint ( boost::bind(&IntensityColumns::op_KeyPoint_padding, this , _1, cv::Point2f( (float) exp_image_delta_factor_constant.x, (float) exp_image_delta_factor_constant.y  ) ) );
-  //std::transform( exp_image_keypoints.begin(), exp_image_keypoints.end(), exp_image_keypoints.begin() , functorKeypoint );
-  //emit exp_image_intensity_columns_changed();
-  //emit exp_image_intensity_keypoints_changed();
 }
 
 bool IntensityColumns::read_simulated_image_from_dat_file(){

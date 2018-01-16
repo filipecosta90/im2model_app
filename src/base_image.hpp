@@ -144,6 +144,7 @@ public:
     bool get_flag_centroid_translation_px(){ return _flag_centroid_translation_px; }
     bool apply_centroid_translation_px( int cols_a = 0, int rows_b = 0 );
     bool apply_centroid_translation_px( cv::Point2i translation_px );
+    bool set_centroid_translation_px( cv::Point2i translation_set );
 
     // ROI FRAME
     bool get_flag_roi_image(){ return _flag_roi_image; }

@@ -2103,7 +2103,6 @@ bool TDMap::set_thickness_user_estimated_nm( std::string s_estimated ){
       bool TDMap::compute_full_super_cell_intensity_cols(){
         bool result = false;
         emit TDMap_started_supercell_segmentate_image();
-        //_flag_read_simulated_supercell_image &= sim_image_intensity_columns->segmentate_sim_image();
         _flag_read_simulated_supercell_image = sim_image_intensity_columns->segmentate_sim_image();
         _flag_read_simulated_supercell_image &= sim_image_intensity_columns->feature_match();
         _flag_read_simulated_supercell_image &= sim_image_intensity_columns->map_sim_intensity_cols_to_exp_image();
@@ -2147,6 +2146,10 @@ bool TDMap::set_thickness_user_estimated_nm( std::string s_estimated ){
 
       double TDMap::get_full_boundary_polygon_margin_nm(){
         return exp_image_bounds->get_full_boundary_polygon_margin_x_nm();
+      }
+
+      int TDMap::get_full_boundary_polygon_margin_px(){
+        return exp_image_bounds->get_full_boundary_polygon_margin_x_px();
       }
 
       double TDMap::get_exp_image_properties_sampling_rate_nm_per_pixel_bottom_limit(){
@@ -2484,7 +2487,7 @@ bool TDMap::update_full_crysta_a_b_sizes(){
     ){
     const double full_crystal_a_size = exp_image_bounds->get_boundary_polygon_length_x_nm();
   const double full_crystal_b_size = exp_image_bounds->get_boundary_polygon_length_y_nm();
-  const int ignore_edge_pixels = exp_image_bounds->get_full_boundary_polygon_margin_y_px();
+  //const int ignore_edge_pixels = exp_image_bounds->get_full_boundary_polygon_margin_y_px();
   
   const bool a_result = tdmap_full_sim_super_cell->set_length_a_Nanometers( full_crystal_a_size );
   const bool b_result = tdmap_full_sim_super_cell->set_length_b_Nanometers( full_crystal_b_size );
@@ -2498,8 +2501,8 @@ bool TDMap::update_full_crysta_a_b_sizes(){
   std::cout << " setting full_sim_super_cell_length_b " << cell_length_b_nm << std::endl;
   const bool image_result_b = supercell_sim_image_properties->set_full_nm_size_rows_b( cell_length_b_nm );
 
-  const bool image_ignore_pixels_result = supercell_sim_image_properties->set_ignore_edge_pixels( ignore_edge_pixels );
-  std::cout << "image_ignore_pixels_result " << image_ignore_pixels_result << " ignore_edge_pixels " << ignore_edge_pixels << std::endl;
+  //const bool image_ignore_pixels_result = supercell_sim_image_properties->set_ignore_edge_pixels( ignore_edge_pixels );
+  //std::cout << "image_ignore_pixels_result " << image_ignore_pixels_result << " ignore_edge_pixels " << ignore_edge_pixels << std::endl;
 
   const bool super_cell_result = a_result && b_result && image_result_a && image_result_b;
   std::cout << "full_crystal_a_size " << full_crystal_a_size << " full_crystal_b_size " << full_crystal_b_size << " super_cell_result " << std::boolalpha << super_cell_result << std::endl;

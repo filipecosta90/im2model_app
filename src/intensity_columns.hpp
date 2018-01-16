@@ -100,6 +100,7 @@ private:
     std::vector< cv::Mat1b > sim_image_intensity_columns_masks;
     std::vector< std::vector<cv::Point> > exp_image_intensity_columns;
     cv::Point2i exp_image_delta_factor_constant;
+    bool _flag_exp_image_delta_factor_constant = false;
 
     bool auto_calculate_threshold_value();
     std::string GetMatType(const cv::Mat& mat);
