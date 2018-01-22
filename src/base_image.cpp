@@ -4,94 +4,94 @@ BaseImage::BaseImage() {
 
   centroid_translation_px = cv::Point2i(0,0);
   // full n rows
-  connect(this, SIGNAL(full_n_rows_height_changed()), this, SLOT(calculate_full_b_size_from_n_rows_and_sampling_rate()));
-  connect(this, SIGNAL(full_n_rows_height_changed()), this, SLOT(calculate_roi_n_rows_from_full_n_rows_and_ignored_edge()));
+  connect(this, SIGNAL(full_n_rows_height_changed()), this, SLOT(calculate_full_b_size_from_n_rows_and_sampling_rate()), Qt::DirectConnection );
+  connect(this, SIGNAL(full_n_rows_height_changed()), this, SLOT(calculate_roi_n_rows_from_full_n_rows_and_ignored_edge()), Qt::DirectConnection);
   
   // roi n rows
-  connect(this, SIGNAL(roi_n_rows_height_changed()), this, SLOT(calculate_roi_b_size_from_n_rows_and_sampling_rate()));
-  connect(this, SIGNAL(roi_n_rows_height_changed()), this, SLOT(calculate_roi_rectangle_and_roi_image()));
-  connect(this, SIGNAL(roi_n_rows_height_changed()) , this, SLOT(update_flag_roi_rectangle()));
+  connect(this, SIGNAL(roi_n_rows_height_changed()), this, SLOT(calculate_roi_b_size_from_n_rows_and_sampling_rate()), Qt::DirectConnection);
+  connect(this, SIGNAL(roi_n_rows_height_changed()), this, SLOT(calculate_roi_rectangle_and_roi_image()), Qt::DirectConnection);
+  connect(this, SIGNAL(roi_n_rows_height_changed()) , this, SLOT(update_flag_roi_rectangle()), Qt::DirectConnection);
 
   // full n cols
-  connect(this, SIGNAL(full_n_cols_width_changed()), this, SLOT(calculate_full_a_size_from_n_cols_and_sampling_rate()));
-  connect(this, SIGNAL(full_n_cols_width_changed()), this, SLOT(calculate_roi_n_cols_from_full_n_cols_and_ignored_edge()));
+  connect(this, SIGNAL(full_n_cols_width_changed()), this, SLOT(calculate_full_a_size_from_n_cols_and_sampling_rate()), Qt::DirectConnection);
+  connect(this, SIGNAL(full_n_cols_width_changed()), this, SLOT(calculate_roi_n_cols_from_full_n_cols_and_ignored_edge()), Qt::DirectConnection);
   
   // roi n cols
-  connect(this, SIGNAL(roi_n_cols_width_changed()), this, SLOT(calculate_roi_a_size_from_n_cols_and_sampling_rate()));
-  connect(this, SIGNAL(roi_n_cols_width_changed()), this, SLOT(calculate_roi_rectangle_and_roi_image()));
-  connect(this, SIGNAL(roi_n_cols_width_changed()) , this, SLOT(update_flag_roi_rectangle()));
+  connect(this, SIGNAL(roi_n_cols_width_changed()), this, SLOT(calculate_roi_a_size_from_n_cols_and_sampling_rate()), Qt::DirectConnection);
+  connect(this, SIGNAL(roi_n_cols_width_changed()), this, SLOT(calculate_roi_rectangle_and_roi_image()), Qt::DirectConnection);
+  connect(this, SIGNAL(roi_n_cols_width_changed()) , this, SLOT(update_flag_roi_rectangle()), Qt::DirectConnection);
 
 
 // sampling_rate_x_nm_per_pixel
-  connect(this, SIGNAL(sampling_rate_x_nm_per_pixel_changed()), this, SLOT( calculate_full_n_rows_from_b_size_and_sampling_rate() ));
-  connect(this, SIGNAL(sampling_rate_x_nm_per_pixel_changed()), this, SLOT( calculate_roi_n_rows_from_b_size_and_sampling_rate() ));
-  connect(this, SIGNAL(sampling_rate_x_nm_per_pixel_changed()), this, SLOT( calculate_roi_b_size_from_n_rows_and_sampling_rate() ));
-  connect(this, SIGNAL(sampling_rate_x_nm_per_pixel_changed()), this, SLOT( calculate_full_b_size_from_n_rows_and_sampling_rate() ));
-  connect(this, SIGNAL(sampling_rate_x_nm_per_pixel_changed()), this, SLOT( calculate_ignore_edge_pixels() ));
+  connect(this, SIGNAL(sampling_rate_x_nm_per_pixel_changed()), this, SLOT( calculate_full_n_rows_from_b_size_and_sampling_rate() ), Qt::DirectConnection);
+  connect(this, SIGNAL(sampling_rate_x_nm_per_pixel_changed()), this, SLOT( calculate_roi_n_rows_from_b_size_and_sampling_rate() ), Qt::DirectConnection);
+  connect(this, SIGNAL(sampling_rate_x_nm_per_pixel_changed()), this, SLOT( calculate_roi_b_size_from_n_rows_and_sampling_rate() ), Qt::DirectConnection);
+  connect(this, SIGNAL(sampling_rate_x_nm_per_pixel_changed()), this, SLOT( calculate_full_b_size_from_n_rows_and_sampling_rate() ), Qt::DirectConnection);
+  connect(this, SIGNAL(sampling_rate_x_nm_per_pixel_changed()), this, SLOT( calculate_ignore_edge_pixels() ), Qt::DirectConnection);
 
 
 // sampling_rate_y_nm_per_pixel
-  connect(this, SIGNAL(sampling_rate_y_nm_per_pixel_changed()), this, SLOT( calculate_full_n_cols_from_a_size_and_sampling_rate() ));
-  connect(this, SIGNAL(sampling_rate_y_nm_per_pixel_changed()), this, SLOT( calculate_roi_n_cols_from_a_size_and_sampling_rate() ));
-  connect(this, SIGNAL(sampling_rate_y_nm_per_pixel_changed()), this, SLOT( calculate_roi_a_size_from_n_cols_and_sampling_rate() ));
-  connect(this, SIGNAL(sampling_rate_y_nm_per_pixel_changed()), this, SLOT( calculate_full_a_size_from_n_cols_and_sampling_rate() ));
-  connect(this, SIGNAL(sampling_rate_y_nm_per_pixel_changed()), this, SLOT( calculate_ignore_edge_pixels() ));
+  connect(this, SIGNAL(sampling_rate_y_nm_per_pixel_changed()), this, SLOT( calculate_full_n_cols_from_a_size_and_sampling_rate() ), Qt::DirectConnection);
+  connect(this, SIGNAL(sampling_rate_y_nm_per_pixel_changed()), this, SLOT( calculate_roi_n_cols_from_a_size_and_sampling_rate() ), Qt::DirectConnection);
+  connect(this, SIGNAL(sampling_rate_y_nm_per_pixel_changed()), this, SLOT( calculate_roi_a_size_from_n_cols_and_sampling_rate() ), Qt::DirectConnection);
+  connect(this, SIGNAL(sampling_rate_y_nm_per_pixel_changed()), this, SLOT( calculate_full_a_size_from_n_cols_and_sampling_rate() ), Qt::DirectConnection);
+  connect(this, SIGNAL(sampling_rate_y_nm_per_pixel_changed()), this, SLOT( calculate_ignore_edge_pixels() ), Qt::DirectConnection);
 
   //  roi_nm_size_rows_b
-  connect(this, SIGNAL(roi_nm_size_rows_b_changed()), this, SLOT(calculate_roi_n_rows_from_b_size_and_sampling_rate()));
+  connect(this, SIGNAL(roi_nm_size_rows_b_changed()), this, SLOT(calculate_roi_n_rows_from_b_size_and_sampling_rate()), Qt::DirectConnection);
 
   // full_nm_size_rows_b 
-  connect(this, SIGNAL(full_nm_size_rows_b_changed()), this, SLOT(calculate_full_n_rows_from_b_size_and_sampling_rate()));
+  connect(this, SIGNAL(full_nm_size_rows_b_changed()), this, SLOT(calculate_full_n_rows_from_b_size_and_sampling_rate()), Qt::DirectConnection);
 
   // roi_nm_size_cols_a
-  connect(this, SIGNAL(roi_nm_size_cols_a_changed()), this, SLOT(calculate_roi_n_cols_from_a_size_and_sampling_rate()));
+  connect(this, SIGNAL(roi_nm_size_cols_a_changed()), this, SLOT(calculate_roi_n_cols_from_a_size_and_sampling_rate()), Qt::DirectConnection);
 
   // full_nm_size_cols_a
-  connect(this, SIGNAL(full_nm_size_cols_a_changed()), this, SLOT(calculate_full_n_cols_from_a_size_and_sampling_rate()));
+  connect(this, SIGNAL(full_nm_size_cols_a_changed()), this, SLOT(calculate_full_n_cols_from_a_size_and_sampling_rate()), Qt::DirectConnection);
 
   // roi_center_x
-  connect(this, SIGNAL(roi_center_x_changed()), this, SLOT(calculate_roi_rectangle_and_roi_image()));
-  connect(this, SIGNAL( roi_center_x_changed() ) , this, SLOT(update_flag_roi_rectangle()));
+  connect(this, SIGNAL(roi_center_x_changed()), this, SLOT(calculate_roi_rectangle_and_roi_image()), Qt::DirectConnection);
+  connect(this, SIGNAL( roi_center_x_changed() ) , this, SLOT(update_flag_roi_rectangle()), Qt::DirectConnection);
 
   // roi_center_y 
-  connect(this, SIGNAL(roi_center_y_changed()), this, SLOT(calculate_roi_rectangle_and_roi_image()));
-  connect(this, SIGNAL( roi_center_y_changed() ) , this, SLOT(update_flag_roi_rectangle()));
+  connect(this, SIGNAL(roi_center_y_changed()), this, SLOT(calculate_roi_rectangle_and_roi_image()), Qt::DirectConnection);
+  connect(this, SIGNAL( roi_center_y_changed() ) , this, SLOT(update_flag_roi_rectangle()), Qt::DirectConnection);
 
   // ignore_edge_pixels
-  connect(this, SIGNAL(ignore_edge_pixels_changed()), this, SLOT(calculate_roi_n_rows_from_full_n_rows_and_ignored_edge()));
-  connect(this, SIGNAL(ignore_edge_pixels_changed()), this, SLOT(calculate_roi_n_cols_from_full_n_cols_and_ignored_edge()));
+  connect(this, SIGNAL(ignore_edge_pixels_changed()), this, SLOT(calculate_roi_n_rows_from_full_n_rows_and_ignored_edge()), Qt::DirectConnection);
+  connect(this, SIGNAL(ignore_edge_pixels_changed()), this, SLOT(calculate_roi_n_cols_from_full_n_cols_and_ignored_edge()), Qt::DirectConnection);
 
     // ignore_edge_nm
-  connect(this, SIGNAL(ignore_edge_nm_changed()), this, SLOT( calculate_ignore_edge_pixels() ));
+  connect(this, SIGNAL(ignore_edge_nm_changed()), this, SLOT( calculate_ignore_edge_pixels() ), Qt::DirectConnection);
 
   // flag_auto_roi_from_ignored_edge
-  connect(this, SIGNAL(flag_auto_roi_from_ignored_edge_changed()), this, SLOT(calculate_roi_n_cols_from_full_n_cols_and_ignored_edge()));
-  connect(this, SIGNAL(flag_auto_roi_from_ignored_edge_changed()), this, SLOT(calculate_roi_n_rows_from_full_n_rows_and_ignored_edge()));
+  connect(this, SIGNAL(flag_auto_roi_from_ignored_edge_changed()), this, SLOT(calculate_roi_n_cols_from_full_n_cols_and_ignored_edge()), Qt::DirectConnection);
+  connect(this, SIGNAL(flag_auto_roi_from_ignored_edge_changed()), this, SLOT(calculate_roi_n_rows_from_full_n_rows_and_ignored_edge()), Qt::DirectConnection);
 
 // _flag_auto_n_rows
-  connect(this, SIGNAL(flag_auto_n_rows_changed()), this, SLOT(calculate_full_n_rows_from_b_size_and_sampling_rate()));
-  connect(this, SIGNAL(flag_auto_n_rows_changed()), this, SLOT(calculate_roi_n_rows_from_b_size_and_sampling_rate()));
+  connect(this, SIGNAL(flag_auto_n_rows_changed()), this, SLOT(calculate_full_n_rows_from_b_size_and_sampling_rate()), Qt::DirectConnection);
+  connect(this, SIGNAL(flag_auto_n_rows_changed()), this, SLOT(calculate_roi_n_rows_from_b_size_and_sampling_rate()), Qt::DirectConnection);
 
 // _flag_auto_n_cols
-  connect(this, SIGNAL( flag_auto_n_cols_changed()), this, SLOT(calculate_full_n_cols_from_a_size_and_sampling_rate()));
-  connect(this, SIGNAL( flag_auto_n_cols_changed()), this, SLOT(calculate_roi_n_cols_from_a_size_and_sampling_rate()));
+  connect(this, SIGNAL( flag_auto_n_cols_changed()), this, SLOT(calculate_full_n_cols_from_a_size_and_sampling_rate()), Qt::DirectConnection);
+  connect(this, SIGNAL( flag_auto_n_cols_changed()), this, SLOT(calculate_roi_n_cols_from_a_size_and_sampling_rate()), Qt::DirectConnection);
 
         // _flag_auto_b_size
-  connect(this, SIGNAL( flag_auto_b_size_changed()), this, SLOT(calculate_full_b_size_from_n_rows_and_sampling_rate()));
-  connect(this, SIGNAL( flag_auto_b_size_changed()), this, SLOT(calculate_roi_b_size_from_n_rows_and_sampling_rate()));
+  connect(this, SIGNAL( flag_auto_b_size_changed()), this, SLOT(calculate_full_b_size_from_n_rows_and_sampling_rate()), Qt::DirectConnection);
+  connect(this, SIGNAL( flag_auto_b_size_changed()), this, SLOT(calculate_roi_b_size_from_n_rows_and_sampling_rate()), Qt::DirectConnection);
 
 // _flag_auto_a_size
-  connect(this, SIGNAL( flag_auto_a_size_changed()), this, SLOT(calculate_full_a_size_from_n_cols_and_sampling_rate()));
-  connect(this, SIGNAL( flag_auto_a_size_changed()), this, SLOT(calculate_roi_a_size_from_n_cols_and_sampling_rate()));
+  connect(this, SIGNAL( flag_auto_a_size_changed()), this, SLOT(calculate_full_a_size_from_n_cols_and_sampling_rate()), Qt::DirectConnection);
+  connect(this, SIGNAL( flag_auto_a_size_changed()), this, SLOT(calculate_roi_a_size_from_n_cols_and_sampling_rate()), Qt::DirectConnection);
 
   // _flag_auto_ignore_edge_pixels
-  connect(this, SIGNAL( flag_auto_ignore_edge_pixels_changed()), this, SLOT(calculate_ignore_edge_pixels()));
+  connect(this, SIGNAL( flag_auto_ignore_edge_pixels_changed()), this, SLOT(calculate_ignore_edge_pixels()), Qt::DirectConnection);
 
   // _flag_auto_ignore_edge_nm
-  connect(this, SIGNAL( flag_auto_ignore_edge_nm_changed()), this, SLOT(calculate_ignore_edge_nm()));
+  connect(this, SIGNAL( flag_auto_ignore_edge_nm_changed()), this, SLOT(calculate_ignore_edge_nm()), Qt::DirectConnection);
 
-  connect(this, SIGNAL( full_image_changed() ) , this, SLOT(update_roi_image_from_full_image_and_roi_rectangle()));
-  connect(this, SIGNAL( roi_rectangle_changed() ) , this, SLOT(update_roi_image_from_full_image_and_roi_rectangle()));
+  connect(this, SIGNAL( full_image_changed() ) , this, SLOT(update_roi_image_from_full_image_and_roi_rectangle()), Qt::DirectConnection);
+  connect(this, SIGNAL( roi_rectangle_changed() ) , this, SLOT(update_roi_image_from_full_image_and_roi_rectangle()), Qt::DirectConnection);
 }
 
 void BaseImage::calculate_roi_n_cols_from_full_n_cols_and_ignored_edge(){

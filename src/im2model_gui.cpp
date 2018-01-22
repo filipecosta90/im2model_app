@@ -85,6 +85,10 @@ class Application final : public QApplication {
 
 int main(int argc, char *argv[]){
   qRegisterMetaType<std::string>("std::string");
+
+  qRegisterMetaType<cv::Point2i>("cv::Point2i");
+
+  
   
   std::cout <<  QDir::currentPath().toStdString() << std::endl;
 

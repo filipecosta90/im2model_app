@@ -2104,9 +2104,14 @@ bool TDMap::set_thickness_user_estimated_nm( std::string s_estimated ){
         bool result = false;
         emit TDMap_started_supercell_segmentate_image();
         _flag_read_simulated_supercell_image = sim_image_intensity_columns->segmentate_sim_image();
+        std::cout << " _flag_read_simulated_supercell_image segmentate_sim_image " << std::boolalpha << _flag_read_simulated_supercell_image << std::endl;
+       
         _flag_read_simulated_supercell_image &= sim_image_intensity_columns->feature_match();
+                std::cout << " _flag_read_simulated_supercell_image feature_match " << std::boolalpha << _flag_read_simulated_supercell_image << std::endl;
+
         _flag_read_simulated_supercell_image &= sim_image_intensity_columns->map_sim_intensity_cols_to_exp_image();
-        
+               std::cout << " _flag_read_simulated_supercell_image map_sim_intensity_cols_to_exp_image " << std::boolalpha << _flag_read_simulated_supercell_image << std::endl;
+
         emit TDMap_ended_supercell_segmentate_image( _flag_read_simulated_supercell_image );
         if( _flag_logger ){
           std::stringstream message;

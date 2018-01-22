@@ -50,6 +50,7 @@
 //#include <opencv2/nonfree/features2d.hpp>
 
 
+Q_DECLARE_METATYPE(cv::Point2i)
 
 class IntensityColumns : public QObject {
   Q_OBJECT
