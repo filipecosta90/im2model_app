@@ -22,6 +22,7 @@
 #include <QObject>
 #include <QApplication>
 
+
 class Application final : public QApplication {
   public:
     ApplicationLog::ApplicationLog* im2model_logger;
@@ -81,8 +82,10 @@ class Application final : public QApplication {
     }
 };
 
+
 int main(int argc, char *argv[]){
   qRegisterMetaType<std::string>("std::string");
+  
   std::cout <<  QDir::currentPath().toStdString() << std::endl;
 
   // to access resources

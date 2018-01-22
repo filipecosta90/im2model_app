@@ -365,8 +365,8 @@ bool IntensityColumns::map_sim_intensity_cols_to_exp_image(){
       for (size_t i = 0; i < sim_image_intensity_columns_masks.size(); i++){
         cv::Mat1b sim_image_keypoint_mask = sim_image_intensity_columns_masks[i];
         
-        cv::Mat dstImageSim = cv::Mat::zeros( src_sim.size(), src_sim.type());    
-        cv::Mat dstImageExp = cv::Mat::zeros( src_sim.size(), src_sim.type());    
+        cv::Mat dstImageSim = cv::Mat::zeros( src_sim.size(), src_sim.type() );    
+        cv::Mat dstImageExp = cv::Mat::zeros( src_sim.size(), src_sim.type() );    
 
         // copy source image to destination image with masking
         src_sim.copyTo(dstImageSim, sim_image_keypoint_mask);

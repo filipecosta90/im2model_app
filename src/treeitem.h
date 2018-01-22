@@ -19,9 +19,16 @@
 #include <boost/program_options.hpp>
 /** END BOOST **/
 
+/** START OPENCV **/
+#include <opencv2/core/types.hpp>    // for Point3d, Point, Rect, Point2d
+#include <opencv2/opencv.hpp>
+/** END OPENCV **/
+
 #include "custom_tool_button.h"
 #include "treemodel.h"
 
+Q_DECLARE_METATYPE(cv::Mat)
+Q_DECLARE_METATYPE(cv::Rect)
 
 class TreeItem : public QObject {
   Q_OBJECT
@@ -44,6 +51,9 @@ class TreeItem : public QObject {
 
     explicit TreeItem( QVector<QVariant> &data, boost::function<bool(std::string)> setter, TreeItem *parent = 0);
     explicit TreeItem( QVector<QVariant> &data, boost::function<bool(std::string)> setter, QVector<bool> editable, TreeItem *parent = 0);
+
+    explicit TreeItem( QVector<QVariant> &data, boost::function<void(QRect)> setter, TreeItem *parent = 0);
+    explicit TreeItem( QVector<QVariant> &data, boost::function<void(QRect)> setter, QVector<bool> editable, TreeItem *parent = 0);
 
     ~TreeItem();
     TreeModel *model();
@@ -143,6 +153,7 @@ class TreeItem : public QObject {
     void load_data_from_getter_int();
     void load_data_from_getter_double();
     void load_data_from_getter_string();
+        void load_data_from_rect( QRect );
 
 signals:
 
@@ -186,6 +197,7 @@ signals:
     QVector<bool> _flag_fp_data_getter_double_vec;
     QVector<bool> _flag_fp_data_getter_int_vec;
     QVector<bool> _flag_fp_data_getter_string_vec;
+    QVector<bool> _flag_fp_data_getter_rect_vec;
 
     std::vector< boost::function<double(void)> > fp_validator_double_range_min;
     std::vector< boost::function<double(void)> > fp_validator_double_range_max;
@@ -193,6 +205,7 @@ signals:
     std::vector< boost::function<double(void)> > fp_data_getter_double_vec;
     std::vector< boost::function<int(void)> > fp_data_getter_int_vec;
     std::vector< boost::function<std::string(void)> > fp_data_getter_string_vec;
+    std::vector< boost::function<QRect(void)> > fp_data_getter_rect_vec;
 
     /* item tooltip */
     QVector<QVariant> itemToolTip;
@@ -209,6 +222,7 @@ signals:
     boost::function<bool(double)> fp_data_setter_double;
     boost::function<bool(bool)> fp_data_setter_bool;
     boost::function<bool(int)> fp_data_setter_int;
+    boost::function<void(QRect)> fp_data_setter_rect;
 
     bool _flag_fp_data_setter_string = false;
     bool _flag_fp_data_appender_string = false;
@@ -218,6 +232,7 @@ signals:
     bool _flag_fp_data_setter_double = false;
 
     bool _flag_fp_data_setter_int = false;
+    bool _flag_fp_data_setter_rect = false;
 
     int _fp_data_setter_col_pos = 1;
     int _fp_data_getter_col_pos = 1;

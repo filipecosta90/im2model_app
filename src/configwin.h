@@ -381,6 +381,7 @@ private:
     TreeItem* super_cell_dimensions_a = nullptr;
     TreeItem* super_cell_dimensions_b = nullptr;
     TreeItem* super_cell_dimensions_c = nullptr;
+    TreeItem* super_cell_rectangle_selection = nullptr;
     TreeItem* noise_carbon_roi_statistical_analysis = nullptr;
     TreeItem* exp_image_properties_noise_carbon_statistical_mean = nullptr;
     TreeItem* exp_image_properties_noise_carbon_statistical_stddev = nullptr;

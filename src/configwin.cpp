@@ -624,7 +624,6 @@ bool MainWindow::_reset_document_modified_flags(){
   return result;
 }
 
-
 void MainWindow::update_from_full_SuperCell_failure( ){
   ui->statusBar->showMessage(tr("Error while running Full-Super-Cell simulation") );
   updateProgressBar(0,4,4);
@@ -1264,6 +1263,8 @@ bool MainWindow::saveFile(const QString &fileName ){
   boost::property_tree::ptree *tdmap_simulation_setup_ptree = tdmap_simulation_setup_model->save_data_into_property_tree();
   boost::property_tree::ptree *tdmap_running_configuration_ptree = tdmap_running_configuration_model->save_data_into_property_tree();
   boost::property_tree::ptree *super_cell_setup_model_ptree = super_cell_setup_model->save_data_into_property_tree();
+  boost::property_tree::ptree *intensity_peaks_model_ptree = intensity_peaks_model->save_data_into_property_tree();
+
   boost::property_tree::ptree *config = new boost::property_tree::ptree();
   config->put( "version", application_version );
   config->add_child("project_setup_image_fields_ptree", *project_setup_image_fields_ptree);
@@ -1271,6 +1272,7 @@ bool MainWindow::saveFile(const QString &fileName ){
   config->add_child("tdmap_simulation_setup_ptree", *tdmap_simulation_setup_ptree);
   config->add_child("tdmap_running_configuration_ptree", *tdmap_running_configuration_ptree);
   config->add_child("super_cell_setup_model_ptree", *super_cell_setup_model_ptree);
+  config->add_child("intensity_peaks_model_ptree", *intensity_peaks_model_ptree);
 
   // Write the property tree to the XML file.
   boost::property_tree::write_xml( fileName.toStdString(), *config, std::locale(), pt_settings );
@@ -1317,6 +1319,7 @@ void MainWindow::update_exp_image_roi_from_rectangle_selection( QRect rectangle_
 
 
 void MainWindow::update_tab3_exp_image_bounds_from_rectangle_selection( QRect rectangle_selection ){
+  std::cout << " update_tab3_exp_image_bounds_from_rectangle_selection " << std::endl;
   cv::Rect cv_rect ( rectangle_selection.x(), rectangle_selection.y(), rectangle_selection.width(), rectangle_selection.height() );
   const bool result = _core_td_map->set_exp_image_bounds_roi_boundary_rect( cv_rect );
   if( result ){
@@ -2620,6 +2623,17 @@ void MainWindow::create_box_options_tab3_supercell(){
   connect( _core_td_map, SIGNAL( super_cell_dimensions_c_changed( )), super_cell_dimensions_c, SLOT( load_data_from_getter_double() ) );
   super_cell_dimensions->insertChildren( super_cell_dimensions_c );
 
+////////////////
+  // Super-Cell Dimensions -- Rect
+  ////////////////
+  QVector<QVariant> box5_option_2_4_data = {"Selection Rect",""};
+  boost::function<void(QRect)> box5_option_2_4_setter ( boost::bind( &MainWindow::update_tab3_exp_image_bounds_from_rectangle_selection, this, _1 ) );
+  QVector<bool> box5_option_2_4_edit = {false,false};
+  super_cell_rectangle_selection = new TreeItem ( box5_option_2_4_data , box5_option_2_4_setter, box5_option_2_4_edit );
+  super_cell_rectangle_selection->set_variable_name( "super_cell_rectangle_selection" );
+  connect(ui->qgraphics_super_cell_edge_detection, SIGNAL(selectionRectangleChanged(QRect)), super_cell_rectangle_selection, SLOT( load_data_from_rect(QRect)) );
+  super_cell_dimensions->insertChildren( super_cell_rectangle_selection );
+
   ////////////////
   // Noise/Carbon ROI Statistical analysis
   ////////////////
@@ -2719,6 +2733,7 @@ void MainWindow::create_box_options_tab4_intensity_peaks(){
 
   QVector<QVariant> box6_option_2_1_2 = {"Distance transform algorithm alpha channel",""};
   intensity_peaks_display_simulated_img_distance_transform_alpha  = new TreeItem ( box6_option_2_1_2 );
+    intensity_peaks_display_simulated_img_distance_transform_alpha->set_variable_name( "intensity_peaks_display_simulated_img_distance_transform_alpha" );
   intensity_peaks_display_simulated_img->insertChildren( intensity_peaks_display_simulated_img_distance_transform_alpha );
   connect( intensity_peaks_display_simulated_img_distance_transform_alpha, SIGNAL(dataChanged(int)), ui->qgraphics_super_cell_refinement->image_widget, SLOT(repaint()) );
 
@@ -2767,6 +2782,7 @@ void MainWindow::create_box_options_tab4_intensity_peaks(){
 
   QVector<QVariant> box6_option_2_2_2 = {"Distance transform algorithm alpha channel",""};
   intensity_peaks_display_experimental_img_distance_transform_alpha  = new TreeItem ( box6_option_2_2_2 );
+  intensity_peaks_display_experimental_img_distance_transform_alpha->set_variable_name( "intensity_peaks_display_experimental_img_distance_transform_alpha" );
   intensity_peaks_display_experimental_img->insertChildren( intensity_peaks_display_experimental_img_distance_transform_alpha );
 
   /*

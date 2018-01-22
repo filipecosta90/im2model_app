@@ -145,8 +145,23 @@ TreeItem::TreeItem( QVector<QVariant> &data, boost::function<bool(int)> setter, 
   itemIsEditableVec = editable;
 }
 
+TreeItem::TreeItem( QVector<QVariant> &data, boost::function<void(QRect)> setter, TreeItem *parent  ) : TreeItem( data, parent ){
+  fp_data_setter_rect = setter;
+  _flag_fp_data_setter_rect = true;
+}
+
+TreeItem::TreeItem( QVector<QVariant> &data, boost::function<void(QRect)> setter, QVector<bool> editable, TreeItem *parent  ) : TreeItem( data, setter, parent ){
+  itemIsEditableVec = editable;
+}
+
+
 TreeItem::~TreeItem(){
   qDeleteAll( childItems );
+}
+
+void TreeItem::load_data_from_rect( QRect _rect_value ){
+  QVariant value = QVariant::fromValue( _rect_value );
+  itemData[_fp_data_setter_col_pos] = value;
 }
 
 void TreeItem::load_data_from_getter( int column ){
@@ -156,6 +171,13 @@ void TreeItem::load_data_from_getter( int column ){
     if( _flag_fp_data_getter_bool_vec[column] == true  ){
       const bool _bool_value = fp_data_getter_bool_vec[column]();
       value = QVariant::fromValue( _bool_value );
+      itemData[column] = value;
+      emit dataChanged( column );
+      emit dataChanged( _variable_name );
+    }
+    if( _flag_fp_data_getter_rect_vec[column] == true  ){
+      const QRect _rect_value = fp_data_getter_rect_vec[column]();
+      value = QVariant::fromValue( _rect_value );
       itemData[column] = value;
       emit dataChanged( column );
       emit dataChanged( _variable_name );
@@ -271,8 +293,19 @@ bool TreeItem::load_data_from_property_tree( boost::property_tree::ptree pt_root
         boost::property_tree::ptree pt_data = pt_root.get_child("data_vec");
         int col = 0;
         for ( boost::property_tree::ptree::value_type &pt_data_node : pt_data ){
-          std::string value = pt_data_node.second.data();
-          setData( col , QVariant( value.c_str() ), Qt::EditRole );
+
+          if( _flag_fp_data_setter_rect && _fp_data_setter_col_pos == col ){
+            int x = pt_data_node.second.get<int>("x", 0);
+            int y = pt_data_node.second.get<int>("y", 0);
+            int width = pt_data_node.second.get<int>("width", 0);
+            int height = pt_data_node.second.get<int>("height", 0);
+            QRect rect(x,y,width,height);
+            setData( col , QVariant( rect ), Qt::EditRole );
+          }
+          else{
+            std::string value = pt_data_node.second.data();
+            setData( col , QVariant( value.c_str() ), Qt::EditRole );
+          }
           col++;
         }
       }
@@ -330,37 +363,48 @@ boost::property_tree::ptree* TreeItem::save_data_into_property_tree( ){
   boost::property_tree::ptree* pt_checked_state = new boost::property_tree::ptree( );
   boost::property_tree::ptree* pt_childs = new boost::property_tree::ptree( );
 
+  int col = 0;
   for ( QVariant _data: itemData ){
     // Create an unnamed node containing the value
     boost::property_tree::ptree* pt_data_node = new boost::property_tree::ptree( );
+    if( _flag_fp_data_setter_rect && _fp_data_setter_col_pos == col ){
+      QRect rect = _data.toRect();
+    pt_data_node->put("x",rect.x() ); //toString().toStdString());
+    pt_data_node->put("y",rect.y() ); //toString().toStdString());
+    pt_data_node->put("width",rect.width() ); //toString().toStdString());
+    pt_data_node->put("height",rect.height() ); //toString().toStdString());
+  }
+  else{
     pt_data_node->put("",_data.toString().toStdString());
-    // Add this node to the list.
-    pt_data->push_back(std::make_pair("data", *pt_data_node));
   }
-  pt->put("varname", _variable_name );
+    // Add this node to the list.
+  pt_data->push_back(std::make_pair("data", *pt_data_node));
+  col++;
+}
+pt->put("varname", _variable_name );
 
-  pt->add_child("data_vec", *pt_data);
+pt->add_child("data_vec", *pt_data);
 
-  for ( bool _checked_state: itemState ){
+for ( bool _checked_state: itemState ){
     // Create an unnamed node containing the value
-    boost::property_tree::ptree* pt_checked_state_node = new boost::property_tree::ptree( );
-    pt_checked_state_node->put( "", _checked_state );
+  boost::property_tree::ptree* pt_checked_state_node = new boost::property_tree::ptree( );
+  pt_checked_state_node->put( "", _checked_state );
     // Add this node to the list.
-    pt_checked_state->push_back(std::make_pair("checkable", *pt_checked_state_node));
-  }
+  pt_checked_state->push_back(std::make_pair("checkable", *pt_checked_state_node));
+}
 
-  pt->add_child("checked_state_vec", *pt_checked_state);
+pt->add_child("checked_state_vec", *pt_checked_state);
 
-  int number_childs = childCount();
-  for( int n = 0; n < number_childs; n++){
-    TreeItem* _child =  childItems.value(n);
-    const std::string child_varname = _child->get_variable_name();
-    boost::property_tree::ptree* pt_child_node = _child->save_data_into_property_tree( );
+int number_childs = childCount();
+for( int n = 0; n < number_childs; n++){
+  TreeItem* _child =  childItems.value(n);
+  const std::string child_varname = _child->get_variable_name();
+  boost::property_tree::ptree* pt_child_node = _child->save_data_into_property_tree( );
     // Add this node to the list.
-    pt_childs->push_back(std::make_pair(child_varname, *pt_child_node));
-  }
-  pt->add_child("child_vec", *pt_childs );
-  return pt;
+  pt_childs->push_back(std::make_pair(child_varname, *pt_child_node));
+}
+pt->add_child("child_vec", *pt_childs );
+return pt;
 }
 
 TreeItem *TreeItem::child(int number) {
@@ -487,7 +531,7 @@ bool TreeItem::insertColumns(int position, int columns){
   return true;
 }
 TreeModel* TreeItem::model(){
-    return parentModel;
+  return parentModel;
 }
 
 TreeItem *TreeItem::parent(){
@@ -530,7 +574,7 @@ bool TreeItem::removeColumns(int position, int columns){
     itemData.remove(position);
   }
   foreach (TreeItem *child, childItems)
-    child->removeColumns(position, columns);
+  child->removeColumns(position, columns);
 
   return true;
 }
@@ -614,14 +658,20 @@ bool TreeItem::setData(int column, const QVariant &value, int role ){
         bool setter_result = false;
         //call setter on core im2model
         if( ( _fp_data_setter_col_pos == column )
-            && (_flag_fp_data_setter_string
-              || _flag_fp_data_setter_bool
-              || _flag_fp_data_setter_int
-              || _flag_fp_data_setter_double )
+          && (_flag_fp_data_setter_string
+            || _flag_fp_data_setter_bool
+            || _flag_fp_data_setter_int
+            || _flag_fp_data_setter_double
+            || _flag_fp_data_setter_rect  )
           ){
           if( _flag_fp_data_setter_string ){
             std::string t1 = value.toString().toStdString();
             setter_result = fp_data_setter_string( t1 );
+          }
+          if( _flag_fp_data_setter_rect ){
+            QRect t1 = value.toRect();
+            fp_data_setter_rect( t1 );
+            setter_result = true;
           }
           if( _flag_fp_data_setter_bool ){
             bool t1 = value.toBool();
