@@ -200,8 +200,15 @@ void CVImageWidget::addShapePolygon( std::vector<cv::Point2i> polygon , cv::Poin
   renderAreas_penWidth.push_back( penWidth  );
   renderAreas_penColor.push_back( QColor(penColor[0], penColor[1], penColor[2]) );
 }
-
 void CVImageWidget::addRenderPoints( std::vector<cv::Point2i> points , int penWidth, cv::Vec3b penColor, QString description_key  , cv::Point2i margin_point, int alpha_channel_value ){
+  std::vector<cv::Vec3b> penColors = std::vector<cv::Vec3b>();
+  for( int pos = 0; pos< points.size(); pos++ ){
+    penColors.push_back( penColor );
+  }
+  addRenderPoints( points ,  penWidth, penColors, description_key  , margin_point,  alpha_channel_value );
+}
+
+void CVImageWidget::addRenderPoints( std::vector<cv::Point2i> points , int penWidth, std::vector<cv::Vec3b> penColors, QString description_key  , cv::Point2i margin_point, int alpha_channel_value ){
   std::map< QString,std::vector<QPoint> >::iterator it = renderPoints_map.find( description_key );
   if ( it != renderPoints_map.end() ){
     renderPoints_map.erase (it);
@@ -212,15 +219,17 @@ void CVImageWidget::addRenderPoints( std::vector<cv::Point2i> points , int penWi
   std::vector<QPoint> renderPoints_margin_points = std::vector<QPoint>();
   std::vector<int> renderPoints_alpha_channel = std::vector<int>();
 
-  for( auto pt : points ) { 
+  for( int pos = 0; pos< points.size(); pos++ ){
+    const cv::Vec3b penColor = penColors[pos];
     QColor point_penColor(penColor[0], penColor[1], penColor[2] );
     renderPoints_penColor.push_back(point_penColor);
     renderPoints_penWidth.push_back( penWidth );
+    cv::Point2i pt = points[pos];
     renderPoints.push_back( QPoint (pt.x, pt.y) );
     renderPoints_margin_points.push_back( QPoint( margin_point.x, margin_point.y ) );
     renderPoints_alpha_channel.push_back( alpha_channel_value );
-
   }
+
   renderPoints_map.insert ( std::pair< QString,std::vector<QPoint> >( description_key , renderPoints ) );
   renderPoints_penColor_map.insert ( std::pair< QString,std::vector<QColor> >( description_key , renderPoints_penColor ) );
   renderPoints_penWidth_map.insert ( std::pair< QString,std::vector<int> >( description_key , renderPoints_penWidth ) );

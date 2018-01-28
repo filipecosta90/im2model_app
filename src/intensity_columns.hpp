@@ -20,6 +20,7 @@
 #include <limits>                        // for numeric_limits
 #include <fstream>                    // for ofstream
 #include <utility>                     // for pair
+#include <math.h>       /* nearbyint */
 
 #include <opencv2/opencv.hpp>           //
 #include <opencv2/core/hal/interface.h>  // for CV_32FC1, CV_8UC1, CV_32F
@@ -98,6 +99,9 @@ private:
     bool _flag_exp_image_keypoints = false;
 
     std::vector< std::vector<cv::Point> > sim_image_intensity_columns;
+    std::vector<cv::Point2i> sim_image_intensity_columns_projective_2D_coordinate;
+    std::vector<bool> sim_image_intensity_columns_marked_delete;
+
     std::vector< cv::Mat1b > sim_image_intensity_columns_masks;
     std::vector< std::vector<cv::Point> > exp_image_intensity_columns;
     cv::Point2i exp_image_delta_factor_constant;
@@ -125,6 +129,8 @@ public:
     bool get_flag_sim_image_properties(){ return _flag_sim_image_properties; }
     std::vector<cv::KeyPoint> get_sim_image_keypoints(){ return sim_image_keypoints; } 
     std::vector<cv::KeyPoint> get_exp_image_keypoints(){ return exp_image_keypoints; } 
+    std::vector<cv::Point2i> get_sim_image_intensity_columns_projective_2D_coordinate(){ return sim_image_intensity_columns_projective_2D_coordinate; }
+    std::vector<bool> get_sim_image_intensity_columns_marked_delete(){ return sim_image_intensity_columns_marked_delete; }
 
     /* Loggers */
     ApplicationLog::ApplicationLog* get_logger(){ return logger; }

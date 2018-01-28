@@ -253,6 +253,10 @@ public:
     int get_super_cell_sim_image_properties_ignore_edge_pixels();
     std::vector<cv::KeyPoint> get_super_cell_sim_image_properties_keypoints();
     std::vector<cv::KeyPoint> get_super_cell_exp_image_properties_keypoints();
+
+    std::vector<bool> get_super_cell_sim_image_intensity_columns_marked_delete();
+    std::vector<cv::Point2i> get_super_cell_sim_image_intensity_columns_projective_2D_coordinate();
+    
     cv::Point2i get_super_cell_exp_image_properties_centroid_translation_px();
 
     // gui flag getters

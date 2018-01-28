@@ -2423,6 +2423,14 @@ std::vector<cv::KeyPoint> TDMap::get_super_cell_sim_image_properties_keypoints()
   return sim_image_intensity_columns->get_sim_image_keypoints();
 }
 
+std::vector<bool> TDMap::get_super_cell_sim_image_intensity_columns_marked_delete(){
+  return sim_image_intensity_columns->get_sim_image_intensity_columns_marked_delete();
+}
+
+std::vector<cv::Point2i> TDMap::get_super_cell_sim_image_intensity_columns_projective_2D_coordinate(){
+  return sim_image_intensity_columns->get_sim_image_intensity_columns_projective_2D_coordinate();
+}
+
 std::vector<cv::KeyPoint> TDMap::get_super_cell_exp_image_properties_keypoints(){
   return sim_image_intensity_columns->get_exp_image_keypoints();
 }

@@ -56,6 +56,7 @@ int get_renderPoints_alpha_channels_map( QString description_key );
     void addRect( cv::Rect _area_rect, int penWidth, cv::Vec3b penColor , QString description );
     void addShapePolygon( std::vector<cv::Point2i> polygon , cv::Point2i top_left,  int penWidth, QString description );
     void addShapePolygon( std::vector<cv::Point2i> polygon , cv::Point2i top_left,  int penWidth, cv::Vec3b penColor, QString description );
+    void addRenderPoints( std::vector<cv::Point2i> points , int penWidth, std::vector<cv::Vec3b> penColor, QString key_string, cv::Point2i margin_point = cv::Point2i(0,0), int alpha_channel_value = 255 );
     void addRenderPoints( std::vector<cv::Point2i> points , int penWidth, cv::Vec3b penColor, QString key_string, cv::Point2i margin_point = cv::Point2i(0,0), int alpha_channel_value = 255 );
     void cleanRenderAreas();
 

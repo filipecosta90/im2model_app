@@ -569,15 +569,26 @@ void MainWindow::update_super_cell_experimental_image_intensity_columns(){
 //update tab 4
 void MainWindow::update_super_cell_simulated_image_intensity_columns(){
   std::vector<cv::KeyPoint> sim_image_keypoints = _core_td_map->get_super_cell_sim_image_properties_keypoints();
+  std::vector<bool> sim_image_keypoints_marked_delete = _core_td_map->get_super_cell_sim_image_intensity_columns_marked_delete();
+  std::vector<cv::Point2i> sim_image_intensity_columns_projective_2D_coordinate = _core_td_map->get_super_cell_sim_image_intensity_columns_projective_2D_coordinate();
+
   std::vector<cv::Point2i> sim_image_renderPoints;
+  std::vector<cv::Vec3b> sim_image_renderPoints_color;
   for( int keypoint_pos = 0; keypoint_pos < sim_image_keypoints.size(); keypoint_pos++ ){
     QVector<QVariant> keypoint_option = {"# " + QString::number( keypoint_pos ),""};
     TreeItem* keypoint_item  = new TreeItem ( keypoint_option );
     super_cell_sim_image_intensity_columns->insertChildren( keypoint_item );
     sim_image_renderPoints.push_back( sim_image_keypoints[keypoint_pos].pt );
+    const bool marked_del = sim_image_keypoints_marked_delete[keypoint_pos];
+    if( marked_del ){
+      sim_image_renderPoints_color.push_back(cv::Vec3b(255,0,0));
+    }
+    else{
+      sim_image_renderPoints_color.push_back(cv::Vec3b(0,255,0));
+    }
   }
   intensity_columns_listing_model->force_layout_change();
-  ui->qgraphics_super_cell_refinement->addRenderPoints( sim_image_renderPoints , 10, cv::Vec3b(255,0,0), tr("Simulated image intensity columns") );
+  ui->qgraphics_super_cell_refinement->addRenderPoints( sim_image_renderPoints , 10, sim_image_renderPoints_color, tr("Simulated image intensity columns") );
   ui->qgraphics_super_cell_refinement->show();
 }
 
@@ -2733,7 +2744,7 @@ void MainWindow::create_box_options_tab4_intensity_peaks(){
 
   QVector<QVariant> box6_option_2_1_2 = {"Distance transform algorithm alpha channel",""};
   intensity_peaks_display_simulated_img_distance_transform_alpha  = new TreeItem ( box6_option_2_1_2 );
-    intensity_peaks_display_simulated_img_distance_transform_alpha->set_variable_name( "intensity_peaks_display_simulated_img_distance_transform_alpha" );
+  intensity_peaks_display_simulated_img_distance_transform_alpha->set_variable_name( "intensity_peaks_display_simulated_img_distance_transform_alpha" );
   intensity_peaks_display_simulated_img->insertChildren( intensity_peaks_display_simulated_img_distance_transform_alpha );
   connect( intensity_peaks_display_simulated_img_distance_transform_alpha, SIGNAL(dataChanged(int)), ui->qgraphics_super_cell_refinement->image_widget, SLOT(repaint()) );
 
