@@ -580,6 +580,8 @@ void MainWindow::update_super_cell_simulated_image_intensity_columns(){
     super_cell_sim_image_intensity_columns->insertChildren( keypoint_item );
     sim_image_renderPoints.push_back( sim_image_keypoints[keypoint_pos].pt );
     const bool marked_del = sim_image_keypoints_marked_delete[keypoint_pos];
+    std::cout << "\t\t\tmarked_del " << std::boolalpha << marked_del << std::endl;
+
     if( marked_del ){
       sim_image_renderPoints_color.push_back(cv::Vec3b(255,0,0));
     }
@@ -587,8 +589,11 @@ void MainWindow::update_super_cell_simulated_image_intensity_columns(){
       sim_image_renderPoints_color.push_back(cv::Vec3b(0,255,0));
     }
   }
+    for( int keypoint_pos = 0; keypoint_pos < sim_image_renderPoints_color.size(); keypoint_pos++ ){
+    std::cout << "\t addRenderPoints point # " << keypoint_pos << " " << sim_image_renderPoints_color[keypoint_pos] << std::endl;
+}
+  ui->qgraphics_super_cell_refinement->addRenderPoints( sim_image_renderPoints , 10, sim_image_renderPoints_color, "Simulated image intensity columns" );
   intensity_columns_listing_model->force_layout_change();
-  ui->qgraphics_super_cell_refinement->addRenderPoints( sim_image_renderPoints , 10, sim_image_renderPoints_color, tr("Simulated image intensity columns") );
   ui->qgraphics_super_cell_refinement->show();
 }
 

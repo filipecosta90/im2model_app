@@ -32,6 +32,7 @@ public:
 
     void startRectangleSelection();
     void startStatisticalRectangleSelection();
+    void MapPosToObject( const QPoint &pos );
 
     /* right click context menu */
     void ShowContextMenu(const QPoint &pos);
@@ -57,12 +58,13 @@ int get_renderPoints_alpha_channels_map( QString description_key );
     void addShapePolygon( std::vector<cv::Point2i> polygon , cv::Point2i top_left,  int penWidth, QString description );
     void addShapePolygon( std::vector<cv::Point2i> polygon , cv::Point2i top_left,  int penWidth, cv::Vec3b penColor, QString description );
     void addRenderPoints( std::vector<cv::Point2i> points , int penWidth, std::vector<cv::Vec3b> penColor, QString key_string, cv::Point2i margin_point = cv::Point2i(0,0), int alpha_channel_value = 255 );
-    void addRenderPoints( std::vector<cv::Point2i> points , int penWidth, cv::Vec3b penColor, QString key_string, cv::Point2i margin_point = cv::Point2i(0,0), int alpha_channel_value = 255 );
+    void addRenderPoints( std::vector<cv::Point2i> points , int penWidth, cv::Vec3b penColor, QString key_string,  cv::Point2i margin_point = cv::Point2i(0,0), int alpha_channel_value = 255 );
     void cleanRenderAreas();
 
     signals:
     void selectionRectangleChanged( QRect );
     void selectionStatisticalRectangleChanged( QRect );
+    void MapPosClicked( QPoint );
 
 protected:
     void paintEvent(QPaintEvent* event);
@@ -104,6 +106,7 @@ private:
 
     bool _enabled_rectangleSelection = false;
     bool _started_rectangleSelection = false;
+    bool _enable_map_pos_signal = true;
     bool freeSelection = false;
     bool pathSelection = false;
     QRect selectionRect;

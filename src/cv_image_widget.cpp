@@ -3,6 +3,13 @@
 CVImageWidget::CVImageWidget(QWidget *parent ) : QWidget(parent) , scaleFactor(1) {
   this->setContextMenuPolicy(Qt::CustomContextMenu);
   connect(this, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(ShowContextMenu(const QPoint &)));
+  connect(this, SIGNAL(MapPosClicked(QPoint)), this, SLOT(MapPosToObject(const QPoint &)));
+}
+
+void CVImageWidget::MapPosToObject(const QPoint &pos){
+  // Handle global position
+  std::cout << "MapPosToObject x "  << pos.x() << " y " << pos.y() << std::endl;
+
 }
 
 QSize CVImageWidget::sizeHint() const {
@@ -213,16 +220,35 @@ void CVImageWidget::addRenderPoints( std::vector<cv::Point2i> points , int penWi
   if ( it != renderPoints_map.end() ){
     renderPoints_map.erase (it);
   }
+  std::map< QString,std::vector<QColor> >::iterator it1 = renderPoints_penColor_map.find( description_key );
+  if ( it1 != renderPoints_penColor_map.end() ){
+    renderPoints_penColor_map.erase (it1);
+  }
+  std::map< QString,std::vector<int> >::iterator it2 = renderPoints_penWidth_map.find( description_key );
+  if ( it2 != renderPoints_penWidth_map.end() ){
+    renderPoints_penWidth_map.erase (it2);
+  }
+  std::map< QString,std::vector<QPoint> >::iterator it3 = renderPoints_margin_points_map.find( description_key );
+  if ( it3 != renderPoints_margin_points_map.end() ){
+    renderPoints_margin_points_map.erase (it3);
+  }
+  std::map< QString,std::vector<int> >::iterator it4 = renderPoints_alpha_channel_map.find( description_key );
+  if ( it4 != renderPoints_alpha_channel_map.end() ){
+    renderPoints_alpha_channel_map.erase (it4);
+  }
+
   std::vector<QPoint> renderPoints = std::vector<QPoint>();
-  std::vector<QColor>renderPoints_penColor = std::vector<QColor>();
+  std::vector<QColor>renderPoints_penColors = std::vector<QColor>();
   std::vector<int> renderPoints_penWidth = std::vector<int>();
   std::vector<QPoint> renderPoints_margin_points = std::vector<QPoint>();
   std::vector<int> renderPoints_alpha_channel = std::vector<int>();
 
   for( int pos = 0; pos< points.size(); pos++ ){
     const cv::Vec3b penColor = penColors[pos];
-    QColor point_penColor(penColor[0], penColor[1], penColor[2] );
-    renderPoints_penColor.push_back(point_penColor);
+    const QColor point_penColor = QColor(penColor[0], penColor[1], penColor[2] );
+    std::cout << "\taddRenderPoints point # " << pos << " " << penColor << " " << point_penColor.name().toStdString() << std::endl;
+
+    renderPoints_penColors.push_back(point_penColor);
     renderPoints_penWidth.push_back( penWidth );
     cv::Point2i pt = points[pos];
     renderPoints.push_back( QPoint (pt.x, pt.y) );
@@ -231,7 +257,7 @@ void CVImageWidget::addRenderPoints( std::vector<cv::Point2i> points , int penWi
   }
 
   renderPoints_map.insert ( std::pair< QString,std::vector<QPoint> >( description_key , renderPoints ) );
-  renderPoints_penColor_map.insert ( std::pair< QString,std::vector<QColor> >( description_key , renderPoints_penColor ) );
+  renderPoints_penColor_map.insert ( std::pair< QString,std::vector<QColor> >( description_key , renderPoints_penColors ) );
   renderPoints_penWidth_map.insert ( std::pair< QString,std::vector<int> >( description_key , renderPoints_penWidth ) );
   renderPoints_margin_points_map.insert ( std::pair< QString,std::vector<QPoint> >( description_key , renderPoints_margin_points ) );
   renderPoints_alpha_channel_map.insert ( std::pair< QString,std::vector<int> >( description_key , renderPoints_alpha_channel ) );
@@ -346,6 +372,7 @@ void CVImageWidget::paintEvent(QPaintEvent* event) {
 
   for ( std::map< QString,std::vector<QPoint>>::iterator it=renderPoints_map.begin(); it!=renderPoints_map.end(); ++it){
     const QString key = it->first;
+
     std::map< QString,std::vector<QColor> >::iterator it_colors = renderPoints_penColor_map.find( key );
     std::map< QString,std::vector<int> >::iterator it_width = renderPoints_penWidth_map.find( key );
     std::map< QString,std::vector<QPoint> >::iterator it_margin = renderPoints_margin_points_map.find( key );
@@ -356,16 +383,26 @@ void CVImageWidget::paintEvent(QPaintEvent* event) {
       it_alpha != renderPoints_alpha_channel_map.end() 
       ){
       const std::vector<QPoint> renderPoints = it->second;
-    const std::vector<QColor>renderPoints_penColor = it_colors->second;
+    const std::vector<QColor> renderPoints_penColor = it_colors->second;
+    const QString key_color = it_colors->first;
+
     const std::vector<int> renderPoints_penWidth = it_width->second;
     const std::vector<QPoint> renderPoints_margin_points = it_margin->second;
     const std::vector<int> render_points_alpha_channel = it_alpha->second;
 
+    std::cout << "#### renderPoints.size() " << renderPoints.size() << std::endl;
+    std::cout << "#### renderPoints_penColor.size() " << renderPoints_penColor.size() << " key: " << key_color.toStdString() << std::endl;
+    std::cout << "#### renderPoints_penWidth.size() " << renderPoints_penWidth.size() << std::endl;
+    std::cout << "#### renderPoints_margin_points.size() " << renderPoints_margin_points.size() << std::endl;
+    std::cout << "#### render_points_alpha_channel.size() " << render_points_alpha_channel.size() << std::endl;
+
     for( int point_n = 0; point_n < renderPoints.size(); point_n++ ){
-      QPoint point_w_margin = renderPoints_margin_points[point_n] + renderPoints[point_n];
-      QColor point_penColor = renderPoints_penColor[point_n];
-      int point_penWidth = renderPoints_penWidth[point_n];
-      double dopacity = render_points_alpha_channel[point_n] / 255.0f;
+      const QPoint point_w_margin = renderPoints_margin_points[point_n] + renderPoints[point_n];
+      const QColor point_penColor = renderPoints_penColor[point_n];
+
+      const int point_penWidth = renderPoints_penWidth[point_n];
+      const double dopacity = render_points_alpha_channel[point_n] / 255.0f;
+      std::cout << " point # " << point_n << " x: " << point_w_margin.x() << " y: " << point_w_margin.y() <<  " " << point_penColor.name().toStdString() << "\t point_penWidth " << point_penWidth << "\t dopacity "<<  dopacity << std::endl;
       painter.save();
       painter.setOpacity( dopacity ); 
       painter.setPen(QPen(QBrush( point_penColor ),point_penWidth,Qt::DashLine));
@@ -403,6 +440,9 @@ void CVImageWidget::mousePressEvent(QMouseEvent *e){
       _started_rectangleSelectionStatistical = true;
       selectionStatisticalRect.setTopLeft(e->pos());
       selectionStatisticalRect.setBottomRight(e->pos());
+    }
+    if( _enable_map_pos_signal ){
+      emit MapPosClicked( e->pos() );
     }
   }
 }
