@@ -575,9 +575,10 @@ void MainWindow::update_super_cell_simulated_image_intensity_columns(){
   std::vector<cv::Point2i> sim_image_renderPoints;
   std::vector<cv::Vec3b> sim_image_renderPoints_color;
   for( int keypoint_pos = 0; keypoint_pos < sim_image_keypoints.size(); keypoint_pos++ ){
-    QVector<QVariant> keypoint_option = {"# " + QString::number( keypoint_pos ),""};
+    const cv::Point2i delta = sim_image_intensity_columns_projective_2D_coordinate[keypoint_pos];
+    QVector<QVariant> keypoint_option = {"# " + QString::number( keypoint_pos ), QString::number( sim_image_keypoints[keypoint_pos].pt.x ) , QString::number( delta.x ) , QString::number( sim_image_keypoints[keypoint_pos].pt.y ) ,  QString::number( delta.y ) };
     TreeItem* keypoint_item  = new TreeItem ( keypoint_option );
-    super_cell_sim_image_intensity_columns->insertChildren( keypoint_item );
+    intensity_columns_listing_root->insertChildren( keypoint_item );
     sim_image_renderPoints.push_back( sim_image_keypoints[keypoint_pos].pt );
     const bool marked_del = sim_image_keypoints_marked_delete[keypoint_pos];
     std::cout << "\t\t\tmarked_del " << std::boolalpha << marked_del << std::endl;
@@ -589,9 +590,9 @@ void MainWindow::update_super_cell_simulated_image_intensity_columns(){
       sim_image_renderPoints_color.push_back(cv::Vec3b(0,255,0));
     }
   }
-    for( int keypoint_pos = 0; keypoint_pos < sim_image_renderPoints_color.size(); keypoint_pos++ ){
+  for( int keypoint_pos = 0; keypoint_pos < sim_image_renderPoints_color.size(); keypoint_pos++ ){
     std::cout << "\t addRenderPoints point # " << keypoint_pos << " " << sim_image_renderPoints_color[keypoint_pos] << std::endl;
-}
+  }
   ui->qgraphics_super_cell_refinement->addRenderPoints( sim_image_renderPoints , 10, sim_image_renderPoints_color, "Simulated image intensity columns" );
   intensity_columns_listing_model->force_layout_change();
   ui->qgraphics_super_cell_refinement->show();
@@ -2831,7 +2832,7 @@ void MainWindow::create_box_options_tab4_intensity_peaks(){
 
 void MainWindow::create_box_options_tab4_intensity_columns_listing(){
 
-  QVector<QVariant> common_header = {"Field","Value"};
+  QVector<QVariant> common_header = {"Intensity column #","SIM x pos", "SIM x delta", "SIM y pos", "SIM y delta", "SIM Integ. Intensity", "EXP Integ. Intensity", "Status"};
 
     /*************************
      * INTENSITY PEAKS
@@ -2843,10 +2844,10 @@ void MainWindow::create_box_options_tab4_intensity_columns_listing(){
   //update_super_cell_simulated_image_intensity_columns();
 
 
-  QVector<QVariant> box7_option_1 = {"Simulated image intensity columns",""};
-  super_cell_sim_image_intensity_columns = new TreeItem ( box7_option_1 );
-  super_cell_sim_image_intensity_columns->set_variable_name( "super_cell_sim_image_intensity_columns" );
-  intensity_columns_listing_root->insertChildren( super_cell_sim_image_intensity_columns );
+  //QVector<QVariant> box7_option_1 = {"Intensity column #","SIM x pos", "SIM x delta", "SIM y pos", "SIM y delta", "SIM Integ. Intensity", "EXP Integ. Intensity", "Status" };
+  //super_cell_sim_image_intensity_columns = new TreeItem ( box7_option_1 );
+  //super_cell_sim_image_intensity_columns->set_variable_name( "super_cell_sim_image_intensity_columns" );
+  //intensity_columns_listing_root->insertChildren( super_cell_sim_image_intensity_columns );
 
 
   ui->qtree_view_refinement_full_simulation_intensity_columns->setModel( intensity_columns_listing_model );

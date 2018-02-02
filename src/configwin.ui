@@ -610,89 +610,158 @@
        </attribute>
        <layout class="QGridLayout" name="gridLayout_5">
         <item row="0" column="0">
-         <widget class="QSplitter" name="refinement_splitter">
+         <widget class="QSplitter" name="splitter_2">
           <property name="orientation">
-           <enum>Qt::Horizontal</enum>
+           <enum>Qt::Vertical</enum>
           </property>
-          <widget class="QWidget" name="layoutWidget_2">
-           <layout class="QVBoxLayout" name="verticalLayout_3" stretch="1">
-            <item>
-             <widget class="QSplitter" name="splitter_layout_simulation_configuration_output_2">
-              <property name="orientation">
-               <enum>Qt::Vertical</enum>
-              </property>
-              <widget class="QWidget" name="layoutWidget_7">
-               <layout class="QVBoxLayout" name="vertical_layout_simulation_configuration_2">
-                <item>
-                 <widget class="QLabel" name="qlabel_image_path_10">
-                  <property name="font">
-                   <font>
-                    <weight>75</weight>
-                    <bold>true</bold>
-                   </font>
-                  </property>
-                  <property name="text">
-                   <string>Full Simulation</string>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QTreeView" name="qtree_view_refinement_full_simulation"/>
-                </item>
-                <item>
-                 <layout class="QHBoxLayout" name="horizontalLayout_20">
-                  <item>
-                   <spacer name="horizontalSpacer_4">
-                    <property name="orientation">
-                     <enum>Qt::Horizontal</enum>
-                    </property>
-                    <property name="sizeHint" stdset="0">
-                     <size>
-                      <width>40</width>
-                      <height>20</height>
-                     </size>
-                    </property>
-                   </spacer>
-                  </item>
-                  <item>
-                   <widget class="QPushButton" name="qpush_run_compute_intensity_columns">
-                    <property name="text">
-                     <string>Compute intensity columns</string>
-                    </property>
-                   </widget>
-                  </item>
-                 </layout>
-                </item>
-               </layout>
+          <widget class="QSplitter" name="refinement_splitter">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <widget class="QWidget" name="layoutWidget_2">
+            <layout class="QVBoxLayout" name="verticalLayout_3" stretch="0">
+             <item>
+              <widget class="QSplitter" name="splitter_layout_simulation_configuration_output_2">
+               <property name="orientation">
+                <enum>Qt::Vertical</enum>
+               </property>
+               <widget class="QWidget" name="layoutWidget_7">
+                <layout class="QVBoxLayout" name="vertical_layout_simulation_configuration_2">
+                 <item>
+                  <widget class="QLabel" name="qlabel_image_path_10">
+                   <property name="font">
+                    <font>
+                     <weight>75</weight>
+                     <bold>true</bold>
+                    </font>
+                   </property>
+                   <property name="text">
+                    <string>Full Simulation</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QTreeView" name="qtree_view_refinement_full_simulation"/>
+                 </item>
+                 <item>
+                  <layout class="QHBoxLayout" name="horizontalLayout_20">
+                   <item>
+                    <spacer name="horizontalSpacer_4">
+                     <property name="orientation">
+                      <enum>Qt::Horizontal</enum>
+                     </property>
+                     <property name="sizeHint" stdset="0">
+                      <size>
+                       <width>40</width>
+                       <height>20</height>
+                      </size>
+                     </property>
+                    </spacer>
+                   </item>
+                   <item>
+                    <widget class="QPushButton" name="qpush_run_compute_intensity_columns">
+                     <property name="text">
+                      <string>Compute intensity columns</string>
+                     </property>
+                    </widget>
+                   </item>
+                  </layout>
+                 </item>
+                </layout>
+               </widget>
               </widget>
-              <widget class="QWidget" name="layoutWidget_8">
-               <layout class="QVBoxLayout" name="vertical_layout_simulation_output_2">
-                <item>
-                 <widget class="QLabel" name="label_6">
-                  <property name="font">
-                   <font>
-                    <weight>75</weight>
-                    <bold>true</bold>
-                   </font>
-                  </property>
-                  <property name="text">
-                   <string>Intensity columns</string>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QTreeView" name="qtree_view_refinement_full_simulation_intensity_columns"/>
-                </item>
-               </layout>
+             </item>
+            </layout>
+           </widget>
+           <widget class="QWidget" name="layoutWidget_3">
+            <layout class="QVBoxLayout" name="vertical_layout_TD_full_2">
+             <item>
+              <widget class="QLabel" name="qlabel_full_experimental_image_5">
+               <property name="font">
+                <font>
+                 <weight>75</weight>
+                 <bold>true</bold>
+                </font>
+               </property>
+               <property name="text">
+                <string>Supercell display</string>
+               </property>
               </widget>
-             </widget>
-            </item>
-           </layout>
+             </item>
+             <item>
+              <widget class="CvImageFrameWidget" name="qgraphics_super_cell_refinement" native="true">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="minimumSize">
+                <size>
+                 <width>320</width>
+                 <height>320</height>
+                </size>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+           <widget class="QWidget" name="layoutWidget_4">
+            <layout class="QVBoxLayout" name="verticalLayout_5" stretch="1">
+             <item>
+              <widget class="QSplitter" name="splitter_layout_simulation_configuration_output_4">
+               <property name="orientation">
+                <enum>Qt::Vertical</enum>
+               </property>
+               <widget class="QWidget" name="layoutWidget_11">
+                <layout class="QVBoxLayout" name="vertical_layout_simulation_configuration_6">
+                 <item>
+                  <widget class="QLabel" name="qlabel_image_path_14">
+                   <property name="font">
+                    <font>
+                     <weight>75</weight>
+                     <bold>true</bold>
+                    </font>
+                   </property>
+                   <property name="text">
+                    <string>Menu3</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QTreeView" name="qtree_view_tdmap_simulation_setup_5"/>
+                 </item>
+                </layout>
+               </widget>
+               <widget class="QWidget" name="layoutWidget_12">
+                <layout class="QVBoxLayout" name="vertical_layout_simulation_output_4">
+                 <item>
+                  <widget class="QLabel" name="label_8">
+                   <property name="font">
+                    <font>
+                     <weight>75</weight>
+                     <bold>true</bold>
+                    </font>
+                   </property>
+                   <property name="text">
+                    <string>Menu4</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QTreeView" name="qtree_view_tdmap_running_configuration_4"/>
+                 </item>
+                </layout>
+               </widget>
+              </widget>
+             </item>
+            </layout>
+           </widget>
           </widget>
-          <widget class="QWidget" name="layoutWidget_3">
-           <layout class="QVBoxLayout" name="vertical_layout_TD_full_2">
+          <widget class="QWidget" name="layoutWidget_8">
+           <layout class="QVBoxLayout" name="vertical_layout_simulation_output_2">
             <item>
-             <widget class="QLabel" name="qlabel_full_experimental_image_5">
+             <widget class="QLabel" name="label_6">
               <property name="font">
                <font>
                 <weight>75</weight>
@@ -700,76 +769,12 @@
                </font>
               </property>
               <property name="text">
-               <string>Supercell display</string>
+               <string>Intensity columns</string>
               </property>
              </widget>
             </item>
             <item>
-             <widget class="CvImageFrameWidget" name="qgraphics_super_cell_refinement" native="true">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="minimumSize">
-               <size>
-                <width>320</width>
-                <height>320</height>
-               </size>
-              </property>
-             </widget>
-            </item>
-           </layout>
-          </widget>
-          <widget class="QWidget" name="layoutWidget_4">
-           <layout class="QVBoxLayout" name="verticalLayout_5" stretch="1">
-            <item>
-             <widget class="QSplitter" name="splitter_layout_simulation_configuration_output_4">
-              <property name="orientation">
-               <enum>Qt::Vertical</enum>
-              </property>
-              <widget class="QWidget" name="layoutWidget_11">
-               <layout class="QVBoxLayout" name="vertical_layout_simulation_configuration_6">
-                <item>
-                 <widget class="QLabel" name="qlabel_image_path_14">
-                  <property name="font">
-                   <font>
-                    <weight>75</weight>
-                    <bold>true</bold>
-                   </font>
-                  </property>
-                  <property name="text">
-                   <string>Menu3</string>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QTreeView" name="qtree_view_tdmap_simulation_setup_5"/>
-                </item>
-               </layout>
-              </widget>
-              <widget class="QWidget" name="layoutWidget_12">
-               <layout class="QVBoxLayout" name="vertical_layout_simulation_output_4">
-                <item>
-                 <widget class="QLabel" name="label_8">
-                  <property name="font">
-                   <font>
-                    <weight>75</weight>
-                    <bold>true</bold>
-                   </font>
-                  </property>
-                  <property name="text">
-                   <string>Menu4</string>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QTreeView" name="qtree_view_tdmap_running_configuration_4"/>
-                </item>
-               </layout>
-              </widget>
-             </widget>
+             <widget class="QTreeView" name="qtree_view_refinement_full_simulation_intensity_columns"/>
             </item>
            </layout>
           </widget>
