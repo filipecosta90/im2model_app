@@ -177,7 +177,6 @@ bool IntensityColumns::segmentate_sim_image()
       // Draw the foreground markers
       for (size_t i = 0; i < sim_image_intensity_columns.size(); i++){
         drawContours(markers, sim_image_intensity_columns, static_cast<int>(i), Scalar::all(static_cast<int>(i)+1), CV_FILLED);
-        std::cout << " i " << i << std::endl;
       }
 
       // Perform the watershed algorithm
@@ -238,8 +237,8 @@ bool IntensityColumns::segmentate_sim_image()
       result = true;
       _flag_sim_image_keypoints = true;
 
-      emit sim_image_intensity_columns_changed();
-      emit sim_image_intensity_keypoints_changed();
+      //emit sim_image_intensity_columns_changed();
+      //emit sim_image_intensity_keypoints_changed();
     }
     else {
       result = false;
@@ -398,21 +397,28 @@ bool IntensityColumns::map_sim_intensity_cols_to_exp_image(){
           sstream1 <<   std::setw(3) << std::setfill('0') << std::to_string( i );
           sstream1 << ".png";
           imwrite ( sstream1.str(), dstImageExp );
-          double sum_dstImageExp = cv::sum(dstImageExp)[0];
-          double sum_dstImageSim = cv::sum(dstImageSim)[0];
+          const double sum_dstImageExp = cv::sum(dstImageExp)[0];
+          const double sum_dstImageSim = cv::sum(dstImageSim)[0];
           std::cout << "keypoint "<< i << " sum_dstImageExp " << sum_dstImageExp << "\t sum_dstImageSim " << sum_dstImageSim << std::endl;
           std::cout << " \t\tExpImage type " << GetMatType(dstImageExp) << " ExpImage type " << GetMatType(dstImageSim) <<  std::endl;
 
           cv::Scalar mean_statistical_ImageExp;
           cv::Scalar stddev_statistical_ImageExp;
-
           cv::Scalar mean_statistical_ImageSim;
           cv::Scalar stddev_statistical_ImageSim;
 
           cv::meanStdDev(dstImageExp,mean_statistical_ImageExp,stddev_statistical_ImageExp,sim_image_keypoint_mask);
           cv::meanStdDev(dstImageSim,mean_statistical_ImageSim,stddev_statistical_ImageSim,sim_image_keypoint_mask);
+          
           const int keypoint_threshold_value = mean_statistical_ImageSim[0] - (int)( nearbyint( ( (double) stddev_statistical_ImageSim[0] ) * stddev_threshold_factor ) );
 
+          sim_image_intensity_columns_threshold_value.push_back( keypoint_threshold_value );
+          sim_image_intensity_columns_stddev_statistical.push_back( stddev_statistical_ImageSim[0] );
+          sim_image_intensity_columns_mean_statistical.push_back( mean_statistical_ImageSim[0] );
+          exp_image_intensity_columns_mean_statistical.push_back( mean_statistical_ImageExp[0] );
+          sim_image_intensity_columns_integrate_intensity.push_back( sum_dstImageSim );
+          exp_image_intensity_columns_integrate_intensity.push_back( sum_dstImageExp );
+          
           std::cout << "\t\t\tmean_statistical_ImageExp: "  << mean_statistical_ImageExp[0] << "\tstddev_statistical_ImageExp: "  << stddev_statistical_ImageExp[0] <<  std::endl;
           std::cout << "\t\t\tmean_statistical_ImageSim: "  << mean_statistical_ImageSim[0] << "\tstddev_statistical_ImageSim: "  << stddev_statistical_ImageSim[0] <<  std::endl;
           std::cout << "\t\t\tfull_threshold_value: "  << threshold_value <<  std::endl;

@@ -256,8 +256,16 @@ public:
 
     std::vector<bool> get_super_cell_sim_image_intensity_columns_marked_delete();
     std::vector<cv::Point2i> get_super_cell_sim_image_intensity_columns_projective_2D_coordinate();
-    
+    std::vector<cv::Point2i> get_super_cell_sim_image_intensity_columns_center();
     cv::Point2i get_super_cell_exp_image_properties_centroid_translation_px();
+
+    std::vector<int> get_super_cell_sim_image_intensity_columns_mean_statistical();
+    std::vector<int> get_super_cell_exp_image_intensity_columns_mean_statistical();
+    std::vector<int> get_super_cell_sim_image_intensity_columns_stddev_statistical();
+    std::vector<int> get_super_cell_exp_image_intensity_columns_stddev_statistical();
+    std::vector<int> get_super_cell_sim_image_intensity_columns_threshold_value();
+    std::vector<double> get_super_cell_sim_image_intensity_columns_integrate_intensity();
+    std::vector<double> get_super_cell_exp_image_intensity_columns_integrate_intensity();
 
     // gui flag getters
     bool get_flag_celslc_io_ap_pipe_out();
@@ -531,7 +539,7 @@ public:
     void update_super_cell_exp_image_centroid_translation_changed( cv::Point2i trans );
 
     signals:
-        void supercell_full_experimental_image_intensity_columns_changed();
+    void supercell_full_experimental_image_intensity_columns_changed();
     void supercell_full_simulated_image_intensity_columns_changed();
     void supercell_full_experimental_image_centroid_translation_changed( );
 

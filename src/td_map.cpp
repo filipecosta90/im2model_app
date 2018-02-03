@@ -2105,12 +2105,12 @@ bool TDMap::set_thickness_user_estimated_nm( std::string s_estimated ){
         emit TDMap_started_supercell_segmentate_image();
         _flag_read_simulated_supercell_image = sim_image_intensity_columns->segmentate_sim_image();
         std::cout << " _flag_read_simulated_supercell_image segmentate_sim_image " << std::boolalpha << _flag_read_simulated_supercell_image << std::endl;
-       
+
         _flag_read_simulated_supercell_image &= sim_image_intensity_columns->feature_match();
-                std::cout << " _flag_read_simulated_supercell_image feature_match " << std::boolalpha << _flag_read_simulated_supercell_image << std::endl;
+        std::cout << " _flag_read_simulated_supercell_image feature_match " << std::boolalpha << _flag_read_simulated_supercell_image << std::endl;
 
         _flag_read_simulated_supercell_image &= sim_image_intensity_columns->map_sim_intensity_cols_to_exp_image();
-               std::cout << " _flag_read_simulated_supercell_image map_sim_intensity_cols_to_exp_image " << std::boolalpha << _flag_read_simulated_supercell_image << std::endl;
+        std::cout << " _flag_read_simulated_supercell_image map_sim_intensity_cols_to_exp_image " << std::boolalpha << _flag_read_simulated_supercell_image << std::endl;
 
         emit TDMap_ended_supercell_segmentate_image( _flag_read_simulated_supercell_image );
         if( _flag_logger ){
@@ -2427,6 +2427,10 @@ std::vector<bool> TDMap::get_super_cell_sim_image_intensity_columns_marked_delet
   return sim_image_intensity_columns->get_sim_image_intensity_columns_marked_delete();
 }
 
+std::vector<cv::Point2i> TDMap::get_super_cell_sim_image_intensity_columns_center(){
+  return sim_image_intensity_columns->get_sim_image_intensity_columns_center();
+}
+
 std::vector<cv::Point2i> TDMap::get_super_cell_sim_image_intensity_columns_projective_2D_coordinate(){
   return sim_image_intensity_columns->get_sim_image_intensity_columns_projective_2D_coordinate();
 }
@@ -2434,6 +2438,15 @@ std::vector<cv::Point2i> TDMap::get_super_cell_sim_image_intensity_columns_proje
 std::vector<cv::KeyPoint> TDMap::get_super_cell_exp_image_properties_keypoints(){
   return sim_image_intensity_columns->get_exp_image_keypoints();
 }
+
+std::vector<int> TDMap::get_super_cell_sim_image_intensity_columns_mean_statistical(){ return sim_image_intensity_columns->get_sim_image_intensity_columns_mean_statistical(); }
+std::vector<int> TDMap::get_super_cell_exp_image_intensity_columns_mean_statistical(){ return sim_image_intensity_columns->get_exp_image_intensity_columns_mean_statistical(); }
+std::vector<int> TDMap::get_super_cell_sim_image_intensity_columns_stddev_statistical(){ return sim_image_intensity_columns->get_sim_image_intensity_columns_stddev_statistical(); }
+std::vector<int> TDMap::get_super_cell_exp_image_intensity_columns_stddev_statistical(){ return sim_image_intensity_columns->get_exp_image_intensity_columns_stddev_statistical(); }
+
+std::vector<int> TDMap::get_super_cell_sim_image_intensity_columns_threshold_value(){ return sim_image_intensity_columns->get_sim_image_intensity_columns_threshold_value(); }
+std::vector<double> TDMap::get_super_cell_sim_image_intensity_columns_integrate_intensity(){ return sim_image_intensity_columns->get_sim_image_intensity_columns_integrate_intensity(); }
+std::vector<double> TDMap::get_super_cell_exp_image_intensity_columns_integrate_intensity(){ return sim_image_intensity_columns->get_exp_image_intensity_columns_integrate_intensity(); }
 
 cv::Point2i TDMap::get_super_cell_exp_image_properties_centroid_translation_px(){
   return supercell_exp_image_properties->get_centroid_translation_px();

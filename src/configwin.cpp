@@ -568,21 +568,43 @@ void MainWindow::update_super_cell_experimental_image_intensity_columns(){
 
 //update tab 4
 void MainWindow::update_super_cell_simulated_image_intensity_columns(){
-  std::vector<cv::KeyPoint> sim_image_keypoints = _core_td_map->get_super_cell_sim_image_properties_keypoints();
-  std::vector<bool> sim_image_keypoints_marked_delete = _core_td_map->get_super_cell_sim_image_intensity_columns_marked_delete();
-  std::vector<cv::Point2i> sim_image_intensity_columns_projective_2D_coordinate = _core_td_map->get_super_cell_sim_image_intensity_columns_projective_2D_coordinate();
+  const std::vector<cv::KeyPoint> sim_image_keypoints = _core_td_map->get_super_cell_sim_image_properties_keypoints();
+  const std::vector<bool> sim_image_keypoints_marked_delete = _core_td_map->get_super_cell_sim_image_intensity_columns_marked_delete();
+  
+  const std::vector<cv::Point2i> sim_image_intensity_columns_projective_2D_coordinate = _core_td_map->get_super_cell_sim_image_intensity_columns_projective_2D_coordinate();
+  const std::vector<cv::Point2i> sim_image_intensity_columns_center = _core_td_map->get_super_cell_sim_image_intensity_columns_center();
+
+  const std::vector<int> sim_image_intensity_columns_mean_statistical = _core_td_map->get_super_cell_sim_image_intensity_columns_mean_statistical();
+  const std::vector<int> exp_image_intensity_columns_mean_statistical = _core_td_map->get_super_cell_exp_image_intensity_columns_mean_statistical();
+  const std::vector<int> sim_image_intensity_columns_stddev_statistical = _core_td_map->get_super_cell_sim_image_intensity_columns_stddev_statistical();
+  const std::vector<int> exp_image_intensity_columns_stddev_statistical = _core_td_map->get_super_cell_exp_image_intensity_columns_stddev_statistical();
+
+  const std::vector<int> sim_image_intensity_columns_threshold_value = _core_td_map->get_super_cell_sim_image_intensity_columns_threshold_value();
+  const std::vector<double> sim_image_intensity_columns_integrate_intensity = _core_td_map->get_super_cell_sim_image_intensity_columns_integrate_intensity();
+  const std::vector<double> exp_image_intensity_columns_integrate_intensity = _core_td_map->get_super_cell_exp_image_intensity_columns_integrate_intensity();
 
   std::vector<cv::Point2i> sim_image_renderPoints;
   std::vector<cv::Vec3b> sim_image_renderPoints_color;
-  for( int keypoint_pos = 0; keypoint_pos < sim_image_keypoints.size(); keypoint_pos++ ){
+  for( int keypoint_pos = 0; keypoint_pos < sim_image_intensity_columns_center.size(); keypoint_pos++ ){
     const cv::Point2i delta = sim_image_intensity_columns_projective_2D_coordinate[keypoint_pos];
-    QVector<QVariant> keypoint_option = {"# " + QString::number( keypoint_pos ), QString::number( sim_image_keypoints[keypoint_pos].pt.x ) , QString::number( delta.x ) , QString::number( sim_image_keypoints[keypoint_pos].pt.y ) ,  QString::number( delta.y ) };
+    const cv::Point2i column_center = sim_image_intensity_columns_center[keypoint_pos];
+    
+    const int sim_image_intensity_col_mean_statistical = sim_image_intensity_columns_mean_statistical[keypoint_pos];
+    const int exp_image_intensity_col_mean_statistical = exp_image_intensity_columns_mean_statistical[keypoint_pos];
+    const int sim_image_intensity_col_stddev_statistical = sim_image_intensity_columns_stddev_statistical[keypoint_pos];
+    const int exp_image_intensity_col_stddev_statistical = exp_image_intensity_columns_stddev_statistical[keypoint_pos];
+
+    const int sim_image_intensity_col_threshold_value = sim_image_intensity_columns_threshold_value[keypoint_pos];
+
+    const double sim_image_integrated_intensity = sim_image_intensity_columns_integrate_intensity[keypoint_pos];
+    const double exp_image_integrated_intensity = exp_image_intensity_columns_integrate_intensity[keypoint_pos];
+    const bool marked_del = sim_image_keypoints_marked_delete[keypoint_pos];
+    QString col_status = marked_del ? QString("Marked delete") : QString("OK");
+    QVector<QVariant> keypoint_option = {"# " + QString::number( keypoint_pos ), QString::number( column_center.x )  , QString::number( column_center.y ) , QString::number( delta.x ), QString::number( delta.y ) , col_status ,  QString::number( sim_image_integrated_intensity ) ,  QString::number( exp_image_integrated_intensity ),  QString::number( sim_image_intensity_col_mean_statistical ),  QString::number( exp_image_intensity_col_mean_statistical ),  QString::number( sim_image_intensity_col_threshold_value ),  QString::number( sim_image_intensity_col_stddev_statistical ),   QString::number( exp_image_intensity_col_stddev_statistical )};
+    
     TreeItem* keypoint_item  = new TreeItem ( keypoint_option );
     intensity_columns_listing_root->insertChildren( keypoint_item );
     sim_image_renderPoints.push_back( sim_image_keypoints[keypoint_pos].pt );
-    const bool marked_del = sim_image_keypoints_marked_delete[keypoint_pos];
-    std::cout << "\t\t\tmarked_del " << std::boolalpha << marked_del << std::endl;
-
     if( marked_del ){
       sim_image_renderPoints_color.push_back(cv::Vec3b(255,0,0));
     }
@@ -2832,7 +2854,7 @@ void MainWindow::create_box_options_tab4_intensity_peaks(){
 
 void MainWindow::create_box_options_tab4_intensity_columns_listing(){
 
-  QVector<QVariant> common_header = {"Intensity column #","SIM x pos", "SIM x delta", "SIM y pos", "SIM y delta", "SIM Integ. Intensity", "EXP Integ. Intensity", "Status"};
+  QVector<QVariant> common_header = {"Intensity column #","SIM x pos", "SIM y pos", "SIM x delta", "SIM y delta", "Status", "SIM Integ. Intensity", "EXP Integ. Intensity", "SIM Column Mean" , "EXP Column Mean" , "Column Threshold Value" , "SIM Column Std. Dev.", "EXP Column Std. Dev." };
 
     /*************************
      * INTENSITY PEAKS

@@ -100,8 +100,17 @@ private:
 
     std::vector< std::vector<cv::Point> > sim_image_intensity_columns;
     std::vector<cv::Point2i> sim_image_intensity_columns_projective_2D_coordinate;
-    std::vector<bool> sim_image_intensity_columns_marked_delete;
 
+    std::vector<int> sim_image_intensity_columns_mean_statistical;
+    std::vector<int> exp_image_intensity_columns_mean_statistical;
+    std::vector<int> sim_image_intensity_columns_stddev_statistical;
+    std::vector<int> exp_image_intensity_columns_stddev_statistical;
+    std::vector<int> sim_image_intensity_columns_threshold_value;
+
+    std::vector<double> sim_image_intensity_columns_integrate_intensity;
+    std::vector<double> exp_image_intensity_columns_integrate_intensity;
+
+    std::vector<bool> sim_image_intensity_columns_marked_delete;
     std::vector< cv::Mat1b > sim_image_intensity_columns_masks;
     std::vector< std::vector<cv::Point> > exp_image_intensity_columns;
     cv::Point2i exp_image_delta_factor_constant;
@@ -128,9 +137,19 @@ public:
     bool get_flag_exp_image_properties(){ return _flag_exp_image_properties; }
     bool get_flag_sim_image_properties(){ return _flag_sim_image_properties; }
     std::vector<cv::KeyPoint> get_sim_image_keypoints(){ return sim_image_keypoints; } 
+    std::vector<cv::Point2i> get_sim_image_intensity_columns_center(){ return sim_image_intensity_columns_center; }
     std::vector<cv::KeyPoint> get_exp_image_keypoints(){ return exp_image_keypoints; } 
     std::vector<cv::Point2i> get_sim_image_intensity_columns_projective_2D_coordinate(){ return sim_image_intensity_columns_projective_2D_coordinate; }
     std::vector<bool> get_sim_image_intensity_columns_marked_delete(){ return sim_image_intensity_columns_marked_delete; }
+
+    std::vector<int> get_sim_image_intensity_columns_mean_statistical(){ return sim_image_intensity_columns_mean_statistical; }
+    std::vector<int> get_exp_image_intensity_columns_mean_statistical(){ return exp_image_intensity_columns_mean_statistical; }
+    std::vector<int> get_sim_image_intensity_columns_stddev_statistical(){ return sim_image_intensity_columns_stddev_statistical; }
+        std::vector<int> get_exp_image_intensity_columns_stddev_statistical(){ return exp_image_intensity_columns_stddev_statistical; }
+    std::vector<int> get_sim_image_intensity_columns_threshold_value(){ return sim_image_intensity_columns_threshold_value; }
+
+    std::vector<double> get_sim_image_intensity_columns_integrate_intensity(){ return sim_image_intensity_columns_integrate_intensity; }
+    std::vector<double> get_exp_image_intensity_columns_integrate_intensity(){ return exp_image_intensity_columns_integrate_intensity; }
 
     /* Loggers */
     ApplicationLog::ApplicationLog* get_logger(){ return logger; }
