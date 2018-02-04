@@ -371,6 +371,29 @@ bool IntensityColumns::map_sim_intensity_cols_to_exp_image(){
 
         imwrite("exp_mapped_matrix.png",exp_mapped_matrix);
 
+        // clean-up after 1st time
+        if( sim_image_intensity_columns_threshold_value.size() > 0 ){
+          sim_image_intensity_columns_threshold_value.clear();
+        }
+        if( sim_image_intensity_columns_stddev_statistical.size() > 0 ){
+          sim_image_intensity_columns_stddev_statistical.clear();
+        }
+        if( exp_image_intensity_columns_stddev_statistical.size() > 0 ){
+          exp_image_intensity_columns_stddev_statistical.clear();
+        }
+        if( sim_image_intensity_columns_mean_statistical.size() > 0 ){
+          sim_image_intensity_columns_mean_statistical.clear();
+        }
+        if( exp_image_intensity_columns_mean_statistical.size() > 0 ){
+          exp_image_intensity_columns_mean_statistical.clear();
+        }
+        if( sim_image_intensity_columns_integrate_intensity.size() > 0 ){
+          sim_image_intensity_columns_integrate_intensity.clear();
+        }
+        if( exp_image_intensity_columns_integrate_intensity.size() > 0 ){
+          exp_image_intensity_columns_integrate_intensity.clear();
+        }
+
         for (size_t i = 0; i < sim_image_intensity_columns_masks.size(); i++){
           cv::Mat1b sim_image_keypoint_mask = sim_image_intensity_columns_masks[i];
           std::stringstream sstream2;
@@ -414,6 +437,7 @@ bool IntensityColumns::map_sim_intensity_cols_to_exp_image(){
 
           sim_image_intensity_columns_threshold_value.push_back( keypoint_threshold_value );
           sim_image_intensity_columns_stddev_statistical.push_back( stddev_statistical_ImageSim[0] );
+          exp_image_intensity_columns_stddev_statistical.push_back( stddev_statistical_ImageExp[0] );
           sim_image_intensity_columns_mean_statistical.push_back( mean_statistical_ImageSim[0] );
           exp_image_intensity_columns_mean_statistical.push_back( mean_statistical_ImageExp[0] );
           sim_image_intensity_columns_integrate_intensity.push_back( sum_dstImageSim );
@@ -459,7 +483,7 @@ bool IntensityColumns::map_sim_intensity_cols_to_exp_image(){
             std::cout << " \t\tTranslation matrix " << warp_matrix <<  std::endl;
             // warpMatrix – floating-point 2 \times 3
 
-            cv::Point2i projective_2D_coordinate = cv::Point2i( int( nearbyint(warp_matrix.at<float>(0,2)) ),int(  nearbyint(warp_matrix.at<float>(1,2) )) );
+            const cv::Point2i projective_2D_coordinate = cv::Point2i( int( nearbyint(warp_matrix.at<float>(0,2)) ),int(  nearbyint(warp_matrix.at<float>(1,2) )) );
             std::cout << " \t\t projective_2D_coordinate " << projective_2D_coordinate <<  std::endl;
 
             sim_image_intensity_columns_projective_2D_coordinate[i] = projective_2D_coordinate;
