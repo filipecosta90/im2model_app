@@ -2893,10 +2893,21 @@ void MainWindow::create_box_options_tab4_intensity_columns_listing(){
 
 void MainWindow::full_simulation_intensity_columns_SelectionChanged(const QItemSelection &selected, const QItemSelection &deselected)
 {
+  QList<QModelIndex> indices = selected.indexes();
+  for( QModelIndex index : indices ) {
+    TreeItem* data = intensity_columns_listing_model->getItem(index);
+    std::string varname = data->get_variable_name();
+    std::cout << "selecting var: " << varname <<  std::endl;
+    ui->qgraphics_super_cell_refinement->set_render_point_selected_state( QString::fromStdString(varname), true );
+  }
+  QList<QModelIndex> des_indices = deselected.indexes();
+  for( QModelIndex index : des_indices ) {
+    TreeItem* data = intensity_columns_listing_model->getItem(index);
+    std::string varname = data->get_variable_name();
+    std::cout << "deselecting var: " << varname <<  std::endl;
+    ui->qgraphics_super_cell_refinement->set_render_point_selected_state( QString::fromStdString(varname), false );
+  }  
 
-  QModelIndex index = ui->qtree_view_refinement_full_simulation_intensity_columns->currentIndex();
-  TreeItem* data = intensity_columns_listing_model->getItem(index);
-  std::cout << "Item selection changed" << std::endl;  
 }
 
 void MainWindow::create_box_options(){

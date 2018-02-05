@@ -119,6 +119,7 @@ int CvImageFrameWidget::get_image_layer_alpha_channel( int layer_number ){
   return result;
 }
 
+
 bool CvImageFrameWidget::set_image_layer_alpha_channel( int layer_number, int value ){
   bool result = false;
   if( image_widget != nullptr ){
@@ -139,6 +140,14 @@ bool CvImageFrameWidget::set_renderPoints_alpha_channels_map( QString key, int v
   bool result = false;
   if( image_widget != nullptr ){
     result = image_widget->set_renderPoints_alpha_channels_map( key, value );
+  }
+  return result;
+}
+
+bool CvImageFrameWidget::set_render_point_selected_state( QString key, bool value ){
+  bool result = false;
+  if( image_widget != nullptr ){
+    result = image_widget->set_render_point_selected_state( key, value );
   }
   return result;
 }

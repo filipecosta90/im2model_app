@@ -49,6 +49,7 @@ public:
     void updateImage();
     int get_image_layer_alpha_channel( int layer_number );
     bool set_image_layer_alpha_channel( int layer_number, int value );
+    bool set_render_point_selected_state( QString key_string, bool value );
     bool set_renderPoints_alpha_channels_map( QString key_string, int value );
     int get_renderPoints_alpha_channels_map( QString description_key );
 

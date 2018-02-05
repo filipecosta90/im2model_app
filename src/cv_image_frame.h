@@ -40,6 +40,7 @@ public:
     void addRenderPoints( std::vector<cv::Point2i> points , int penWidth, cv::Vec3b penColor, QString description , cv::Point2i margin_point = cv::Point2i(0,0) );
     int get_image_layer_alpha_channel( int layer_number );
     bool set_image_layer_alpha_channel( int layer_number, int value );
+    bool set_render_point_selected_state( QString key_string, bool value );
     int get_renderPoints_alpha_channels_map( QString key );
     bool set_renderPoints_alpha_channels_map( QString key, int value );
 

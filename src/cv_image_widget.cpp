@@ -255,7 +255,7 @@ void CVImageWidget::addRenderPoints( std::vector<cv::Point2i> points , int penWi
     std::cout << "\taddRenderPoints point # " << pos << " " << penColor << " " << point_penColor.name().toStdString() << std::endl;
 
     renderPoints_penColors.push_back(point_penColor);
-    renderPoints_penSelection.push_back( true );
+    renderPoints_penSelection.push_back( false );
     renderPoints_penWidth.push_back( penWidth );
     cv::Point2i pt = points[pos];
     renderPoints.push_back( QPoint (pt.x, pt.y) );
@@ -319,6 +319,18 @@ bool CVImageWidget::set_renderPoints_alpha_channels_map( QString description_key
       *it = value;
     }
     std::cout << "set_renderPoints_alpha_channels_map" << std::endl;
+    result = true;
+  }
+  return result;
+}
+
+bool CVImageWidget::set_render_point_selected_state( QString key_string, bool value ){
+  bool result = false;
+  std::map< QString,std::vector<bool> >::iterator it_selected = renderPoints_Selection_map.find( key_string );
+  if ( it_selected != renderPoints_Selection_map.end() ){
+    for( std::vector<bool>::iterator it = it_selected->second.begin(); it != it_selected->second.end(); ++it ){
+      *it = value;
+    }
     result = true;
   }
   return result;
