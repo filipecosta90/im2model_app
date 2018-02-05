@@ -145,7 +145,7 @@ public:
     std::vector<int> get_sim_image_intensity_columns_mean_statistical(){ return sim_image_intensity_columns_mean_statistical; }
     std::vector<int> get_exp_image_intensity_columns_mean_statistical(){ return exp_image_intensity_columns_mean_statistical; }
     std::vector<int> get_sim_image_intensity_columns_stddev_statistical(){ return sim_image_intensity_columns_stddev_statistical; }
-        std::vector<int> get_exp_image_intensity_columns_stddev_statistical(){ return exp_image_intensity_columns_stddev_statistical; }
+    std::vector<int> get_exp_image_intensity_columns_stddev_statistical(){ return exp_image_intensity_columns_stddev_statistical; }
     std::vector<int> get_sim_image_intensity_columns_threshold_value(){ return sim_image_intensity_columns_threshold_value; }
 
     std::vector<double> get_sim_image_intensity_columns_integrate_intensity(){ return sim_image_intensity_columns_integrate_intensity; }

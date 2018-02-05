@@ -32,7 +32,7 @@ Q_DECLARE_METATYPE(cv::Rect)
 
 class TreeItem : public QObject {
   Q_OBJECT
-  public:
+public:
     enum DelegateType { _delegate_ACTION_CHECK, _delegate_FILE, _delegate_DIR, _delegate_TEXT, _delegate_TEXT_ACTION, _delegate_SLIDER_INT, _delegate_TEXT_DOCUMENT, _delegate_TEXT_BROWSER, _delegate_DROP };
     enum ActionStatusType { _status_NOT_READY, _status_READY_TO_RUN, _status_RUNNING, _status_RUNNED_OK, _status_RUNNED_ERROR };
 
@@ -148,20 +148,20 @@ class TreeItem : public QObject {
     bool set_fp_data_getter_string_vec( int col_pos ,  boost::function<std::string(void)> fp );
 
     public slots:
-      void setToolTipText(const QString&);
+    void setToolTipText(const QString&);
     void load_data_from_getter( int column );
     void load_data_from_getter_int();
     void load_data_from_getter_double();
     void load_data_from_getter_string();
-        void load_data_from_rect( QRect );
+    void load_data_from_rect( QRect );
 
-signals:
+    signals:
 
     void dataChanged( int column );
     void dataChanged( std::string varname );
     void highlight_error( int column );
 
-  private:
+private:
     TreeModel *parentModel = nullptr;
     TreeItem *parentItem;
     QList<TreeItem*> childItems;
@@ -258,8 +258,8 @@ signals:
 
     std::vector<bool> _flag_highlight_error;
     private slots:
-      void clean_highlight_status( int column );
-      void force_layout_change( int column );
+    void clean_highlight_status( int column );
+    void force_layout_change( int column );
 };
 
 Q_DECLARE_METATYPE(std::string)

@@ -50,7 +50,7 @@ public:
     int get_image_layer_alpha_channel( int layer_number );
     bool set_image_layer_alpha_channel( int layer_number, int value );
     bool set_renderPoints_alpha_channels_map( QString key_string, int value );
-int get_renderPoints_alpha_channels_map( QString description_key );
+    int get_renderPoints_alpha_channels_map( QString description_key );
 
     /*shape setters*/
     void addRect( cv::Rect _area_rect, int penWidth , QString description );
@@ -86,6 +86,7 @@ private:
     cv::Vec3b renderAreas_default_color = cv::Vec3b(255,0,0);
 
     std::map< QString,std::vector<QPoint> > renderPoints_map;
+    std::map< QString,std::vector<bool> > renderPoints_Selection_map;
     std::map< QString,std::vector<QColor> > renderPoints_penColor_map;
     std::map< QString,std::vector<int> > renderPoints_penWidth_map;
     std::map< QString,std::vector<QPoint> > renderPoints_margin_points_map;

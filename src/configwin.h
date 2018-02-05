@@ -52,6 +52,7 @@
 #include <Qt3DExtras/qfirstpersoncameracontroller.h>
 #include <Qt3DExtras/QOrbitCameraController>
 #include <Qt3DExtras/QPhongMaterial>
+#include <QTreeView>
 
 #include <opencv2/core/hal/interface.h>                   // for CV_8UC1
 #include <opencv2/imgcodecs/imgcodecs_c.h>                // for ::CV_LOAD_I...
@@ -153,6 +154,7 @@ public:
     void update_from_full_SuperCell_failure();
     void update_from_full_SuperCell_intensity_cols_sucess();
     void update_from_full_SuperCell_intensity_cols_failure();
+    void full_simulation_intensity_columns_SelectionChanged(const QItemSelection &selected, const QItemSelection &deselected);
 
 protected:
     void closeEvent(QCloseEvent *event) override;

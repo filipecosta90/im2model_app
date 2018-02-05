@@ -216,6 +216,7 @@ void CVImageWidget::addRenderPoints( std::vector<cv::Point2i> points , int penWi
 }
 
 void CVImageWidget::addRenderPoints( std::vector<cv::Point2i> points , int penWidth, std::vector<cv::Vec3b> penColors, QString description_key  , cv::Point2i margin_point, int alpha_channel_value ){
+
   std::map< QString,std::vector<QPoint> >::iterator it = renderPoints_map.find( description_key );
   if ( it != renderPoints_map.end() ){
     renderPoints_map.erase (it);
@@ -236,8 +237,13 @@ void CVImageWidget::addRenderPoints( std::vector<cv::Point2i> points , int penWi
   if ( it4 != renderPoints_alpha_channel_map.end() ){
     renderPoints_alpha_channel_map.erase (it4);
   }
+  std::map< QString,std::vector<bool> >::iterator it5 = renderPoints_Selection_map.find( description_key );
+  if ( it5 != renderPoints_Selection_map.end() ){
+    renderPoints_Selection_map.erase (it5);
+  }
 
   std::vector<QPoint> renderPoints = std::vector<QPoint>();
+  std::vector<bool>renderPoints_penSelection = std::vector<bool>();
   std::vector<QColor>renderPoints_penColors = std::vector<QColor>();
   std::vector<int> renderPoints_penWidth = std::vector<int>();
   std::vector<QPoint> renderPoints_margin_points = std::vector<QPoint>();
@@ -249,6 +255,7 @@ void CVImageWidget::addRenderPoints( std::vector<cv::Point2i> points , int penWi
     std::cout << "\taddRenderPoints point # " << pos << " " << penColor << " " << point_penColor.name().toStdString() << std::endl;
 
     renderPoints_penColors.push_back(point_penColor);
+    renderPoints_penSelection.push_back( true );
     renderPoints_penWidth.push_back( penWidth );
     cv::Point2i pt = points[pos];
     renderPoints.push_back( QPoint (pt.x, pt.y) );
@@ -257,6 +264,7 @@ void CVImageWidget::addRenderPoints( std::vector<cv::Point2i> points , int penWi
   }
 
   renderPoints_map.insert ( std::pair< QString,std::vector<QPoint> >( description_key , renderPoints ) );
+  renderPoints_Selection_map.insert ( std::pair< QString,std::vector<bool> >( description_key , renderPoints_penSelection ) );
   renderPoints_penColor_map.insert ( std::pair< QString,std::vector<QColor> >( description_key , renderPoints_penColors ) );
   renderPoints_penWidth_map.insert ( std::pair< QString,std::vector<int> >( description_key , renderPoints_penWidth ) );
   renderPoints_margin_points_map.insert ( std::pair< QString,std::vector<QPoint> >( description_key , renderPoints_margin_points ) );
@@ -374,10 +382,13 @@ void CVImageWidget::paintEvent(QPaintEvent* event) {
     const QString key = it->first;
 
     std::map< QString,std::vector<QColor> >::iterator it_colors = renderPoints_penColor_map.find( key );
+    std::map< QString,std::vector<bool> >::iterator it_selected = renderPoints_Selection_map.find( key );
     std::map< QString,std::vector<int> >::iterator it_width = renderPoints_penWidth_map.find( key );
     std::map< QString,std::vector<QPoint> >::iterator it_margin = renderPoints_margin_points_map.find( key );
     std::map< QString,std::vector<int> >::iterator it_alpha = renderPoints_alpha_channel_map.find( key );
+    
     if (  it_colors != renderPoints_penColor_map.end() &&  
+      it_selected != renderPoints_Selection_map.end() &&  
       it_width != renderPoints_penWidth_map.end() &&
       it_margin != renderPoints_margin_points_map.end() && 
       it_alpha != renderPoints_alpha_channel_map.end() 
@@ -389,8 +400,10 @@ void CVImageWidget::paintEvent(QPaintEvent* event) {
     const std::vector<int> renderPoints_penWidth = it_width->second;
     const std::vector<QPoint> renderPoints_margin_points = it_margin->second;
     const std::vector<int> render_points_alpha_channel = it_alpha->second;
+    const std::vector<bool> render_points_selection = it_selected->second;
 
     std::cout << "#### renderPoints.size() " << renderPoints.size() << std::endl;
+    std::cout << "#### renderPoints_Selection_map.size() " << renderPoints_Selection_map.size() << std::endl;
     std::cout << "#### renderPoints_penColor.size() " << renderPoints_penColor.size() << " key: " << key_color.toStdString() << std::endl;
     std::cout << "#### renderPoints_penWidth.size() " << renderPoints_penWidth.size() << std::endl;
     std::cout << "#### renderPoints_margin_points.size() " << renderPoints_margin_points.size() << std::endl;
@@ -399,8 +412,9 @@ void CVImageWidget::paintEvent(QPaintEvent* event) {
     for( int point_n = 0; point_n < renderPoints.size(); point_n++ ){
       const QPoint point_w_margin = renderPoints_margin_points[point_n] + renderPoints[point_n];
       const QColor point_penColor = renderPoints_penColor[point_n];
-
-      const int point_penWidth = renderPoints_penWidth[point_n];
+      const bool selected = render_points_selection[point_n];
+      int point_penWidth = renderPoints_penWidth[point_n];
+      point_penWidth *= selected ? 2 : 1;
       const double dopacity = render_points_alpha_channel[point_n] / 255.0f;
       std::cout << " point # " << point_n << " x: " << point_w_margin.x() << " y: " << point_w_margin.y() <<  " " << point_penColor.name().toStdString() << "\t point_penWidth " << point_penWidth << "\t dopacity "<<  dopacity << std::endl;
       painter.save();
