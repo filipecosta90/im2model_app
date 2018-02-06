@@ -6,7 +6,6 @@ bool MainWindow::create_3d_widgets( QMainWindow *parent , SuperCell* tdmap_vis_s
 }
 
 MainWindow::MainWindow( ApplicationLog::ApplicationLog* logger , QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow) {
-  chemfiles::Topology water;
 
 
   im2model_logger = logger;
