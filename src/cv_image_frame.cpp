@@ -107,6 +107,7 @@ int CvImageFrameWidget::addImageLayer( const cv::Mat& image ){
   int result = -1;
   if( image_widget != nullptr ){
     result = image_widget->addImageLayer(image);
+    image_widget->update();
   }
   return result;
 }
@@ -115,6 +116,7 @@ int CvImageFrameWidget::get_image_layer_alpha_channel( int layer_number ){
   int result = 255;
   if( image_widget != nullptr ){
     result = image_widget->get_image_layer_alpha_channel(layer_number);
+    image_widget->update();
   }
   return result;
 }
@@ -124,6 +126,7 @@ bool CvImageFrameWidget::set_image_layer_alpha_channel( int layer_number, int va
   bool result = false;
   if( image_widget != nullptr ){
     result = image_widget->set_image_layer_alpha_channel(layer_number, value);
+    image_widget->update();
   }
   return result;
 }
@@ -132,6 +135,7 @@ int CvImageFrameWidget::get_renderPoints_alpha_channels_map( QString key ){
   int result = 255;
   if( image_widget != nullptr ){
     result = image_widget->get_renderPoints_alpha_channels_map( key );
+    image_widget->update();
   }
   return result;
 }
@@ -140,6 +144,26 @@ bool CvImageFrameWidget::set_renderPoints_alpha_channels_map( QString key, int v
   bool result = false;
   if( image_widget != nullptr ){
     result = image_widget->set_renderPoints_alpha_channels_map( key, value );
+    image_widget->update();
+  }
+  return result;
+}
+
+bool CvImageFrameWidget::set_renderPoints_alpha_channels_map_group( QString group_key, int value ){
+  bool result = false;
+  if( image_widget != nullptr ){
+    result = image_widget->set_renderPoints_group_alpha_channels_map( group_key, value );
+    image_widget->update();
+  }
+  return result;
+}
+
+bool CvImageFrameWidget::addRenderPoints_key_to_group( QString key_string, QString group_key ){
+  bool result = false;
+  if( image_widget != nullptr ){
+    image_widget->addRenderPoints_key_to_group( key_string, group_key );
+    image_widget->update();
+    result = true;
   }
   return result;
 }
@@ -148,6 +172,7 @@ bool CvImageFrameWidget::set_render_point_selected_state( QString key, bool valu
   bool result = false;
   if( image_widget != nullptr ){
     result = image_widget->set_render_point_selected_state( key, value );
+    image_widget->update();
   }
   return result;
 }

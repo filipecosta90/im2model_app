@@ -570,19 +570,15 @@ void MainWindow::update_super_cell_experimental_image_intensity_columns(){
 void MainWindow::update_super_cell_simulated_image_intensity_columns(){
   const std::vector<cv::KeyPoint> sim_image_keypoints = _core_td_map->get_super_cell_sim_image_properties_keypoints();
   const std::vector<bool> sim_image_keypoints_marked_delete = _core_td_map->get_super_cell_sim_image_intensity_columns_marked_delete();
-  
   const std::vector<cv::Point2i> sim_image_intensity_columns_projective_2D_coordinate = _core_td_map->get_super_cell_sim_image_intensity_columns_projective_2D_coordinate();
   const std::vector<cv::Point2i> sim_image_intensity_columns_center = _core_td_map->get_super_cell_sim_image_intensity_columns_center();
-
   const std::vector<int> sim_image_intensity_columns_mean_statistical = _core_td_map->get_super_cell_sim_image_intensity_columns_mean_statistical();
   const std::vector<int> exp_image_intensity_columns_mean_statistical = _core_td_map->get_super_cell_exp_image_intensity_columns_mean_statistical();
   const std::vector<int> sim_image_intensity_columns_stddev_statistical = _core_td_map->get_super_cell_sim_image_intensity_columns_stddev_statistical();
   const std::vector<int> exp_image_intensity_columns_stddev_statistical = _core_td_map->get_super_cell_exp_image_intensity_columns_stddev_statistical();
-
   const std::vector<int> sim_image_intensity_columns_threshold_value = _core_td_map->get_super_cell_sim_image_intensity_columns_threshold_value();
   const std::vector<double> sim_image_intensity_columns_integrate_intensity = _core_td_map->get_super_cell_sim_image_intensity_columns_integrate_intensity();
   const std::vector<double> exp_image_intensity_columns_integrate_intensity = _core_td_map->get_super_cell_exp_image_intensity_columns_integrate_intensity();
-
   
   for( int keypoint_pos = 0; keypoint_pos < sim_image_intensity_columns_center.size(); keypoint_pos++ ){
     std::vector<cv::Point2i> sim_image_renderPoints;
@@ -620,6 +616,7 @@ void MainWindow::update_super_cell_simulated_image_intensity_columns(){
       sim_image_renderPoints_color.push_back(cv::Vec3b(0,255,0));
     }
     ui->qgraphics_super_cell_refinement->addRenderPoints( sim_image_renderPoints, 10, sim_image_renderPoints_color, QString::fromStdString( sstream.str() ) );
+    ui->qgraphics_super_cell_refinement->addRenderPoints_key_to_group( QString::fromStdString( sstream.str() ), tr("Simulated image intensity columns") );
   }
 
   intensity_columns_listing_model->force_layout_change();
@@ -2784,7 +2781,7 @@ void MainWindow::create_box_options_tab4_intensity_peaks(){
 
   QVector<QVariant> box6_option_2_1_3 = {"Intensity peaks alpha channel",""};
   boost::function<int(void)> box6_option_2_1_3_getter ( boost::bind( &CvImageFrameWidget::get_renderPoints_alpha_channels_map, ui->qgraphics_super_cell_refinement , tr("Simulated image intensity columns") ) );
-  boost::function<bool(int)> box6_option_2_1_3_setter ( boost::bind( &CvImageFrameWidget::set_renderPoints_alpha_channels_map, ui->qgraphics_super_cell_refinement, tr("Simulated image intensity columns"), _1 ) );
+  boost::function<bool(int)> box6_option_2_1_3_setter ( boost::bind( &CvImageFrameWidget::set_renderPoints_alpha_channels_map_group, ui->qgraphics_super_cell_refinement, tr("Simulated image intensity columns"), _1 ) );
   QVector<bool> box6_option_2_1_3_edit = {false,true};
   
   intensity_peaks_display_simulated_img_alpha_channel  = new TreeItem ( box6_option_2_1_3 , box6_option_2_1_3_setter , box6_option_2_1_3_edit );
@@ -2877,18 +2874,19 @@ void MainWindow::create_box_options_tab4_intensity_columns_listing(){
     //start editing after one click
   ui->qtree_view_refinement_full_simulation_intensity_columns->setEditTriggers( QAbstractItemView::AllEditTriggers );
   ui->qtree_view_refinement_full_simulation_intensity_columns->expandAll();
+  ui->qtree_view_refinement_full_simulation_intensity_columns->setSelectionMode( QAbstractItemView::ExtendedSelection );
 
   for (int column = 0; column < intensity_columns_listing_model->columnCount(); ++column){
     ui->qtree_view_refinement_full_simulation_intensity_columns->resizeColumnToContents(column);
   }
 
-
-  connect(ui->qtree_view_refinement_full_simulation_intensity_columns->selectionModel(),
+  connect(
+    ui->qtree_view_refinement_full_simulation_intensity_columns->selectionModel(),
     SIGNAL(selectionChanged(const QItemSelection &, const QItemSelection &)),
     this,
-    SLOT(full_simulation_intensity_columns_SelectionChanged(const QItemSelection &, const QItemSelection &)));
-
-
+    SLOT(full_simulation_intensity_columns_SelectionChanged(const QItemSelection &, const QItemSelection &)),
+    Qt::DirectConnection
+    );
 }
 
 void MainWindow::full_simulation_intensity_columns_SelectionChanged(const QItemSelection &selected, const QItemSelection &deselected)
@@ -2907,7 +2905,8 @@ void MainWindow::full_simulation_intensity_columns_SelectionChanged(const QItemS
     std::cout << "deselecting var: " << varname <<  std::endl;
     ui->qgraphics_super_cell_refinement->set_render_point_selected_state( QString::fromStdString(varname), false );
   }  
-
+  ui->qgraphics_super_cell_refinement->repaint();
+  //ui->qgraphics_super_cell_refinement->force_layout_change();
 }
 
 void MainWindow::create_box_options(){

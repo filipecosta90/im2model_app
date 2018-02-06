@@ -43,6 +43,8 @@ public:
     bool set_render_point_selected_state( QString key_string, bool value );
     int get_renderPoints_alpha_channels_map( QString key );
     bool set_renderPoints_alpha_channels_map( QString key, int value );
+    bool set_renderPoints_alpha_channels_map_group( QString group_key, int value );
+    bool addRenderPoints_key_to_group( QString key_string, QString group_key );
 
     signals:
     void selectionRectangleChanged(QRect);

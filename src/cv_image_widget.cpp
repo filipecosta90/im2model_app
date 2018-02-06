@@ -215,7 +215,7 @@ void CVImageWidget::addRenderPoints( std::vector<cv::Point2i> points , int penWi
   addRenderPoints( points ,  penWidth, penColors, description_key  , margin_point,  alpha_channel_value );
 }
 
-void CVImageWidget::addRenderPoints( std::vector<cv::Point2i> points , int penWidth, std::vector<cv::Vec3b> penColors, QString description_key  , cv::Point2i margin_point, int alpha_channel_value ){
+void CVImageWidget::addRenderPoints( std::vector<cv::Point2i> points , int penWidth, std::vector<cv::Vec3b> penColors, QString description_key, cv::Point2i margin_point, int alpha_channel_value ){
 
   std::map< QString,std::vector<QPoint> >::iterator it = renderPoints_map.find( description_key );
   if ( it != renderPoints_map.end() ){
@@ -271,6 +271,35 @@ void CVImageWidget::addRenderPoints( std::vector<cv::Point2i> points , int penWi
   renderPoints_alpha_channel_map.insert ( std::pair< QString,std::vector<int> >( description_key , renderPoints_alpha_channel ) );
 }
 
+void CVImageWidget::addRenderPoints_key_to_group( QString key_string, QString group_key ){
+
+  std::map< QString,std::vector<QString> >::iterator it4 = renderPoints_group_keys_map.find( group_key );
+  if ( it4 == renderPoints_group_keys_map.end() ){
+    std::vector<QString> renderPoints_group = std::vector<QString>();
+    renderPoints_group.push_back( key_string );
+    renderPoints_group_keys_map.insert ( std::pair< QString,std::vector<QString> >( group_key , renderPoints_group ) );
+  }
+  else{
+    std::vector<QString> renderPoints_group = it4->second;
+    renderPoints_group.push_back( key_string );
+    it4->second = renderPoints_group;
+  }
+
+}
+
+bool CVImageWidget::set_renderPoints_group_alpha_channels_map( QString group_key, int value ){
+  bool result = false;
+  std::map< QString,std::vector<QString> >::iterator it4 = renderPoints_group_keys_map.find( group_key );
+  if ( it4 != renderPoints_group_keys_map.end() ){
+   std::vector<QString> renderPoints_group = it4->second;
+   result = true;
+   for( QString key : renderPoints_group ){
+    result &= set_renderPoints_alpha_channels_map( key, value );
+  }
+  std::cout << "set_renderPoints_group_alpha_channels_map ( " << value << " ) . group size: " << renderPoints_group.size() << " final result " << std::boolalpha << result << std::endl;
+}
+return result;
+}
 
 void CVImageWidget::cleanRenderAreas(){
   renderAreas.clear();
@@ -318,7 +347,6 @@ bool CVImageWidget::set_renderPoints_alpha_channels_map( QString description_key
     for( std::vector<int>::iterator it = it_alpha->second.begin(); it != it_alpha->second.end(); ++it ){
       *it = value;
     }
-    std::cout << "set_renderPoints_alpha_channels_map" << std::endl;
     result = true;
   }
   return result;
@@ -413,14 +441,14 @@ void CVImageWidget::paintEvent(QPaintEvent* event) {
     const std::vector<QPoint> renderPoints_margin_points = it_margin->second;
     const std::vector<int> render_points_alpha_channel = it_alpha->second;
     const std::vector<bool> render_points_selection = it_selected->second;
-
+/*
     std::cout << "#### renderPoints.size() " << renderPoints.size() << std::endl;
     std::cout << "#### renderPoints_Selection_map.size() " << renderPoints_Selection_map.size() << std::endl;
     std::cout << "#### renderPoints_penColor.size() " << renderPoints_penColor.size() << " key: " << key_color.toStdString() << std::endl;
     std::cout << "#### renderPoints_penWidth.size() " << renderPoints_penWidth.size() << std::endl;
     std::cout << "#### renderPoints_margin_points.size() " << renderPoints_margin_points.size() << std::endl;
     std::cout << "#### render_points_alpha_channel.size() " << render_points_alpha_channel.size() << std::endl;
-
+*/
     for( int point_n = 0; point_n < renderPoints.size(); point_n++ ){
       const QPoint point_w_margin = renderPoints_margin_points[point_n] + renderPoints[point_n];
       const QColor point_penColor = renderPoints_penColor[point_n];
