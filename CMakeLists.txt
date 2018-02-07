@@ -342,7 +342,7 @@
 
 
       #Include Chemfiles dir
-      include_directories(externals/chemfiles)
+      #include_directories(externals/chemfiles)
 
       #Include googletest dir
       include_directories(externals/googletest)
@@ -414,7 +414,7 @@
   # Adds sources to the Solution Explorer
 
   # Properties->Linker->Input->Additional Dependencies
-  target_link_libraries( ${PROJECT_NAME} rapidjson ${OpenCV_LIBS} ${Boost_LIBRARIES} ${HDF5_CXX_LIBRARIES} chemfiles )
+  target_link_libraries( ${PROJECT_NAME} rapidjson ${OpenCV_LIBS} ${Boost_LIBRARIES} ${HDF5_CXX_LIBRARIES} )
 
   # Creates a folder "executables" and adds target
   # project (app.vcproj) under it
