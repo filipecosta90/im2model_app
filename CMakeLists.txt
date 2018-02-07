@@ -361,7 +361,6 @@
     add_test(MockTestIntensityColumns test/mytest)
 
   else()
-      find_package(GTest REQUIRED)
     message(STATUS "testing disabled")
   endif()
 

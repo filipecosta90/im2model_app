@@ -78,6 +78,7 @@ TDMap::TDMap(
 
   _td_map_simgrid = new SimGrid( ostream_simgrid_buffer );
   sim_image_intensity_columns = new IntensityColumns();
+  _flag_sim_image_intensity_columns = true;
 
   exp_image_properties->set_flag_auto_a_size( true );
   exp_image_properties->set_flag_auto_b_size( true );
@@ -687,6 +688,10 @@ bool TDMap::export_sim_grid( std::string sim_grid_file_name_image, bool cut_marg
   return _td_map_simgrid->export_sim_grid( sim_grid_file_name_image, cut_margin );
 }
 
+bool TDMap::export_super_cell_simulated_image_intensity_columns_integrated_intensities( std::string filename , bool onlymapped ){
+    return sim_image_intensity_columns->export_sim_image_intensity_columns_integrated_intensities_to_csv( filename, onlymapped );
+}
+
 // gui getters
 
 /* flag getters */
@@ -811,6 +816,10 @@ std::string TDMap::get_export_sim_grid_filename_hint(){
   return _td_map_simgrid->get_export_sim_grid_filename_hint();
 }
 
+std::string TDMap::get_export_integrated_intensities_filename_hint(){
+  return sim_image_intensity_columns->get_export_integrated_intensities_filename_hint();
+}
+
 // more work here. asserts, etc
 cv::Point2i TDMap::get_simgrid_best_match_position(){
   return _td_map_simgrid->get_best_match_position();
@@ -923,6 +932,19 @@ bool TDMap::get_flag_slice_params_accum_nm_slice_vec(){
 
 bool TDMap::get_flag_raw_simulated_images_grid(){
   return _td_map_simgrid->get_flag_raw_simulated_images_grid();
+}
+
+bool TDMap::get_flag_super_cell_simulated_image_intensity_columns_integrated_intensities(){
+  bool result = false;
+  if ( _flag_sim_image_intensity_columns ){
+    const bool marked_delete_flag = sim_image_intensity_columns->get_flag_sim_image_intensity_columns_marked_delete();
+    const bool columns_center_flag = sim_image_intensity_columns->get_flag_sim_image_intensity_columns_center();
+    const bool columns_projective_2D_coordinate_flag = sim_image_intensity_columns->get_flag_sim_image_intensity_columns_projective_2D_coordinate();
+    const bool sim_integrated_intensities_flag = sim_image_intensity_columns->get_flag_sim_image_intensity_columns_integrate_intensity();
+    const bool exp_integrated_intensities_flag = sim_image_intensity_columns->get_flag_exp_image_intensity_columns_integrate_intensity();
+    result = marked_delete_flag && columns_center_flag && columns_projective_2D_coordinate_flag && sim_integrated_intensities_flag && exp_integrated_intensities_flag;
+  }
+  return result;
 }
 
 // gui var getters

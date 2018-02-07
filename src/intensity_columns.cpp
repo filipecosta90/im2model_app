@@ -163,10 +163,11 @@ bool IntensityColumns::segmentate_sim_image()
       Mat1b mask_borders = ((dist_8u > 0));
       if( sim_image_intensity_columns.size() > 0 ){
         sim_image_intensity_columns.clear();
-        //vector<T>().swap(sim_image_intensity_columns);
+        _flag_sim_image_intensity_columns = false;
       }
 
       findContours(C, sim_image_intensity_columns, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
+      _flag_sim_image_intensity_columns = true;
 
       // Create the marker image for the watershed algorithm
       //CV_32S - 32-bit signed integers ( -2147483648..2147483647 )
@@ -199,24 +200,30 @@ bool IntensityColumns::segmentate_sim_image()
 
       for (int seed = 1; seed <= sim_image_intensity_columns.size(); ++seed)
       {
-        cv::Mat1b intensity_column_mask(markers == seed);
+        const cv::Mat1b intensity_column_mask(markers == seed);
         sim_image_intensity_columns_masks.push_back( intensity_column_mask );
       }
 
       if( sim_image_intensity_columns_center.size() > 0 ){
         sim_image_intensity_columns_center.clear();
+        _flag_sim_image_intensity_columns_center = false;
       }
 
       if( sim_image_keypoints.size() > 0 ){
         sim_image_keypoints.clear();
+        _flag_sim_image_keypoints = false;
       }
 
       if( sim_image_intensity_columns_projective_2D_coordinate.size() > 0 ){
         sim_image_intensity_columns_projective_2D_coordinate.clear();
+        _flag_sim_image_intensity_columns_projective_2D_coordinate = false;
+
       }
 
       if( sim_image_intensity_columns_marked_delete.size() > 0 ){
         sim_image_intensity_columns_marked_delete.clear();
+        _flag_sim_image_intensity_columns_marked_delete = false;
+
       }
 
       for (size_t i = 0; i < sim_image_intensity_columns.size(); i++){
@@ -236,6 +243,10 @@ bool IntensityColumns::segmentate_sim_image()
       }
       result = true;
       _flag_sim_image_keypoints = true;
+      _flag_sim_image_intensity_columns_projective_2D_coordinate = true;
+      _flag_sim_image_intensity_columns_marked_delete = true;
+_flag_sim_image_intensity_columns_center = true;
+
 
       //emit sim_image_intensity_columns_changed();
       //emit sim_image_intensity_keypoints_changed();
@@ -266,7 +277,7 @@ bool IntensityColumns::feature_match(){
   auto_calculate_threshold_value();
   if( _flag_exp_image_properties ){
     if(  
-      sim_image_properties->get_flag_roi_image( ) && 
+      sim_image_properties->get_flag_roi_image() && 
       exp_image_properties->get_flag_roi_image()
       ){
       double minVal, maxVal, matchVal;
@@ -374,24 +385,33 @@ bool IntensityColumns::map_sim_intensity_cols_to_exp_image(){
         // clean-up after 1st time
         if( sim_image_intensity_columns_threshold_value.size() > 0 ){
           sim_image_intensity_columns_threshold_value.clear();
+          _flag_sim_image_intensity_columns_threshold_value = false;
         }
         if( sim_image_intensity_columns_stddev_statistical.size() > 0 ){
           sim_image_intensity_columns_stddev_statistical.clear();
+          _flag_sim_image_intensity_columns_stddev_statistical = false;
+
         }
         if( exp_image_intensity_columns_stddev_statistical.size() > 0 ){
           exp_image_intensity_columns_stddev_statistical.clear();
+          _flag_exp_image_intensity_columns_stddev_statistical = false;
+
         }
         if( sim_image_intensity_columns_mean_statistical.size() > 0 ){
           sim_image_intensity_columns_mean_statistical.clear();
+          _flag_sim_image_intensity_columns_mean_statistical = false;
         }
         if( exp_image_intensity_columns_mean_statistical.size() > 0 ){
           exp_image_intensity_columns_mean_statistical.clear();
+          _flag_exp_image_intensity_columns_mean_statistical = false;
         }
         if( sim_image_intensity_columns_integrate_intensity.size() > 0 ){
           sim_image_intensity_columns_integrate_intensity.clear();
+          _flag_sim_image_intensity_columns_integrate_intensity = false;
         }
         if( exp_image_intensity_columns_integrate_intensity.size() > 0 ){
           exp_image_intensity_columns_integrate_intensity.clear();
+          _flag_exp_image_intensity_columns_integrate_intensity = false;
         }
 
         for (size_t i = 0; i < sim_image_intensity_columns_masks.size(); i++){
@@ -497,8 +517,17 @@ bool IntensityColumns::map_sim_intensity_cols_to_exp_image(){
         imwrite("exp_mapped_matrix_with_cols_clean.png",exp_mapped_matrix_with_cols_clean);
         imwrite("exp_mapped_matrix_with_cols.png",exp_mapped_matrix_with_cols);
         result = true;
+        _flag_sim_image_intensity_columns_threshold_value = true;
+        _flag_sim_image_intensity_columns_stddev_statistical = true;
+        _flag_exp_image_intensity_columns_stddev_statistical = true;
+        _flag_sim_image_intensity_columns_mean_statistical = true;
+        _flag_exp_image_intensity_columns_mean_statistical = true;
+        _flag_sim_image_intensity_columns_integrate_intensity = true;
+        _flag_exp_image_intensity_columns_integrate_intensity = true;
+
         emit sim_image_intensity_columns_changed();
         emit sim_image_intensity_keypoints_changed();
+
       } catch ( const std::exception& e ){
         if( _flag_logger ){
           std::stringstream message;
@@ -686,6 +715,39 @@ if( _flag_logger ){
   else{
     BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::error , message.str() );
   }
+}
+return result;
+}
+
+
+bool IntensityColumns::export_sim_image_intensity_columns_integrated_intensities_to_csv( std::string filename , bool onlymapped ){
+  bool result = false;
+
+  if( _flag_sim_image_intensity_columns_marked_delete &&
+    _flag_sim_image_intensity_columns_center && 
+    _flag_sim_image_intensity_columns_projective_2D_coordinate && 
+    _flag_sim_image_intensity_columns_integrate_intensity && 
+    _flag_exp_image_intensity_columns_integrate_intensity
+    ){
+    std::fstream outputFile;
+  outputFile.open( filename, std::ios::out );
+  outputFile << "Column_number"  << "," << "Marked_Delete"  << "," 
+  << "Column_center_x" << "," << "Column_center_y" << "," 
+  << "Projective_2D_coordinate_center_x" << "," << "Projective_2D_coordinate_center_y" <<  "," 
+  << "SIM_Intensity_Column_Integrated_intensity" <<  "," << "EXP_Intensity_Column_Integrated_intensity"
+  << std::endl;
+
+  for (size_t i = 0; i < sim_image_intensity_columns_center.size(); i++){
+    if( !(sim_image_intensity_columns_marked_delete[i] && onlymapped) ){
+     outputFile << i  << "," << std::boolalpha << sim_image_intensity_columns_marked_delete[i]  << "," 
+     << sim_image_intensity_columns_center[i].x << "," << sim_image_intensity_columns_center[i].y << "," 
+     << sim_image_intensity_columns_projective_2D_coordinate[i].x << "," << sim_image_intensity_columns_projective_2D_coordinate[i].y << " , " 
+     << sim_image_intensity_columns_integrate_intensity[i] << ","  << exp_image_intensity_columns_integrate_intensity[i] 
+     << std::endl;
+   }
+ }
+ outputFile.close( );
+ result = true;
 }
 return result;
 }

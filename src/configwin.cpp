@@ -6,8 +6,6 @@ bool MainWindow::create_3d_widgets( QMainWindow *parent , SuperCell* tdmap_vis_s
 }
 
 MainWindow::MainWindow( ApplicationLog::ApplicationLog* logger , QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow) {
-  chemfiles::Topology water;
-
 
   im2model_logger = logger;
   _flag_im2model_logger = true;
@@ -908,6 +906,46 @@ bool MainWindow::export_TDMap( bool cut_margin ){
   return result;
 }
 
+bool MainWindow::export_IntegratedIntensities_onlymapped(){
+  return export_IntegratedIntensities( true );
+}
+
+bool MainWindow::export_IntegratedIntensities_full(){
+  return export_IntegratedIntensities( false );
+}
+
+bool MainWindow::export_IntegratedIntensities( bool onlymapped ){
+  // returns false if no settings were saved
+  bool result = false;
+  if( _core_td_map ){
+    if( _core_td_map->get_flag_super_cell_simulated_image_intensity_columns_integrated_intensities() ){
+      QFileDialog dialog(this);
+      dialog.setWindowModality(Qt::WindowModal);
+      std::string preset_filename = _core_td_map->get_export_integrated_intensities_filename_hint();
+      boost::filesystem::path base_dir_path = _core_td_map->get_project_dir_path();
+      boost::filesystem::path filename( preset_filename );
+      boost::filesystem::path full_path_filename = base_dir_path / preset_filename ;
+      dialog.selectFile( QString::fromStdString(full_path_filename.string() ) );
+
+      dialog.setAcceptMode(QFileDialog::AcceptSave);
+      if (dialog.exec() != QDialog::Accepted){
+        result = false;
+      }
+      else{
+        QString tdmap_filename = dialog.selectedFiles().first();
+        result = _core_td_map->export_super_cell_simulated_image_intensity_columns_integrated_intensities(  tdmap_filename.toStdString() , onlymapped );
+        if( result ){
+          ui->statusBar->showMessage(tr("Integrated intensities CSV correctly exported to file: " ) + tdmap_filename , 2000);
+        }
+      }
+    }
+  }
+  if( !result ){
+    ui->statusBar->showMessage(tr("Error while exporting Integrated intensities CSV") );
+  }
+  return result;
+}
+
 bool MainWindow::edit_preferences(){
   // returns false if no settings were saved
   bool result = false;
@@ -991,12 +1029,26 @@ void MainWindow::createActions(){
   //QToolBar *fileToolBar = addToolBar(tr("File"));
   QAction *exportTDMap_cut = tdmapMenu->addAction( tr("&Export "), this , &MainWindow::export_TDMap_cutted );
   // newAct->setShortcuts(QKeySequence::);
-  newAct->setStatusTip(tr("Export the current TD Map"));
+  exportTDMap_cut->setStatusTip(tr("Export the current TD Map"));
   tdmapMenu->addAction( exportTDMap_cut );
+
   QAction *exportTDMap_mrg = tdmapMenu->addAction( tr("&Export with super-cell margins"), this , &MainWindow::export_TDMap_full );
   // newAct->setShortcuts(QKeySequence::);
-  newAct->setStatusTip(tr("Export the current TD Map with super-cell margin"));
+  exportTDMap_mrg->setStatusTip(tr("Export the current TD Map with super-cell margin"));
   tdmapMenu->addAction( exportTDMap_mrg );
+
+
+  QMenu *supercellMenu = ui->menuBar->addMenu(tr("&SuperCell"));
+  //QToolBar *fileToolBar = addToolBar(tr("File"));
+  QAction *exportAllIntensityCols = supercellMenu->addAction( tr("&Export All Intensity Columns data"), this , &MainWindow::export_IntegratedIntensities_full );
+  // newAct->setShortcuts(QKeySequence::);
+  exportAllIntensityCols->setStatusTip(tr("Export All Intensity Columns data to a CSV"));
+  supercellMenu->addAction( exportAllIntensityCols );
+  
+  QAction *exportMappedIntensityCols = tdmapMenu->addAction( tr("&Export Mapped Intensity Columns data"), this , &MainWindow::export_IntegratedIntensities_onlymapped );
+  // newAct->setShortcuts(QKeySequence::);
+  exportMappedIntensityCols->setStatusTip(tr("Export only the mapped agains EXP image Intensity Columns data to a CSV"));
+  supercellMenu->addAction( exportMappedIntensityCols );
 
 }
 

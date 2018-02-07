@@ -127,6 +127,8 @@ private:
     ImageBounds* exp_image_bounds = nullptr;
 
     IntensityColumns* sim_image_intensity_columns = nullptr;
+    bool _flag_sim_image_intensity_columns = false;
+
     bool _flag_read_simulated_supercell_image = false;
 
     BaseCrystal* sim_crystal_properties = nullptr;
@@ -178,6 +180,7 @@ public:
     /** others **/
 
     bool export_sim_grid( std::string sim_grid_file_name_image , bool cut_margin = false );
+    bool export_super_cell_simulated_image_intensity_columns_integrated_intensities( std::string sim_grid_file_name_image , bool onlymapped = true );
 
     /*
      * RUN METHODS
@@ -230,6 +233,8 @@ public:
     std::vector< double > get_simulated_images_horizontal_header_defocus_nm();
     std::vector< std::vector<cv::Mat> > get_simulated_images_grid();
     std::string get_export_sim_grid_filename_hint();
+    std::string get_export_integrated_intensities_filename_hint();
+    
     cv::Point2i get_simgrid_best_match_position();
     cv::Mat get_simulated_image_in_grid( int row, int col );
     double get_simulated_image_match_in_grid( int row, int col );
@@ -289,6 +294,7 @@ public:
     bool get_flag_slice_params_accum_nm_slice_vec();
     bool get_flag_simulated_images_grid();
     bool get_flag_raw_simulated_images_grid();
+    bool get_flag_super_cell_simulated_image_intensity_columns_integrated_intensities();
     bool get_flag_super_cell_sim_image_properties_full_image();
     bool get_flag_super_cell_sim_image_properties_roi_image();
 

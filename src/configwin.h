@@ -97,7 +97,7 @@
 
 #include "vis/inputcontrols/qtrackballcameracontroller.h"
 
-#include "chemfiles.hpp"
+//#include "chemfiles.hpp"
 
 namespace Ui {
   class MainWindow;
@@ -194,6 +194,9 @@ protected:
     bool export_TDMap_cutted();
     bool export_TDMap_full();
     bool export_TDMap( bool cut_margin = false );
+    bool export_IntegratedIntensities_onlymapped();
+    bool export_IntegratedIntensities_full();
+    bool export_IntegratedIntensities( bool onlymapped = true );
 
     void on_qpush_apply_edge_detection_clicked();
     void on_qpush_test_tdmap_clicked();

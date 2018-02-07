@@ -91,26 +91,45 @@ private:
 
     cv::Mat sim_image_descriptor;
     std::vector<cv::KeyPoint> sim_image_keypoints;
-    std::vector<cv::Point2i> sim_image_intensity_columns_center;
     bool _flag_sim_image_keypoints = false;
+
+    std::vector<cv::Point2i> sim_image_intensity_columns_center;
+    bool _flag_sim_image_intensity_columns_center = false;
 
     cv::Mat exp_image_descriptor;
     std::vector<cv::KeyPoint> exp_image_keypoints;
     bool _flag_exp_image_keypoints = false;
 
     std::vector< std::vector<cv::Point> > sim_image_intensity_columns;
+    bool _flag_sim_image_intensity_columns = false;
+
     std::vector<cv::Point2i> sim_image_intensity_columns_projective_2D_coordinate;
+    bool _flag_sim_image_intensity_columns_projective_2D_coordinate = false;
 
     std::vector<int> sim_image_intensity_columns_mean_statistical;
+    bool _flag_sim_image_intensity_columns_mean_statistical = false;
+    
     std::vector<int> exp_image_intensity_columns_mean_statistical;
+    bool _flag_exp_image_intensity_columns_mean_statistical = false;
+    
     std::vector<int> sim_image_intensity_columns_stddev_statistical;
+    bool _flag_sim_image_intensity_columns_stddev_statistical = false;
+    
     std::vector<int> exp_image_intensity_columns_stddev_statistical;
+    bool _flag_exp_image_intensity_columns_stddev_statistical = false;
+
     std::vector<int> sim_image_intensity_columns_threshold_value;
+    bool _flag_sim_image_intensity_columns_threshold_value = false;
 
     std::vector<double> sim_image_intensity_columns_integrate_intensity;
+    bool _flag_sim_image_intensity_columns_integrate_intensity = false;
+
     std::vector<double> exp_image_intensity_columns_integrate_intensity;
+    bool _flag_exp_image_intensity_columns_integrate_intensity = false;
 
     std::vector<bool> sim_image_intensity_columns_marked_delete;
+    bool _flag_sim_image_intensity_columns_marked_delete = false;
+
     std::vector< cv::Mat1b > sim_image_intensity_columns_masks;
     std::vector< std::vector<cv::Point> > exp_image_intensity_columns;
     cv::Point2i exp_image_delta_factor_constant;
@@ -147,9 +166,22 @@ public:
     std::vector<int> get_sim_image_intensity_columns_stddev_statistical(){ return sim_image_intensity_columns_stddev_statistical; }
     std::vector<int> get_exp_image_intensity_columns_stddev_statistical(){ return exp_image_intensity_columns_stddev_statistical; }
     std::vector<int> get_sim_image_intensity_columns_threshold_value(){ return sim_image_intensity_columns_threshold_value; }
-
     std::vector<double> get_sim_image_intensity_columns_integrate_intensity(){ return sim_image_intensity_columns_integrate_intensity; }
     std::vector<double> get_exp_image_intensity_columns_integrate_intensity(){ return exp_image_intensity_columns_integrate_intensity; }
+
+    bool get_flag_sim_image_intensity_columns_center(){ return _flag_sim_image_intensity_columns_center; }
+    bool get_flag_sim_image_intensity_columns_projective_2D_coordinate(){ return _flag_sim_image_intensity_columns_projective_2D_coordinate; }
+    bool get_flag_sim_image_intensity_columns_marked_delete(){ return _flag_sim_image_intensity_columns_marked_delete; }
+    bool get_flag_sim_image_intensity_columns_mean_statistical(){ return _flag_sim_image_intensity_columns_mean_statistical; }
+    bool get_flag_exp_image_intensity_columns_mean_statistical(){ return _flag_exp_image_intensity_columns_mean_statistical; }
+    bool get_flag_sim_image_intensity_columns_stddev_statistical(){ return _flag_sim_image_intensity_columns_stddev_statistical; }
+    bool get_flag_exp_image_intensity_columns_stddev_statistical(){ return _flag_exp_image_intensity_columns_stddev_statistical; }
+    bool get_flag_sim_image_intensity_columns_threshold_value(){ return _flag_sim_image_intensity_columns_threshold_value; }
+    bool get_flag_sim_image_intensity_columns_integrate_intensity(){ return _flag_sim_image_intensity_columns_integrate_intensity; }
+    bool get_flag_exp_image_intensity_columns_integrate_intensity(){ return _flag_exp_image_intensity_columns_integrate_intensity; }
+
+    std::string get_export_integrated_intensities_filename_hint(){ return "integrated_intensities.csv"; }
+    bool export_sim_image_intensity_columns_integrated_intensities_to_csv( std::string sim_grid_file_name_image , bool onlymapped = true );
 
     /* Loggers */
     ApplicationLog::ApplicationLog* get_logger(){ return logger; }
