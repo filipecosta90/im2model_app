@@ -81,6 +81,7 @@ private:
     bool _flag_logger = false;
 
     float intensity_columns_keypoint_diameter = 16.0f;
+    cv::Mat imgResult;
 
 
     cv::Ptr<Feature2D> f2d;
@@ -103,12 +104,18 @@ private:
     bool _flag_sim_image_intensity_columns_projective_2D_coordinate = false;
 
     std::vector<int> sim_image_intensity_columns_mean_statistical;
+    std::vector<int> sim_image_intensity_columns_trans_mean_statistical;
+    std::vector<int> sim_image_intensity_columns_roi_mean_statistical;
+
     bool _flag_sim_image_intensity_columns_mean_statistical = false;
     
     std::vector<int> exp_image_intensity_columns_mean_statistical;
     bool _flag_exp_image_intensity_columns_mean_statistical = false;
     
     std::vector<int> sim_image_intensity_columns_stddev_statistical;
+        std::vector<int> sim_image_intensity_columns_trans_stddev_statistical;
+    std::vector<int> sim_image_intensity_columns_roi_stddev_statistical;
+
     bool _flag_sim_image_intensity_columns_stddev_statistical = false;
     
     std::vector<int> exp_image_intensity_columns_stddev_statistical;
@@ -117,7 +124,10 @@ private:
     std::vector<int> sim_image_intensity_columns_threshold_value;
     bool _flag_sim_image_intensity_columns_threshold_value = false;
 
+    std::vector<double> sim_image_intensity_columns_trans_integrate_intensity;
     std::vector<double> sim_image_intensity_columns_integrate_intensity;
+    std::vector<double> sim_image_intensity_columns_roi_integrate_intensity;
+
     bool _flag_sim_image_intensity_columns_integrate_intensity = false;
 
     std::vector<double> exp_image_intensity_columns_integrate_intensity;
@@ -127,6 +137,8 @@ private:
     bool _flag_sim_image_intensity_columns_marked_delete = false;
 
     std::vector< cv::Mat1b > sim_image_intensity_columns_masks;
+    std::vector< cv::Mat1b > sim_image_intensity_columns_roi_masks;
+
     std::vector< std::vector<cv::Point> > exp_image_intensity_columns;
     cv::Point2i exp_image_delta_factor_constant;
     bool _flag_exp_image_delta_factor_constant = false;

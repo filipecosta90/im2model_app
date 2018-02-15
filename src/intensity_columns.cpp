@@ -132,7 +132,7 @@ bool IntensityColumns::segmentate_sim_image()
 
       filter2D( src, imgLaplacian, CV_32F, kernel );
       src.convertTo( sharp, CV_32F );
-      cv::Mat imgResult = sharp - imgLaplacian;
+      imgResult = sharp - imgLaplacian;
 
       // convert back to 8bits gray scale
       imgResult.convertTo( imgResult, CV_8UC1 );
@@ -198,6 +198,8 @@ bool IntensityColumns::segmentate_sim_image()
         //vector<T>().swap(sim_image_intensity_columns_masks);
       }
 
+
+
       for (int seed = 1; seed <= sim_image_intensity_columns.size(); ++seed)
       {
         const cv::Mat1b intensity_column_mask(markers == seed);
@@ -245,7 +247,7 @@ bool IntensityColumns::segmentate_sim_image()
       _flag_sim_image_keypoints = true;
       _flag_sim_image_intensity_columns_projective_2D_coordinate = true;
       _flag_sim_image_intensity_columns_marked_delete = true;
-_flag_sim_image_intensity_columns_center = true;
+      _flag_sim_image_intensity_columns_center = true;
 
 
       //emit sim_image_intensity_columns_changed();
@@ -414,6 +416,10 @@ bool IntensityColumns::map_sim_intensity_cols_to_exp_image(){
           _flag_exp_image_intensity_columns_integrate_intensity = false;
         }
 
+        if( sim_image_intensity_columns_roi_masks.size() > 0 ){
+          sim_image_intensity_columns_roi_masks.clear();
+        }
+
         for (size_t i = 0; i < sim_image_intensity_columns_masks.size(); i++){
           cv::Mat1b sim_image_keypoint_mask = sim_image_intensity_columns_masks[i];
           std::stringstream sstream2;
@@ -421,13 +427,28 @@ bool IntensityColumns::map_sim_intensity_cols_to_exp_image(){
           const cv::Point2i sim_image_keypoint_center = sim_image_intensity_columns_center[i];
 
           putText(exp_mapped_matrix_with_cols, sstream2.str(), sim_image_keypoint_center, FONT_HERSHEY_SIMPLEX, 0.35,  Scalar(255,255,255), 1 , 8 , false);
-          
+
           cv::Mat dstImageSim = cv::Mat::zeros( src_sim.size(), src_sim.type() );    
+          cv::Mat dstImageSim_col_roi_mask = cv::Mat::zeros( src_sim.size(), src_sim.type() );    
+          cv::Mat dstImageSim_col_roi = cv::Mat::zeros( src_sim.size(), src_sim.type() );    
+
           cv::Mat dstImageExp = cv::Mat::zeros( src_sim.size(), src_sim.type() );    
 
           // copy source image to destination image with masking
           src_sim.copyTo(dstImageSim, sim_image_keypoint_mask);
+          imgResult.copyTo(dstImageSim_col_roi_mask, sim_image_keypoint_mask);
+          cv::Mat1b dstImageSim_col_roi_mask_b (dstImageSim_col_roi_mask>0);
+          sim_image_intensity_columns_roi_masks.push_back( dstImageSim_col_roi_mask_b );
+
+          src_sim.copyTo(dstImageSim_col_roi, dstImageSim_col_roi_mask_b);
+
           exp_mapped_matrix.copyTo(dstImageExp, sim_image_keypoint_mask);
+          
+          cv::Rect Min_Rect=boundingRect(dstImageSim);
+          cv::Rect Min_Rect_col=boundingRect(dstImageSim_col_roi);
+
+          cv::Mat dstImageSim_minimal = dstImageSim( Min_Rect );
+          cv::Mat dstImageSim_minimal_roi = dstImageSim( Min_Rect_col );
 
           std::stringstream sstream;
           sstream << "dstImageSim_" << "KeyPoint_";
@@ -435,34 +456,57 @@ bool IntensityColumns::map_sim_intensity_cols_to_exp_image(){
           sstream << ".png";
           imwrite ( sstream.str(), dstImageSim );
 
+          std::stringstream sstream_roi;
+          sstream_roi << "dstImageSim_col_roi_" << "KeyPoint_";
+          sstream_roi <<   std::setw(3) << std::setfill('0') << std::to_string( i );
+          sstream_roi << ".png";
+          imwrite ( sstream_roi.str(), dstImageSim_col_roi );
+
           std::stringstream sstream1;
           sstream1 << "dstImageExp_" << "Mapped_KeyPoint_";
           sstream1 <<   std::setw(3) << std::setfill('0') << std::to_string( i );
           sstream1 << ".png";
           imwrite ( sstream1.str(), dstImageExp );
           const double sum_dstImageExp = cv::sum(dstImageExp)[0];
-          const double sum_dstImageSim = cv::sum(dstImageSim)[0];
+          const double sum_dstImageSim = cv::sum(dstImageSim_minimal)[0];
+          const double sum_dstImageSim_roi = cv::sum(dstImageSim_minimal_roi)[0];
+
           std::cout << "keypoint "<< i << " sum_dstImageExp " << sum_dstImageExp << "\t sum_dstImageSim " << sum_dstImageSim << std::endl;
           std::cout << " \t\tExpImage type " << GetMatType(dstImageExp) << " ExpImage type " << GetMatType(dstImageSim) <<  std::endl;
 
           cv::Scalar mean_statistical_ImageExp;
           cv::Scalar stddev_statistical_ImageExp;
+
           cv::Scalar mean_statistical_ImageSim;
           cv::Scalar stddev_statistical_ImageSim;
+          cv::Scalar mean_statistical_ImageSim_roi;
+          cv::Scalar stddev_statistical_ImageSim_roi;
 
           cv::meanStdDev(dstImageExp,mean_statistical_ImageExp,stddev_statistical_ImageExp,sim_image_keypoint_mask);
           cv::meanStdDev(dstImageSim,mean_statistical_ImageSim,stddev_statistical_ImageSim,sim_image_keypoint_mask);
-          
+          cv::meanStdDev(dstImageSim_minimal_roi,mean_statistical_ImageSim_roi,stddev_statistical_ImageSim_roi);
+
           const int keypoint_threshold_value = mean_statistical_ImageSim[0] - (int)( nearbyint( ( (double) stddev_statistical_ImageSim[0] ) * stddev_threshold_factor ) );
 
+          //intensity col + surrounding area
           sim_image_intensity_columns_threshold_value.push_back( keypoint_threshold_value );
           sim_image_intensity_columns_stddev_statistical.push_back( stddev_statistical_ImageSim[0] );
-          exp_image_intensity_columns_stddev_statistical.push_back( stddev_statistical_ImageExp[0] );
           sim_image_intensity_columns_mean_statistical.push_back( mean_statistical_ImageSim[0] );
-          exp_image_intensity_columns_mean_statistical.push_back( mean_statistical_ImageExp[0] );
           sim_image_intensity_columns_integrate_intensity.push_back( sum_dstImageSim );
-          exp_image_intensity_columns_integrate_intensity.push_back( sum_dstImageExp );
+
+          sim_image_intensity_columns_trans_stddev_statistical.push_back( stddev_statistical_ImageSim[0] );
+          sim_image_intensity_columns_trans_mean_statistical.push_back( mean_statistical_ImageSim[0] );
+          sim_image_intensity_columns_trans_integrate_intensity.push_back( sum_dstImageSim );
           
+          //intensity col 
+          sim_image_intensity_columns_roi_stddev_statistical.push_back( stddev_statistical_ImageSim_roi[0] );
+          sim_image_intensity_columns_roi_mean_statistical.push_back( mean_statistical_ImageSim_roi[0] );
+          sim_image_intensity_columns_roi_integrate_intensity.push_back( sum_dstImageSim_roi );
+          
+          exp_image_intensity_columns_stddev_statistical.push_back( stddev_statistical_ImageExp[0] );
+          exp_image_intensity_columns_integrate_intensity.push_back( sum_dstImageExp );
+          exp_image_intensity_columns_mean_statistical.push_back( mean_statistical_ImageExp[0] );
+
           std::cout << "\t\t\tmean_statistical_ImageExp: "  << mean_statistical_ImageExp[0] << "\tstddev_statistical_ImageExp: "  << stddev_statistical_ImageExp[0] <<  std::endl;
           std::cout << "\t\t\tmean_statistical_ImageSim: "  << mean_statistical_ImageSim[0] << "\tstddev_statistical_ImageSim: "  << stddev_statistical_ImageSim[0] <<  std::endl;
           std::cout << "\t\t\tfull_threshold_value: "  << threshold_value <<  std::endl;
@@ -470,94 +514,206 @@ bool IntensityColumns::map_sim_intensity_cols_to_exp_image(){
 
           if( mean_statistical_ImageExp[0] > keypoint_threshold_value ){
 
-          // Define the motion model 
-            putText(exp_mapped_matrix_with_cols_clean, sstream2.str(), sim_image_keypoint_center, FONT_HERSHEY_SIMPLEX, 0.35,  Scalar(255,255,255), 1 , 8 , false);
 
-            const int warp_mode = MOTION_TRANSLATION;
+            std::stringstream sstream_dstImageSim_minimal;
+            sstream_dstImageSim_minimal << "dstImageSim_minimal_" << "KeyPoint_";
+            sstream_dstImageSim_minimal <<   std::setw(3) << std::setfill('0') << std::to_string( i );
+         // sstream_dstImageSim_minimal << ".png";
+            std::fstream outputFile_sstream_dstImageSim_minimal;
+            outputFile_sstream_dstImageSim_minimal.open( sstream_dstImageSim_minimal.str(), std::ios::out );
+            outputFile_sstream_dstImageSim_minimal << sstream_dstImageSim_minimal.str()  << " = " << dstImageSim_minimal << std::endl;
+            outputFile_sstream_dstImageSim_minimal.close();
+
+            std::stringstream sstream_dstImageSim_minimal_png;
+            sstream_dstImageSim_minimal_png << "dstImageSim_minimal_" << "KeyPoint_";
+            sstream_dstImageSim_minimal_png <<   std::setw(3) << std::setfill('0') << std::to_string( i );
+            sstream_dstImageSim_minimal_png << ".png";
+            imwrite ( sstream_dstImageSim_minimal_png.str(), dstImageSim_minimal );
+
+            std::stringstream sstream_dstImageSim_minimal_col_png;
+            sstream_dstImageSim_minimal_col_png << "dstImageSim_minimal_roi_" << "KeyPoint_";
+            sstream_dstImageSim_minimal_col_png <<   std::setw(3) << std::setfill('0') << std::to_string( i );
+            sstream_dstImageSim_minimal_col_png << ".png";
+            imwrite ( sstream_dstImageSim_minimal_col_png.str(), dstImageSim_minimal_roi );
+
+            const int ws = dstImageSim_minimal.cols;
+            const int hs = dstImageSim_minimal.rows;
+          Mat templateFloat = Mat(hs, ws, CV_32F);// to store the (smoothed) template
+          dstImageSim_minimal.convertTo(templateFloat, templateFloat.type());
+          GaussianBlur(templateFloat, templateFloat, Size(5, 5), 0, 0);
+          cv::Mat laplace;
+          Laplacian(templateFloat, laplace, templateFloat.type(), 5);
+          cv::Mat laplace_file;
+          std::stringstream sstream111;
+          sstream111 << "laplace_" << "KeyPoint_";
+          sstream111 <<   std::setw(3) << std::setfill('0') << std::to_string( i );
+          sstream111 << ".png";
+          imwrite ( sstream111.str(), laplace );
+
+          std::stringstream sstream_laplace;
+          sstream_laplace << "laplace_" << "KeyPoint_";
+          sstream_laplace <<   std::setw(3) << std::setfill('0') << std::to_string( i );
+         // sstream_dstImageSim_minimal << ".png";
+          std::fstream outputFile_laplace;
+          outputFile_laplace.open( sstream_laplace.str(), std::ios::out );
+          outputFile_laplace << sstream_laplace.str()  << " = " << laplace << std::endl;
+          outputFile_laplace.close();
+
+          laplace.convertTo(laplace_file, CV_8UC3, 255.0); 
+          
+          std::stringstream sstream112;
+          sstream112 << "laplace_file_" << "KeyPoint_";
+          sstream112 <<   std::setw(3) << std::setfill('0') << std::to_string( i );
+          sstream112 << ".png";
+          imwrite ( sstream112.str(), laplace_file );
+
+
+           // needed matrices for gradients and warped gradients
+          Mat gradientX = Mat::zeros(hs, ws, CV_32FC1);
+          Mat gradientY = Mat::zeros(hs, ws, CV_32FC1);
+
+
+          // calculate first order image derivatives
+          // calculate the gradient values.
+          // apply the 1-D centered, point discrete derivative mask in one or both of the horizontal and vertical directions. 
+          Matx13f dx(-0.5f, 0.0f, 0.5f);
+
+          filter2D(templateFloat, gradientX, -1, dx);
+          filter2D(templateFloat, gradientY, -1, dx.t());
+
+          std::stringstream sstream10;
+          sstream10 << "templateFloat_" << "KeyPoint_";
+          sstream10 <<   std::setw(3) << std::setfill('0') << std::to_string( i );
+          sstream10 << ".png";
+          imwrite ( sstream10.str(), templateFloat );
+
+          std::stringstream sstream20;
+          sstream20 << "gradientY_" << "KeyPoint_";
+          sstream20 <<   std::setw(3) << std::setfill('0') << std::to_string( i );
+          sstream20 << ".png";
+          imwrite ( sstream20.str(), gradientY );
+
+          std::stringstream sstream30;
+          sstream30 << "gradientX_" << "KeyPoint_";
+          sstream30 <<   std::setw(3) << std::setfill('0') << std::to_string( i );
+          sstream30 << ".png";
+          imwrite ( sstream30.str(), gradientX );
+
+          // Define the motion model 
+          putText(exp_mapped_matrix_with_cols_clean, sstream2.str(), sim_image_keypoint_center, FONT_HERSHEY_SIMPLEX, 0.35,  Scalar(255,255,255), 1 , 8 , false);
+
+          const int warp_mode = MOTION_TRANSLATION;
 
 // Set a 2x3 or 3x3 warp matrix depending on the motion model.
-            Mat warp_matrix = Mat::eye(2, 3, CV_32F);
+          Mat warp_matrix = Mat::eye(2, 3, CV_32F);
   // Specify the number of iterations.
-            int number_of_iterations = 50;
+          int number_of_iterations = 50;
 
 // Specify the threshold of the increment
 // in the correlation coefficient between two iterations
-            double termination_eps = 1e-4;
+          double termination_eps = 1e-4;
 
 // Define termination criteria
-            TermCriteria criteria (TermCriteria::COUNT+TermCriteria::EPS, number_of_iterations, termination_eps);
+          TermCriteria criteria (TermCriteria::COUNT+TermCriteria::EPS, number_of_iterations, termination_eps);
 
 // Run the ECC algorithm. The results are stored in warp_matrix.
-            findTransformECC(
+          findTransformECC(
                  // templateImage – single-channel template image
-             dstImageSim,
+           dstImageSim,
                  // inputImage – single-channel input image which should be warped with the final warpMatrix in order to provide an image similar to templateImage, same type as temlateImage.
-             dstImageExp,
+           dstImageExp,
                  // warpMatrix – floating-point 2 \times 3 or 3\ times 3 mapping matrix (warp).
-             warp_matrix,
-             warp_mode,
-             criteria,
+           warp_matrix,
+           warp_mode,
+           criteria,
                  // An optional mask to indicate valid values of inputImage.
-             sim_image_keypoint_mask
-             );
-            std::cout << " \t\tTranslation matrix " << warp_matrix <<  std::endl;
+           sim_image_keypoint_mask
+           );
+          std::cout << " \t\tTranslation matrix " << warp_matrix <<  std::endl;
             // warpMatrix – floating-point 2 \times 3
 
-            const cv::Point2i projective_2D_coordinate = cv::Point2i( int( nearbyint(warp_matrix.at<float>(0,2)) ),int(  nearbyint(warp_matrix.at<float>(1,2) )) );
-            std::cout << " \t\t projective_2D_coordinate " << projective_2D_coordinate <<  std::endl;
+          const cv::Point2i projective_2D_coordinate = cv::Point2i( int( nearbyint(warp_matrix.at<float>(0,2)) ),int(  nearbyint(warp_matrix.at<float>(1,2) )) );
+          std::cout << " \t\t projective_2D_coordinate " << projective_2D_coordinate <<  std::endl;
 
-            sim_image_intensity_columns_projective_2D_coordinate[i] = projective_2D_coordinate;
+          sim_image_intensity_columns_projective_2D_coordinate[i] = projective_2D_coordinate;
 
-          }
-          else{
-            sim_image_intensity_columns_marked_delete[i] = true;
-            std::cout << "keypoint "<< i << "  marked for delete on dstImageExp.( mean_statistical_ImageExp: << "  << mean_statistical_ImageExp[0] << threshold_value << " ) " <<  std::endl;
-          }
+          // Applies an Affine Transform to the mask of the intensity column.
+          cv::Mat1b sim_image_keypoint_mask_translated = cv::Mat::zeros( sim_image_keypoint_mask.size(), sim_image_keypoint_mask.type() );    
+          cv::warpAffine( sim_image_keypoint_mask, sim_image_keypoint_mask_translated, warp_matrix, sim_image_keypoint_mask.size() );
+          cv::Mat dstImageSim_translated = cv::Mat::zeros( dstImageSim.size(), dstImageSim.type() );    
+          
+          // copy source image to destination image with masking
+          src_sim.copyTo(dstImageSim_translated, sim_image_keypoint_mask_translated);
+
+          std::stringstream sstream_trans;
+          sstream_trans << "dstImageSim_translated_" << "KeyPoint_";
+          sstream_trans <<   std::setw(3) << std::setfill('0') << std::to_string( i );
+          sstream_trans << ".png";
+          imwrite ( sstream_trans.str(), dstImageSim_translated );
+
+          const double sum_dstImageSimTrans = cv::sum(dstImageSim_translated)[0];
+
+
+          cv::Scalar mean_statistical_ImageSimTrans;
+          cv::Scalar stddev_statistical_ImageSimTrans;
+
+
+          cv::meanStdDev(dstImageSim_translated,mean_statistical_ImageSimTrans,stddev_statistical_ImageSimTrans,sim_image_keypoint_mask_translated);
+          
+          sim_image_intensity_columns_trans_stddev_statistical[ i ] = stddev_statistical_ImageSimTrans[0];
+          sim_image_intensity_columns_trans_mean_statistical[ i ] = mean_statistical_ImageSimTrans[0];
+          sim_image_intensity_columns_trans_integrate_intensity[ i ] = sum_dstImageSimTrans;
+
         }
-        imwrite("exp_mapped_matrix_with_cols_clean.png",exp_mapped_matrix_with_cols_clean);
-        imwrite("exp_mapped_matrix_with_cols.png",exp_mapped_matrix_with_cols);
-        result = true;
-        _flag_sim_image_intensity_columns_threshold_value = true;
-        _flag_sim_image_intensity_columns_stddev_statistical = true;
-        _flag_exp_image_intensity_columns_stddev_statistical = true;
-        _flag_sim_image_intensity_columns_mean_statistical = true;
-        _flag_exp_image_intensity_columns_mean_statistical = true;
-        _flag_sim_image_intensity_columns_integrate_intensity = true;
-        _flag_exp_image_intensity_columns_integrate_intensity = true;
-
-        emit sim_image_intensity_columns_changed();
-        emit sim_image_intensity_keypoints_changed();
-
-      } catch ( const std::exception& e ){
-        if( _flag_logger ){
-          std::stringstream message;
-          message << "A standard exception was caught, while running map_sim_intensity_cols_to_exp_image: " << e.what();
-          ApplicationLog::severity_level _log_type = ApplicationLog::error;
-          BOOST_LOG_FUNCTION();  logger->logEvent( _log_type , message.str() );
+        else{
+          sim_image_intensity_columns_marked_delete[i] = true;
+          std::cout << "keypoint "<< i << "  marked for delete on dstImageExp.( mean_statistical_ImageExp: << "  << mean_statistical_ImageExp[0] << threshold_value << " ) " <<  std::endl;
         }
       }
-    }
-    else {
-      result = false;
+      imwrite("exp_mapped_matrix_with_cols_clean.png",exp_mapped_matrix_with_cols_clean);
+      imwrite("exp_mapped_matrix_with_cols.png",exp_mapped_matrix_with_cols);
+      result = true;
+      _flag_sim_image_intensity_columns_threshold_value = true;
+      _flag_sim_image_intensity_columns_stddev_statistical = true;
+      _flag_exp_image_intensity_columns_stddev_statistical = true;
+      _flag_sim_image_intensity_columns_mean_statistical = true;
+      _flag_exp_image_intensity_columns_mean_statistical = true;
+      _flag_sim_image_intensity_columns_integrate_intensity = true;
+      _flag_exp_image_intensity_columns_integrate_intensity = true;
 
+      emit sim_image_intensity_columns_changed();
+      emit sim_image_intensity_keypoints_changed();
 
+    } catch ( const std::exception& e ){
       if( _flag_logger ){
         std::stringstream message;
-        message << "The required vars for map_sim_intensity_cols_to_exp_image() are not setted up.";
-        BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::error , message.str() );
+        message << "A standard exception was caught, while running map_sim_intensity_cols_to_exp_image: " << e.what();
+        ApplicationLog::severity_level _log_type = ApplicationLog::error;
+        BOOST_LOG_FUNCTION();  logger->logEvent( _log_type , message.str() );
       }
-      print_var_state();
     }
   }
-  else{
+  else {
+    result = false;
+
+
     if( _flag_logger ){
       std::stringstream message;
-      message << "The required Class POINTERS for map_sim_intensity_cols_to_exp_image() are not setted up.";
+      message << "The required vars for map_sim_intensity_cols_to_exp_image() are not setted up.";
       BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::error , message.str() );
     }
     print_var_state();
   }
-  return result;
+}
+else{
+  if( _flag_logger ){
+    std::stringstream message;
+    message << "The required Class POINTERS for map_sim_intensity_cols_to_exp_image() are not setted up.";
+    BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::error , message.str() );
+  }
+  print_var_state();
+}
+return result;
 }
 
 
@@ -734,15 +890,21 @@ bool IntensityColumns::export_sim_image_intensity_columns_integrated_intensities
   outputFile << "Column_number"  << "," << "Marked_Delete"  << "," 
   << "Column_center_x" << "," << "Column_center_y" << "," 
   << "Projective_2D_coordinate_center_x" << "," << "Projective_2D_coordinate_center_y" <<  "," 
-  << "SIM_Intensity_Column_Integrated_intensity" <<  "," << "EXP_Intensity_Column_Integrated_intensity"
+  << "SIM_Intensity_Column_Pixel_Count" << "," << "SIM_Intensity_Column_And_Surrounding_Pixel_Count" <<  ","
+  << "SIM_Intensity_Column_Mean" << "," << "SIM_Intensity_Column_And_Surrounding_Mean" <<  "," << "SIM_Intensity_Translated_Column_And_Surrounding_Mean" <<  ","
+  << "SIM_Intensity_Column_Integrated_intensity" <<  "," << "SIM_Intensity_Column_And_Surrounding_Integrated_intensity" <<  "," << "SIM_Intensity_Translated_Column_And_Surrounding_Integrated_intensity" <<  "," << "EXP_Intensity_Column_Integrated_intensity"
   << std::endl;
 
   for (size_t i = 0; i < sim_image_intensity_columns_center.size(); i++){
+    const int intensity_col_roi_pixel_count =   cv::countNonZero ( sim_image_intensity_columns_roi_masks[i] );
+    const int intensity_col_pixel_count =   cv::countNonZero ( sim_image_intensity_columns_masks[i] );
     if( !(sim_image_intensity_columns_marked_delete[i] && onlymapped) ){
      outputFile << i  << "," << std::boolalpha << sim_image_intensity_columns_marked_delete[i]  << "," 
      << sim_image_intensity_columns_center[i].x << "," << sim_image_intensity_columns_center[i].y << "," 
      << sim_image_intensity_columns_projective_2D_coordinate[i].x << "," << sim_image_intensity_columns_projective_2D_coordinate[i].y << " , " 
-     << sim_image_intensity_columns_integrate_intensity[i] << ","  << exp_image_intensity_columns_integrate_intensity[i] 
+     <<  intensity_col_roi_pixel_count << "," << intensity_col_pixel_count << "," 
+     << sim_image_intensity_columns_roi_mean_statistical[i] << "," << sim_image_intensity_columns_mean_statistical[i] << "," << sim_image_intensity_columns_trans_mean_statistical[i] << "," 
+     << sim_image_intensity_columns_roi_integrate_intensity[i] << "," << sim_image_intensity_columns_integrate_intensity[i] << "," << sim_image_intensity_columns_trans_integrate_intensity[i]  << ","  << exp_image_intensity_columns_integrate_intensity[i] 
      << std::endl;
    }
  }
