@@ -741,6 +741,7 @@ void IntensityColumns::apply_exp_image_delta_factor(){
 bool IntensityColumns::read_simulated_image_from_dat_file(){
   bool result = false;
   if( _flag_sim_crystal_properties ){
+
     if(
         // BaseCrystal vars
       sim_crystal_properties->get_flag_base_dir_path() &&
@@ -748,32 +749,37 @@ bool IntensityColumns::read_simulated_image_from_dat_file(){
         // BaseImage vars
       sim_image_properties->get_flag_full_n_rows_height() &&
       sim_image_properties->get_flag_full_n_cols_width()
-      ){
+      )
+    {
       // get const vars from class pointer
       const boost::filesystem::path base_dir_path = sim_crystal_properties->get_base_dir_path();
-    const int default_full_n_rows_height = sim_image_properties->get_full_n_rows_height();
-    const int default_full_n_cols_width = sim_image_properties->get_full_n_cols_width();
-    const std::string dat_output_target_folder = sim_crystal_properties->get_dat_output_target_folder();
-    const std::string file_name_output_image_wave_function = wavimg_parameters->get_file_name_output_image_wave_function();
-    boost::filesystem::path dat_input_dir ( dat_output_target_folder );
+      const int default_full_n_rows_height = sim_image_properties->get_full_n_rows_height();
+      const int default_full_n_cols_width = sim_image_properties->get_full_n_cols_width();
+      const std::string dat_output_target_folder = sim_crystal_properties->get_dat_output_target_folder();
+      const std::string file_name_output_image_wave_function = wavimg_parameters->get_file_name_output_image_wave_function();
+      boost::filesystem::path dat_input_dir ( dat_output_target_folder );
 
-    std::stringstream output_dat_name_stream;
-    output_dat_name_stream << file_name_output_image_wave_function << ".dat";
-    boost::filesystem::path dat_file ( output_dat_name_stream.str() );
-    boost::filesystem::path full_dat_path = base_dir_path / dat_input_dir / dat_file;
+      std::stringstream output_dat_name_stream;
+      output_dat_name_stream << file_name_output_image_wave_function << ".dat";
+      boost::filesystem::path dat_file ( output_dat_name_stream.str() );
+      boost::filesystem::path full_dat_path = base_dir_path / dat_input_dir / dat_file;
 
-    const bool _dat_exists = boost::filesystem::exists( full_dat_path );
-    if( _flag_logger ){
-      std::stringstream message;
-      message << " Opening \"" << full_dat_path.string() << "\", exists: " << std::boolalpha << _dat_exists;
+      const bool _dat_exists = boost::filesystem::exists( full_dat_path );
+      if( _flag_logger ){
+        std::stringstream message;
+        message << " Opening \"" << full_dat_path.string() << "\", exists: " << std::boolalpha << _dat_exists;
+        if( _dat_exists ){
+          BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification , message.str() );
+        }
+        else{
+          BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::error , message.str() );
+        }
+      }
       if( _dat_exists ){
-        BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification , message.str() );
-      }
-      else{
-        BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::error , message.str() );
-      }
-    }
-    if( _dat_exists ){
+       result = sim_image_properties->read_dat_file( full_dat_path, true, default_full_n_cols_width, default_full_n_rows_height);
+
+
+      /*
       int full_n_rows_height = default_full_n_rows_height;
       int full_n_cols_width = default_full_n_cols_width;
       bool _mmap_ok = false;
@@ -826,18 +832,19 @@ bool IntensityColumns::read_simulated_image_from_dat_file(){
 
         }
       }
-      if( _flag_logger ){
-        std::stringstream message;
-        message << " Finished mmap with result: " << std::boolalpha << result;
-        if( result ){
-          BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification , message.str() );
-          print_var_state();
-        }
-        else{
-          BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::error , message.str() );
-          print_var_state();
+      */
+     }
+     if( _flag_logger ){
+      std::stringstream message;
+      message << " Finished mmap with result: " << std::boolalpha << result;
+      if( result ){
+        BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification , message.str() );
+        print_var_state();
+      }
+      else{
+        BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::error , message.str() );
+        print_var_state();
 
-        }
       }
     }
     else{

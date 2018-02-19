@@ -443,6 +443,58 @@ bool BaseImage::set_roi_rectangle( cv::Rect rect ){
   return result;
 }
 
+bool BaseImage::read_dat_file( boost::filesystem::path full_dat_path, bool normalize, int n_cols, int n_rows ){
+// The image dimension is equal to the number of data points (NX horizontally, NY vertically) with the physical data origin (0,0) in the lower left image corner.
+  bool result = false;
+  try {
+    boost::iostreams::mapped_file_source mmap( full_dat_path );
+    float* p = (float*) mmap.data();
+    full_image = cv::Mat( n_rows , n_cols , CV_32FC1);
+    int pos = 0;
+    float *pixel;
+    for (int row = 0; row < n_rows; row++) {
+      for (int col = 0; col < n_cols; col++) {
+        full_image.at<float>(n_rows - 1 - row, col) = (float) p[pos] ;
+        pos++;
+      }
+    }
+    mmap.close();
+    if ( normalize ){
+     double min, max;
+     cv::minMaxLoc(full_image, &min, &max);
+     full_image.convertTo(full_image, cv::DataType<unsigned char>::type , 255.0f/(max - min), -min * 255.0f/(max - min));
+   }
+   set_full_n_rows_height( n_rows );
+   set_full_n_cols_width( n_cols );
+   result = true;
+ }
+ catch(const std::exception & e) {
+  result = false;
+  if( _flag_logger ){
+    std::stringstream message;
+    message << "Caught std::exception: " << typeid(e).name() << " : " << e.what();; 
+    BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::error , message.str() );
+    print_var_state();
+
+  }
+}
+if( _flag_logger ){
+  std::stringstream message;
+  message << " Finished mmap with result: " << std::boolalpha << result;
+  if( result ){
+    BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification , message.str() );
+    print_var_state();
+  }
+  else{
+    BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::error , message.str() );
+    print_var_state();
+
+  }
+}
+return result;
+}
+
+
 bool BaseImage::set_full_image( cv::Mat image ){
   bool result = false;
   if( ! image.empty() ){

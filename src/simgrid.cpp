@@ -259,6 +259,12 @@ bool SimGrid::read_grid_from_dat_files(){
             output_dat_name_stream << file_name_output_image_wave_function << "_" << std::setw(3) << std::setfill('0') << std::to_string(thickness) << "_" << std::setw(3) << std::setfill('0') << std::to_string(defocus) << ".dat";
             boost::filesystem::path dat_file ( output_dat_name_stream.str() );
             boost::filesystem::path full_dat_path = base_dir_path / dat_input_dir / dat_file;
+            const bool _mmap_ok = sim_image_properties->read_dat_file( full_dat_path, true, default_full_n_cols_width, default_full_n_rows_height);
+            if( _mmap_ok ){
+              cv::Mat raw_simulated_image = sim_image_properties->get_full_image();
+              raw_simulated_images_row.push_back( raw_simulated_image );
+            }
+            /*
             int full_n_rows_height = default_full_n_rows_height;
             int full_n_cols_width = default_full_n_cols_width;
             bool _mmap_ok = false;
@@ -272,7 +278,9 @@ bool SimGrid::read_grid_from_dat_files(){
               float *pixel;
               for (int row = 0; row < full_n_rows_height; row++) {
                 for (int col = 0; col < full_n_cols_width; col++) {
-                  raw_simulated_image.at<float>(row, full_n_cols_width - col -1) = (float) p[pos] ;
+                  //The image dimension is equal to the number of data points (NX horizontally, NY vertically) with the physical data origin (0,0) in the lower left image corner. 
+
+                   raw_simulated_image.at<float>(row, full_n_cols_width - col -1) = (float) p[pos] ;
                   pos++;
                 }
               }
@@ -296,6 +304,7 @@ bool SimGrid::read_grid_from_dat_files(){
                BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::error , message.str() );
               }
             }
+            */
             result &= _mmap_ok;
           }
           raw_simulated_images_grid.push_back( raw_simulated_images_row );

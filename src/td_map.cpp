@@ -434,61 +434,224 @@ bool TDMap::test_run_config(){
   }
   return result;
 }
+bool TDMap::run_tdmap_celslc(){
+  bool result = false;
+  bool _clean_run_env = !_flag_runned_tdmap_celslc;
+  if( _flag_runned_tdmap_celslc ){
+    const bool _clean_run_env_step1_celslc_ok = _tdmap_celslc_parameters->clean_for_re_run();
+    const bool _clean_run_env_step1_msa_ok = _tdmap_msa_parameters->base_cystal_clean_for_re_run();
+    const bool _clean_run_env_step1_wavimg_ok = _tdmap_wavimg_parameters->base_cystal_clean_for_re_run();
+    const bool _clean_run_env_step1_simgrid_ok = _td_map_simgrid->base_cystal_clean_for_re_run();
+    _clean_run_env = ( _clean_run_env_step1_celslc_ok & _clean_run_env_step1_msa_ok & _clean_run_env_step1_wavimg_ok & _clean_run_env_step1_simgrid_ok );
+    _flag_runned_tdmap_celslc = ! _clean_run_env;
+    if( _flag_logger ){
+      std::stringstream message;
+      message << "Already runned celslc. going to clean vars. result: " << std::boolalpha << _clean_run_env ;
+      if( _clean_run_env ){
+        BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification , message.str() );
+      }
+      else{
+        BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::error , message.str() );
+      }
+    }
+  }
+  if( _clean_run_env ){
+    emit TDMap_started_celslc();
+    const bool unit_cell_update = tdmap_roi_sim_super_cell->update_from_unit_cell();
+    if( unit_cell_update ){
+      const bool cel_generation = tdmap_roi_sim_super_cell->generate_super_cell_file();
+      tdmap_roi_sim_super_cell->generate_xyz_file();
+      if( cel_generation ){
+        _flag_runned_tdmap_celslc = _tdmap_celslc_parameters->call_boost_bin( true );
+      }
+    }
+    emit TDMap_ended_celslc( _flag_runned_tdmap_celslc );
+  }
+  result = _flag_runned_tdmap_celslc;
+  if( _flag_logger ){
+    std::stringstream message;
+    message << "_flag_runned_tdmap_celslc: " << std::boolalpha << _flag_runned_tdmap_celslc;
+    if( _flag_runned_tdmap_celslc ){
+      BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification , message.str() );
+    }
+    else{
+      BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::error , message.str() );
+    }
+  }
+  return result;
+}
+
+bool TDMap::run_tdmap_msa(){
+  bool result = false;
+  bool _clean_run_env = !_flag_runned_tdmap_msa;
+  if( _flag_runned_tdmap_msa ){
+    _clean_run_env = _tdmap_msa_parameters->clean_for_re_run();
+    _flag_runned_tdmap_msa = !_clean_run_env;
+    if( _flag_logger ){
+      std::stringstream message;
+      message << "Already runned msa. going to clean vars. result: " << std::boolalpha << _clean_run_env ;
+      if( _clean_run_env ){
+        BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification , message.str() );
+      }
+      else{
+        BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::error , message.str() );
+      }
+    }
+  }
+  if( _clean_run_env ){
+    const bool prm_status = _tdmap_msa_parameters->produce_prm();
+    emit TDMap_started_msa();
+    if( prm_status ){
+      _flag_runned_tdmap_msa = _tdmap_msa_parameters->call_bin();
+    }
+    emit TDMap_ended_msa( _flag_runned_tdmap_msa );
+    if( _flag_logger ){
+      std::stringstream message;
+      message << "_flag_runned_tdmap_msa: " << std::boolalpha << _flag_runned_tdmap_msa;
+      if( _flag_runned_tdmap_msa ){
+        BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification , message.str() );
+      }
+      else{
+        BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::error , message.str() );
+      }
+    }
+  }
+  return result;
+}
+
+bool TDMap::run_tdmap_wavimg(){
+  bool result = false;
+  bool _clean_run_env = !_flag_runned_tdmap_wavimg;
+
+  if( _flag_runned_tdmap_wavimg ){
+    _clean_run_env = _tdmap_wavimg_parameters->clean_for_re_run();
+    _flag_runned_tdmap_wavimg = !_clean_run_env;
+    if( _flag_logger ){
+      std::stringstream message;
+      message << "Already runned wavimg. going to clean vars. result: " << std::boolalpha << _clean_run_env ;
+      if( _clean_run_env ){
+        BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification , message.str() );
+      }
+      else{
+        BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::error , message.str() );
+      }
+    }
+  }
+  if( _clean_run_env ){
+    emit TDMap_started_wavimg();
+    const bool prm_status = _tdmap_wavimg_parameters->produce_prm();
+    if( prm_status ){
+      _flag_runned_tdmap_wavimg = _tdmap_wavimg_parameters->call_bin();
+    }
+    emit TDMap_ended_wavimg( _flag_runned_tdmap_wavimg );
+    if( !_flag_runned_tdmap_wavimg ){
+      _tdmap_wavimg_parameters->print_var_state();
+    }
+    if( _flag_logger ){
+      std::stringstream message;
+      message << "_flag_runned_tdmap_wavimg: " << std::boolalpha << _flag_runned_tdmap_wavimg;
+      ApplicationLog::severity_level _log_type = _flag_runned_tdmap_wavimg ? ApplicationLog::notification : ApplicationLog::error;
+      BOOST_LOG_FUNCTION();  logger->logEvent( _log_type , message.str() );
+    }
+  }
+  return result;
+}
+
+bool TDMap::run_tdmap_simgrid(){
+  bool result = false;
+  bool _simgrid_stage_ok = false;
+
+  bool _clean_run_env = !_flag_runned_tdmap_simgrid_read || !_flag_runned_tdmap_simgrid_correlate;
+  if( _flag_runned_tdmap_simgrid_read || _flag_runned_tdmap_simgrid_correlate ){
+    _clean_run_env = _td_map_simgrid->clean_for_re_run();
+    _flag_runned_tdmap_simgrid_read = !_clean_run_env;
+    _flag_runned_tdmap_simgrid_correlate = !_clean_run_env;
+    if( _flag_logger ){
+      std::stringstream message;
+      message << "Already runned simgrid. going to clean vars. result: " << std::boolalpha << _clean_run_env ;
+      ApplicationLog::severity_level _log_type = _clean_run_env ? ApplicationLog::notification : ApplicationLog::error;
+      BOOST_LOG_FUNCTION();  logger->logEvent( _log_type , message.str() );
+    }
+  }
+  if( _clean_run_env ){
+    emit TDMap_started_simgrid();
+        // 1st step in simgrid
+    bool _grid_ok = false;
+    try {
+      _grid_ok = _td_map_simgrid->read_grid_from_dat_files();
+    } catch ( const std::exception& e ){
+      _grid_ok = false;
+      if( _flag_logger ){
+        std::stringstream message;
+        message << "A standard exception was caught, while running _td_map_simgrid->read_grid_from_dat_files(): " << e.what();
+        ApplicationLog::severity_level _log_type = ApplicationLog::error;
+        BOOST_LOG_FUNCTION();  logger->logEvent( _log_type , message.str() );
+      }
+    }
+        // 2nd step in simgrid
+    bool _margin_ok = false;
+    if( _grid_ok ){
+      _margin_ok = _td_map_simgrid->apply_margin_to_grid();
+    }
+    bool _normalization_ok = false;
+    if( _grid_ok && _margin_ok ){
+      _normalization_ok = _td_map_simgrid->apply_normalization_to_grid();
+    }
+    _flag_runned_tdmap_simgrid_read = _margin_ok && _grid_ok && _normalization_ok;
+    if ( _run_simgrid_switch ){
+          // 3rd step in simgrid
+      if( _flag_runned_tdmap_simgrid_read ){
+        try {
+          _flag_runned_tdmap_simgrid_correlate = _td_map_simgrid->simulate_from_grid();
+        } catch ( const std::exception& e ){
+          _flag_runned_tdmap_simgrid_correlate = false;
+          if( _flag_logger ){
+            std::stringstream message;
+            message << "A standard exception was caught, while running _td_map_simgrid->simulate_from_grid(): " << e.what();
+            ApplicationLog::severity_level _log_type = ApplicationLog::error;
+            BOOST_LOG_FUNCTION();  logger->logEvent( _log_type , message.str() );
+          }
+        }
+      }
+      _simgrid_stage_ok = _flag_runned_tdmap_simgrid_read & _flag_runned_tdmap_simgrid_correlate;
+
+      emit TDMap_ended_simgrid( _simgrid_stage_ok );
+      if( _flag_logger ){
+        std::stringstream message;
+        message << "_simgrid_stage_ok: " << std::boolalpha << _simgrid_stage_ok;
+        ApplicationLog::severity_level _log_type = _simgrid_stage_ok ? ApplicationLog::notification : ApplicationLog::error;
+        BOOST_LOG_FUNCTION();  logger->logEvent( _log_type , message.str() );
+      }
+    }
+    else{
+      emit TDMap_no_simgrid( _flag_runned_tdmap_simgrid_read );
+      _simgrid_stage_ok = _flag_runned_tdmap_simgrid_read;
+      if( _flag_logger ){
+        std::stringstream message;
+        message << "emiting TDMap_no_simgrid( _flag_runned_tdmap_simgrid_read ) ";
+        ApplicationLog::severity_level _log_type = ApplicationLog::notification;
+        BOOST_LOG_FUNCTION();  logger->logEvent( _log_type , message.str() );
+      }
+    }
+  }
+  return result;
+}
 
 bool TDMap::run_tdmap(){
   bool _simulation_status = false;
   const bool _vars_setted_up = test_run_config();
+
   if ( _vars_setted_up ){
     bool _celslc_stage_ok = false;
     bool _msa_stage_ok = false;
     bool _wavimg_stage_ok = false;
     bool _simgrid_stage_ok = false;
+
     if ( _run_celslc_switch ){
-      bool _clean_run_env = !_flag_runned_tdmap_celslc;
-      if( _flag_runned_tdmap_celslc ){
-        const bool _clean_run_env_step1_celslc_ok = _tdmap_celslc_parameters->clean_for_re_run();
-        const bool _clean_run_env_step1_msa_ok = _tdmap_msa_parameters->base_cystal_clean_for_re_run();
-        const bool _clean_run_env_step1_wavimg_ok = _tdmap_wavimg_parameters->base_cystal_clean_for_re_run();
-        const bool _clean_run_env_step1_simgrid_ok = _td_map_simgrid->base_cystal_clean_for_re_run();
-        _clean_run_env = ( _clean_run_env_step1_celslc_ok & _clean_run_env_step1_msa_ok & _clean_run_env_step1_wavimg_ok & _clean_run_env_step1_simgrid_ok );
-        _flag_runned_tdmap_celslc = ! _clean_run_env;
-        if( _flag_logger ){
-          std::stringstream message;
-          message << "Already runned celslc. going to clean vars. result: " << std::boolalpha << _clean_run_env ;
-          if( _clean_run_env ){
-            BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification , message.str() );
-          }
-          else{
-            BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::error , message.str() );
-          }
-        }
-      }
-      if( _clean_run_env ){
-        emit TDMap_started_celslc();
-        const bool unit_cell_update = tdmap_roi_sim_super_cell->update_from_unit_cell();
-        if( unit_cell_update ){
-          const bool cel_generation = tdmap_roi_sim_super_cell->generate_super_cell_file();
-          tdmap_roi_sim_super_cell->generate_xyz_file();
-          if( cel_generation ){
-            _flag_runned_tdmap_celslc = _tdmap_celslc_parameters->call_boost_bin( );
-          }
-        }
-        emit TDMap_ended_celslc( _flag_runned_tdmap_celslc );
-      }
-      _celslc_stage_ok = _flag_runned_tdmap_celslc;
-      if( _flag_logger ){
-        std::stringstream message;
-        message << "_flag_runned_tdmap_celslc: " << std::boolalpha << _flag_runned_tdmap_celslc;
-        if( _flag_runned_tdmap_celslc ){
-          BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification , message.str() );
-        }
-        else{
-          BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::error , message.str() );
-        }
-      }
+      run_tdmap_celslc();
     }
     // if we runned and it was ok, or if we didnt runned and we want to set nz from prm
-    _celslc_stage_ok = _run_celslc_switch ? ( _run_celslc_switch && _flag_runned_tdmap_celslc ) : sim_crystal_properties->set_nz_simulated_partitions_from_prm();
+    _celslc_stage_ok = _run_celslc_switch ? _flag_runned_tdmap_celslc : sim_crystal_properties->set_nz_simulated_partitions_from_prm();
 
     if( _flag_logger ){
       std::stringstream message;
@@ -498,174 +661,41 @@ bool TDMap::run_tdmap(){
     //MSA
     if( _celslc_stage_ok ){
       if ( _run_msa_switch ){
-        bool _clean_run_env = !_flag_runned_tdmap_msa;
-        if( _flag_runned_tdmap_msa ){
-          _clean_run_env = _tdmap_msa_parameters->clean_for_re_run();
-          _flag_runned_tdmap_msa = !_clean_run_env;
-          if( _flag_logger ){
-            std::stringstream message;
-            message << "Already runned msa. going to clean vars. result: " << std::boolalpha << _clean_run_env ;
-            if( _clean_run_env ){
-              BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification , message.str() );
-            }
-            else{
-              BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::error , message.str() );
-            }
-          }
-        }
-        if( _clean_run_env ){
-          const bool prm_status = _tdmap_msa_parameters->produce_prm();
-          emit TDMap_started_msa();
-          if( prm_status ){
-            _flag_runned_tdmap_msa = _tdmap_msa_parameters->call_bin();
-          }
-          emit TDMap_ended_msa( _flag_runned_tdmap_msa );
-          if( _flag_logger ){
-            std::stringstream message;
-            message << "_flag_runned_tdmap_msa: " << std::boolalpha << _flag_runned_tdmap_msa;
-            if( _flag_runned_tdmap_msa ){
-              BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification , message.str() );
-            }
-            else{
-              BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::error , message.str() );
-            }
-          }
-        }
-        _msa_stage_ok = _flag_runned_tdmap_msa;
+        run_tdmap_msa();        
       }
       //if run msa flag is false, the wav files should exist and we should update from them
-      else{
-        _msa_stage_ok = _tdmap_msa_parameters->check_produced_waves();
-        if( _flag_logger ){
-          std::stringstream message;
-          message << "Run msa flag was false, the wav files should exist and we should update from them. result: " << std::boolalpha << _msa_stage_ok;
-          BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification , message.str() );
-        }
+      _msa_stage_ok = _run_msa_switch ? _flag_runned_tdmap_msa : _tdmap_msa_parameters->check_produced_waves();
+
+      if( _flag_logger ){
+        std::stringstream message;
+        message << "Run msa flag was false, the wav files should exist and we should update from them. result: " << std::boolalpha << _msa_stage_ok;
+        BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification , message.str() );
       }
     }
     //WAVIMG
-    if( _celslc_stage_ok && _msa_stage_ok ){
-      bool _clean_run_env = !_flag_runned_tdmap_wavimg;
-      if( _run_wavimg_switch && _flag_runned_tdmap_wavimg ){
-        _clean_run_env = _tdmap_wavimg_parameters->clean_for_re_run();
-        _flag_runned_tdmap_wavimg = !_clean_run_env;
-        if( _flag_logger ){
-          std::stringstream message;
-          message << "Already runned wavimg. going to clean vars. result: " << std::boolalpha << _clean_run_env ;
-          if( _clean_run_env ){
-            BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification , message.str() );
-          }
-          else{
-            BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::error , message.str() );
-          }
-        }
-      }
+    if( _celslc_stage_ok && _msa_stage_ok ){      
+
       //if run wavimg flag is true, the prm and dat files should be produced
       if ( _run_wavimg_switch ){
-        if( _clean_run_env ){
-          emit TDMap_started_wavimg();
-          const bool prm_status = _tdmap_wavimg_parameters->produce_prm();
-          if( prm_status ){
-            _flag_runned_tdmap_wavimg = _tdmap_wavimg_parameters->call_bin();
-          }
-          emit TDMap_ended_wavimg( _flag_runned_tdmap_wavimg );
-          if( !_flag_runned_tdmap_wavimg ){
-            _tdmap_wavimg_parameters->print_var_state();
-          }
-          if( _flag_logger ){
-            std::stringstream message;
-            message << "_flag_runned_tdmap_wavimg: " << std::boolalpha << _flag_runned_tdmap_wavimg;
-            ApplicationLog::severity_level _log_type = _flag_runned_tdmap_wavimg ? ApplicationLog::notification : ApplicationLog::error;
-            BOOST_LOG_FUNCTION();  logger->logEvent( _log_type , message.str() );
-          }
-        }
-        _wavimg_stage_ok = _flag_runned_tdmap_wavimg;
+        run_tdmap_wavimg();
       }
+      _simgrid_stage_ok = _flag_runned_tdmap_simgrid_read & _flag_runned_tdmap_simgrid_correlate;
+
+      _wavimg_stage_ok = _run_wavimg_switch ? _flag_runned_tdmap_wavimg : _tdmap_wavimg_parameters->check_produced_dat();
       //if run wavimg flag is false, the dat files should exist and we should update from them
-      else{
-        _wavimg_stage_ok = _tdmap_wavimg_parameters->check_produced_dat();
-        if( _flag_logger ){
-          std::stringstream message;
-          message << "Run wavimg flag is false, the dat files should exist and we should update from them. result: " << std::boolalpha << _wavimg_stage_ok;
-          BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification , message.str() );
-        }
+
+      if( _flag_logger ){
+        std::stringstream message;
+        message << "Run wavimg flag is false, the dat files should exist and we should update from them. result: " << std::boolalpha << _wavimg_stage_ok;
+        BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification , message.str() );
       }
     }
+
     //SIMGRID
     if( _celslc_stage_ok && _msa_stage_ok && _wavimg_stage_ok ){
-      bool _clean_run_env = !_flag_runned_tdmap_simgrid_read || !_flag_runned_tdmap_simgrid_correlate;
-      if( _flag_runned_tdmap_simgrid_read || _flag_runned_tdmap_simgrid_correlate ){
-        _clean_run_env = _td_map_simgrid->clean_for_re_run();
-        _flag_runned_tdmap_simgrid_read = !_clean_run_env;
-        _flag_runned_tdmap_simgrid_correlate = !_clean_run_env;
-        if( _flag_logger ){
-          std::stringstream message;
-          message << "Already runned simgrid. going to clean vars. result: " << std::boolalpha << _clean_run_env ;
-          ApplicationLog::severity_level _log_type = _clean_run_env ? ApplicationLog::notification : ApplicationLog::error;
-          BOOST_LOG_FUNCTION();  logger->logEvent( _log_type , message.str() );
-        }
-      }
-      if( _clean_run_env ){
-        emit TDMap_started_simgrid();
-        // 1st step in simgrid
-        bool _grid_ok = false;
-        try {
-          _grid_ok = _td_map_simgrid->read_grid_from_dat_files();
-        } catch ( const std::exception& e ){
-          _grid_ok = false;
-          if( _flag_logger ){
-            std::stringstream message;
-            message << "A standard exception was caught, while running _td_map_simgrid->read_grid_from_dat_files(): " << e.what();
-            ApplicationLog::severity_level _log_type = ApplicationLog::error;
-            BOOST_LOG_FUNCTION();  logger->logEvent( _log_type , message.str() );
-          }
-        }
-        // 2nd step in simgrid
-        bool _margin_ok = false;
-        if( _grid_ok ){
-          _margin_ok = _td_map_simgrid->apply_margin_to_grid();
-        }
-        bool _normalization_ok = false;
-        if( _grid_ok && _margin_ok ){
-          _normalization_ok = _td_map_simgrid->apply_normalization_to_grid();
-        }
-        _flag_runned_tdmap_simgrid_read = _margin_ok && _grid_ok && _normalization_ok;
-        if ( _run_simgrid_switch ){
-          // 3rd step in simgrid
-          if( _flag_runned_tdmap_simgrid_read ){
-            try {
-              _flag_runned_tdmap_simgrid_correlate = _td_map_simgrid->simulate_from_grid();
-            } catch ( const std::exception& e ){
-              _flag_runned_tdmap_simgrid_correlate = false;
-              if( _flag_logger ){
-                std::stringstream message;
-                message << "A standard exception was caught, while running _td_map_simgrid->simulate_from_grid(): " << e.what();
-                ApplicationLog::severity_level _log_type = ApplicationLog::error;
-                BOOST_LOG_FUNCTION();  logger->logEvent( _log_type , message.str() );
-              }
-            }
-          }
-          _simgrid_stage_ok = _flag_runned_tdmap_simgrid_read & _flag_runned_tdmap_simgrid_correlate;
-          emit TDMap_ended_simgrid( _simgrid_stage_ok );
-          if( _flag_logger ){
-            std::stringstream message;
-            message << "_simgrid_stage_ok: " << std::boolalpha << _simgrid_stage_ok;
-            ApplicationLog::severity_level _log_type = _simgrid_stage_ok ? ApplicationLog::notification : ApplicationLog::error;
-            BOOST_LOG_FUNCTION();  logger->logEvent( _log_type , message.str() );
-          }
-        }
-        else{
-          emit TDMap_no_simgrid( _flag_runned_tdmap_simgrid_read );
-          _simgrid_stage_ok = _flag_runned_tdmap_simgrid_read;
-          if( _flag_logger ){
-            std::stringstream message;
-            message << "emiting TDMap_no_simgrid( _flag_runned_tdmap_simgrid_read ) ";
-            ApplicationLog::severity_level _log_type = ApplicationLog::notification;
-            BOOST_LOG_FUNCTION();  logger->logEvent( _log_type , message.str() );
-          }
-        }
-      }
+      run_tdmap_simgrid();
     }
+
     _simulation_status = _celslc_stage_ok & _msa_stage_ok & _wavimg_stage_ok & _simgrid_stage_ok;
   }
   else{
@@ -689,7 +719,7 @@ bool TDMap::export_sim_grid( std::string sim_grid_file_name_image, bool cut_marg
 }
 
 bool TDMap::export_super_cell_simulated_image_intensity_columns_integrated_intensities( std::string filename , bool onlymapped ){
-    return sim_image_intensity_columns->export_sim_image_intensity_columns_integrated_intensities_to_csv( filename, onlymapped );
+  return sim_image_intensity_columns->export_sim_image_intensity_columns_integrated_intensities_to_csv( filename, onlymapped );
 }
 
 // gui getters
@@ -2109,7 +2139,7 @@ bool TDMap::set_thickness_user_estimated_nm( std::string s_estimated ){
             std::cout << "read_simulated_image_from_dat_file: " << std::boolalpha << _flag_read_simulated_supercell_image << std::endl;
 
             compute_full_super_cell_intensity_cols();
-            
+
             if( _flag_logger ){
               std::stringstream message;
               message << "_flag_read_simulated_supercell_image: " << std::boolalpha << _flag_read_simulated_supercell_image;

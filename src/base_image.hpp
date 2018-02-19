@@ -23,6 +23,10 @@
 #include <boost/thread.hpp>                               // for thread
 #include <boost/tokenizer.hpp>
 #include <boost/lexical_cast.hpp>
+#include <boost/iostreams/device/mapped_file.hpp> // for mmap
+#include <boost/iostreams/stream.hpp>             // for stream
+#include <boost/filesystem.hpp>                      // for path, operator==, oper...
+#include <boost/filesystem/path.hpp>                      // for path, operator==, oper...
 /* END BOOST */
 
 #include <iosfwd>                    // for string
@@ -200,6 +204,7 @@ public:
     bool set_emd_wrapper( EMDWrapper* wrapper );
 
     // full frame
+    bool read_dat_file( boost::filesystem::path full_dat_path, bool normalize = false, int n_cols = -1, int n_rows = -1  );
     bool set_full_image( std::string path, bool normalize = false );
     bool set_full_image( cv::Mat full_image );
     bool set_full_n_rows_height( int full_n_rows_height );

@@ -186,6 +186,10 @@ public:
      * RUN METHODS
      */
     bool run_tdmap();
+    bool run_tdmap_celslc();
+    bool run_tdmap_msa();
+    bool run_tdmap_wavimg();
+    bool run_tdmap_simgrid();
     bool test_run_config();
     bool test_clean_run_env();
     bool calculate_exp_image_boundaries_from_full_image();
