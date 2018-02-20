@@ -41,7 +41,8 @@
 #include "base_crystal.hpp"
 #include "application_log.hpp"
 
-class CELSLC_prm : public BaseBin {
+class CELSLC_prm : public QObject, public BaseBin {
+    Q_OBJECT
   private:
     /* Classes with sim properties */
     UnitCell* unit_cell = nullptr;
@@ -78,6 +79,7 @@ class CELSLC_prm : public BaseBin {
     bool prepare_bin_ssc();
     bool prepare_nz_simulated_partitions_from_ssc_prm();
     bool check_child_exit_code( int _child_exit_code );
+
   public:
 
     virtual std::ostream& create_bin_args(std::ostream& stream, bool prepare_ssc = false ) const;
@@ -119,6 +121,10 @@ class CELSLC_prm : public BaseBin {
     virtual std::ostream& output(std::ostream& stream) const;
     void print_var_state();
 
+    signals:
+    void celslc_ssc_stage_started( int nslices );
+    void celslc_ssc_single_slice_ended( bool result );
+    void celslc_ssc_stage_ended( bool result );
 
 
 };

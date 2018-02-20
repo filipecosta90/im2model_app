@@ -172,9 +172,15 @@ MainWindow::MainWindow( ApplicationLog::ApplicationLog* logger , QWidget *parent
       connect(this, SIGNAL(super_cell_target_region_changed()), this, SLOT(update_super_cell_target_region()));
 
       connect( _core_td_map, SIGNAL(TDMap_started_celslc( )), this, SLOT(update_tdmap_celslc_started( ) ) );
-      connect(_core_td_map, SIGNAL(TDMap_started_celslc()), this, SLOT(update_tdmap_sim_ostream_celslc()));
-      connect( _core_td_map, SIGNAL(TDMap_started_supercell_celslc( )), this, SLOT(update_supercell_celslc_started( ) ) );
+      connect(_core_td_map,  SIGNAL(TDMap_started_celslc()), this, SLOT(update_tdmap_sim_ostream_celslc()));
+      connect( _core_td_map, SIGNAL(TDMap_inform_celslc_n_steps( int )), this, SLOT(update_tdmap_celslc_started_with_steps_info( int ) ) );
+
+      connect( _core_td_map, SIGNAL(TDMap_started_supercell_celslc( )), this, SLOT( update_supercell_celslc_started( ) ) );
+      connect( _core_td_map, SIGNAL(TDMap_inform_supercell_celslc_n_steps( int )), this, SLOT(update_supercell_celslc_started_with_steps_info( int ) ) );
+
       connect( _core_td_map, SIGNAL(TDMap_at_celslc_step( int )), this, SLOT(update_tdmap_celslc_step( int ) ) );
+      connect( _core_td_map, SIGNAL(TDMap_ended_supercell_celslc_ssc_single_slice_ended( bool )), this, SLOT(update_supercell_celslc_ssc_single_slice_step( bool ) ) );
+
       connect( _core_td_map, SIGNAL(TDMap_ended_celslc( bool )), this, SLOT(update_tdmap_celslc_ended( bool ) ) );
       connect( _core_td_map, SIGNAL(TDMap_ended_supercell_celslc( bool )), this, SLOT(update_supercell_celslc_ended( bool ) ) );
 
@@ -213,12 +219,37 @@ void MainWindow::setApplicationVersion( std::string app_version ){
 }
 
 void MainWindow::update_tdmap_celslc_started( ){
-  updateProgressBar(0,0,4);
+  updateProgressBar(0,0,100);
   ui->statusBar->showMessage(tr("Started multislice step"), 2000);
 }
 
+
+void MainWindow::update_tdmap_celslc_started_with_steps_info( int n_steps ){
+  updateProgressBar(0,0,100);
+  std::stringstream message;
+  _core_td_map_info_supercell_celslc_n_steps = n_steps;
+  message << "Launching " << n_steps << " concurrent processes to calculate the multislice step.";
+  ui->statusBar->showMessage(QString::fromStdString(message.str()), 5000);
+}
+
+void MainWindow::update_supercell_celslc_started_with_steps_info( int n_steps ){
+  updateProgressBar(0,0,100);
+  std::stringstream message;
+  message << "Launching " << n_steps << " concurrent processes to calculate the multislice step for supercell.";
+  ui->statusBar->showMessage(QString::fromStdString(message.str()), 5000);
+}
+
+void MainWindow::update_supercell_celslc_ssc_single_slice_step( bool result ){
+  std::stringstream message;
+  _core_td_map_info_supercell_celslc_at_step++;
+  const int _core_td_map_info_supercell_celslc_step_to_percent = (int) ( ( (float) _core_td_map_info_supercell_celslc_n_steps ) / ( (float) _core_td_map_info_supercell_celslc_at_step ) * 25.0f );
+  updateProgressBar(0,_core_td_map_info_supercell_celslc_step_to_percent,100);
+  message << "Multislice process ended with result " << std::boolalpha << result << ".";
+  ui->statusBar->showMessage(QString::fromStdString(message.str()), 5000);
+}
+
 void MainWindow::update_supercell_celslc_started( ){
-  updateProgressBar(0,0,4);
+  updateProgressBar(0,0,100);
   ui->statusBar->showMessage(tr("Started multislice step for supercell"), 2000);
 }
 
@@ -245,12 +276,12 @@ void MainWindow::update_supercell_celslc_ended( bool result ){
 }
 
 void MainWindow::update_tdmap_msa_started( ){
-  updateProgressBar(0,1,4);
+  updateProgressBar(0,25,100);
   ui->statusBar->showMessage(tr("Started calculating electron diffraction patterns"), 2000);
 }
 
 void MainWindow::update_supercell_msa_started( ){
-  updateProgressBar(0,1,4);
+  updateProgressBar(0,25,100);
   ui->statusBar->showMessage(tr("Started calculating electron diffraction patterns for supercell"), 2000);
 }
 
@@ -258,11 +289,11 @@ void MainWindow::update_tdmap_msa_ended( bool result ){
   // reset pipe
   _sim_tdmap_msa_ostream_buffer.pipe( boost::process::pipe() );
   if( result ){
-    updateProgressBar(0,2,4);
+    updateProgressBar(0,50,100);
     ui->statusBar->showMessage(tr("Sucessfully ended calculating the electron diffraction patterns"), 2000);
   }
   else{
-    updateProgressBar(0,2,4, true);
+    updateProgressBar(0,50,100, true);
     ui->statusBar->showMessage(tr("Error while calculating the electron diffraction patterns") );
   }
 }
@@ -271,17 +302,17 @@ void MainWindow::update_supercell_msa_ended( bool result ){
   // reset pipe
   _sim_supercell_msa_ostream_buffer.pipe( boost::process::pipe() );
   if( result ){
-    updateProgressBar(0,2,4);
+    updateProgressBar(0,50,100);
     ui->statusBar->showMessage(tr("Sucessfully ended calculating the electron diffraction patterns for supercell"), 2000);
   }
   else{
-    updateProgressBar(0,2,4, true);
+    updateProgressBar(0,50,100, true);
     ui->statusBar->showMessage(tr("Error while calculating the electron diffraction patterns for supercell") );
   }
 }
 
 void MainWindow::update_tdmap_wavimg_started( ){
-  updateProgressBar(0,2,4);
+  updateProgressBar(0,50,100);
   ui->statusBar->showMessage(tr("Started calculating image intensity distribuitions"), 2000);
 }
 
@@ -289,17 +320,17 @@ void MainWindow::update_tdmap_wavimg_ended( bool result ){
   // reset pipe
   _sim_tdmap_wavimg_ostream_buffer.pipe( boost::process::pipe() );
   if( result ){
-    updateProgressBar(0,3,4);
+    updateProgressBar(0,75,100);
     ui->statusBar->showMessage(tr("Sucessfully ended calculating the image intensity distribuitions"), 2000);
   }
   else{
-    updateProgressBar(0,3,4, true);
+    updateProgressBar(0,75,100, true);
     ui->statusBar->showMessage(tr("Error while calculating the image intensity distribuitions") );
   }
 }
 
 void MainWindow::update_supercell_wavimg_started( ){
-  updateProgressBar(0,2,4);
+  updateProgressBar(0,50,100);
   ui->statusBar->showMessage(tr("Started calculating image intensity distribuitions  for supercell"), 2000);
 }
 
@@ -307,11 +338,11 @@ void MainWindow::update_supercell_wavimg_ended( bool result ){
   // reset pipe
   _sim_supercell_wavimg_ostream_buffer.pipe( boost::process::pipe() );
   if( result ){
-    updateProgressBar(0,3,4);
+    updateProgressBar(0,75,100);
     ui->statusBar->showMessage(tr("Sucessfully ended calculating the image intensity distribuitions  for supercell"), 2000);
   }
   else{
-    updateProgressBar(0,3,4, true);
+    updateProgressBar(0,75,100, true);
     ui->statusBar->showMessage(tr("Error while calculating the image intensity distribuitions  for supercell") );
   }
 }
@@ -319,13 +350,13 @@ void MainWindow::update_supercell_wavimg_ended( bool result ){
 void MainWindow::update_tdmap_simgrid_started( ){
   // reset pipe
   _sim_tdmap_simgrid_ostream_buffer.pipe( boost::process::pipe() );
-  updateProgressBar(0,3,4);
+  updateProgressBar(0,75,100);
   ui->statusBar->showMessage(tr("Started image correlation step"), 2000);
 }
 
 void MainWindow::update_tdmap_simgrid_ended( bool result ){
   if( result ){
-    updateProgressBar(0,4,4);
+    updateProgressBar(0,100,100);
     ui->statusBar->showMessage(tr("Sucessfully ended image correlation step"), 2000);
     SuperCell* tdmap_roi_sim_super_cell = _core_td_map->get_tdmap_roi_sim_super_cell();
     ui->qgraphics_tdmap_selection->set_super_cell( tdmap_roi_sim_super_cell , false );
@@ -333,7 +364,7 @@ void MainWindow::update_tdmap_simgrid_ended( bool result ){
     ui->qgraphics_tdmap_selection->reload_data_from_super_cell();
   }
   else{
-    updateProgressBar(0,4,4, true);
+    updateProgressBar(0,100,100, true);
     // TO DO: clear ui->qgraphics_tdmap_selection
     ui->statusBar->showMessage(tr("Error while running image correlation step") );
   }
@@ -341,11 +372,11 @@ void MainWindow::update_tdmap_simgrid_ended( bool result ){
 
 void MainWindow::update_tdmap_no_simgrid_ended( bool result ){
   if( result ){
-    updateProgressBar(0,4,4);
+    updateProgressBar(0,100,100);
     ui->statusBar->showMessage(tr("Sucessfully ended creating TDMap without image correlation step"), 2000);
   }
   else{
-    updateProgressBar(0,4,4, true);
+    updateProgressBar(0,100,100, true);
     ui->statusBar->showMessage(tr("Error while creating TDMap without image correlation step") );
   }
 }
@@ -666,27 +697,27 @@ bool MainWindow::_reset_document_modified_flags(){
 
 void MainWindow::update_from_full_SuperCell_failure( ){
   ui->statusBar->showMessage(tr("Error while running Full-Super-Cell simulation") );
-  updateProgressBar(0,4,4);
+  updateProgressBar(0,100,100);
 }
 
 void MainWindow::update_from_full_SuperCell_intensity_cols_failure( ){
   ui->statusBar->showMessage(tr("Error while running Full-Super-Cell image segmentation") );
-  updateProgressBar(0,4,4);
+  updateProgressBar(0,100,100);
 }
 
 void MainWindow::update_from_full_SuperCell_sucess( ){
   ui->statusBar->showMessage(tr("Sucessfully runned Full-Super-Cell simulation"), 2000);
-  updateProgressBar(0,4,4);
+  updateProgressBar(0,100,100);
 }
 
 void MainWindow::update_from_full_SuperCell_intensity_cols_sucess( ){
   ui->statusBar->showMessage(tr("Sucessfully runned Full-Super-Cell image segmentation"), 2000);
-  updateProgressBar(0,4,4);
+  updateProgressBar(0,100,100);
 }
 
 void MainWindow::update_from_TDMap_sucess( ){
   ui->statusBar->showMessage(tr("Sucessfully runned TD-Map"), 2000);
-  updateProgressBar(0,4,4);
+  updateProgressBar(0,100,100);
   emit simulated_grid_changed( );
 }
 
@@ -3036,7 +3067,7 @@ void MainWindow::on_qpush_run_tdmap_clicked(){
   const bool project_ok = maybeSetProject();
   if ( project_ok ){
     bool status = false;
-    updateProgressBar(0,0,4);
+    updateProgressBar(0,0,100);
     ui->statusBar->showMessage(tr("Requesting a TD-Map worker thread."), 2000);
     clear_tdmap_sim_ostream_containers();
     sim_tdmap_worker->requestTDMap();

@@ -130,6 +130,11 @@ public:
     void update_from_TDMap_failure();
     bool _is_initialization_ok();
     void update_tdmap_celslc_started( );
+
+    void update_tdmap_celslc_started_with_steps_info( int n_steps );
+    void update_supercell_celslc_started_with_steps_info( int n_steps );
+    void update_supercell_celslc_ssc_single_slice_step( bool step_result );
+
     void update_supercell_celslc_started( );
     void update_tdmap_celslc_ended( bool result );
     void update_supercell_celslc_ended( bool result );
@@ -246,6 +251,10 @@ private:
     bool _flag_project_setted = false;
     Ui::MainWindow *ui;
     TDMap *_core_td_map;
+    int _core_td_map_info_celslc_n_steps = 1;
+    int _core_td_map_info_celslc_at_step = 0;
+    int _core_td_map_info_supercell_celslc_n_steps = 1;
+    int _core_td_map_info_supercell_celslc_at_step = 0;
 
     // tab 1
     TreeModel *project_setup_image_fields_model;

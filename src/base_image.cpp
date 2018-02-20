@@ -466,6 +466,8 @@ bool BaseImage::read_dat_file( boost::filesystem::path full_dat_path, bool norma
    }
    set_full_n_rows_height( n_rows );
    set_full_n_cols_width( n_cols );
+   _flag_full_image = true;
+   emit full_image_changed();
    result = true;
  }
  catch(const std::exception & e) {
@@ -774,6 +776,11 @@ std::ostream& BaseImage::output(std::ostream& stream) const {
   << "\t" << "ignore_edge_pixels : " <<  ignore_edge_pixels << "\n"
   << "\t\t" << "_flag_ignore_edge_pixels : " << std::boolalpha << _flag_ignore_edge_pixels << "\n"
   << "\t\t" << "_flag_auto_ignore_edge_pixels : " << std::boolalpha << _flag_auto_ignore_edge_pixels << "\n"
+  << "\t" << "mean_image_statistical : " <<  mean_image_statistical << "\n"
+  << "\t\t" << "_flag_mean_image_statistical : " << std::boolalpha << _flag_mean_image_statistical << "\n"
+  << "\t" << "stddev_image_statistical : " <<  stddev_image_statistical << "\n"
+  << "\t\t" << "_flag_stddev_image_statistical : " << std::boolalpha << _flag_stddev_image_statistical << "\n"
+
   << "\t\t #################### \n";
   return stream;
 }

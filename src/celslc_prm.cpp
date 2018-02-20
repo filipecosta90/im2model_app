@@ -400,6 +400,8 @@ bool CELSLC_prm::call_boost_bin( bool enable_ssc ){
           std::stringstream args_stream_ssc;
           create_bin_args( args_stream_ssc );
 
+          emit celslc_ssc_stage_started( nz_simulated_partitions );
+
           if( _flag_logger ){
             std::stringstream message;
             message << "Will start "<< nz_simulated_partitions << " distinct processes.";
@@ -443,7 +445,9 @@ bool CELSLC_prm::call_boost_bin( bool enable_ssc ){
               boost::process::child& c = it->second;
               if (!c.running()){
                 int exit_code = c.exit_code();
-                _exit_sucess_flag &= check_child_exit_code( _child_exit_code );
+                const bool current_sluce_status = check_child_exit_code( _child_exit_code );
+                emit celslc_ssc_single_slice_ended( current_sluce_status );
+                _exit_sucess_flag &= current_sluce_status; 
                 std::cout << "exit " << it->first << " exit code: " << exit_code << " _exit_sucess_flag "  << std::boolalpha << _exit_sucess_flag <<   std::endl;
                 it = ssc_queue.erase(it);
                 if( _flag_logger ){
@@ -458,7 +462,7 @@ bool CELSLC_prm::call_boost_bin( bool enable_ssc ){
             }
             std::this_thread::sleep_for(std::chrono::milliseconds(100));
           }
-
+          emit celslc_ssc_stage_ended( _exit_sucess_flag );
           if( _flag_logger ){
             std::stringstream message;
             message << "Final ssc _exit_sucess_flag value: " << std::boolalpha << _exit_sucess_flag;

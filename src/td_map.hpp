@@ -547,6 +547,9 @@ public:
     void update_super_cell_sim_image_intensity_columns_changed();
     void update_super_cell_exp_image_intensity_columns_changed();
     void update_super_cell_exp_image_centroid_translation_changed( cv::Point2i trans );
+    void update_super_cell_celslc_ssc_stage_started( int nsteps );
+    void update_super_celslc_ssc_single_slice_ended( bool result );
+    void update_super_cell_celslc_ssc_stage_ended( bool result );
 
     signals:
     void supercell_full_experimental_image_intensity_columns_changed();
@@ -564,8 +567,14 @@ public:
 
     void TDMap_started_celslc( );
     void TDMap_started_supercell_celslc( );
+
     void TDMap_inform_celslc_n_steps( int number_steps );
+    void TDMap_inform_supercell_celslc_n_steps( int number_steps );
+
     void TDMap_at_celslc_step( int step );
+    void TDMap_ended_celslc_ssc_single_slice_ended( bool slice_result );
+    void TDMap_ended_supercell_celslc_ssc_single_slice_ended( bool slice_result );
+
     void TDMap_ended_celslc( bool celslc_status );
     void TDMap_ended_supercell_celslc( bool celslc_status );
 

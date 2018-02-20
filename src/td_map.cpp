@@ -132,6 +132,10 @@ TDMap::TDMap(
   _supercell_celslc_parameters->set_sim_super_cell ( tdmap_full_sim_super_cell );
   _supercell_celslc_parameters->set_sim_image_properties ( supercell_sim_image_properties );
 
+  connect( _supercell_celslc_parameters, SIGNAL( celslc_ssc_stage_started( int )), this, SLOT(update_super_cell_celslc_ssc_stage_started( int ) ) );
+  connect( _supercell_celslc_parameters, SIGNAL( celslc_ssc_single_slice_ended( bool )), this, SLOT(update_super_celslc_ssc_single_slice_ended( bool ) ) );
+  connect( _supercell_celslc_parameters, SIGNAL( celslc_ssc_stage_ended( bool )), this, SLOT(update_super_cell_celslc_ssc_stage_ended( bool ) ) );
+
   // set pointers for SUPERCELL  msa
   _supercell_msa_parameters->set_unit_cell ( unit_cell );
   _supercell_msa_parameters->set_sim_crystal_properties ( supercell_sim_crystal_properties );
@@ -266,6 +270,19 @@ TDMap::TDMap( boost::process::ipstream& ostream_celslc_buffer,
   ApplicationLog::ApplicationLog* app_logger ) :
 TDMap::TDMap( ostream_celslc_buffer, ostream_msa_buffer, ostream_wavimg_buffer, ostream_simgrid_buffer, ostream_supercell_celslc_buffer, ostream_supercell_msa_buffer, ostream_supercell_wavimg_buffer  ) {
   set_application_logger( app_logger );
+}
+
+void TDMap::update_super_cell_celslc_ssc_stage_started( int nsteps ){
+  emit TDMap_started_supercell_celslc();
+  emit TDMap_inform_supercell_celslc_n_steps( nsteps );
+}
+
+void TDMap::update_super_celslc_ssc_single_slice_ended( bool result ){
+  emit TDMap_ended_supercell_celslc_ssc_single_slice_ended( result );
+}
+
+void TDMap::update_super_cell_celslc_ssc_stage_ended( bool result ){
+  emit TDMap_ended_supercell_celslc( result );
 }
 
 void TDMap::update_super_cell_sim_image_intensity_columns_changed(){
@@ -560,8 +577,8 @@ bool TDMap::run_tdmap_wavimg(){
 bool TDMap::run_tdmap_simgrid(){
   bool result = false;
   bool _simgrid_stage_ok = false;
-
   bool _clean_run_env = !_flag_runned_tdmap_simgrid_read || !_flag_runned_tdmap_simgrid_correlate;
+
   if( _flag_runned_tdmap_simgrid_read || _flag_runned_tdmap_simgrid_correlate ){
     _clean_run_env = _td_map_simgrid->clean_for_re_run();
     _flag_runned_tdmap_simgrid_read = !_clean_run_env;
@@ -654,10 +671,10 @@ bool TDMap::run_tdmap(){
     _celslc_stage_ok = _run_celslc_switch ? _flag_runned_tdmap_celslc : sim_crystal_properties->set_nz_simulated_partitions_from_prm();
 
     if( _flag_logger ){
-      std::stringstream message;
-      message << "Celslc step result: " << std::boolalpha << _celslc_stage_ok;
-      BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification , message.str() );
-    }
+        std::stringstream message;
+        message << "_celslc_stage_ok result: " << std::boolalpha << _celslc_stage_ok;
+        BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification , message.str() );
+      }
     //MSA
     if( _celslc_stage_ok ){
       if ( _run_msa_switch ){
@@ -668,7 +685,7 @@ bool TDMap::run_tdmap(){
 
       if( _flag_logger ){
         std::stringstream message;
-        message << "Run msa flag was false, the wav files should exist and we should update from them. result: " << std::boolalpha << _msa_stage_ok;
+        message << "_msa_stage_ok result: " << std::boolalpha << _msa_stage_ok;
         BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification , message.str() );
       }
     }
@@ -679,14 +696,13 @@ bool TDMap::run_tdmap(){
       if ( _run_wavimg_switch ){
         run_tdmap_wavimg();
       }
-      _simgrid_stage_ok = _flag_runned_tdmap_simgrid_read & _flag_runned_tdmap_simgrid_correlate;
 
       _wavimg_stage_ok = _run_wavimg_switch ? _flag_runned_tdmap_wavimg : _tdmap_wavimg_parameters->check_produced_dat();
       //if run wavimg flag is false, the dat files should exist and we should update from them
 
       if( _flag_logger ){
         std::stringstream message;
-        message << "Run wavimg flag is false, the dat files should exist and we should update from them. result: " << std::boolalpha << _wavimg_stage_ok;
+        message << "_wavimg_stage_ok result: " << std::boolalpha << _wavimg_stage_ok;
         BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification , message.str() );
       }
     }
@@ -695,8 +711,22 @@ bool TDMap::run_tdmap(){
     if( _celslc_stage_ok && _msa_stage_ok && _wavimg_stage_ok ){
       run_tdmap_simgrid();
     }
+      _simgrid_stage_ok = _flag_runned_tdmap_simgrid_read & _flag_runned_tdmap_simgrid_correlate;
+
+if( _flag_logger ){
+        std::stringstream message;
+        message << "_simgrid_stage_ok result: " << std::boolalpha << _simgrid_stage_ok;
+        BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification , message.str() );
+      }
 
     _simulation_status = _celslc_stage_ok & _msa_stage_ok & _wavimg_stage_ok & _simgrid_stage_ok;
+
+    if( _flag_logger ){
+        std::stringstream message;
+        message << "_simulation_status result: " << std::boolalpha << _simulation_status;
+        BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification , message.str() );
+      }
+
   }
   else{
     if( _flag_logger ){
@@ -2088,7 +2118,7 @@ bool TDMap::set_thickness_user_estimated_nm( std::string s_estimated ){
             const bool super_cell_result = unit_cell_update && cel_generation && xyz_export;
             std::cout << " super_cell_result " << std::boolalpha << super_cell_result << std::endl;
             if( super_cell_result ){
-              _flag_runned_supercell_celslc = _supercell_celslc_parameters->call_boost_bin( );
+              _flag_runned_supercell_celslc = _supercell_celslc_parameters->call_boost_bin( true );
               std::cout << " _flag_runned_supercell_celslc " << std::boolalpha << _flag_runned_supercell_celslc << std::endl;
             }
           }
@@ -2132,9 +2162,11 @@ bool TDMap::set_thickness_user_estimated_nm( std::string s_estimated ){
           if( _flag_runned_supercell_wavimg ){
             emit TDMap_started_supercell_read_simulated_image();
             _flag_read_simulated_supercell_image = sim_image_intensity_columns->read_simulated_image_from_dat_file();
+            
             if( _flag_read_simulated_supercell_image ){
               emit supercell_roi_simulated_image_changed();
             }
+
             emit TDMap_ended_supercell_read_simulated_image( _flag_read_simulated_supercell_image );
             std::cout << "read_simulated_image_from_dat_file: " << std::boolalpha << _flag_read_simulated_supercell_image << std::endl;
 
@@ -2303,12 +2335,12 @@ int TDMap::get_defocus_samples_top_limit(){
 }
 
 double TDMap::get_defocus_lower_bound_bottom_limit(){
-  double bot_standard = -100.0f;
+  double bot_standard = -300.0f;
   return bot_standard;
 }
 
 double TDMap::get_defocus_lower_bound_top_limit(){
-  double top_standard = 100.0f;
+  double top_standard = 300.0f;
   if( sim_crystal_properties->get_flag_defocus_upper_bound() ){
     double _current_upper_bound = sim_crystal_properties->get_defocus_upper_bound();
     top_standard = _current_upper_bound  < top_standard ? _current_upper_bound : top_standard;
@@ -2317,7 +2349,7 @@ double TDMap::get_defocus_lower_bound_top_limit(){
 }
 
 double TDMap::get_defocus_upper_bound_bottom_limit(){
-  double bot_standard = -100.0f;
+  double bot_standard = -300.0f;
   if( sim_crystal_properties->get_flag_defocus_lower_bound() ){
     double _current_lower_bound = sim_crystal_properties->get_defocus_lower_bound();
     bot_standard = _current_lower_bound  > bot_standard ? _current_lower_bound : bot_standard;
@@ -2326,7 +2358,7 @@ double TDMap::get_defocus_upper_bound_bottom_limit(){
 }
 
 double TDMap::get_defocus_upper_bound_top_limit(){
-  double top_standard = 100.0f;
+  double top_standard = 300.0f;
   return top_standard;
 }
 
