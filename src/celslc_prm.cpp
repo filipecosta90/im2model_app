@@ -417,7 +417,8 @@ bool CELSLC_prm::call_boost_bin( bool enable_ssc ){
               message << "going to run boost process with args: "<< ssc_stream.str();
               BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification , message.str() );
             }
-
+#if defined(BOOST_WINDOWS_API)
+            boost::process::environment env = ::boost::this_process::environment();
             ssc_queue[slice_id] = boost::process::child (
                 // command
               ssc_stream.str(),
@@ -426,7 +427,22 @@ bool CELSLC_prm::call_boost_bin( bool enable_ssc ){
                 // process group
               ssc_group ,
                 // error control
-              _error_code );
+              _error_code ,
+              // hide console on windows
+              env, ::boost::process::windows::hide
+              );
+#elif defined(BOOST_POSIX_API)
+            ssc_queue[slice_id] = boost::process::child (
+                // command
+              ssc_stream.str(),
+                // redirecting std_out
+              boost::process::std_out > boost::process::null,
+                // process group
+              ssc_group ,
+                // error control
+              _error_code 
+              );
+#endif
             if( _error_code ){
               if( _flag_logger ){
                 std::stringstream message;

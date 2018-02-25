@@ -7,6 +7,9 @@
 #include <boost/filesystem.hpp>
 #include <boost/filesystem/operations.hpp>                // for directory_iterator
 #include <boost/filesystem/path.hpp>                      // for path, operator==, oper...
+#if defined(BOOST_WINDOWS_API)
+#include <boost/process/windows.hpp> // for windows::hide that can only be used on Windows
+#endif
 /** END BOOST **/
 
 #include <opencv2/core/hal/interface.h>                   // for CV_8UC1

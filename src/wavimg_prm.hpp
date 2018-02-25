@@ -7,6 +7,9 @@
 #include <boost/filesystem/path.hpp>                      // for path, operator==, oper...
 #include <boost/iterator/iterator_facade.hpp>             // for iterator_facade_base
 #include <boost/thread.hpp>                               // for thread
+#if defined(BOOST_WINDOWS_API)
+#include <boost/process/windows.hpp> // for windows::hide that can only be used on Windows
+#endif
 /* END BOOST */
 
 #include <fstream>                             // for basic_ostream, operator<<

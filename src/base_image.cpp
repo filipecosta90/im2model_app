@@ -443,6 +443,8 @@ bool BaseImage::set_roi_rectangle( cv::Rect rect ){
   return result;
 }
 
+
+
 bool BaseImage::read_dat_file( boost::filesystem::path full_dat_path, bool normalize, int n_cols, int n_rows ){
 // The image dimension is equal to the number of data points (NX horizontally, NY vertically) with the physical data origin (0,0) in the lower left image corner.
   bool result = false;

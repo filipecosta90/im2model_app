@@ -216,16 +216,31 @@ bool MSA_prm::call_bin(){
       }
     }
     else{
-      boost::process::child c(
+#if defined(BOOST_WINDOWS_API)
+       boost::process::child c(
           // command
           args_stream.str(),
-          boost::process::start_dir= base_bin_start_dir_path,
+          boost::process::start_dir = base_bin_start_dir_path,
+          // redirecting std_out to null
+          boost::process::std_out > boost::process::null,
+          // redirecting std_err to null
+          //   boost::process::std_err > boost::process::null,
+          _error_code,
+              // hide console on windows
+              env, ::boost::process::windows::hide
+              );
+#elif defined(BOOST_POSIX_API)
+            boost::process::child c(
+          // command
+          args_stream.str(),
+          boost::process::start_dir = base_bin_start_dir_path,
           // redirecting std_out to null
           boost::process::std_out > boost::process::null,
           // redirecting std_err to null
           //   boost::process::std_err > boost::process::null,
           _error_code
           );
+#endif
       c.wait();
       _child_exit_code = c.exit_code();
       if( _flag_logger ){
