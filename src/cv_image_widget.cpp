@@ -76,9 +76,21 @@ void CVImageWidget::setImage( const cv::Mat& image, int layer_number, QString Im
   cv::Size original_size, current_size;
 
   switch (image.type()) {
+    case cv::DataType<int>::type:
+    case cv::DataType<unsigned int>::type:
+    {
+      cv::Mat temp;
+      image.convertTo(temp, cv::DataType<unsigned char>::type, 1.0f/65536.0f);
+      cvtColor(temp, _tmp_original, CV_GRAY2RGBA );
+      break;
+    }
+    case cv::DataType<char>::type:
     case cv::DataType<unsigned char>::type:
-    cvtColor(image, _tmp_original, CV_GRAY2RGBA);
-    break;
+    {
+      cvtColor(image, _tmp_original, CV_GRAY2RGBA);
+      break;
+    }
+    case cv::DataType<short>::type:
     case cv::DataType<unsigned short>::type:
     {
       cv::Mat temp;
@@ -252,7 +264,7 @@ void CVImageWidget::addRenderPoints( std::vector<cv::Point2i> points , int penWi
   for( int pos = 0; pos< points.size(); pos++ ){
     const cv::Vec3b penColor = penColors[pos];
     const QColor point_penColor = QColor(penColor[0], penColor[1], penColor[2] );
-    std::cout << "\taddRenderPoints point # " << pos << " " << penColor << " " << point_penColor.name().toStdString() << std::endl;
+    //std::cout << "\taddRenderPoints point # " << pos << " " << penColor << " " << point_penColor.name().toStdString() << std::endl;
 
     renderPoints_penColors.push_back(point_penColor);
     renderPoints_penSelection.push_back( false );
@@ -296,7 +308,7 @@ bool CVImageWidget::set_renderPoints_group_alpha_channels_map( QString group_key
    for( QString key : renderPoints_group ){
     result &= set_renderPoints_alpha_channels_map( key, value );
   }
-  std::cout << "set_renderPoints_group_alpha_channels_map ( " << value << " ) . group size: " << renderPoints_group.size() << " final result " << std::boolalpha << result << std::endl;
+  //std::cout << "set_renderPoints_group_alpha_channels_map ( " << value << " ) . group size: " << renderPoints_group.size() << " final result " << std::boolalpha << result << std::endl;
 }
 return result;
 }
@@ -456,7 +468,7 @@ void CVImageWidget::paintEvent(QPaintEvent* event) {
       int point_penWidth = renderPoints_penWidth[point_n];
       point_penWidth *= selected ? 2 : 1;
       const double dopacity = render_points_alpha_channel[point_n] / 255.0f;
-      std::cout << " point # " << point_n << " x: " << point_w_margin.x() << " y: " << point_w_margin.y() <<  " " << point_penColor.name().toStdString() << "\t point_penWidth " << point_penWidth << "\t dopacity "<<  dopacity << std::endl;
+      //std::cout << " point # " << point_n << " x: " << point_w_margin.x() << " y: " << point_w_margin.y() <<  " " << point_penColor.name().toStdString() << "\t point_penWidth " << point_penWidth << "\t dopacity "<<  dopacity << std::endl;
       painter.save();
       painter.setOpacity( dopacity ); 
       painter.setPen(QPen(QBrush( point_penColor ),point_penWidth,Qt::DashLine));

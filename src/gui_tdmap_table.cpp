@@ -171,7 +171,7 @@ void TDMap_Table::create_cells(){
 
   for (int row = 0; row < RowCount; ++row) {
     for (int col = 0; col < ColumnCount; ++col) {
-      CvImageCellWidget *cell_widget  = new CvImageCellWidget(  );
+      CvImageCellWidget *cell_widget  = new CvImageCellWidget( this );
       cell_widget->setMaximumSize( QSize(ColumnSize, RowSize) );
       cell_widget->set_container_size( ColumnSize, RowSize );
 
@@ -198,7 +198,7 @@ void TDMap_Table::update_cells(){
       for (int row = 0; row < RowCount; ++row) {
         std::vector<cv::Mat> simulated_image_row = simulated_image_grid.at(row);
         for (int col = 0; col < ColumnCount; ++col) {
-          CvImageCellWidget *cell_widget  = new CvImageCellWidget(  );
+          CvImageCellWidget *cell_widget  = new CvImageCellWidget( this );
           cell_widget->setMaximumSize( QSize(ColumnSize, RowSize) );
           cell_widget->set_container_size( ColumnSize, RowSize );
           cv::Mat full_image = simulated_image_row.at(col);
@@ -215,7 +215,7 @@ void TDMap_Table::update_cells(){
         }
       }
       setCurrentCell( best_match_pos.x,best_match_pos.y );
-      emit cellClicked( best_match_pos.x,best_match_pos.y );
+      emit cellClicked( best_match_pos.x, best_match_pos.y );
     }
     else{
       //only visualy update cells
@@ -242,7 +242,6 @@ TDMap_Cell* TDMap_Table::cell(int row, int column) const
 {
   return static_cast<TDMap_Cell*> (item(row, column));
 }
-
 
 /*
  * The currentLocation() function returns the current cell's location in the

@@ -242,7 +242,7 @@ void MainWindow::update_supercell_celslc_started_with_steps_info( int n_steps ){
 void MainWindow::update_supercell_celslc_ssc_single_slice_step( bool result ){
   std::stringstream message;
   _core_td_map_info_supercell_celslc_at_step++;
-  const int _core_td_map_info_supercell_celslc_step_to_percent = (int) ( ( (float) _core_td_map_info_supercell_celslc_n_steps ) / ( (float) _core_td_map_info_supercell_celslc_at_step ) * 25.0f );
+  const int _core_td_map_info_supercell_celslc_step_to_percent = (int) ( ( (float) _core_td_map_info_supercell_celslc_at_step  ) / ( (float) _core_td_map_info_supercell_celslc_n_steps ) * 25.0f );
   updateProgressBar(0,_core_td_map_info_supercell_celslc_step_to_percent,100);
   message << "Multislice process ended with result " << std::boolalpha << result << ".";
   ui->statusBar->showMessage(QString::fromStdString(message.str()), 5000);

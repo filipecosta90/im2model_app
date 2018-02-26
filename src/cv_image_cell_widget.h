@@ -34,8 +34,6 @@ class CvImageCellWidget : public QWidget
     toolsLayout->addLayout(contentsLayout);
   }
 
-
-
     void set_best(){
       _flag_best = true;
     }

@@ -96,7 +96,6 @@ private:
     std::map< QString,std::vector<int> > renderPoints_alpha_channel_map;
     std::map< QString,std::vector<QString> > renderPoints_group_keys_map;
 
-
     std::vector<int> alpha_channels;
     std::vector<QImage> images;
     std::vector<cv::Mat> _tmp_originals;
