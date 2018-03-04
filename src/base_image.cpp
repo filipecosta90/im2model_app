@@ -1,5 +1,9 @@
 #include "base_image.hpp"
 
+
+using namespace cv;
+using namespace std;
+
 BaseImage::BaseImage() {
 
   centroid_translation_px = cv::Point2i(0,0);
@@ -451,7 +455,7 @@ bool BaseImage::read_dat_file( boost::filesystem::path full_dat_path, bool norma
   try {
     boost::iostreams::mapped_file_source mmap( full_dat_path );
     float* p = (float*) mmap.data();
-    full_image = cv::Mat( n_rows , n_cols , CV_32FC1);
+    full_image = cv::Mat( n_rows , n_cols , CV_32FC1 );
     int pos = 0;
     float *pixel;
     for (int row = 0; row < n_rows; row++) {
@@ -461,41 +465,46 @@ bool BaseImage::read_dat_file( boost::filesystem::path full_dat_path, bool norma
       }
     }
     mmap.close();
+    cv::minMaxLoc(full_image, &full_image_min_intensity_detected, &full_image_max_intensity_detected);
+    _flag_full_image_min_intensity_detected = true;
+    _flag_full_image_max_intensity_detected = true;
+    std::cout << "min " << full_image_min_intensity_detected << " max " << full_image_max_intensity_detected << std::endl;
+
     if ( normalize ){
-     double min, max;
-     cv::minMaxLoc(full_image, &min, &max);
-     full_image.convertTo(full_image, cv::DataType<unsigned char>::type , 255.0f/(max - min), -min * 255.0f/(max - min));
-   }
-   set_full_n_rows_height( n_rows );
-   set_full_n_cols_width( n_cols );
-   _flag_full_image = true;
-   emit full_image_changed();
-   result = true;
- }
- catch(const std::exception & e) {
-  result = false;
+
+
+     //full_image.convertTo(full_image, cv::DataType<unsigned char>::type , 255.0f/(max - min), -min * 255.0f/(max - min));
+    }
+    set_full_n_rows_height( n_rows );
+    set_full_n_cols_width( n_cols );
+    _flag_full_image = true;
+    emit full_image_changed();
+    result = true;
+  }
+  catch(const std::exception & e) {
+    result = false;
+    if( _flag_logger ){
+      std::stringstream message;
+      message << "Caught std::exception: " << typeid(e).name() << " : " << e.what();; 
+      BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::error , message.str() );
+      print_var_state();
+
+    }
+  }
   if( _flag_logger ){
     std::stringstream message;
-    message << "Caught std::exception: " << typeid(e).name() << " : " << e.what();; 
-    BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::error , message.str() );
-    print_var_state();
+    message << " Finished mmap with result: " << std::boolalpha << result;
+    if( result ){
+      BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification , message.str() );
+      print_var_state();
+    }
+    else{
+      BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::error , message.str() );
+      print_var_state();
 
+    }
   }
-}
-if( _flag_logger ){
-  std::stringstream message;
-  message << " Finished mmap with result: " << std::boolalpha << result;
-  if( result ){
-    BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification , message.str() );
-    print_var_state();
-  }
-  else{
-    BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::error , message.str() );
-    print_var_state();
-
-  }
-}
-return result;
+  return result;
 }
 
 
@@ -504,6 +513,11 @@ bool BaseImage::set_full_image( cv::Mat image ){
   if( ! image.empty() ){
     // full_image is a deep copy of image. (has its own copy of the pixels)
     image.copyTo(full_image);
+    std::cout << "type: " << type2str(full_image.type()) << std::endl;
+    cv::minMaxLoc(full_image, &full_image_min_intensity_detected, &full_image_max_intensity_detected);
+    _flag_full_image_min_intensity_detected = true;
+    _flag_full_image_max_intensity_detected = true;
+    std::cout << "min " << full_image_min_intensity_detected << " max " << full_image_max_intensity_detected << std::endl;
     result  = true;
     const int calc_full_n_rows_height = full_image.rows;
     const int calc_full_n_cols_width = full_image.cols;
@@ -511,8 +525,59 @@ bool BaseImage::set_full_image( cv::Mat image ){
     set_full_n_cols_width( calc_full_n_cols_width );
     _flag_full_image = true;
     emit full_image_changed();
+    // debug
   }
   return result;
+}
+
+cv::Mat BaseImage::get_image_visualization( cv::Mat image ){
+
+  // Quantize the saturation to (full_image_max_intensity_detected - full_image_min_intensity_detected) levels
+  /// Establish the number of bins
+  int diff_levels = (int) (full_image_max_intensity_detected - full_image_min_intensity_detected);
+  const int n_pixels_high_percentage_brightest_pixels = (int)((double)high_percentage_brightest_pixels * image.total());
+  const int n_pixels_low_percentage_darkest_pixels = (int)((double)low_percentage_darkest_pixels * image.total());
+
+  const float _f_full_image_max_intensity_detected = (float) full_image_max_intensity_detected;
+  const float _f_full_image_min_intensity_detected = (float) full_image_min_intensity_detected;
+
+  //Hold the histogram
+  MatND full_image_hist;
+
+  int hsize[] = { diff_levels }; // just one dimension
+  float range[] = { _f_full_image_min_intensity_detected, _f_full_image_max_intensity_detected };
+  const float *ranges[] = { range };
+  int chnls[] = {0};
+
+  // create colors channels
+  vector<Mat> colors;
+  split(image, colors);
+
+  // compute for all colors
+  calcHist(&colors[0], 1, chnls, Mat(), full_image_hist,1,hsize,ranges);
+
+  high_percentage_brightest_pixels_intensity_level = full_image_min_intensity_detected;
+  low_percentage_darkest_pixel_intensity_level = full_image_min_intensity_detected;
+
+  /// Draw for each channel
+  int accum_pixel_count = 0;
+  for( int i = 0; i < diff_levels; i++ )
+  {
+    accum_pixel_count+=full_image_hist.at<float>(i);
+    if (accum_pixel_count < n_pixels_low_percentage_darkest_pixels){
+      low_percentage_darkest_pixel_intensity_level++;
+    }
+    if (accum_pixel_count < n_pixels_high_percentage_brightest_pixels){
+      high_percentage_brightest_pixels_intensity_level++;
+    }
+  }
+  std::cout << "type: " << type2str(full_image_hist.type()) << std::endl;
+  std::cout << " low_percentage_darkest_pixel_intensity_level " <<  low_percentage_darkest_pixel_intensity_level << std::endl;
+  std::cout << " high_percentage_brightest_pixels_intensity_level " <<  high_percentage_brightest_pixels_intensity_level << std::endl;
+
+  Mat  draw;
+  image.convertTo(draw,  CV_8U,  255.0/(high_percentage_brightest_pixels_intensity_level  -  low_percentage_darkest_pixel_intensity_level),  -low_percentage_darkest_pixel_intensity_level);
+  return draw;
 }
 
 void BaseImage::update_roi_image_from_full_image_and_roi_rectangle(){
@@ -539,7 +604,7 @@ bool BaseImage::set_full_image( std::string image_path, bool normalize ){
     }
     else{
       try{
-        const cv::Mat full_image = cv::imread( image_path, CV_LOAD_IMAGE_GRAYSCALE );
+        const cv::Mat full_image = cv::imread( image_path, CV_LOAD_IMAGE_ANYDEPTH );
         result = set_full_image( full_image );
       }
       catch( cv::Exception& e ){

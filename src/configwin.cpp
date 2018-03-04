@@ -541,7 +541,7 @@ void MainWindow::update_super_cell_target_region_shapes(){
 
 void MainWindow::update_full_experimental_image(){
   if( _core_td_map->get_exp_image_properties_flag_full_image() ){
-    const cv::Mat full_image = _core_td_map->get_exp_image_properties_full_image();
+    const cv::Mat full_image = _core_td_map->get_exp_image_properties_full_image_visualization();
     // update tab 1
     ui->qgraphics_full_experimental_image->setImage( full_image );
     ui->qgraphics_full_experimental_image->enableRectangleSelection();
@@ -559,7 +559,7 @@ void MainWindow::update_full_experimental_image(){
 
 void MainWindow::update_roi_experimental_image_frame(){
   if( _core_td_map->get_exp_image_properties_flag_roi_image() ){
-    cv::Mat roi_image = _core_td_map->get_exp_image_properties_roi_image();
+    cv::Mat roi_image = _core_td_map->get_exp_image_properties_roi_image_visualization();
     ui->qgraphics_roi_experimental_image_tab1->setImage( roi_image );
     ui->qgraphics_roi_experimental_image_tab2->setImage( roi_image );
     ui->qgraphics_roi_experimental_image_tab1->show();

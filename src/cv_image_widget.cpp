@@ -76,6 +76,13 @@ void CVImageWidget::setImage( const cv::Mat& image, int layer_number, QString Im
   cv::Size original_size, current_size;
 
   switch (image.type()) {
+    case cv::DataType<float>::type:
+    {
+      cv::Mat temp;
+      image.convertTo(temp, cv::DataType<unsigned char>::type);
+      cvtColor(temp, _tmp_original, CV_GRAY2RGBA );
+      break;
+    }
     case cv::DataType<int>::type:
     case cv::DataType<unsigned int>::type:
     {

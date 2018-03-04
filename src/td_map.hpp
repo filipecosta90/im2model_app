@@ -481,7 +481,9 @@ public:
     int get_unit_cell_display_expand_factor_b();
     int get_unit_cell_display_expand_factor_c();
     cv::Mat get_exp_image_properties_full_image();
+    cv::Mat get_exp_image_properties_full_image_visualization();
     cv::Mat get_exp_image_properties_roi_image();
+    cv::Mat get_exp_image_properties_roi_image_visualization();
     cv::Rect get_exp_image_properties_roi_rectangle();
     double get_exp_image_properties_full_ny_size_height_nm();
     double get_exp_image_properties_full_nx_size_width_nm();

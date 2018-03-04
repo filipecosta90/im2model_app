@@ -25,6 +25,7 @@ class CvImageCellWidget : public QWidget
     scrollArea->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     scrollArea->setSizeAdjustPolicy(QAbstractScrollArea::AdjustToContents);
     toolsLayout = new QBoxLayout(QBoxLayout::TopToBottom,this);
+    
     //set margins to zero so the toolbar touches the widget's edges
     toolsLayout->setContentsMargins(0, 0, 0, 0);
 

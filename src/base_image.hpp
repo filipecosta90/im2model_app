@@ -41,6 +41,9 @@
 #include <opencv2/core/operations.hpp>                    // for RNG::RNG
 #include <opencv2/core/types.hpp>                         // for Rect, Point3d
 #include <opencv2/imgcodecs.hpp>                          // for imread
+#include "opencv2/highgui/highgui.hpp"
+#include "opencv2/imgproc/imgproc.hpp"
+ 
 
 #include "application_log.hpp"
 #include "emd_wrapper.h"
@@ -66,7 +69,19 @@ protected:
     // FULL IMAGE
     std::string image_extension;
     cv::Mat full_image;
+    //cv::Mat full_image_hist;
     bool _flag_full_image = false;
+    int  high_percentage_brightest_pixels_intensity_level = -1;
+    double  high_percentage_brightest_pixels = 0.99f;
+
+    double full_image_min_intensity_detected = 0.0f;
+    bool _flag_full_image_min_intensity_detected = false;
+
+    double  low_percentage_darkest_pixels = 0.01f;
+    int  low_percentage_darkest_pixel_intensity_level = -1;
+
+    double full_image_max_intensity_detected = 0.0f;
+    bool _flag_full_image_max_intensity_detected = false;
 
     int full_n_rows_height = 0;
     bool _flag_full_n_rows_height = false;
@@ -164,6 +179,8 @@ public:
     // var getters
     std::string get_image_extension(){ return image_extension; }
     cv::Mat get_full_image(){ return full_image.clone(); }
+    cv::Mat get_image_visualization( cv::Mat );
+    cv::Mat get_full_image_visualization(){ return get_image_visualization( full_image ); }
     int get_full_n_rows_height(){ return full_n_rows_height; }
     double get_full_n_rows_height_nm(){ return full_nm_size_rows_b; }
     int get_full_n_cols_width(){ return full_n_cols_width; }
@@ -171,6 +188,7 @@ public:
     double get_sampling_rate_x_nm_per_pixel(){ return sampling_rate_x_nm_per_pixel; }
     double get_sampling_rate_y_nm_per_pixel(){ return sampling_rate_y_nm_per_pixel; }
     cv::Mat get_roi_image(){ return roi_image.clone(); }
+    cv::Mat get_roi_image_visualization(){ return get_image_visualization( roi_image ); }
     cv::Rect get_roi_rectangle(){ return roi_rectangle; }
     int get_roi_n_rows_height(){ return roi_n_rows_height; }
     double get_roi_n_rows_height_nm(){ return roi_nm_size_rows_b; }

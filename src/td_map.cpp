@@ -2450,8 +2450,16 @@ cv::Mat TDMap::get_exp_image_properties_full_image(){
   return exp_image_properties->get_full_image();
 }
 
+cv::Mat TDMap::get_exp_image_properties_full_image_visualization(){
+  return exp_image_properties->get_full_image_visualization();
+}
+
 cv::Mat TDMap::get_exp_image_properties_roi_image(){
   return exp_image_properties->get_roi_image();
+}
+
+cv::Mat TDMap::get_exp_image_properties_roi_image_visualization(){
+  return exp_image_properties->get_roi_image_visualization();
 }
 
 cv::Rect TDMap::get_exp_image_properties_roi_rectangle(){
