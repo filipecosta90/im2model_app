@@ -67,52 +67,6 @@ if( _flag_exp_image_properties ){
 return result;
 }
 
-std::string IntensityColumns::GetMatType(const cv::Mat& mat)
-{
-  const int mtype = mat.type();
-
-  switch (mtype)
-  {
-    case CV_8UC1:  return "CV_8UC1";
-    case CV_8UC2:  return "CV_8UC2";
-    case CV_8UC3:  return "CV_8UC3";
-    case CV_8UC4:  return "CV_8UC4";
-
-    case CV_8SC1:  return "CV_8SC1";
-    case CV_8SC2:  return "CV_8SC2";
-    case CV_8SC3:  return "CV_8SC3";
-    case CV_8SC4:  return "CV_8SC4";
-
-    case CV_16UC1: return "CV_16UC1";
-    case CV_16UC2: return "CV_16UC2";
-    case CV_16UC3: return "CV_16UC3";
-    case CV_16UC4: return "CV_16UC4";
-
-    case CV_16SC1: return "CV_16SC1";
-    case CV_16SC2: return "CV_16SC2";
-    case CV_16SC3: return "CV_16SC3";
-    case CV_16SC4: return "CV_16SC4";
-
-    case CV_32SC1: return "CV_32SC1";
-    case CV_32SC2: return "CV_32SC2";
-    case CV_32SC3: return "CV_32SC3";
-    case CV_32SC4: return "CV_32SC4";
-
-    case CV_32FC1: return "CV_32FC1";
-    case CV_32FC2: return "CV_32FC2";
-    case CV_32FC3: return "CV_32FC3";
-    case CV_32FC4: return "CV_32FC4";
-
-    case CV_64FC1: return "CV_64FC1";
-    case CV_64FC2: return "CV_64FC2";
-    case CV_64FC3: return "CV_64FC3";
-    case CV_64FC4: return "CV_64FC4";
-
-    default:
-    return "Invalid type of matrix!";
-  }
-}
-
 bool IntensityColumns::segmentate_sim_image()
 {
   //-- Step 1.1: Detect the keypoints for simulated image
@@ -135,30 +89,26 @@ bool IntensityColumns::segmentate_sim_image()
       imgResult = sharp - imgLaplacian;
 
       // convert back to 8bits gray scale
-      imgResult.convertTo( imgResult, CV_8UC1 );
+      imgResult.convertTo( imgResult, CV_8UC1  );
 
       cv::threshold( imgResult, imgResult, threshold_value, 255, CV_THRESH_BINARY ); //| CV_THRESH_OTSU );
       imwrite( "imgResult.png", imgResult );
       distanceTransform(imgResult, sim_image_dist_transform, CV_DIST_L2, 3);
-      std::cout << " sim_image_dist_transform: " << GetMatType(sim_image_dist_transform) << std::endl;
+      std::cout << " sim_image_dist_transform: " << BaseImage::type2str(sim_image_dist_transform.type()) << std::endl;
 
       sim_image_dist_transform.convertTo( markerMask, CV_8UC1 );
-      std::cout << " sim_image_dist_transform after convert: " << GetMatType(sim_image_dist_transform) << std::endl;
+      std::cout << " sim_image_dist_transform after convert: " << BaseImage::type2str(sim_image_dist_transform.type()) << std::endl;
 
       C = imgResult.clone();
       bitwise_not(markerMask,markerMask);
-      std::cout << " markerMask: " << GetMatType(markerMask) << std::endl;
+      std::cout << " markerMask: " << BaseImage::type2str(markerMask.type()) << std::endl;
       imwrite( "bitwise_not_imgResult.png", C );
-
 
       distanceTransform(markerMask, dist_8u, CV_DIST_L2, 3);
       cv::normalize(dist_8u, dist_8u, 0, 1, NORM_MINMAX);
 
-
-      std::cout << " dist_8u: " << GetMatType(dist_8u) << std::endl;
-      std::cout << " markerMask: " << GetMatType(markerMask) << std::endl;
-
-
+      std::cout << " dist_8u: " << BaseImage::type2str(dist_8u.type()) << std::endl;
+      std::cout << " markerMask: " << BaseImage::type2str(markerMask.type()) << std::endl;
 
       Mat1b mask_borders = ((dist_8u > 0));
       if( sim_image_intensity_columns.size() > 0 ){
@@ -183,8 +133,8 @@ bool IntensityColumns::segmentate_sim_image()
       // Perform the watershed algorithm
       // CV_8U OR CV_16U  
       cv::Mat src_converted = dist_8u;
-      std::cout << " src mat type: " << GetMatType(src_converted) << std::endl;
-      std::cout << " sim_image_dist_transform mat type: " << GetMatType(sim_image_dist_transform) << std::endl;
+      std::cout << " src mat type: " << BaseImage::type2str(src_converted.type()) << std::endl;
+      std::cout << " sim_image_dist_transform mat type: " << BaseImage::type2str(sim_image_dist_transform.type()) << std::endl;
 
       if( src_converted.type() != (((0) & ((1 << 3) - 1)) + (((3)-1) << 3)) ){
         std::cout << "not correct type " << std::endl;
@@ -248,10 +198,6 @@ bool IntensityColumns::segmentate_sim_image()
       _flag_sim_image_intensity_columns_projective_2D_coordinate = true;
       _flag_sim_image_intensity_columns_marked_delete = true;
       _flag_sim_image_intensity_columns_center = true;
-
-
-      //emit sim_image_intensity_columns_changed();
-      //emit sim_image_intensity_keypoints_changed();
     }
     else {
       result = false;
@@ -294,6 +240,9 @@ bool IntensityColumns::feature_match(){
 
       const int result_cols =  src_sim.cols - src_exp.cols + 1;
       const int result_rows = src_sim.rows - src_exp.rows + 1;
+
+      std::cout << " src_exp " << BaseImage::type2str( src_exp.type() ) << std::endl;
+      std::cout << " src_sim " << BaseImage::type2str( src_sim.type() ) << std::endl;
 
       cv::Mat result_mat( result_rows, result_cols, cv::DataType<unsigned char>::type );
       const int delta_center_cols = result_cols / 2;
@@ -472,7 +421,7 @@ bool IntensityColumns::map_sim_intensity_cols_to_exp_image(){
           const double sum_dstImageSim_roi = cv::sum(dstImageSim_minimal_roi)[0];
 
           std::cout << "keypoint "<< i << " sum_dstImageExp " << sum_dstImageExp << "\t sum_dstImageSim " << sum_dstImageSim << std::endl;
-          std::cout << " \t\tExpImage type " << GetMatType(dstImageExp) << " ExpImage type " << GetMatType(dstImageSim) <<  std::endl;
+          std::cout << " \t\tExpImage type " << BaseImage::type2str(dstImageExp.type()) << " ExpImage type " << BaseImage::type2str(dstImageSim.type()) <<  std::endl;
 
           cv::Scalar mean_statistical_ImageExp;
           cv::Scalar stddev_statistical_ImageExp;

@@ -144,7 +144,6 @@ private:
     bool _flag_exp_image_delta_factor_constant = false;
 
     bool auto_calculate_threshold_value();
-    std::string GetMatType(const cv::Mat& mat);
 
 public:
 
