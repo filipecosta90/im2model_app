@@ -49,7 +49,7 @@ class WAVIMG_prm : public BaseBin {
     std::string file_name_output_image_wave_function;
     // line 8
     // ! Flag and parameters for creating integer images with optional noise. Flag <intflg> 0 = off (default), 1 = 32-bit, 2 = 16-bit, Parameter: <mean> = mean vacuum intensity, <conv> = electron to counts conversion rate, <rnoise> detector readout noise level.
-    int image_data_type = 0;
+    int image_data_type = 1;
     double image_vacuum_mean_intensity = 0.0f;
     double conversion_rate = 0.0f;
     double readout_noise_rms_amplitude = 0.0f;

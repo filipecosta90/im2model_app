@@ -458,7 +458,7 @@ void MainWindow::update_tdmap_current_selection(int x,int y){
     std::cout << "full_image_height_nm" << full_image_height_nm << std::endl;
     Qt3DCore::QTransform* transform = new Qt3DCore::QTransform( );
     transform->setRotation(QQuaternion::fromAxisAndAngle(1,0,0,90));
-    ui->qgraphics_tdmap_selection->update_image_layer( _simulated_image , full_image_width_nm ,  full_image_height_nm , transform, "Simulated image layer");
+    //ui->qgraphics_tdmap_selection->update_image_layer( _simulated_image , full_image_width_nm ,  full_image_height_nm , transform, "Simulated image layer");
 
   }
 }
@@ -505,7 +505,7 @@ void MainWindow::update_super_cell_target_region(){
 
 void MainWindow::update_super_cell_target_region_image(){
   if( _core_td_map->get_exp_image_bounds_flag_roi_boundary_image() ){
-    const cv::Mat super_cell_target_region_image = _core_td_map->get_exp_image_bounds_roi_boundary_image();
+    const cv::Mat super_cell_target_region_image = _core_td_map->get_exp_image_bounds_roi_boundary_image_visualization();
     const int full_boundary_polygon_margin_x_px = _core_td_map->get_exp_image_bounds_full_boundary_polygon_margin_x_px();
     const int full_boundary_polygon_margin_y_px = _core_td_map->get_exp_image_bounds_full_boundary_polygon_margin_y_px();
     const cv::Point2i centroid_translation_px = _core_td_map->get_super_cell_exp_image_properties_centroid_translation_px();
@@ -654,7 +654,7 @@ void MainWindow::update_super_cell_simulated_image_intensity_columns(){
 
 void MainWindow::update_super_cell_simulated_image_roi_image(){
   if( _core_td_map->get_flag_super_cell_sim_image_properties_roi_image() ){
-    const cv::Mat roi_image = _core_td_map->get_super_cell_sim_image_properties_roi_image();
+    const cv::Mat roi_image = _core_td_map->get_super_cell_sim_image_properties_roi_image_visualization();
     // update tab 4
     ui->qgraphics_super_cell_refinement->setImage( roi_image, 0, "ROI super-cell simulated image"  );
     ui->qgraphics_super_cell_refinement->show();
@@ -663,7 +663,7 @@ void MainWindow::update_super_cell_simulated_image_roi_image(){
 
 void MainWindow::update_super_cell_simulated_image_full_image(){
   if( _core_td_map->get_flag_super_cell_sim_image_properties_full_image() ){
-    const cv::Mat full_image = _core_td_map->get_super_cell_sim_image_properties_full_image();
+    const cv::Mat full_image = _core_td_map->get_super_cell_sim_image_properties_full_image_visualization();
     // update tab 4
     ui->qgraphics_super_cell_refinement->setImage( full_image, 0, "Full super-cell simulated image"  );
     ui->qgraphics_super_cell_refinement->show();

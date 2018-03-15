@@ -2507,6 +2507,14 @@ cv::Mat TDMap::get_super_cell_sim_image_properties_full_image(){
   return supercell_sim_image_properties->get_full_image();
 }
 
+cv::Mat TDMap::get_super_cell_sim_image_properties_roi_image_visualization(){
+  return supercell_sim_image_properties->get_roi_image_visualization();
+}
+
+cv::Mat TDMap::get_super_cell_sim_image_properties_full_image_visualization(){
+  return supercell_sim_image_properties->get_full_image_visualization();
+}
+
 int TDMap::get_super_cell_sim_image_properties_ignore_edge_pixels(){
   return supercell_sim_image_properties->get_ignore_edge_pixels();
 }
@@ -2716,7 +2724,7 @@ std::vector<cv::Point2i> TDMap::get_exp_image_bounds_full_boundary_polygon_w_mar
 // the next 2 vectors are position-related to the ROI of the experimental image
 std::vector<cv::Point2i> TDMap::get_exp_image_bounds_roi_boundary_polygon(){ return exp_image_bounds->get_roi_boundary_polygon(); }
 cv::Rect TDMap::get_exp_image_bounds_roi_boundary_rect(){ return exp_image_bounds->get_roi_boundary_rect(); }
-cv::Mat TDMap::get_exp_image_bounds_roi_boundary_image(){ return exp_image_bounds->get_roi_boundary_image(); }
+cv::Mat TDMap::get_exp_image_bounds_roi_boundary_image_visualization(){ return exp_image_bounds->get_roi_boundary_image_visualization(); }
 std::vector<cv::Point2i> TDMap::get_exp_image_bounds_roi_boundary_polygon_w_margin(){ return exp_image_bounds->get_roi_boundary_polygon_w_margin(); }
 cv::Rect TDMap::get_exp_image_bounds_roi_boundary_rect_w_margin(){ return exp_image_bounds->get_roi_boundary_rect_w_margin(); }
 cv::Mat TDMap::get_exp_image_bounds_roi_boundary_image_w_margin(){ return exp_image_bounds->get_roi_boundary_image_w_margin(); }

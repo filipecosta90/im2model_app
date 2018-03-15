@@ -259,6 +259,10 @@ public:
     double get_super_cell_dimensions_c();
     cv::Mat get_super_cell_sim_image_properties_roi_image();
     cv::Mat get_super_cell_sim_image_properties_full_image();
+
+    cv::Mat get_super_cell_sim_image_properties_roi_image_visualization();
+    cv::Mat get_super_cell_sim_image_properties_full_image_visualization();
+
     int get_super_cell_sim_image_properties_ignore_edge_pixels();
     std::vector<cv::KeyPoint> get_super_cell_sim_image_properties_keypoints();
     std::vector<cv::KeyPoint> get_super_cell_exp_image_properties_keypoints();
@@ -467,7 +471,7 @@ public:
     // the next 2 vectors are position-related to the ROI of the experimental image
     std::vector<cv::Point2i> get_exp_image_bounds_roi_boundary_polygon();
     cv::Rect get_exp_image_bounds_roi_boundary_rect();
-    cv::Mat get_exp_image_bounds_roi_boundary_image();
+    cv::Mat get_exp_image_bounds_roi_boundary_image_visualization();
     std::vector<cv::Point2i> get_exp_image_bounds_roi_boundary_polygon_w_margin();
     cv::Rect get_exp_image_bounds_roi_boundary_rect_w_margin();
     cv::Mat get_exp_image_bounds_roi_boundary_image_w_margin();

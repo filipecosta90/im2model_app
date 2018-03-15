@@ -1,6 +1,5 @@
 #include "base_image.hpp"
 
-
 using namespace cv;
 using namespace std;
 
@@ -10,7 +9,7 @@ BaseImage::BaseImage() {
   // full n rows
   connect(this, SIGNAL(full_n_rows_height_changed()), this, SLOT(calculate_full_b_size_from_n_rows_and_sampling_rate()), Qt::DirectConnection );
   connect(this, SIGNAL(full_n_rows_height_changed()), this, SLOT(calculate_roi_n_rows_from_full_n_rows_and_ignored_edge()), Qt::DirectConnection);
-  
+
   // roi n rows
   connect(this, SIGNAL(roi_n_rows_height_changed()), this, SLOT(calculate_roi_b_size_from_n_rows_and_sampling_rate()), Qt::DirectConnection);
   connect(this, SIGNAL(roi_n_rows_height_changed()), this, SLOT(calculate_roi_rectangle_and_roi_image()), Qt::DirectConnection);
@@ -19,14 +18,14 @@ BaseImage::BaseImage() {
   // full n cols
   connect(this, SIGNAL(full_n_cols_width_changed()), this, SLOT(calculate_full_a_size_from_n_cols_and_sampling_rate()), Qt::DirectConnection);
   connect(this, SIGNAL(full_n_cols_width_changed()), this, SLOT(calculate_roi_n_cols_from_full_n_cols_and_ignored_edge()), Qt::DirectConnection);
-  
+
   // roi n cols
   connect(this, SIGNAL(roi_n_cols_width_changed()), this, SLOT(calculate_roi_a_size_from_n_cols_and_sampling_rate()), Qt::DirectConnection);
   connect(this, SIGNAL(roi_n_cols_width_changed()), this, SLOT(calculate_roi_rectangle_and_roi_image()), Qt::DirectConnection);
   connect(this, SIGNAL(roi_n_cols_width_changed()) , this, SLOT(update_flag_roi_rectangle()), Qt::DirectConnection);
 
 
-// sampling_rate_x_nm_per_pixel
+  // sampling_rate_x_nm_per_pixel
   connect(this, SIGNAL(sampling_rate_x_nm_per_pixel_changed()), this, SLOT( calculate_full_n_rows_from_b_size_and_sampling_rate() ), Qt::DirectConnection);
   connect(this, SIGNAL(sampling_rate_x_nm_per_pixel_changed()), this, SLOT( calculate_roi_n_rows_from_b_size_and_sampling_rate() ), Qt::DirectConnection);
   connect(this, SIGNAL(sampling_rate_x_nm_per_pixel_changed()), this, SLOT( calculate_roi_b_size_from_n_rows_and_sampling_rate() ), Qt::DirectConnection);
@@ -34,7 +33,7 @@ BaseImage::BaseImage() {
   connect(this, SIGNAL(sampling_rate_x_nm_per_pixel_changed()), this, SLOT( calculate_ignore_edge_pixels() ), Qt::DirectConnection);
 
 
-// sampling_rate_y_nm_per_pixel
+  // sampling_rate_y_nm_per_pixel
   connect(this, SIGNAL(sampling_rate_y_nm_per_pixel_changed()), this, SLOT( calculate_full_n_cols_from_a_size_and_sampling_rate() ), Qt::DirectConnection);
   connect(this, SIGNAL(sampling_rate_y_nm_per_pixel_changed()), this, SLOT( calculate_roi_n_cols_from_a_size_and_sampling_rate() ), Qt::DirectConnection);
   connect(this, SIGNAL(sampling_rate_y_nm_per_pixel_changed()), this, SLOT( calculate_roi_a_size_from_n_cols_and_sampling_rate() ), Qt::DirectConnection);
@@ -65,26 +64,26 @@ BaseImage::BaseImage() {
   connect(this, SIGNAL(ignore_edge_pixels_changed()), this, SLOT(calculate_roi_n_rows_from_full_n_rows_and_ignored_edge()), Qt::DirectConnection);
   connect(this, SIGNAL(ignore_edge_pixels_changed()), this, SLOT(calculate_roi_n_cols_from_full_n_cols_and_ignored_edge()), Qt::DirectConnection);
 
-    // ignore_edge_nm
+  // ignore_edge_nm
   connect(this, SIGNAL(ignore_edge_nm_changed()), this, SLOT( calculate_ignore_edge_pixels() ), Qt::DirectConnection);
 
   // flag_auto_roi_from_ignored_edge
   connect(this, SIGNAL(flag_auto_roi_from_ignored_edge_changed()), this, SLOT(calculate_roi_n_cols_from_full_n_cols_and_ignored_edge()), Qt::DirectConnection);
   connect(this, SIGNAL(flag_auto_roi_from_ignored_edge_changed()), this, SLOT(calculate_roi_n_rows_from_full_n_rows_and_ignored_edge()), Qt::DirectConnection);
 
-// _flag_auto_n_rows
+  // _flag_auto_n_rows
   connect(this, SIGNAL(flag_auto_n_rows_changed()), this, SLOT(calculate_full_n_rows_from_b_size_and_sampling_rate()), Qt::DirectConnection);
   connect(this, SIGNAL(flag_auto_n_rows_changed()), this, SLOT(calculate_roi_n_rows_from_b_size_and_sampling_rate()), Qt::DirectConnection);
 
-// _flag_auto_n_cols
+  // _flag_auto_n_cols
   connect(this, SIGNAL( flag_auto_n_cols_changed()), this, SLOT(calculate_full_n_cols_from_a_size_and_sampling_rate()), Qt::DirectConnection);
   connect(this, SIGNAL( flag_auto_n_cols_changed()), this, SLOT(calculate_roi_n_cols_from_a_size_and_sampling_rate()), Qt::DirectConnection);
 
-        // _flag_auto_b_size
+  // _flag_auto_b_size
   connect(this, SIGNAL( flag_auto_b_size_changed()), this, SLOT(calculate_full_b_size_from_n_rows_and_sampling_rate()), Qt::DirectConnection);
   connect(this, SIGNAL( flag_auto_b_size_changed()), this, SLOT(calculate_roi_b_size_from_n_rows_and_sampling_rate()), Qt::DirectConnection);
 
-// _flag_auto_a_size
+  // _flag_auto_a_size
   connect(this, SIGNAL( flag_auto_a_size_changed()), this, SLOT(calculate_full_a_size_from_n_cols_and_sampling_rate()), Qt::DirectConnection);
   connect(this, SIGNAL( flag_auto_a_size_changed()), this, SLOT(calculate_roi_a_size_from_n_cols_and_sampling_rate()), Qt::DirectConnection);
 
@@ -132,9 +131,9 @@ void BaseImage::calculate_roi_n_rows_from_full_n_rows_and_ignored_edge(){
 
 void BaseImage::calculate_full_n_rows_from_b_size_and_sampling_rate(){
   if( _flag_auto_n_rows && _flag_full_nm_size_rows_b && _flag_sampling_rate_x_nm_per_pixel ){
-   const int full_n_rows_height = (int) ( full_nm_size_rows_b / sampling_rate_x_nm_per_pixel );
-   set_full_n_rows_height( full_n_rows_height );
- }
+    const int full_n_rows_height = (int) ( full_nm_size_rows_b / sampling_rate_x_nm_per_pixel );
+    set_full_n_rows_height( full_n_rows_height );
+  }
 }
 
 void BaseImage::calculate_roi_n_rows_from_b_size_and_sampling_rate(){
@@ -207,53 +206,53 @@ bool BaseImage::set_flag_auto_n_cols( bool value ){
 }
 
 bool BaseImage::set_flag_auto_a_size( bool value ){
- bool result = false;
- if( value != _flag_auto_a_size ){
-  _flag_auto_a_size = value;
-  emit flag_auto_a_size_changed();
-  result = true;
-}
-return result;
+  bool result = false;
+  if( value != _flag_auto_a_size ){
+    _flag_auto_a_size = value;
+    emit flag_auto_a_size_changed();
+    result = true;
+  }
+  return result;
 }
 
 bool BaseImage::set_flag_auto_b_size( bool value ){
- bool result = false;
- if( value != _flag_auto_b_size ){
-  _flag_auto_b_size = value;
-  emit flag_auto_b_size_changed();
-  result = true;
-}
-return result;
+  bool result = false;
+  if( value != _flag_auto_b_size ){
+    _flag_auto_b_size = value;
+    emit flag_auto_b_size_changed();
+    result = true;
+  }
+  return result;
 }
 
 bool BaseImage::set_flag_auto_roi_from_ignored_edge( bool value ){
- bool result = false;
- if( value != _flag_auto_roi_from_ignored_edge ){
-  _flag_auto_roi_from_ignored_edge = value;
-  emit flag_auto_roi_from_ignored_edge_changed();
-  result = true;
-}
-return result;
+  bool result = false;
+  if( value != _flag_auto_roi_from_ignored_edge ){
+    _flag_auto_roi_from_ignored_edge = value;
+    emit flag_auto_roi_from_ignored_edge_changed();
+    result = true;
+  }
+  return result;
 }
 
 bool BaseImage::set_flag_auto_ignore_edge_pixels( bool value ){
- bool result = false;
- if( value != _flag_auto_ignore_edge_pixels ){
-  _flag_auto_ignore_edge_pixels = value;
-  emit flag_auto_ignore_edge_pixels_changed();
-  result = true;
-}
-return result;
+  bool result = false;
+  if( value != _flag_auto_ignore_edge_pixels ){
+    _flag_auto_ignore_edge_pixels = value;
+    emit flag_auto_ignore_edge_pixels_changed();
+    result = true;
+  }
+  return result;
 }
 
 bool BaseImage::set_flag_auto_ignore_edge_nm( bool value ){
- bool result = false;
- if( value != _flag_auto_ignore_edge_nm ){
-  _flag_auto_ignore_edge_nm = value;
-  emit flag_auto_ignore_edge_nm_changed();
-  result = true;
-}
-return result;
+  bool result = false;
+  if( value != _flag_auto_ignore_edge_nm ){
+    _flag_auto_ignore_edge_nm = value;
+    emit flag_auto_ignore_edge_nm_changed();
+    result = true;
+  }
+  return result;
 }
 
 bool BaseImage::set_full_n_rows_height(  int n_rows ){
@@ -286,25 +285,25 @@ void BaseImage::update_flag_roi_rectangle(){
 }
 
 bool BaseImage::set_full_n_cols_width( int width ){
- bool result = false;
- if( width != full_n_cols_width || ( _flag_full_n_cols_width == false ) ){
-  full_n_cols_width = width;
-  _flag_full_n_cols_width = true;
-  result = true;
-  emit full_n_cols_width_changed();
-}
-return result;
+  bool result = false;
+  if( width != full_n_cols_width || ( _flag_full_n_cols_width == false ) ){
+    full_n_cols_width = width;
+    _flag_full_n_cols_width = true;
+    result = true;
+    emit full_n_cols_width_changed();
+  }
+  return result;
 }
 
 bool BaseImage::set_roi_n_cols_width( int width ){
- bool result = false;
- if( width != roi_n_cols_width || ( _flag_roi_n_cols_width == false ) ){
-  roi_n_cols_width = width;
-  _flag_roi_n_cols_width = true;
-  result = true;
-  emit roi_n_cols_width_changed();
-}
-return result;
+  bool result = false;
+  if( width != roi_n_cols_width || ( _flag_roi_n_cols_width == false ) ){
+    roi_n_cols_width = width;
+    _flag_roi_n_cols_width = true;
+    result = true;
+    emit roi_n_cols_width_changed();
+  }
+  return result;
 }
 
 bool BaseImage::set_sampling_rate_x_nm_per_pixel( double rate_nm ){
@@ -450,14 +449,13 @@ bool BaseImage::set_roi_rectangle( cv::Rect rect ){
 
 
 bool BaseImage::read_dat_file( boost::filesystem::path full_dat_path, bool normalize, int n_cols, int n_rows ){
-// The image dimension is equal to the number of data points (NX horizontally, NY vertically) with the physical data origin (0,0) in the lower left image corner.
+  // The image dimension is equal to the number of data points (NX horizontally, NY vertically) with the physical data origin (0,0) in the lower left image corner.
   bool result = false;
   try {
     boost::iostreams::mapped_file_source mmap( full_dat_path );
     float* p = (float*) mmap.data();
     full_image = cv::Mat( n_rows , n_cols , CV_32FC1 );
     int pos = 0;
-    float *pixel;
     for (int row = 0; row < n_rows; row++) {
       for (int col = 0; col < n_cols; col++) {
         full_image.at<float>(n_rows - 1 - row, col) = (float) p[pos] ;
@@ -469,11 +467,10 @@ bool BaseImage::read_dat_file( boost::filesystem::path full_dat_path, bool norma
     _flag_full_image_min_intensity_detected = true;
     _flag_full_image_max_intensity_detected = true;
     std::cout << "min " << full_image_min_intensity_detected << " max " << full_image_max_intensity_detected << std::endl;
-
     if ( normalize ){
 
 
-     //full_image.convertTo(full_image, cv::DataType<unsigned char>::type , 255.0f/(max - min), -min * 255.0f/(max - min));
+      //full_image.convertTo(full_image, cv::DataType<unsigned char>::type , 255.0f/(max - min), -min * 255.0f/(max - min));
     }
     set_full_n_rows_height( n_rows );
     set_full_n_cols_width( n_cols );
@@ -531,15 +528,17 @@ bool BaseImage::set_full_image( cv::Mat image ){
 }
 
 cv::Mat BaseImage::get_image_visualization( cv::Mat image ){
+  double image_min_intensity_detected, image_max_intensity_detected;
+  cv::minMaxLoc(image, &image_min_intensity_detected, &image_max_intensity_detected);
 
   // Quantize the saturation to (full_image_max_intensity_detected - full_image_min_intensity_detected) levels
   /// Establish the number of bins
-  int diff_levels = (int) (full_image_max_intensity_detected - full_image_min_intensity_detected);
+  int diff_levels = (int) (image_max_intensity_detected - image_min_intensity_detected);
   const int n_pixels_high_percentage_brightest_pixels = (int)((double)high_percentage_brightest_pixels * image.total());
   const int n_pixels_low_percentage_darkest_pixels = (int)((double)low_percentage_darkest_pixels * image.total());
 
-  const float _f_full_image_max_intensity_detected = (float) full_image_max_intensity_detected;
-  const float _f_full_image_min_intensity_detected = (float) full_image_min_intensity_detected;
+  const float _f_full_image_max_intensity_detected = (float) image_max_intensity_detected;
+  const float _f_full_image_min_intensity_detected = (float) image_min_intensity_detected;
 
   //Hold the histogram
   MatND full_image_hist;
@@ -556,8 +555,8 @@ cv::Mat BaseImage::get_image_visualization( cv::Mat image ){
   // compute for all colors
   calcHist(&colors[0], 1, chnls, Mat(), full_image_hist,1,hsize,ranges);
 
-  high_percentage_brightest_pixels_intensity_level = full_image_min_intensity_detected;
-  low_percentage_darkest_pixel_intensity_level = full_image_min_intensity_detected;
+  high_percentage_brightest_pixels_intensity_level = image_min_intensity_detected;
+  low_percentage_darkest_pixel_intensity_level = image_min_intensity_detected;
 
   /// Draw for each channel
   int accum_pixel_count = 0;
@@ -578,7 +577,7 @@ cv::Mat BaseImage::get_image_visualization( cv::Mat image ){
   cv::Mat  draw;
   image.copyTo( draw );
 
-//Mat thresh = m > th;
+  //Mat thresh = m > th;
 
   draw.setTo(low_percentage_darkest_pixel_intensity_level, draw < low_percentage_darkest_pixel_intensity_level);
   draw.setTo(high_percentage_brightest_pixels_intensity_level, draw > high_percentage_brightest_pixels_intensity_level);
@@ -645,31 +644,31 @@ bool BaseImage::set_full_image( std::string image_path, bool normalize ){
 
 void BaseImage::calculate_roi_rectangle_and_roi_image(){
   if( _flag_roi_center_x &&
-    _flag_roi_center_y &&
-    _flag_roi_n_rows_height &&
-    _flag_roi_n_cols_width ) {
+      _flag_roi_center_y &&
+      _flag_roi_n_rows_height &&
+      _flag_roi_n_cols_width ) {
 
     const int top_left_x = roi_center_x - ( roi_n_cols_width  / 2 );
-  const int top_left_y = roi_center_y - ( roi_n_rows_height / 2 );
+    const int top_left_y = roi_center_y - ( roi_n_rows_height / 2 );
 
-  if( top_left_x >= 0 && top_left_y >= 0 ){
+    if( top_left_x >= 0 && top_left_y >= 0 ){
 
-   roi_rectangle.x = top_left_x;
-   roi_rectangle.y = top_left_y;
-   roi_rectangle.width = roi_n_cols_width;
-   roi_rectangle.height = roi_n_rows_height;
-   _flag_roi_rectangle = true;
-   emit roi_rectangle_changed();
+      roi_rectangle.x = top_left_x;
+      roi_rectangle.y = top_left_y;
+      roi_rectangle.width = roi_n_cols_width;
+      roi_rectangle.height = roi_n_rows_height;
+      _flag_roi_rectangle = true;
+      emit roi_rectangle_changed();
 
- }
- else{
-   if( _flag_logger ){
-    std::stringstream message;
-    message << "ERROR: top_left_x " << top_left_x << " top_left_y " << top_left_y;
-    BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::error , message.str() );
+    }
+    else{
+      if( _flag_logger ){
+        std::stringstream message;
+        message << "ERROR: top_left_x " << top_left_x << " top_left_y " << top_left_y;
+        BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::error , message.str() );
+      }
+    }
   }
-}
-}
 }
 
 bool BaseImage::set_roi_rectangle_statistical( cv::Rect boundary_rect ){
@@ -799,7 +798,7 @@ void BaseImage::print_var_state(){
 }
 
 std::ostream& operator<<(std::ostream& stream,
-  const BaseImage& var) {
+    const BaseImage& var) {
   var.output(stream);
   return stream;
 }
@@ -807,60 +806,60 @@ std::ostream& operator<<(std::ostream& stream,
 std::ostream& BaseImage::output(std::ostream& stream) const {
 
   stream << "\t\t #################### \n" 
-  << "BaseImage vars:\n"
-  << "\t\t" << "_flag_auto_n_rows : " << std::boolalpha << _flag_auto_n_rows << "\n"
-  << "\t\t" << "_flag_auto_n_cols : " << std::boolalpha << _flag_auto_n_cols << "\n"
-  << "\t\t" << "_flag_auto_a_size : " << std::boolalpha << _flag_auto_a_size << "\n"
-  << "\t\t" << "_flag_auto_b_size : " << std::boolalpha << _flag_auto_b_size << "\n"
-  << "\t\t" << "_flag_auto_roi_from_ignored_edge : " << std::boolalpha << _flag_auto_roi_from_ignored_edge << "\n"
+    << "BaseImage vars:\n"
+    << "\t\t" << "_flag_auto_n_rows : " << std::boolalpha << _flag_auto_n_rows << "\n"
+    << "\t\t" << "_flag_auto_n_cols : " << std::boolalpha << _flag_auto_n_cols << "\n"
+    << "\t\t" << "_flag_auto_a_size : " << std::boolalpha << _flag_auto_a_size << "\n"
+    << "\t\t" << "_flag_auto_b_size : " << std::boolalpha << _flag_auto_b_size << "\n"
+    << "\t\t" << "_flag_auto_roi_from_ignored_edge : " << std::boolalpha << _flag_auto_roi_from_ignored_edge << "\n"
     // FULL IMAGE
-  << "\t\t" << "_flag_full_image : " <<  std::boolalpha << _flag_full_image << "\n"
-  << "\t" << "full_n_rows_height : " <<  full_n_rows_height << "\n"
-  << "\t\t" << "_flag_full_n_rows_height : " << std::boolalpha << _flag_full_n_rows_height << "\n"
-  << "\t" << "full_n_cols_width : " <<  full_n_cols_width << "\n"
-  << "\t\t" << "_flag_full_n_cols_width : " << std::boolalpha << _flag_full_n_cols_width << "\n"
+    << "\t\t" << "_flag_full_image : " <<  std::boolalpha << _flag_full_image << "\n"
+    << "\t" << "full_n_rows_height : " <<  full_n_rows_height << "\n"
+    << "\t\t" << "_flag_full_n_rows_height : " << std::boolalpha << _flag_full_n_rows_height << "\n"
+    << "\t" << "full_n_cols_width : " <<  full_n_cols_width << "\n"
+    << "\t\t" << "_flag_full_n_cols_width : " << std::boolalpha << _flag_full_n_cols_width << "\n"
     // sampling rate and dimensioning
-  << "\t" << "sampling_rate_x_nm_per_pixel : " << sampling_rate_x_nm_per_pixel << "\n"
-  << "\t\t" << "_flag_sampling_rate_x_nm_per_pixel : " << std::boolalpha <<  _flag_sampling_rate_x_nm_per_pixel << "\n"
-  << "\t" << "sampling_rate_y_nm_per_pixel : " << sampling_rate_y_nm_per_pixel << "\n"
-  << "\t\t" << "_flag_sampling_rate_y_nm_per_pixel : " << std::boolalpha <<  _flag_sampling_rate_y_nm_per_pixel << "\n"
-  << "\t\t" << "_flag_sampling_rate : " << std::boolalpha <<  _flag_sampling_rate << "\n"
+    << "\t" << "sampling_rate_x_nm_per_pixel : " << sampling_rate_x_nm_per_pixel << "\n"
+    << "\t\t" << "_flag_sampling_rate_x_nm_per_pixel : " << std::boolalpha <<  _flag_sampling_rate_x_nm_per_pixel << "\n"
+    << "\t" << "sampling_rate_y_nm_per_pixel : " << sampling_rate_y_nm_per_pixel << "\n"
+    << "\t\t" << "_flag_sampling_rate_y_nm_per_pixel : " << std::boolalpha <<  _flag_sampling_rate_y_nm_per_pixel << "\n"
+    << "\t\t" << "_flag_sampling_rate : " << std::boolalpha <<  _flag_sampling_rate << "\n"
     // [nm dimensions]
-  << "\t" << "full_nm_size_rows_b : " << full_nm_size_rows_b << "\n"
-  << "\t\t" << "_flag_full_nm_size_rows_b : " << std::boolalpha <<  _flag_full_nm_size_rows_b << "\n"
-  << "\t" << "full_nm_size_cols_a : " << full_nm_size_cols_a << "\n"
-  << "\t\t" << "_flag_full_nm_size_cols_a : " << std::boolalpha <<  _flag_full_nm_size_cols_a << "\n"
+    << "\t" << "full_nm_size_rows_b : " << full_nm_size_rows_b << "\n"
+    << "\t\t" << "_flag_full_nm_size_rows_b : " << std::boolalpha <<  _flag_full_nm_size_rows_b << "\n"
+    << "\t" << "full_nm_size_cols_a : " << full_nm_size_cols_a << "\n"
+    << "\t\t" << "_flag_full_nm_size_cols_a : " << std::boolalpha <<  _flag_full_nm_size_cols_a << "\n"
     // ROI FRAME
-  << "\t\t" << "_flag_roi_image : " << std::boolalpha << _flag_roi_image << "\n"
-  << "\t" << "roi_rectangle : " <<  roi_rectangle << "\n"
-  << "\t\t" << "_flag_roi_rectangle : " << std::boolalpha << _flag_roi_rectangle << "\n"
-  << "\t" << "roi_n_rows_height : " <<  roi_n_rows_height << "\n"
-  << "\t\t" << "_flag_roi_n_rows_height : " << std::boolalpha << _flag_roi_n_rows_height << "\n"
-  << "\t" << "roi_n_cols_width : " <<  roi_n_cols_width << "\n"
-  << "\t\t" << "_flag_roi_n_cols_width : " << std::boolalpha << _flag_roi_n_cols_width << "\n"
+    << "\t\t" << "_flag_roi_image : " << std::boolalpha << _flag_roi_image << "\n"
+    << "\t" << "roi_rectangle : " <<  roi_rectangle << "\n"
+    << "\t\t" << "_flag_roi_rectangle : " << std::boolalpha << _flag_roi_rectangle << "\n"
+    << "\t" << "roi_n_rows_height : " <<  roi_n_rows_height << "\n"
+    << "\t\t" << "_flag_roi_n_rows_height : " << std::boolalpha << _flag_roi_n_rows_height << "\n"
+    << "\t" << "roi_n_cols_width : " <<  roi_n_cols_width << "\n"
+    << "\t\t" << "_flag_roi_n_cols_width : " << std::boolalpha << _flag_roi_n_cols_width << "\n"
     // ROI [nm dimensions]
-  << "\t" << "roi_nm_size_rows_b : " << roi_nm_size_rows_b << "\n"
-  << "\t\t" << "_flag_roi_nm_size_rows_b : " << std::boolalpha <<  _flag_roi_nm_size_rows_b << "\n"
-  << "\t" << "roi_nm_size_cols_a : " << roi_nm_size_cols_a << "\n"
-  << "\t\t" << "_flag_roi_nm_size_cols_a : " << std::boolalpha <<  _flag_roi_nm_size_cols_a << "\n"
-  << "\t" << "roi_center_x : " <<  roi_center_x << "\n"
-  << "\t\t" << "_flag_roi_center_x : " << std::boolalpha << _flag_roi_center_x << "\n"
-  << "\t" << "roi_center_y : " <<  roi_center_y << "\n"
-  << "\t\t" << "_flag_roi_center_y : " << std::boolalpha << _flag_roi_center_y << "\n"
-  << "\t" << "centroid_translation_px : " <<  centroid_translation_px << "\n"
-  << "\t\t" << "_flag_centroid_translation_px : " << std::boolalpha << _flag_centroid_translation_px << "\n"
+    << "\t" << "roi_nm_size_rows_b : " << roi_nm_size_rows_b << "\n"
+    << "\t\t" << "_flag_roi_nm_size_rows_b : " << std::boolalpha <<  _flag_roi_nm_size_rows_b << "\n"
+    << "\t" << "roi_nm_size_cols_a : " << roi_nm_size_cols_a << "\n"
+    << "\t\t" << "_flag_roi_nm_size_cols_a : " << std::boolalpha <<  _flag_roi_nm_size_cols_a << "\n"
+    << "\t" << "roi_center_x : " <<  roi_center_x << "\n"
+    << "\t\t" << "_flag_roi_center_x : " << std::boolalpha << _flag_roi_center_x << "\n"
+    << "\t" << "roi_center_y : " <<  roi_center_y << "\n"
+    << "\t\t" << "_flag_roi_center_y : " << std::boolalpha << _flag_roi_center_y << "\n"
+    << "\t" << "centroid_translation_px : " <<  centroid_translation_px << "\n"
+    << "\t\t" << "_flag_centroid_translation_px : " << std::boolalpha << _flag_centroid_translation_px << "\n"
     // rectangle without the ignored edge pixels of the full image
-  << "\t" << "ignore_edge_nm : " <<  ignore_edge_nm << "\n"
-  << "\t\t" << "_flag_ignore_edge_nm : " << std::boolalpha << _flag_ignore_edge_nm << "\n"
-  << "\t\t" << "_flag_auto_ignore_edge_nm : " << std::boolalpha << _flag_auto_ignore_edge_nm << "\n"
-  << "\t" << "ignore_edge_pixels : " <<  ignore_edge_pixels << "\n"
-  << "\t\t" << "_flag_ignore_edge_pixels : " << std::boolalpha << _flag_ignore_edge_pixels << "\n"
-  << "\t\t" << "_flag_auto_ignore_edge_pixels : " << std::boolalpha << _flag_auto_ignore_edge_pixels << "\n"
-  << "\t" << "mean_image_statistical : " <<  mean_image_statistical << "\n"
-  << "\t\t" << "_flag_mean_image_statistical : " << std::boolalpha << _flag_mean_image_statistical << "\n"
-  << "\t" << "stddev_image_statistical : " <<  stddev_image_statistical << "\n"
-  << "\t\t" << "_flag_stddev_image_statistical : " << std::boolalpha << _flag_stddev_image_statistical << "\n"
+    << "\t" << "ignore_edge_nm : " <<  ignore_edge_nm << "\n"
+    << "\t\t" << "_flag_ignore_edge_nm : " << std::boolalpha << _flag_ignore_edge_nm << "\n"
+    << "\t\t" << "_flag_auto_ignore_edge_nm : " << std::boolalpha << _flag_auto_ignore_edge_nm << "\n"
+    << "\t" << "ignore_edge_pixels : " <<  ignore_edge_pixels << "\n"
+    << "\t\t" << "_flag_ignore_edge_pixels : " << std::boolalpha << _flag_ignore_edge_pixels << "\n"
+    << "\t\t" << "_flag_auto_ignore_edge_pixels : " << std::boolalpha << _flag_auto_ignore_edge_pixels << "\n"
+    << "\t" << "mean_image_statistical : " <<  mean_image_statistical << "\n"
+    << "\t\t" << "_flag_mean_image_statistical : " << std::boolalpha << _flag_mean_image_statistical << "\n"
+    << "\t" << "stddev_image_statistical : " <<  stddev_image_statistical << "\n"
+    << "\t\t" << "_flag_stddev_image_statistical : " << std::boolalpha << _flag_stddev_image_statistical << "\n"
 
-  << "\t\t #################### \n";
+    << "\t\t #################### \n";
   return stream;
 }

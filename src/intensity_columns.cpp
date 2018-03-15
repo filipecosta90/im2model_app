@@ -51,7 +51,7 @@ bool IntensityColumns::auto_calculate_threshold_value( ){
     result = true;
   }
 }
-if( _flag_exp_image_properties ){
+/*if( _flag_exp_image_properties ){
   if( 
     _flag_stddev_threshold_factor &&
     exp_image_properties->get_flag_stddev_image_statistical() &&
@@ -63,7 +63,7 @@ if( _flag_exp_image_properties ){
   _flag_threshold_value = true;
   result = true;
 }
-}
+}*/
 return result;
 }
 
@@ -71,10 +71,8 @@ bool IntensityColumns::segmentate_sim_image()
 {
   //-- Step 1.1: Detect the keypoints for simulated image
   bool result = false;
-  auto_calculate_threshold_value();
   if( _flag_sim_image_properties ){
-    if(  _flag_threshold_value && sim_image_properties->get_flag_roi_image()
-      )
+    if( sim_image_properties->get_flag_roi_image() )
     {
       const cv::Mat src = sim_image_properties->get_roi_image();
 
@@ -85,13 +83,20 @@ bool IntensityColumns::segmentate_sim_image()
       cv::Mat C, dist_8u, imgGray, markerMask ;
 
       filter2D( src, imgLaplacian, CV_32F, kernel );
-      src.convertTo( sharp, CV_32F );
-      imgResult = sharp - imgLaplacian;
+      imgResult = src - imgLaplacian;
 
       // convert back to 8bits gray scale
-      imgResult.convertTo( imgResult, CV_8UC1  );
+      imgResult = sim_image_properties->get_image_visualization( imgResult ); 
 
-      cv::threshold( imgResult, imgResult, threshold_value, 255, CV_THRESH_BINARY ); //| CV_THRESH_OTSU );
+      cv::Scalar mean_image_statistical;
+      cv::Scalar stddev_image_statistical;
+
+      cv::meanStdDev( imgResult, mean_image_statistical, stddev_image_statistical, cv::Mat() );
+      threshold_value = mean_image_statistical[0];// + (int)( ( (double) stddev_image_statistical[0] ) * stddev_threshold_factor );
+
+      //imgResult.convertTo( imgResult, CV_8UC1  );
+
+      cv::threshold( imgResult, imgResult, threshold_value, 255, CV_THRESH_BINARY | CV_THRESH_OTSU );
       imwrite( "imgResult.png", imgResult );
       distanceTransform(imgResult, sim_image_dist_transform, CV_DIST_L2, 3);
       std::cout << " sim_image_dist_transform: " << BaseImage::type2str(sim_image_dist_transform.type()) << std::endl;
@@ -147,8 +152,6 @@ bool IntensityColumns::segmentate_sim_image()
         sim_image_intensity_columns_masks.clear();
         //vector<T>().swap(sim_image_intensity_columns_masks);
       }
-
-
 
       for (int seed = 1; seed <= sim_image_intensity_columns.size(); ++seed)
       {
@@ -222,7 +225,6 @@ bool IntensityColumns::segmentate_sim_image()
 
 bool IntensityColumns::feature_match(){
   bool result = false;
-  auto_calculate_threshold_value();
   if( _flag_exp_image_properties ){
     if(  
       sim_image_properties->get_flag_roi_image() && 
@@ -302,7 +304,6 @@ return result;
 
 bool IntensityColumns::map_sim_intensity_cols_to_exp_image(){
   bool result = false;
-  auto_calculate_threshold_value();
   if( _flag_exp_image_properties ){
     if(  
       sim_image_properties->get_flag_roi_image( ) && 

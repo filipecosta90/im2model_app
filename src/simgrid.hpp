@@ -103,7 +103,7 @@ class SimGrid {
     // // // // //
     bool sim_grid_switch = false;
     bool runned_simulation = false;
-    int normalization_mode = InmageNormalizationMode::LOCAL_NORMALIZATION;
+    int normalization_mode = InmageNormalizationMode::GLOBAL_NORMALIZATION;
 
     /* Loggers */
     ApplicationLog::ApplicationLog* logger = nullptr;

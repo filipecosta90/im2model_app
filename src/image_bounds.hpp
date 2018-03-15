@@ -162,6 +162,7 @@ class ImageBounds {
     std::vector<cv::Point2i> get_roi_boundary_polygon(){ return roi_boundary_polygon; }
     cv::Rect get_roi_boundary_rect(){ return roi_boundary_rect; }
     cv::Mat get_roi_boundary_image(){ return roi_boundary_image; }
+    cv::Mat get_roi_boundary_image_visualization(){ return base_image->get_image_visualization( roi_boundary_image ); }
     std::vector<cv::Point2i> get_roi_boundary_polygon_w_margin(){ return roi_boundary_polygon_w_margin; }
     std::vector<cv::Point2d> get_roi_boundary_polygon_w_margin_nm(){ return roi_boundary_polygon_w_margin_nm; }
     cv::Rect get_roi_boundary_rect_w_margin(){ return roi_boundary_rect_w_margin; }
