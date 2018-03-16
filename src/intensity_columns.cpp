@@ -96,7 +96,7 @@ bool IntensityColumns::segmentate_sim_image()
 
       //imgResult.convertTo( imgResult, CV_8UC1  );
 
-      cv::threshold( imgResult, imgResult, threshold_value, 255, CV_THRESH_BINARY | CV_THRESH_OTSU );
+      cv::threshold( imgResult, imgResult, threshold_value, 255, CV_THRESH_BINARY ); //| CV_THRESH_OTSU );
       imwrite( "imgResult.png", imgResult );
       distanceTransform(imgResult, sim_image_dist_transform, CV_DIST_L2, 3);
       std::cout << " sim_image_dist_transform: " << BaseImage::type2str(sim_image_dist_transform.type()) << std::endl;

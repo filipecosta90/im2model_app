@@ -595,274 +595,303 @@ bool SimGrid::simulate_from_grid(){
 
           if ( roi_image.depth() != cleaned_simulated_image.depth() ){
                           std::cout << " converting " << std::endl; //..size() " << roi_image.size() << " _templ.depth " << roi_image.depth() << " _templ.type " << BaseImage::type2str( roi_image.type() )<< std::endl;
-              roi_image.convertTo(roi_image_convert, cleaned_simulated_image.type() , 1.0/255.0, 0.0f );
-              std::cout << " corrected _templ..size() " << roi_image.size() << " _templ.depth " << roi_image.depth() << " _templ.type " << BaseImage::type2str( roi_image.type() )<< std::endl;
-            }
-            else{
-              roi_image_convert = roi_image;
-            }
+                          roi_image.convertTo(roi_image_convert, cleaned_simulated_image.type() , 1.0/255.0, 0.0f );
+                          std::cout << " corrected _templ..size() " << roi_image.size() << " _templ.depth " << roi_image.depth() << " _templ.type " << BaseImage::type2str( roi_image.type() )<< std::endl;
+                        }
+                        else{
+                          roi_image_convert = roi_image;
+                        }
 
             /// Create the result matrix
-            int result_cols =  roi_n_cols_width - cleaned_simulated_image.cols + 1;
-            int result_rows = roi_n_rows_height - cleaned_simulated_image.rows + 1;
+                        int result_cols =  roi_n_cols_width - cleaned_simulated_image.cols + 1;
+                        int result_rows = roi_n_rows_height - cleaned_simulated_image.rows + 1;
 
-            cv::Mat result( result_rows, result_cols, roi_image_convert.type() );
-            
-            std::cout << " result.size() " << result.size() << " type " << BaseImage::type2str( result.type() )<< std::endl;
+                        cv::Mat result( result_rows, result_cols, roi_image_convert.type() );
+
+                        std::cout << " result.size() " << result.size() << " type " << BaseImage::type2str( result.type() )<< std::endl;
 
             //: normalized correlation, non-normalized correlation and sum-absolute-difference
-            cv::matchTemplate( roi_image_convert , cleaned_simulated_image, result, _sim_correlation_method  );
-            cv::minMaxLoc( result, &minVal, &maxVal, &minLoc, &maxLoc, cv::Mat() );
-            matchVal = maxVal;
+                        cv::matchTemplate( roi_image_convert , cleaned_simulated_image, result, _sim_correlation_method  );
+                        cv::minMaxLoc( result, &minVal, &maxVal, &minLoc, &maxLoc, cv::Mat() );
+                        matchVal = maxVal;
 
-            match_factor = matchVal * 100.0;
+                        match_factor = matchVal * 100.0;
             //slice_defocus_match_points.push_back (cv::Point3d ( slice_match, defocus_match, match_factor ));
-            match_values_matrix.at<float>( thickness, defocus ) =  match_factor ;
-            simulated_matches.push_back(match_factor);
+                        match_values_matrix.at<float>( thickness, defocus ) =  match_factor ;
+                        simulated_matches.push_back(match_factor);
 
-          } catch ( const std::exception& e ){
-            _error_flag = true;
-            if( _flag_logger ){
-              std::stringstream message;
-              message << "A standard exception was caught, while running _td_map_simgrid->simulate_from_grid(): \"" << e.what() <<  "\" while processing image: row,col[<<" << thickness <<" , " << defocus <<  " ]"  ;
-              ApplicationLog::severity_level _log_type = ApplicationLog::error;
-              BOOST_LOG_FUNCTION();  logger->logEvent( _log_type , message.str() );
+                      } catch ( const std::exception& e ){
+                        _error_flag = true;
+                        if( _flag_logger ){
+                          std::stringstream message;
+                          message << "A standard exception was caught, while running _td_map_simgrid->simulate_from_grid(): \"" << e.what() <<  "\" while processing image: row,col[<<" << thickness <<" , " << defocus <<  " ]"  ;
+                          ApplicationLog::severity_level _log_type = ApplicationLog::error;
+                          BOOST_LOG_FUNCTION();  logger->logEvent( _log_type , message.str() );
+                        }
+                      }
+                    }
+                  }
+                  if( _error_flag == false ){
+                    std::vector<double>::iterator maxElement;
+                    maxElement = std::max_element(simulated_matches.begin(), simulated_matches.end());
+                    int dist = distance(simulated_matches.begin(), maxElement);
+
+                    int col_defocus = dist % defocus_samples;
+                    int row_thickness = (dist - col_defocus ) / defocus_samples;
+
+                    best_match_Point2i = cv::Point2i( row_thickness, col_defocus);
+                    _flag_best_match_Point2i = true;
+
+                    simgrid_best_match_thickness_slice = simulated_params_slice_vec.at(row_thickness);
+                    _flag_simgrid_best_match_thickness_slice = true;
+                    simgrid_best_match_thickness_nm = simulated_params_nm_slice_vec.at(row_thickness);
+                    _flag_simgrid_best_match_thickness_nm = true;
+                    simgrid_best_match_defocus_nm = simulated_params_nm_defocus_vec.at(col_defocus);
+                    _flag_simgrid_best_match_defocus_nm = true;
+                    runned_simulation = true;
+                    _flag_match_values_matrix = true;
+                  }
+                }
+                else {
+                  if( _flag_logger ){
+                    std::stringstream message;
+                    message << "The required vars for simulate_from_grid() are not setted up.";
+                    BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::error , message.str() );
+                  }
+                  print_var_state();
+                }
+              }
+              else{
+                if( _flag_logger ){
+                  std::stringstream message;
+                  message << "The required Class POINTERS for export_sim_grid() are not setted up.";
+                  BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::error , message.str() );
+                }
+                print_var_state();
+              }
+              return runned_simulation;
+            }
+
+            bool SimGrid::clean_for_re_run(){
+              bool result = false;
+              sim_grid.release();
+  // simulated images
+
+              for (int thickness_row = 0; thickness_row < raw_simulated_images_grid.size(); thickness_row ++ ){
+    //will contain the row of simulated images (same thickness, diferent defocus)
+                std::vector<cv::Mat> raw_simulated_images_row = raw_simulated_images_grid.at(thickness_row);
+                raw_simulated_images_row.clear();
+              }
+              raw_simulated_images_grid.clear();
+
+              for (int thickness_row = 0; thickness_row < simulated_images_grid.size(); thickness_row ++ ){
+                std::vector<cv::Mat> simulated_images_row = simulated_images_grid.at(thickness_row);
+                simulated_images_row.clear();
+              }
+              simulated_images_grid.clear();
+
+              for (int thickness_row = 0; thickness_row < experimental_images_match_location_grid.size(); thickness_row ++ ){
+                std::vector<cv::Point> experimental_images_matchloc_row = experimental_images_match_location_grid.at(thickness_row);
+                experimental_images_matchloc_row.clear();
+              }
+              experimental_images_match_location_grid.clear();
+
+              simulated_matches.clear();
+              slice_defocus_match_points.clear();
+
+              match_values_matrix.release();
+              imregionalmax_match_values_matrix.release();
+
+              if(
+                ( simulated_images_grid.size() == 0 ) &&
+                ( raw_simulated_images_grid.size() == 0 ) &&
+                ( experimental_images_match_location_grid.size() == 0 ) &&
+                ( simulated_matches.size() == 0 ) &&
+                ( slice_defocus_match_points.size() == 0 )
+                ){
+                runned_simulation = false;
+              result = true;
+            }
+            return result;
+          }
+
+          std::string SimGrid::get_export_sim_grid_filename_hint(){
+            std::string sim_grid_file_name_image;
+            if(
+              _flag_sim_crystal_properties
+              ){
+              if(
+        // BaseCrystal vars
+                sim_crystal_properties->get_flag_nm_lower_bound() &&
+                sim_crystal_properties->get_flag_nm_upper_bound() &&
+                sim_crystal_properties->get_flag_defocus_lower_bound() &&
+                sim_crystal_properties->get_flag_defocus_upper_bound()
+                ){
+      // get const vars from class pointer
+                const double slices_lower_bound = sim_crystal_properties->get_slices_lower_bound();
+              const double slices_upper_bound = sim_crystal_properties->get_slices_upper_bound();
+              const double defocus_lower_bound = sim_crystal_properties->get_defocus_lower_bound();
+              const double defocus_upper_bound = sim_crystal_properties->get_defocus_upper_bound();
+              std::stringstream sim_grid_file_image;
+              sim_grid_file_image << "sim_grid_thickness_" << slices_lower_bound << "_to_" << slices_upper_bound <<  "_defocus_" <<defocus_lower_bound << "_to_" << defocus_upper_bound << ".png" ;
+              sim_grid_file_name_image = sim_grid_file_image.str();
+            }
+            else {
+              if( _flag_logger ){
+                std::stringstream message;
+                message << "The required vars for simulate_from_grid() are not setted up.";
+                BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::error , message.str() );
+              }
+              print_var_state();
             }
           }
+          else{
+            if( _flag_logger ){
+              std::stringstream message;
+              message << "The required Class POINTERS for export_sim_grid() are not setted up.";
+              BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::error , message.str() );
+            }
+            print_var_state();
+          }
+          return sim_grid_file_name_image;
+        }
+
+        std::vector< std::vector<cv::Mat> > SimGrid::get_simulated_images_grid(){
+          return simulated_images_grid;
+
+        }
+
+        std::vector< std::vector<cv::Mat> > SimGrid::get_simulated_images_grid_visualization(){
+          std::vector< std::vector<cv::Mat> > simulated_images_grid_visualization;
+
+          for (int thickness = 0; thickness < simulated_images_grid.size(); thickness++ ){
+        // get the matrices row
+            std::vector< cv::Mat > simulated_images_row = simulated_images_grid.at( thickness );
+            std::vector<cv::Mat> simulated_images_row_visualization;
+
+            for (int defocus = 0; defocus < simulated_images_row.size() ; defocus ++ ){
+              const cv::Mat simulated_image = simulated_images_row.at( defocus );
+              BaseImage img_treater;
+              cv::Mat simulated_image_visualization = img_treater.get_image_visualization( simulated_image );
+              simulated_images_row_visualization.push_back( simulated_image_visualization );
+            }
+            
+            simulated_images_grid_visualization.push_back( simulated_images_row_visualization );
+          }
+          return simulated_images_grid_visualization;
+
+        }
+
+        cv::Mat SimGrid::get_simulated_image_in_grid( int row_thickness, int col_defocus ){
+          std::vector<cv::Mat> simulated_images_row = simulated_images_grid.at(row_thickness);
+          cv::Mat cleaned_simulated_image = simulated_images_row.at(col_defocus);
+          return cleaned_simulated_image;
+        }
+
+        cv::Mat SimGrid::get_simulated_image_in_grid_visualization( int row_thickness, int col_defocus ){
+          std::vector<cv::Mat> simulated_images_row = simulated_images_grid.at(row_thickness);
+          const cv::Mat cleaned_simulated_image = simulated_images_row.at(col_defocus);
+          BaseImage img_treater;
+          return img_treater.get_image_visualization( cleaned_simulated_image );
+        }
+
+        double SimGrid::get_simulated_image_match_in_grid( int row_thickness, int col_defocus ){
+          return (double) match_values_matrix.at<float>( row_thickness, col_defocus );
+        }
+
+        int SimGrid::get_simulated_image_thickness_slice_in_grid( int row_thickness, int col_defocus ){
+          int result = -1;
+          if( _flag_sim_crystal_properties ){
+            if(
+              sim_crystal_properties->get_flag_simulated_params_slice_vec()
+              ){
+      // get const vars from class pointer
+              std::vector<int> simulated_params_slice_vec = sim_crystal_properties->get_simulated_params_slice_vec();
+            result = simulated_params_slice_vec.at(row_thickness);
+          }
+          else {
+            if( _flag_logger ){
+              std::stringstream message;
+              message << "The required vars for get_simulated_image_thickness_slice_in_grid() are not setted up.";
+              BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::error , message.str() );
+            }
+            print_var_state();
+          }
+        }
+        else{
+          if( _flag_logger ){
+            std::stringstream message;
+            message << "The required Class POINTERS for get_simulated_image_thickness_slice_in_grid() are not setted up.";
+            BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::error , message.str() );
+          }
+          print_var_state();
+        }
+        return result;
+      }
+
+      double SimGrid::get_simulated_image_thickness_nm_in_grid( int row_thickness, int col_defocus ){
+        double result = -1.0f;
+        if( _flag_sim_crystal_properties ){
+          if(
+            sim_crystal_properties->get_flag_simulated_params_nm_slice_vec()
+            ){
+      // get const vars from class pointer
+            std::vector<double> simulated_params_nm_slice_vec = sim_crystal_properties->get_simulated_params_nm_slice_vec();
+          result = simulated_params_nm_slice_vec.at(row_thickness);
+        }
+        else {
+          if( _flag_logger ){
+            std::stringstream message;
+            message << "The required vars for get_simulated_image_thickness_nm_in_grid() are not setted up.";
+            BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::error , message.str() );
+          }
+          print_var_state();
         }
       }
-      if( _error_flag == false ){
-        std::vector<double>::iterator maxElement;
-        maxElement = std::max_element(simulated_matches.begin(), simulated_matches.end());
-        int dist = distance(simulated_matches.begin(), maxElement);
+      else{
+        if( _flag_logger ){
+          std::stringstream message;
+          message << "The required Class POINTERS for get_simulated_image_thickness_nm_in_grid() are not setted up.";
+          BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::error , message.str() );
+        }
+        print_var_state();
+      }
+      return result;
+    }
 
-        int col_defocus = dist % defocus_samples;
-        int row_thickness = (dist - col_defocus ) / defocus_samples;
-
-        best_match_Point2i = cv::Point2i( row_thickness, col_defocus);
-        _flag_best_match_Point2i = true;
-
-        simgrid_best_match_thickness_slice = simulated_params_slice_vec.at(row_thickness);
-        _flag_simgrid_best_match_thickness_slice = true;
-        simgrid_best_match_thickness_nm = simulated_params_nm_slice_vec.at(row_thickness);
-        _flag_simgrid_best_match_thickness_nm = true;
-        simgrid_best_match_defocus_nm = simulated_params_nm_defocus_vec.at(col_defocus);
-        _flag_simgrid_best_match_defocus_nm = true;
-        runned_simulation = true;
-        _flag_match_values_matrix = true;
+    double SimGrid::get_simulated_image_defocus_in_grid( int row_thickness, int col_defocus ){
+      double result = -1000.0f;
+      if( _flag_sim_crystal_properties ){
+        if(
+          sim_crystal_properties->get_flag_simulated_params_nm_defocus_vec()
+          ){
+      // get const vars from class pointer
+          std::vector<double>  simulated_params_nm_defocus_vec = sim_crystal_properties->get_simulated_params_nm_defocus_vec();
+        result = simulated_params_nm_defocus_vec.at(col_defocus);
+      }
+      else {
+        if( _flag_logger ){
+          std::stringstream message;
+          message << "The required vars for get_simulated_image_defocus_in_grid() are not setted up.";
+          BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::error , message.str() );
+        }
+        print_var_state();
       }
     }
-    else {
+    else{
       if( _flag_logger ){
         std::stringstream message;
-        message << "The required vars for simulate_from_grid() are not setted up.";
+        message << "The required Class POINTERS for get_simulated_image_defocus_in_grid() are not setted up.";
         BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::error , message.str() );
       }
       print_var_state();
     }
+    return result;
   }
-  else{
-    if( _flag_logger ){
-      std::stringstream message;
-      message << "The required Class POINTERS for export_sim_grid() are not setted up.";
-      BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::error , message.str() );
-    }
-    print_var_state();
-  }
-  return runned_simulation;
-}
-
-bool SimGrid::clean_for_re_run(){
-  bool result = false;
-  sim_grid.release();
-  // simulated images
-
-  for (int thickness_row = 0; thickness_row < raw_simulated_images_grid.size(); thickness_row ++ ){
-    //will contain the row of simulated images (same thickness, diferent defocus)
-    std::vector<cv::Mat> raw_simulated_images_row = raw_simulated_images_grid.at(thickness_row);
-    raw_simulated_images_row.clear();
-  }
-  raw_simulated_images_grid.clear();
-
-  for (int thickness_row = 0; thickness_row < simulated_images_grid.size(); thickness_row ++ ){
-    std::vector<cv::Mat> simulated_images_row = simulated_images_grid.at(thickness_row);
-    simulated_images_row.clear();
-  }
-  simulated_images_grid.clear();
-
-  for (int thickness_row = 0; thickness_row < experimental_images_match_location_grid.size(); thickness_row ++ ){
-    std::vector<cv::Point> experimental_images_matchloc_row = experimental_images_match_location_grid.at(thickness_row);
-    experimental_images_matchloc_row.clear();
-  }
-  experimental_images_match_location_grid.clear();
-
-  simulated_matches.clear();
-  slice_defocus_match_points.clear();
-
-  match_values_matrix.release();
-  imregionalmax_match_values_matrix.release();
-
-  if(
-    ( simulated_images_grid.size() == 0 ) &&
-    ( raw_simulated_images_grid.size() == 0 ) &&
-    ( experimental_images_match_location_grid.size() == 0 ) &&
-    ( simulated_matches.size() == 0 ) &&
-    ( slice_defocus_match_points.size() == 0 )
-    ){
-    runned_simulation = false;
-  result = true;
-}
-return result;
-}
-
-std::string SimGrid::get_export_sim_grid_filename_hint(){
-  std::string sim_grid_file_name_image;
-  if(
-    _flag_sim_crystal_properties
-    ){
-    if(
-        // BaseCrystal vars
-      sim_crystal_properties->get_flag_nm_lower_bound() &&
-      sim_crystal_properties->get_flag_nm_upper_bound() &&
-      sim_crystal_properties->get_flag_defocus_lower_bound() &&
-      sim_crystal_properties->get_flag_defocus_upper_bound()
-      ){
-      // get const vars from class pointer
-      const double slices_lower_bound = sim_crystal_properties->get_slices_lower_bound();
-    const double slices_upper_bound = sim_crystal_properties->get_slices_upper_bound();
-    const double defocus_lower_bound = sim_crystal_properties->get_defocus_lower_bound();
-    const double defocus_upper_bound = sim_crystal_properties->get_defocus_upper_bound();
-    std::stringstream sim_grid_file_image;
-    sim_grid_file_image << "sim_grid_thickness_" << slices_lower_bound << "_to_" << slices_upper_bound <<  "_defocus_" <<defocus_lower_bound << "_to_" << defocus_upper_bound << ".png" ;
-    sim_grid_file_name_image = sim_grid_file_image.str();
-  }
-  else {
-    if( _flag_logger ){
-      std::stringstream message;
-      message << "The required vars for simulate_from_grid() are not setted up.";
-      BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::error , message.str() );
-    }
-    print_var_state();
-  }
-}
-else{
-  if( _flag_logger ){
-    std::stringstream message;
-    message << "The required Class POINTERS for export_sim_grid() are not setted up.";
-    BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::error , message.str() );
-  }
-  print_var_state();
-}
-return sim_grid_file_name_image;
-}
-
-std::vector< std::vector<cv::Mat> > SimGrid::get_simulated_images_grid(){
-  return simulated_images_grid;
-}
-
-cv::Mat SimGrid::get_simulated_image_in_grid( int row_thickness, int col_defocus ){
-  std::vector<cv::Mat> simulated_images_row = simulated_images_grid.at(row_thickness);
-  cv::Mat cleaned_simulated_image = simulated_images_row.at(col_defocus);
-  return cleaned_simulated_image;
-}
-
-double SimGrid::get_simulated_image_match_in_grid( int row_thickness, int col_defocus ){
-  return (double) match_values_matrix.at<float>( row_thickness, col_defocus );
-}
-
-int SimGrid::get_simulated_image_thickness_slice_in_grid( int row_thickness, int col_defocus ){
-  int result = -1;
-  if( _flag_sim_crystal_properties ){
-    if(
-      sim_crystal_properties->get_flag_simulated_params_slice_vec()
-      ){
-      // get const vars from class pointer
-      std::vector<int> simulated_params_slice_vec = sim_crystal_properties->get_simulated_params_slice_vec();
-    result = simulated_params_slice_vec.at(row_thickness);
-  }
-  else {
-    if( _flag_logger ){
-      std::stringstream message;
-      message << "The required vars for get_simulated_image_thickness_slice_in_grid() are not setted up.";
-      BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::error , message.str() );
-    }
-    print_var_state();
-  }
-}
-else{
-  if( _flag_logger ){
-    std::stringstream message;
-    message << "The required Class POINTERS for get_simulated_image_thickness_slice_in_grid() are not setted up.";
-    BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::error , message.str() );
-  }
-  print_var_state();
-}
-return result;
-}
-
-double SimGrid::get_simulated_image_thickness_nm_in_grid( int row_thickness, int col_defocus ){
-  double result = -1.0f;
-  if( _flag_sim_crystal_properties ){
-    if(
-      sim_crystal_properties->get_flag_simulated_params_nm_slice_vec()
-      ){
-      // get const vars from class pointer
-      std::vector<double> simulated_params_nm_slice_vec = sim_crystal_properties->get_simulated_params_nm_slice_vec();
-    result = simulated_params_nm_slice_vec.at(row_thickness);
-  }
-  else {
-    if( _flag_logger ){
-      std::stringstream message;
-      message << "The required vars for get_simulated_image_thickness_nm_in_grid() are not setted up.";
-      BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::error , message.str() );
-    }
-    print_var_state();
-  }
-}
-else{
-  if( _flag_logger ){
-    std::stringstream message;
-    message << "The required Class POINTERS for get_simulated_image_thickness_nm_in_grid() are not setted up.";
-    BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::error , message.str() );
-  }
-  print_var_state();
-}
-return result;
-}
-
-double SimGrid::get_simulated_image_defocus_in_grid( int row_thickness, int col_defocus ){
-  double result = -1000.0f;
-  if( _flag_sim_crystal_properties ){
-    if(
-      sim_crystal_properties->get_flag_simulated_params_nm_defocus_vec()
-      ){
-      // get const vars from class pointer
-      std::vector<double>  simulated_params_nm_defocus_vec = sim_crystal_properties->get_simulated_params_nm_defocus_vec();
-    result = simulated_params_nm_defocus_vec.at(col_defocus);
-  }
-  else {
-    if( _flag_logger ){
-      std::stringstream message;
-      message << "The required vars for get_simulated_image_defocus_in_grid() are not setted up.";
-      BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::error , message.str() );
-    }
-    print_var_state();
-  }
-}
-else{
-  if( _flag_logger ){
-    std::stringstream message;
-    message << "The required Class POINTERS for get_simulated_image_defocus_in_grid() are not setted up.";
-    BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::error , message.str() );
-  }
-  print_var_state();
-}
-return result;
-}
 
 
-bool SimGrid::set_image_correlation_matching_method( int enumerator ){
-  bool result = false;
+  bool SimGrid::set_image_correlation_matching_method( int enumerator ){
+    bool result = false;
 
   /*
      0 - (CV_TM_SQDIFF): squared difference
@@ -873,15 +902,15 @@ bool SimGrid::set_image_correlation_matching_method( int enumerator ){
      5- (CV_TM_CCOEFF_NORMED): normalized correlation coefficient
      */
 
-  if(
-    ( enumerator == CV_TM_SQDIFF_NORMED )
-    || ( enumerator == CV_TM_CCORR_NORMED )
-    || ( enumerator == CV_TM_CCOEFF_NORMED )
-    ) {
-    _sim_correlation_method = enumerator;
-  result = true;
-}
-return result;
+    if(
+      ( enumerator == CV_TM_SQDIFF_NORMED )
+      || ( enumerator == CV_TM_CCORR_NORMED )
+      || ( enumerator == CV_TM_CCOEFF_NORMED )
+      ) {
+      _sim_correlation_method = enumerator;
+    result = true;
+  }
+  return result;
 }
 
 bool SimGrid::set_image_normalization_method( int enumerator ){

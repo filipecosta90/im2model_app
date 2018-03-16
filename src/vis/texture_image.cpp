@@ -40,6 +40,10 @@ void TextureImage::setImage( const cv::Mat& image ){
   }
 
   // QImage needs the data to be stored continuously in memory
+  if ( ! _tmp_original.isContinuous() )
+{ 
+    _tmp_original = _tmp_original.clone();
+}
   assert( _tmp_original.isContinuous() );
   original_size = image.size();
   std::cout << "TextureImage::setImage from image with original size " << original_size << std::endl;

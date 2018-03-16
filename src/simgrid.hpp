@@ -44,7 +44,7 @@
 
 class SimGrid {
 
-  private:
+private:
 
     // // // // //
     // simulation parameters
@@ -109,7 +109,7 @@ class SimGrid {
     ApplicationLog::ApplicationLog* logger = nullptr;
     bool _flag_logger = false;
 
-  public:
+public:
 
     SimGrid( boost::process::ipstream& async_io_buffer_out );
     bool export_sim_grid( std::string filename , bool cut_margin = false );
@@ -121,16 +121,19 @@ class SimGrid {
     double get_simgrid_best_match_thickness_nm(){ return simgrid_best_match_thickness_nm; }
     double get_simgrid_best_match_defocus_nm(){ return simgrid_best_match_defocus_nm; }
     int get_image_correlation_matching_method(){ return _sim_correlation_method; }
-        std::vector< std::vector<cv::Mat> > get_simulated_images_grid();
-        cv::Mat get_match_values_matrix(){ return match_values_matrix; }
-        cv::Point2i get_best_match_position(){ return best_match_Point2i; }
-        cv::Mat get_simulated_image_in_grid( int row, int col );
-        double get_simulated_image_match_in_grid( int row, int col );
-        int get_simulated_image_thickness_slice_in_grid( int row, int col );
-        double get_simulated_image_thickness_nm_in_grid( int row, int col );
-        double get_simulated_image_defocus_in_grid( int row, int col );
-        std::string get_export_sim_grid_filename_hint();
-            int get_image_normalization_method(){ return normalization_mode; }
+    std::vector< std::vector<cv::Mat> > get_simulated_images_grid();
+        std::vector< std::vector<cv::Mat> > get_simulated_images_grid_visualization();
+    cv::Mat get_match_values_matrix(){ return match_values_matrix; }
+    cv::Point2i get_best_match_position(){ return best_match_Point2i; }
+    cv::Mat get_simulated_image_in_grid( int row, int col );
+    cv::Mat get_simulated_image_in_grid_visualization( int row, int col );
+
+    double get_simulated_image_match_in_grid( int row, int col );
+    int get_simulated_image_thickness_slice_in_grid( int row, int col );
+    double get_simulated_image_thickness_nm_in_grid( int row, int col );
+    double get_simulated_image_defocus_in_grid( int row, int col );
+    std::string get_export_sim_grid_filename_hint();
+    int get_image_normalization_method(){ return normalization_mode; }
 
     // flag getters
     bool get_flag_simgrid_best_match_thickness_slice(){ return _flag_simgrid_best_match_thickness_slice; }

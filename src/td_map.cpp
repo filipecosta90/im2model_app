@@ -872,6 +872,10 @@ std::vector< std::vector<cv::Mat> > TDMap::get_simulated_images_grid(){
   return _td_map_simgrid->get_simulated_images_grid();
 }
 
+std::vector< std::vector<cv::Mat> > TDMap::get_simulated_images_grid_visualization(){
+  return _td_map_simgrid->get_simulated_images_grid_visualization();
+}
+
 std::string TDMap::get_export_sim_grid_filename_hint(){
   return _td_map_simgrid->get_export_sim_grid_filename_hint();
 }
@@ -887,6 +891,10 @@ cv::Point2i TDMap::get_simgrid_best_match_position(){
 
 cv::Mat TDMap::get_simulated_image_in_grid( int x, int y ){
   return _td_map_simgrid->get_simulated_image_in_grid(  x,  y );
+}
+
+cv::Mat TDMap::get_simulated_image_in_grid_visualization( int x, int y ){
+  return _td_map_simgrid->get_simulated_image_in_grid_visualization(  x,  y );
 }
 
 double TDMap::get_simulated_image_match_in_grid( int x, int y ){
@@ -2188,13 +2196,13 @@ bool TDMap::set_thickness_user_estimated_nm( std::string s_estimated ){
         bool result = false;
         emit TDMap_started_supercell_segmentate_image();
         _flag_read_simulated_supercell_image = sim_image_intensity_columns->segmentate_sim_image();
-        std::cout << " _flag_read_simulated_supercell_image segmentate_sim_image " << std::boolalpha << _flag_read_simulated_supercell_image << std::endl;
+        std::cout << " compute_full_super_cell_intensity_cols segmentate_sim_image " << std::boolalpha << _flag_read_simulated_supercell_image << std::endl;
 
         _flag_read_simulated_supercell_image &= sim_image_intensity_columns->feature_match();
-        std::cout << " _flag_read_simulated_supercell_image feature_match " << std::boolalpha << _flag_read_simulated_supercell_image << std::endl;
+        std::cout << " compute_full_super_cell_intensity_cols feature_match " << std::boolalpha << _flag_read_simulated_supercell_image << std::endl;
 
         _flag_read_simulated_supercell_image &= sim_image_intensity_columns->map_sim_intensity_cols_to_exp_image();
-        std::cout << " _flag_read_simulated_supercell_image map_sim_intensity_cols_to_exp_image " << std::boolalpha << _flag_read_simulated_supercell_image << std::endl;
+        std::cout << " compute_full_super_cell_intensity_cols map_sim_intensity_cols_to_exp_image " << std::boolalpha << _flag_read_simulated_supercell_image << std::endl;
 
         emit TDMap_ended_supercell_segmentate_image( _flag_read_simulated_supercell_image );
         if( _flag_logger ){

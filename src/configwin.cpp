@@ -418,7 +418,7 @@ void MainWindow::update_tdmap_current_selection(int x,int y){
   if(_core_td_map->get_flag_simulated_images_grid()){
     tdmap_current_selection_pos.x = x;
     tdmap_current_selection_pos.y = y;
-    cv::Mat _simulated_image = _core_td_map->get_simulated_image_in_grid(x,y);
+    const cv::Mat _simulated_image = _core_td_map->get_simulated_image_in_grid_visualization(x,y);
     double _simulated_image_match = 0.0f;
     const bool correlation_active = _core_td_map->get_run_simgrid_switch();
     QStandardItem *match_item;
@@ -458,7 +458,10 @@ void MainWindow::update_tdmap_current_selection(int x,int y){
     std::cout << "full_image_height_nm" << full_image_height_nm << std::endl;
     Qt3DCore::QTransform* transform = new Qt3DCore::QTransform( );
     transform->setRotation(QQuaternion::fromAxisAndAngle(1,0,0,90));
-    //ui->qgraphics_tdmap_selection->update_image_layer( _simulated_image , full_image_width_nm ,  full_image_height_nm , transform, "Simulated image layer");
+
+    
+
+    ui->qgraphics_tdmap_selection->update_image_layer( _simulated_image , full_image_width_nm ,  full_image_height_nm , transform, "Simulated image layer");
 
   }
 }
@@ -492,7 +495,7 @@ bool MainWindow::update_qline_image_path( std::string fileName ){
 }
 
 void MainWindow::update_simgrid_frame(){
-  std::vector< std::vector<cv::Mat> > _simulated_images_grid = _core_td_map->get_simulated_images_grid();
+  std::vector< std::vector<cv::Mat> > _simulated_images_grid = _core_td_map->get_simulated_images_grid_visualization();
   this->ui->tdmap_table->set_simulated_images_grid( _simulated_images_grid );
 }
 

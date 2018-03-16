@@ -236,11 +236,13 @@ public:
     std::vector< double > get_simulated_images_vertical_header_slice_nm();
     std::vector< double > get_simulated_images_horizontal_header_defocus_nm();
     std::vector< std::vector<cv::Mat> > get_simulated_images_grid();
+    std::vector< std::vector<cv::Mat> > get_simulated_images_grid_visualization();
     std::string get_export_sim_grid_filename_hint();
     std::string get_export_integrated_intensities_filename_hint();
     
     cv::Point2i get_simgrid_best_match_position();
     cv::Mat get_simulated_image_in_grid( int row, int col );
+    cv::Mat get_simulated_image_in_grid_visualization( int row, int col );
     double get_simulated_image_match_in_grid( int row, int col );
     int get_simulated_image_thickness_slice_in_grid( int row, int col );
     double get_simulated_image_thickness_nm_in_grid( int row, int col );
