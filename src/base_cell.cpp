@@ -175,24 +175,31 @@ void BaseCell::update_length_flag(){
 bool BaseCell::set_angle_alpha( double alpha ){
   angle_alpha = alpha;
   _flag_angle_alpha = true;
+  std::cout << " setted angle alpha to " << alpha << std::endl;
   update_volume();
   form_matrix_from_lattice_parameters();
+  form_matrix_from_miller_indices();
   return true;
 }
 
 bool BaseCell::set_angle_beta( double beta ){
   angle_beta = beta;
   _flag_angle_beta = true;
+  std::cout << " setted angle beta to " << angle_beta << std::endl;
+
   update_volume();
   form_matrix_from_lattice_parameters();
+  form_matrix_from_miller_indices();
   return true;
 }
 
 bool BaseCell::set_angle_gamma( double gamma ){
   angle_gamma = gamma;
   _flag_angle_gamma = true;
+  std::cout << " setted angle gamma to " << angle_gamma << std::endl;
   update_volume();
   form_matrix_from_lattice_parameters();
+  form_matrix_from_miller_indices();
   return true;
 }
 
@@ -314,6 +321,7 @@ int BaseCell::get_atom_fractional_cell_coordinates_vec_size( ){
   return size;
 }
 void BaseCell::form_matrix_from_lattice_parameters(){
+  std::cout << "form_matrix_from_lattice_parameters " << std::endl;
   if(
     _flag_length_a &&
     _flag_length_b &&
@@ -322,7 +330,9 @@ void BaseCell::form_matrix_from_lattice_parameters(){
     _flag_angle_beta &&
     _flag_angle_gamma
     ){
-    std::cout << " cos( angle_alpha )" << cos( deg2rad(angle_alpha) ) << std::endl;
+    std::cout << "form_matrix_from_lattice_parameters " << std::endl;
+
+  std::cout << " cos( angle_alpha )" << cos( deg2rad(angle_alpha) ) << std::endl;
   std::cout << " cos( angle_beta )" << cos( deg2rad(angle_beta) ) << std::endl;
   std::cout << " cos( angle_gamma )" << cos( deg2rad(angle_gamma) ) << std::endl;
   std::cout << " sin( angle_alpha )" << sin( deg2rad(angle_alpha) ) << std::endl;
@@ -368,6 +378,9 @@ void BaseCell::form_matrix_from_lattice_parameters(){
   points.push_back(vector_b_Ang);
   points.push_back(vector_c_Ang);
   cv::Mat lattice_mapping_matrix_temp = cv::Mat( points , true );
+  std::cout << "###########################" << std::endl;
+  std::cout << "lattice_mapping_matrix_factors" << lattice_mapping_matrix_factors << std::endl;
+  std::cout << "###########################" << std::endl;
   lattice_mapping_matrix_Angstroms = lattice_mapping_matrix_temp.reshape(1);
   lattice_mapping_matrix_Nanometers = lattice_mapping_matrix_Angstroms / 10.0f;
 
@@ -435,7 +448,10 @@ std::vector<cv::Point3d> BaseCell::get_atom_positions_cols_vec_keys(){
 void BaseCell::form_matrix_from_miller_indices(){
   if(
     _flag_zone_axis &&
-    _flag_upward_vector
+    _flag_upward_vector && 
+    _flag_angle_alpha &&
+    _flag_angle_beta &&
+    _flag_angle_gamma
     ){
     upward_vector.x = upward_vector_u;
   upward_vector.y = upward_vector_v;
@@ -443,6 +459,10 @@ void BaseCell::form_matrix_from_miller_indices(){
   zone_axis.x = zone_axis_u;
   zone_axis.y = zone_axis_v;
   zone_axis.z = zone_axis_w;
+
+  cv::Point3d vector_a_Ang;
+  
+
   const double norm_uvw = cv::norm( zone_axis );
   const double norm_hkl = cv::norm( upward_vector );
 
@@ -489,6 +509,14 @@ void BaseCell::form_matrix_from_miller_indices(){
     /* insert into matrix */
   std::vector<cv::Point3d> points;
   points.push_back(vector_x_axis_projected);
+
+  std::cout << " cos( angle_alpha )" << cos( deg2rad(angle_alpha) ) << std::endl;
+  std::cout << " cos( angle_beta )" << cos( deg2rad(angle_beta) ) << std::endl;
+  std::cout << " cos( angle_gamma )" << cos( deg2rad(angle_gamma) ) << std::endl;
+  std::cout << " sin( angle_alpha )" << sin( deg2rad(angle_alpha) ) << std::endl;
+  std::cout << " sin( angle_beta )" << sin( deg2rad(angle_beta) ) << std::endl;
+  std::cout << " sin( angle_gamma )" << sin( deg2rad(angle_gamma) ) << std::endl;
+
   points.push_back(vector_yy_axis_projected);
   points.push_back(vector_z_axis_projected);
   orientation_matrix = cv::Mat( points , true );
@@ -502,6 +530,32 @@ void BaseCell::form_matrix_from_miller_indices(){
 
   std::cout << "NEW orientation matrix: \n" << orientation_matrix << std::endl;
 
+  cv::Point3d vector_a_factor;
+  vector_a_factor.x = sin( deg2rad(angle_beta) );
+  vector_a_factor.y = sin( deg2rad(angle_alpha) ) * cos( deg2rad(angle_gamma) );
+  vector_a_factor.z = 0.0f;
+
+  cv::Point3d vector_b_factor;
+  vector_b_factor.x = 0.0f;
+  vector_b_factor.y = sin( deg2rad(angle_alpha) ) * sin( deg2rad(angle_gamma) );
+  vector_b_factor.z = 0.0f;
+
+  cv::Point3d vector_c_factor;
+  vector_c_factor.x = cos( deg2rad(angle_beta) );
+  vector_c_factor.y = cos( deg2rad(angle_alpha) );
+  vector_c_factor.z = 1.0f;
+
+    /* insert into matrix */
+  std::vector<cv::Point3d> factor_points;
+  factor_points.push_back(vector_a_factor);
+  factor_points.push_back(vector_b_factor);
+  factor_points.push_back(vector_c_factor);
+  cv::Mat lattice_mapping_matrix_factor_temp = cv::Mat( factor_points , true );
+  lattice_mapping_matrix_factors = lattice_mapping_matrix_factor_temp.reshape(1);
+
+  std::cout << "  lattice_mapping_matrix_factor_temp : \n" << lattice_mapping_matrix_factors << std::endl;
+
+  
     /**
      * R is normalized: the squares of the elements in any row or column sum to 1.
      * R is orthogonal: the dot product of any pair of rows or any pair of columns is 0.

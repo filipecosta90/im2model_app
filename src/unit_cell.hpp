@@ -4,6 +4,7 @@
 #include <iosfwd>                    // for string
 
 #include "base_cell.hpp"
+#include "base_bin.hpp"
 
 class UnitCell : public BaseCell {
   private:

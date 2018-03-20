@@ -272,6 +272,14 @@ TDMap::TDMap( ostream_celslc_buffer, ostream_msa_buffer, ostream_wavimg_buffer, 
   set_application_logger( app_logger );
 }
 
+std::string TDMap::get_unit_cell_cif_path(){
+  std::string result = "";
+  if( unit_cell != nullptr ){
+    result = unit_cell->get_cif_path();
+  }
+  return result;
+}
+
 void TDMap::update_super_cell_celslc_ssc_stage_started( int nsteps ){
   emit TDMap_started_supercell_celslc();
   emit TDMap_inform_supercell_celslc_n_steps( nsteps );
@@ -671,10 +679,10 @@ bool TDMap::run_tdmap(){
     _celslc_stage_ok = _run_celslc_switch ? _flag_runned_tdmap_celslc : sim_crystal_properties->set_nz_simulated_partitions_from_prm();
 
     if( _flag_logger ){
-        std::stringstream message;
-        message << "_celslc_stage_ok result: " << std::boolalpha << _celslc_stage_ok;
-        BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification , message.str() );
-      }
+      std::stringstream message;
+      message << "_celslc_stage_ok result: " << std::boolalpha << _celslc_stage_ok;
+      BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification , message.str() );
+    }
     //MSA
     if( _celslc_stage_ok ){
       if ( _run_msa_switch ){
@@ -711,21 +719,21 @@ bool TDMap::run_tdmap(){
     if( _celslc_stage_ok && _msa_stage_ok && _wavimg_stage_ok ){
       run_tdmap_simgrid();
     }
-      _simgrid_stage_ok = _flag_runned_tdmap_simgrid_read & _flag_runned_tdmap_simgrid_correlate;
+    _simgrid_stage_ok = _flag_runned_tdmap_simgrid_read & _flag_runned_tdmap_simgrid_correlate;
 
-if( _flag_logger ){
-        std::stringstream message;
-        message << "_simgrid_stage_ok result: " << std::boolalpha << _simgrid_stage_ok;
-        BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification , message.str() );
-      }
+    if( _flag_logger ){
+      std::stringstream message;
+      message << "_simgrid_stage_ok result: " << std::boolalpha << _simgrid_stage_ok;
+      BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification , message.str() );
+    }
 
     _simulation_status = _celslc_stage_ok & _msa_stage_ok & _wavimg_stage_ok & _simgrid_stage_ok;
 
     if( _flag_logger ){
-        std::stringstream message;
-        message << "_simulation_status result: " << std::boolalpha << _simulation_status;
-        BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification , message.str() );
-      }
+      std::stringstream message;
+      message << "_simulation_status result: " << std::boolalpha << _simulation_status;
+      BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification , message.str() );
+    }
 
   }
   else{
@@ -1337,9 +1345,24 @@ bool TDMap::set_dr_probe_wavimg_execname( std::string wavimg_execname ){
   return result;
 }
 
+bool TDMap::copy_external_files_to_project_dir(){
+  return true;
+}
+
 bool TDMap::set_exp_image_properties_full_image( std::string path ){
-  bool result = exp_image_properties->set_full_image( path );
-  result &= supercell_exp_image_properties->set_full_image( path );
+  std::string string_path;
+  boost::filesystem::path filename_path ( path );
+
+  if( filename_path.is_relative( )){
+    boost::filesystem::path full_path = project_dir_path / filename_path;
+    string_path = full_path.string();
+  }
+  else{
+    string_path = path;
+  }
+
+  bool result = exp_image_properties->set_full_image( string_path );
+  result &= supercell_exp_image_properties->set_full_image( string_path );
 
   if( result && exp_image_properties->get_image_extension() == ".emd" ){
     update_emd_fields();
@@ -1496,8 +1519,28 @@ bool TDMap::set_nx_size_width( std::string s_nx ){
   return result;
 }
 
-bool TDMap::set_unit_cell_cif_path( std::string cif_path ){
+boost::filesystem::path TDMap::make_path_relative_to_project_dir( boost::filesystem::path  childPath ){
+  boost::filesystem::path relativePath = boost::filesystem::relative( childPath, project_dir_path );
+  std::cout << "project_dir_path " << project_dir_path << std::endl;
+  std::cout << "childPath " << childPath << std::endl;
+  std::cout << "relativePath " << relativePath << std::endl;
+  return relativePath;
+}
+
+bool TDMap::set_unit_cell_cif_path( std::string cif_filename ){
   bool result = false;
+  //boost::filesystem::path ();
+
+  std::string cif_path;
+  boost::filesystem::path cif_filename_path ( cif_filename );
+  if( cif_filename_path.is_relative( )){
+    boost::filesystem::path full_path = project_dir_path / cif_filename_path;
+    cif_path = full_path.string();
+  }
+  else{
+    cif_path = cif_filename;
+  }
+  
   try {
     result = unit_cell->set_cif_path( cif_path );
     // in case of the dimensions being already setted up

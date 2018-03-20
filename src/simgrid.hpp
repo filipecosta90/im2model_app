@@ -122,7 +122,7 @@ public:
     double get_simgrid_best_match_defocus_nm(){ return simgrid_best_match_defocus_nm; }
     int get_image_correlation_matching_method(){ return _sim_correlation_method; }
     std::vector< std::vector<cv::Mat> > get_simulated_images_grid();
-        std::vector< std::vector<cv::Mat> > get_simulated_images_grid_visualization();
+    std::vector< std::vector<cv::Mat> > get_simulated_images_grid_visualization();
     cv::Mat get_match_values_matrix(){ return match_values_matrix; }
     cv::Point2i get_best_match_position(){ return best_match_Point2i; }
     cv::Mat get_simulated_image_in_grid( int row, int col );
@@ -179,8 +179,6 @@ public:
     /* Loggers */
     bool set_application_logger( ApplicationLog::ApplicationLog* logger );
     virtual std::ostream& output(std::ostream& stream) const;
-
-
 };
 
 #endif

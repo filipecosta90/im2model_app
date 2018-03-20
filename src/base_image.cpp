@@ -606,6 +606,7 @@ bool BaseImage::set_full_image( std::string image_path, bool normalize ){
   bool result = false;
   if ( boost::filesystem::exists( image_path ) ){
     image_extension = boost::filesystem::extension( image_path );
+    full_image_path = boost::filesystem::path( image_path );
 
     if( image_extension == ".emd" ){
       const bool emd_result = emd_wrapper->read_emd(image_path);
@@ -638,6 +639,15 @@ bool BaseImage::set_full_image( std::string image_path, bool normalize ){
         logger->logEvent( _log_type , message.str() );
       }
     }
+  }
+  else{
+     if( _flag_logger ){
+        std::stringstream message;
+        message << "Unable to read image with path " << image_path;
+        ApplicationLog::severity_level _log_type = ApplicationLog::critical;
+        BOOST_LOG_FUNCTION();
+        logger->logEvent( _log_type , message.str() );
+      }
   }
   return _flag_full_image;
 }

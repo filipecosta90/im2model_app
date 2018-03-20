@@ -175,6 +175,8 @@ protected:
     void update_super_cell_simulated_image_roi_image();
     void on_qpush_run_tdmap_clicked();
     void update_simgrid_frame( );
+    bool copy_external_dependencies();
+    bool copy_external_files_to_project_dir();
     void update_super_cell_target_region();
     void update_super_cell_target_region_image();
     void update_super_cell_target_region_shapes();

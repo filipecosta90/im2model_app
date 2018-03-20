@@ -86,7 +86,7 @@ bool IntensityColumns::segmentate_sim_image()
       imgResult = src - imgLaplacian;
 
       // convert back to 8bits gray scale
-      imgResult = sim_image_properties->get_image_visualization( imgResult ); 
+      imgResult = sim_image_properties->get_image_visualization( src ); 
 
       cv::Scalar mean_image_statistical;
       cv::Scalar stddev_image_statistical;
@@ -95,6 +95,7 @@ bool IntensityColumns::segmentate_sim_image()
       threshold_value = mean_image_statistical[0];// + (int)( ( (double) stddev_image_statistical[0] ) * stddev_threshold_factor );
 
       //imgResult.convertTo( imgResult, CV_8UC1  );
+      imwrite( "imgResult_prior.png", imgResult );
 
       cv::threshold( imgResult, imgResult, threshold_value, 255, CV_THRESH_BINARY ); //| CV_THRESH_OTSU );
       imwrite( "imgResult.png", imgResult );
@@ -488,6 +489,7 @@ bool IntensityColumns::map_sim_intensity_cols_to_exp_image(){
 
             const int ws = dstImageSim_minimal.cols;
             const int hs = dstImageSim_minimal.rows;
+            
           Mat templateFloat = Mat(hs, ws, CV_32F);// to store the (smoothed) template
           dstImageSim_minimal.convertTo(templateFloat, templateFloat.type());
           GaussianBlur(templateFloat, templateFloat, Size(5, 5), 0, 0);

@@ -171,7 +171,7 @@ MainWindow::MainWindow( ApplicationLog::ApplicationLog* logger , QWidget *parent
 
       connect(this, SIGNAL(super_cell_target_region_changed()), this, SLOT(update_super_cell_target_region()));
 
-      connect( _core_td_map, SIGNAL(TDMap_started_celslc( )), this, SLOT(update_tdmap_celslc_started( ) ) );
+      connect( _core_td_map, SIGNAL(TDMap_started_celslc()), this, SLOT(update_tdmap_celslc_started( ) ) );
       connect(_core_td_map,  SIGNAL(TDMap_started_celslc()), this, SLOT(update_tdmap_sim_ostream_celslc()));
       connect( _core_td_map, SIGNAL(TDMap_inform_celslc_n_steps( int )), this, SLOT(update_tdmap_celslc_started_with_steps_info( int ) ) );
 
@@ -486,10 +486,13 @@ MainWindow::~MainWindow(){
 
 bool MainWindow::update_qline_image_path( std::string fileName ){
   bool status = false;
-  const bool _td_map_load_ok = _core_td_map->set_exp_image_properties_full_image( fileName );
-  if( _td_map_load_ok ){
-    emit experimental_image_filename_changed();
-    status = true;
+  const bool project_setted = maybeSetProject();
+  if ( project_setted ){
+    const bool _td_map_load_ok = _core_td_map->set_exp_image_properties_full_image( fileName );
+    if( _td_map_load_ok ){
+      emit experimental_image_filename_changed();
+      status = true;
+    }
   }
   return status;
 }
@@ -497,6 +500,15 @@ bool MainWindow::update_qline_image_path( std::string fileName ){
 void MainWindow::update_simgrid_frame(){
   std::vector< std::vector<cv::Mat> > _simulated_images_grid = _core_td_map->get_simulated_images_grid_visualization();
   this->ui->tdmap_table->set_simulated_images_grid( _simulated_images_grid );
+}
+
+bool MainWindow::copy_external_files_to_project_dir(){
+ bool result = false;
+ const bool project_setted = maybeSetProject();
+ if ( project_setted ){
+  result = _core_td_map->copy_external_files_to_project_dir();
+ }
+ return result;
 }
 
 void MainWindow::update_super_cell_target_region(){
@@ -891,6 +903,7 @@ bool MainWindow::saveAs()
     QString folder_path = dialog.selectedFiles().first();
     result = _core_td_map->set_project_dir_path( folder_path.toStdString() );
     if( result ){
+      _load_file_delegate->set_base_dir_path( folder_path.toStdString(), true );
       std::string project_filename_with_path = _core_td_map->get_project_filename_with_path();
       QString qt_project_filename_with_path = QString::fromStdString( project_filename_with_path );
       result = saveFile( qt_project_filename_with_path );
@@ -899,6 +912,9 @@ bool MainWindow::saveAs()
   return result;
 }
 
+bool MainWindow::copy_external_dependencies(){
+  return true;
+}
 
 bool MainWindow::export_TDMap_full( ){
   return export_TDMap( false );
@@ -1043,6 +1059,8 @@ void MainWindow::createActions(){
   saveAsAct->setShortcuts(QKeySequence::SaveAs);
   saveAsAct->setStatusTip(tr("Save the document under a new name"));
 
+  QAction *copyExternal = fileMenu->addAction( tr("Copy external dependencies..."), this, &MainWindow::copy_external_dependencies);
+  copyExternal->setStatusTip(tr("Copy external dependencies to folder inside project"));
   fileMenu->addSeparator();
 
   const QIcon exitIcon = QIcon::fromTheme("application-exit");
@@ -1071,7 +1089,6 @@ void MainWindow::createActions(){
   exportTDMap_mrg->setStatusTip(tr("Export the current TD Map with super-cell margin"));
   tdmapMenu->addAction( exportTDMap_mrg );
 
-
   QMenu *supercellMenu = ui->menuBar->addMenu(tr("&SuperCell"));
   //QToolBar *fileToolBar = addToolBar(tr("File"));
   QAction *exportAllIntensityCols = supercellMenu->addAction( tr("&Export All Intensity Columns data"), this , &MainWindow::export_IntegratedIntensities_full );
@@ -1083,8 +1100,8 @@ void MainWindow::createActions(){
   // newAct->setShortcuts(QKeySequence::);
   exportMappedIntensityCols->setStatusTip(tr("Export only the mapped agains EXP image Intensity Columns data to a CSV"));
   supercellMenu->addAction( exportMappedIntensityCols );
-
 }
+
 
 void MainWindow::createProgressBar(){
   running_progress = new QProgressBar(this);
@@ -1252,7 +1269,7 @@ bool MainWindow::maybeSetProject(){
   else{
     const QMessageBox::StandardButton ret
     = QMessageBox::warning(this, tr("Application"),
-      tr("In order to Run Im2Model you need to set the project.\n"
+      tr("To make that action you need to set the project.\n"
         "Do you want to set the project?"),
       QMessageBox::Yes  | QMessageBox::Cancel);
     switch (ret) {
@@ -1283,6 +1300,10 @@ void MainWindow::loadFile(const QString &fileName){
   // The first parameter in the constructor is the character used for indentation, whilst the second is the indentation length.
   boost::property_tree::xml_writer_settings<std::string> pt_settings( ' ', 4 );
   boost::property_tree::ptree config;
+  boost::filesystem::path filename_path ( fileName.toStdString() );
+
+  _load_file_delegate->set_base_dir_path( filename_path.parent_path().string(), true );
+
   bool result = _core_td_map->set_project_filename_with_path( fileName.toStdString() );
   bool missing_version = false;
   bool old_version = false;
@@ -1688,6 +1709,10 @@ void MainWindow::create_box_options_tab1_crystallography(){
   boost::function<bool(std::string)> box2_function_1_1 ( boost::bind( &TDMap::set_unit_cell_cif_path,_core_td_map, _1 ) );
   unit_cell_file_cif = new TreeItem ( box2_option_1_1 , box2_function_1_1, box2_option_1_1_edit );
   unit_cell_file_cif->set_variable_name( "unit_cell_file_cif" );
+
+  boost::function<std::string(void)> box2_function_1_1_getter ( boost::bind( &TDMap::get_unit_cell_cif_path, _core_td_map ) );
+  unit_cell_file_cif->set_fp_data_getter_string_vec( 1, box2_function_1_1_getter );
+
   unit_cell_file_cif->set_item_delegate_type( TreeItem::_delegate_FILE );
   unit_cell_file->insertChildren( unit_cell_file_cif );
 

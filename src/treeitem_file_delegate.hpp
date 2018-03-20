@@ -16,7 +16,9 @@
 #include <QMenu>
 #include <QAction>
 #include <QLocale>
-
+#include <boost/filesystem.hpp>
+#include <boost/filesystem/operations.hpp>                // for directory_iterator
+#include <boost/filesystem/path.hpp>                      // for path, operator==, oper...
 
 #include "qt_file_push_button.h"
 #include "treeitem.h"
@@ -58,10 +60,13 @@ private slots:
     void get_dirname_slot( QWidget *editor );
     void commit_and_call(  QWidget * editor, boost::function<bool()> _action  ) ;
     void showToolTipText( QWidget *editor ) const;
+    void set_base_dir_path( std::string , bool use_relative );
 
   private:
     QToolBar* _editor_toolbar;
     bool* _flag_temp_data;
+    boost::filesystem::path base_dir_path;
+    bool use_base_dir_for_relative = false;
 };
 
 #endif // end FILEDELEGATE_H

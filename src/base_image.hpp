@@ -69,6 +69,7 @@ protected:
     // FULL IMAGE
     std::string image_extension;
     cv::Mat full_image;
+    boost::filesystem::path full_image_path;
     //cv::Mat full_image_hist;
     bool _flag_full_image = false;
     int  high_percentage_brightest_pixels_intensity_level = -1;

@@ -357,16 +357,16 @@ bool TreeItem::load_data_from_property_tree( boost::property_tree::ptree pt_root
   return result;
 }
 
-boost::property_tree::ptree* TreeItem::save_data_into_property_tree( ){
-  boost::property_tree::ptree* pt = new boost::property_tree::ptree( );
-  boost::property_tree::ptree* pt_data = new boost::property_tree::ptree( );
-  boost::property_tree::ptree* pt_checked_state = new boost::property_tree::ptree( );
-  boost::property_tree::ptree* pt_childs = new boost::property_tree::ptree( );
+boost::property_tree::ptree* TreeItem::save_data_into_property_tree(){
+  boost::property_tree::ptree* pt = new boost::property_tree::ptree();
+  boost::property_tree::ptree* pt_data = new boost::property_tree::ptree();
+  boost::property_tree::ptree* pt_checked_state = new boost::property_tree::ptree();
+  boost::property_tree::ptree* pt_childs = new boost::property_tree::ptree();
 
   int col = 0;
   for ( QVariant _data: itemData ){
     // Create an unnamed node containing the value
-    boost::property_tree::ptree* pt_data_node = new boost::property_tree::ptree( );
+    boost::property_tree::ptree* pt_data_node = new boost::property_tree::ptree();
     if( _flag_fp_data_setter_rect && _fp_data_setter_col_pos == col ){
       QRect rect = _data.toRect();
     pt_data_node->put("x",rect.x() ); //toString().toStdString());

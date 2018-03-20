@@ -341,6 +341,7 @@ public:
     // class setters
     bool set_project_dir_path( std::string name_path );
     bool set_project_filename_with_path( std::string filename_with_path );
+    bool copy_external_files_to_project_dir();
     bool set_exp_image_properties_full_image( std::string path );
     bool set_image_properties_sampling_rate_x_m_per_pixel( const double sampling_x );
     bool set_image_properties_sampling_rate_y_m_per_pixel( const double sampling_y );
@@ -388,6 +389,7 @@ public:
     // gui setters
     bool set_nx_size_width( std::string );
     bool set_ny_size_height( std::string );
+    boost::filesystem::path make_path_relative_to_project_dir( boost::filesystem::path  childPath );
     bool set_unit_cell_cif_path( std::string cif_path );
     bool set_zone_axis_u( std::string );
     bool set_zone_axis_v( std::string );
@@ -483,6 +485,7 @@ public:
     int get_exp_image_bounds_full_boundary_polygon_margin_y_px();
 
     /* gui getters */
+    std::string get_unit_cell_cif_path();
     int get_unit_cell_display_expand_factor_a();
     int get_unit_cell_display_expand_factor_b();
     int get_unit_cell_display_expand_factor_c();

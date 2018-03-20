@@ -301,6 +301,11 @@ QWidget *TreeItemFileDelegate::createEditor( QWidget *parent, const QStyleOption
   return editor;
 }
 
+void TreeItemFileDelegate::set_base_dir_path( std::string base_dir, bool use_relative ){
+  base_dir_path = boost::filesystem::path( base_dir );
+  use_base_dir_for_relative = use_relative;
+}
+
 void TreeItemFileDelegate::setEditorData(QWidget *editor, const QModelIndex &index) const {
   TreeItem *item = static_cast<TreeItem*>(index.internalPointer());
   switch(item->get_item_delegate_type())
@@ -492,7 +497,18 @@ void TreeItemFileDelegate::get_filename_slot( QWidget *editor ) const {
       //, tr("Text Files")
     );
   if( ! (fileName.isNull()) ){
-    line->setText(fileName);
+    if ( use_base_dir_for_relative ){
+      boost::filesystem::path childPath ( fileName.toStdString() );
+      boost::filesystem::path relativePath = boost::filesystem::relative( childPath, base_dir_path );
+      std::cout << "project_dir_path " << base_dir_path << std::endl;
+      std::cout << "childPath " << childPath << std::endl;
+      std::cout << "relativePath " << relativePath << std::endl;
+      line->setText(QString::fromStdString( relativePath.string() ));
+
+    }
+    else{
+      line->setText(fileName);
+    }
   }
 }
 
