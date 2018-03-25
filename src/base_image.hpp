@@ -178,6 +178,8 @@ public:
     bool get_flag_auto_roi_from_ignored_edge(){ return _flag_auto_roi_from_ignored_edge; }
 
     // var getters
+    std::string get_full_image_path_string();
+    boost::filesystem::path get_full_image_path();
     std::string get_image_extension(){ return image_extension; }
     cv::Mat get_full_image(){ return full_image.clone(); }
     cv::Mat get_image_visualization( cv::Mat );
@@ -219,6 +221,9 @@ public:
     bool set_flag_auto_roi_from_ignored_edge( bool value );
     bool set_flag_auto_ignore_edge_pixels( bool value );
     bool set_flag_auto_ignore_edge_nm( bool value );
+
+    bool set_full_image_path( boost::filesystem::path image_path );
+    bool set_full_image_path_string( std::string image_path );
 
     bool set_emd_wrapper( EMDWrapper* wrapper );
 

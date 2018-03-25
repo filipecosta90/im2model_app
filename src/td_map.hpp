@@ -42,6 +42,10 @@ private:
     std::string project_filename;
     bool _flag_project_dir_path = false;
 
+    bool _flag_parse_cif = false;
+    bool _flag_mtf_filename = false;
+    bool _flag_experimental_image_properties_path = false;
+
     /////////////////////////
     // Dr Probe PRM wrappers
     /////////////////////////
@@ -464,6 +468,7 @@ public:
     bool set_exp_image_properties_roi_rectangle_statistical_mean( int );
     int get_exp_image_properties_roi_rectangle_statistical_stddev(  );
     bool set_exp_image_properties_roi_rectangle_statistical_stddev( int );
+    std::string get_mtf_filename();
 
     // threshold limits
     int get_exp_image_bounds_hysteresis_threshold_range_bottom_limit();
@@ -498,6 +503,7 @@ public:
     double get_exp_image_properties_full_nx_size_width_nm();
     double get_exp_image_properties_roi_ny_size_height_nm();
     double get_exp_image_properties_roi_nx_size_width_nm();
+    std::string get_exp_image_properties_image_path_string();
     double get_full_boundary_polygon_margin_nm( );
     int get_full_boundary_polygon_margin_px();
     double get_sim_image_properties_full_ny_size_height_nm();

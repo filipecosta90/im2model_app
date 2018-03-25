@@ -32,206 +32,207 @@ bool WAVIMG_prm::set_sim_image_properties ( BaseImage* sim_prop ){
 bool WAVIMG_prm::produce_prm ( ) {
   bool result = false;
   if(
-      _flag_sim_crystal_properties
+    _flag_sim_crystal_properties
     ){
     if(
         // prm
-        _flag_prm_filename &&
+      _flag_prm_filename &&
         // BaseCrystal vars
-        sim_crystal_properties->get_flag_base_dir_path() &&
-        sim_crystal_properties->get_flag_ht_accelaration_voltage_KV() &&
-        sim_crystal_properties->get_flag_wav_output_target_folder() &&
-        sim_crystal_properties->get_flag_slice_samples() &&
-        sim_crystal_properties->get_flag_nm_upper_bound() &&
+      sim_crystal_properties->get_flag_base_dir_path() &&
+      sim_crystal_properties->get_flag_ht_accelaration_voltage_KV() &&
+      sim_crystal_properties->get_flag_wav_output_target_folder() &&
+      sim_crystal_properties->get_flag_slice_samples() &&
+      sim_crystal_properties->get_flag_nm_upper_bound() &&
+      (
         (
-        (
-        sim_crystal_properties->get_flag_defocus_parameter_loop() &&
-        sim_crystal_properties->get_flag_defocus_lower_bound() &&
-        sim_crystal_properties->get_flag_defocus_upper_bound() &&
-        sim_crystal_properties->get_flag_defocus_samples() &&
-        sim_crystal_properties->get_flag_simulated_params_nm_defocus_vec()
-        )
+          sim_crystal_properties->get_flag_defocus_parameter_loop() &&
+          sim_crystal_properties->get_flag_defocus_lower_bound() &&
+          sim_crystal_properties->get_flag_defocus_upper_bound() &&
+          sim_crystal_properties->get_flag_defocus_samples() &&
+          sim_crystal_properties->get_flag_simulated_params_nm_defocus_vec()
+          )
         ||
         (
-        sim_crystal_properties->get_flag_defocus_parameter_loop() == false
+          sim_crystal_properties->get_flag_defocus_parameter_loop() == false
         // no extra constraint if no defocus loop since we can have no defocus aberration
+          )
         )
-      )
       &&
       (
         (
-      sim_crystal_properties->get_flag_thickness_parameter_loop() &&
-      sim_crystal_properties->get_flag_nm_lower_bound()
-      )
-      ||
-      (
-      sim_crystal_properties->get_flag_thickness_parameter_loop() == false
+          sim_crystal_properties->get_flag_thickness_parameter_loop() &&
+          sim_crystal_properties->get_flag_nm_lower_bound()
+          )
+        ||
+        (
+          sim_crystal_properties->get_flag_thickness_parameter_loop() == false
       // no extra constraint if no defocus loop since we can have no defocus aberration
-      )
-    )
-    &&
-    sim_crystal_properties->get_flag_simulated_params_slice_vec() &&
-    sim_crystal_properties->get_flag_simulated_params_nm_slice_vec()  &&
+          )
+        )
+      &&
+      sim_crystal_properties->get_flag_simulated_params_slice_vec() &&
+      sim_crystal_properties->get_flag_simulated_params_nm_slice_vec()  &&
         // BaseImage vars
-        sim_image_properties->get_flag_full_n_cols_width() &&
-        sim_image_properties->get_flag_full_n_rows_height() &&
-        sim_image_properties->get_flag_sampling_rate_x_nm_per_pixel() &&
-        sim_image_properties->get_flag_sampling_rate_y_nm_per_pixel()
-        ){
+      sim_image_properties->get_flag_full_n_cols_width() &&
+      sim_image_properties->get_flag_full_n_rows_height() &&
+      sim_image_properties->get_flag_sampling_rate_x_nm_per_pixel() &&
+      sim_image_properties->get_flag_sampling_rate_y_nm_per_pixel()
+      ){
           // get const vars from class pointer
-          const boost::filesystem::path base_dir_path = sim_crystal_properties->get_base_dir_path();
-          const double ht_accelaration_voltage = sim_crystal_properties->get_ht_accelaration_voltage_KV();
-          const std::string wav_output_target_folder = sim_crystal_properties->get_wav_output_target_folder();
-          const int full_n_cols_width = sim_image_properties->get_full_n_cols_width();
-          const int full_n_rows_height = sim_image_properties->get_full_n_rows_height();
-          const double sampling_rate_x_nm_per_pixel = sim_image_properties->get_sampling_rate_x_nm_per_pixel();
-          const double sampling_rate_y_nm_per_pixel = sim_image_properties->get_sampling_rate_y_nm_per_pixel();
+      const boost::filesystem::path base_dir_path = sim_crystal_properties->get_base_dir_path();
+      const double ht_accelaration_voltage = sim_crystal_properties->get_ht_accelaration_voltage_KV();
+      const std::string wav_output_target_folder = sim_crystal_properties->get_wav_output_target_folder();
+      const int full_n_cols_width = sim_image_properties->get_full_n_cols_width();
+      const int full_n_rows_height = sim_image_properties->get_full_n_rows_height();
+      const double sampling_rate_x_nm_per_pixel = sim_image_properties->get_sampling_rate_x_nm_per_pixel();
+      const double sampling_rate_y_nm_per_pixel = sim_image_properties->get_sampling_rate_y_nm_per_pixel();
 
-          const std::vector<int> simulated_params_slice_vec = sim_crystal_properties->get_simulated_params_slice_vec();
-          const std::vector<double> simulated_params_nm_slice_vec = sim_crystal_properties->get_simulated_params_nm_slice_vec();
-          const int slice_samples = sim_crystal_properties->get_slice_samples();
-          const int slices_upper_bound = sim_crystal_properties->get_slices_upper_bound();
+      const std::vector<int> simulated_params_slice_vec = sim_crystal_properties->get_simulated_params_slice_vec();
+      const std::vector<double> simulated_params_nm_slice_vec = sim_crystal_properties->get_simulated_params_nm_slice_vec();
+      const int slice_samples = sim_crystal_properties->get_slice_samples();
+      const int slices_upper_bound = sim_crystal_properties->get_slices_upper_bound();
 
-          if( _flag_logger ){
-            std::stringstream message;
-            message << "Will simulate " << slice_samples << " thikness samples: {" ;
-            for(int slice_id = 0 ; slice_id <  simulated_params_slice_vec.size(); slice_id++ ){
-              message << simulated_params_nm_slice_vec[slice_id] << " (sli# "<< simulated_params_slice_vec[slice_id] << "), ";
-            }
-            message <<"}";
-           BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification , message.str() );
-          }
+      if( _flag_logger ){
+        std::stringstream message;
+        message << "Will simulate " << slice_samples << " thikness samples: {" ;
+        for(int slice_id = 0 ; slice_id <  simulated_params_slice_vec.size(); slice_id++ ){
+          message << simulated_params_nm_slice_vec[slice_id] << " (sli# "<< simulated_params_slice_vec[slice_id] << "), ";
+        }
+        message <<"}";
+        BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification , message.str() );
+      }
 
-          boost::filesystem::path file ( prm_filename );
-          boost::filesystem::path full_path = base_bin_output_dir_path / file;
-          std::ofstream outfile;
+      boost::filesystem::path file ( prm_filename );
+      boost::filesystem::path full_path = base_bin_output_dir_path / file;
+      std::ofstream outfile;
 
-          outfile.open( full_path.string() );
+      outfile.open( full_path.string() );
           // line 1
-          boost::filesystem::path input_wave_function ( file_name_input_wave_function );
-          boost::filesystem::path wav_input_dir ( wav_output_target_folder );
-          boost::filesystem::path input_wave_function_full_path = base_dir_path / wav_input_dir / input_wave_function;
-          std::stringstream  input_prefix_stream ;
-          input_prefix_stream << "'" << input_wave_function_full_path.string() << "_sl";
-          if( slice_samples == 1 ){
-            input_prefix_stream <<   std::setw(3) << std::setfill('0') << std::to_string( slices_upper_bound );
-          }
-          input_prefix_stream << ".wav"<< "'";
-          outfile  << input_prefix_stream.str() << "\t\t! Wave function file name string used to locate existing wave functions. Use quotation marks to secure the input including space characters." << std::endl;
+      boost::filesystem::path input_wave_function ( file_name_input_wave_function );
+      boost::filesystem::path wav_input_dir ( wav_output_target_folder );
+      boost::filesystem::path input_wave_function_full_path = base_dir_path / wav_input_dir / input_wave_function;
+      std::stringstream  input_prefix_stream ;
+      input_prefix_stream << "'" << input_wave_function_full_path.string() << "_sl";
+      if( slice_samples == 1 ){
+        input_prefix_stream <<   std::setw(3) << std::setfill('0') << std::to_string( slices_upper_bound );
+      }
+      input_prefix_stream << ".wav"<< "'";
+      outfile  << input_prefix_stream.str() << "\t\t! Wave function file name string used to locate existing wave functions. Use quotation marks to secure the input including space characters." << std::endl;
           // line 2
-          outfile <<  full_n_cols_width << ", " <<  full_n_rows_height << "\t\t! Dimension of the wave data in pixels, <nx> = number of horizontal wave pixels, <ny>  = number of vertical wave pixels." << std::endl;
+      outfile <<  full_n_cols_width << ", " <<  full_n_rows_height << "\t\t! Dimension of the wave data in pixels, <nx> = number of horizontal wave pixels, <ny>  = number of vertical wave pixels." << std::endl;
           // line 3
-          outfile  << sampling_rate_x_nm_per_pixel << ", " << sampling_rate_y_nm_per_pixel << "\t\t! Sampling rate of the wave data (<sx> = horizontal, <sy> = vertical) [nm/pix]." << std::endl;
+      outfile  << sampling_rate_x_nm_per_pixel << ", " << sampling_rate_y_nm_per_pixel << "\t\t! Sampling rate of the wave data (<sx> = horizontal, <sy> = vertical) [nm/pix]." << std::endl;
           // line 4
-          outfile <<  ht_accelaration_voltage << "\t\t! TEM high-tension as used for wave function calculation [kV]." << std::endl;
+      outfile <<  ht_accelaration_voltage << "\t\t! TEM high-tension as used for wave function calculation [kV]." << std::endl;
           // line 5
-          outfile <<  type_of_output << "\t\t! Image output type option: 0 = TEM image" << std::endl;
+      outfile <<  type_of_output << "\t\t! Image output type option: 0 = TEM image" << std::endl;
           // line 6
-          boost::filesystem::path output_wave_function ( file_name_output_image_wave_function );
-          boost::filesystem::path output_wave_function_full_path = base_bin_output_dir_path / output_wave_function;
-          std::stringstream  output_prefix_stream ;
-          output_prefix_stream << "'" << output_wave_function_full_path.string() << ".dat" << "'";
-          outfile <<  output_prefix_stream.str() << "\t\t! Image output file name string. Use quotation marks to secure the input including space characters." << std::endl;
+      boost::filesystem::path output_wave_function ( file_name_output_image_wave_function );
+      boost::filesystem::path output_wave_function_full_path = base_bin_output_dir_path / output_wave_function;
+      std::stringstream  output_prefix_stream ;
+      output_prefix_stream << "'" << output_wave_function_full_path.string() << ".dat" << "'";
+      outfile <<  output_prefix_stream.str() << "\t\t! Image output file name string. Use quotation marks to secure the input including space characters." << std::endl;
           // line 7
-          outfile << full_n_cols_width  << ", " << full_n_rows_height << "\t\t! Image output size (<ix> = horizontal , <iy> = vertical) in number of pixels." << std::endl;
+      outfile << full_n_cols_width  << ", " << full_n_rows_height << "\t\t! Image output size (<ix> = horizontal , <iy> = vertical) in number of pixels." << std::endl;
           // line 8
-          outfile <<  image_data_type << ", " << image_vacuum_mean_intensity << ", " << conversion_rate << ", " <<  readout_noise_rms_amplitude << "\t\t! Flag and parameters for creating integer images with optional noise. Flag <intflg> 0 = off (default)" << std::endl;
+      outfile <<  image_data_type << ", " << image_vacuum_mean_intensity << ", " << conversion_rate << ", " <<  readout_noise_rms_amplitude << "\t\t! Flag and parameters for creating integer images with optional noise. Flag <intflg> 0 = off (default)" << std::endl;
           // line 9
-          outfile <<  switch_option_extract_particular_image_frame << "\t! Flag activating the extraction of a special image frame (0=OFF, 1=ON)." << std::endl;
+      outfile <<  switch_option_extract_particular_image_frame << "\t! Flag activating the extraction of a special image frame (0=OFF, 1=ON)." << std::endl;
           // line 10
-          outfile <<  sampling_rate_x_nm_per_pixel << "\t! Image output sampling rate [nm/pix], isotropic. The parameter is used only if the Flag in line 09 is set to 1." << std::endl;
+      outfile <<  sampling_rate_x_nm_per_pixel << "\t! Image output sampling rate [nm/pix], isotropic. The parameter is used only if the Flag in line 09 is set to 1." << std::endl;
           // line 11
-          outfile <<  image_frame_offset_x_pixels_input_wave_function << ", " << image_frame_offset_y_pixels_input_wave_function << " !" << std::endl;
+      outfile <<  image_frame_offset_x_pixels_input_wave_function << ", " << image_frame_offset_y_pixels_input_wave_function << " !" << std::endl;
           // line 12
-          outfile <<  image_frame_rotation << " !" << std::endl;
+      outfile <<  image_frame_rotation << " !" << std::endl;
           // line 13
-          outfile <<  switch_coherence_model <<  "\t! Coherence calculation model switch: 1 = averaging of coherent sub images explicit focal variation but quasi-coherent spatial envelope, 2 = averaging of coherent sub images with explicit focal and angular variation, 3 = quasi-coherent linear envelopes, 4 = Fourier-space synthesis with partially coherent TCC, 5: averaging of coherent sub images with explicit focal, angular, and frozen lattice variation)" << std::endl;
+      outfile <<  switch_coherence_model <<  "\t! Coherence calculation model switch: 1 = averaging of coherent sub images explicit focal variation but quasi-coherent spatial envelope, 2 = averaging of coherent sub images with explicit focal and angular variation, 3 = quasi-coherent linear envelopes, 4 = Fourier-space synthesis with partially coherent TCC, 5: averaging of coherent sub images with explicit focal, angular, and frozen lattice variation)" << std::endl;
           // line 14
-          outfile <<  ( partial_temporal_coherence_switch ? "1" : "0") << ", " << partial_temporal_coherence_focus_spread << "\t\t! Flag and parameters for partial temporal coherence: <ptcflg> = flag (0=OFF, 1=ON), <f-spread> = focus spread (1/e) half width [nm]" << std::endl;
+      outfile <<  ( partial_temporal_coherence_switch ? "1" : "0") << ", " << partial_temporal_coherence_focus_spread << "\t\t! Flag and parameters for partial temporal coherence: <ptcflg> = flag (0=OFF, 1=ON), <f-spread> = focus spread (1/e) half width [nm]" << std::endl;
           // line 15
-          outfile <<  ( partial_spatial_coherence_switch ? "1" : "0") << ", " << partial_spatial_coherence_semi_convergence_angle << "\t\t! Flag and parameters for partial spatial coherence: <pscflg> = flag (0=OFF, 1=ON), <s-conv> = beam convergence (1/e) half width [mrad]" << std::endl;
+      outfile <<  ( partial_spatial_coherence_switch ? "1" : "0") << ", " << partial_spatial_coherence_semi_convergence_angle << "\t\t! Flag and parameters for partial spatial coherence: <pscflg> = flag (0=OFF, 1=ON), <s-conv> = beam convergence (1/e) half width [mrad]" << std::endl;
           // line 16
-          const int _mtf_swith = mtf_simulation_switch ? 1 : 0;
-          outfile <<  _mtf_swith << ", " << k_space_scaling << ", \'" <<  mtf_filename << "\'\t\t! Flag and parameters for applying the detector MTF: <mtfflag> = flag (0=OFF, 1=ON), <mtf-scale> = calculation scale of the mtf = (sampling rate experiment)/(sampling rate simulation), <mtf-file> = File name string to locate the MTF data. Use quotation marks to secure the input including space characters." << std::endl;
+      const int _mtf_swith = mtf_simulation_switch ? 1 : 0;
+      std::string full_mtf_filename =  get_mtf_filename_full_path();
+      outfile <<  _mtf_swith << ", " << k_space_scaling << ", \'" <<  full_mtf_filename << "\'\t\t! Flag and parameters for applying the detector MTF: <mtfflag> = flag (0=OFF, 1=ON), <mtf-scale> = calculation scale of the mtf = (sampling rate experiment)/(sampling rate simulation), <mtf-file> = File name string to locate the MTF data. Use quotation marks to secure the input including space characters." << std::endl;
           // line 17
-          outfile <<  simulation_image_spread_envelope_switch << ", " << isotropic_one_rms_amplitude << "\t! Flag and parameters for a vibration envelope: <vibflg> = flag (0=OFF, 1=ON), <vibprm> = vibration RMS amplitude [nm]." << std::endl;
+      outfile <<  simulation_image_spread_envelope_switch << ", " << isotropic_one_rms_amplitude << "\t! Flag and parameters for a vibration envelope: <vibflg> = flag (0=OFF, 1=ON), <vibprm> = vibration RMS amplitude [nm]." << std::endl;
           // line 18
-          number_image_aberrations_set = 0;
-          for (auto&& _aberration : aberration_definition_switch ){
-            if (_aberration.second == true)
-              ++number_image_aberrations_set;
-          }
-          outfile <<  number_image_aberrations_set << "\t! Number of aberration definitions following this line" << std::endl;
+      number_image_aberrations_set = 0;
+      for (auto&& _aberration : aberration_definition_switch ){
+        if (_aberration.second == true)
+          ++number_image_aberrations_set;
+      }
+      outfile <<  number_image_aberrations_set << "\t! Number of aberration definitions following this line" << std::endl;
           // line 19
-          if(number_image_aberrations_set == 1 ){
+      if(number_image_aberrations_set == 1 ){
             //        outfile <<  "1,0,0" << "\t\t! aberration definition (index, ax, ay) [nm]" << std::endl;
-          }
-          for (auto&& _aberration : aberration_definition_switch ){
-            if ( _aberration.second == true ){
-              outfile << _aberration.first << ", " << aberration_definition_1st_coefficient_value_nm.at( _aberration.first ) << ", "<< aberration_definition_2nd_coefficient_value_nm.at( _aberration.first ) << "\t\t! aberration definition (index, ax, ay) [nm]" << std::endl;
-            }
-          }
+      }
+      for (auto&& _aberration : aberration_definition_switch ){
+        if ( _aberration.second == true ){
+          outfile << _aberration.first << ", " << aberration_definition_1st_coefficient_value_nm.at( _aberration.first ) << ", "<< aberration_definition_2nd_coefficient_value_nm.at( _aberration.first ) << "\t\t! aberration definition (index, ax, ay) [nm]" << std::endl;
+        }
+      }
           // line 19 + aberration_definition_index_number
-          outfile <<  objective_aperture_radius << "\t\t! Objective aperture radius [mrad]. Set to very large values to deactivate." << std::endl;
+      outfile <<  objective_aperture_radius << "\t\t! Objective aperture radius [mrad]. Set to very large values to deactivate." << std::endl;
           // line 20 + aberration_definition_index_number
-          outfile <<  center_x_of_objective_aperture << ", " << center_y_of_objective_aperture << "\t\t! Center of the objective aperture with respect to the zero beam [mrad]." << std::endl;
+      outfile <<  center_x_of_objective_aperture << ", " << center_y_of_objective_aperture << "\t\t! Center of the objective aperture with respect to the zero beam [mrad]." << std::endl;
           // line 21
 
           //set_number_parameter_loops(2);
-          if( sim_crystal_properties->get_flag_defocus_parameter_loop() ){
-            const double defocus_lower_bound = sim_crystal_properties->get_defocus_lower_bound();
-            const double defocus_upper_bound = sim_crystal_properties->get_defocus_upper_bound();
-            const int defocus_samples = sim_crystal_properties->get_defocus_samples();
-            const std::vector<double> simulated_params_nm_defocus_vec = sim_crystal_properties->get_simulated_params_nm_defocus_vec();
-            if( _flag_logger ){
-              std::stringstream message;
-              message << "Will simulate " << defocus_samples << " defocus samples: { ";
-              for(auto& def : simulated_params_nm_defocus_vec){
-                message << def << " ";
-              }
-              message << " }";
-             BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification , message.str() );
-            }
-            number_parameter_loops++;
-            add_parameter_loop ( 1 , 1 , 1, defocus_lower_bound, defocus_upper_bound, defocus_samples, "'foc'" );
+      if( sim_crystal_properties->get_flag_defocus_parameter_loop() ){
+        const double defocus_lower_bound = sim_crystal_properties->get_defocus_lower_bound();
+        const double defocus_upper_bound = sim_crystal_properties->get_defocus_upper_bound();
+        const int defocus_samples = sim_crystal_properties->get_defocus_samples();
+        const std::vector<double> simulated_params_nm_defocus_vec = sim_crystal_properties->get_simulated_params_nm_defocus_vec();
+        if( _flag_logger ){
+          std::stringstream message;
+          message << "Will simulate " << defocus_samples << " defocus samples: { ";
+          for(auto& def : simulated_params_nm_defocus_vec){
+            message << def << " ";
           }
-          if( sim_crystal_properties->get_flag_thickness_parameter_loop() ){
-                      const int slices_lower_bound = sim_crystal_properties->get_slices_lower_bound();
-            number_parameter_loops++;
-            add_parameter_loop ( 3 , 1 , 1, slices_lower_bound, slices_upper_bound, slice_samples, "'_sl'" );
-          }
-
-          outfile <<  number_parameter_loops << "\t\t! Number variable of loop definitions following below." << std::endl;
-          for ( int pos = 0 ; pos < number_parameter_loops ; pos++){
-            // line 22 + aberration_definition_index_number
-            outfile << loop_parameter_class.at(pos) << " !" << std::endl;
-            // line 23 + aberration_definition_index_number
-            outfile <<  loop_parameter_index.at(pos) << " !" << std::endl;
-            // line 24 + aberration_definition_index_number
-            outfile << loop_variation_form.at(pos) << " !" << std::endl;
-            // line 25 + aberration_definition_index_number
-            outfile << loop_range_0.at(pos) << ", " << loop_range_1.at(pos) << ", " << loop_range_n.at(pos) << " !" << std::endl;
-            // line 26 + aberration_definition_index_number
-            outfile << loop_string_indentifier.at(pos) << " !" << std::endl;
-          }
-
-          outfile.close();
-          if( _flag_logger ){
-            std::stringstream message;
-            message << "checking if WAVIMG prm file was produced. filename: " <<  full_path.string() << " || result: " << boost::filesystem::exists( full_path.string() ) << std::endl;
-           BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification , message.str() );
-          }
-
-          _flag_produced_prm = boost::filesystem::exists( full_path );
-          prm_filename_path = boost::filesystem::canonical( full_path ).string();
-          _flag_prm_filename_path = _flag_produced_prm;
-          result = _flag_produced_prm;
+          message << " }";
+          BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification , message.str() );
         }
+        number_parameter_loops++;
+        add_parameter_loop ( 1 , 1 , 1, defocus_lower_bound, defocus_upper_bound, defocus_samples, "'foc'" );
+      }
+      if( sim_crystal_properties->get_flag_thickness_parameter_loop() ){
+        const int slices_lower_bound = sim_crystal_properties->get_slices_lower_bound();
+        number_parameter_loops++;
+        add_parameter_loop ( 3 , 1 , 1, slices_lower_bound, slices_upper_bound, slice_samples, "'_sl'" );
+      }
+
+      outfile <<  number_parameter_loops << "\t\t! Number variable of loop definitions following below." << std::endl;
+      for ( int pos = 0 ; pos < number_parameter_loops ; pos++){
+            // line 22 + aberration_definition_index_number
+        outfile << loop_parameter_class.at(pos) << " !" << std::endl;
+            // line 23 + aberration_definition_index_number
+        outfile <<  loop_parameter_index.at(pos) << " !" << std::endl;
+            // line 24 + aberration_definition_index_number
+        outfile << loop_variation_form.at(pos) << " !" << std::endl;
+            // line 25 + aberration_definition_index_number
+        outfile << loop_range_0.at(pos) << ", " << loop_range_1.at(pos) << ", " << loop_range_n.at(pos) << " !" << std::endl;
+            // line 26 + aberration_definition_index_number
+        outfile << loop_string_indentifier.at(pos) << " !" << std::endl;
+      }
+
+      outfile.close();
+      if( _flag_logger ){
+        std::stringstream message;
+        message << "checking if WAVIMG prm file was produced. filename: " <<  full_path.string() << " || result: " << boost::filesystem::exists( full_path.string() ) << std::endl;
+        BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification , message.str() );
+      }
+
+      _flag_produced_prm = boost::filesystem::exists( full_path );
+      prm_filename_path = boost::filesystem::canonical( full_path ).string();
+      _flag_prm_filename_path = _flag_produced_prm;
+      result = _flag_produced_prm;
+    }
     else{
       if( _flag_logger ){
         std::stringstream message;
         message << "The required vars for produce_prm() are not setted up.";
-       BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::error , message.str() );
+        BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::error , message.str() );
       }
       print_var_state();
     }
@@ -240,7 +241,7 @@ bool WAVIMG_prm::produce_prm ( ) {
     if( _flag_logger ){
       std::stringstream message;
       message << "The required Class POINTERS for produce_prm() are not setted up.";
-     BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::error , message.str() );
+      BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::error , message.str() );
     }
     print_var_state();
   }
@@ -258,9 +259,9 @@ bool WAVIMG_prm::check_clean_run_env(){
 
         std::stringstream filename_stream;
         filename_stream << file_name_output_image_wave_function <<
-          "_"<< std::setw(3) << std::setfill('0') << std::to_string(outter_loop_pos) <<
-          "_"<< std::setw(3) << std::setfill('0') << std::to_string(inner_loop_pos) <<
-          ".dat" ;
+        "_"<< std::setw(3) << std::setfill('0') << std::to_string(outter_loop_pos) <<
+        "_"<< std::setw(3) << std::setfill('0') << std::to_string(inner_loop_pos) <<
+        ".dat" ;
         boost::filesystem::path dat_file ( filename_stream.str() );
         boost::filesystem::path full_dat_path = base_bin_output_dir_path / dat_file;
 
@@ -275,12 +276,12 @@ bool WAVIMG_prm::check_clean_run_env(){
           run_env_warnings.push_back( message.str() );
           if( _flag_logger ){
            BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification , message.str() );
-          }
-        }
-      }
-    }
-  }
-  return status;
+         }
+       }
+     }
+   }
+ }
+ return status;
 }
 
 bool WAVIMG_prm::cleanup_prm(){
@@ -295,7 +296,7 @@ bool WAVIMG_prm::cleanup_prm(){
     if( _flag_logger ){
       std::stringstream message;
       message << "Removing the wavimg prm file: " << full_prm_path.string() << " result: " << std::boolalpha << status;
-     BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification , message.str() );
+      BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification , message.str() );
     }
   }
   return status;
@@ -312,9 +313,9 @@ bool WAVIMG_prm::cleanup_dat(){
 
         std::stringstream filename_stream;
         filename_stream << file_name_output_image_wave_function <<
-          "_"<< std::setw(3) << std::setfill('0') << std::to_string(outter_loop_pos) <<
-          "_"<< std::setw(3) << std::setfill('0') << std::to_string(inner_loop_pos) <<
-          ".dat" ;
+        "_"<< std::setw(3) << std::setfill('0') << std::to_string(outter_loop_pos) <<
+        "_"<< std::setw(3) << std::setfill('0') << std::to_string(inner_loop_pos) <<
+        ".dat" ;
         boost::filesystem::path dat_file ( filename_stream.str() );
         boost::filesystem::path full_dat_path = base_bin_output_dir_path / dat_file;
         if( boost::filesystem::exists( full_dat_path ) ){
@@ -323,7 +324,7 @@ bool WAVIMG_prm::cleanup_dat(){
           if( _flag_logger ){
             std::stringstream message;
             message << "Removing the dat file: " << full_dat_path.string() << " result: " << std::boolalpha << remove_result;
-           BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification , message.str() );
+            BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification , message.str() );
           }
         }
       }
@@ -369,7 +370,7 @@ bool WAVIMG_prm::call_bin(){
     if( _flag_logger ){
       std::stringstream message;
       message << "going to run boost process with args: "<< args_stream.str();
-     BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification , message.str() );
+      BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification , message.str() );
     }
 
     int _child_exit_code = -1;
@@ -380,14 +381,14 @@ bool WAVIMG_prm::call_bin(){
       if( _io_pipe_out.pipe().is_open() ){
         boost::process::child c(
             // command
-            args_stream.str(),
-            boost::process::start_dir = base_bin_start_dir_path,
+          args_stream.str(),
+          boost::process::start_dir = base_bin_start_dir_path,
             // redirecting std_out to async buffer
-            boost::process::std_out > _io_pipe_out,
+          boost::process::std_out > _io_pipe_out,
             // redirecting std_err to null
             // boost::process::std_err > boost::process::detail::
-            _error_code
-            );
+          _error_code
+          );
         c.wait();
         _child_exit_code = c.exit_code();
       }
@@ -395,77 +396,77 @@ bool WAVIMG_prm::call_bin(){
         if( _flag_logger ){
           std::stringstream message;
           message << " ERROR. pipe output is enabled but pipe is closed";
-         BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::error ,  message.str() );
+          BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::error ,  message.str() );
         }
       }
     }
     else{
 #if defined(BOOST_WINDOWS_API)
-       boost::process::child c(
+     boost::process::child c(
           // command
-          args_stream.str(),
-          boost::process::start_dir = base_bin_start_dir_path,
+      args_stream.str(),
+      boost::process::start_dir = base_bin_start_dir_path,
           // redirecting std_out to null
-          boost::process::std_out > boost::process::null,
+      boost::process::std_out > boost::process::null,
           // redirecting std_err to null
           //   boost::process::std_err > boost::process::null,
-          _error_code,
+      _error_code,
               // hide console on windows
-              env, ::boost::process::windows::hide
-              );
+      env, ::boost::process::windows::hide
+      );
 #elif defined(BOOST_POSIX_API)
-            boost::process::child c(
+     boost::process::child c(
           // command
-          args_stream.str(),
-          boost::process::start_dir = base_bin_start_dir_path,
+      args_stream.str(),
+      boost::process::start_dir = base_bin_start_dir_path,
           // redirecting std_out to null
-          boost::process::std_out > boost::process::null,
+      boost::process::std_out > boost::process::null,
           // redirecting std_err to null
           //   boost::process::std_err > boost::process::null,
-          _error_code
-          );
+      _error_code
+      );
 #endif
-      c.wait();
-      _child_exit_code = c.exit_code();
-      if( _flag_logger ){
-        std::stringstream message;
-        message << " runned in silent mode";
-       BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification ,  message.str() );
-      }
-    }
-
-    bool _exit_sucess_flag;
-#if defined(BOOST_WINDOWS_API)
-    if( _flag_logger ){
+     c.wait();
+     _child_exit_code = c.exit_code();
+     if( _flag_logger ){
       std::stringstream message;
-      message << "(EXIT_SUCCESS == _child_exit_code) "<< std::boolalpha << (EXIT_SUCCESS == _child_exit_code);
-     BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification , message.str() );
-    }
-    _exit_sucess_flag = ((EXIT_SUCCESS == _child_exit_code));
-#elif defined(BOOST_POSIX_API)
-    if( _flag_logger ){
-      std::stringstream message;
-      message << "(EXIT_SUCCESS == WEXITSTATUS(_child_exit_code)) "<< std::boolalpha << (EXIT_SUCCESS == WEXITSTATUS(_child_exit_code));
-     BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification , message.str() );
-    }
-    _exit_sucess_flag = ((EXIT_SUCCESS == WEXITSTATUS(_child_exit_code)));
-#endif
-
-    if( _error_code ){
-      if( _flag_logger ){
-        std::stringstream message;
-        message << "ERROR CODE:" << _error_code.value() << " MESSAGE:" << _error_code.message();
-       BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification , message.str() );
-      }
-      _exit_sucess_flag = false;
-    }
-
-    if( _exit_sucess_flag ){
-      _flag_runned_bin = check_produced_dat();
-      result = _flag_runned_bin;
+      message << " runned in silent mode";
+      BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification ,  message.str() );
     }
   }
-  return result;
+
+  bool _exit_sucess_flag;
+#if defined(BOOST_WINDOWS_API)
+  if( _flag_logger ){
+    std::stringstream message;
+    message << "(EXIT_SUCCESS == _child_exit_code) "<< std::boolalpha << (EXIT_SUCCESS == _child_exit_code);
+    BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification , message.str() );
+  }
+  _exit_sucess_flag = ((EXIT_SUCCESS == _child_exit_code));
+#elif defined(BOOST_POSIX_API)
+  if( _flag_logger ){
+    std::stringstream message;
+    message << "(EXIT_SUCCESS == WEXITSTATUS(_child_exit_code)) "<< std::boolalpha << (EXIT_SUCCESS == WEXITSTATUS(_child_exit_code));
+    BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification , message.str() );
+  }
+  _exit_sucess_flag = ((EXIT_SUCCESS == WEXITSTATUS(_child_exit_code)));
+#endif
+
+  if( _error_code ){
+    if( _flag_logger ){
+      std::stringstream message;
+      message << "ERROR CODE:" << _error_code.value() << " MESSAGE:" << _error_code.message();
+      BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification , message.str() );
+    }
+    _exit_sucess_flag = false;
+  }
+
+  if( _exit_sucess_flag ){
+    _flag_runned_bin = check_produced_dat();
+    result = _flag_runned_bin;
+  }
+}
+return result;
 }
 
 bool WAVIMG_prm::check_produced_dat(){
@@ -479,9 +480,9 @@ bool WAVIMG_prm::check_produced_dat(){
 
         std::stringstream filename_stream;
         filename_stream << file_name_output_image_wave_function <<
-          "_"<< std::setw(3) << std::setfill('0') << std::to_string(outter_loop_pos) <<
-          "_"<< std::setw(3) << std::setfill('0') << std::to_string(inner_loop_pos) <<
-          ".dat" ;
+        "_"<< std::setw(3) << std::setfill('0') << std::to_string(outter_loop_pos) <<
+        "_"<< std::setw(3) << std::setfill('0') << std::to_string(inner_loop_pos) <<
+        ".dat" ;
         boost::filesystem::path dat_file ( filename_stream.str() );
         boost::filesystem::path full_dat_path = base_bin_output_dir_path / dat_file;
         const bool _dat_exists = boost::filesystem::exists( full_dat_path );
@@ -489,7 +490,7 @@ bool WAVIMG_prm::check_produced_dat(){
         if( _flag_logger ){
           std::stringstream message;
           message << "Checking if the produced dat file exists: " << full_dat_path.string() << " result: " << std::boolalpha << _dat_exists;
-         BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification , message.str() );
+          BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification , message.str() );
         }
       }
     }
@@ -498,23 +499,23 @@ bool WAVIMG_prm::check_produced_dat(){
   else if(
     sim_crystal_properties->get_flag_thickness_parameter_loop() == false &&
     sim_crystal_properties->get_flag_defocus_parameter_loop() == false &&
-number_parameter_loops == 0 &&
-( loop_range_n.size() == 0 )
-){
+    number_parameter_loops == 0 &&
+    ( loop_range_n.size() == 0 )
+    ){
     boost::filesystem::path output_wave_function ( file_name_output_image_wave_function );
-    boost::filesystem::path output_wave_function_full_path = base_bin_output_dir_path / output_wave_function;
-    std::stringstream  output_prefix_stream;
-    output_prefix_stream << output_wave_function_full_path.string() << ".dat";
-    boost::filesystem::path dat_file ( output_prefix_stream.str() );
-    const bool _dat_exists = boost::filesystem::exists( dat_file );
-    result = _dat_exists;
-    if( _flag_logger ){
-      std::stringstream message;
-      message << "Checking if the produced dat file exists: " << dat_file.string() << " result: " << std::boolalpha << _dat_exists;
-     BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification , message.str() );
-    }
+  boost::filesystem::path output_wave_function_full_path = base_bin_output_dir_path / output_wave_function;
+  std::stringstream  output_prefix_stream;
+  output_prefix_stream << output_wave_function_full_path.string() << ".dat";
+  boost::filesystem::path dat_file ( output_prefix_stream.str() );
+  const bool _dat_exists = boost::filesystem::exists( dat_file );
+  result = _dat_exists;
+  if( _flag_logger ){
+    std::stringstream message;
+    message << "Checking if the produced dat file exists: " << dat_file.string() << " result: " << std::boolalpha << _dat_exists;
+    BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification , message.str() );
   }
-  return result;
+}
+return result;
 }
 
 bool WAVIMG_prm::clean_for_re_run(){
@@ -691,22 +692,39 @@ void WAVIMG_prm::set_k_space_scaling( double scale ){
   k_space_scaling = scale;
 }
 
-bool WAVIMG_prm::set_mtf_filename( std::string file_name ){
-  boost::filesystem::path full_path( file_name );
-  _flag_mtf_filename = boost::filesystem::exists(full_path);
+// internally we represent the filename path relative to the base_bin_start_dir_path. when you call getter you get the full path 
+std::string WAVIMG_prm::get_mtf_filename(){
+  return mtf_filename;
+}
+
+
+// internally we represent the filename path relative to the base_bin_start_dir_path. when you call getter you get the full path 
+std::string WAVIMG_prm::get_mtf_filename_full_path(){
+  std::string result = "";
   if( _flag_mtf_filename ) {
-    mtf_filename = boost::filesystem::canonical(full_path).string();
+    boost::filesystem::path full_path = base_bin_start_dir_path / boost::filesystem::path( mtf_filename );
+    result =  boost::filesystem::system_complete ( full_path.string() ).string();
+  }
+  return result;
+}
+
+bool WAVIMG_prm::set_mtf_filename( std::string file_name ){
+  boost::filesystem::path full_path = base_bin_start_dir_path / boost::filesystem::path( file_name );
+  _flag_mtf_filename = boost::filesystem::exists(full_path);
+
+  if( _flag_mtf_filename ) {
+    mtf_filename = file_name;
     if( _flag_logger ){
       std::stringstream message;
-      message << "Specified mtf file: " <<  mtf_filename;
-     BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::normal , message.str() );
+      message << "Specified mtf file: " <<  mtf_filename << " full path: " << full_path.string();
+      BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::normal , message.str() );
     }
   }
   else{
     if( _flag_logger ){
       std::stringstream message;
-      message << "The specified mtf file does not exist: " <<  file_name << " result " << _flag_mtf_filename;
-     BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::error , message.str() );
+      message << "The specified mtf mtf file: " <<  mtf_filename << " full path: " << full_path.string()  << " does not exist: result " << _flag_mtf_filename;
+      BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::error , message.str() );
     }
   }
   return _flag_mtf_filename;
@@ -846,7 +864,7 @@ bool WAVIMG_prm::set_application_logger( ApplicationLog::ApplicationLog* app_log
   logger = app_logger;
   _flag_logger = true;
   BaseBin::set_application_logger( app_logger );
- BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification, "Application logger setted for WAVIMG_prm class." );
+  BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification, "Application logger setted for WAVIMG_prm class." );
   return true;
 }
 
@@ -854,7 +872,7 @@ void WAVIMG_prm::print_var_state(){
   if( _flag_logger ){
     std::stringstream message;
     output( message );
-   BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification , message.str() );
+    BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification , message.str() );
   }
 }
 
@@ -865,11 +883,11 @@ std::ostream& operator<<(std::ostream& stream, const WAVIMG_prm& var) {
 
 std::ostream& WAVIMG_prm::output(std::ostream& stream) const {
   stream << "WAVIMG_prm vars:\n"
-    << "\t" << "file_name_input_wave_function : " << file_name_input_wave_function << "\n"
-    << "\t" << "file_name_output_image_wave_function : " << file_name_output_image_wave_function << "\n"
+  << "\t" << "file_name_input_wave_function : " << file_name_input_wave_function << "\n"
+  << "\t" << "file_name_output_image_wave_function : " << file_name_output_image_wave_function << "\n"
     // more vars here
     // ...
-    << "\t" << "BaseCrystal Properties : " << "\n";
+  << "\t" << "BaseCrystal Properties : " << "\n";
   sim_crystal_properties->output(stream);
   stream <<  "\t" << "BaseImage Properties : " << "\n";
   sim_image_properties->output(stream);

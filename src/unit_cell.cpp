@@ -51,24 +51,65 @@ void UnitCell::add_atom_site_occupancy( double occupancy ){
 bool UnitCell::parse_cif(){
   bool result = false;
   if( _flag_cif_path ){
-    cif_driver.parse( cif_path.c_str() );
-    std::map<std::string,std::string> non_looped_items = cif_driver.get_cif_non_looped_items();
-    std::cout << "XXXXXXXX going to populate cell " << non_looped_items.size() << std::endl;
+    std::string full_path = get_cif_path_full();
+    if( _flag_logger ){
+      std::stringstream message;
+      message << "Will parse cif file " << full_path;
+      BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::normal , message.str() );
+    }
+
+    const bool parse_result = cif_driver.parse( full_path.c_str() );
+    if( parse_result ){
+         std::map<std::string,std::string> non_looped_items = cif_driver.get_cif_non_looped_items();
+
+    if( _flag_logger ){
+      std::stringstream message;
+      message << "going to populate cell " << non_looped_items.size();
+      BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::normal , message.str() );
+    }
+
     const bool populate_cell_result = populate_cell( non_looped_items );
-    std::cout <<  "populate_cell_result " << std::boolalpha << populate_cell_result << std::endl;
+    if( _flag_logger ){
+      std::stringstream message;
+      message <<  "populate_cell_result " << std::boolalpha << populate_cell_result;
+      BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::normal , message.str() );
+    }
+    std::cout  << std::endl;
     std::map<std::string,std::vector<std::string>> looped_items = cif_driver.get_cif_looped_items();
     const bool populate_atom_result = populate_atom_site( looped_items );
-    std::cout <<  "populate_atom_result " << std::boolalpha << populate_atom_result << std::endl;
+
+    if( _flag_logger ){
+      std::stringstream message;
+      message <<  "populate_atom_result " << std::boolalpha << populate_atom_result;
+      BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::normal , message.str() );
+    }
 
     const bool populate_symetry_result = populate_symetry_equiv_pos_as_xyz( looped_items );
-    std::cout <<  "populate_symetry_result " << std::boolalpha << populate_symetry_result << std::endl;
+
+    if( _flag_logger ){
+      std::stringstream message;
+      message <<  "populate_symetry_result " << std::boolalpha << populate_symetry_result;
+      BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::normal , message.str() );
+    }
 
     const bool create_atoms_result = create_atoms_from_site_and_symetry();
-    std::cout <<  "create_atoms_result " << std::boolalpha << create_atoms_result << std::endl;
+
+    if( _flag_logger ){
+      std::stringstream message;
+      message <<  "create_atoms_result " << std::boolalpha << create_atoms_result;
+      BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::normal , message.str() );
+    }
 
     _flag_parsed_cif = populate_cell_result && populate_atom_result && populate_symetry_result && create_atoms_result;
-    std::cout <<  "parse_cif result " << std::boolalpha << _flag_parsed_cif << std::endl;
+
+    if( _flag_logger ){
+      std::stringstream message;
+      message <<  "parse_cif result " << std::boolalpha << _flag_parsed_cif;
+      BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::normal , message.str() );
+    }
+
     result = _flag_parsed_cif;
+    }  
   }
   return result;
 }
@@ -81,7 +122,6 @@ bool UnitCell::populate_cell( std::map<std::string,std::string> non_looped_items
     const std::string item_value = it->second;
     const double d_item_value = convert_to_double( item_value );
     set_length_a_Angstroms( d_item_value );
-    std::cout << " XXXXX " << d_item_value << std::endl;
   }
   else{
     parse_error = true;
@@ -229,11 +269,11 @@ bool UnitCell::populate_symetry_equiv_pos_as_xyz( std::map<std::string,std::vect
       std::string symetry_xyz = *value_list_it;
       //remove white spaces
       symetry_xyz.erase(std::remove_if(
-            symetry_xyz.begin(),
-            symetry_xyz.end(),
-            [](char x){return std::isspace(x);}
-            ),
-          symetry_xyz.end());
+        symetry_xyz.begin(),
+        symetry_xyz.end(),
+        [](char x){return std::isspace(x);}
+        ),
+      symetry_xyz.end());
       std::vector<std::string> symetry_vec = split( symetry_xyz, ",");
       add_symmetry_equiv_pos_as_x( symetry_vec[0]);
       add_symmetry_equiv_pos_as_y( symetry_vec[1]);
@@ -246,114 +286,120 @@ bool UnitCell::populate_symetry_equiv_pos_as_xyz( std::map<std::string,std::vect
 bool UnitCell::create_atoms_from_site_and_symetry(){
   bool result = false;
   if(
-      ( ! atoms_site_type_symbols.empty() ) &&
-      ( atoms_site_fract_x.size() == atoms_site_type_symbols.size() ) &&
-      ( atoms_site_fract_y.size() == atoms_site_type_symbols.size() ) &&
-      ( atoms_site_fract_z.size() == atoms_site_type_symbols.size() ) &&
-      ( atoms_site_fract_z.size() == atoms_site_occupancy.size() ) &&
+    ( ! atoms_site_type_symbols.empty() ) &&
+    ( atoms_site_fract_x.size() == atoms_site_type_symbols.size() ) &&
+    ( atoms_site_fract_y.size() == atoms_site_type_symbols.size() ) &&
+    ( atoms_site_fract_z.size() == atoms_site_type_symbols.size() ) &&
+    ( atoms_site_fract_z.size() == atoms_site_occupancy.size() ) &&
       // BaseCell vars
-      _flag_length &&
-      _flag_lattice_mapping_matrix_Nanometers
+    _flag_length &&
+    _flag_lattice_mapping_matrix_Nanometers
     ){
     int distinct = 0;
-    const int distinct_atom_types = atoms_site_type_symbols.size() ;
+  const int distinct_atom_types = atoms_site_type_symbols.size() ;
 
     //  allocates enough memory for the elements before we start
-    atom_positions.reserve( distinct_atom_types );
-    atom_symbols.reserve( distinct_atom_types );
-    atom_occupancies.reserve( distinct_atom_types );
-    atom_debye_waller_factors.reserve( distinct_atom_types );
-    atom_empirical_radiis.reserve( distinct_atom_types );
-    atom_cpk_rgba_colors.reserve( distinct_atom_types );
+  atom_positions.reserve( distinct_atom_types );
+  atom_symbols.reserve( distinct_atom_types );
+  atom_occupancies.reserve( distinct_atom_types );
+  atom_debye_waller_factors.reserve( distinct_atom_types );
+  atom_empirical_radiis.reserve( distinct_atom_types );
+  atom_cpk_rgba_colors.reserve( distinct_atom_types );
 
-    for( int atom_site_pos = 0 ; atom_site_pos < atoms_site_type_symbols.size(); atom_site_pos++ ) {
-      atom_positions.push_back(std::vector<cv::Point3d>(  ));
-      const double fract_x = atoms_site_fract_x[atom_site_pos];
-      const double fract_y = atoms_site_fract_y[atom_site_pos];
-      const double fract_z = atoms_site_fract_z[atom_site_pos];
-      std::string atom_site_type_symbol = atoms_site_type_symbols[atom_site_pos];
-      const double atom_occupancy = atoms_site_occupancy[atom_site_pos];
-      const double debye_waller_factor = 0.01f;
-      Atom_Info atom_info = chem_database.get_atom_info( atom_site_type_symbol );
-      double atom_radious = atom_info.empiricalRadius_Nanometers();
-      std::string atom_type_symbol = atom_info.symbol();
-      cv::Vec4d cpk_color = atom_info.cpkColor();
+  for( int atom_site_pos = 0 ; atom_site_pos < atoms_site_type_symbols.size(); atom_site_pos++ ) {
+    atom_positions.push_back(std::vector<cv::Point3d>(  ));
+    const double fract_x = atoms_site_fract_x[atom_site_pos];
+    const double fract_y = atoms_site_fract_y[atom_site_pos];
+    const double fract_z = atoms_site_fract_z[atom_site_pos];
+    std::string atom_site_type_symbol = atoms_site_type_symbols[atom_site_pos];
+    const double atom_occupancy = atoms_site_occupancy[atom_site_pos];
+    const double debye_waller_factor = 0.01f;
+    Atom_Info atom_info = chem_database.get_atom_info( atom_site_type_symbol );
+    double atom_radious = atom_info.empiricalRadius_Nanometers();
+    std::string atom_type_symbol = atom_info.symbol();
+    cv::Vec4d cpk_color = atom_info.cpkColor();
 
-      atom_symbols.push_back( atom_type_symbol );
-      atom_occupancies.push_back(atom_occupancy);
-      atom_debye_waller_factors.push_back(debye_waller_factor);
-      atom_empirical_radiis.push_back(atom_radious);
+    atom_symbols.push_back( atom_type_symbol );
+    atom_occupancies.push_back(atom_occupancy);
+    atom_debye_waller_factors.push_back(debye_waller_factor);
+    atom_empirical_radiis.push_back(atom_radious);
       //_atom_cpk_colors
-      atom_cpk_rgba_colors.push_back(cpk_color);
+    atom_cpk_rgba_colors.push_back(cpk_color);
 
-      std::cout << "symmetry_equiv_pos_as_x.size()" << symmetry_equiv_pos_as_x.size() << std::endl;
-      for( int value_list_pos = 0; value_list_pos < symmetry_equiv_pos_as_x.size(); value_list_pos++ ) {
-        std::string symetry_x = symmetry_equiv_pos_as_x[value_list_pos];
-        std::string symetry_y = symmetry_equiv_pos_as_y[value_list_pos];
-        std::string symetry_z = symmetry_equiv_pos_as_z[value_list_pos];
-        double temp_a = symbCalc( symetry_x , fract_x, fract_y, fract_z);
-        double temp_b = symbCalc( symetry_y , fract_x, fract_y, fract_z);
-        double temp_c = symbCalc( symetry_z , fract_x, fract_y, fract_z);
+    for( int value_list_pos = 0; value_list_pos < symmetry_equiv_pos_as_x.size(); value_list_pos++ ) {
+      std::string symetry_x = symmetry_equiv_pos_as_x[value_list_pos];
+      std::string symetry_y = symmetry_equiv_pos_as_y[value_list_pos];
+      std::string symetry_z = symmetry_equiv_pos_as_z[value_list_pos];
+      double temp_a = symbCalc( symetry_x , fract_x, fract_y, fract_z);
+      double temp_b = symbCalc( symetry_y , fract_x, fract_y, fract_z);
+      double temp_c = symbCalc( symetry_z , fract_x, fract_y, fract_z);
 
-        if  ( temp_a > 1.0f ) {
-          temp_a -= 1.0f;
-        }
-        if  ( temp_a < 0.0f ) {
-          temp_a += 1.0f;
-        }
-        if  ( temp_b > 1.0f ) {
-          temp_b -= 1.0f;
-        }
-        if  ( temp_b < 0.0f ) {
-          temp_b += 1.0f;
-        }
-        if  ( temp_c > 1.0f ) {
-          temp_c -= 1.0f;
-        }
-        if  ( temp_c < 0.0f ) {
-          temp_c += 1.0f;
-        }
+      if  ( temp_a > 1.0f ) {
+        temp_a -= 1.0f;
+      }
+      if  ( temp_a < 0.0f ) {
+        temp_a += 1.0f;
+      }
+      if  ( temp_b > 1.0f ) {
+        temp_b -= 1.0f;
+      }
+      if  ( temp_b < 0.0f ) {
+        temp_b += 1.0f;
+      }
+      if  ( temp_c > 1.0f ) {
+        temp_c -= 1.0f;
+      }
+      if  ( temp_c < 0.0f ) {
+        temp_c += 1.0f;
+      }
 
-        const cv::Point3d temporary_point = cv::Point3d(temp_a, temp_b, temp_c );
-        std::vector<cv::Point3d>::iterator it ;
+      const cv::Point3d temporary_point = cv::Point3d(temp_a, temp_b, temp_c );
+      std::vector<cv::Point3d>::iterator it ;
         // check if it already exists
-        it = std::find( symetry_atom_positions.begin(), symetry_atom_positions.end(), temporary_point );
-        if(it == symetry_atom_positions.end() ){
-          symetry_atom_positions.push_back(temporary_point);
-          std::cout << "atom # " << distinct << " ( " << atom_type_symbol << " )" << temp_a << " , " << temp_b << " , " << temp_c << std::endl;
-          const double px = temp_a * length_a_Nanometers;
-          const double py = temp_b * length_b_Nanometers;
-          const double pz = temp_c * length_c_Nanometers;
-          const cv::Point3d temp_atom_pos ( px, py, pz );
-          std::cout << "temporary_point" << temp_atom_pos << std::endl;
-          const cv::Mat atom_pos_mapped_result = lattice_mapping_matrix_Nanometers * cv::Mat( temporary_point );
-          const cv::Point3d atom_pos (atom_pos_mapped_result.at<double>(0,0), atom_pos_mapped_result.at<double>(1,0), atom_pos_mapped_result.at<double>(2,0) );
-          std::cout << "atom_pos" << atom_pos << std::endl;
-          atom_positions[atom_site_pos].push_back( atom_pos );
-          distinct++;
-        }
+      it = std::find( symetry_atom_positions.begin(), symetry_atom_positions.end(), temporary_point );
+      if(it == symetry_atom_positions.end() ){
+        symetry_atom_positions.push_back(temporary_point);
+        const double px = temp_a * length_a_Nanometers;
+        const double py = temp_b * length_b_Nanometers;
+        const double pz = temp_c * length_c_Nanometers;
+        const cv::Point3d temp_atom_pos ( px, py, pz );
+        const cv::Mat atom_pos_mapped_result = lattice_mapping_matrix_Nanometers * cv::Mat( temporary_point );
+        const cv::Point3d atom_pos (atom_pos_mapped_result.at<double>(0,0), atom_pos_mapped_result.at<double>(1,0), atom_pos_mapped_result.at<double>(2,0) );
+        atom_positions[atom_site_pos].push_back( atom_pos );
+        distinct++;
       }
     }
-    _flag_atom_positions = true;
-    result = true;
   }
-  else{
-    if( _flag_logger ){
-      std::stringstream message;
-      message << "The required vars for create_atoms_from_site_and_symetry() are not setted up.";
-     BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::error , message.str() );
-    }
-    print_var_state();
+  _flag_atom_positions = true;
+  result = true;
+}
+else{
+  if( _flag_logger ){
+    std::stringstream message;
+    message << "The required vars for create_atoms_from_site_and_symetry() are not setted up.";
+    BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::error , message.str() );
   }
-  return result;
+  print_var_state();
+}
+return result;
 }
 
 void UnitCell::print_var_state(){
   if( _flag_logger ){
     std::stringstream message;
     output( message );
-   BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification , message.str() );
+    BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification , message.str() );
   }
+}
+
+
+/* Loggers */
+bool UnitCell::set_application_logger( ApplicationLog::ApplicationLog* app_logger ){
+  logger = app_logger;
+  _flag_logger = true;
+  cif_driver.set_application_logger(app_logger);
+ BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification, "Application logger setted for UnitCell class." );
+  return true;
 }
 
 std::ostream& operator<<(std::ostream& stream, const UnitCell& var) {
@@ -363,7 +409,7 @@ std::ostream& operator<<(std::ostream& stream, const UnitCell& var) {
 
 std::ostream& UnitCell::output(std::ostream& stream) const {
   stream << "UnitCell vars:\n"
-    << "\t\t" << "_flag_parsed_cif : " << std::boolalpha << _flag_parsed_cif << "\n";
+  << "\t\t" << "_flag_parsed_cif : " << std::boolalpha << _flag_parsed_cif << "\n";
   stream << "BaseCell Properties : " << "\n";
   BaseCell::output(stream);
   return stream;

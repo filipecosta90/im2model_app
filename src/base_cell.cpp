@@ -83,6 +83,32 @@ bool BaseCell::clear_atom_positions(){
   return true;
 }
 
+/* Base dir path */
+bool BaseCell::set_base_bin_start_dir_path( boost::filesystem::path path ){
+  base_bin_start_dir_path = path;
+  _flag_base_bin_start_dir_path = true;
+
+  if( _flag_logger ){
+    std::stringstream message;
+    message << "BaseBim baseDirPath: " << path.string();
+   BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification, message.str() );
+  }
+  return true;
+}
+
+std::string BaseCell::get_cif_path_full( ){
+  std::string result = "";
+  if ( _flag_cif_path ) {
+ boost::filesystem::path full_path = base_bin_start_dir_path / boost::filesystem::path( cif_path );
+    result = full_path.string();
+  }
+  return result;
+}
+
+std::string BaseCell::get_cif_path( ){
+  return cif_path;
+}
+
 bool BaseCell::set_cif_path( std::string path ){
   cif_path = path;
   _flag_cif_path = true;
@@ -186,7 +212,6 @@ bool BaseCell::set_angle_beta( double beta ){
   angle_beta = beta;
   _flag_angle_beta = true;
   std::cout << " setted angle beta to " << angle_beta << std::endl;
-
   update_volume();
   form_matrix_from_lattice_parameters();
   form_matrix_from_miller_indices();
@@ -321,7 +346,6 @@ int BaseCell::get_atom_fractional_cell_coordinates_vec_size( ){
   return size;
 }
 void BaseCell::form_matrix_from_lattice_parameters(){
-  std::cout << "form_matrix_from_lattice_parameters " << std::endl;
   if(
     _flag_length_a &&
     _flag_length_b &&
@@ -330,14 +354,6 @@ void BaseCell::form_matrix_from_lattice_parameters(){
     _flag_angle_beta &&
     _flag_angle_gamma
     ){
-    std::cout << "form_matrix_from_lattice_parameters " << std::endl;
-
-  std::cout << " cos( angle_alpha )" << cos( deg2rad(angle_alpha) ) << std::endl;
-  std::cout << " cos( angle_beta )" << cos( deg2rad(angle_beta) ) << std::endl;
-  std::cout << " cos( angle_gamma )" << cos( deg2rad(angle_gamma) ) << std::endl;
-  std::cout << " sin( angle_alpha )" << sin( deg2rad(angle_alpha) ) << std::endl;
-  std::cout << " sin( angle_beta )" << sin( deg2rad(angle_beta) ) << std::endl;
-  std::cout << " sin( angle_gamma )" << sin( deg2rad(angle_gamma) ) << std::endl;
   cv::Point3d vector_a_factor;
   cv::Point3d vector_a_Ang;
   vector_a_factor.x = sin( deg2rad(angle_beta) );
@@ -372,24 +388,13 @@ void BaseCell::form_matrix_from_lattice_parameters(){
   factor_points.push_back(vector_c_factor);
   cv::Mat lattice_mapping_matrix_factor_temp = cv::Mat( factor_points , true );
   lattice_mapping_matrix_factors = lattice_mapping_matrix_factor_temp.reshape(1);
-
   std::vector<cv::Point3d> points;
   points.push_back(vector_a_Ang);
   points.push_back(vector_b_Ang);
   points.push_back(vector_c_Ang);
   cv::Mat lattice_mapping_matrix_temp = cv::Mat( points , true );
-  std::cout << "###########################" << std::endl;
-  std::cout << "lattice_mapping_matrix_factors" << lattice_mapping_matrix_factors << std::endl;
-  std::cout << "###########################" << std::endl;
   lattice_mapping_matrix_Angstroms = lattice_mapping_matrix_temp.reshape(1);
   lattice_mapping_matrix_Nanometers = lattice_mapping_matrix_Angstroms / 10.0f;
-
-  std::cout << " line 1 " << vector_a_Ang << std::endl;
-  std::cout << " line 2 " << vector_b_Ang << std::endl;
-  std::cout << " line 3 " << vector_c_Ang << std::endl;
-  std::cout <<"lattice_mapping_matrix_factors: \n" << lattice_mapping_matrix_factors << std::endl;
-  std::cout <<"lattice_mapping_matrix_Angstroms: \n" << lattice_mapping_matrix_Angstroms << std::endl;
-  std::cout <<"lattice_mapping_matrix_Nanometers: \n" << lattice_mapping_matrix_Nanometers << std::endl;
   _flag_lattice_mapping_matrix_Nanometers = true;
 }
 }
@@ -498,7 +503,6 @@ void BaseCell::form_matrix_from_miller_indices(){
   vector_yy_axis_projected.x = mat_yy_axis_projected.at<double>(0,0);
   vector_yy_axis_projected.y = mat_yy_axis_projected.at<double>(1,0);
   vector_yy_axis_projected.z = mat_yy_axis_projected.at<double>(2,0);
-  std::cout << " vector_yy_axis_projected " << vector_yy_axis_projected << std::endl;
   upward_vector = vector_yy_axis_projected;
   cv::Point3d vector_zz_axis_projected;
   vector_zz_axis_projected.x = z_axis_projected_mat.at<double>(0,0);
@@ -510,13 +514,6 @@ void BaseCell::form_matrix_from_miller_indices(){
   std::vector<cv::Point3d> points;
   points.push_back(vector_x_axis_projected);
 
-  std::cout << " cos( angle_alpha )" << cos( deg2rad(angle_alpha) ) << std::endl;
-  std::cout << " cos( angle_beta )" << cos( deg2rad(angle_beta) ) << std::endl;
-  std::cout << " cos( angle_gamma )" << cos( deg2rad(angle_gamma) ) << std::endl;
-  std::cout << " sin( angle_alpha )" << sin( deg2rad(angle_alpha) ) << std::endl;
-  std::cout << " sin( angle_beta )" << sin( deg2rad(angle_beta) ) << std::endl;
-  std::cout << " sin( angle_gamma )" << sin( deg2rad(angle_gamma) ) << std::endl;
-
   points.push_back(vector_yy_axis_projected);
   points.push_back(vector_z_axis_projected);
   orientation_matrix = cv::Mat( points , true );
@@ -527,8 +524,6 @@ void BaseCell::form_matrix_from_miller_indices(){
   emit orientation_matrix_changed();
   emit upward_vector_changed();
   emit zone_axis_vector_changed();
-
-  std::cout << "NEW orientation matrix: \n" << orientation_matrix << std::endl;
 
   cv::Point3d vector_a_factor;
   vector_a_factor.x = sin( deg2rad(angle_beta) );
@@ -552,8 +547,6 @@ void BaseCell::form_matrix_from_miller_indices(){
   factor_points.push_back(vector_c_factor);
   cv::Mat lattice_mapping_matrix_factor_temp = cv::Mat( factor_points , true );
   lattice_mapping_matrix_factors = lattice_mapping_matrix_factor_temp.reshape(1);
-
-  std::cout << "  lattice_mapping_matrix_factor_temp : \n" << lattice_mapping_matrix_factors << std::endl;
 
   
     /**
@@ -581,7 +574,6 @@ std::ostream& operator<<(std::ostream& stream, const BaseCell& var) {
 std::ostream& BaseCell::output(std::ostream& stream) const {
   stream << "BaseCell vars:\n"
   << "\t" << "cif_path : "  << cif_path << "\n"
-  << "\t\t" << "_flag_cif_path : " << std::boolalpha << _flag_cif_path << "\n"
   << "\t\t" << "_flag_cif_path : " << std::boolalpha << _flag_cif_path << "\n"
   << "\t" << "cel_path : "  << cel_path << "\n"
   << "\t\t" << "_flag_cel_filename : " << std::boolalpha << _flag_cel_filename << "\n"

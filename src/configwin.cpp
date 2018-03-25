@@ -505,10 +505,17 @@ void MainWindow::update_simgrid_frame(){
 bool MainWindow::copy_external_files_to_project_dir(){
  bool result = false;
  const bool project_setted = maybeSetProject();
+ 
  if ( project_setted ){
   result = _core_td_map->copy_external_files_to_project_dir();
- }
- return result;
+  if ( result ){
+    image_path->load_data_from_getter_string();
+        unit_cell_file_cif->load_data_from_getter_string();
+    _mtf_parameters->load_data_from_getter_string();
+  }
+}
+
+return result;
 }
 
 void MainWindow::update_super_cell_target_region(){
@@ -1059,7 +1066,7 @@ void MainWindow::createActions(){
   saveAsAct->setShortcuts(QKeySequence::SaveAs);
   saveAsAct->setStatusTip(tr("Save the document under a new name"));
 
-  QAction *copyExternal = fileMenu->addAction( tr("Copy external dependencies..."), this, &MainWindow::copy_external_dependencies);
+  QAction *copyExternal = fileMenu->addAction( tr("Copy external dependencies..."), this, &MainWindow::copy_external_files_to_project_dir);
   copyExternal->setStatusTip(tr("Copy external dependencies to folder inside project"));
   fileMenu->addSeparator();
 
@@ -1304,7 +1311,12 @@ void MainWindow::loadFile(const QString &fileName){
 
   _load_file_delegate->set_base_dir_path( filename_path.parent_path().string(), true );
 
+  if ( _flag_im2model_logger ){
+    im2model_logger->add_sync( filename_path.parent_path() );
+  }
+
   bool result = _core_td_map->set_project_filename_with_path( fileName.toStdString() );
+
   bool missing_version = false;
   bool old_version = false;
   std::string file_version;
@@ -1380,7 +1392,6 @@ void MainWindow::loadFile(const QString &fileName){
       result = false;
       std::cout << e.what() << std::endl;
     }
-    _flag_project_setted = true;
     this->setCurrentFile(fileName);
   }
 
@@ -1389,6 +1400,7 @@ void MainWindow::loadFile(const QString &fileName){
 #endif
 
   if( result ){
+    _flag_project_setted = true;
     ui->statusBar->showMessage(tr("Project loaded"), 2000);
     _reset_document_modified_flags();
   }
@@ -1533,10 +1545,12 @@ void MainWindow::create_box_options_tab1_exp_image(){
   image_path  = new TreeItem (  box1_option_1 , box1_function_1, box1_option_1_edit );
   image_path->set_variable_name( "image_path" );
   image_path->set_item_delegate_type( TreeItem::_delegate_FILE );
-  experimental_image_root->insertChildren( image_path );
+  boost::function<std::string(void)> box1_function_1_getter ( boost::bind( &TDMap::get_exp_image_properties_image_path_string, _core_td_map ) );
+  image_path->set_fp_data_getter_string_vec( 1, box1_function_1_getter );
   /*group options*/
   image_path->set_variable_description( "Experimental image path" );
   simgrid_step_group_options->add_option( project_setup_image_fields_model, image_path , 1, true);
+  experimental_image_root->insertChildren( image_path );
 
   ////////////////
   // ROI
@@ -2348,6 +2362,10 @@ void MainWindow::create_box_options_tab2_sim_config(){
   boost::function<bool(std::string)> box3_function_5_3 ( boost::bind( &TDMap::set_mtf_filename,_core_td_map, _1 ) );
   _mtf_parameters = new TreeItem ( box3_option_5_3 , box3_function_5_3, box3_option_5_3_edit );
   _mtf_parameters->set_variable_name( "_mtf_parameters" );
+
+  boost::function<std::string(void)> box3_function_5_3_getter ( boost::bind( &TDMap::get_mtf_filename, _core_td_map ) );
+  _mtf_parameters->set_fp_data_getter_string_vec( 1, box3_function_5_3_getter );
+
   _mtf_parameters->set_item_delegate_type( TreeItem::_delegate_FILE );
   _simulation_refinement->insertChildren( _mtf_parameters );
 

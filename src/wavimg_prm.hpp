@@ -243,7 +243,12 @@ class WAVIMG_prm : public BaseBin {
     /**
      * flag getters
      */
+
+    std::string get_mtf_filename();
+        std::string get_mtf_filename_full_path();
+
      int get_simulation_image_spread_envelope_switch(){ return simulation_image_spread_envelope_switch; }
+
 
     double get_aberration_definition( WAVIMG_prm::AberrationDefinition aberration_index, int coefficient );
 

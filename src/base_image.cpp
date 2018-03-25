@@ -602,6 +602,18 @@ void BaseImage::update_roi_image_from_full_image_and_roi_rectangle(){
   }
 }
 
+boost::filesystem::path BaseImage::get_full_image_path(){
+  return full_image_path;
+}
+
+bool BaseImage::set_full_image_path( boost::filesystem::path image_path ){
+  full_image_path = boost::filesystem::path( image_path );
+}
+
+std::string BaseImage::get_full_image_path_string(){
+  return full_image_path.string();
+}
+
 bool BaseImage::set_full_image( std::string image_path, bool normalize ){
   bool result = false;
   if ( boost::filesystem::exists( image_path ) ){
@@ -641,44 +653,44 @@ bool BaseImage::set_full_image( std::string image_path, bool normalize ){
     }
   }
   else{
-     if( _flag_logger ){
-        std::stringstream message;
-        message << "Unable to read image with path " << image_path;
-        ApplicationLog::severity_level _log_type = ApplicationLog::critical;
-        BOOST_LOG_FUNCTION();
-        logger->logEvent( _log_type , message.str() );
-      }
+   if( _flag_logger ){
+    std::stringstream message;
+    message << "Unable to read image with path " << image_path;
+    ApplicationLog::severity_level _log_type = ApplicationLog::critical;
+    BOOST_LOG_FUNCTION();
+    logger->logEvent( _log_type , message.str() );
   }
-  return _flag_full_image;
+}
+return _flag_full_image;
 }
 
 void BaseImage::calculate_roi_rectangle_and_roi_image(){
   if( _flag_roi_center_x &&
-      _flag_roi_center_y &&
-      _flag_roi_n_rows_height &&
-      _flag_roi_n_cols_width ) {
+    _flag_roi_center_y &&
+    _flag_roi_n_rows_height &&
+    _flag_roi_n_cols_width ) {
 
     const int top_left_x = roi_center_x - ( roi_n_cols_width  / 2 );
-    const int top_left_y = roi_center_y - ( roi_n_rows_height / 2 );
+  const int top_left_y = roi_center_y - ( roi_n_rows_height / 2 );
 
-    if( top_left_x >= 0 && top_left_y >= 0 ){
+  if( top_left_x >= 0 && top_left_y >= 0 ){
 
-      roi_rectangle.x = top_left_x;
-      roi_rectangle.y = top_left_y;
-      roi_rectangle.width = roi_n_cols_width;
-      roi_rectangle.height = roi_n_rows_height;
-      _flag_roi_rectangle = true;
-      emit roi_rectangle_changed();
+    roi_rectangle.x = top_left_x;
+    roi_rectangle.y = top_left_y;
+    roi_rectangle.width = roi_n_cols_width;
+    roi_rectangle.height = roi_n_rows_height;
+    _flag_roi_rectangle = true;
+    emit roi_rectangle_changed();
 
-    }
-    else{
-      if( _flag_logger ){
-        std::stringstream message;
-        message << "ERROR: top_left_x " << top_left_x << " top_left_y " << top_left_y;
-        BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::error , message.str() );
-      }
+  }
+  else{
+    if( _flag_logger ){
+      std::stringstream message;
+      message << "ERROR: top_left_x " << top_left_x << " top_left_y " << top_left_y;
+      BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::error , message.str() );
     }
   }
+}
 }
 
 bool BaseImage::set_roi_rectangle_statistical( cv::Rect boundary_rect ){
@@ -808,7 +820,7 @@ void BaseImage::print_var_state(){
 }
 
 std::ostream& operator<<(std::ostream& stream,
-    const BaseImage& var) {
+  const BaseImage& var) {
   var.output(stream);
   return stream;
 }
@@ -816,60 +828,60 @@ std::ostream& operator<<(std::ostream& stream,
 std::ostream& BaseImage::output(std::ostream& stream) const {
 
   stream << "\t\t #################### \n" 
-    << "BaseImage vars:\n"
-    << "\t\t" << "_flag_auto_n_rows : " << std::boolalpha << _flag_auto_n_rows << "\n"
-    << "\t\t" << "_flag_auto_n_cols : " << std::boolalpha << _flag_auto_n_cols << "\n"
-    << "\t\t" << "_flag_auto_a_size : " << std::boolalpha << _flag_auto_a_size << "\n"
-    << "\t\t" << "_flag_auto_b_size : " << std::boolalpha << _flag_auto_b_size << "\n"
-    << "\t\t" << "_flag_auto_roi_from_ignored_edge : " << std::boolalpha << _flag_auto_roi_from_ignored_edge << "\n"
+  << "BaseImage vars:\n"
+  << "\t\t" << "_flag_auto_n_rows : " << std::boolalpha << _flag_auto_n_rows << "\n"
+  << "\t\t" << "_flag_auto_n_cols : " << std::boolalpha << _flag_auto_n_cols << "\n"
+  << "\t\t" << "_flag_auto_a_size : " << std::boolalpha << _flag_auto_a_size << "\n"
+  << "\t\t" << "_flag_auto_b_size : " << std::boolalpha << _flag_auto_b_size << "\n"
+  << "\t\t" << "_flag_auto_roi_from_ignored_edge : " << std::boolalpha << _flag_auto_roi_from_ignored_edge << "\n"
     // FULL IMAGE
-    << "\t\t" << "_flag_full_image : " <<  std::boolalpha << _flag_full_image << "\n"
-    << "\t" << "full_n_rows_height : " <<  full_n_rows_height << "\n"
-    << "\t\t" << "_flag_full_n_rows_height : " << std::boolalpha << _flag_full_n_rows_height << "\n"
-    << "\t" << "full_n_cols_width : " <<  full_n_cols_width << "\n"
-    << "\t\t" << "_flag_full_n_cols_width : " << std::boolalpha << _flag_full_n_cols_width << "\n"
+  << "\t\t" << "_flag_full_image : " <<  std::boolalpha << _flag_full_image << "\n"
+  << "\t" << "full_n_rows_height : " <<  full_n_rows_height << "\n"
+  << "\t\t" << "_flag_full_n_rows_height : " << std::boolalpha << _flag_full_n_rows_height << "\n"
+  << "\t" << "full_n_cols_width : " <<  full_n_cols_width << "\n"
+  << "\t\t" << "_flag_full_n_cols_width : " << std::boolalpha << _flag_full_n_cols_width << "\n"
     // sampling rate and dimensioning
-    << "\t" << "sampling_rate_x_nm_per_pixel : " << sampling_rate_x_nm_per_pixel << "\n"
-    << "\t\t" << "_flag_sampling_rate_x_nm_per_pixel : " << std::boolalpha <<  _flag_sampling_rate_x_nm_per_pixel << "\n"
-    << "\t" << "sampling_rate_y_nm_per_pixel : " << sampling_rate_y_nm_per_pixel << "\n"
-    << "\t\t" << "_flag_sampling_rate_y_nm_per_pixel : " << std::boolalpha <<  _flag_sampling_rate_y_nm_per_pixel << "\n"
-    << "\t\t" << "_flag_sampling_rate : " << std::boolalpha <<  _flag_sampling_rate << "\n"
+  << "\t" << "sampling_rate_x_nm_per_pixel : " << sampling_rate_x_nm_per_pixel << "\n"
+  << "\t\t" << "_flag_sampling_rate_x_nm_per_pixel : " << std::boolalpha <<  _flag_sampling_rate_x_nm_per_pixel << "\n"
+  << "\t" << "sampling_rate_y_nm_per_pixel : " << sampling_rate_y_nm_per_pixel << "\n"
+  << "\t\t" << "_flag_sampling_rate_y_nm_per_pixel : " << std::boolalpha <<  _flag_sampling_rate_y_nm_per_pixel << "\n"
+  << "\t\t" << "_flag_sampling_rate : " << std::boolalpha <<  _flag_sampling_rate << "\n"
     // [nm dimensions]
-    << "\t" << "full_nm_size_rows_b : " << full_nm_size_rows_b << "\n"
-    << "\t\t" << "_flag_full_nm_size_rows_b : " << std::boolalpha <<  _flag_full_nm_size_rows_b << "\n"
-    << "\t" << "full_nm_size_cols_a : " << full_nm_size_cols_a << "\n"
-    << "\t\t" << "_flag_full_nm_size_cols_a : " << std::boolalpha <<  _flag_full_nm_size_cols_a << "\n"
+  << "\t" << "full_nm_size_rows_b : " << full_nm_size_rows_b << "\n"
+  << "\t\t" << "_flag_full_nm_size_rows_b : " << std::boolalpha <<  _flag_full_nm_size_rows_b << "\n"
+  << "\t" << "full_nm_size_cols_a : " << full_nm_size_cols_a << "\n"
+  << "\t\t" << "_flag_full_nm_size_cols_a : " << std::boolalpha <<  _flag_full_nm_size_cols_a << "\n"
     // ROI FRAME
-    << "\t\t" << "_flag_roi_image : " << std::boolalpha << _flag_roi_image << "\n"
-    << "\t" << "roi_rectangle : " <<  roi_rectangle << "\n"
-    << "\t\t" << "_flag_roi_rectangle : " << std::boolalpha << _flag_roi_rectangle << "\n"
-    << "\t" << "roi_n_rows_height : " <<  roi_n_rows_height << "\n"
-    << "\t\t" << "_flag_roi_n_rows_height : " << std::boolalpha << _flag_roi_n_rows_height << "\n"
-    << "\t" << "roi_n_cols_width : " <<  roi_n_cols_width << "\n"
-    << "\t\t" << "_flag_roi_n_cols_width : " << std::boolalpha << _flag_roi_n_cols_width << "\n"
+  << "\t\t" << "_flag_roi_image : " << std::boolalpha << _flag_roi_image << "\n"
+  << "\t" << "roi_rectangle : " <<  roi_rectangle << "\n"
+  << "\t\t" << "_flag_roi_rectangle : " << std::boolalpha << _flag_roi_rectangle << "\n"
+  << "\t" << "roi_n_rows_height : " <<  roi_n_rows_height << "\n"
+  << "\t\t" << "_flag_roi_n_rows_height : " << std::boolalpha << _flag_roi_n_rows_height << "\n"
+  << "\t" << "roi_n_cols_width : " <<  roi_n_cols_width << "\n"
+  << "\t\t" << "_flag_roi_n_cols_width : " << std::boolalpha << _flag_roi_n_cols_width << "\n"
     // ROI [nm dimensions]
-    << "\t" << "roi_nm_size_rows_b : " << roi_nm_size_rows_b << "\n"
-    << "\t\t" << "_flag_roi_nm_size_rows_b : " << std::boolalpha <<  _flag_roi_nm_size_rows_b << "\n"
-    << "\t" << "roi_nm_size_cols_a : " << roi_nm_size_cols_a << "\n"
-    << "\t\t" << "_flag_roi_nm_size_cols_a : " << std::boolalpha <<  _flag_roi_nm_size_cols_a << "\n"
-    << "\t" << "roi_center_x : " <<  roi_center_x << "\n"
-    << "\t\t" << "_flag_roi_center_x : " << std::boolalpha << _flag_roi_center_x << "\n"
-    << "\t" << "roi_center_y : " <<  roi_center_y << "\n"
-    << "\t\t" << "_flag_roi_center_y : " << std::boolalpha << _flag_roi_center_y << "\n"
-    << "\t" << "centroid_translation_px : " <<  centroid_translation_px << "\n"
-    << "\t\t" << "_flag_centroid_translation_px : " << std::boolalpha << _flag_centroid_translation_px << "\n"
+  << "\t" << "roi_nm_size_rows_b : " << roi_nm_size_rows_b << "\n"
+  << "\t\t" << "_flag_roi_nm_size_rows_b : " << std::boolalpha <<  _flag_roi_nm_size_rows_b << "\n"
+  << "\t" << "roi_nm_size_cols_a : " << roi_nm_size_cols_a << "\n"
+  << "\t\t" << "_flag_roi_nm_size_cols_a : " << std::boolalpha <<  _flag_roi_nm_size_cols_a << "\n"
+  << "\t" << "roi_center_x : " <<  roi_center_x << "\n"
+  << "\t\t" << "_flag_roi_center_x : " << std::boolalpha << _flag_roi_center_x << "\n"
+  << "\t" << "roi_center_y : " <<  roi_center_y << "\n"
+  << "\t\t" << "_flag_roi_center_y : " << std::boolalpha << _flag_roi_center_y << "\n"
+  << "\t" << "centroid_translation_px : " <<  centroid_translation_px << "\n"
+  << "\t\t" << "_flag_centroid_translation_px : " << std::boolalpha << _flag_centroid_translation_px << "\n"
     // rectangle without the ignored edge pixels of the full image
-    << "\t" << "ignore_edge_nm : " <<  ignore_edge_nm << "\n"
-    << "\t\t" << "_flag_ignore_edge_nm : " << std::boolalpha << _flag_ignore_edge_nm << "\n"
-    << "\t\t" << "_flag_auto_ignore_edge_nm : " << std::boolalpha << _flag_auto_ignore_edge_nm << "\n"
-    << "\t" << "ignore_edge_pixels : " <<  ignore_edge_pixels << "\n"
-    << "\t\t" << "_flag_ignore_edge_pixels : " << std::boolalpha << _flag_ignore_edge_pixels << "\n"
-    << "\t\t" << "_flag_auto_ignore_edge_pixels : " << std::boolalpha << _flag_auto_ignore_edge_pixels << "\n"
-    << "\t" << "mean_image_statistical : " <<  mean_image_statistical << "\n"
-    << "\t\t" << "_flag_mean_image_statistical : " << std::boolalpha << _flag_mean_image_statistical << "\n"
-    << "\t" << "stddev_image_statistical : " <<  stddev_image_statistical << "\n"
-    << "\t\t" << "_flag_stddev_image_statistical : " << std::boolalpha << _flag_stddev_image_statistical << "\n"
+  << "\t" << "ignore_edge_nm : " <<  ignore_edge_nm << "\n"
+  << "\t\t" << "_flag_ignore_edge_nm : " << std::boolalpha << _flag_ignore_edge_nm << "\n"
+  << "\t\t" << "_flag_auto_ignore_edge_nm : " << std::boolalpha << _flag_auto_ignore_edge_nm << "\n"
+  << "\t" << "ignore_edge_pixels : " <<  ignore_edge_pixels << "\n"
+  << "\t\t" << "_flag_ignore_edge_pixels : " << std::boolalpha << _flag_ignore_edge_pixels << "\n"
+  << "\t\t" << "_flag_auto_ignore_edge_pixels : " << std::boolalpha << _flag_auto_ignore_edge_pixels << "\n"
+  << "\t" << "mean_image_statistical : " <<  mean_image_statistical << "\n"
+  << "\t\t" << "_flag_mean_image_statistical : " << std::boolalpha << _flag_mean_image_statistical << "\n"
+  << "\t" << "stddev_image_statistical : " <<  stddev_image_statistical << "\n"
+  << "\t\t" << "_flag_stddev_image_statistical : " << std::boolalpha << _flag_stddev_image_statistical << "\n"
 
-    << "\t\t #################### \n";
+  << "\t\t #################### \n";
   return stream;
 }

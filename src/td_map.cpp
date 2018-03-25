@@ -1262,6 +1262,9 @@ bool TDMap::set_project_filename_with_path( std::string filename_with_path ){
 bool TDMap::set_base_dir_path( boost::filesystem::path path ){
   bool result = true;
   result &= sim_crystal_properties->set_base_dir_path( path );
+  result &=  unit_cell->set_base_bin_start_dir_path( path );
+  result &=  tdmap_roi_sim_super_cell->set_base_bin_start_dir_path( path );
+
   result &= _tdmap_celslc_parameters->set_base_bin_start_dir_path( path );
   result &= _tdmap_msa_parameters->set_base_bin_start_dir_path( path );
   result &= _tdmap_wavimg_parameters->set_base_bin_start_dir_path( path );
@@ -1294,7 +1297,7 @@ bool TDMap::set_application_logger( ApplicationLog::ApplicationLog* app_logger )
   _supercell_msa_parameters->set_application_logger( app_logger );
   _supercell_wavimg_parameters->set_application_logger( app_logger );
   /* Classes with sim properties */
-  //unit_cell->set_application_logger(app_logger);
+  unit_cell->set_application_logger(app_logger);
   tdmap_roi_sim_super_cell->set_application_logger(app_logger);
   tdmap_full_sim_super_cell->set_application_logger(app_logger);
   final_full_sim_super_cell->set_application_logger(app_logger);
@@ -1346,7 +1349,79 @@ bool TDMap::set_dr_probe_wavimg_execname( std::string wavimg_execname ){
 }
 
 bool TDMap::copy_external_files_to_project_dir(){
-  return true;
+  bool result = true;
+  boost::filesystem::path internal_folder ( "external" );
+  boost::filesystem::path project_external_path = project_dir_path / internal_folder;
+
+  // check if if external folder exists, if not, create it
+  if (!boost::filesystem::exists(project_external_path) || !boost::filesystem::is_directory(project_external_path)) {
+    boost::filesystem::create_directory(project_external_path);
+    if( _flag_logger ){
+      std::stringstream message;
+      message << "creating folder: " <<  project_external_path.string();
+      BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification , message.str() );
+    }
+  }
+
+  if( _flag_parse_cif ){
+    std::string cif_path = unit_cell->get_cif_path_full();
+    boost::filesystem::path project_external_path_cif ( cif_path );
+    boost::filesystem::path cif_filename = project_external_path_cif.filename();
+    boost::filesystem::path project_internal_path_cif = project_external_path / cif_filename;
+    boost::filesystem::copy_file( project_external_path_cif, project_internal_path_cif, boost::filesystem::copy_option::overwrite_if_exists );
+    project_internal_path_cif = make_path_relative_to_project_dir( project_internal_path_cif );
+    const bool cif_set_result = unit_cell->set_cif_path( project_internal_path_cif.string() );
+    result &= cif_set_result;
+    if( _flag_logger ){
+      std::stringstream message;
+      message << "copy_external_files_to_project_dir :: cif_set_result: " << std::boolalpha << cif_set_result;
+      if( cif_set_result ){
+        BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification , message.str() );
+      }
+      else{
+        BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::error , message.str() );
+      }
+    }
+  }
+  if( _flag_experimental_image_properties_path ){
+    boost::filesystem::path project_external_experimental_image_path = exp_image_properties->get_full_image_path();
+    boost::filesystem::path experimental_image_filename = project_external_experimental_image_path.filename();
+    boost::filesystem::path project_internal_path_experimental_image = project_external_path / experimental_image_filename;
+    boost::filesystem::copy_file( project_external_experimental_image_path, project_internal_path_experimental_image, boost::filesystem::copy_option::overwrite_if_exists );
+    project_internal_path_experimental_image = make_path_relative_to_project_dir( project_internal_path_experimental_image );
+    const bool experimental_image_set_result = exp_image_properties->set_full_image_path( project_internal_path_experimental_image );
+    result &= experimental_image_set_result;
+    if( _flag_logger ){
+      std::stringstream message;
+      message << "copy_external_files_to_project_dir :: experimental_image_set_result: " << std::boolalpha << experimental_image_set_result;
+      if( experimental_image_set_result ){
+        BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification , message.str() );
+      }
+      else{
+        BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::error , message.str() );
+      }
+    }
+  }
+  if( _flag_mtf_filename ){
+    boost::filesystem::path project_external_mtf_path ( _tdmap_wavimg_parameters->get_mtf_filename_full_path() );
+    boost::filesystem::path mtf_filename = project_external_mtf_path.filename();
+    boost::filesystem::path project_internal_mtf_path = project_external_path / mtf_filename;
+    boost::filesystem::copy_file( project_external_mtf_path, project_internal_mtf_path, boost::filesystem::copy_option::overwrite_if_exists );
+    project_internal_mtf_path = make_path_relative_to_project_dir( project_internal_mtf_path );
+    const bool mtf_set_result = _tdmap_wavimg_parameters->set_mtf_filename( project_internal_mtf_path.string() );
+    result &= mtf_set_result;
+    if( _flag_logger ){
+      std::stringstream message;
+      message << "copy_external_files_to_project_dir :: mtf_set_result: " << std::boolalpha << mtf_set_result;
+      if( mtf_set_result ){
+        BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification , message.str() );
+      }
+      else{
+        BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::error , message.str() );
+      }
+    }
+  }
+  return result;
 }
 
 bool TDMap::set_exp_image_properties_full_image( std::string path ){
@@ -1363,6 +1438,10 @@ bool TDMap::set_exp_image_properties_full_image( std::string path ){
 
   bool result = exp_image_properties->set_full_image( string_path );
   result &= supercell_exp_image_properties->set_full_image( string_path );
+
+  if( result ){
+    _flag_experimental_image_properties_path = true;
+  }
 
   if( result && exp_image_properties->get_image_extension() == ".emd" ){
     update_emd_fields();
@@ -1519,7 +1598,7 @@ bool TDMap::set_nx_size_width( std::string s_nx ){
   return result;
 }
 
-boost::filesystem::path TDMap::make_path_relative_to_project_dir( boost::filesystem::path  childPath ){
+boost::filesystem::path TDMap::make_path_relative_to_project_dir( boost::filesystem::path childPath ){
   boost::filesystem::path relativePath = boost::filesystem::relative( childPath, project_dir_path );
   std::cout << "project_dir_path " << project_dir_path << std::endl;
   std::cout << "childPath " << childPath << std::endl;
@@ -1529,24 +1608,31 @@ boost::filesystem::path TDMap::make_path_relative_to_project_dir( boost::filesys
 
 bool TDMap::set_unit_cell_cif_path( std::string cif_filename ){
   bool result = false;
-  //boost::filesystem::path ();
-
-  std::string cif_path;
-  boost::filesystem::path cif_filename_path ( cif_filename );
-  if( cif_filename_path.is_relative( )){
-    boost::filesystem::path full_path = project_dir_path / cif_filename_path;
-    cif_path = full_path.string();
-  }
-  else{
-    cif_path = cif_filename;
-  }
   
   try {
-    result = unit_cell->set_cif_path( cif_path );
+    
+    if( _flag_logger ){
+      std::stringstream message;
+      message << "setting cif path to " << cif_filename;
+      ApplicationLog::severity_level _log_type = ApplicationLog::notification;
+      BOOST_LOG_FUNCTION();  logger->logEvent( _log_type , message.str() );
+    }
+
+    result = unit_cell->set_cif_path( cif_filename );
+    //_flag_cif_path = true;
     // in case of the dimensions being already setted up
     if( result ){
+
       const bool parse_result = unit_cell->parse_cif();
+      if( _flag_logger ){
+        std::stringstream message;
+        message << "parse result " << std::boolalpha << parse_result;
+        ApplicationLog::severity_level _log_type = parse_result ? ApplicationLog::notification : ApplicationLog::error;
+        BOOST_LOG_FUNCTION();  logger->logEvent( _log_type , message.str() );
+      }
+
       if( parse_result ){
+        _flag_parse_cif = true;
         tdmap_roi_sim_super_cell->update_from_unit_cell();
         // just for visualization purposes
         tdmap_vis_sim_unit_cell->update_from_unit_cell();
@@ -1943,10 +2029,30 @@ bool TDMap::set_thickness_user_estimated_nm( std::string s_estimated ){
           return result;
         }
 
+        std::string TDMap::get_mtf_filename( ){
+          std::string result = "";
+          if( _flag_mtf_filename ){
+            result = _tdmap_wavimg_parameters->get_mtf_filename( );
+          }
+          return result;
+        }
+
+
         bool TDMap::set_mtf_filename( std::string file_name ){
-          bool result = _tdmap_wavimg_parameters->set_mtf_filename( file_name );
-          result &= _supercell_wavimg_parameters->set_mtf_filename( file_name );
+          boost::filesystem::path project_internal_path_mtf;
+          boost::filesystem::path file_name_full_path ( file_name );
+
+          if ( file_name_full_path.is_relative() ){
+            project_internal_path_mtf = project_dir_path / file_name_full_path;
+          } 
+          else{
+            project_internal_path_mtf = make_path_relative_to_project_dir( file_name_full_path );
+          }
+
+          bool result = _tdmap_wavimg_parameters->set_mtf_filename( project_internal_path_mtf.string() );
+          result &= _supercell_wavimg_parameters->set_mtf_filename( project_internal_path_mtf.string() );
           if( result ){
+            _flag_mtf_filename = true;
             _tdmap_wavimg_parameters->set_mtf_simulation_switch( true );
             _supercell_wavimg_parameters->set_mtf_simulation_switch( true );
           }
@@ -2544,6 +2650,10 @@ double TDMap::get_sim_image_properties_roi_ny_size_height_nm(){
 
 double TDMap::get_exp_image_properties_roi_ny_size_height_nm(){
   return exp_image_properties->get_roi_n_rows_height_nm();
+}
+
+std::string TDMap::get_exp_image_properties_image_path_string(){
+  return exp_image_properties->get_full_image_path_string();
 }
 
 double TDMap::get_exp_image_properties_roi_nx_size_width_nm(){

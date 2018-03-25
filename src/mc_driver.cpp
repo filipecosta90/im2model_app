@@ -19,15 +19,40 @@ MC::MC_Driver::~MC_Driver(){
   parser = nullptr;
 }
 
-void MC::MC_Driver::parse( const char * const filename ){
-  assert( filename != nullptr );
-  std::ifstream in_file( filename );
-  if( ! in_file.good() )
-  {
-    exit( EXIT_FAILURE );
+bool MC::MC_Driver::parse( const char * const filename ){
+  bool result = false;
+  if( filename != nullptr ){
+
+   std::ifstream in_file( filename );
+   if( in_file.good() )
+   {
+    parse_helper( in_file );
+    result = true;
   }
-  parse_helper( in_file );
-  return;
+  else{
+   if( _flag_logger ){
+    std::stringstream message;
+    message << "An error has occurred during the parsing process.";
+    BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::error , message.str() );
+  }
+} 
+}
+else{
+  if( _flag_logger ){
+    std::stringstream message;
+    message << "An error has occurred during the parsing process. filename == nullptr.";
+    BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::error , message.str() );
+  }
+}
+return result;
+}
+
+/* Loggers */
+bool MC::MC_Driver::set_application_logger( ApplicationLog::ApplicationLog* app_logger ){
+  logger = app_logger;
+  _flag_logger = true;
+  BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification, "Application logger setted for MC::MC_Driver class." );
+  return true;
 }
 
 void MC::MC_Driver::parse( std::istream &stream ){
@@ -46,9 +71,11 @@ void MC::MC_Driver::parse_helper( std::istream &stream ){
     scanner = new MC::MC_Scanner( &stream );
   }
   catch( std::bad_alloc &ba ) {
-    std::cerr << "Failed to allocate scanner: (" <<
-      ba.what() << "), exiting!!\n";
-    exit( EXIT_FAILURE );
+    if( _flag_logger ){
+      std::stringstream message;
+      message << "Failed to allocate scanner: (" << ba.what() << "), exiting!!";
+      BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::error , message.str() );
+    }
   }
   delete(parser);
   try
@@ -58,14 +85,19 @@ void MC::MC_Driver::parse_helper( std::istream &stream ){
   }
   catch( std::bad_alloc &ba )
   {
-    std::cerr << "Failed to allocate parser: (" <<
-      ba.what() << "), exiting!!\n";
-    exit( EXIT_FAILURE );
+    if( _flag_logger ){
+      std::stringstream message;
+      message << "Failed to allocate parser: (" << ba.what() << "), exiting!!";
+      BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::error , message.str() );
+    }
   }
   const int accept( 0 );
-  if( parser->parse() != accept )
-  {
-    std::cerr << "Parse failed!!\n";
+  if( parser->parse() != accept ){
+    if( _flag_logger ){
+      std::stringstream message;
+      message << "Parse failed!!";
+      BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::error , message.str() );
+    }
   }
   return;
 }
@@ -73,7 +105,6 @@ void MC::MC_Driver::parse_helper( std::istream &stream ){
 void MC::MC_Driver::add_non_looped_item( const std::string &ItemName, const std::string &ItemValue){
   non_looped_items.insert(std::map<std::string, std::string>::value_type(ItemName, ItemValue));
 }
-
 
 void MC::MC_Driver::add_loop( const int loop_number){
   std::vector<std::string> ItemNameList;                                // empty vector of std::string

@@ -104,9 +104,11 @@ public:
   bool set_zone_axis_u( double u );
   bool set_zone_axis_v( double v );
   bool set_zone_axis_w( double w );
+  bool set_base_bin_start_dir_path( boost::filesystem::path base_dir );
 
     //getters
-  std::string get_cif_path(){ return cif_path; }
+  std::string get_cif_path();
+    std::string get_cif_path_full();
   bool get_flag_cif_path(){ return _flag_cif_path; }
   bool get_flag_cif_format(){ return _flag_cif_format; }
   bool get_flag_cel_format(){ return _flag_cel_format; }
@@ -199,6 +201,7 @@ public:
   std::vector<double> get_atom_occupancies_vec(){ return atom_occupancies; }
   std::vector<double> get_atom_debye_waller_factors_vec(){ return atom_debye_waller_factors; }
   std::vector<Atom> get_atoms_vec(){ return atoms;}
+    bool get_flag_base_bin_start_dir_path(){ return _flag_base_bin_start_dir_path; }
 
   int get_nx_px(){ return cel_nx_px; }
   int get_ny_px(){ return cel_ny_px; }
@@ -263,6 +266,10 @@ protected:
     bool _flag_angle_alpha = false;
     bool _flag_angle_beta = false;
     bool _flag_angle_gamma = false;
+
+     /* Base dir path */
+    boost::filesystem::path base_bin_start_dir_path;
+    bool _flag_base_bin_start_dir_path = false;
 
     /// Cell type
     CellShape cell_shape;
