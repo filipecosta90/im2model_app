@@ -464,12 +464,17 @@ bool BaseImage::read_dat_file( boost::filesystem::path full_dat_path, bool norma
     }
     mmap.close();
     cv::minMaxLoc(full_image, &full_image_min_intensity_detected, &full_image_max_intensity_detected);
+
     _flag_full_image_min_intensity_detected = true;
     _flag_full_image_max_intensity_detected = true;
-    std::cout << "min " << full_image_min_intensity_detected << " max " << full_image_max_intensity_detected << std::endl;
+
+    if( _flag_logger ){
+      std::stringstream message;
+      message << "read_dat_file. mmap() with min " << full_image_min_intensity_detected << " max " << full_image_max_intensity_detected; 
+      BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification , message.str() );
+      print_var_state();
+    }
     if ( normalize ){
-
-
       //full_image.convertTo(full_image, cv::DataType<unsigned char>::type , 255.0f/(max - min), -min * 255.0f/(max - min));
     }
     set_full_n_rows_height( n_rows );
@@ -482,15 +487,14 @@ bool BaseImage::read_dat_file( boost::filesystem::path full_dat_path, bool norma
     result = false;
     if( _flag_logger ){
       std::stringstream message;
-      message << "Caught std::exception: " << typeid(e).name() << " : " << e.what();; 
+      message << "Caught std::exception: " << typeid(e).name() << " : " << e.what();
       BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::error , message.str() );
       print_var_state();
-
     }
   }
   if( _flag_logger ){
     std::stringstream message;
-    message << " Finished mmap with result: " << std::boolalpha << result;
+    message << "Finished mmap with result: " << std::boolalpha << result;
     if( result ){
       BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification , message.str() );
       print_var_state();
@@ -510,11 +514,21 @@ bool BaseImage::set_full_image( cv::Mat image ){
   if( ! image.empty() ){
     // full_image is a deep copy of image. (has its own copy of the pixels)
     image.copyTo(full_image);
-    std::cout << "type: " << type2str(full_image.type()) << std::endl;
+    if( _flag_logger ){
+      std::stringstream message;
+      message  << "set_full_image. type: " << type2str(full_image.type()); 
+      BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification , message.str() );
+      print_var_state();
+    }
     cv::minMaxLoc(full_image, &full_image_min_intensity_detected, &full_image_max_intensity_detected);
     _flag_full_image_min_intensity_detected = true;
     _flag_full_image_max_intensity_detected = true;
-    std::cout << "min " << full_image_min_intensity_detected << " max " << full_image_max_intensity_detected << std::endl;
+    if( _flag_logger ){
+      std::stringstream message;
+      message << "min " << full_image_min_intensity_detected << " max " << full_image_max_intensity_detected; 
+      BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification , message.str() );
+      print_var_state();
+    }
     result  = true;
     const int calc_full_n_rows_height = full_image.rows;
     const int calc_full_n_cols_width = full_image.cols;
@@ -528,12 +542,28 @@ bool BaseImage::set_full_image( cv::Mat image ){
 }
 
 cv::Mat BaseImage::get_image_visualization( cv::Mat image ){
+
   double image_min_intensity_detected, image_max_intensity_detected;
   cv::minMaxLoc(image, &image_min_intensity_detected, &image_max_intensity_detected);
+  
 
   // Quantize the saturation to (full_image_max_intensity_detected - full_image_min_intensity_detected) levels
   /// Establish the number of bins
   int diff_levels = (int) (image_max_intensity_detected - image_min_intensity_detected);
+  
+  if ( diff_levels < 255 ){
+    diff_levels = 255;
+  }
+
+  double t = diff_levels/(image_max_intensity_detected - image_min_intensity_detected);
+
+  if( _flag_logger ){
+      std::stringstream message;
+      message << "get_image_visualization() min " << image_min_intensity_detected << " max " << image_max_intensity_detected << " diff_levels " << diff_levels << ", t " << t; 
+      BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification , message.str() );
+      print_var_state();
+    }
+
   const int n_pixels_high_percentage_brightest_pixels = (int)((double)high_percentage_brightest_pixels * image.total());
   const int n_pixels_low_percentage_darkest_pixels = (int)((double)low_percentage_darkest_pixels * image.total());
 
@@ -543,7 +573,7 @@ cv::Mat BaseImage::get_image_visualization( cv::Mat image ){
   //Hold the histogram
   MatND full_image_hist;
 
-  int hsize[] = { diff_levels }; // just one dimension
+  int histSize[] = { diff_levels }; // just one dimension
   float range[] = { _f_full_image_min_intensity_detected, _f_full_image_max_intensity_detected };
   const float *ranges[] = { range };
   int chnls[] = {0};
@@ -553,7 +583,8 @@ cv::Mat BaseImage::get_image_visualization( cv::Mat image ){
   split(image, colors);
 
   // compute for all colors
-  calcHist(&colors[0], 1, chnls, Mat(), full_image_hist,1,hsize,ranges);
+  calcHist(&colors[0], 1, chnls, Mat(), full_image_hist,1,histSize,ranges);
+ // double t = histSize[i]/(_f_full_image_max_intensity_detected - low);
 
   high_percentage_brightest_pixels_intensity_level = image_min_intensity_detected;
   low_percentage_darkest_pixel_intensity_level = image_min_intensity_detected;
@@ -592,6 +623,20 @@ cv::Mat BaseImage::get_image_visualization( cv::Mat image ){
   return draw;
 }
 
+/* Base dir path */
+bool BaseImage::set_base_bin_start_dir_path( boost::filesystem::path path ){
+  base_bin_start_dir_path = path;
+  _flag_base_bin_start_dir_path = true;
+
+  if( _flag_logger ){
+    std::stringstream message;
+    message << "BaseImage baseDirPath: " << path.string();
+    BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification, message.str() );
+  }
+  
+  return true;
+}
+
 void BaseImage::update_roi_image_from_full_image_and_roi_rectangle(){
   std::cout <<  " update_roi_image_from_full_image_and_roi_rectangle " << std::endl;
   if( _flag_full_image && _flag_roi_rectangle ){
@@ -602,8 +647,13 @@ void BaseImage::update_roi_image_from_full_image_and_roi_rectangle(){
   }
 }
 
-boost::filesystem::path BaseImage::get_full_image_path(){
-  return full_image_path;
+std::string BaseImage::get_full_image_path_full_string(){
+  std::string result = "";
+  if ( _flag_full_image ) {
+   boost::filesystem::path full_path = base_bin_start_dir_path / full_image_path;
+   result = full_path.string();
+ }
+ return result;
 }
 
 bool BaseImage::set_full_image_path( boost::filesystem::path image_path ){
@@ -616,12 +666,13 @@ std::string BaseImage::get_full_image_path_string(){
 
 bool BaseImage::set_full_image( std::string image_path, bool normalize ){
   bool result = false;
-  if ( boost::filesystem::exists( image_path ) ){
-    image_extension = boost::filesystem::extension( image_path );
-    full_image_path = boost::filesystem::path( image_path );
+  full_image_path = boost::filesystem::path( image_path );
+  boost::filesystem::path full_path = base_bin_start_dir_path / full_image_path;
+  image_extension = boost::filesystem::extension( image_path );
 
+  if ( boost::filesystem::exists( full_path ) ){
     if( image_extension == ".emd" ){
-      const bool emd_result = emd_wrapper->read_emd(image_path);
+      const bool emd_result = emd_wrapper->read_emd(full_path.string());
       if( emd_result ){
         const cv::Mat full_image = emd_wrapper->get_full_image();
         result = set_full_image( full_image );
@@ -629,17 +680,38 @@ bool BaseImage::set_full_image( std::string image_path, bool normalize ){
     }
     else{
       try{
-        const cv::Mat full_image = cv::imread( image_path, CV_LOAD_IMAGE_ANYDEPTH );
+        const cv::Mat full_image = cv::imread( full_path.string(), CV_LOAD_IMAGE_ANYDEPTH );
         result = set_full_image( full_image );
       }
       catch( cv::Exception& e ){
-        std::cout << "Exception: " << e.what() << std::endl;
+        if( _flag_logger ){
+          std::stringstream message;
+          message << "Exception: " << e.what();
+          ApplicationLog::severity_level _log_type = ApplicationLog::error;
+          BOOST_LOG_FUNCTION();
+          logger->logEvent( _log_type , message.str() );
+        }
       }
       catch ( std::runtime_error& ex ) {
-        std::cout << "Runtime error reading image" << ex.what() << std::endl;
+
+        if( _flag_logger ){
+          std::stringstream message;
+          message << "Runtime error reading image" << ex.what();
+          ApplicationLog::severity_level _log_type = ApplicationLog::error;
+          BOOST_LOG_FUNCTION();
+          logger->logEvent( _log_type , message.str() );
+        }
+
+
       }
       catch(std::exception e){
-        std::cout << "Exception: " << e.what() << std::endl;
+        if( _flag_logger ){
+          std::stringstream message;
+          message << "Exception: " << e.what();
+          ApplicationLog::severity_level _log_type = ApplicationLog::error;
+          BOOST_LOG_FUNCTION();
+          logger->logEvent( _log_type , message.str() );
+        }
       }
     }
     if( _flag_full_image ){

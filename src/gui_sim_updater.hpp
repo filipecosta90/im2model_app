@@ -36,8 +36,13 @@ class GuiSimOutUpdater : public QObject {
      */
     TDMap* tdmap;
 
+    /* Loggers */
+    ApplicationLog::ApplicationLog* logger = nullptr;
+    bool _flag_logger = false;
+
   public:
     GuiSimOutUpdater(TDMap* core_tdmap ,  QObject *parent = 0 );
+    bool set_application_logger( ApplicationLog::ApplicationLog* logger );
 
     public slots:
     void newSuperCellFull();

@@ -19,13 +19,13 @@
 #include "cv_image_frame.h"
 #include "cv_image_cell_widget.h"
 
+#include "base_logger.hpp"
 
 class QAbstractItemModel;
 class QObject;
 class QPainter;
 
-class CvTDMapImageFrameDelegate : public QStyledItemDelegate
-{
+class CvTDMapImageFrameDelegate : public QStyledItemDelegate {
   Q_OBJECT
   public:
     CvTDMapImageFrameDelegate(int margin, QWidget *parent = 0) : QStyledItemDelegate(parent),  m_margin(margin) {}
@@ -34,6 +34,7 @@ class CvTDMapImageFrameDelegate : public QStyledItemDelegate
     bool shouldBeBest(const QModelIndex &index) const;
     void set_best( int row, int col );
     void clean_best( );
+  bool set_application_logger( ApplicationLog::ApplicationLog* logger );
 
   private:
     // margin between cells
@@ -41,6 +42,11 @@ class CvTDMapImageFrameDelegate : public QStyledItemDelegate
     int _best_row;
     int _best_col;
     bool _best_defined = false;
+
+        /* Loggers */
+    ApplicationLog::ApplicationLog* logger = nullptr;
+    bool _flag_logger = false;
+
 };
 
 #endif // SRC_CVTDMAPCELLIMAGEFRAMEDELEGATE_H__

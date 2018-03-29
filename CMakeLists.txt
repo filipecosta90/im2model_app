@@ -1,10 +1,8 @@
 ﻿  # the minimum version of CMake required
   cmake_minimum_required(VERSION 3.6.2)
 
-  set ( VERSION_IM2MODEL "0.2.3" )
+  set ( VERSION_IM2MODEL "0.3.3" )
   project( Im2Model VERSION ${VERSION_IM2MODEL} LANGUAGES CXX C )
-
-
 
   cmake_policy(VERSION 2.8.11)
   if (${CMAKE_VERSION} VERSION_GREATER 3.0.0)

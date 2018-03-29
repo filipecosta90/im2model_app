@@ -146,6 +146,10 @@ protected:
     cv::Scalar stddev_image_statistical;
     bool _flag_stddev_image_statistical = false;
 
+     /* Base dir path */
+    boost::filesystem::path base_bin_start_dir_path;
+    bool _flag_base_bin_start_dir_path = false;
+
 public:
     BaseImage();
     /** getters **/
@@ -178,8 +182,10 @@ public:
     bool get_flag_auto_roi_from_ignored_edge(){ return _flag_auto_roi_from_ignored_edge; }
 
     // var getters
+
     std::string get_full_image_path_string();
-    boost::filesystem::path get_full_image_path();
+    std::string get_full_image_path_full_string();
+
     std::string get_image_extension(){ return image_extension; }
     cv::Mat get_full_image(){ return full_image.clone(); }
     cv::Mat get_image_visualization( cv::Mat );
@@ -253,6 +259,7 @@ public:
     bool set_roi_rectangle_statistical( cv::Rect );
     bool set_mean_image_statistical( cv::Scalar );
     bool set_stddev_image_statistical( cv::Scalar );
+    bool set_base_bin_start_dir_path( boost::filesystem::path base_dir );
 
 
     static std::string type2str(int type);

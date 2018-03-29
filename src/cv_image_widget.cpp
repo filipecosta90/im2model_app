@@ -9,7 +9,14 @@ CVImageWidget::CVImageWidget(QWidget *parent ) : QWidget(parent) , scaleFactor(1
 void CVImageWidget::MapPosToObject(const QPoint &pos){
   // Handle global position
   std::cout << "MapPosToObject x "  << pos.x() << " y " << pos.y() << std::endl;
+}
 
+/* Loggers */
+bool CVImageWidget::set_application_logger( ApplicationLog::ApplicationLog* app_logger ){
+  logger = app_logger;
+  _flag_logger = true;
+  BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification, "Application logger setted for CVImageWidget class." );
+  return true;
 }
 
 QSize CVImageWidget::sizeHint() const {
@@ -22,6 +29,8 @@ QSize CVImageWidget::minimumSizeHint() const {
 
 QSize CVImageWidget::largestImageLayerSize() const {
   QSize returnSize;
+  returnSize.setHeight(0);
+  returnSize.setWidth(0);
   for( int image_pos = 0; image_pos < images.size(); image_pos++ ){
     if( images_set[image_pos] ){
       const int total_height = images[image_pos].size().height() + margin_points[image_pos].y;

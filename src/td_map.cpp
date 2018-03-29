@@ -459,6 +459,7 @@ bool TDMap::test_run_config(){
   }
   return result;
 }
+
 bool TDMap::run_tdmap_celslc(){
   bool result = false;
   bool _clean_run_env = !_flag_runned_tdmap_celslc;
@@ -623,6 +624,7 @@ bool TDMap::run_tdmap_simgrid(){
       _normalization_ok = _td_map_simgrid->apply_normalization_to_grid();
     }
     _flag_runned_tdmap_simgrid_read = _margin_ok && _grid_ok && _normalization_ok;
+
     if ( _run_simgrid_switch ){
           // 3rd step in simgrid
       if( _flag_runned_tdmap_simgrid_read ){
@@ -653,7 +655,7 @@ bool TDMap::run_tdmap_simgrid(){
       _simgrid_stage_ok = _flag_runned_tdmap_simgrid_read;
       if( _flag_logger ){
         std::stringstream message;
-        message << "emiting TDMap_no_simgrid( _flag_runned_tdmap_simgrid_read ) ";
+        message << "emiting TDMap_no_simgrid( " << std::boolalpha << _flag_runned_tdmap_simgrid_read << " ) ";
         ApplicationLog::severity_level _log_type = ApplicationLog::notification;
         BOOST_LOG_FUNCTION();  logger->logEvent( _log_type , message.str() );
       }
@@ -719,7 +721,11 @@ bool TDMap::run_tdmap(){
     if( _celslc_stage_ok && _msa_stage_ok && _wavimg_stage_ok ){
       run_tdmap_simgrid();
     }
-    _simgrid_stage_ok = _flag_runned_tdmap_simgrid_read & _flag_runned_tdmap_simgrid_correlate;
+    _simgrid_stage_ok = _flag_runned_tdmap_simgrid_read ;
+
+    if( _run_simgrid_switch ){
+      _simgrid_stage_ok &= _flag_runned_tdmap_simgrid_correlate;
+    }
 
     if( _flag_logger ){
       std::stringstream message;
@@ -1275,6 +1281,11 @@ bool TDMap::set_base_dir_path( boost::filesystem::path path ){
   result &= _supercell_celslc_parameters->set_base_bin_start_dir_path( path );
   result &= _supercell_msa_parameters->set_base_bin_start_dir_path( path );
   result &= _supercell_wavimg_parameters->set_base_bin_start_dir_path( path );
+  /* Classes with sim properties */
+  sim_image_properties->set_base_bin_start_dir_path( path );
+  exp_image_properties->set_base_bin_start_dir_path( path );
+  supercell_sim_image_properties->set_base_bin_start_dir_path( path );
+  supercell_exp_image_properties->set_base_bin_start_dir_path( path );
   return result;
 }
 
@@ -1384,12 +1395,14 @@ bool TDMap::copy_external_files_to_project_dir(){
     }
   }
   if( _flag_experimental_image_properties_path ){
-    boost::filesystem::path project_external_experimental_image_path = exp_image_properties->get_full_image_path();
-    boost::filesystem::path experimental_image_filename = project_external_experimental_image_path.filename();
-    boost::filesystem::path project_internal_path_experimental_image = project_external_path / experimental_image_filename;
-    boost::filesystem::copy_file( project_external_experimental_image_path, project_internal_path_experimental_image, boost::filesystem::copy_option::overwrite_if_exists );
-    project_internal_path_experimental_image = make_path_relative_to_project_dir( project_internal_path_experimental_image );
-    const bool experimental_image_set_result = exp_image_properties->set_full_image_path( project_internal_path_experimental_image );
+
+    std::string image_path = exp_image_properties->get_full_image_path_full_string();
+    boost::filesystem::path project_external_experimental_image_path ( image_path );
+    boost::filesystem::path image_filename = project_external_experimental_image_path.filename();
+    boost::filesystem::path project_internal_path_image = project_external_path / image_filename;
+    boost::filesystem::copy_file( project_external_experimental_image_path, project_internal_path_image, boost::filesystem::copy_option::overwrite_if_exists );
+    project_internal_path_image = make_path_relative_to_project_dir( project_internal_path_image );
+    const bool experimental_image_set_result = exp_image_properties->set_full_image_path( project_internal_path_image );
     result &= experimental_image_set_result;
     if( _flag_logger ){
       std::stringstream message;
@@ -1425,19 +1438,8 @@ bool TDMap::copy_external_files_to_project_dir(){
 }
 
 bool TDMap::set_exp_image_properties_full_image( std::string path ){
-  std::string string_path;
-  boost::filesystem::path filename_path ( path );
-
-  if( filename_path.is_relative( )){
-    boost::filesystem::path full_path = project_dir_path / filename_path;
-    string_path = full_path.string();
-  }
-  else{
-    string_path = path;
-  }
-
-  bool result = exp_image_properties->set_full_image( string_path );
-  result &= supercell_exp_image_properties->set_full_image( string_path );
+  bool result = exp_image_properties->set_full_image( path );
+  result &= supercell_exp_image_properties->set_full_image( path );
 
   if( result ){
     _flag_experimental_image_properties_path = true;
@@ -1600,9 +1602,12 @@ bool TDMap::set_nx_size_width( std::string s_nx ){
 
 boost::filesystem::path TDMap::make_path_relative_to_project_dir( boost::filesystem::path childPath ){
   boost::filesystem::path relativePath = boost::filesystem::relative( childPath, project_dir_path );
-  std::cout << "project_dir_path " << project_dir_path << std::endl;
-  std::cout << "childPath " << childPath << std::endl;
-  std::cout << "relativePath " << relativePath << std::endl;
+  if( _flag_logger ){
+    std::stringstream message;
+    message << "make_path_relative_to_project_dir " << project_dir_path << " childPath " << childPath<< " relativePath " << relativePath;
+    ApplicationLog::severity_level _log_type = ApplicationLog::notification;
+    BOOST_LOG_FUNCTION();  logger->logEvent( _log_type , message.str() );
+  }
   return relativePath;
 }
 
@@ -1610,7 +1615,7 @@ bool TDMap::set_unit_cell_cif_path( std::string cif_filename ){
   bool result = false;
   
   try {
-    
+
     if( _flag_logger ){
       std::stringstream message;
       message << "setting cif path to " << cif_filename;
@@ -2039,18 +2044,10 @@ bool TDMap::set_thickness_user_estimated_nm( std::string s_estimated ){
 
 
         bool TDMap::set_mtf_filename( std::string file_name ){
-          boost::filesystem::path project_internal_path_mtf;
-          boost::filesystem::path file_name_full_path ( file_name );
 
-          if ( file_name_full_path.is_relative() ){
-            project_internal_path_mtf = project_dir_path / file_name_full_path;
-          } 
-          else{
-            project_internal_path_mtf = make_path_relative_to_project_dir( file_name_full_path );
-          }
+          bool result = _tdmap_wavimg_parameters->set_mtf_filename( file_name );
+          result &= _supercell_wavimg_parameters->set_mtf_filename( file_name );
 
-          bool result = _tdmap_wavimg_parameters->set_mtf_filename( project_internal_path_mtf.string() );
-          result &= _supercell_wavimg_parameters->set_mtf_filename( project_internal_path_mtf.string() );
           if( result ){
             _flag_mtf_filename = true;
             _tdmap_wavimg_parameters->set_mtf_simulation_switch( true );

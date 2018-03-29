@@ -24,6 +24,14 @@ void CvTDMapImageFrameDelegate::paint(QPainter *painter, const QStyleOptionViewI
   painter->restore();
 }
 
+/* Loggers */
+bool CvTDMapImageFrameDelegate::set_application_logger( ApplicationLog::ApplicationLog* app_logger ){
+  logger = app_logger;
+  _flag_logger = true;
+  BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification, "Application logger setted for CvTDMapImageFrameDelegate class." );
+  return true;
+}
+
 bool CvTDMapImageFrameDelegate::shouldBeBest(const QModelIndex &index) const {
   bool result = false;
   if( (index.row() == _best_row) && (index.column() == _best_col) && (_best_defined) ){

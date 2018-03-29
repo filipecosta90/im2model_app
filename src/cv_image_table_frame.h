@@ -13,6 +13,7 @@
 
 #include "cv_image_widget.h"
 #include "cv_image_frame.h"
+#include "base_logger.hpp"
 
 class CvImageFrameTableWidget : public CvImageFrameWidget
 {
@@ -27,6 +28,10 @@ class CvImageFrameTableWidget : public CvImageFrameWidget
     table_view->setMaximumHeight(0);
     contentsLayout->addWidget(table_view);
   }
+
+   /* Loggers */
+  bool set_application_logger( ApplicationLog::ApplicationLog* logger );
+  
     public slots:
 
       void setModel(QAbstractItemModel* model ){
@@ -41,6 +46,12 @@ class CvImageFrameTableWidget : public CvImageFrameWidget
 
   protected:
     QTableView *table_view;
+
+  private:
+        /* Loggers */
+    ApplicationLog::ApplicationLog* logger = nullptr;
+    bool _flag_logger = false;
+
 
 };
 

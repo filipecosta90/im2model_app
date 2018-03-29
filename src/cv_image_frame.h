@@ -11,6 +11,7 @@
 #include <QBoxLayout>
 
 #include "cv_image_widget.h"
+#include "base_logger.hpp"
 
 class CvImageFrameWidget : public QWidget
 {
@@ -18,6 +19,9 @@ class CvImageFrameWidget : public QWidget
 public:
     explicit CvImageFrameWidget(QWidget *parent = 0);
     CVImageWidget *image_widget;
+
+     /* Loggers */
+  bool set_application_logger( ApplicationLog::ApplicationLog* logger );
 
     public slots:
 
@@ -68,6 +72,12 @@ protected:
     QMenu *dataCollectionMenu;
 
     QToolButton* toolsButton;
+
+private:
+        /* Loggers */
+    ApplicationLog::ApplicationLog* logger = nullptr;
+    bool _flag_logger = false;
+
 };
 
 #endif

@@ -22,6 +22,7 @@ public:
   void setImage(const cv::Mat& image);
   void setImageWidget( CVImageWidget* widget );
   bool _is_image_setted();
+  bool set_application_logger( ApplicationLog::ApplicationLog* logger );
 
 protected:
   CVImageWidget *image_widget;
@@ -31,6 +32,12 @@ protected:
   QBoxLayout *toolsLayout;
   QToolBar *toolbar;
   bool  _flag_image_setted = false;
+
+private:
+  
+        /* Loggers */
+    ApplicationLog::ApplicationLog* logger = nullptr;
+    bool _flag_logger = false;
 
 };
 

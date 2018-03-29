@@ -90,6 +90,11 @@ MainWindow::MainWindow( ApplicationLog::ApplicationLog* logger , QWidget *parent
       _core_td_map->set_application_logger(im2model_logger);
     }
 
+    if (_flag_im2model_logger) {
+      im2model_logger->logEvent(ApplicationLog::critical, "Trying to set application logger for Visualization Widgets.");
+      ui->tdmap_table->set_application_logger(im2model_logger);
+    }
+
     bool status = true;
     //  status &= _core_td_map->set_dr_probe_bin_path( _dr_probe_bin_path.toStdString() );
     status &= _core_td_map->set_dr_probe_celslc_execname( _dr_probe_celslc_bin.toStdString() );
@@ -110,6 +115,9 @@ MainWindow::MainWindow( ApplicationLog::ApplicationLog* logger , QWidget *parent
       /* TDMap simulation thread */
       _sim_tdmap_thread = new QThread( this );
       sim_tdmap_worker = new GuiSimOutUpdater( _core_td_map  );
+      // set logger
+      sim_tdmap_worker->set_application_logger(im2model_logger);
+
 
       sim_tdmap_worker->moveToThread( _sim_tdmap_thread );
 

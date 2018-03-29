@@ -35,6 +35,13 @@ class CvImageCellWidget : public QWidget
     toolsLayout->addLayout(contentsLayout);
   }
 
+/* Loggers */
+bool set_application_logger( ApplicationLog::ApplicationLog* app_logger ){
+  logger = app_logger;
+  _flag_logger = true;
+  BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification, "Application logger setted for CvImageCellWidget class." );
+  return true;
+}
     void set_best(){
       _flag_best = true;
     }
@@ -52,6 +59,14 @@ class CvImageCellWidget : public QWidget
     public slots:
 
       void setImage(const cv::Mat& image) {
+        
+        if( _flag_logger ){
+      std::stringstream message;
+      message << "TDMap_Table::setImage";
+      ApplicationLog::severity_level _log_type = ApplicationLog::normal;
+      BOOST_LOG_FUNCTION();
+      logger->logEvent( _log_type , message.str() );
+    }
         image_widget->setImage(image);
         scrollArea->setWidget(image_widget);
         scrollArea->show();
@@ -86,6 +101,11 @@ class CvImageCellWidget : public QWidget
     int _container_window_height = 0;
     QSize _sz_hint;
     QSize _mn_sz_hint;
+
+  private:
+        /* Loggers */
+    ApplicationLog::ApplicationLog* logger = nullptr;
+    bool _flag_logger = false;
     // QToolBar *toolbar;
 };
 

@@ -76,8 +76,10 @@ private:
     // simulated images
     std::vector< std::vector<cv::Mat> > cleaned_simulated_images_grid;
     bool _flag_cleaned_simulated_images_grid = false;
+
     std::vector< std::vector<cv::Mat> > simulated_images_grid;
     bool _flag_simulated_images_grid = false;
+    
     std::vector< std::vector<cv::Mat> > raw_simulated_images_grid;
     bool _flag_raw_simulated_images_grid = false;
 

@@ -65,6 +65,14 @@ CvImageFrameWidget::CvImageFrameWidget(QWidget *parent ) : QWidget(parent) {
   toolsLayout->addLayout(contentsLayout);
 }
 
+/* Loggers */
+bool CvImageFrameWidget::set_application_logger( ApplicationLog::ApplicationLog* app_logger ){
+  logger = app_logger;
+  _flag_logger = true;
+  BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification, "Application logger setted for CvImageFrameWidget class." );
+  return true;
+}
+
 void CvImageFrameWidget::cleanRenderAreas(){
   image_widget->cleanRenderAreas();
   image_widget->update();

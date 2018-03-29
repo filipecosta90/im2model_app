@@ -22,6 +22,14 @@ CvTDMapImageFrame::CvTDMapImageFrame( ) {
   toolsLayout->addLayout(contentsLayout);
 }
 
+/* Loggers */
+bool CvTDMapImageFrame::set_application_logger( ApplicationLog::ApplicationLog* app_logger ){
+  logger = app_logger;
+  _flag_logger = true;
+  BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification, "Application logger setted for CvTDMapImageFrame class." );
+  return true;
+}
+
 CvTDMapImageFrame::CvTDMapImageFrame( QWidget * parent ) {
   image_widget = new CVImageWidget( parent );
   scrollArea = new QScrollArea( parent );

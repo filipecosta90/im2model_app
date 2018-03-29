@@ -16,6 +16,7 @@
 
 
 #include "renderarea.h"
+#include "base_logger.hpp"
 
 class CVImageWidget : public QWidget
 {
@@ -27,6 +28,9 @@ public:
     QSize minimumSizeHint() const;
     QSize largestImageLayerSize() const;
     void set_container_window_size( const int width , const int height );
+
+     /* Loggers */
+  bool set_application_logger( ApplicationLog::ApplicationLog* logger );
 
     public slots:
 
@@ -119,6 +123,11 @@ private:
     QRect selectionStatisticalRect;
     bool _enabled_rectangleSelectionStatistical = false;
     bool _started_rectangleSelectionStatistical = false;
+
+        /* Loggers */
+    ApplicationLog::ApplicationLog* logger = nullptr;
+    bool _flag_logger = false;
+
 
 };
 

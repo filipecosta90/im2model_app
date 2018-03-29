@@ -93,6 +93,7 @@ bool BaseCell::set_base_bin_start_dir_path( boost::filesystem::path path ){
     message << "BaseBim baseDirPath: " << path.string();
    BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification, message.str() );
   }
+  
   return true;
 }
 
