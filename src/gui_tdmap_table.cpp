@@ -1,3 +1,12 @@
+/*
+ * This file is subject to the terms and conditions defined in
+ * file 'LICENSE', which is part of this source code package.
+ *
+ * Partialy financiated as part of the protocol between UTAustin I Portugal - UTA-P.
+ * [2017] - [2018] University of Minho, Filipe Costa Oliveira 
+ * All Rights Reserved.
+ */
+
 #include "gui_tdmap_table.h"
 #include "gui_tdmap_cell.h"
 #include "cv_tdmap_cell_image_frame_delegate.h"
@@ -123,6 +132,13 @@ void TDMap_Table::update_ColumnCount_from_defocus_range_number_samples( int sign
   if ( signal_item_changed_column == _treeitem_defocus_range_number_samples_watch_col ){
     if( core_tdmap->get_flag_defocus_samples() ){
       int new_ColumnCount = core_tdmap->get_defocus_samples();
+      if( _flag_logger ){
+        std::stringstream message;
+        message << "TDMap_Table::update_ColumnCount_from_defocus_range_number_samples setting new_ColumnCount ( defocus ) to :" << new_ColumnCount;
+        ApplicationLog::severity_level _log_type = ApplicationLog::normal;
+        BOOST_LOG_FUNCTION();
+        logger->logEvent( _log_type , message.str() );
+      }
       ColumnCount = new_ColumnCount;
       update_column_size();
       clear();
@@ -143,42 +159,73 @@ void TDMap_Table::set_simulated_images_grid( std::vector< std::vector<cv::Mat> >
   clear();
 }
 
+void TDMap_Table::update_headers_columns(){
+  if( core_tdmap->get_flag_defocus_samples() ){
+    ColumnCount = core_tdmap->get_defocus_samples();
+    if( core_tdmap->get_flag_simulated_images_horizontal_header_defocus_nm() ){
+      const std::vector <double> _local_simulated_images_horizontal_header_defocus_nm = core_tdmap->get_simulated_images_horizontal_header_defocus_nm();
+      const int vec_size = _local_simulated_images_horizontal_header_defocus_nm.size();
+      if( ColumnCount == vec_size ){
+        for (int i = 0; i < ColumnCount; ++i) {
+          setItemDelegateForColumn(i, image_delegate);
+          QTableWidgetItem *item = new QTableWidgetItem;
+          const double defocus_nm = _local_simulated_images_horizontal_header_defocus_nm.at(i);
+          stringstream stream;
+          stream << fixed << setprecision(2) << defocus_nm << "\nnm";
+          item->setText( QString::fromStdString( stream.str() ) );
+          setHorizontalHeaderItem(i, item);
+        }
+      }
+      else{
+        if( _flag_logger ){
+          std::stringstream message;
+          message << "TDMap_Table:: ColumnCount " << ColumnCount << " != _local_simulated_images_horizontal_header_defocus_nm.size() " << vec_size;
+          ApplicationLog::severity_level _log_type = ApplicationLog::error;
+          BOOST_LOG_FUNCTION();
+          logger->logEvent( _log_type , message.str() );
+        }
+      }
+    }
+    else{
+      if( _flag_logger ){
+        std::stringstream message;
+        message << "TDMap_Table:: core_tdmap  flag_simulated_images_horizontal_header_defocus_nm is not setted up";
+        ApplicationLog::severity_level _log_type = ApplicationLog::error;
+        BOOST_LOG_FUNCTION();
+        logger->logEvent( _log_type , message.str() );
+      }
+    }
+  }
+
+}
+
+
+void TDMap_Table::update_headers_rows(){
+  if( core_tdmap->get_flag_slice_samples() ){
+    RowCount = core_tdmap->get_slice_samples();
+    if( core_tdmap->get_flag_simulated_images_vertical_header_slice_nm() ){
+      std::vector <double> _local_simulated_images_vertical_header_slice_nm = core_tdmap->get_simulated_images_vertical_header_slice_nm();
+      if( RowCount == _local_simulated_images_vertical_header_slice_nm.size() ){
+        for (int i = 0; i < RowCount; ++i) {
+          setItemDelegateForRow(i, image_delegate);
+          QTableWidgetItem *item = new QTableWidgetItem;
+          const double slice_thickness_nm = _local_simulated_images_vertical_header_slice_nm.at(i);
+          stringstream stream;
+          stream << fixed << setprecision(2) << slice_thickness_nm << "\nnm";
+          item->setText( QString::fromStdString( stream.str() ) );
+          setVerticalHeaderItem(i, item);
+        }
+      }
+    }
+  }
+}
+
 void TDMap_Table::update_headers(){
   if( _flag_core_tdmap ){
-    if( core_tdmap->get_flag_defocus_samples() ){
-      ColumnCount = core_tdmap->get_defocus_samples();
-      if( core_tdmap->get_flag_simulated_images_horizontal_header_defocus_nm() ){
-        std::vector <double> _local_simulated_images_horizontal_header_defocus_nm = core_tdmap->get_simulated_images_horizontal_header_defocus_nm();
-        if( ColumnCount == _local_simulated_images_horizontal_header_defocus_nm.size() ){
-          for (int i = 0; i < ColumnCount; ++i) {
-            setItemDelegateForColumn(i, image_delegate);
-            QTableWidgetItem *item = new QTableWidgetItem;
-            const double defocus_nm = _local_simulated_images_horizontal_header_defocus_nm.at(i);
-            stringstream stream;
-            stream << fixed << setprecision(2) << defocus_nm << "\nnm";
-            item->setText( QString::fromStdString( stream.str() ) );
-            setHorizontalHeaderItem(i, item);
-          }
-        }
-      }
-    }
-    if( core_tdmap->get_flag_slice_samples() ){
-      RowCount = core_tdmap->get_slice_samples();
-      if( core_tdmap->get_flag_simulated_images_vertical_header_slice_nm() ){
-        std::vector <double> _local_simulated_images_vertical_header_slice_nm = core_tdmap->get_simulated_images_vertical_header_slice_nm();
-        if( RowCount == _local_simulated_images_vertical_header_slice_nm.size() ){
-          for (int i = 0; i < RowCount; ++i) {
-            setItemDelegateForRow(i, image_delegate);
-            QTableWidgetItem *item = new QTableWidgetItem;
-            const double slice_thickness_nm = _local_simulated_images_vertical_header_slice_nm.at(i);
-            stringstream stream;
-            stream << fixed << setprecision(2) << slice_thickness_nm << "\nnm";
-            item->setText( QString::fromStdString( stream.str() ) );
-            setVerticalHeaderItem(i, item);
-          }
-        }
-      }
-    }
+    // defocus
+    update_headers_columns();
+    // thickness
+    update_headers_rows();
   }
   this->resizeColumnsToContents();
   this->resizeRowsToContents();

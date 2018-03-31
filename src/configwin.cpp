@@ -1,3 +1,12 @@
+/*
+ * This file is subject to the terms and conditions defined in
+ * file 'LICENSE', which is part of this source code package.
+ *
+ * Partialy financiated as part of the protocol between UTAustin I Portugal - UTA-P.
+ * [2017] - [2018] University of Minho, Filipe Costa Oliveira 
+ * All Rights Reserved.
+ */
+
 #include "configwin.h"
 
 bool MainWindow::create_3d_widgets( QMainWindow *parent , SuperCell* tdmap_vis_sim_unit_cell, SuperCell* tdmap_full_sim_super_cell ){
@@ -2456,11 +2465,17 @@ void MainWindow::create_box_options_tab2_sim_config(){
   ui->tdmap_table->connect_item_changes_to_invalidate_grid( thickness_range_number_samples, 1 );
   ui->tdmap_table->connect_item_changes_to_invalidate_grid( thickness_range_lower_bound, 1 );
   ui->tdmap_table->connect_item_changes_to_invalidate_grid( thickness_range_upper_bound, 1 );
+  
   ui->tdmap_table->connect_item_changes_to_invalidate_grid( defocus_range_number_samples, 1 );
   ui->tdmap_table->connect_item_changes_to_invalidate_grid( defocus_range_upper_bound, 1 );
   ui->tdmap_table->connect_item_changes_to_invalidate_grid( defocus_range_lower_bound, 1 );
 
+  ui->tdmap_table->connect_thickness_range_number_samples_changes(  thickness_range_lower_bound, 1 );
+  ui->tdmap_table->connect_thickness_range_number_samples_changes(  thickness_range_upper_bound, 1 );
   ui->tdmap_table->connect_thickness_range_number_samples_changes(  thickness_range_number_samples, 1 );
+
+  ui->tdmap_table->connect_defocus_range_number_samples_changes(  defocus_range_upper_bound, 1 );
+  ui->tdmap_table->connect_defocus_range_number_samples_changes(  defocus_range_lower_bound, 1 );
   ui->tdmap_table->connect_defocus_range_number_samples_changes(  defocus_range_number_samples, 1 );
 }
 

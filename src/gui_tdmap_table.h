@@ -1,3 +1,12 @@
+/*
+ * This file is subject to the terms and conditions defined in
+ * file 'LICENSE', which is part of this source code package.
+ *
+ * Partialy financiated as part of the protocol between UTAustin I Portugal - UTA-P.
+ * [2017] - [2018] University of Minho, Filipe Costa Oliveira 
+ * All Rights Reserved.
+ */
+
 #ifndef TDMap_Table_H
 #define TDMap_Table_H
 
@@ -65,6 +74,8 @@ signals:
     int _number_calculated_cells = 0;
     bool _flag_created_cells = false;
 
+    void update_headers_rows();
+    void update_headers_columns();
     void update_headers();
     void create_cells();
     void update_cells();

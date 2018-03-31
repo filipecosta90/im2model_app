@@ -1,3 +1,12 @@
+/*
+ * This file is subject to the terms and conditions defined in
+ * file 'LICENSE', which is part of this source code package.
+ *
+ * Partialy financiated as part of the protocol between UTAustin I Portugal - UTA-P.
+ * [2017] - [2018] University of Minho, Filipe Costa Oliveira 
+ * All Rights Reserved.
+ */
+
 #include "simgrid.hpp"
 
 SimGrid::SimGrid( boost::process::ipstream& async_io_buffer_out ){
@@ -690,6 +699,7 @@ bool SimGrid::clean_for_re_run(){
     std::vector<cv::Point> experimental_images_matchloc_row = experimental_images_match_location_grid.at(thickness_row);
     experimental_images_matchloc_row.clear();
   }
+
   experimental_images_match_location_grid.clear();
 
   simulated_matches.clear();

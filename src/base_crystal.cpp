@@ -1,3 +1,12 @@
+/*
+ * This file is subject to the terms and conditions defined in
+ * file 'LICENSE', which is part of this source code package.
+ *
+ * Partialy financiated as part of the protocol between UTAustin I Portugal - UTA-P.
+ * [2017] - [2018] University of Minho, Filipe Costa Oliveira 
+ * All Rights Reserved.
+ */
+
 #include "base_crystal.hpp"
 
 BaseCrystal::BaseCrystal( ) {
@@ -17,10 +26,16 @@ bool BaseCrystal::calculate_defocus_period(){
     /////////////////////////
     // Simulation Points for Defocus
     /////////////////////////
+
+    if( simulated_params_nm_defocus_vec.size() != 0 ){
+        simulated_params_nm_defocus_vec.clear();
+        _flag_simulated_params_nm_defocus_vec = false;
+    }
+
     if( !_flag_simulated_params_nm_defocus_vec ){
       simulated_params_nm_defocus_vec.reserve(defocus_samples);
       // only if it is a paramenter loop
-      if( thickness_parameter_loop ){
+      if( defocus_parameter_loop ){
         for( int defocus_pos = 0; defocus_pos < (defocus_samples-1); defocus_pos++ ){
           const double at_defocus = defocus_lower_bound + (defocus_pos * defocus_period);
           simulated_params_nm_defocus_vec.push_back( at_defocus );
@@ -80,6 +95,13 @@ bool BaseCrystal::calculate_thickness_slice_period(){
 }
 
 bool BaseCrystal::clean_for_re_run(){
+
+  if( _flag_logger ){
+      std::stringstream message;
+      message << "BaseCrystal clean_for_re_run";
+     BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification , message.str() );
+    }
+
   bool result = false;
 
   _flag_nz_simulated_partitions = false;

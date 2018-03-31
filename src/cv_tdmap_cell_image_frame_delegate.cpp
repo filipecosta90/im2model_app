@@ -1,5 +1,13 @@
-#include "cv_tdmap_cell_image_frame_delegate.h"
+/*
+ * This file is subject to the terms and conditions defined in
+ * file 'LICENSE', which is part of this source code package.
+ *
+ * Partialy financiated as part of the protocol between UTAustin I Portugal - UTA-P.
+ * [2017] - [2018] University of Minho, Filipe Costa Oliveira 
+ * All Rights Reserved.
+ */
 
+#include "cv_tdmap_cell_image_frame_delegate.h"
 
 void CvTDMapImageFrameDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const {
   // save the painter's state
