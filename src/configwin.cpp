@@ -516,7 +516,15 @@ bool MainWindow::update_qline_image_path( std::string fileName ){
 
 void MainWindow::update_simgrid_frame(){
   std::vector< std::vector<cv::Mat> > _simulated_images_grid = _core_td_map->get_simulated_images_grid_visualization();
-  this->ui->tdmap_table->set_simulated_images_grid( _simulated_images_grid );
+  try {
+    this->ui->tdmap_table->set_simulated_images_grid( _simulated_images_grid );
+  } catch (std::exception &ex) {
+    if (_flag_im2model_logger) {
+      std::stringstream message;
+      message << "error on update_simgrid_frame ";
+      BOOST_LOG_FUNCTION();  im2model_logger->logEvent( ApplicationLog::error , message.str() );
+    }
+  }
 }
 
 bool MainWindow::copy_external_files_to_project_dir(){
@@ -527,7 +535,7 @@ bool MainWindow::copy_external_files_to_project_dir(){
   result = _core_td_map->copy_external_files_to_project_dir();
   if ( result ){
     image_path->load_data_from_getter_string();
-        unit_cell_file_cif->load_data_from_getter_string();
+    unit_cell_file_cif->load_data_from_getter_string();
     _mtf_parameters->load_data_from_getter_string();
   }
 }

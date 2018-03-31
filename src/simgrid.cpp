@@ -779,13 +779,17 @@ std::vector< std::vector<cv::Mat> > SimGrid::get_simulated_images_grid_visualiza
   }
 
   std::vector< std::vector<cv::Mat> > simulated_images_grid_visualization;
+  const int rows_size = cleaned_simulated_images_grid.size();
+  simulated_images_grid_visualization.reserve( rows_size );
 
-  for (int thickness = 0; thickness < cleaned_simulated_images_grid.size(); thickness++ ){
+  for (int thickness = 0; thickness < rows_size; thickness++ ){
     // get the matrices row
-    std::vector< cv::Mat > simulated_images_row = cleaned_simulated_images_grid.at( thickness );
+    const std::vector< cv::Mat > simulated_images_row = cleaned_simulated_images_grid.at( thickness );
+    const int col_size = simulated_images_row.size();
     std::vector<cv::Mat> simulated_images_row_visualization;
+    simulated_images_row_visualization.reserve( col_size );
 
-    for (int defocus = 0; defocus < simulated_images_row.size() ; defocus ++ ){
+    for (int defocus = 0; defocus < col_size ; defocus ++ ){
       const cv::Mat simulated_image = simulated_images_row.at( defocus );
       cv::Mat simulated_image_visualization = img_treater.get_image_visualization( simulated_image );
       simulated_images_row_visualization.push_back( simulated_image_visualization );
@@ -798,11 +802,8 @@ std::vector< std::vector<cv::Mat> > SimGrid::get_simulated_images_grid_visualiza
     std::stringstream message;
     message << "successfully finished get_simulated_images_grid_visualization().";
     BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::normal , message.str() );
-    img_treater.set_application_logger( logger );
   }
-
   return simulated_images_grid_visualization;
-
 }
 
 cv::Mat SimGrid::get_simulated_image_in_grid( int row_thickness, int col_defocus ){

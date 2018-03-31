@@ -55,7 +55,7 @@ class Application final : public QApplication {
       BOOST_LOG_FUNCTION();
       bool result = false;
       try {
-        result = QApplication::notify(receiver, event);
+        result = QApplication::notify( receiver, event );
       } catch (boost::exception &ex) {
         QMessageBox msgBox;
         msgBox.setText("Caught an unhandled exception.");

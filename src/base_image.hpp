@@ -198,6 +198,7 @@ public:
     std::string get_image_extension(){ return image_extension; }
     cv::Mat get_full_image(){ return full_image.clone(); }
     cv::Mat get_image_visualization( cv::Mat );
+    std::string print_cv_mat_information( cv::Mat );
     cv::Mat get_full_image_visualization(){ return get_image_visualization( full_image ); }
     int get_full_n_rows_height(){ return full_n_rows_height; }
     double get_full_n_rows_height_nm(){ return full_nm_size_rows_b; }

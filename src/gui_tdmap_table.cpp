@@ -166,7 +166,7 @@ void TDMap_Table::update_headers_columns(){
       const std::vector <double> _local_simulated_images_horizontal_header_defocus_nm = core_tdmap->get_simulated_images_horizontal_header_defocus_nm();
       const int vec_size = _local_simulated_images_horizontal_header_defocus_nm.size();
       if( ColumnCount == vec_size ){
-        for (int i = 0; i < ColumnCount; ++i) {
+        for (int i = 0; i < ColumnCount; i++) {
           setItemDelegateForColumn(i, image_delegate);
           QTableWidgetItem *item = new QTableWidgetItem;
           const double defocus_nm = _local_simulated_images_horizontal_header_defocus_nm.at(i);
@@ -206,7 +206,7 @@ void TDMap_Table::update_headers_rows(){
     if( core_tdmap->get_flag_simulated_images_vertical_header_slice_nm() ){
       std::vector <double> _local_simulated_images_vertical_header_slice_nm = core_tdmap->get_simulated_images_vertical_header_slice_nm();
       if( RowCount == _local_simulated_images_vertical_header_slice_nm.size() ){
-        for (int i = 0; i < RowCount; ++i) {
+        for (int i = 0; i < RowCount; i++) {
           setItemDelegateForRow(i, image_delegate);
           QTableWidgetItem *item = new QTableWidgetItem;
           const double slice_thickness_nm = _local_simulated_images_vertical_header_slice_nm.at(i);
@@ -221,16 +221,26 @@ void TDMap_Table::update_headers_rows(){
 }
 
 void TDMap_Table::update_headers(){
-  if( _flag_core_tdmap ){
+  try {  
+    if( _flag_core_tdmap ){
     // defocus
-    update_headers_columns();
+      update_headers_columns();
     // thickness
-    update_headers_rows();
+      update_headers_rows();
+    }
+    this->resizeColumnsToContents();
+    this->resizeRowsToContents();
+    update_row_size();
+    update_column_size();
+  } 
+  catch (std::exception &ex) {
+    if ( _flag_logger ) {
+      std::stringstream message;
+      message << "error on TDMap_Table::update_headers " << ex.what();
+      ApplicationLog::severity_level _log_type = ApplicationLog::error;            
+      BOOST_LOG_FUNCTION();  logger->logEvent( _log_type , message.str() );
+    }
   }
-  this->resizeColumnsToContents();
-  this->resizeRowsToContents();
-  update_row_size();
-  update_column_size();
 }
 
 void TDMap_Table::clear(){
@@ -247,8 +257,9 @@ void TDMap_Table::clear(){
 }
 
 void TDMap_Table::create_cells(){
-  for (int row = 0; row < RowCount; ++row) {
-    for (int col = 0; col < ColumnCount; ++col) {
+  try {  
+   for (int row = 0; row < RowCount; row++) {
+    for (int col = 0; col < ColumnCount; col++) {
       CvImageCellWidget *cell_widget  = new CvImageCellWidget( this );
       if( _flag_logger ){
         cell_widget->set_application_logger( logger );
@@ -263,40 +274,54 @@ void TDMap_Table::create_cells(){
   }
   _number_drawed_cells = RowCount * ColumnCount;
   _flag_created_cells = true;
+} 
+catch (std::exception &ex) {
+  if ( _flag_logger ) {
+    std::stringstream message;
+    message << "error on TDMap_Table::create_cells " << ex.what();
+    ApplicationLog::severity_level _log_type = ApplicationLog::error;            
+    BOOST_LOG_FUNCTION();  logger->logEvent( _log_type , message.str() );
+  }
+}
 }
 
 void TDMap_Table::update_cells(){
-  if( _flag_created_cells ){
-    if( _flag_simulated_image_grid ){
-      cv::Point2i best_match_pos;
-      best_match_pos.x = 0;
-      best_match_pos.y = 0;
-      const bool _calculated_best_match = core_tdmap->get_flag_simgrid_best_match_position();
-      if( _calculated_best_match ){
-       best_match_pos = core_tdmap->get_simgrid_best_match_position();
-       emit tdmap_best_match( best_match_pos.x, best_match_pos.y );
-     }
-     for (int row = 0; row < RowCount; ++row) {
-      if( simulated_image_grid.size() > row ){
-        std::vector<cv::Mat> simulated_image_row = simulated_image_grid.at(row);
-        for (int col = 0; col < ColumnCount; ++col) {
-          if( simulated_image_row.size() > col ){
-           CvImageCellWidget *cell_widget  = new CvImageCellWidget( this );
-           if( _flag_logger ){
-            cell_widget->set_application_logger( logger );
-          }
-          cell_widget->setMaximumSize( QSize(ColumnSize, RowSize) );
-          cell_widget->set_container_size( ColumnSize, RowSize );
-          cv::Mat full_image = simulated_image_row.at(col);
-          cell_widget->setImage( full_image.clone() );
-          cell_widget->fitToContainer();
-          if( _calculated_best_match ){
-            if( best_match_pos.x ==  row && best_match_pos.y == col ){
-              cell_widget->set_best();
-              this->image_delegate->set_best(  row, col );
+  try {  
+    if( _flag_created_cells ){
+      if( _flag_simulated_image_grid ){
+        cv::Point2i best_match_pos;
+        best_match_pos.x = 0;
+        best_match_pos.y = 0;
+
+        const bool _calculated_best_match = core_tdmap->get_flag_simgrid_best_match_position();
+        if( _calculated_best_match ){
+          std::cout << " _calculated_best_match " << _calculated_best_match << std::endl;
+         best_match_pos = core_tdmap->get_simgrid_best_match_position();
+         emit tdmap_best_match( best_match_pos.x, best_match_pos.y );
+       }
+
+       for ( int row = 0; row < RowCount; row++ ) {
+        if( simulated_image_grid.size() > row ){
+          std::vector<cv::Mat> simulated_image_row = simulated_image_grid.at(row);
+          for ( int col = 0; col < ColumnCount; col++ ) {
+            if( simulated_image_row.size() > col ){
+             CvImageCellWidget *cell_widget  = new CvImageCellWidget( this );
+             if( _flag_logger ){
+              cell_widget->set_application_logger( logger );
             }
-          }
-          this->setCellWidget(row,col, cell_widget);
+            cell_widget->setMaximumSize( QSize(ColumnSize, RowSize) );
+            cell_widget->set_container_size( ColumnSize, RowSize );
+            cv::Mat full_image = simulated_image_row.at(col);
+
+            cell_widget->setImage( full_image );
+            cell_widget->fitToContainer();
+            if( _calculated_best_match ){
+              if( best_match_pos.x ==  row && best_match_pos.y == col ){
+                cell_widget->set_best();
+                this->image_delegate->set_best(  row, col );
+              }
+            }
+            this->setCellWidget(row,col, cell_widget);
           this->setItem(row, col, new QTableWidgetItem());//used to find it
         }
         else{
@@ -325,8 +350,8 @@ void TDMap_Table::update_cells(){
 }
 else{
       //only visualy update cells
-  for (int row = 0; row < RowCount; ++row) {
-    for (int col = 0; col < ColumnCount; ++col) {
+  for (int row = 0; row < RowCount; row++) {
+    for (int col = 0; col < ColumnCount; col++) {
       CvImageCellWidget *cell_widget  = new CvImageCellWidget( );
       cell_widget->setMaximumSize( QSize( ColumnSize, RowSize ) );
       cell_widget->set_container_size( ColumnSize, RowSize );
@@ -337,6 +362,16 @@ else{
       }
     }
   }
+
+} 
+catch (std::exception &ex) {
+  if ( _flag_logger ) {
+    std::stringstream message;
+    message << "error on TDMap_Table::update_cells " << ex.what();
+    ApplicationLog::severity_level _log_type = ApplicationLog::error;            
+    BOOST_LOG_FUNCTION();  logger->logEvent( _log_type , message.str() );
+  }
+}
 }
 
 /*
