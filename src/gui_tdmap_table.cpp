@@ -281,7 +281,10 @@ catch (std::exception &ex) {
 
 void TDMap_Table::connect_focus_event( QFocusEvent *event, int row, int col ){
   emit cellClicked( row, col );
+  image_delegate->set_selected( row, col );
   std::cout << "connect_focus_event cell clicked row " << row << " col " << col << std::endl;
+  // repaint the widget
+  this->repaint();
 }
 
 void TDMap_Table::update_cells(){
@@ -305,7 +308,7 @@ void TDMap_Table::update_cells(){
             for ( int col = 0; col < ColumnCount; col++ ) {
               if( simulated_image_row.size() > col ){
                CvImageCellWidget *cell_widget  = new CvImageCellWidget( this );
-               
+
                if( _flag_logger ){
                 cell_widget->set_application_logger( logger );
               }
@@ -322,7 +325,7 @@ void TDMap_Table::update_cells(){
               if( _calculated_best_match ){
                 if( best_match_pos.x ==  row && best_match_pos.y == col ){
                   cell_widget->set_best();
-                  this->image_delegate->set_best(  row, col );
+                  this->image_delegate->set_best( row, col );
                 }
               }
               this->setCellWidget(row,col, cell_widget);
@@ -365,6 +368,8 @@ void TDMap_Table::update_cells(){
     logger->logEvent( _log_type , message.str() );
   }
   emit cellClicked( best_match_pos.x, best_match_pos.y );
+  image_delegate->set_selected( best_match_pos.x, best_match_pos.y );
+
 
   if( _flag_logger ){
     std::stringstream message;

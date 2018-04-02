@@ -41,8 +41,11 @@ class CvTDMapImageFrameDelegate : public QStyledItemDelegate {
 
     void paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const override;
     bool shouldBeBest(const QModelIndex &index) const;
+    bool shouldBeSelected(const QModelIndex &index) const;
     void set_best( int row, int col );
+    void set_selected( int row, int col );
     void clean_best( );
+    void clean_selected( );
   bool set_application_logger( ApplicationLog::ApplicationLog* logger );
 
   private:
@@ -51,6 +54,9 @@ class CvTDMapImageFrameDelegate : public QStyledItemDelegate {
     int _best_row;
     int _best_col;
     bool _best_defined = false;
+    int _selected_row;
+    int _selected_col;
+    bool _selected_defined = false;
 
         /* Loggers */
     ApplicationLog::ApplicationLog* logger = nullptr;

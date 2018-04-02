@@ -15,7 +15,7 @@ void CvTDMapImageFrameDelegate::paint(QPainter *painter, const QStyleOptionViewI
 
   painter->setRenderHint(QPainter::Antialiasing);
 
-  if ( option.state & QStyle::State_Selected ){
+  if ( shouldBeSelected(index) ){
     painter->setPen(QPen(QColor(255,0,0),1));
     painter->setBrush(QBrush(QColor(255, 0, 0)));
   }
@@ -40,12 +40,30 @@ bool CvTDMapImageFrameDelegate::set_application_logger( ApplicationLog::Applicat
   return true;
 }
 
+bool CvTDMapImageFrameDelegate::shouldBeSelected(const QModelIndex &index) const {
+  bool result = false;
+  if( (index.row() == _selected_row) && (index.column() == _selected_col) && (_selected_defined) ){
+    result = true;
+  }
+  return result;
+}
+
 bool CvTDMapImageFrameDelegate::shouldBeBest(const QModelIndex &index) const {
   bool result = false;
   if( (index.row() == _best_row) && (index.column() == _best_col) && (_best_defined) ){
     result = true;
   }
   return result;
+}
+
+void CvTDMapImageFrameDelegate::set_selected( int row, int col ){
+  _selected_row = row;
+  _selected_col = col;
+  _selected_defined = true;
+}
+
+void CvTDMapImageFrameDelegate::clean_selected( ){
+  _selected_defined = false;
 }
 
 void CvTDMapImageFrameDelegate::set_best( int row, int col ){
