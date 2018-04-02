@@ -12,8 +12,13 @@
 
 #include <QTableWidget>
 #include <QTableWidgetItem>
+#include <QWidget>
 
 #include "gui_tdmap_cell.h"
+#include "cv_tdmap_cell_image_frame.h"
+#include "cv_image_cell_widget.h"
+#include "cv_image_frame.h"
+#include "td_map.hpp"
 #include "cv_image_delegate.h"
 #include "td_map.hpp"
 #include "treeitem.h"
@@ -45,6 +50,9 @@ class TDMap_Table : public QTableWidget
 
     /* Loggers */
     bool set_application_logger( ApplicationLog::ApplicationLog* logger );
+
+    /* masking qfocusevent */
+    void connect_focus_event( QFocusEvent *event, int row, int col );
 
 public slots:
     void selectCurrentRow();

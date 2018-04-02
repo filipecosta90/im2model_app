@@ -474,7 +474,6 @@ void MainWindow::update_tdmap_current_selection(int x,int y){
     model->setItem(0, 1, match_item);
     model->setItem(1, 1, thickness_item);
     model->setItem(2, 1, defocus_item);
-
     ui->qgraphics_tdmap_selection->setModel(model);
 
     const double full_image_height_nm = _core_td_map->get_sim_image_properties_roi_ny_size_height_nm();

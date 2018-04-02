@@ -8,13 +8,6 @@
  */
 
 #include "gui_tdmap_table.h"
-#include "gui_tdmap_cell.h"
-#include "cv_tdmap_cell_image_frame_delegate.h"
-#include "cv_tdmap_cell_image_frame.h"
-#include "cv_image_cell_widget.h"
-#include "cv_image_frame.h"
-
-#include "td_map.hpp"
 
 TDMap_Table::TDMap_Table(QWidget *parent) : QTableWidget(parent) {
 
@@ -199,7 +192,6 @@ void TDMap_Table::update_headers_columns(){
 
 }
 
-
 void TDMap_Table::update_headers_rows(){
   if( core_tdmap->get_flag_slice_samples() ){
     RowCount = core_tdmap->get_slice_samples();
@@ -268,6 +260,8 @@ void TDMap_Table::create_cells(){
       cell_widget->set_container_size( ColumnSize, RowSize );
 
       //cell_widget->setStyleSheet("background-color:red;");
+      boost::function<void(QFocusEvent *event)> cell_function ( boost::bind( &TDMap_Table::connect_focus_event, this, _1, row, col ) );
+      cell_widget->add_onfocus_functor( cell_function );
       this->setCellWidget(row, col, cell_widget);
       this->setItem(row, col, new QTableWidgetItem());//used to find it
     }
@@ -283,6 +277,11 @@ catch (std::exception &ex) {
     BOOST_LOG_FUNCTION();  logger->logEvent( _log_type , message.str() );
   }
 }
+}
+
+void TDMap_Table::connect_focus_event( QFocusEvent *event, int row, int col ){
+  emit cellClicked( row, col );
+  std::cout << "connect_focus_event cell clicked row " << row << " col " << col << std::endl;
 }
 
 void TDMap_Table::update_cells(){
@@ -306,9 +305,14 @@ void TDMap_Table::update_cells(){
             for ( int col = 0; col < ColumnCount; col++ ) {
               if( simulated_image_row.size() > col ){
                CvImageCellWidget *cell_widget  = new CvImageCellWidget( this );
+               
                if( _flag_logger ){
                 cell_widget->set_application_logger( logger );
               }
+
+              boost::function<void(QFocusEvent *event)> cell_function ( boost::bind( &TDMap_Table::connect_focus_event, this, _1, row, col ) );
+              cell_widget->add_onfocus_functor( cell_function );
+
               cell_widget->setMaximumSize( QSize(ColumnSize, RowSize) );
               cell_widget->set_container_size( ColumnSize, RowSize );
               cv::Mat full_image = simulated_image_row.at(col);
@@ -322,7 +326,7 @@ void TDMap_Table::update_cells(){
                 }
               }
               this->setCellWidget(row,col, cell_widget);
-          this->setItem(row, col, new QTableWidgetItem());//used to find it
+          this->setItem(row, col, new QTableWidgetItem() );//used to find it
         }
         else{
           if( _flag_logger ){
@@ -361,7 +365,7 @@ void TDMap_Table::update_cells(){
     logger->logEvent( _log_type , message.str() );
   }
   emit cellClicked( best_match_pos.x, best_match_pos.y );
-  
+
   if( _flag_logger ){
     std::stringstream message;
     message << "TDMap_Table:: post emit cellClicked: " << best_match_pos;
@@ -381,10 +385,12 @@ else{
       //only visualy update cells
   for (int row = 0; row < RowCount; row++) {
     for (int col = 0; col < ColumnCount; col++) {
-      CvImageCellWidget *cell_widget  = new CvImageCellWidget( );
+      CvImageCellWidget *cell_widget  = new CvImageCellWidget(  );
       cell_widget->setMaximumSize( QSize( ColumnSize, RowSize ) );
       cell_widget->set_container_size( ColumnSize, RowSize );
       cell_widget->fitToContainer();
+      boost::function<void(QFocusEvent *event)> cell_function ( boost::bind( &TDMap_Table::connect_focus_event, this, _1, row, col ) );
+      cell_widget->add_onfocus_functor( cell_function );
       this->setCellWidget(row,col, cell_widget);
           this->setItem(row, col, new QTableWidgetItem());//used to find it
         }

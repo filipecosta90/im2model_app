@@ -30,7 +30,7 @@ public:
     CVImageWidget *image_widget;
 
      /* Loggers */
-  bool set_application_logger( ApplicationLog::ApplicationLog* logger );
+    bool set_application_logger( ApplicationLog::ApplicationLog* logger );
 
     public slots:
 

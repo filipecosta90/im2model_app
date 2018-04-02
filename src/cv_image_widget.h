@@ -22,6 +22,7 @@
 #include <QHash>
 #include <QWidget>
 #include <map>
+#include <QFocusEvent>
 
 
 #include "renderarea.h"
@@ -40,9 +41,9 @@ public:
 
      /* Loggers */
   bool set_application_logger( ApplicationLog::ApplicationLog* logger );
+  void add_onfocus_functor( boost::function<void(QFocusEvent *event)> );
 
     public slots:
-
     void startRectangleSelection();
     void startStatisticalRectangleSelection();
     void MapPosToObject( const QPoint &pos );
@@ -87,8 +88,11 @@ protected:
     void mousePressEvent(QMouseEvent *e);
     void mouseMoveEvent(QMouseEvent *e);
     void mouseReleaseEvent(QMouseEvent *e);
+    void focusInEvent(QFocusEvent *event);
+
 
 private:
+  boost::function<void(QFocusEvent *event)> focus_functor;
 
     QRect mapSelectionRectToOriginalSize();
     QRect mapSelectionStatisticalRectToOriginalSize();

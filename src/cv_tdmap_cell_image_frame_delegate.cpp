@@ -15,7 +15,7 @@ void CvTDMapImageFrameDelegate::paint(QPainter *painter, const QStyleOptionViewI
 
   painter->setRenderHint(QPainter::Antialiasing);
 
-  if (option.state & QStyle::State_Selected){
+  if ( option.state & QStyle::State_Selected ){
     painter->setPen(QPen(QColor(255,0,0),1));
     painter->setBrush(QBrush(QColor(255, 0, 0)));
   }

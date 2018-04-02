@@ -280,6 +280,7 @@
         src/cv_image_frame.h
         src/cv_image_frame.cpp
         src/cv_image_cell_widget.h
+        src/cv_image_cell_widget.cpp
         src/cv_image_delegate.h
         src/cv_image_delegate.cpp
         src/cv_tdmap_cell_image_frame.h
