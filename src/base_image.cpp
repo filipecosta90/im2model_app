@@ -167,14 +167,14 @@ void BaseImage::calculate_roi_n_cols_from_a_size_and_sampling_rate(){
 }
 
 void BaseImage::calculate_roi_b_size_from_n_rows_and_sampling_rate(){
-  if( _flag_auto_b_size && _flag_roi_n_rows_height && _flag_sampling_rate_x_nm_per_pixel ){
+  if( _flag_auto_b_size_roi && _flag_roi_n_rows_height && _flag_sampling_rate_x_nm_per_pixel ){
     const double roi_nm_size_rows_b = ( (double) roi_n_rows_height ) * sampling_rate_x_nm_per_pixel;
     set_roi_nm_size_rows_b( roi_nm_size_rows_b );
   }
 }
 
 void BaseImage::calculate_roi_a_size_from_n_cols_and_sampling_rate(){
-  if( _flag_auto_a_size && _flag_roi_n_cols_width && _flag_sampling_rate_y_nm_per_pixel ){
+  if( _flag_auto_a_size_roi && _flag_roi_n_cols_width && _flag_sampling_rate_y_nm_per_pixel ){
     const double roi_nm_size_cols_a = (double) ( roi_n_cols_width ) * sampling_rate_y_nm_per_pixel;
     set_roi_nm_size_cols_a( roi_nm_size_cols_a );
   }
@@ -935,6 +935,8 @@ std::ostream& BaseImage::output(std::ostream& stream) const {
   << "\t\t" << "_flag_auto_n_cols : " << std::boolalpha << _flag_auto_n_cols << "\n"
   << "\t\t" << "_flag_auto_a_size : " << std::boolalpha << _flag_auto_a_size << "\n"
   << "\t\t" << "_flag_auto_b_size : " << std::boolalpha << _flag_auto_b_size << "\n"
+  << "\t\t" << "_flag_auto_a_size_roi : " << std::boolalpha << _flag_auto_a_size_roi << "\n"
+  << "\t\t" << "_flag_auto_b_size_roi : " << std::boolalpha << _flag_auto_b_size_roi << "\n"
   << "\t\t" << "_flag_auto_roi_from_ignored_edge : " << std::boolalpha << _flag_auto_roi_from_ignored_edge << "\n"
     // FULL IMAGE
   << "\t\t" << "_flag_full_image : " <<  std::boolalpha << _flag_full_image << "\n"

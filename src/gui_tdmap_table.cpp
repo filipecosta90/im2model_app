@@ -283,7 +283,7 @@ void TDMap_Table::connect_focus_event( QFocusEvent *event, int row, int col ){
   emit cellClicked( row, col );
   image_delegate->set_selected( row, col );
   std::cout << "connect_focus_event cell clicked row " << row << " col " << col << std::endl;
-  // repaint the widget
+  // force emediate repaint the widget
   this->repaint();
 }
 

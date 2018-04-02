@@ -10,6 +10,7 @@
 #include "cv_image_widget.h"
 
 CVImageWidget::CVImageWidget(QWidget *parent ) : QWidget(parent) , scaleFactor(1) {
+
   this->setFocusPolicy( Qt::StrongFocus );
   this->setContextMenuPolicy(Qt::CustomContextMenu);
   connect(this, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(ShowContextMenu(const QPoint &)));

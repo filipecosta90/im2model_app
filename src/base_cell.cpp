@@ -342,7 +342,7 @@ double BaseCell::get_max_length_abc_Nanometers( ){
 
 int BaseCell::get_atom_positions_vec_size( ){
   int size = 0;
-  for ( size_t pos = 0; pos < atom_positions.size() ; pos++ ){
+  for ( int pos = 0; pos < atom_positions.size() ; pos++ ){
     size += ( atom_positions[pos].size() );
   }
   return size;
@@ -350,7 +350,7 @@ int BaseCell::get_atom_positions_vec_size( ){
 
 int BaseCell::get_atom_fractional_cell_coordinates_vec_size( ){
   int size = 0;
-  for ( size_t pos = 0; pos < atom_fractional_cell_coordinates.size() ; pos++ ){
+  for ( int pos = 0; pos < atom_fractional_cell_coordinates.size() ; pos++ ){
     size += ( atom_fractional_cell_coordinates[pos].size() );
   }
   return size;
@@ -605,6 +605,9 @@ std::ostream& BaseCell::output(std::ostream& stream) const {
   << "\t" << "angle_beta : "  << angle_beta << "\n"
   << "\t" << "angle_gamma : "  << angle_gamma << "\n"
     /** reciprocal-lattice (Miller) indices  **/
+    << "\t" << "_flag_lattice_mapping_matrix : "  << std::boolalpha << _flag_lattice_mapping_matrix_Nanometers << "\n"
+    << "\t" << "_flag_lattice_mapping_matrix_Nanometers : "  << std::boolalpha << _flag_lattice_mapping_matrix_Nanometers << "\n"
+    << "\t" << "lattice_mapping_matrix : "  << std::boolalpha << lattice_mapping_matrix_Nanometers << "\n"
   << "\t" << "vector_t : "  << vector_t << "\n"
     // projected z-axis:
   << "\t" << "upward_vector : "  << upward_vector << "\n"
@@ -628,7 +631,7 @@ std::ostream& BaseCell::output(std::ostream& stream) const {
   << "\t" << "#### VECTORS: \n"
   << "\t" << "atoms.size() : "  << atoms.size() << "\n"
   << "\t" << "atom_positions.size() : "  << atom_positions.size() << "\n"
-    //<< "\t" << "get_atom_positions_vec_size : "  << BaseCell::get_atom_positions_vec_size() << "\n"
+  //<< "\t" << "get_atom_positions_vec_size : "  << tget_atom_positions_vec_size() << "\n"
   << "\t\t" << "_flag_atom_positions : " << std::boolalpha << _flag_atom_positions << "\n"
   << "\t" << "atom_symbols.size() : "  << atom_symbols.size() << "\n"
   << "\t" << "atom_debye_waller_factors.size() : "  << atom_debye_waller_factors.size() << "\n"

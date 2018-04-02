@@ -859,7 +859,9 @@ std::ostream& SuperCell::output(std::ostream& stream) const {
     << "\t" << "expand_factor_a : "  << expand_factor_a << "\n"
     << "\t" << "expand_factor_b : "  << expand_factor_b << "\n"
     << "\t" << "expand_factor_c : "  << expand_factor_c << "\n"
-    << "\t\t" << "_flag_expand_factor : " << std::boolalpha << _flag_expand_factor << "\n";
+    << "\t\t" << "_flag_expand_factor : " << std::boolalpha << _flag_expand_factor << "\n"
+    << "\t\t" << "inverse_orientation_matrix.empty() : " << std::boolalpha << inverse_orientation_matrix.empty() << "\n"
+    << "\t\t" << "inverse_orientation_matrix : " << std::boolalpha << inverse_orientation_matrix << "\n";
   stream << "\t\t" << "_flag_image_bounds : " << std::boolalpha << _flag_image_bounds << "\n";
   stream << "BaseCell Properties : " << "\n";
   BaseCell::output(stream);

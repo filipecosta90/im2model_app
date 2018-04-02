@@ -484,8 +484,6 @@ void MainWindow::update_tdmap_current_selection(int x,int y){
     Qt3DCore::QTransform* transform = new Qt3DCore::QTransform( );
     transform->setRotation(QQuaternion::fromAxisAndAngle(1,0,0,90));
 
-    
-
     ui->qgraphics_tdmap_selection->update_image_layer( _simulated_image , full_image_width_nm ,  full_image_height_nm , transform, "Simulated image layer");
 
   }

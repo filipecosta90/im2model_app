@@ -65,6 +65,8 @@ private:
     bool _flag_auto_n_cols = false;
     bool _flag_auto_a_size = false;
     bool _flag_auto_b_size = false;
+    bool _flag_auto_a_size_roi = true;
+    bool _flag_auto_b_size_roi = true;
     bool _flag_auto_roi_from_ignored_edge = false;
 
     /* Loggers */
