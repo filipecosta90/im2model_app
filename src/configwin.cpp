@@ -432,6 +432,15 @@ bool MainWindow::maybeSetPreferences(){
 }
 
 void MainWindow::update_tdmap_current_selection(int x,int y){
+
+
+  if (_flag_im2model_logger) {
+    std::stringstream message;
+    message << "update_tdmap_current_selection to x : " <<  x << " y: " << y;
+    im2model_logger->logEvent(ApplicationLog::notification, message.str());
+    message = std::stringstream();
+  }
+
   if(_core_td_map->get_flag_simulated_images_grid()){
     tdmap_current_selection_pos.x = x;
     tdmap_current_selection_pos.y = y;
@@ -1357,11 +1366,15 @@ void MainWindow::loadFile(const QString &fileName){
     file_version = config.get<std::string>("version");
     if( application_version > file_version ){
       old_version = true;
-      result = false;
     }
   }
   catch(const boost::property_tree::ptree_error &e) {
     missing_version = true;
+  }
+
+   if( old_version ){
+    ui->statusBar->showMessage(tr("The file seems to be from an old Im2model Version. Will try to load project anyway.") );
+      // File version \"") + QString::fromStdString(file_version) + QString::fromStdString("\" is older than \"") + QString::fromStdString(application_version) + QString::fromStdString("\"" )
   }
 
   if( missing_version ){
@@ -1428,11 +1441,6 @@ void MainWindow::loadFile(const QString &fileName){
     _flag_project_setted = true;
     ui->statusBar->showMessage(tr("Project loaded"), 2000);
     _reset_document_modified_flags();
-  }
-  else{
-    if( old_version ){
-      ui->statusBar->showMessage( QString::fromStdString("Error loading project. File version \"") + QString::fromStdString(file_version) + QString::fromStdString("\" is older than \"") + QString::fromStdString(application_version) + QString::fromStdString("\"" ) );
-    }
   }
 }
 
