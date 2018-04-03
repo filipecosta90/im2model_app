@@ -1,11 +1,13 @@
-#include "unit_cell_view_widget.h"
+/*
+ * This file is subject to the terms and conditions defined in
+ * file 'LICENSE', which is part of this source code package.
+ *
+ * Partialy financiated as part of the protocol between UTAustin I Portugal - UTA-P.
+ * [2017] - [2018] University of Minho, Filipe Costa Oliveira 
+ * All Rights Reserved.
+ */
 
-#include <QVBoxLayout>
-#include <QGroupBox>
-#include <QRadioButton>
-#include <QCheckBox>
-#include <QLabel>
-#include <QQuickItem>
+#include "unit_cell_view_widget.h"
 
 UnitCellViewerWindow::UnitCellViewerWindow(QWidget *parent) : QWidget(parent) {
 
@@ -68,6 +70,14 @@ UnitCellViewerWindow::UnitCellViewerWindow(QWidget *parent) : QWidget(parent) {
 
   init();
   create_standard_atom_options();
+}
+
+/* Loggers */
+bool UnitCellViewerWindow::set_application_logger( ApplicationLog::ApplicationLog* app_logger ){
+  logger = app_logger;
+  _flag_logger = true;
+  BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification, "Application logger setted for UnitCellViewerWindow class." );
+  return true;
 }
 
 void UnitCellViewerWindow::set_super_cell( SuperCell* cell , bool bind_orientation ){
@@ -154,7 +164,7 @@ void UnitCellViewerWindow::create_standard_atom_options(){
   atom_radius_root->set_variable_name( "atom_radius_root" );
   atom_properties_root->insertChildren( atom_radius_root );
 
-  atom_info_tree_view->setModel(atom_info_fields_model);
+  atom_info_tree_view->setModel( atom_info_fields_model );
   atom_info_tree_view->setItemDelegate( atom_info_tree_view_delegate );
   //start editing after one click
   atom_info_tree_view->setEditTriggers(QAbstractItemView::AllEditTriggers);
@@ -202,10 +212,10 @@ void UnitCellViewerWindow::reload_data_from_super_cell( ){
       atom_info_fields_model->insertChildren( atom_item, atom_radius_root );
     }
   }
-    atom_info_tree_view->expandAll();
-    for (int column = 0; column < atom_info_fields_model->columnCount(); ++column){
-      atom_info_tree_view->resizeColumnToContents(column);
-    }
+  atom_info_tree_view->expandAll();
+  for (int column = 0; column < atom_info_fields_model->columnCount(); ++column){
+    atom_info_tree_view->resizeColumnToContents(column);
+  }
   this->update();
 }
 

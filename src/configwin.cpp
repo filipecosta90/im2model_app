@@ -78,7 +78,6 @@ MainWindow::MainWindow( ApplicationLog::ApplicationLog* logger , QWidget *parent
     SuperCell* tdmap_vis_sim_unit_cell = _core_td_map->get_tdmap_vis_sim_unit_cell();
     SuperCell* tdmap_full_sim_super_cell = _core_td_map->get_tdmap_full_sim_super_cell();
 
-    create_3d_widgets( this , tdmap_vis_sim_unit_cell, tdmap_full_sim_super_cell );
 
     celslc_step_group_options = new group_options("celslc_step");
     msa_step_group_options = new group_options("msa_step");
@@ -97,11 +96,9 @@ MainWindow::MainWindow( ApplicationLog::ApplicationLog* logger , QWidget *parent
     if (_flag_im2model_logger) {
       im2model_logger->logEvent(ApplicationLog::critical, "Trying to set application logger for TDMap and SuperCell.");
       _core_td_map->set_application_logger(im2model_logger);
-    }
-
-    if (_flag_im2model_logger) {
       im2model_logger->logEvent(ApplicationLog::critical, "Trying to set application logger for Visualization Widgets.");
       ui->tdmap_table->set_application_logger(im2model_logger);
+      ui->qgraphics_tdmap_selection->set_application_logger( im2model_logger );
     }
 
     bool status = true;
@@ -109,6 +106,8 @@ MainWindow::MainWindow( ApplicationLog::ApplicationLog* logger , QWidget *parent
     status &= _core_td_map->set_dr_probe_celslc_execname( _dr_probe_celslc_bin.toStdString() );
     status &= _core_td_map->set_dr_probe_msa_execname( _dr_probe_msa_bin.toStdString() );
     status &= _core_td_map->set_dr_probe_wavimg_execname( _dr_probe_wavimg_bin.toStdString() );
+
+    create_3d_widgets( this , tdmap_vis_sim_unit_cell, tdmap_full_sim_super_cell );
 
     if( status == false ){
       _failed_initialization = true;
@@ -238,8 +237,12 @@ void MainWindow::setApplicationVersion( std::string app_version ){
 void MainWindow::update_tdmap_celslc_started( ){
   updateProgressBar(0,0,100);
   ui->statusBar->showMessage(tr("Started multislice step"), 2000);
-}
 
+  SuperCell* tdmap_roi_sim_super_cell = _core_td_map->get_tdmap_roi_sim_super_cell();
+  ui->qgraphics_tdmap_selection->set_super_cell( tdmap_roi_sim_super_cell , false );
+  ui->qgraphics_tdmap_selection->view_along_c_axis();
+  ui->qgraphics_tdmap_selection->reload_data_from_super_cell();
+}
 
 void MainWindow::update_tdmap_celslc_started_with_steps_info( int n_steps ){
   updateProgressBar(0,0,100);
@@ -248,6 +251,7 @@ void MainWindow::update_tdmap_celslc_started_with_steps_info( int n_steps ){
   message << "Launching " << n_steps << " concurrent processes to calculate the multislice step.";
   ui->statusBar->showMessage(QString::fromStdString(message.str()), 5000);
 }
+
 
 void MainWindow::update_supercell_celslc_started_with_steps_info( int n_steps ){
   updateProgressBar(0,0,100);
@@ -375,10 +379,6 @@ void MainWindow::update_tdmap_simgrid_ended( bool result ){
   if( result ){
     updateProgressBar(0,100,100);
     ui->statusBar->showMessage(tr("Sucessfully ended image correlation step"), 2000);
-    SuperCell* tdmap_roi_sim_super_cell = _core_td_map->get_tdmap_roi_sim_super_cell();
-    ui->qgraphics_tdmap_selection->set_super_cell( tdmap_roi_sim_super_cell , false );
-    ui->qgraphics_tdmap_selection->view_along_c_axis();
-    ui->qgraphics_tdmap_selection->reload_data_from_super_cell();
   }
   else{
     updateProgressBar(0,100,100, true);
@@ -1369,7 +1369,7 @@ void MainWindow::loadFile(const QString &fileName){
     missing_version = true;
   }
 
-   if( old_version ){
+  if( old_version ){
     ui->statusBar->showMessage(tr("The file seems to be from an old Im2model Version. Will try to load project anyway.") );
       // File version \"") + QString::fromStdString(file_version) + QString::fromStdString("\" is older than \"") + QString::fromStdString(application_version) + QString::fromStdString("\"" )
   }

@@ -25,8 +25,8 @@
 class CvCellFrameTableWidget : public UnitCellViewerWindow
 {
   Q_OBJECT
-  public:
-    explicit CvCellFrameTableWidget(QWidget *parent = 0) : UnitCellViewerWindow(parent){
+public:
+  explicit CvCellFrameTableWidget(QWidget *parent = 0) : UnitCellViewerWindow(parent){
     table_view = new QTableView;
     //disable editing
     table_view->setEditTriggers(QAbstractItemView::NoEditTriggers);
@@ -35,20 +35,27 @@ class CvCellFrameTableWidget : public UnitCellViewerWindow
     table_view->setMaximumHeight(0);
     m_containerLayout->addWidget(table_view);
   }
-    public slots:
 
-      void setModel(QAbstractItemModel* model ){
-        table_view->setModel(model);
-        table_view->resizeRowsToContents();
-        int row_heigth = table_view->rowHeight(0) * model->rowCount();
-        int header_heigth = table_view->horizontalHeader()->height();
-        table_view->setMaximumHeight(row_heigth + header_heigth);
-        m_containerLayout->update();
-        table_view->show();
-      }
+    /* Loggers */
+  bool set_application_logger( ApplicationLog::ApplicationLog* logger ){
+    bool result = UnitCellViewerWindow::set_application_logger( logger );
+    return result;
+  }
 
-  protected:
-    QTableView *table_view;
+  public slots:
+
+  void setModel(QAbstractItemModel* model ){
+    table_view->setModel(model);
+    table_view->resizeRowsToContents();
+    int row_heigth = table_view->rowHeight(0) * model->rowCount();
+    int header_heigth = table_view->horizontalHeader()->height();
+    table_view->setMaximumHeight(row_heigth + header_heigth);
+    m_containerLayout->update();
+    table_view->show();
+  }
+
+protected:
+  QTableView *table_view;
 
 };
 

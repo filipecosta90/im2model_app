@@ -794,7 +794,6 @@ std::vector< std::vector<cv::Mat> > SimGrid::get_simulated_images_grid_visualiza
       cv::Mat simulated_image_visualization = img_treater.get_image_visualization( simulated_image );
       simulated_images_row_visualization.push_back( simulated_image_visualization );
     }
-
     simulated_images_grid_visualization.push_back( simulated_images_row_visualization );
   }
 
@@ -807,15 +806,15 @@ std::vector< std::vector<cv::Mat> > SimGrid::get_simulated_images_grid_visualiza
 }
 
 cv::Mat SimGrid::get_simulated_image_in_grid( int row_thickness, int col_defocus ){
-  std::vector<cv::Mat> simulated_images_row = simulated_images_grid.at(row_thickness);
+  std::vector<cv::Mat> simulated_images_row = cleaned_simulated_images_grid.at(row_thickness);
   cv::Mat cleaned_simulated_image = simulated_images_row.at(col_defocus);
   return cleaned_simulated_image;
 }
 
 cv::Mat SimGrid::get_simulated_image_in_grid_visualization( int row_thickness, int col_defocus ){
   cv::Mat return_mat;
-  if( simulated_images_grid.size() > row_thickness ){
-    const std::vector<cv::Mat> simulated_images_row = simulated_images_grid.at(row_thickness);
+  if( cleaned_simulated_images_grid.size() > row_thickness ){
+    const std::vector<cv::Mat> simulated_images_row = cleaned_simulated_images_grid.at(row_thickness);
     if( simulated_images_row.size() > col_defocus ){
       const cv::Mat cleaned_simulated_image = simulated_images_row.at(col_defocus);
       BaseImage img_treater;
