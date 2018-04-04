@@ -628,7 +628,9 @@ cv::Mat BaseImage::get_image_visualization( cv::Mat image ){
   //image.copyTo( draw );
 
   //Mat thresh = m > th;
-
+draw.setTo( low_percentage_darkest_pixel_intensity_level, draw < low_percentage_darkest_pixel_intensity_level);
+  draw.setTo( high_percentage_brightest_pixels_intensity_level, draw > high_percentage_brightest_pixels_intensity_level);
+  cv::minMaxLoc(image, &image_min_intensity_detected, &image_max_intensity_detected);
   
   double interval = ( image_max_intensity_detected  -  image_min_intensity_detected );
   double alpha = 255.0/interval ;
@@ -639,14 +641,12 @@ cv::Mat BaseImage::get_image_visualization( cv::Mat image ){
     std::cout << "draw initial info : " << print_cv_mat_information( draw ) << std::endl;
   draw.convertTo(draw,  CV_8U,  alpha, beta);
 
-  draw.setTo( low_percentage_darkest_pixel_intensity_level, draw < low_percentage_darkest_pixel_intensity_level);
-  draw.setTo( high_percentage_brightest_pixels_intensity_level, draw > high_percentage_brightest_pixels_intensity_level);
-
+  /*
   // [ 1%, 99% ] for visualization
   interval = ( high_percentage_brightest_pixels_intensity_level  -  low_percentage_darkest_pixel_intensity_level );
   alpha = 255.0/interval ;
   beta = -low_percentage_darkest_pixel_intensity_level * alpha;
-  draw.convertTo(draw,  CV_8U,  alpha, beta);
+  draw.convertTo(draw,  CV_8U,  alpha, beta);*/
 
   std::cout << "returning image of type: " << type2str(draw.type()) << std::endl;
   std::cout << "#### " << print_cv_mat_information( draw ) << std::endl;

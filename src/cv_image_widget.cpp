@@ -10,7 +10,6 @@
 #include "cv_image_widget.h"
 
 CVImageWidget::CVImageWidget(QWidget *parent ) : QWidget(parent) , scaleFactor(1) {
-
   this->setFocusPolicy( Qt::StrongFocus );
   this->setContextMenuPolicy(Qt::CustomContextMenu);
   connect(this, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(ShowContextMenu(const QPoint &)));
@@ -24,12 +23,14 @@ void CVImageWidget::MapPosToObject(const QPoint &pos){
 
 void CVImageWidget::add_onfocus_functor( boost::function<void(QFocusEvent *event)> functor ){
   focus_functor = functor;
+  _flag_focus_functor = true;
      std::cout << " added add_onfocus_functor CVImageWidget" << std::endl;
-
 }
 
-void CVImageWidget::focusInEvent ( QFocusEvent * event ) { 
-  focus_functor( event );  
+void CVImageWidget::focusInEvent ( QFocusEvent * event ) {
+  if( _flag_focus_functor ){
+      focus_functor( event );  
+  }
    std::cout << " received focusInEvent" << std::endl;
 }
 

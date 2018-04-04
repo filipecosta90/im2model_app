@@ -40,8 +40,8 @@ public:
     void set_container_window_size( const int width , const int height );
 
      /* Loggers */
-  bool set_application_logger( ApplicationLog::ApplicationLog* logger );
-  void add_onfocus_functor( boost::function<void(QFocusEvent *event)> );
+    bool set_application_logger( ApplicationLog::ApplicationLog* logger );
+    void add_onfocus_functor( boost::function<void(QFocusEvent *event)> );
 
     public slots:
     void startRectangleSelection();
@@ -93,53 +93,54 @@ protected:
 
 private:
   boost::function<void(QFocusEvent *event)> focus_functor;
+  bool _flag_focus_functor = false;
 
-    QRect mapSelectionRectToOriginalSize();
-    QRect mapSelectionStatisticalRectToOriginalSize();
+  QRect mapSelectionRectToOriginalSize();
+  QRect mapSelectionStatisticalRectToOriginalSize();
 
-    QList<QPainterPath> renderAreas;
-    QList<int> renderAreas_penWidth;
-    QList<QString> renderAreas_description;
-    QList<bool> renderAreas_visible;
-    QList<QColor> renderAreas_penColor;
-    std::vector<cv::Point2i> renderAreas_top_left;
-    cv::Vec3b renderAreas_default_color = cv::Vec3b(255,0,0);
+  QList<QPainterPath> renderAreas;
+  QList<int> renderAreas_penWidth;
+  QList<QString> renderAreas_description;
+  QList<bool> renderAreas_visible;
+  QList<QColor> renderAreas_penColor;
+  std::vector<cv::Point2i> renderAreas_top_left;
+  cv::Vec3b renderAreas_default_color = cv::Vec3b(255,0,0);
 
-    std::map< QString,std::vector<QPoint> > renderPoints_map;
-    std::map< QString,std::vector<bool> > renderPoints_Selection_map;
-    std::map< QString,std::vector<QColor> > renderPoints_penColor_map;
-    std::map< QString,std::vector<int> > renderPoints_penWidth_map;
-    std::map< QString,std::vector<QPoint> > renderPoints_margin_points_map;
-    std::map< QString,std::vector<int> > renderPoints_alpha_channel_map;
-    std::map< QString,std::vector<QString> > renderPoints_group_keys_map;
+  std::map< QString,std::vector<QPoint> > renderPoints_map;
+  std::map< QString,std::vector<bool> > renderPoints_Selection_map;
+  std::map< QString,std::vector<QColor> > renderPoints_penColor_map;
+  std::map< QString,std::vector<int> > renderPoints_penWidth_map;
+  std::map< QString,std::vector<QPoint> > renderPoints_margin_points_map;
+  std::map< QString,std::vector<int> > renderPoints_alpha_channel_map;
+  std::map< QString,std::vector<QString> > renderPoints_group_keys_map;
 
-    std::vector<int> alpha_channels;
-    std::vector<QImage> images;
-    std::vector<cv::Mat> _tmp_originals;
-    std::vector<cv::Mat> _tmp_currents;
-    std::vector<cv::Size> original_sizes;
-    std::vector<cv::Size> current_sizes;
-    std::vector<bool> images_set;
-    std::vector<cv::Point2i> margin_points;
+  std::vector<int> alpha_channels;
+  std::vector<QImage> images;
+  std::vector<cv::Mat> _tmp_originals;
+  std::vector<cv::Mat> _tmp_currents;
+  std::vector<cv::Size> original_sizes;
+  std::vector<cv::Size> current_sizes;
+  std::vector<bool> images_set;
+  std::vector<cv::Point2i> margin_points;
 
-    float scaleFactor = 1.0f;
-    int _container_window_width = 0;
-    int _container_window_height = 0;
+  float scaleFactor = 1.0f;
+  int _container_window_width = 0;
+  int _container_window_height = 0;
 
-    bool _enabled_rectangleSelection = false;
-    bool _started_rectangleSelection = false;
-    bool _enable_map_pos_signal = true;
-    bool freeSelection = false;
-    bool pathSelection = false;
-    QRect selectionRect;
+  bool _enabled_rectangleSelection = false;
+  bool _started_rectangleSelection = false;
+  bool _enable_map_pos_signal = true;
+  bool freeSelection = false;
+  bool pathSelection = false;
+  QRect selectionRect;
 
-    QRect selectionStatisticalRect;
-    bool _enabled_rectangleSelectionStatistical = false;
-    bool _started_rectangleSelectionStatistical = false;
+  QRect selectionStatisticalRect;
+  bool _enabled_rectangleSelectionStatistical = false;
+  bool _started_rectangleSelectionStatistical = false;
 
         /* Loggers */
-    ApplicationLog::ApplicationLog* logger = nullptr;
-    bool _flag_logger = false;
+  ApplicationLog::ApplicationLog* logger = nullptr;
+  bool _flag_logger = false;
 
 
 };
