@@ -16,6 +16,8 @@ void EMDObject::do_dtype(hid_t tid ){
   t_class = H5Tget_class(tid);
   t_size = H5Tget_size(tid);
 
+  //Returns the native datatype of a specified datatype.
+
   if(t_class < 0){
     //puts(" Invalid datatype.\n");
   } else {
@@ -23,7 +25,9 @@ void EMDObject::do_dtype(hid_t tid ){
      * Each class has specific properties that can be
      * retrieved, e.g., size, byte order, exponent, etc.
      */
-    if(t_class == H5T_INTEGER) {
+    native_dtype = H5Tget_native_type(tid, H5T_DIR_DESCEND );
+
+    if( t_class == H5T_INTEGER ) {
       int_sign = H5Tget_sign(tid);
       /* display size, signed, endianess, etc. */
     } else if(t_class == H5T_FLOAT) {
@@ -45,6 +49,22 @@ void EMDObject::do_dtype(hid_t tid ){
       /* eg. Object Reference, ...and so on ... */
     }
   }
+}
+
+bool EMDObject::is_numeric(){
+   bool result = false;
+  if( ( t_class == H5T_INTEGER ) || (t_class == H5T_FLOAT) ) {
+      result = true;
+    }
+  return result;
+}
+
+bool EMDObject::is_signed_int(){
+  bool result = false;
+  if( t_class == H5T_INTEGER ) {
+      result = ( int_sign == H5T_SGN_2 ) ? true : false;
+    }
+  return result;
 }
 
 void EMDObject::do_link(hid_t gid, char *name){

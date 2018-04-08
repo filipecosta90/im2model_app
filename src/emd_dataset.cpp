@@ -52,6 +52,7 @@ void EMDDataSet::scan_attrs(hid_t oid) {
 void EMDDataSet::do_dset(hid_t did){
   hid_t tid;
   hid_t pid;
+
   // dataset space
   hid_t space_id;
   hsize_t size;
@@ -62,7 +63,7 @@ void EMDDataSet::do_dset(hid_t did){
    *
    *  Other info., not shown here: number of links, object id
    */
-  H5Iget_name(did, ds_name, MAX_NAME  );
+  H5Iget_name( did, ds_name, MAX_NAME  );
   name = ds_name;
 
   /*
@@ -79,26 +80,24 @@ void EMDDataSet::do_dset(hid_t did){
   /*
    * Retrieve and analyse the dataset properties
    */
-  pid = H5Dget_create_plist(did); /* get creation property list */
-  do_plist(pid);
-  size = H5Dget_storage_size(did);
+  /* get creation property list */
+  pid = H5Dget_create_plist(did); 
 
-  size_raw_data = chunk_dims_out[0];
-  for(size_t pos_rank = 1; pos_rank < rank_chunk; pos_rank++ ){
-    size_raw_data *= chunk_dims_out[pos_rank];
-  }
+  if(H5D_CHUNKED == H5Pget_layout(pid)){
+    // Array to store the chunk dimensions.
+    rank_chunk = H5Pget_chunk(pid, 3, chunk_dims_out);
+    const hsize_t n_rows = chunk_dims_out[0];
+    const hsize_t n_cols = chunk_dims_out[1];
+    std::cout << "name " << name << " n_rows " << n_rows <<" n_cols " << n_cols << std::endl;
+  } 
+
+  do_plist(pid);
+
+  size_raw_data = H5Dget_storage_size(did);
+  std::cout << " size1 " << size_raw_data << std::endl;
+  raw_data->resize(static_cast<int>(size_raw_data), 0x00); //Allocate and Zero the array
 
   herr_t      status;
-  /*
-   * Create a datatype to refer to.
-   */
-  hid_t		type_id;       /* Datatype ID	   	 */
-  hid_t		size1;       /* Datatype ID	   	 */
-
-  type_id = H5Tvlen_create (H5T_NATIVE_USHORT);
-  size1 = H5Dget_storage_size(did);
-  raw_data->resize(static_cast<int>(size1), 0x00); //Allocate and Zero the array
-  type_id = H5Dget_type(did);
   status = H5Dread(did, tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, &(raw_data->front()) );
 
   /*
@@ -143,6 +142,7 @@ void EMDDataSet::do_plist(hid_t pid) {
    *  For other layouts, would get the relevant information.
    */
   if(H5D_CHUNKED == H5Pget_layout(pid)){
+    // Array to store the chunk dimensions.
     rank_chunk = H5Pget_chunk(pid, 3, chunk_dims_out);
   } /* else if contiguous, etc. */
 
@@ -152,37 +152,37 @@ void EMDDataSet::do_plist(hid_t pid) {
    *  This include optional checksum and compression methods.
    */
 
-  nfilters = H5Pget_nfilters(pid);
-  for (i = 0; i < nfilters; i++)
-  {
+    nfilters = H5Pget_nfilters(pid);
+    for (i = 0; i < nfilters; i++)
+    {
     /* For each filter, get
      *   filter ID
      *   filter specific parameters
      */
-    cd_nelmts = 32;
-    filtn = H5Pget_filter(pid, (unsigned)i,
+      cd_nelmts = 32;
+      filtn = H5Pget_filter(pid, (unsigned)i,
         &filt_flags, &cd_nelmts, cd_values,
         (size_t)MAX_NAME, f_name, &filt_conf);
     /*
      *  These are the predefined filters
      */
-    switch (filtn) {
+      switch (filtn) {
       case H5Z_FILTER_DEFLATE:  /* AKA GZIP compression */
         break;
-      case H5Z_FILTER_SHUFFLE:
+        case H5Z_FILTER_SHUFFLE:
         break;
-      case H5Z_FILTER_FLETCHER32:
+        case H5Z_FILTER_FLETCHER32:
         break;
-      case H5Z_FILTER_SZIP:
+        case H5Z_FILTER_SZIP:
         szip_options_mask=cd_values[0];;
         szip_pixels_per_block=cd_values[1];
 
         /* print SZIP options mask, etc. */
         break;
-      default:
+        default:
         break;
+      }
     }
-  }
 
   /*
    *  Get the fill value information:
@@ -191,43 +191,43 @@ void EMDDataSet::do_plist(hid_t pid) {
    *    - value to fill, if any
    */
 
-  H5Pget_alloc_time(pid, &at);
+    H5Pget_alloc_time(pid, &at);
 
-  switch (at)
-  {
-    case H5D_ALLOC_TIME_EARLY:
+    switch (at)
+    {
+      case H5D_ALLOC_TIME_EARLY:
       break;
-    case H5D_ALLOC_TIME_INCR:
+      case H5D_ALLOC_TIME_INCR:
       break;
-    case H5D_ALLOC_TIME_LATE:
+      case H5D_ALLOC_TIME_LATE:
       break;
-    default:
+      default:
       break;
-  }
+    }
 
-  H5Pget_fill_time(pid, &ft);
-  switch ( ft )
-  {
-    case H5D_FILL_TIME_ALLOC:
+    H5Pget_fill_time(pid, &ft);
+    switch ( ft )
+    {
+      case H5D_FILL_TIME_ALLOC:
       break;
-    case H5D_FILL_TIME_NEVER:
+      case H5D_FILL_TIME_NEVER:
       break;
-    case H5D_FILL_TIME_IFSET:
+      case H5D_FILL_TIME_IFSET:
       break;
-    default:
+      default:
       break;
-  }
+    }
 
-  H5Pfill_value_defined(pid, &fvstatus);
+    H5Pfill_value_defined(pid, &fvstatus);
 
-  if (fvstatus == H5D_FILL_VALUE_UNDEFINED)
-  {
-  } else {
+    if (fvstatus == H5D_FILL_VALUE_UNDEFINED)
+    {
+    } else {
     /* Read  the fill value with H5Pget_fill_value.
      * Fill value is the same data type as the dataset.
      * (details not shown)
      **/
-  }
+    }
 
   /* ... and so on for other dataset properties ... */
-}
+  }

@@ -270,6 +270,13 @@ bool BaseImage::set_full_n_rows_height(  int n_rows ){
     full_n_rows_height = n_rows;
     _flag_full_n_rows_height = true;
     result = true;
+    if( _flag_logger ){
+      std::stringstream message;
+      message << "set_full_n_rows_height to " << full_n_rows_height;
+      ApplicationLog::severity_level _log_type = ApplicationLog::normal;
+      BOOST_LOG_FUNCTION();
+      logger->logEvent( _log_type , message.str() );
+    }
     emit full_n_rows_height_changed();
   }
   return result;
@@ -281,6 +288,13 @@ bool BaseImage::set_roi_n_rows_height(  int n_rows ){
     roi_n_rows_height = n_rows;
     _flag_roi_n_rows_height = true;
     result = true;
+    if( _flag_logger ){
+      std::stringstream message;
+      message << "set_roi_n_rows_height to " << roi_n_rows_height;
+      ApplicationLog::severity_level _log_type = ApplicationLog::normal;
+      BOOST_LOG_FUNCTION();
+      logger->logEvent( _log_type , message.str() );
+    }
     emit roi_n_rows_height_changed();
   }
   return result;
@@ -299,6 +313,13 @@ bool BaseImage::set_full_n_cols_width( int width ){
     full_n_cols_width = width;
     _flag_full_n_cols_width = true;
     result = true;
+    if( _flag_logger ){
+      std::stringstream message;
+      message << "set_full_n_cols_width to " << full_n_cols_width;
+      ApplicationLog::severity_level _log_type = ApplicationLog::normal;
+      BOOST_LOG_FUNCTION();
+      logger->logEvent( _log_type , message.str() );
+    }
     emit full_n_cols_width_changed();
   }
   return result;
@@ -310,6 +331,13 @@ bool BaseImage::set_roi_n_cols_width( int width ){
     roi_n_cols_width = width;
     _flag_roi_n_cols_width = true;
     result = true;
+    if( _flag_logger ){
+      std::stringstream message;
+      message << "set_roi_n_cols_width to " << roi_n_cols_width;
+      ApplicationLog::severity_level _log_type = ApplicationLog::normal;
+      BOOST_LOG_FUNCTION();
+      logger->logEvent( _log_type , message.str() );
+    }
     emit roi_n_cols_width_changed();
   }
   return result;
@@ -545,6 +573,12 @@ bool BaseImage::set_full_image( cv::Mat image ){
     set_full_n_rows_height( calc_full_n_rows_height );
     set_full_n_cols_width( calc_full_n_cols_width );
     _flag_full_image = true;
+    if( _flag_logger ){
+      std::stringstream message;
+      message << "emitting full_image_changed with mat info: " << print_cv_mat_information( full_image ); 
+      BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification , message.str() );
+      print_var_state();
+    }
     emit full_image_changed();
     // debug
   }
@@ -638,7 +672,7 @@ draw.setTo( low_percentage_darkest_pixel_intensity_level, draw < low_percentage_
   std::cout << "interval: " << interval << std::endl;
   std::cout << "alpha: " << alpha << std::endl;
   std::cout << "beta: " << beta << std::endl;
-    std::cout << "draw initial info : " << print_cv_mat_information( draw ) << std::endl;
+  std::cout << "draw initial info : " << print_cv_mat_information( draw ) << std::endl;
   draw.convertTo(draw,  CV_8U,  alpha, beta);
 
   /*
@@ -695,6 +729,7 @@ std::string BaseImage::get_full_image_path_string(){
 }
 
 bool BaseImage::set_full_image( std::string image_path, bool normalize ){
+
   bool result = false;
   full_image_path = boost::filesystem::path( image_path );
   boost::filesystem::path full_path = base_bin_start_dir_path / full_image_path;
@@ -705,6 +740,7 @@ bool BaseImage::set_full_image( std::string image_path, bool normalize ){
       const bool emd_result = emd_wrapper->read_emd(full_path.string());
       if( emd_result ){
         const cv::Mat full_image = emd_wrapper->get_full_image();
+        std::cout << "emd full_image " << BaseImage::print_cv_mat_information(full_image);
         result = set_full_image( full_image );
       }
     }
@@ -833,7 +869,6 @@ bool BaseImage::set_stddev_image_statistical( cv::Scalar stddev ){
   result = true;
   return result;
 }
-
 
 std::string BaseImage::type2str(int type){
   std::string r;

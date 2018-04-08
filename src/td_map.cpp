@@ -208,17 +208,6 @@ TDMap::TDMap(
   /* ******
    * wavimg static settings
    */
-  // setters line 1
-  // setters line 2
-  // SIMULATION DEPENDENT
-  // setters line 3
-  // SIMULATION DEPENDENT
-  // setters line 4
-  // SIMULATION DEPENDENT
-  // setters line 5
-  // setters line 6
-  // setters line 7
-  // SIMULATION DEPENDENT
   // setters line 8
   _tdmap_wavimg_parameters->set_image_data_type( 0 );
   _tdmap_wavimg_parameters->set_image_vacuum_mean_intensity( 1.0f );
@@ -229,32 +218,9 @@ TDMap::TDMap(
   _supercell_wavimg_parameters->set_image_vacuum_mean_intensity( 1.0f );
   _supercell_wavimg_parameters->set_conversion_rate( 1.0f );
   _supercell_wavimg_parameters->set_readout_noise_rms_amplitude( 0.0f );
-  // setters line 9
-  // NOT USED
-  // setters line 10
-  // NOT USED
-  // setters line 11
-  // NOT USED
-  // setters line 12
-  // NOT USED
   // setters line 13
   _tdmap_wavimg_parameters->set_switch_coherence_model( 1 );
   _supercell_wavimg_parameters->set_switch_coherence_model( 1 );
-  // setters line 14
-  //_tdmap_wavimg_parameters->set_partial_temporal_coherence_switch( 1 );
-  //_tdmap_wavimg_parameters->set_partial_temporal_coherence_focus_spread( 4.0f );
-  // setters line 15
-  //_tdmap_wavimg_parameters->set_partial_spacial_coherence_switch( 1 );
-  //_tdmap_wavimg_parameters->set_partial_spacial_coherence_semi_convergence_angle( 0.2f );
-  // setters line 16
-  // SIMULATION DEPENDENT
-  // setters line 17
-  //_tdmap_wavimg_parameters->set_simulation_image_spread_envelope_switch( 0 );
-  //_tdmap_wavimg_parameters->set_isotropic_one_rms_amplitude( 0.03 ); // colocar a zero
-  // setters line 18
-  // SIMULATION DEPENDENT
-  // setters line 19
-  // SIMULATION DEPENDENT
   // setters line 19 + aberration_definition_index_number
   _tdmap_wavimg_parameters->set_objective_aperture_radius( 5500.0f );
   _supercell_wavimg_parameters->set_objective_aperture_radius( 5500.0f );
@@ -264,9 +230,6 @@ TDMap::TDMap(
 
   _supercell_wavimg_parameters->set_center_x_of_objective_aperture( 0.0f );
   _supercell_wavimg_parameters->set_center_y_of_objective_aperture( 0.0f );
-
-  // setters line 21 + aberration_definition_index_number
-  // SIMULATION DEPENDENT
 }
 
 TDMap::TDMap( boost::process::ipstream& ostream_celslc_buffer,
@@ -1466,6 +1429,7 @@ bool TDMap::set_sim_image_intensity_columns( IntensityColumns* int_cols ){
 }
 
 bool TDMap::update_emd_fields(){
+  std::cout << " inside update_emd_fields "  << std::endl;
   bool result = false;
   if( exp_image_properties->get_image_extension() == ".emd" ){
     result = true;

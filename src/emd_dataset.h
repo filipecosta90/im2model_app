@@ -37,7 +37,6 @@
 #include "emd_object.h"
 #include "emd_attribute.h"
 
-
 #define MAX_NAME 1024
 
 using namespace H5;
@@ -53,7 +52,7 @@ class EMDDataSet : public EMDObject {
     int  rank_chunk;
     int nfilters;
 
-    size_t size_raw_data;
+    hsize_t size_raw_data;
 
     std::vector<unsigned char>* raw_data;
 

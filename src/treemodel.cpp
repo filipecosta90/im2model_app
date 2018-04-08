@@ -45,9 +45,9 @@ boost::property_tree::ptree* TreeModel::save_data_into_property_tree( ){
 bool TreeModel::load_data_from_property_tree( boost::property_tree::ptree pt_root ){
   // Load from the property tree object
   emit layoutAboutToBeChanged();
-  rootItem->load_data_from_property_tree( pt_root );
+  bool result = rootItem->load_data_from_property_tree( pt_root );
   emit layoutChanged();
-  return true;
+  return result;
 }
 
 
