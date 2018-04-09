@@ -913,7 +913,7 @@ void MainWindow::closeEvent(QCloseEvent *event){
 
 void MainWindow::newFile(){
   if (maybeSave()) {
-    setCurrentFile(QString());
+    //setCurrentFile(QString());
   }
 }
 
@@ -1148,7 +1148,6 @@ void MainWindow::createActions(){
   exportMappedIntensityCols->setStatusTip(tr("Export only the mapped agains EXP image Intensity Columns data to a CSV"));
   supercellMenu->addAction( exportMappedIntensityCols );
 }
-
 
 void MainWindow::createProgressBar(){
   running_progress = new QProgressBar(this);
@@ -1538,6 +1537,14 @@ bool MainWindow::saveFile(const QString &fileName ){
 #endif
 
   // The first parameter in the constructor is the character used for indentation, whilst the second is the indentation length.
+  boost::filesystem::path filename_path ( fileName.toStdString() );
+  _load_file_delegate->set_base_dir_path( filename_path.parent_path().string(), true );
+
+  if ( _flag_im2model_logger ){
+    im2model_logger->add_sync( filename_path.parent_path() );
+  }
+
+  // The first parameter in the constructor is the character used for indentation, whilst the second is the indentation length.
   boost::property_tree::xml_writer_settings<std::string> pt_settings(' ', 4);
   boost::property_tree::ptree *project_setup_image_fields_ptree = project_setup_image_fields_model->save_data_into_property_tree();
   boost::property_tree::ptree *project_setup_crystalographic_fields_ptree = project_setup_crystalographic_fields_model->save_data_into_property_tree();
@@ -1561,6 +1568,8 @@ bool MainWindow::saveFile(const QString &fileName ){
 #ifndef QT_NO_CURSOR
   QApplication::restoreOverrideCursor();
 #endif
+
+    _flag_project_setted = true;
 
   setCurrentFile(fileName);
   std::stringstream message;
