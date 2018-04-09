@@ -589,42 +589,43 @@ std::string BaseImage::print_cv_mat_information( cv::Mat image ){
   double image_min_intensity_detected, image_max_intensity_detected;
   cv::minMaxLoc(image, &image_min_intensity_detected, &image_max_intensity_detected);
   std::stringstream message;
+  message << "matrix flags: empty?() " <<  std::boolalpha << image.empty();
   message << "matrix of type: " << type2str(image.type()) << " size() " <<  image.size();
   message << "min intensity : " << image_min_intensity_detected << " max intensity : " << image_max_intensity_detected;
   return message.str();
 }
 
 cv::Mat BaseImage::get_image_visualization( cv::Mat image ){
-
-  double image_min_intensity_detected, image_max_intensity_detected;
-  cv::minMaxLoc(image, &image_min_intensity_detected, &image_max_intensity_detected);
+  cv::Mat  draw;
+  if( !image.empty() && image.cols > 0 && image.rows > 0 ){
+    double image_min_intensity_detected, image_max_intensity_detected;
+    cv::minMaxLoc(image, &image_min_intensity_detected, &image_max_intensity_detected);
 
 
   // Quantize the saturation to (full_image_max_intensity_detected - full_image_min_intensity_detected) levels
   /// Establish the number of bins
-  int diff_levels = (int) (image_max_intensity_detected - image_min_intensity_detected);
-  
-  if ( diff_levels < 255 ){
-    diff_levels = 255;
-  }
+    int diff_levels = (int) (image_max_intensity_detected - image_min_intensity_detected);
 
-  double t = diff_levels/(image_max_intensity_detected - image_min_intensity_detected);
+    if ( diff_levels < 255 ){
+      diff_levels = 255;
+    }
 
-  if( _flag_logger ){
-    std::stringstream message;
-    message << "get_image_visualization() min " << image_min_intensity_detected << " max " << image_max_intensity_detected << " diff_levels " << diff_levels << ", t " << t; 
-    BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification , message.str() );
-    print_var_state();
-  }
+    double t = diff_levels/(image_max_intensity_detected - image_min_intensity_detected);
 
-  const int n_pixels_high_percentage_brightest_pixels = (int)((double)high_percentage_brightest_pixels * image.total());
-  const int n_pixels_low_percentage_darkest_pixels = (int)((double)low_percentage_darkest_pixels * image.total());
+    if( _flag_logger ){
+      std::stringstream message;
+      message << "get_image_visualization() min " << image_min_intensity_detected << " max " << image_max_intensity_detected << " diff_levels " << diff_levels << ", t " << t; 
+      BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification , message.str() );
+    }
 
-  const float _f_full_image_max_intensity_detected = (float) image_max_intensity_detected;
-  const float _f_full_image_min_intensity_detected = (float) image_min_intensity_detected;
+    const int n_pixels_high_percentage_brightest_pixels = (int)((double)high_percentage_brightest_pixels * image.total());
+    const int n_pixels_low_percentage_darkest_pixels = (int)((double)low_percentage_darkest_pixels * image.total());
+
+    const float _f_full_image_max_intensity_detected = (float) image_max_intensity_detected;
+    const float _f_full_image_min_intensity_detected = (float) image_min_intensity_detected;
 
   //Hold the histogram
-  MatND full_image_hist;
+    MatND full_image_hist;
 
   int histSize[] = { diff_levels }; // just one dimension
   float range[] = { _f_full_image_min_intensity_detected, _f_full_image_max_intensity_detected };
@@ -654,25 +655,37 @@ cv::Mat BaseImage::get_image_visualization( cv::Mat image ){
       high_percentage_brightest_pixels_intensity_level++;
     }
   }
-  std::cout << "type: " << type2str(full_image_hist.type()) << std::endl;
-  std::cout << " low_percentage_darkest_pixel_intensity_level " <<  low_percentage_darkest_pixel_intensity_level << std::endl;
-  std::cout << " high_percentage_brightest_pixels_intensity_level " <<  high_percentage_brightest_pixels_intensity_level << std::endl;
 
-  cv::Mat  draw = image.clone();
-  //image.copyTo( draw );
+  if( _flag_logger ){
+    std::stringstream message;
+    message << "type: " << type2str(full_image_hist.type());
+    message << " low_percentage_darkest_pixel_intensity_level " <<  low_percentage_darkest_pixel_intensity_level;
+    message << " high_percentage_brightest_pixels_intensity_level " <<  high_percentage_brightest_pixels_intensity_level;
+    BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification , message.str() );
+  }
 
-  //Mat thresh = m > th;
-draw.setTo( low_percentage_darkest_pixel_intensity_level, draw < low_percentage_darkest_pixel_intensity_level);
+  draw = image.clone();
+
+  draw.setTo( low_percentage_darkest_pixel_intensity_level, draw < low_percentage_darkest_pixel_intensity_level);
   draw.setTo( high_percentage_brightest_pixels_intensity_level, draw > high_percentage_brightest_pixels_intensity_level);
   cv::minMaxLoc(image, &image_min_intensity_detected, &image_max_intensity_detected);
   
   double interval = ( image_max_intensity_detected  -  image_min_intensity_detected );
   double alpha = 255.0/interval ;
   double beta = -image_min_intensity_detected * alpha;
-  std::cout << "interval: " << interval << std::endl;
-  std::cout << "alpha: " << alpha << std::endl;
-  std::cout << "beta: " << beta << std::endl;
-  std::cout << "draw initial info : " << print_cv_mat_information( draw ) << std::endl;
+
+  if( _flag_logger ){
+    std::stringstream message;
+    message << "type: " << type2str(full_image_hist.type()) << std::endl;
+    message << "low_percentage_darkest_pixel_intensity_level " <<  low_percentage_darkest_pixel_intensity_level << std::endl;
+    message << "high_percentage_brightest_pixels_intensity_level " <<  high_percentage_brightest_pixels_intensity_level << std::endl;
+    message << "interval: " << interval << std::endl;
+    message << "alpha: " << alpha << std::endl;
+    message << "beta: " << beta << std::endl;
+    message << "draw initial info : " << print_cv_mat_information( draw ) << std::endl;
+    BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification , message.str() );
+  }
+
   draw.convertTo(draw,  CV_8U,  alpha, beta);
 
   /*
@@ -682,9 +695,23 @@ draw.setTo( low_percentage_darkest_pixel_intensity_level, draw < low_percentage_
   beta = -low_percentage_darkest_pixel_intensity_level * alpha;
   draw.convertTo(draw,  CV_8U,  alpha, beta);*/
 
-  std::cout << "returning image of type: " << type2str(draw.type()) << std::endl;
-  std::cout << "#### " << print_cv_mat_information( draw ) << std::endl;
-  return draw;
+  if( _flag_logger ){
+    std::stringstream message;
+    message << "returning image of type: " << type2str(draw.type());
+    message << "draw final info : " << print_cv_mat_information( draw );
+    BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification , message.str() );
+  }
+}
+else {
+
+  if( _flag_logger ){
+    std::stringstream message;
+    message << "the matrix is empty or has dimensions with 0";
+    message<<  "info: " << print_cv_mat_information( image );
+    BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::error, message.str() );
+  }
+} 
+return draw;
 }
 
 /* Base dir path */

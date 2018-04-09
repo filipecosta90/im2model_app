@@ -360,8 +360,6 @@ bool SimGrid::apply_normalization_to_grid(){
           cv::minMaxLoc(cleaned_simulated_image, &local_min, &local_max);
           global_min = local_min < global_min ? local_min : global_min;
           global_max = local_max > global_max ? local_max : global_max;
-
-          simulated_images_grid.push_back(normalized_simulated_images_row);
         }
       }
     }
@@ -414,6 +412,7 @@ bool SimGrid::apply_normalization_to_grid(){
         normalized_simulated_images_row.push_back( cleaned_simulated_image );
 
       }
+      simulated_images_grid.push_back( normalized_simulated_images_row );
     }
 
     status = ! _error_flag;

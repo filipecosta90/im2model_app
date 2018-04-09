@@ -433,7 +433,6 @@ bool MainWindow::maybeSetPreferences(){
 
 void MainWindow::update_tdmap_current_selection(int x,int y){
 
-
   if (_flag_im2model_logger) {
     std::stringstream message;
     message << "update_tdmap_current_selection to x : " <<  x << " y: " << y;
@@ -509,7 +508,7 @@ MainWindow::~MainWindow(){
 
 bool MainWindow::update_qline_image_path( std::string fileName ){
   bool status = false;
-  const bool project_setted = maybeSetProject();
+  const bool project_setted = true; //maybeSetProject();
   if ( project_setted ){
     const bool _td_map_load_ok = _core_td_map->set_exp_image_properties_full_image( fileName );
     std::cout << " !!! " << std::boolalpha << _td_map_load_ok << std::endl;
@@ -560,12 +559,21 @@ void MainWindow::update_super_cell_target_region(){
 void MainWindow::update_super_cell_target_region_image(){
   if( _core_td_map->get_exp_image_bounds_flag_roi_boundary_image() ){
     const cv::Mat super_cell_target_region_image = _core_td_map->get_exp_image_bounds_roi_boundary_image_visualization();
-    const int full_boundary_polygon_margin_x_px = _core_td_map->get_exp_image_bounds_full_boundary_polygon_margin_x_px();
-    const int full_boundary_polygon_margin_y_px = _core_td_map->get_exp_image_bounds_full_boundary_polygon_margin_y_px();
-    const cv::Point2i centroid_translation_px = _core_td_map->get_super_cell_exp_image_properties_centroid_translation_px();
-    const cv::Point2i top_right_corner_margin ( full_boundary_polygon_margin_x_px, full_boundary_polygon_margin_y_px);
-    ui->qgraphics_super_cell_refinement->setImage( super_cell_target_region_image, 1 , tr("Super-cell experimental image target region"), centroid_translation_px + top_right_corner_margin );
+    if( !super_cell_target_region_image.empty() && super_cell_target_region_image.cols > 0 && super_cell_target_region_image.rows > 0  ){
+     const int full_boundary_polygon_margin_x_px = _core_td_map->get_exp_image_bounds_full_boundary_polygon_margin_x_px();
+     const int full_boundary_polygon_margin_y_px = _core_td_map->get_exp_image_bounds_full_boundary_polygon_margin_y_px();
+     const cv::Point2i centroid_translation_px = _core_td_map->get_super_cell_exp_image_properties_centroid_translation_px();
+     const cv::Point2i top_right_corner_margin ( full_boundary_polygon_margin_x_px, full_boundary_polygon_margin_y_px);
+     ui->qgraphics_super_cell_refinement->setImage( super_cell_target_region_image, 1 , tr("Super-cell experimental image target region"), centroid_translation_px + top_right_corner_margin );
+   }
+   else{
+    if (_flag_im2model_logger) {
+      std::stringstream message;
+      message << " On update_super_cell_target_region_image() mat is empty or has dimensions with 0 value. empty? " << std::boolalpha << super_cell_target_region_image.empty()  << ", width: " << super_cell_target_region_image.cols << ", height: " << super_cell_target_region_image.rows;
+      im2model_logger->logEvent(ApplicationLog::error, message.str());
+    }
   }
+}
 }
 
 void MainWindow::update_super_cell_target_region_shapes(){
@@ -1660,7 +1668,7 @@ void MainWindow::create_box_options_tab1_exp_image(){
   ////////////////
   QVector<QVariant> box1_option_1 = {"Image path",""};
   QVector<bool> box1_option_1_edit = {false,true};
-  boost::function<bool(std::string)> box1_function_1( boost::bind( &TDMap::set_exp_image_properties_full_image, _core_td_map, _1 ) );
+  boost::function<bool(std::string)> box1_function_1( boost::bind( &MainWindow::update_qline_image_path, this, _1 ) );
   image_path  = new TreeItem (  box1_option_1 , box1_function_1, box1_option_1_edit );
   image_path->set_variable_name( "image_path" );
   image_path->set_item_delegate_type( TreeItem::_delegate_FILE );
@@ -3054,7 +3062,6 @@ void MainWindow::create_box_options_tab4_intensity_peaks(){
   intensity_peaks_display_experimental_img->set_variable_name( "intensity_peaks_display_experimental_img" );
   intensity_peaks_display->insertChildren( intensity_peaks_display_experimental_img );
 
-
   QVector<QVariant> box6_option_2_2_1 = {"Alpha channel",""};
   boost::function<int(void)> box6_option_2_2_1_getter ( boost::bind( &CvImageFrameWidget::get_image_layer_alpha_channel, ui->qgraphics_super_cell_refinement , 1 ) );
   boost::function<bool(int)> box6_option_2_2_1_setter ( boost::bind( &CvImageFrameWidget::set_image_layer_alpha_channel, ui->qgraphics_super_cell_refinement, 1, _1 ) );
@@ -3080,23 +3087,6 @@ void MainWindow::create_box_options_tab4_intensity_peaks(){
   intensity_peaks_display_experimental_img_distance_transform_alpha->set_variable_name( "intensity_peaks_display_experimental_img_distance_transform_alpha" );
   intensity_peaks_display_experimental_img->insertChildren( intensity_peaks_display_experimental_img_distance_transform_alpha );
 
-  /*
-  QVector<QVariant> box6_option_2_2_3 = {"Intensity peaks alpha channel",""};
-  boost::function<int(void)> box6_option_2_2_3_getter ( boost::bind( &CvImageFrameWidget::get_renderPoints_alpha_channels_map, ui->qgraphics_super_cell_refinement , tr("Experimental image intensity columns") ) );
-  boost::function<bool(int)> box6_option_2_2_3_setter ( boost::bind( &CvImageFrameWidget::set_renderPoints_alpha_channels_map, ui->qgraphics_super_cell_refinement, tr("Experimental image intensity columns"), _1 ) );
-  QVector<bool> box6_option_2_2_3_edit = {false,true};
-
-  intensity_peaks_display_experimental_img_alpha_channel  = new TreeItem ( box6_option_2_2_3 , box6_option_2_2_3_setter , box6_option_2_2_3_edit );
-  intensity_peaks_display_experimental_img_alpha_channel->set_fp_data_getter_int_vec( 1, box6_option_2_2_3_getter );
-  intensity_peaks_display_experimental_img_alpha_channel->load_data_from_getter( 1 );
-
-  intensity_peaks_display_experimental_img_alpha_channel->set_variable_name( "intensity_peaks_display_experimental_img_alpha_channel" );
-  intensity_peaks_display_experimental_img_alpha_channel->set_item_delegate_type( TreeItem::_delegate_SLIDER_INT );
-  connect( intensity_peaks_display_experimental_img_alpha_channel, SIGNAL(dataChanged(int)), ui->qgraphics_super_cell_refinement->image_widget, SLOT(repaint()) );
-  intensity_peaks_display_experimental_img->insertChildren( intensity_peaks_display_experimental_img_alpha_channel );
-  intensity_peaks_display_experimental_img_alpha_channel->set_slider_int_range_min( alpha_bottom_limit );
-  intensity_peaks_display_experimental_img_alpha_channel->set_slider_int_range_max( alpha_top_limit );
-  */
   ui->qtree_view_refinement_full_simulation->setModel( intensity_peaks_model );
   ui->qtree_view_refinement_full_simulation->setItemDelegate( _load_file_delegate );
     //start editing after one click

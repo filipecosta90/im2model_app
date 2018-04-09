@@ -2,9 +2,12 @@
 
 
 # Im2Model
-Msc. Thesis regarding efficient computation to refine atomic models for TEM image simulation and matching
+Msc. Thesis regarding efficient computation to refine atomic models for TEM image simulation and matching.
+
 Partialy financiated as part of the protocol between UTAustin I Portugal - UTA-P.
+
 [2017] - [2018] University of Minho, Filipe Costa Oliveira 
+
 All Rights Reserved. 
 
 ********************************************************************************

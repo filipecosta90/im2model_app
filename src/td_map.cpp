@@ -1410,6 +1410,7 @@ bool TDMap::copy_external_files_to_project_dir(){
 }
 
 bool TDMap::set_exp_image_properties_full_image( std::string path ){
+  
   bool result = exp_image_properties->set_full_image( path );
   result &= supercell_exp_image_properties->set_full_image( path );
 
