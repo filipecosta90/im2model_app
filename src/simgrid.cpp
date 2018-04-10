@@ -344,6 +344,8 @@ bool SimGrid::apply_normalization_to_grid(){
       cv::minMaxLoc(roi_image, &darkest_pixel_intensity_level, &brightest_pixels_intensity_level);
     }
 
+    
+
       // go through all matrices to get simulated images max and min intensities
     if( normalization_mode == GLOBAL_NORMALIZATION ){
 
@@ -590,12 +592,12 @@ bool SimGrid::simulate_from_grid(){
             // get the matrix in the specified col of tdmap (defocus pos)
                 const cv::Mat cleaned_simulated_image = cleaned_edges_simulated_images_row.at( defocus );
                 std::cout << " cleaned_simulated_image.size() " << cleaned_simulated_image.size() << " depth " << cleaned_simulated_image.depth() << " type " << BaseImage::type2str( cleaned_simulated_image.type() )<< std::endl;
-                std::cout << " _templ..size() " << roi_image.size() << " _templ.depth " << roi_image.depth() << " _templ.type " << BaseImage::type2str( roi_image.type() )<< std::endl;
+                std::cout << " _templ.size() " << roi_image.size() << " _templ.depth " << roi_image.depth() << " _templ.type " << BaseImage::type2str( roi_image.type() )<< std::endl;
                 cv::Mat roi_image_convert;
 
                 if ( roi_image.depth() != cleaned_simulated_image.depth() ){
                 roi_image.convertTo(roi_image_convert, cleaned_simulated_image.type() ); //, 1.0/255.0, 0.0f );
-                std::cout << " corrected _templ..size() " << roi_image.size() << " _templ.depth " << roi_image.depth() << " _templ.type " << BaseImage::type2str( roi_image.type() )<< std::endl;
+                std::cout << " corrected _templ.size() " << roi_image_convert.size() << " _templ.depth " << roi_image_convert.depth() << " _templ.type " << BaseImage::type2str( roi_image_convert.type() )<< std::endl;
               }
               else{
                 roi_image_convert = roi_image;

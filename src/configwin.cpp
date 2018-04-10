@@ -1306,7 +1306,6 @@ bool MainWindow::maybeSave(){
   return true;
 }
 
-
 bool MainWindow::maybeSetProject(){
   bool result = false;
   if ( _flag_project_setted ){
