@@ -283,6 +283,8 @@ private:
     TreeModel* intensity_peaks_model;
     TreeModel* intensity_columns_listing_model;
 
+    TreeModel* chem_database_model;
+
     QModelIndex project_setup_image_fields_model_index;
 
     /* Threads and workers */
@@ -326,6 +328,8 @@ private:
     CustomToolButton* alignToolButton;
 
     /* GUI options */
+    TreeItem* chem_database_root = nullptr;
+    
     TreeItem* experimental_image_root = nullptr;
     TreeItem* experimental_sampling_rate = nullptr;
     TreeItem* experimental_sampling_rate_x = nullptr;

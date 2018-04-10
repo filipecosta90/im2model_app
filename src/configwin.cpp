@@ -1552,6 +1552,7 @@ bool MainWindow::saveFile(const QString &fileName ){
   boost::property_tree::ptree *tdmap_running_configuration_ptree = tdmap_running_configuration_model->save_data_into_property_tree();
   boost::property_tree::ptree *super_cell_setup_model_ptree = super_cell_setup_model->save_data_into_property_tree();
   boost::property_tree::ptree *intensity_peaks_model_ptree = intensity_peaks_model->save_data_into_property_tree();
+  //boost::property_tree::ptree *chem_database_model_ptree = chem_database_model->save_data_into_property_tree();
 
   boost::property_tree::ptree *config = new boost::property_tree::ptree();
   config->put( "version", application_version );
@@ -1561,6 +1562,7 @@ bool MainWindow::saveFile(const QString &fileName ){
   config->add_child( "tdmap_running_configuration_ptree", *tdmap_running_configuration_ptree);
   config->add_child( "super_cell_setup_model_ptree", *super_cell_setup_model_ptree);
   config->add_child( "intensity_peaks_model_ptree", *intensity_peaks_model_ptree);
+  //config->add_child( "chem_database_model_ptree", *chem_database_model_ptree);
 
   // Write the property tree to the XML file.
   boost::property_tree::write_xml( fileName.toStdString(), *config, std::locale(), pt_settings );
@@ -2579,6 +2581,11 @@ void MainWindow::create_box_options_tab2_sim_config(){
   //# thick samples, thick lower bound, thick upper bound
   //# defocus samples, lower bound, upper bound,
   // more work here
+
+  ui->tdmap_table->connect_item_changes_to_invalidate_grid( tdmap_cell_dimensions_a, 1 );
+  ui->tdmap_table->connect_item_changes_to_invalidate_grid( tdmap_cell_dimensions_b, 1 );
+  ui->tdmap_table->connect_item_changes_to_invalidate_grid( accelaration_voltage_kv, 1 );
+  ui->tdmap_table->connect_item_changes_to_invalidate_grid( experimental_sampling_rate, 1 );
 
   ui->tdmap_table->connect_item_changes_to_invalidate_grid( thickness_range_number_samples, 1 );
   ui->tdmap_table->connect_item_changes_to_invalidate_grid( thickness_range_lower_bound, 1 );

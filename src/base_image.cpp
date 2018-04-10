@@ -598,13 +598,15 @@ std::string BaseImage::print_cv_mat_information( cv::Mat image ){
 cv::Mat BaseImage::get_image_visualization( cv::Mat image ){
   cv::Mat  draw;
   if( !image.empty() && image.cols > 0 && image.rows > 0 ){
+
+    high_percentage_brightest_pixels_intensity_level = -1;
+    low_percentage_darkest_pixel_intensity_level = -1;
     double image_min_intensity_detected, image_max_intensity_detected;
     cv::minMaxLoc(image, &image_min_intensity_detected, &image_max_intensity_detected);
-
-
+    std::cout << "image_min_intensity_detected " << image_min_intensity_detected << " image_max_intensity_detected " << image_max_intensity_detected << std::endl;
   // Quantize the saturation to (full_image_max_intensity_detected - full_image_min_intensity_detected) levels
   /// Establish the number of bins
-    int diff_levels = (int) (image_max_intensity_detected - image_min_intensity_detected);
+    int diff_levels = (int) ( image_max_intensity_detected - image_min_intensity_detected );
 
     if ( diff_levels < 255 ){
       diff_levels = 255;
@@ -666,8 +668,8 @@ cv::Mat BaseImage::get_image_visualization( cv::Mat image ){
 
   draw = image.clone();
 
-  draw.setTo( low_percentage_darkest_pixel_intensity_level, draw < low_percentage_darkest_pixel_intensity_level);
-  draw.setTo( high_percentage_brightest_pixels_intensity_level, draw > high_percentage_brightest_pixels_intensity_level);
+  //draw.setTo( low_percentage_darkest_pixel_intensity_level, draw < low_percentage_darkest_pixel_intensity_level);
+  //draw.setTo( high_percentage_brightest_pixels_intensity_level, draw > high_percentage_brightest_pixels_intensity_level);
   cv::minMaxLoc(image, &image_min_intensity_detected, &image_max_intensity_detected);
   
   double interval = ( image_max_intensity_detected  -  image_min_intensity_detected );
