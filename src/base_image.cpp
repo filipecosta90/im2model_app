@@ -749,6 +749,7 @@ std::string BaseImage::get_full_image_path_full_string(){
 
 bool BaseImage::set_full_image_path( boost::filesystem::path image_path ){
   full_image_path = boost::filesystem::path( image_path );
+  return true;
 }
 
 std::string BaseImage::get_full_image_path_string(){

@@ -236,7 +236,7 @@ bool MSA_prm::call_bin(){
           //   boost::process::std_err > boost::process::null,
           _error_code,
               // hide console on windows
-              env, ::boost::process::windows::hide
+              boost::process::windows::hide
               );
 #elif defined(BOOST_POSIX_API)
             boost::process::child c(
