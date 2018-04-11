@@ -78,23 +78,23 @@ bool SimGrid::export_sim_grid( std::string sim_grid_file_name_image , bool cut_m
     sim_grid_height = ( n_rows * slice_samples );
     sim_grid.create ( sim_grid_height, sim_grid_width , CV_8UC1 );
     sim_grid = cv::Mat::zeros(sim_grid_height, sim_grid_width, CV_8UC1);
-
+    BaseImage sim_image_exporter;
     int vector_position = 0;
     for (int thickness = 1; thickness <= slice_samples; thickness ++ ){
       const double slice_thickness_nm = simulated_params_nm_slice_vec.at(thickness-1);
       const int at_slice = simulated_params_slice_vec.at(thickness-1);
 
         // the slice thickness in nanometers
-      std::vector<cv::Mat> simulated_images_row = cut_margin ? simulated_images_grid.at(thickness-1) : raw_simulated_images_grid.at(thickness-1);
+      const std::vector<cv::Mat> simulated_images_row = cut_margin ? simulated_images_grid.at(thickness-1) : raw_simulated_images_grid.at(thickness-1);
 
       for (int defocus = 1; defocus <= defocus_samples; defocus ++ ){
 
         const double at_defocus = simulated_params_nm_defocus_vec.at(defocus-1);
 
-        cv::Mat cleaned_simulated_image = simulated_images_row.at(defocus-1);
+        cv::Mat cleaned_simulated_image = sim_image_exporter.get_image_visualization( simulated_images_row.at(defocus-1) );
         std::cout << "cleaned_simulated_image.size() " << cleaned_simulated_image.size() << std::endl;
         cv::Rect r1 = cv::Rect ( n_cols *(defocus-1), n_rows *(slice_samples-thickness), n_cols, n_rows);
-        cleaned_simulated_image.copyTo(sim_grid( r1 ));
+        cleaned_simulated_image.copyTo( sim_grid( r1 ));
 
         std::stringstream output_legend_line2;
         output_legend_line2 <<  "T: " << std::fixed << std::setw( 2 ) << std::setprecision( 2 ) << slice_thickness_nm << "nm, slc " << at_slice ;
@@ -344,6 +344,8 @@ bool SimGrid::apply_normalization_to_grid(){
       cv::minMaxLoc(roi_image, &darkest_pixel_intensity_level, &brightest_pixels_intensity_level);
     }
 
+    
+
       // go through all matrices to get simulated images max and min intensities
     if( normalization_mode == GLOBAL_NORMALIZATION ){
 
@@ -590,12 +592,12 @@ bool SimGrid::simulate_from_grid(){
             // get the matrix in the specified col of tdmap (defocus pos)
                 const cv::Mat cleaned_simulated_image = cleaned_edges_simulated_images_row.at( defocus );
                 std::cout << " cleaned_simulated_image.size() " << cleaned_simulated_image.size() << " depth " << cleaned_simulated_image.depth() << " type " << BaseImage::type2str( cleaned_simulated_image.type() )<< std::endl;
-                std::cout << " _templ..size() " << roi_image.size() << " _templ.depth " << roi_image.depth() << " _templ.type " << BaseImage::type2str( roi_image.type() )<< std::endl;
+                std::cout << " _templ.size() " << roi_image.size() << " _templ.depth " << roi_image.depth() << " _templ.type " << BaseImage::type2str( roi_image.type() )<< std::endl;
                 cv::Mat roi_image_convert;
 
                 if ( roi_image.depth() != cleaned_simulated_image.depth() ){
                 roi_image.convertTo(roi_image_convert, cleaned_simulated_image.type() ); //, 1.0/255.0, 0.0f );
-                std::cout << " corrected _templ..size() " << roi_image.size() << " _templ.depth " << roi_image.depth() << " _templ.type " << BaseImage::type2str( roi_image.type() )<< std::endl;
+                std::cout << " corrected _templ.size() " << roi_image_convert.size() << " _templ.depth " << roi_image_convert.depth() << " _templ.type " << BaseImage::type2str( roi_image_convert.type() )<< std::endl;
               }
               else{
                 roi_image_convert = roi_image;
