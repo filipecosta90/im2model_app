@@ -143,6 +143,7 @@ public:
     void update_tdmap_celslc_started_with_steps_info( int n_steps );
     void update_supercell_celslc_started_with_steps_info( int n_steps );
     void update_supercell_celslc_ssc_single_slice_step( bool step_result );
+    void update_tdmap_celslc_ssc_single_slice_step( bool step_result );
 
     void update_supercell_celslc_started( );
     void update_tdmap_celslc_ended( bool result );

@@ -126,14 +126,12 @@ MainWindow::MainWindow( ApplicationLog::ApplicationLog* logger , QWidget *parent
       // set logger
       sim_tdmap_worker->set_application_logger(im2model_logger);
 
-
       sim_tdmap_worker->moveToThread( _sim_tdmap_thread );
 
       // will only start thread when needed
       connect(sim_tdmap_worker, SIGNAL(TDMap_request()), _sim_tdmap_thread, SLOT( start() ));
-      connect(_sim_tdmap_thread, SIGNAL( started() ), sim_tdmap_worker, SLOT( newTDMapSim() ) );
+      connect(_sim_tdmap_thread, SIGNAL(started() ), sim_tdmap_worker, SLOT( newTDMapSim() ) );
       connect(sim_tdmap_worker, SIGNAL(TDMap_sucess()), this, SLOT(update_from_TDMap_sucess( )));
-      connect(sim_tdmap_worker, SIGNAL(TDMap_sucess_no_correlation()), this, SLOT(update_from_TDMap_sucess( )));
       connect(sim_tdmap_worker, SIGNAL(TDMap_failure()), this, SLOT(update_from_TDMap_failure()));
       // will quit thread after work done
       connect(sim_tdmap_worker, SIGNAL( TDMap_finished() ), _sim_tdmap_thread, SLOT(quit()), Qt::DirectConnection);
@@ -187,15 +185,16 @@ MainWindow::MainWindow( ApplicationLog::ApplicationLog* logger , QWidget *parent
 
       connect(this, SIGNAL(super_cell_target_region_changed()), this, SLOT(update_super_cell_target_region()));
 
-      connect( _core_td_map, SIGNAL(TDMap_started_celslc()), this, SLOT(update_tdmap_celslc_started( ) ) );
-      connect(_core_td_map,  SIGNAL(TDMap_started_celslc()), this, SLOT(update_tdmap_sim_ostream_celslc()));
-      connect( _core_td_map, SIGNAL(TDMap_inform_celslc_n_steps( int )), this, SLOT(update_tdmap_celslc_started_with_steps_info( int ) ) );
+      connect( _core_td_map, SIGNAL( TDMap_started_celslc()), this, SLOT(update_tdmap_celslc_started( )) );
+      connect( _core_td_map, SIGNAL( TDMap_started_celslc()), this, SLOT(update_tdmap_sim_ostream_celslc()) );
+      connect( _core_td_map, SIGNAL( TDMap_inform_celslc_n_steps( int )), this, SLOT(update_tdmap_celslc_started_with_steps_info( int ) ) );
 
       connect( _core_td_map, SIGNAL(TDMap_started_supercell_celslc( )), this, SLOT( update_supercell_celslc_started( ) ) );
       connect( _core_td_map, SIGNAL(TDMap_inform_supercell_celslc_n_steps( int )), this, SLOT(update_supercell_celslc_started_with_steps_info( int ) ) );
 
       connect( _core_td_map, SIGNAL(TDMap_at_celslc_step( int )), this, SLOT(update_tdmap_celslc_step( int ) ) );
       connect( _core_td_map, SIGNAL(TDMap_ended_supercell_celslc_ssc_single_slice_ended( bool )), this, SLOT(update_supercell_celslc_ssc_single_slice_step( bool ) ) );
+      connect( _core_td_map, SIGNAL(TDMap_ended_celslc_ssc_single_slice_ended( bool )), this, SLOT(update_tdmap_celslc_ssc_single_slice_step( bool ) ) );
 
       connect( _core_td_map, SIGNAL(TDMap_ended_celslc( bool )), this, SLOT(update_tdmap_celslc_ended( bool ) ) );
       connect( _core_td_map, SIGNAL(TDMap_ended_supercell_celslc( bool )), this, SLOT(update_supercell_celslc_ended( bool ) ) );
@@ -239,6 +238,7 @@ void MainWindow::update_tdmap_celslc_started( ){
   ui->statusBar->showMessage(tr("Started multislice step"), 2000);
 
   SuperCell* tdmap_roi_sim_super_cell = _core_td_map->get_tdmap_roi_sim_super_cell();
+
   ui->qgraphics_tdmap_selection->set_super_cell( tdmap_roi_sim_super_cell , false );
   ui->qgraphics_tdmap_selection->view_along_c_axis();
   ui->qgraphics_tdmap_selection->reload_data_from_super_cell();
@@ -251,7 +251,6 @@ void MainWindow::update_tdmap_celslc_started_with_steps_info( int n_steps ){
   message << "Launching " << n_steps << " concurrent processes to calculate the multislice step.";
   ui->statusBar->showMessage(QString::fromStdString(message.str()), 5000);
 }
-
 
 void MainWindow::update_supercell_celslc_started_with_steps_info( int n_steps ){
   updateProgressBar(0,0,100);
@@ -266,6 +265,15 @@ void MainWindow::update_supercell_celslc_ssc_single_slice_step( bool result ){
   const int _core_td_map_info_supercell_celslc_step_to_percent = (int) ( ( (float) _core_td_map_info_supercell_celslc_at_step  ) / ( (float) _core_td_map_info_supercell_celslc_n_steps ) * 25.0f );
   updateProgressBar(0,_core_td_map_info_supercell_celslc_step_to_percent,100);
   message << "Multislice process ended with result " << std::boolalpha << result << ".";
+  ui->statusBar->showMessage(QString::fromStdString(message.str()), 5000);
+}
+
+void MainWindow::update_tdmap_celslc_ssc_single_slice_step( bool result ){
+  std::stringstream message;
+  _core_td_map_info_celslc_at_step++;
+  const int _core_td_map_info_supercell_celslc_step_to_percent = (int) ( ( (float) _core_td_map_info_celslc_at_step  ) / ( (float) _core_td_map_info_celslc_n_steps ) * 25.0f );
+  updateProgressBar(0,_core_td_map_info_supercell_celslc_step_to_percent,100);
+  message << "TDmap multislice process ended with result " << std::boolalpha << result << ".";
   ui->statusBar->showMessage(QString::fromStdString(message.str()), 5000);
 }
 
@@ -377,6 +385,7 @@ void MainWindow::update_tdmap_simgrid_started( ){
 
 void MainWindow::update_tdmap_simgrid_ended( bool result ){
   if( result ){
+      emit simulated_grid_changed( );
     updateProgressBar(0,100,100);
     ui->statusBar->showMessage(tr("Sucessfully ended image correlation step"), 2000);
   }
@@ -389,6 +398,7 @@ void MainWindow::update_tdmap_simgrid_ended( bool result ){
 
 void MainWindow::update_tdmap_no_simgrid_ended( bool result ){
   if( result ){
+      emit simulated_grid_changed( );
     updateProgressBar(0,100,100);
     ui->statusBar->showMessage(tr("Sucessfully ended creating TDMap without image correlation step"), 2000);
   }
@@ -778,13 +788,12 @@ void MainWindow::update_from_full_SuperCell_intensity_cols_sucess( ){
 }
 
 void MainWindow::update_from_TDMap_sucess( ){
-  ui->statusBar->showMessage(tr("Sucessfully runned TD-Map"), 2000);
+  ui->statusBar->showMessage(tr("Sucessfully runned TD-Map requested tasks"), 2000);
   updateProgressBar(0,100,100);
-  emit simulated_grid_changed( );
 }
 
 void MainWindow::update_from_TDMap_failure(){
-  ui->statusBar->showMessage(tr("Error while running TD-Map") );
+  ui->statusBar->showMessage(tr("Error while running TD-Map requested tasks") );
   std::vector <std::string> errors = _core_td_map->get_test_run_config_errors();
   std::ostringstream os;
   for( int pos = 0; pos < errors.size(); pos++ ){

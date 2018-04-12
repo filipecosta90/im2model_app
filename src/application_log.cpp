@@ -40,19 +40,19 @@ namespace ApplicationLog{
     typedef boost::log::sinks::synchronous_sink<boost::log::sinks::text_file_backend> file_sink;
 
 
-    // Automatically rotate files when they reach 2 mb
+    // Automatically rotate files when they reach 10MB
     boost::shared_ptr<file_sink> sink(new file_sink(
           // the resulting file name pattern
       keywords::file_name = full_path_file.string(),
           // rotation size, in characters
-      keywords::rotation_size =  2 * 1024 * 1024
+      keywords::rotation_size =  10 * 1024 * 1024
       ));
 
     // Set up where the rotated files will be stored
     sink->locked_backend()->set_file_collector(
       sinks::file::make_collector(
           boost::log::keywords::target = targetFolder,         // the target directory
-          boost::log::keywords::max_size = 2 * 1024 * 1024    // rotate files after 2 megabytes
+          boost::log::keywords::max_size = 100 * 1024 * 1024    // rotate files after 2 megabytes
           ));
 
     // Upon restart, scan the directory for files matching the file_name pattern and delete any required files
@@ -129,14 +129,14 @@ namespace ApplicationLog{
           // the resulting file name pattern
       keywords::file_name = full_path_file.string(),
           // rotation size, in characters
-      keywords::rotation_size =  2 * 1024 * 1024
+      keywords::rotation_size =  10 * 1024 * 1024
       ));
 
     // Set up where the rotated files will be stored
     sink->locked_backend()->set_file_collector(
       sinks::file::make_collector(
           boost::log::keywords::target = targetFolder,         // the target directory
-          boost::log::keywords::max_size = 2 * 1024 * 1024    // rotate files after 2 megabytes
+          boost::log::keywords::max_size = 100 * 1024 * 1024    // rotate files after 2 megabytes
           ));
 
     // Upon restart, scan the directory for files matching the file_name pattern and delete any required files

@@ -143,35 +143,27 @@ void   GuiSimOutUpdater::newTDMapSim() {
 }
 
 const bool _vars_setted_up = tdmap->test_run_config();
+bool result = false;
 if ( _vars_setted_up ) {
   emit  TDMap_started();
-  bool result = tdmap->run_tdmap();
-  if ( result ){
-    if( tdmap->get_run_simgrid_switch() ){
-      if( _flag_logger ){
-        std::stringstream message;
-        message << "Emitting sucess on newTDMapSim. emit TDMap_sucess()";
-        BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::normal , message.str() );
-      }
-      emit TDMap_sucess();
-    }
-    else{
-      if( _flag_logger ){
-        std::stringstream message;
-        message << "Emitting sucess on newTDMapSim. emit TDMap_sucess_no_correlation()";
-        BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::normal , message.str() );
-      }
-      emit TDMap_sucess_no_correlation();
-    }
+  result = tdmap->run_tdmap();
+}
+
+if ( result ){
+  emit TDMap_sucess();
+  if( _flag_logger ){
+    std::stringstream message;
+    message << "Emitting sucess on newTDMapSim. emit TDMap_sucess()";
+    BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::normal , message.str() );
   }
 }
-else {
+else{
+  emit TDMap_failure();
   if( _flag_logger ){
     std::stringstream message;
     message << "Emitting failure on newTDMapSim. emit TDMap_failure()";
     BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::error , message.str() );
   }
-  emit TDMap_failure();
 }
 
   // Set _working to false, meaning the process can't be aborted anymore.

@@ -202,10 +202,14 @@ public:
     bool run_tdmap_celslc();
     bool run_tdmap_msa();
     bool run_tdmap_wavimg();
+    bool run_tdmap_simgrid_read();
     bool run_tdmap_simgrid();
     bool test_run_config();
     bool test_clean_run_env();
     bool calculate_exp_image_boundaries_from_full_image();
+    bool check_tdmap_celslc_output();
+    bool check_tdmap_msa_output();
+    bool check_tdmap_wavimg_output();
 
     bool set_full_sim_super_cell_length_a_nm( double full_crystal_a_size );
     bool set_full_sim_super_cell_length_b_nm( double full_crystal_b_size );
@@ -573,9 +577,13 @@ public:
     void update_super_cell_sim_image_intensity_columns_changed();
     void update_super_cell_exp_image_intensity_columns_changed();
     void update_super_cell_exp_image_centroid_translation_changed( cv::Point2i trans );
+    void update_tdmap_celslc_ssc_stage_started( int nsteps );
+    void update_tdmap_celslc_ssc_single_slice_ended( bool result );
+    void update_tdmap_celslc_ssc_stage_ended( bool result );
     void update_super_cell_celslc_ssc_stage_started( int nsteps );
-    void update_super_celslc_ssc_single_slice_ended( bool result );
+    void update_super_cell_celslc_ssc_single_slice_ended( bool result );
     void update_super_cell_celslc_ssc_stage_ended( bool result );
+
 
     signals:
     void supercell_full_experimental_image_intensity_columns_changed();
