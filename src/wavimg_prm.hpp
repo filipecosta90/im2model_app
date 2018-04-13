@@ -36,7 +36,7 @@
 #include "super_cell.hpp"
 
 class WAVIMG_prm : public BaseBin {
-  private:
+private:
     /* Classes with sim properties */
     UnitCell* unit_cell = nullptr;
     bool _flag_unit_cell = false;
@@ -137,11 +137,14 @@ class WAVIMG_prm : public BaseBin {
     bool get_flag_prm_filename();
     bool get_flag_produced_prm();
 
+    bool check_produced_dat_single();
+    bool check_produced_dat_looped();
+
     /* Loggers */
     ApplicationLog::ApplicationLog* logger = nullptr;
     bool _flag_logger = false;
 
-  public:
+public:
     WAVIMG_prm( boost::process::ipstream& async_io_buffer_out );
 
     bool set_unit_cell( UnitCell* unit_cell );
@@ -155,123 +158,120 @@ class WAVIMG_prm : public BaseBin {
       FourfoldAstigmatism = 7, Coma5thOrder = 8, ThreeLobeAberration = 9,
       FiveFoldAstigmatism = 10, SphericalAberration6thOrder = 11, StarAberration6thOrder = 12,
       RosetteAberration = 13, SixfoldAstigmatism = 14, EightfoldAstigmatism = 23
-    };
+  };
 
-    enum EnvelopeVibrationalDamping { Deactivated = 0, Isotropic = 1, Anisotropic = 2 };
+  enum EnvelopeVibrationalDamping { Deactivated = 0, Isotropic = 1, Anisotropic = 2 };
 
     /** getters **/
     // flag getters
-    bool get_flag_logger(){ return _flag_logger; }
+  bool get_flag_logger(){ return _flag_logger; }
     /* Loggers */
-    ApplicationLog::ApplicationLog* get_logger(){ return logger; }
+  ApplicationLog::ApplicationLog* get_logger(){ return logger; }
 
-    bool produce_prm();
+  bool produce_prm();
 
-    bool full_prm_dat_cleanup_bin();
+  bool full_prm_dat_cleanup_bin();
 
-    bool dat_cleanup_bin();
+  bool dat_cleanup_bin();
 
-    bool check_clean_run_env();
+  bool check_clean_run_env();
 
-    bool call_bin();
+  bool call_bin();
 
-    bool clean_for_re_run();
-    bool base_cystal_clean_for_re_run();
+  bool clean_for_re_run();
+  bool base_cystal_clean_for_re_run();
 
-    bool check_produced_dat();
-
-
+  bool check_produced_dat();
 
     // setters line 1
-    bool set_file_name_input_wave_function( std::string file_name );
+  bool set_file_name_input_wave_function( std::string file_name );
     // setters line 5
-    void set_type_of_output( int type );
+  void set_type_of_output( int type );
     // setters line 6
-    bool set_file_name_output_image_wave_function( std::string file_name );
+  bool set_file_name_output_image_wave_function( std::string file_name );
 
     // setters line 8
-    void set_image_data_type(int data_type );
-    void set_image_vacuum_mean_intensity( double mean_intensity );
-    void set_conversion_rate( double rate );
-    void set_readout_noise_rms_amplitude( double readout_noise );
+  void set_image_data_type(int data_type );
+  void set_image_vacuum_mean_intensity( double mean_intensity );
+  void set_conversion_rate( double rate );
+  void set_readout_noise_rms_amplitude( double readout_noise );
     // setters line 9
-    void set_switch_option_extract_particular_image_frame( int option );
+  void set_switch_option_extract_particular_image_frame( int option );
     // setters line 10
     // INHERITS FROM BaseCrystal
     // setters line 11
-    void set_image_frame_offset_x_pixels_input_wave_function( double offset_x );
-    void set_image_frame_offset_y_pixels_input_wave_function( double offset_y );
+  void set_image_frame_offset_x_pixels_input_wave_function( double offset_x );
+  void set_image_frame_offset_y_pixels_input_wave_function( double offset_y );
     // setters line 12
-    void set_image_frame_rotation( double frame_rotation );
+  void set_image_frame_rotation( double frame_rotation );
     // setters line 13
-    void set_switch_coherence_model( int coherence_model );
+  void set_switch_coherence_model( int coherence_model );
     // setters line 14
-    bool set_partial_temporal_coherence_switch( bool temporal_switch );
-    bool set_partial_temporal_coherence_focus_spread( double focus_spread );
+  bool set_partial_temporal_coherence_switch( bool temporal_switch );
+  bool set_partial_temporal_coherence_focus_spread( double focus_spread );
     // setters line 15
-    bool set_partial_spatial_coherence_switch( bool coherence_switch );
-    bool set_partial_spatial_coherence_semi_convergence_angle( double convergence_angle );
+  bool set_partial_spatial_coherence_switch( bool coherence_switch );
+  bool set_partial_spatial_coherence_semi_convergence_angle( double convergence_angle );
     // setters line 16
-    bool set_mtf_simulation_switch( bool simulation_switch );
-    void set_k_space_scaling( double scale );
-    bool set_mtf_filename( std::string file_name );
+  bool set_mtf_simulation_switch( bool simulation_switch );
+  void set_k_space_scaling( double scale );
+  bool set_mtf_filename( std::string file_name );
     // setters line 17
-    void set_simulation_image_spread_envelope_switch( int spread_switch );
-    void set_isotropic_one_rms_amplitude( double amplitude );
-    void set_anisotropic_second_rms_amplitude( double amplitude );
-    void set_azimuth_orientation_angle( double angle );
+  void set_simulation_image_spread_envelope_switch( int spread_switch );
+  void set_isotropic_one_rms_amplitude( double amplitude );
+  void set_anisotropic_second_rms_amplitude( double amplitude );
+  void set_azimuth_orientation_angle( double angle );
     // setters line 18
-    void set_number_image_aberrations_set( int number_image_aberrations );
+  void set_number_image_aberrations_set( int number_image_aberrations );
     // setters line 19
-    void add_aberration_definition ( int index_number, double first_coefficient_value_nm, double second_coefficient_value_nm );
+  void add_aberration_definition ( int index_number, double first_coefficient_value_nm, double second_coefficient_value_nm );
 
-    bool set_aberration_definition ( WAVIMG_prm::AberrationDefinition aberration_index, int coefficient , double value );
+  bool set_aberration_definition ( WAVIMG_prm::AberrationDefinition aberration_index, int coefficient , double value );
 
-    bool set_aberration_definition_switch(  WAVIMG_prm::AberrationDefinition aberration_index, bool value );
+  bool set_aberration_definition_switch(  WAVIMG_prm::AberrationDefinition aberration_index, bool value );
 
     // setters line 19 + aberration_definition_index_number
-    void set_objective_aperture_radius( double radius );
+  void set_objective_aperture_radius( double radius );
     // setters line 20 + aberration_definition_index_number
-    void set_center_x_of_objective_aperture( double center_x );
-    void set_center_y_of_objective_aperture( double center_y );
+  void set_center_x_of_objective_aperture( double center_x );
+  void set_center_y_of_objective_aperture( double center_y );
     // setters line 21 + aberration_definition_index_number
-    void set_number_parameter_loops( int number_loops );
+  void set_number_parameter_loops( int number_loops );
     // setters lines 22, 23, 24, 25, 26 + aberration_definition_index_number
-    void add_parameter_loop ( int parameter_class , int parameter_index, int variation_form, double range_0, double range_1, double range_n, std::string string_identifier );
+  void add_parameter_loop ( int parameter_class , int parameter_index, int variation_form, double range_0, double range_1, double range_n, std::string string_identifier );
 
-    bool set_prm_file_name( std::string filename );
-
-    /**
-     * flag getters
-     */
-    bool get_aberration_definition_switch( WAVIMG_prm::AberrationDefinition aberration_index );
-    bool get_partial_temporal_coherence_switch(){ return partial_temporal_coherence_switch;}
-    bool get_partial_spatial_coherence_switch(){ return partial_spatial_coherence_switch;}
-    bool get_mtf_simulation_switch();
+  bool set_prm_file_name( std::string filename );
 
     /**
      * flag getters
      */
+  bool get_aberration_definition_switch( WAVIMG_prm::AberrationDefinition aberration_index );
+  bool get_partial_temporal_coherence_switch(){ return partial_temporal_coherence_switch;}
+  bool get_partial_spatial_coherence_switch(){ return partial_spatial_coherence_switch;}
+  bool get_mtf_simulation_switch();
 
-    std::string get_mtf_filename();
-        std::string get_mtf_filename_full_path();
+    /**
+     * flag getters
+     */
 
-     int get_simulation_image_spread_envelope_switch(){ return simulation_image_spread_envelope_switch; }
+  std::string get_mtf_filename();
+  std::string get_mtf_filename_full_path();
+
+  int get_simulation_image_spread_envelope_switch(){ return simulation_image_spread_envelope_switch; }
 
 
-    double get_aberration_definition( WAVIMG_prm::AberrationDefinition aberration_index, int coefficient );
+  double get_aberration_definition( WAVIMG_prm::AberrationDefinition aberration_index, int coefficient );
 
-    std::string get_file_name_output_image_wave_function(){ return file_name_output_image_wave_function; }
-
+  std::string get_file_name_output_image_wave_function(){ return file_name_output_image_wave_function; }
 
     /* Loggers */
-    bool set_application_logger( ApplicationLog::ApplicationLog* logger );
+  bool set_application_logger( ApplicationLog::ApplicationLog* logger );
 
-    void print_var_state();
+  void print_var_state();
 
-    friend std::ostream& operator<< (std::ostream& stream, const WAVIMG_prm& var);
+  friend std::ostream& operator<< (std::ostream& stream, const WAVIMG_prm& var);
 
-    virtual std::ostream& output(std::ostream& stream) const;
+  virtual std::ostream& output(std::ostream& stream) const;
 
 
 };

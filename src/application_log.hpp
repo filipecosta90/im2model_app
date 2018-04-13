@@ -45,13 +45,14 @@ namespace ApplicationLog {
 
   class ApplicationLog {
     public:
-      ApplicationLog( boost::filesystem::path full_path_file );
+      ApplicationLog( boost::filesystem::path full_path_file,  severity_level log_level =  normal );
       void logEvent(const severity_level level, std::string message);
       void logEvent(const severity_level level, std::string message, std::string file , std::string line, std::string function);
       void add_sync( boost::filesystem::path  new_path_file  );
     private:
       src::severity_logger<severity_level> m_logger;
       boost::filesystem::path full_path_file;
+      severity_level log_level = normal;
   };
 
 }

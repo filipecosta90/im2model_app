@@ -18,7 +18,7 @@ TDMap::TDMap(
   boost::process::ipstream& ostream_supercell_celslc_buffer,
   boost::process::ipstream& ostream_supercell_msa_buffer,
   boost::process::ipstream& ostream_supercell_wavimg_buffer
-  )
+  , QObject* parent ) : QObject(parent) 
 {
   /* base unit cell info */
   unit_cell = new UnitCell();
@@ -95,7 +95,7 @@ TDMap::TDMap(
 
   supercell_exp_image_properties->set_flag_auto_a_size( true );
   supercell_exp_image_properties->set_flag_auto_b_size( true );
-  connect( supercell_exp_image_properties, SIGNAL( centroid_translation_changed( cv::Point2i )), this, SLOT(update_super_cell_exp_image_centroid_translation_changed( cv::Point2i ) ) );
+  connect( supercell_exp_image_properties, SIGNAL( centroid_translation_changed( cv::Point2i )), this, SLOT(update_super_cell_exp_image_centroid_translation_changed( cv::Point2i ) )    );
 
   //supercell_exp_image_properties->set_flag_auto_ignore_edge_pixels( true );
 
@@ -116,9 +116,9 @@ TDMap::TDMap(
   _tdmap_celslc_parameters->set_sim_crystal_properties ( sim_crystal_properties );
   _tdmap_celslc_parameters->set_sim_super_cell ( tdmap_roi_sim_super_cell );
   _tdmap_celslc_parameters->set_sim_image_properties ( sim_image_properties );
-  connect( _tdmap_celslc_parameters, SIGNAL( celslc_ssc_stage_started( int )), this, SLOT(update_tdmap_celslc_ssc_stage_started( int ) ) );
-  connect( _tdmap_celslc_parameters, SIGNAL( celslc_ssc_single_slice_ended( bool )), this, SLOT(update_tdmap_celslc_ssc_single_slice_ended( bool ) ) );
-  connect( _tdmap_celslc_parameters, SIGNAL( celslc_ssc_stage_ended( bool )), this, SLOT(update_tdmap_celslc_ssc_stage_ended( bool ) ) );
+  connect( _tdmap_celslc_parameters, SIGNAL( celslc_ssc_stage_started( int )), this, SLOT(update_tdmap_celslc_ssc_stage_started( int ) )  );
+  connect( _tdmap_celslc_parameters, SIGNAL( celslc_ssc_single_slice_ended( bool )), this, SLOT(update_tdmap_celslc_ssc_single_slice_ended( bool ) )  );
+  connect( _tdmap_celslc_parameters, SIGNAL( celslc_ssc_stage_ended( bool )), this, SLOT(update_tdmap_celslc_ssc_stage_ended( bool ) )  );
 
   // set pointers for msa
   _tdmap_msa_parameters->set_unit_cell ( unit_cell );
@@ -144,9 +144,9 @@ TDMap::TDMap(
   _supercell_celslc_parameters->set_sim_super_cell ( tdmap_full_sim_super_cell );
   _supercell_celslc_parameters->set_sim_image_properties ( supercell_sim_image_properties );
 
-  connect( _supercell_celslc_parameters, SIGNAL( celslc_ssc_stage_started( int )), this, SLOT(update_super_cell_celslc_ssc_stage_started( int ) ) );
-  connect( _supercell_celslc_parameters, SIGNAL( celslc_ssc_single_slice_ended( bool )), this, SLOT(update_super_cell_celslc_ssc_single_slice_ended( bool ) ) );
-  connect( _supercell_celslc_parameters, SIGNAL( celslc_ssc_stage_ended( bool )), this, SLOT(update_super_cell_celslc_ssc_stage_ended( bool ) ) );
+  connect( _supercell_celslc_parameters, SIGNAL( celslc_ssc_stage_started( int )), this, SLOT(update_super_cell_celslc_ssc_stage_started( int ) )    );
+  connect( _supercell_celslc_parameters, SIGNAL( celslc_ssc_single_slice_ended( bool )), this, SLOT(update_super_cell_celslc_ssc_single_slice_ended( bool ) )    );
+  connect( _supercell_celslc_parameters, SIGNAL( celslc_ssc_stage_ended( bool )), this, SLOT(update_super_cell_celslc_ssc_stage_ended( bool ) )    );
 
   // set pointers for SUPERCELL  msa
   _supercell_msa_parameters->set_unit_cell ( unit_cell );
@@ -166,8 +166,8 @@ TDMap::TDMap(
   sim_image_intensity_columns->set_exp_image_properties ( supercell_exp_image_properties );
   sim_image_intensity_columns->set_sim_image_properties ( supercell_sim_image_properties );
 
-  connect( sim_image_intensity_columns, SIGNAL( sim_image_intensity_columns_changed( )), this, SLOT(update_super_cell_sim_image_intensity_columns_changed() ) );
-  connect( sim_image_intensity_columns, SIGNAL( exp_image_intensity_columns_changed( )), this, SLOT(update_super_cell_exp_image_intensity_columns_changed() ) );
+  connect( sim_image_intensity_columns, SIGNAL( sim_image_intensity_columns_changed( )), this, SLOT(update_super_cell_sim_image_intensity_columns_changed() )    );
+  connect( sim_image_intensity_columns, SIGNAL( exp_image_intensity_columns_changed( )), this, SLOT(update_super_cell_exp_image_intensity_columns_changed() )    );
   
   /////////////
   // only for debug. need to add this options like in im2model command line
@@ -242,8 +242,9 @@ TDMap::TDMap( boost::process::ipstream& ostream_celslc_buffer,
   boost::process::ipstream& ostream_supercell_celslc_buffer,
   boost::process::ipstream& ostream_supercell_msa_buffer,
   boost::process::ipstream& ostream_supercell_wavimg_buffer,
-  ApplicationLog::ApplicationLog* app_logger ) :
-TDMap::TDMap( ostream_celslc_buffer, ostream_msa_buffer, ostream_wavimg_buffer, ostream_simgrid_buffer, ostream_supercell_celslc_buffer, ostream_supercell_msa_buffer, ostream_supercell_wavimg_buffer  ) {
+  ApplicationLog::ApplicationLog* app_logger , 
+  QObject* parent ) :
+TDMap::TDMap( ostream_celslc_buffer, ostream_msa_buffer, ostream_wavimg_buffer, ostream_simgrid_buffer, ostream_supercell_celslc_buffer, ostream_supercell_msa_buffer, ostream_supercell_wavimg_buffer  ,  parent ) {
   set_application_logger( app_logger );
 }
 
@@ -256,11 +257,14 @@ std::string TDMap::get_unit_cell_cif_path(){
 }
 
 void TDMap::update_tdmap_celslc_ssc_stage_started( int nsteps ){
+      std::cout << "update_tdmap_celslc_ssc_stage_started" << std::endl;
   emit TDMap_started_celslc();
   emit TDMap_inform_celslc_n_steps( nsteps );
 }
 
 void TDMap::update_tdmap_celslc_ssc_single_slice_ended( bool result ){
+    std::cout << "update_tdmap_celslc_ssc_single_slice_ended" << std::endl;
+
   emit TDMap_ended_celslc_ssc_single_slice_ended( result );
 }
 
@@ -274,6 +278,7 @@ void TDMap::update_super_cell_celslc_ssc_stage_started( int nsteps ){
 }
 
 void TDMap::update_super_cell_celslc_ssc_single_slice_ended( bool result ){
+  std::cout << "update_super_cell_celslc_ssc_single_slice_ended" << std::endl;
   emit TDMap_ended_supercell_celslc_ssc_single_slice_ended( result );
 }
 
@@ -473,7 +478,7 @@ bool TDMap::run_tdmap_celslc(){
       const bool cel_generation = tdmap_roi_sim_super_cell->generate_super_cell_file();
       tdmap_roi_sim_super_cell->generate_xyz_file();
       if( cel_generation ){
-        _flag_runned_tdmap_celslc = _tdmap_celslc_parameters->call_boost_bin( true );
+        _flag_runned_tdmap_celslc = _tdmap_celslc_parameters->call_boost_bin( false );
       }
     }
     emit TDMap_ended_celslc( _flag_runned_tdmap_celslc );
@@ -514,6 +519,7 @@ bool TDMap::run_tdmap_msa(){
     emit TDMap_started_msa();
     if( prm_status ){
       _flag_runned_tdmap_msa = _tdmap_msa_parameters->call_bin();
+      result = _flag_runned_tdmap_msa;
     }
     emit TDMap_ended_msa( _flag_runned_tdmap_msa );
     if( _flag_logger ){
@@ -565,6 +571,7 @@ bool TDMap::run_tdmap_wavimg(){
     const bool prm_status = _tdmap_wavimg_parameters->produce_prm();
     if( prm_status ){
       _flag_runned_tdmap_wavimg = _tdmap_wavimg_parameters->call_bin();
+      result = _flag_runned_tdmap_wavimg;
     }
     emit TDMap_ended_wavimg( _flag_runned_tdmap_wavimg );
     if( !_flag_runned_tdmap_wavimg ){
@@ -582,6 +589,11 @@ bool TDMap::run_tdmap_wavimg(){
 
 bool TDMap::run_tdmap_simgrid_read(){
   if( check_tdmap_wavimg_output() ){
+
+ if( _flag_runned_tdmap_simgrid_read ){
+    _flag_runned_tdmap_simgrid_read = !_td_map_simgrid->clean_for_re_run();
+  }
+
     emit TDMap_started_simgrid();
             // 1st step in simgrid
     bool _grid_ok = false;
@@ -614,6 +626,14 @@ bool TDMap::run_tdmap_simgrid_read(){
       ApplicationLog::severity_level _log_type = ApplicationLog::notification;
       BOOST_LOG_FUNCTION();  logger->logEvent( _log_type , message.str() );
     }
+  }
+  else{
+    if( _flag_logger ){
+        std::stringstream message;
+        message << "check_tdmap_wavimg_output returned false";
+        ApplicationLog::severity_level _log_type = ApplicationLog::error;
+        BOOST_LOG_FUNCTION();  logger->logEvent( _log_type , message.str() );
+      }
   }
   return _flag_runned_tdmap_simgrid_read;
 }

@@ -138,11 +138,10 @@ bool CELSLC_prm::check_produced_slices(){
       // get const vars from class pointer
     const std::string slc_file_name_prefix = sim_crystal_properties->get_slc_file_name_prefix();
     const int nz_simulated_partitions = sim_crystal_properties->get_nz_simulated_partitions();
-    std::cout << "$$$$$ nz_simulated_partitions " << nz_simulated_partitions << std::endl;
+    //std::cout << "$$$$$ nz_simulated_partitions " << nz_simulated_partitions << std::endl;
     bool flag_files = true;
-    for ( int slice_id = 1 ;
-      slice_id <= nz_simulated_partitions && flag_files;
-      slice_id++){
+    
+    for ( int slice_id = 1 ; slice_id <= nz_simulated_partitions && flag_files; slice_id++){
       std::stringstream filename_stream;
     filename_stream << slc_file_name_prefix << "_"<< std::setw(3) << std::setfill('0') << std::to_string(slice_id) << ".sli" ;
     boost::filesystem::path slice_file ( filename_stream.str() );

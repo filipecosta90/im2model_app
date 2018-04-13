@@ -178,7 +178,8 @@ public:
         boost::process::ipstream& ostream_simgrid_buffer,
         boost::process::ipstream& ostream_supercell_celslc_buffer,
         boost::process::ipstream& ostream_supercell_msa_buffer,
-        boost::process::ipstream& ostream_supercell_wavimg_buffer );
+        boost::process::ipstream& ostream_supercell_wavimg_buffer,
+        QObject* parent = 0 );
 
     /* constructor with logger */
     TDMap( boost::process::ipstream& ostream_celslc_buffer,
@@ -188,7 +189,8 @@ public:
         boost::process::ipstream& ostream_supercell_celslc_buffer,
         boost::process::ipstream& ostream_supercell_msa_buffer,
         boost::process::ipstream& ostream_supercell_wavimg_buffer,
-        ApplicationLog::ApplicationLog* app_logger );
+        ApplicationLog::ApplicationLog* app_logger ,
+        QObject* parent = 0 );
 
     /** others **/
 

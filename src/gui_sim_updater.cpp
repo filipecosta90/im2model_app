@@ -9,7 +9,7 @@
 
 #include "gui_sim_updater.hpp"
 
-GuiSimOutUpdater::GuiSimOutUpdater(TDMap* core_tdmap ,  QObject *parent ) : QObject(parent) {
+GuiSimOutUpdater::GuiSimOutUpdater(TDMap* core_tdmap , QObject* parent ) : QObject(parent) {
   _working =false;
   _abort = false;
   tdmap = core_tdmap;

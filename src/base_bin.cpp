@@ -70,7 +70,6 @@ bool BaseBin::set_bin_execname( std::string execname ){
     _flag_full_bin_path_execname = boost::filesystem::exists( full_bin_path_execname );
   }
   catch (const boost::filesystem::filesystem_error& ex) {
-    std::cout << ex.what() << '\n';
     _flag_full_bin_path_execname = false;
     if( _flag_logger ){
       std::stringstream message;

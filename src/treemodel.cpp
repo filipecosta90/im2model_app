@@ -257,6 +257,5 @@ bool TreeModel::_reset_model_modified(){
 }
 
 void TreeModel::set_model_modified(){
-  std::cout << "##### model was modified " << std::endl;
   _flag_model_modified = true;
 }

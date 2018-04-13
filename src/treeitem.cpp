@@ -101,7 +101,7 @@ TreeItem::TreeItem( QVector<QVariant> &data, TreeItem *parent) {
 
 void TreeItem::force_layout_change( int column ){
   if( parentModel ){
-    std::cout << "forcing layout change by var " << _variable_name << std::endl;
+    //std::cout << "forcing layout change by var " << _variable_name << std::endl;
     parentModel->force_layout_change();
   }
 }
@@ -207,7 +207,7 @@ void TreeItem::load_data_from_getter( int column ){
     }
     if( _flag_fp_data_getter_string_vec[column] == true  ){
       std::string _string_value = fp_data_getter_string_vec[column]();
-      std::cout << "\t\tfp_data_getter_string_vec in col "<< column << " value:\n"<< _string_value <<std::endl;
+      //std::cout << "\t\tfp_data_getter_string_vec in col "<< column << " value:\n"<< _string_value <<std::endl;
       //value = QVariant::fromValue( _string_value );
       itemData[column] = QString::fromStdString(_string_value);
       emit dataChanged( column );
@@ -232,7 +232,7 @@ void TreeItem::load_data_from_getter_int( ){
 
 // loads data for all cols
 void TreeItem::load_data_from_getter_string( ){
-  std::cout << "##### load_data_from_getter_string()" << std::endl;
+  //std::cout << "##### load_data_from_getter_string()" << std::endl;
   for(int col = 0; col < fp_data_getter_string_vec.size(); col++ ){
     load_data_from_getter( col );
   }
@@ -450,7 +450,7 @@ QVariant TreeItem::data(int column, int role ) const{
     return itemData.value(column);
   }
   else if( role == Qt::ToolTipRole ){
-    std::cout << "data with Qt::ToolTipRole" << std::endl;
+    //std::cout << "data with Qt::ToolTipRole" << std::endl;
     if( _flag_itemToolTip.at(column) == true ) {
       itemToolTip.value(column);
     }else{
@@ -486,7 +486,7 @@ bool TreeItem::isItemCheckable( int column ) const {
 bool TreeItem::insertChildren(TreeItem *item){
   if( parentModel != nullptr ){
     item->set_model( parentModel );
-    std::cout << "connect " << item->get_variable_name() << " to model " << std::endl;
+    //std::cout << "connect " << item->get_variable_name() << " to model " << std::endl;
     connect(item, SIGNAL( dataChanged( int ) ) , parentModel, SLOT( set_model_modified() ) );
   }
   item->set_parent(this);
@@ -933,5 +933,5 @@ double TreeItem::get_validator_value_double_top( int col_pos  ){
 }
 
 void TreeItem::setToolTipText(const QString& text ){
-  std::cout << "called setToolTipText with text " << text.toStdString() << std::endl;
+  //std::cout << "called setToolTipText with text " << text.toStdString() << std::endl;
 }

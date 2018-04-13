@@ -15,7 +15,6 @@
 #include <boost/iostreams/stream.hpp>             // for stream
 #include <boost/math/constants/constants.hpp>
 
-
 /* END BOOST */
 
 #include <math.h>                        // for fabs, ceil, pow, M_PI
@@ -66,9 +65,9 @@
 
 
 struct cmpPoint3dOnlyByXY {
-    bool operator()(const cv::Point3d& a, const cv::Point3d& b) const {
-        return (( a.x < b.x ) && (a.x < b.x) );
-    }
+  bool operator()(const cv::Point3d& a, const cv::Point3d& b) const {
+    return (( a.x < b.x ) && (a.x < b.x) );
+  }
 };
 
 class BaseCell : public QObject {
@@ -76,11 +75,11 @@ class BaseCell : public QObject {
 public:
 
     /// Possible shapes for the unit cell
-    enum CellShape {
+  enum CellShape {
       /// Orthorhombic cell, with the three angles equals to 90°
-      ORTHORHOMBIC = 0,
+    ORTHORHOMBIC = 0,
       /// Triclinic cell, with any values for the angles.
-      TRICLINIC = 1
+    TRICLINIC = 1
   };
 
   BaseCell();
@@ -117,7 +116,7 @@ public:
 
     //getters
   std::string get_cif_path();
-    std::string get_cif_path_full();
+  std::string get_cif_path_full();
   bool get_flag_cif_path(){ return _flag_cif_path; }
   bool get_flag_cif_format(){ return _flag_cif_format; }
   bool get_flag_cel_format(){ return _flag_cel_format; }
@@ -200,7 +199,7 @@ public:
 
   double get_cel_margin_nm(){ return cel_margin_Nanometers; }
 
-  std::vector< std::vector<cv::Point3d> > get_atom_positions_vec( ){ get_atom_positions_cols_vec(); return atom_positions; }
+  std::vector< std::vector<cv::Point3d> > get_atom_positions_vec(){ return atom_positions; }
   std::map<cv::Point3d, std::vector< std::vector<cv::Point3d> > , cmpPoint3dOnlyByXY> get_atom_positions_cols_vec();
   int get_atom_positions_vec_size();
   int get_atom_fractional_cell_coordinates_vec_size();
@@ -210,7 +209,7 @@ public:
   std::vector<double> get_atom_occupancies_vec(){ return atom_occupancies; }
   std::vector<double> get_atom_debye_waller_factors_vec(){ return atom_debye_waller_factors; }
   std::vector<Atom> get_atoms_vec(){ return atoms;}
-    bool get_flag_base_bin_start_dir_path(){ return _flag_base_bin_start_dir_path; }
+  bool get_flag_base_bin_start_dir_path(){ return _flag_base_bin_start_dir_path; }
 
   int get_nx_px(){ return cel_nx_px; }
   int get_ny_px(){ return cel_ny_px; }
@@ -229,148 +228,148 @@ public:
   void zone_axis_vector_changed();
 
 private:
-    void update_length_flag();
+  void update_length_flag();
 
     /* Loggers */
-    ApplicationLog::ApplicationLog* logger = nullptr;
-    bool _flag_logger = false;
+  ApplicationLog::ApplicationLog* logger = nullptr;
+  bool _flag_logger = false;
 
 protected:
     // Specifies the input super-cell file containing the atomic structure data in CIF file format.
-    std::string cif_path;
-    bool _flag_cif_path = false;
-    bool _flag_cif_format = false;
+  std::string cif_path;
+  bool _flag_cif_path = false;
+  bool _flag_cif_format = false;
 
-    std::string cel_filename;
-    std::string cel_path;
-    bool _flag_cel_filename = false;
-    bool _flag_cel_path = false;
-    bool _flag_cel_format = false;
+  std::string cel_filename;
+  std::string cel_path;
+  bool _flag_cel_filename = false;
+  bool _flag_cel_path = false;
+  bool _flag_cel_format = false;
 
-    std::string xyz_filename;
-    bool _flag_xyz_filename = false;
-    std::string xyz_path;
-    bool _flag_xyz_path = false;
-    bool _flag_xyz_format = false;
+  std::string xyz_filename;
+  bool _flag_xyz_filename = false;
+  std::string xyz_path;
+  bool _flag_xyz_path = false;
+  bool _flag_xyz_format = false;
 
-    double length_a_Angstroms = 0.0f;
-    double length_b_Angstroms = 0.0f;
-    double length_c_Angstroms = 0.0f;
-    double length_a_Nanometers = 0.0f;
-    double length_b_Nanometers = 0.0f;
-    double length_c_Nanometers = 0.0f;
-    bool _flag_length_a = false;
-    bool _flag_length_b = false;
-    bool _flag_length_c = false;
-    bool _flag_length = false;
+  double length_a_Angstroms = 0.0f;
+  double length_b_Angstroms = 0.0f;
+  double length_c_Angstroms = 0.0f;
+  double length_a_Nanometers = 0.0f;
+  double length_b_Nanometers = 0.0f;
+  double length_c_Nanometers = 0.0f;
+  bool _flag_length_a = false;
+  bool _flag_length_b = false;
+  bool _flag_length_c = false;
+  bool _flag_length = false;
 
-    double cell_volume_Angstroms = 0.0f;
-    double cell_volume_Nanometers = 0.0f;
-    bool _flag_cell_volume =false;
+  double cell_volume_Angstroms = 0.0f;
+  double cell_volume_Nanometers = 0.0f;
+  bool _flag_cell_volume =false;
 
-    double angle_alpha = 0.0f;
-    double angle_beta = 0.0f;
-    double angle_gamma = 0.0f;
+  double angle_alpha = 0.0f;
+  double angle_beta = 0.0f;
+  double angle_gamma = 0.0f;
 
-    bool _flag_angle_alpha = false;
-    bool _flag_angle_beta = false;
-    bool _flag_angle_gamma = false;
+  bool _flag_angle_alpha = false;
+  bool _flag_angle_beta = false;
+  bool _flag_angle_gamma = false;
 
      /* Base dir path */
-    boost::filesystem::path base_bin_start_dir_path;
-    bool _flag_base_bin_start_dir_path = false;
+  boost::filesystem::path base_bin_start_dir_path;
+  bool _flag_base_bin_start_dir_path = false;
 
     /// Cell type
-    CellShape cell_shape;
+  CellShape cell_shape;
 
     /** reciprocal-lattice (Miller) indices  **/
-    cv::Point3d vector_t = cv::Point3d( 0.0f, 0.0f, 0.0f );
+  cv::Point3d vector_t = cv::Point3d( 0.0f, 0.0f, 0.0f );
 
     /** Upward vector **/
     // projected z-axis:
-    cv::Point3d upward_vector = cv::Point3d( 0.0f, 0.0f, 0.0f );
-    double upward_vector_u = 0.0f;
-    double upward_vector_v = 0.0f;
-    double upward_vector_w = 0.0f;
-    bool _flag_upward_vector_u = false;
-    bool _flag_upward_vector_v = false;
-    bool _flag_upward_vector_w = false;
-    bool _flag_upward_vector = false;
+  cv::Point3d upward_vector = cv::Point3d( 0.0f, 0.0f, 0.0f );
+  double upward_vector_u = 0.0f;
+  double upward_vector_v = 0.0f;
+  double upward_vector_w = 0.0f;
+  bool _flag_upward_vector_u = false;
+  bool _flag_upward_vector_v = false;
+  bool _flag_upward_vector_w = false;
+  bool _flag_upward_vector = false;
 
     /** Zone Axis / Lattice vector **/
     // projected y-axis
-    cv::Point3d  zone_axis = cv::Point3d( 0.0f, 0.0f, 0.0f );
-    double zone_axis_u = 0.0f;
-    double zone_axis_v = 0.0f;
-    double zone_axis_w = 0.0f;
-    bool _flag_zone_axis_u = false;
-    bool _flag_zone_axis_v = false;
-    bool _flag_zone_axis_w = false;
-    bool _flag_zone_axis = false;
+  cv::Point3d  zone_axis = cv::Point3d( 0.0f, 0.0f, 0.0f );
+  double zone_axis_u = 0.0f;
+  double zone_axis_v = 0.0f;
+  double zone_axis_w = 0.0f;
+  bool _flag_zone_axis_u = false;
+  bool _flag_zone_axis_v = false;
+  bool _flag_zone_axis_w = false;
+  bool _flag_zone_axis = false;
 
-    std::map< cv::Point3d, std::vector< std::vector<cv::Point3d> > , cmpPoint3dOnlyByXY > atom_positions_cols;
-    std::vector< std::vector<cv::Point3d> > atom_positions;
-    std::vector<std::string> atom_symbols;
-    bool _flag_atom_positions = false;
-    std::vector<double> atom_debye_waller_factors;
-    std::vector<cv::Vec4d> atom_cpk_rgba_colors;
-    std::vector<double> atom_occupancies;
-    std::vector<double> atom_empirical_radiis;
-    std::vector<Atom> atoms;
+  std::map< cv::Point3d, std::vector< std::vector<cv::Point3d> > , cmpPoint3dOnlyByXY > atom_positions_cols;
+  std::vector< std::vector<cv::Point3d> > atom_positions;
+  std::vector<std::string> atom_symbols;
+  bool _flag_atom_positions = false;
+  std::vector<double> atom_debye_waller_factors;
+  std::vector<cv::Vec4d> atom_cpk_rgba_colors;
+  std::vector<double> atom_occupancies;
+  std::vector<double> atom_empirical_radiis;
+  std::vector<Atom> atoms;
 
     /** .cel **/
-    std::vector< std::vector<cv::Point3d> > atom_fractional_cell_coordinates;
-    bool _flag_atom_fractional_cell_coordinates = false;
+  std::vector< std::vector<cv::Point3d> > atom_fractional_cell_coordinates;
+  bool _flag_atom_fractional_cell_coordinates = false;
 
-    double fractional_norm_a_atom_pos = 0.0f;
-    double fractional_norm_b_atom_pos = 0.0f;
-    double fractional_norm_c_atom_pos = 0.0f;
-    bool _flag_fractional_norm = false;
+  double fractional_norm_a_atom_pos = 0.0f;
+  double fractional_norm_b_atom_pos = 0.0f;
+  double fractional_norm_c_atom_pos = 0.0f;
+  bool _flag_fractional_norm = false;
 
     // this margin is used to generate .cel files
-    double cel_margin_Nanometers = 0.0f;
-    double cel_margin_Angstroms = 0.0f;
-    bool _flag_cel_margin = false;
+  double cel_margin_Nanometers = 0.0f;
+  double cel_margin_Angstroms = 0.0f;
+  bool _flag_cel_margin = false;
 
-    double ab_margin = 0.0f;
-    int cel_margin_a_px = 0.0f;
-    int cel_margin_b_px = 0.0f;
+  double ab_margin = 0.0f;
+  int cel_margin_a_px = 0.0f;
+  int cel_margin_b_px = 0.0f;
 
-    int cel_nx_px = 0;
-    int cel_ny_px = 0;
+  int cel_nx_px = 0;
+  int cel_ny_px = 0;
 
     // used in the simulated super-cell. this is calculated based on _cel_nXY_px - 2 * _cel_margin_AB_px
-    int cel_wout_margin_nx_px = 0;
-    int cel_wout_margin_ny_px = 0;
+  int cel_wout_margin_nx_px = 0;
+  int cel_wout_margin_ny_px = 0;
 
-    cv::Rect ignore_cel_margin_rectangle;
+  cv::Rect ignore_cel_margin_rectangle;
 
     /** Orientation **/
-    cv::Mat orientation_matrix;
-    bool _flag_orientation_matrix = true;
-    cv::Mat3d inverse_orientation_matrix;
-    bool _flag_inverse_orientation_matrix = false;
+  cv::Mat orientation_matrix;
+  bool _flag_orientation_matrix = true;
+  cv::Mat3d inverse_orientation_matrix;
+  bool _flag_inverse_orientation_matrix = false;
 
-    cv::Mat lattice_mapping_matrix_factors;
-    cv::Mat lattice_mapping_matrix_Angstroms;
-    cv::Mat lattice_mapping_matrix_Nanometers;
-    bool _flag_lattice_mapping_matrix_Nanometers = false;
+  cv::Mat lattice_mapping_matrix_factors;
+  cv::Mat lattice_mapping_matrix_Angstroms;
+  cv::Mat lattice_mapping_matrix_Nanometers;
+  bool _flag_lattice_mapping_matrix_Nanometers = false;
 
-    int min_width_px = 0;
-    int min_height_px = 0;
-    int left_padding_w_margin_px = 0;
-    int top_padding_w_margin_px = 0;
-    int left_padding_px = 0;
-    int top_padding_px = 0;
+  int min_width_px = 0;
+  int min_height_px = 0;
+  int left_padding_w_margin_px = 0;
+  int top_padding_w_margin_px = 0;
+  int left_padding_px = 0;
+  int top_padding_px = 0;
 
-    int width_px = 0;
-    int height_px = 0;
+  int width_px = 0;
+  int height_px = 0;
 
     /** Chem Database **/
-    Chem_Database chem_database;
+  Chem_Database chem_database;
 
-    bool update_volume();
-    bool update_cell_shape();
+  bool update_volume();
+  bool update_cell_shape();
 };
 
 #endif

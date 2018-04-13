@@ -122,19 +122,19 @@ MainWindow::MainWindow( ApplicationLog::ApplicationLog* logger , QWidget *parent
 
       /* TDMap simulation thread */
       _sim_tdmap_thread = new QThread( this );
-      sim_tdmap_worker = new GuiSimOutUpdater( _core_td_map  );
+      sim_tdmap_worker = new GuiSimOutUpdater( _core_td_map );
       // set logger
       sim_tdmap_worker->set_application_logger(im2model_logger);
 
       sim_tdmap_worker->moveToThread( _sim_tdmap_thread );
 
       // will only start thread when needed
-      connect(sim_tdmap_worker, SIGNAL(TDMap_request()), _sim_tdmap_thread, SLOT( start() ));
-      connect(_sim_tdmap_thread, SIGNAL(started() ), sim_tdmap_worker, SLOT( newTDMapSim() ) );
-      connect(sim_tdmap_worker, SIGNAL(TDMap_sucess()), this, SLOT(update_from_TDMap_sucess( )));
+      connect(sim_tdmap_worker, SIGNAL(TDMap_request()), _sim_tdmap_thread, SLOT( start() )    );
+      connect(_sim_tdmap_thread, SIGNAL(started() ), sim_tdmap_worker, SLOT( newTDMapSim() )    );
+      connect(sim_tdmap_worker, SIGNAL(TDMap_sucess()), this, SLOT(update_from_TDMap_sucess()));
       connect(sim_tdmap_worker, SIGNAL(TDMap_failure()), this, SLOT(update_from_TDMap_failure()));
       // will quit thread after work done
-      connect(sim_tdmap_worker, SIGNAL( TDMap_finished() ), _sim_tdmap_thread, SLOT(quit()), Qt::DirectConnection);
+      connect(sim_tdmap_worker, SIGNAL( TDMap_finished() ), _sim_tdmap_thread, SLOT(quit()) , Qt::DirectConnection  );
 
       /* Super-Cell Full simulation  thread */
       full_sim_super_cell_thread = new QThread( this );
@@ -142,13 +142,13 @@ MainWindow::MainWindow( ApplicationLog::ApplicationLog* logger , QWidget *parent
       full_sim_super_cell_worker->moveToThread( full_sim_super_cell_thread );
 
       // will only start thread when needed
-      connect( full_sim_super_cell_worker, SIGNAL(SuperCell_full_request()), full_sim_super_cell_thread, SLOT(start()) );
-      connect(full_sim_super_cell_thread, SIGNAL( started() ), full_sim_super_cell_worker, SLOT( newSuperCellFull() ) );
+      connect( full_sim_super_cell_worker, SIGNAL(SuperCell_full_request()), full_sim_super_cell_thread, SLOT(start()),Qt::DirectConnection );
+      connect(full_sim_super_cell_thread, SIGNAL( started() ), full_sim_super_cell_worker, SLOT( newSuperCellFull() )    );
 
       connect(full_sim_super_cell_worker, SIGNAL(SuperCell_full_sucess()), this, SLOT(update_from_full_SuperCell_sucess()));
       connect(full_sim_super_cell_worker, SIGNAL(SuperCell_full_failure()), this, SLOT(update_from_full_SuperCell_failure()));
       // will quit thread after work done
-      connect(full_sim_super_cell_worker, SIGNAL(SuperCell_full_finished()), full_sim_super_cell_thread, SLOT(quit()), Qt::DirectConnection);
+      connect(full_sim_super_cell_worker, SIGNAL(SuperCell_full_finished()), full_sim_super_cell_thread, SLOT(quit()) , Qt::DirectConnection  );
 
       /* Super-Cell Full simulation  thread */
       full_sim_super_cell_intensity_cols_thread = new QThread( this );
@@ -156,13 +156,13 @@ MainWindow::MainWindow( ApplicationLog::ApplicationLog* logger , QWidget *parent
       full_sim_super_cell_intensity_cols_worker->moveToThread( full_sim_super_cell_intensity_cols_thread );
 
       // will only start thread when needed
-      QMetaObject::Connection c1 = connect( full_sim_super_cell_intensity_cols_worker, SIGNAL(SuperCell_full_intensity_cols_request()), full_sim_super_cell_intensity_cols_thread, SLOT(start()) );
-      QMetaObject::Connection c2 = connect( full_sim_super_cell_intensity_cols_thread, &QThread::started, full_sim_super_cell_intensity_cols_worker, &GuiSimOutUpdater::newSuperCellFull_intensity_cols );
+      QMetaObject::Connection c1 = connect( full_sim_super_cell_intensity_cols_worker, SIGNAL(SuperCell_full_intensity_cols_request()), full_sim_super_cell_intensity_cols_thread, SLOT(start())     );
+      QMetaObject::Connection c2 = connect( full_sim_super_cell_intensity_cols_thread, &QThread::started, full_sim_super_cell_intensity_cols_worker, &GuiSimOutUpdater::newSuperCellFull_intensity_cols    );
 
       connect(full_sim_super_cell_intensity_cols_worker, SIGNAL(SuperCell_full_intensity_cols_sucess()), this, SLOT(update_from_full_SuperCell_intensity_cols_sucess()));
       connect(full_sim_super_cell_intensity_cols_worker, SIGNAL(SuperCell_full_intensity_cols_failure()), this, SLOT(update_from_full_SuperCell_intensity_cols_failure()));
       // will quit thread after work done
-      connect(full_sim_super_cell_intensity_cols_worker, SIGNAL(SuperCell_full_intensity_cols_finished()), full_sim_super_cell_intensity_cols_thread, SLOT(quit()), Qt::DirectConnection);
+      connect(full_sim_super_cell_intensity_cols_worker, SIGNAL(SuperCell_full_intensity_cols_finished()), full_sim_super_cell_intensity_cols_thread, SLOT(quit()) , Qt::DirectConnection  );
 
       /* Super-Cell Edge Detection  thread */
       _sim_super_cell_thread = new QThread( this );
@@ -176,27 +176,28 @@ MainWindow::MainWindow( ApplicationLog::ApplicationLog* logger , QWidget *parent
       connect(sim_super_cell_worker, SIGNAL(SuperCell_edge_sucess()), this, SLOT(update_from_SuperCell_edge_sucess()));
       connect(sim_super_cell_worker, SIGNAL(SuperCell_edge_failure()), this, SLOT(update_from_SuperCell_edge_failure()));
       // will quit thread after work done
-      connect(sim_super_cell_worker, SIGNAL(SuperCell_edge_finished()), _sim_super_cell_thread, SLOT(quit()), Qt::DirectConnection);
+      connect(sim_super_cell_worker, SIGNAL(SuperCell_edge_finished()), _sim_super_cell_thread, SLOT(quit()), Qt::DirectConnection  );
 
       connect(ui->tdmap_table, SIGNAL(cellClicked(int , int )), this, SLOT( update_tdmap_current_selection(int,int)) );
 
-      connect(this, SIGNAL(experimental_image_filename_changed()), this, SLOT(update_full_experimental_image()));
-      connect(this, SIGNAL(simulated_grid_changed( )), this, SLOT(update_simgrid_frame( )));
+      connect(this, SIGNAL(experimental_image_filename_changed()), this, SLOT(update_full_experimental_image())    );
+      connect(this, SIGNAL(simulated_grid_changed( )), this, SLOT(update_simgrid_frame( ))  );
 
-      connect(this, SIGNAL(super_cell_target_region_changed()), this, SLOT(update_super_cell_target_region()));
+      connect(this, SIGNAL(super_cell_target_region_changed()), this, SLOT(update_super_cell_target_region())   );
 
       connect( _core_td_map, SIGNAL( TDMap_started_celslc()), this, SLOT(update_tdmap_celslc_started( )) );
       connect( _core_td_map, SIGNAL( TDMap_started_celslc()), this, SLOT(update_tdmap_sim_ostream_celslc()) );
       connect( _core_td_map, SIGNAL( TDMap_inform_celslc_n_steps( int )), this, SLOT(update_tdmap_celslc_started_with_steps_info( int ) ) );
 
-      connect( _core_td_map, SIGNAL(TDMap_started_supercell_celslc( )), this, SLOT( update_supercell_celslc_started( ) ) );
-      connect( _core_td_map, SIGNAL(TDMap_inform_supercell_celslc_n_steps( int )), this, SLOT(update_supercell_celslc_started_with_steps_info( int ) ) );
+      connect( _core_td_map, SIGNAL(TDMap_started_supercell_celslc( )), this, SLOT( update_supercell_celslc_started( ) )     );
+      connect( _core_td_map, SIGNAL(TDMap_inform_supercell_celslc_n_steps( int )), this, SLOT(update_supercell_celslc_started_with_steps_info( int ) )     );
 
       connect( _core_td_map, SIGNAL(TDMap_at_celslc_step( int )), this, SLOT(update_tdmap_celslc_step( int ) ) );
+      
       connect( _core_td_map, SIGNAL(TDMap_ended_supercell_celslc_ssc_single_slice_ended( bool )), this, SLOT(update_supercell_celslc_ssc_single_slice_step( bool ) ) );
-      connect( _core_td_map, SIGNAL(TDMap_ended_celslc_ssc_single_slice_ended( bool )), this, SLOT(update_tdmap_celslc_ssc_single_slice_step( bool ) ) );
+      connect( _core_td_map, SIGNAL(TDMap_ended_celslc_ssc_single_slice_ended( bool )), this, SLOT(update_tdmap_celslc_ssc_single_slice_step( bool ) )    );
 
-      connect( _core_td_map, SIGNAL(TDMap_ended_celslc( bool )), this, SLOT(update_tdmap_celslc_ended( bool ) ) );
+      connect( _core_td_map, SIGNAL(TDMap_ended_celslc( bool )), this, SLOT(update_tdmap_celslc_ended( bool ) )     );
       connect( _core_td_map, SIGNAL(TDMap_ended_supercell_celslc( bool )), this, SLOT(update_supercell_celslc_ended( bool ) ) );
 
       connect( _core_td_map, SIGNAL(TDMap_started_msa( )), this, SLOT(update_tdmap_msa_started( ) ) );
@@ -269,6 +270,7 @@ void MainWindow::update_supercell_celslc_ssc_single_slice_step( bool result ){
 }
 
 void MainWindow::update_tdmap_celslc_ssc_single_slice_step( bool result ){
+  std::cout << "CONFIG update_tdmap_celslc_ssc_single_slice_step " << std::endl;
   std::stringstream message;
   _core_td_map_info_celslc_at_step++;
   const int _core_td_map_info_supercell_celslc_step_to_percent = (int) ( ( (float) _core_td_map_info_celslc_at_step  ) / ( (float) _core_td_map_info_celslc_n_steps ) * 25.0f );

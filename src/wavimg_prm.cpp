@@ -478,40 +478,10 @@ bool WAVIMG_prm::call_bin(){
 return result;
 }
 
-bool WAVIMG_prm::check_produced_dat(){
+bool WAVIMG_prm::check_produced_dat_single(){
   bool result = false;
-  bool status = true;
-  if( number_parameter_loops == 2 && ( loop_range_n.size() == 2 ) ){
-    const int outter_loop_limit = loop_range_n.at(1);
-    const int inner_loop_limit = loop_range_n.at(0);
-    for ( int outter_loop_pos = 1; outter_loop_pos <= outter_loop_limit; outter_loop_pos++){
-      for ( int inner_loop_pos = 1; inner_loop_pos <= inner_loop_limit; inner_loop_pos++){
 
-        std::stringstream filename_stream;
-        filename_stream << file_name_output_image_wave_function <<
-        "_"<< std::setw(3) << std::setfill('0') << std::to_string(outter_loop_pos) <<
-        "_"<< std::setw(3) << std::setfill('0') << std::to_string(inner_loop_pos) <<
-        ".dat" ;
-        boost::filesystem::path dat_file ( filename_stream.str() );
-        boost::filesystem::path full_dat_path = base_bin_output_dir_path / dat_file;
-        const bool _dat_exists = boost::filesystem::exists( full_dat_path );
-        status &= _dat_exists;
-        if( _flag_logger ){
-          std::stringstream message;
-          message << "Checking if the produced dat file exists: " << full_dat_path.string() << " result: " << std::boolalpha << _dat_exists;
-          BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification , message.str() );
-        }
-      }
-    }
-    result = status;
-  }
-  else if(
-    sim_crystal_properties->get_flag_thickness_parameter_loop() == false &&
-    sim_crystal_properties->get_flag_defocus_parameter_loop() == false &&
-    number_parameter_loops == 0 &&
-    ( loop_range_n.size() == 0 )
-    ){
-    boost::filesystem::path output_wave_function ( file_name_output_image_wave_function );
+  boost::filesystem::path output_wave_function ( file_name_output_image_wave_function );
   boost::filesystem::path output_wave_function_full_path = base_bin_output_dir_path / output_wave_function;
   std::stringstream  output_prefix_stream;
   output_prefix_stream << output_wave_function_full_path.string() << ".dat";
@@ -521,6 +491,64 @@ bool WAVIMG_prm::check_produced_dat(){
   if( _flag_logger ){
     std::stringstream message;
     message << "Checking if the produced dat file exists: " << dat_file.string() << " result: " << std::boolalpha << _dat_exists;
+    BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification , message.str() );
+  }
+  return result;
+}
+
+bool WAVIMG_prm::check_produced_dat_looped(){
+  bool result = false;
+  bool status = true;
+
+  const int outter_loop_limit = loop_range_n.at(1);
+  const int inner_loop_limit = loop_range_n.at(0);
+  for ( int outter_loop_pos = 1; outter_loop_pos <= outter_loop_limit; outter_loop_pos++){
+    for ( int inner_loop_pos = 1; inner_loop_pos <= inner_loop_limit; inner_loop_pos++){
+
+      std::stringstream filename_stream;
+      filename_stream << file_name_output_image_wave_function <<
+      "_"<< std::setw(3) << std::setfill('0') << std::to_string(outter_loop_pos) <<
+      "_"<< std::setw(3) << std::setfill('0') << std::to_string(inner_loop_pos) <<
+      ".dat" ;
+      boost::filesystem::path dat_file ( filename_stream.str() );
+      boost::filesystem::path full_dat_path = base_bin_output_dir_path / dat_file;
+      const bool _dat_exists = boost::filesystem::exists( full_dat_path );
+      status &= _dat_exists;
+      if( _flag_logger ){
+        std::stringstream message;
+        message << "Checking if the produced dat file exists: " << full_dat_path.string() << " result: " << std::boolalpha << _dat_exists;
+        BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification , message.str() );
+      }
+    }
+  }
+  
+  result = status;
+  if( _flag_logger ){
+    std::stringstream message;
+    message << "Final check_produced_dat_looped result: " << std::boolalpha << result;
+    BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification , message.str() );
+  }
+  return result;
+}
+
+bool WAVIMG_prm::check_produced_dat(){
+  bool result = false;
+  if( number_parameter_loops == 2 && ( loop_range_n.size() == 2 ) ){
+    result = check_produced_dat_looped();
+  }
+  else if(
+    sim_crystal_properties->get_flag_thickness_parameter_loop() == false &&
+    sim_crystal_properties->get_flag_defocus_parameter_loop() == false &&
+    number_parameter_loops == 0 &&
+    ( loop_range_n.size() == 0 )
+    ){
+    result = check_produced_dat_single();
+}
+else{
+  result = false;
+  if( _flag_logger ){
+    std::stringstream message;
+    message << "The required parameters for check_produced_dat are not setted up: ";
     BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification , message.str() );
   }
 }

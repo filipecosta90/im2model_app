@@ -441,7 +441,7 @@ else{
 if( _flag_logger ){
   std::stringstream message;
   message << "Overall apply_normalization_to_grid() result: " << std::boolalpha << status;
-  BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::error , message.str() );
+  BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::normal , message.str() );
 }
 return status;
 }
@@ -530,7 +530,7 @@ else{
 if( _flag_logger ){
   std::stringstream message;
   message << "Overall export_sim_grid() result: " << std::boolalpha << status;
-  BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::error , message.str() );
+  BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::normal , message.str() );
 }
 return status;
 }
@@ -837,9 +837,14 @@ std::vector< std::vector<cv::Mat> > SimGrid::get_simulated_images_grid_visualiza
 }
 
 cv::Mat SimGrid::get_simulated_image_in_grid( int row_thickness, int col_defocus ){
+ cv::Mat return_mat;
+ if( cleaned_simulated_images_grid.size() > row_thickness ){
   std::vector<cv::Mat> simulated_images_row = cleaned_simulated_images_grid.at(row_thickness);
-  cv::Mat cleaned_simulated_image = simulated_images_row.at(col_defocus);
-  return cleaned_simulated_image;
+  if( simulated_images_row.size() > col_defocus ){
+    return_mat = simulated_images_row.at(col_defocus);
+  }
+}
+return return_mat;
 }
 
 cv::Mat SimGrid::get_simulated_image_in_grid_visualization( int row_thickness, int col_defocus ){
@@ -856,7 +861,18 @@ cv::Mat SimGrid::get_simulated_image_in_grid_visualization( int row_thickness, i
 }
 
 double SimGrid::get_simulated_image_match_in_grid( int row_thickness, int col_defocus ){
-  return (double) match_values_matrix.at<float>( row_thickness, col_defocus );
+  double result = -1;
+  if( match_values_matrix.cols > col_defocus && match_values_matrix.rows > row_thickness ){
+    result = match_values_matrix.at<float>( row_thickness, col_defocus );
+  }
+  else{
+    if( _flag_logger ){
+      std::stringstream message;
+      message << "The request matrix pos ( " << row_thickness << "," << col_defocus << " ) is out of bounds for mat. size: " << match_values_matrix.size();
+      BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::error , message.str() );
+    }
+  }
+  return result;
 }
 
 int SimGrid::get_simulated_image_thickness_slice_in_grid( int row_thickness, int col_defocus ){

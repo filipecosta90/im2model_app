@@ -211,7 +211,7 @@ void BaseCell::update_length_flag(){
 bool BaseCell::set_angle_alpha( double alpha ){
   angle_alpha = alpha;
   _flag_angle_alpha = true;
-  std::cout << " setted angle alpha to " << alpha << std::endl;
+  //std::cout << " setted angle alpha to " << alpha << std::endl;
   update_volume();
   form_matrix_from_lattice_parameters();
   form_matrix_from_miller_indices();
@@ -221,7 +221,7 @@ bool BaseCell::set_angle_alpha( double alpha ){
 bool BaseCell::set_angle_beta( double beta ){
   angle_beta = beta;
   _flag_angle_beta = true;
-  std::cout << " setted angle beta to " << angle_beta << std::endl;
+  //std::cout << " setted angle beta to " << angle_beta << std::endl;
   update_volume();
   form_matrix_from_lattice_parameters();
   form_matrix_from_miller_indices();
@@ -231,7 +231,7 @@ bool BaseCell::set_angle_beta( double beta ){
 bool BaseCell::set_angle_gamma( double gamma ){
   angle_gamma = gamma;
   _flag_angle_gamma = true;
-  std::cout << " setted angle gamma to " << angle_gamma << std::endl;
+  //std::cout << " setted angle gamma to " << angle_gamma << std::endl;
   update_volume();
   form_matrix_from_lattice_parameters();
   form_matrix_from_miller_indices();
@@ -439,7 +439,7 @@ std::map<cv::Point3d, std::vector< std::vector< cv::Point3d> > , cmpPoint3dOnlyB
       atom_positions_cols[point][outter_pos].push_back( point );
     }
   }
-  std::cout << "#### BaseCell model contains " << atom_positions_cols.size() << " distinct columns" << std::endl;
+  //std::cout << "#### BaseCell model contains " << atom_positions_cols.size() << " distinct columns" << std::endl;
   return atom_positions_cols;
 }
 

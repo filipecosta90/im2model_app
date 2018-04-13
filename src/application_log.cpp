@@ -18,7 +18,7 @@ namespace ApplicationLog{
   boost::log::attributes::constant<int> attrID(1);
 
 
-  ApplicationLog::ApplicationLog( boost::filesystem::path app_path ){
+  ApplicationLog::ApplicationLog( boost::filesystem::path app_path, severity_level log_level ){
 
     // Access the core
     boost::shared_ptr<boost::log::core> core = boost::log::core::get();
@@ -93,8 +93,10 @@ namespace ApplicationLog{
   }
 
       // Actually designate the message to the log
-  void ApplicationLog::logEvent(const severity_level level, std::string message){
-    BOOST_LOG_SEV(m_logger, level)  << message;
+  void ApplicationLog::logEvent(const severity_level level, std::string message ){
+    if( level >= log_level ){
+          BOOST_LOG_SEV(m_logger, level)  << message;
+    }
   }
 
     // Actually designate the message to the log
