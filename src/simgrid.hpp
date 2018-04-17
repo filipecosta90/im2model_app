@@ -88,6 +88,8 @@ private:
 
     std::vector< std::vector<cv::Mat> > simulated_images_grid;
     bool _flag_simulated_images_grid = false;
+    double simulated_images_grid_global_min;
+    double simulated_images_grid_global_max;
     
     std::vector< std::vector<cv::Mat> > raw_simulated_images_grid;
     bool _flag_raw_simulated_images_grid = false;

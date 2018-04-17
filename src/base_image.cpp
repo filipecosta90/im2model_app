@@ -595,28 +595,25 @@ std::string BaseImage::print_cv_mat_information( cv::Mat image ){
   return message.str();
 }
 
-cv::Mat BaseImage::get_image_visualization( cv::Mat image ){
+cv::Mat BaseImage::get_image_visualization( cv::Mat image, bool use_visualization_levels, double global_min_intensity_detected, double global_max_intensity_detected, bool use_global_intensity ){
   cv::Mat  draw;
   if( !image.empty() && image.cols > 0 && image.rows > 0 ){
 
-    high_percentage_brightest_pixels_intensity_level = -1;
-    low_percentage_darkest_pixel_intensity_level = -1;
     double image_min_intensity_detected, image_max_intensity_detected;
     cv::minMaxLoc(image, &image_min_intensity_detected, &image_max_intensity_detected);
     //std::cout << "image_min_intensity_detected " << image_min_intensity_detected << " image_max_intensity_detected " << image_max_intensity_detected << std::endl;
   // Quantize the saturation to (full_image_max_intensity_detected - full_image_min_intensity_detected) levels
   /// Establish the number of bins
+    /*
     int diff_levels = (int) ( image_max_intensity_detected - image_min_intensity_detected );
 
     if ( diff_levels < 255 ){
       diff_levels = 255;
     }
 
-    double t = diff_levels/(image_max_intensity_detected - image_min_intensity_detected);
-
     if( _flag_logger ){
       std::stringstream message;
-      message << "get_image_visualization() min " << image_min_intensity_detected << " max " << image_max_intensity_detected << " diff_levels " << diff_levels << ", t " << t; 
+      message << "get_image_visualization() min " << image_min_intensity_detected << " max " << image_max_intensity_detected << " diff_levels " << diff_levels; 
       BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification , message.str() );
     }
 
@@ -641,9 +638,9 @@ cv::Mat BaseImage::get_image_visualization( cv::Mat image ){
   // compute for all colors
   calcHist(&colors[0], 1, chnls, Mat(), full_image_hist,1,histSize,ranges);
  // double t = histSize[i]/(_f_full_image_max_intensity_detected - low);
-
-  high_percentage_brightest_pixels_intensity_level = image_min_intensity_detected;
-  low_percentage_darkest_pixel_intensity_level = image_min_intensity_detected;
+  
+  int high_percentage_brightest_pixels_intensity_level = image_min_intensity_detected;
+  int low_percentage_darkest_pixel_intensity_level = image_min_intensity_detected;
 
   /// Draw for each channel
   int accum_pixel_count = 0;
@@ -666,16 +663,21 @@ cv::Mat BaseImage::get_image_visualization( cv::Mat image ){
     BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification , message.str() );
   }
 
-  draw = image.clone();
+  
+  draw.convertTo(draw,  CV_8U,  alpha, beta);
 
   //draw.setTo( low_percentage_darkest_pixel_intensity_level, draw < low_percentage_darkest_pixel_intensity_level);
   //draw.setTo( high_percentage_brightest_pixels_intensity_level, draw > high_percentage_brightest_pixels_intensity_level);
   cv::minMaxLoc(image, &image_min_intensity_detected, &image_max_intensity_detected);
-  
-  double interval = ( image_max_intensity_detected  -  image_min_intensity_detected );
-  double alpha = 255.0/interval ;
-  double beta = -image_min_intensity_detected * alpha;
+*/
+    draw = image.clone();
+  const double using_max = use_global_intensity ? global_max_intensity_detected : image_max_intensity_detected;
+  const double using_min = use_global_intensity ? global_min_intensity_detected : image_min_intensity_detected;
 
+  const double interval = ( using_max  -  using_min );
+  const double alpha = 255.0/interval ;
+  const double beta = -using_min * alpha;
+/*
   if( _flag_logger ){
     std::stringstream message;
     message << "type: " << type2str(full_image_hist.type()) << std::endl;
@@ -687,7 +689,7 @@ cv::Mat BaseImage::get_image_visualization( cv::Mat image ){
     message << "draw initial info : " << print_cv_mat_information( draw ) << std::endl;
     BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification , message.str() );
   }
-
+*/
   draw.convertTo(draw,  CV_8U,  alpha, beta);
 
   /*
@@ -695,7 +697,8 @@ cv::Mat BaseImage::get_image_visualization( cv::Mat image ){
   interval = ( high_percentage_brightest_pixels_intensity_level  -  low_percentage_darkest_pixel_intensity_level );
   alpha = 255.0/interval ;
   beta = -low_percentage_darkest_pixel_intensity_level * alpha;
-  draw.convertTo(draw,  CV_8U,  alpha, beta);*/
+  draw.convertTo(draw,  CV_8U,  alpha, beta);
+  */
 
   if( _flag_logger ){
     std::stringstream message;

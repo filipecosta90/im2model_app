@@ -344,17 +344,14 @@ bool SimGrid::apply_normalization_to_grid(){
       cv::minMaxLoc(roi_image, &darkest_pixel_intensity_level, &brightest_pixels_intensity_level);
     }
 
-    
-
       // go through all matrices to get simulated images max and min intensities
     if( normalization_mode == GLOBAL_NORMALIZATION ){
 
-      for (int thickness = 0; thickness < slice_samples && _error_flag != true; thickness ++ ){
+      for (int thickness = 0; thickness < cleaned_simulated_images_grid.size(); thickness ++ ){
           // get the matrices row
         const std::vector<cv::Mat> cleaned_simulated_images_row = cleaned_simulated_images_grid.at( thickness );
-        std::vector<cv::Mat> normalized_simulated_images_row;
           // for the same thickness iterate through every defocus
-        for (int defocus = 0; defocus < defocus_samples && _error_flag != true; defocus ++ ){
+        for (int defocus = 0; defocus < cleaned_simulated_images_row.size(); defocus ++ ){
             // get the matrix in the specified col of tdmap (defocus pos)
           const cv::Mat cleaned_simulated_image = cleaned_simulated_images_row.at( defocus );
             // save work for later
@@ -366,12 +363,15 @@ bool SimGrid::apply_normalization_to_grid(){
       }
     }
 
+    simulated_images_grid_global_min = global_min;
+    simulated_images_grid_global_max = global_max;
+
     if( _flag_logger ){
       std::stringstream message;
       message << "apply_normalization_to_grid of size: thickness " << slice_samples <<  " defocus " << defocus_samples;
       message << ", normalization_mode: ";
       if(normalization_mode == GLOBAL_NORMALIZATION){
-        message << " GLOBAL_NORMALIZATION, global simulated images: min: " << global_min << " global max: " << global_max ;
+        message << " GLOBAL_NORMALIZATION, global simulated images: min: " << simulated_images_grid_global_min << " global max: " << simulated_images_grid_global_max ;
       }
       if( normalization_mode == LOCAL_NORMALIZATION ){
         message << " LOCAL_NORMALIZATION ";
@@ -381,34 +381,23 @@ bool SimGrid::apply_normalization_to_grid(){
     }
 
 
-    for (int thickness = 0; thickness < slice_samples && _error_flag != true; thickness ++ ){
+    for (int thickness = 0; thickness < cleaned_simulated_images_grid.size(); thickness ++ ){
         // get the matrices row
       const std::vector<cv::Mat> cleaned_simulated_images_row = cleaned_simulated_images_grid.at( thickness );
       std::vector<cv::Mat> normalized_simulated_images_row;
         // for the same thickness iterate through every defocus
-      for (int defocus = 0; defocus < defocus_samples && _error_flag != true; defocus ++ ){
-        cv::Mat cleaned_simulated_image = cleaned_simulated_images_row.at( defocus );
-        double min, max, alpha, beta;
-        cv::minMaxLoc(cleaned_simulated_image, &min, &max);
-        const double interval = ( max - min );
+      for (int defocus = 0; defocus < cleaned_simulated_images_row.size(); defocus ++ ){
 
-        if ( ( use_experimental == false ) && ( normalization_mode == LOCAL_NORMALIZATION ) ){
-            // nothing to do
-          alpha = max/interval;
-          beta = -alpha * min;
-        }
-        if ( ( use_experimental == true ) && ( normalization_mode == LOCAL_NORMALIZATION ) ){
-          alpha = brightest_pixels_intensity_level/interval;
-          beta = -alpha * darkest_pixel_intensity_level;
-        }
-        if ( ( use_experimental == false ) && ( normalization_mode == GLOBAL_NORMALIZATION ) ){
-          alpha = global_max/interval;
-          beta = -alpha * global_min;
-        }
-        if ( ( use_experimental == true ) && ( normalization_mode == GLOBAL_NORMALIZATION ) ){
-          alpha = brightest_pixels_intensity_level/interval;
-          beta = -alpha * darkest_pixel_intensity_level;
-        }
+        cv::Mat cleaned_simulated_image = cleaned_simulated_images_row.at( defocus );
+        double min, max;
+
+        cv::minMaxLoc(cleaned_simulated_image, &min, &max);
+        const double use_max = use_experimental ? brightest_pixels_intensity_level : ( ( normalization_mode == GLOBAL_NORMALIZATION ) ? simulated_images_grid_global_max : max );
+        const double use_min = use_experimental ? darkest_pixel_intensity_level : ( ( normalization_mode == GLOBAL_NORMALIZATION ) ? simulated_images_grid_global_min : min );
+        const double interval = ( use_max - use_min );
+        const double alpha = use_max/interval;
+        const double beta = -alpha * use_min;
+
         cv::Mat normalized_simulated_image;
         cleaned_simulated_image.convertTo(normalized_simulated_image, cleaned_simulated_image.type() , alpha, beta );
         normalized_simulated_images_row.push_back( cleaned_simulated_image );
@@ -468,12 +457,12 @@ bool SimGrid::apply_margin_to_grid(){
       BOOST_LOG_FUNCTION();  logger->logEvent( _log_type , message.str() );
     }
 
-    for (int thickness = 0; thickness < slice_samples; thickness ++ ){
+    for (int thickness = 0; thickness < raw_simulated_images_grid.size(); thickness ++ ){
         // get the matrices row
       const std::vector<cv::Mat> raw_simulated_images_row = raw_simulated_images_grid.at( thickness );
       std::vector<cv::Mat> cleaned_edges_simulated_images_row;
         // for the same thickness iterate through every defocus
-      for (int defocus = 0; defocus < defocus_samples ; defocus ++ ){
+      for (int defocus = 0; defocus < raw_simulated_images_row.size() ; defocus ++ ){
         try{
             // get the matrix in the specified col of tdmap (defocus pos)
           const cv::Mat raw_simulated_image = raw_simulated_images_row.at( defocus );
@@ -526,7 +515,6 @@ else{
   }
   print_var_state();
 }
-
 if( _flag_logger ){
   std::stringstream message;
   message << "Overall export_sim_grid() result: " << std::boolalpha << status;
@@ -809,20 +797,21 @@ std::vector< std::vector<cv::Mat> > SimGrid::get_simulated_images_grid_visualiza
     img_treater.set_application_logger( logger );
   }
 
+  const bool use_global =  (normalization_mode == GLOBAL_NORMALIZATION ) ? true : false;
   std::vector< std::vector<cv::Mat> > simulated_images_grid_visualization;
   const int rows_size = cleaned_simulated_images_grid.size();
   simulated_images_grid_visualization.reserve( rows_size );
 
-  for (int thickness = 0; thickness < rows_size; thickness++ ){
+  for (int thickness = 0; thickness < simulated_images_grid.size(); thickness++ ){
     // get the matrices row
-    const std::vector< cv::Mat > simulated_images_row = cleaned_simulated_images_grid.at( thickness );
+    const std::vector< cv::Mat > simulated_images_row = simulated_images_grid.at( thickness );
     const int col_size = simulated_images_row.size();
     std::vector<cv::Mat> simulated_images_row_visualization;
     simulated_images_row_visualization.reserve( col_size );
 
-    for (int defocus = 0; defocus < col_size ; defocus ++ ){
+    for (int defocus = 0; defocus < simulated_images_row.size() ; defocus ++ ){
       const cv::Mat simulated_image = simulated_images_row.at( defocus );
-      cv::Mat simulated_image_visualization = img_treater.get_image_visualization( simulated_image );
+      cv::Mat simulated_image_visualization = img_treater.get_image_visualization( simulated_image, false, simulated_images_grid_global_min, simulated_images_grid_global_max, use_global );
       simulated_images_row_visualization.push_back( simulated_image_visualization );
     }
     simulated_images_grid_visualization.push_back( simulated_images_row_visualization );

@@ -199,7 +199,7 @@ public:
 
     std::string get_image_extension(){ return image_extension; }
     cv::Mat get_full_image(){ return full_image.clone(); }
-    cv::Mat get_image_visualization( cv::Mat );
+    cv::Mat get_image_visualization( cv::Mat, bool use_visualization_levels = false, double global_min_intensity_detected = 0.0f, double global_max_intensity_detected = 0.0f, bool use_global_intensity = false );
     std::string print_cv_mat_information( cv::Mat );
     cv::Mat get_full_image_visualization(){ return get_image_visualization( full_image ); }
     int get_full_n_rows_height(){ return full_n_rows_height; }
