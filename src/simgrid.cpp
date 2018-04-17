@@ -78,6 +78,8 @@ bool SimGrid::export_sim_grid( std::string sim_grid_file_name_image , bool cut_m
     sim_grid_height = ( n_rows * slice_samples );
     sim_grid.create ( sim_grid_height, sim_grid_width , CV_8UC1 );
     sim_grid = cv::Mat::zeros(sim_grid_height, sim_grid_width, CV_8UC1);
+      const bool use_global =  (normalization_mode == GLOBAL_NORMALIZATION ) ? true : false;
+
     BaseImage sim_image_exporter;
     int vector_position = 0;
     for (int thickness = 1; thickness <= slice_samples; thickness ++ ){
@@ -90,8 +92,8 @@ bool SimGrid::export_sim_grid( std::string sim_grid_file_name_image , bool cut_m
       for (int defocus = 1; defocus <= defocus_samples; defocus ++ ){
 
         const double at_defocus = simulated_params_nm_defocus_vec.at(defocus-1);
-
-        cv::Mat cleaned_simulated_image = sim_image_exporter.get_image_visualization( simulated_images_row.at(defocus-1) );
+        const cv::Mat sim_image = simulated_images_row.at(defocus-1); 
+        cv::Mat cleaned_simulated_image = sim_image_exporter.get_image_visualization( sim_image, false, simulated_images_grid_global_min, simulated_images_grid_global_max, use_global );
         std::cout << "cleaned_simulated_image.size() " << cleaned_simulated_image.size() << std::endl;
         cv::Rect r1 = cv::Rect ( n_cols *(defocus-1), n_rows *(slice_samples-thickness), n_cols, n_rows);
         cleaned_simulated_image.copyTo( sim_grid( r1 ));
@@ -838,12 +840,13 @@ return return_mat;
 
 cv::Mat SimGrid::get_simulated_image_in_grid_visualization( int row_thickness, int col_defocus ){
   cv::Mat return_mat;
+   const bool use_global = (normalization_mode == GLOBAL_NORMALIZATION ) ? true : false;
   if( cleaned_simulated_images_grid.size() > row_thickness ){
     const std::vector<cv::Mat> simulated_images_row = cleaned_simulated_images_grid.at(row_thickness);
     if( simulated_images_row.size() > col_defocus ){
       const cv::Mat cleaned_simulated_image = simulated_images_row.at(col_defocus);
       BaseImage img_treater;
-      return_mat = img_treater.get_image_visualization( cleaned_simulated_image );
+      return_mat = img_treater.get_image_visualization( cleaned_simulated_image, false, simulated_images_grid_global_min, simulated_images_grid_global_max, use_global );
     }
   }
   return return_mat;
