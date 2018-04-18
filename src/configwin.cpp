@@ -387,7 +387,7 @@ void MainWindow::update_tdmap_simgrid_started( ){
 
 void MainWindow::update_tdmap_simgrid_ended( bool result ){
   if( result ){
-      emit simulated_grid_changed( );
+    emit simulated_grid_changed( );
     updateProgressBar(0,100,100);
     ui->statusBar->showMessage(tr("Sucessfully ended image correlation step"), 2000);
   }
@@ -400,7 +400,7 @@ void MainWindow::update_tdmap_simgrid_ended( bool result ){
 
 void MainWindow::update_tdmap_no_simgrid_ended( bool result ){
   if( result ){
-      emit simulated_grid_changed( );
+    emit simulated_grid_changed( );
     updateProgressBar(0,100,100);
     ui->statusBar->showMessage(tr("Sucessfully ended creating TDMap without image correlation step"), 2000);
   }
@@ -520,14 +520,31 @@ MainWindow::~MainWindow(){
 
 bool MainWindow::update_qline_image_path( std::string fileName ){
   bool status = false;
-  const bool project_setted = true; //maybeSetProject();
+  const bool project_setted = maybeSetProject();
   if ( project_setted ){
     const bool _td_map_load_ok = _core_td_map->set_exp_image_properties_full_image( fileName );
-    std::cout << " !!! " << std::boolalpha << _td_map_load_ok << std::endl;
     if( _td_map_load_ok ){
       emit experimental_image_filename_changed();
       status = true;
     }
+  }
+  return status;
+}
+
+bool MainWindow::update_qline_cif_path( std::string fileName ){
+  bool status = false;
+  const bool project_setted = maybeSetProject();
+  if ( project_setted ){
+    status = _core_td_map->set_unit_cell_cif_path( fileName );
+  }
+  return status;
+}
+
+bool MainWindow::update_qline_mtf_path( std::string fileName ){
+  bool status = false;
+  const bool project_setted = maybeSetProject();
+  if ( project_setted ){
+    status = _core_td_map->set_mtf_filename( fileName );
   }
   return status;
 }
@@ -1365,33 +1382,50 @@ void MainWindow::loadFile(const QString &fileName){
   }
 
   bool result = _core_td_map->set_project_filename_with_path( fileName.toStdString() );
+  if( result ){
+    // temporary set flag
+    _flag_project_setted = true;
 
-  bool missing_version = false;
-  bool old_version = false;
-  std::string file_version;
+    bool missing_version = false;
+    bool old_version = false;
+    std::string file_version;
 
-  try {
-    boost::property_tree::read_xml( fileName.toStdString(), config);
-  }
-  catch (const boost::property_tree::xml_parser::xml_parser_error& ex) {
-    result = false;
-    std::stringstream message;
-    message << "error in file " << ex.filename() << " line " << ex.line();
-    ui->statusBar->showMessage( QString::fromStdString(message.str()) );
-    if( _flag_im2model_logger ){
-      ApplicationLog::severity_level _log_type = ApplicationLog::error;
-      BOOST_LOG_FUNCTION();
-      im2model_logger->logEvent( _log_type , message.str() );
+    try {
+      boost::property_tree::read_xml( fileName.toStdString(), config);
     }
-  }
+    catch (const boost::property_tree::xml_parser::xml_parser_error& ex) {
+      _flag_project_setted = false;
+      result = false;
+      std::stringstream message;
+      message << "error in file " << ex.filename() << " line " << ex.line();
+      ui->statusBar->showMessage( QString::fromStdString(message.str()) );
+      if( _flag_im2model_logger ){
+        ApplicationLog::severity_level _log_type = ApplicationLog::error;
+        BOOST_LOG_FUNCTION();
+        im2model_logger->logEvent( _log_type , message.str() );
+      }
+    }
 
   /* check for version */
-  try{
-    file_version = config.get<std::string>("version");
-    if( application_version > file_version ){
-      old_version = true;
+    try{
+      file_version = config.get<std::string>("version");
+      if( application_version > file_version ){
+        old_version = true;
+        std::stringstream message;
+        message << "The file seems to be from an old Im2model Version. Will try to load project anyway." << "File version \"" << file_version << "\" is older than \"" << application_version << "\"";
+        ui->statusBar->showMessage( QString::fromStdString(message.str()) );
+        if( _flag_im2model_logger ){
+          ApplicationLog::severity_level _log_type = ApplicationLog::normal;
+          BOOST_LOG_FUNCTION();
+          im2model_logger->logEvent( _log_type , message.str() );
+        }
+      }
+    }
+    catch(const boost::property_tree::ptree_error &e) {
+      _flag_project_setted = false;
+      missing_version = true;
       std::stringstream message;
-      message << "The file seems to be from an old Im2model Version. Will try to load project anyway." << "File version \"" << file_version << "\" is older than \"" << application_version << "\"";
+      message << "Version parameter is missing. Will try to load project anyway.";
       ui->statusBar->showMessage( QString::fromStdString(message.str()) );
       if( _flag_im2model_logger ){
         ApplicationLog::severity_level _log_type = ApplicationLog::normal;
@@ -1399,143 +1433,138 @@ void MainWindow::loadFile(const QString &fileName){
         im2model_logger->logEvent( _log_type , message.str() );
       }
     }
-  }
-  catch(const boost::property_tree::ptree_error &e) {
-    missing_version = true;
-    std::stringstream message;
-    message << "Version parameter is missing. Will try to load project anyway.";
-    ui->statusBar->showMessage( QString::fromStdString(message.str()) );
-    if( _flag_im2model_logger ){
-      ApplicationLog::severity_level _log_type = ApplicationLog::normal;
-      BOOST_LOG_FUNCTION();
-      im2model_logger->logEvent( _log_type , message.str() );
-    }
-  }
 
-  bool project_setup_image_fields_ptree_result = false;
-  bool project_setup_crystalographic_fields_ptree_result = false;
-  bool tdmap_simulation_setup_ptree_result = false;
-  bool tdmap_running_configuration_ptree_result = false;
-  bool super_cell_setup_ptree_result = false;
+    bool project_setup_image_fields_ptree_result = false;
+    bool project_setup_crystalographic_fields_ptree_result = false;
+    bool tdmap_simulation_setup_ptree_result = false;
+    bool tdmap_running_configuration_ptree_result = false;
+    bool super_cell_setup_ptree_result = false;
 
-  if(result){
-    try{
-      boost::property_tree::ptree project_setup_image_fields_ptree = config.get_child("project_setup_image_fields_ptree");
-      project_setup_image_fields_ptree_result = project_setup_image_fields_model->load_data_from_property_tree( project_setup_image_fields_ptree );
-      result &= project_setup_image_fields_ptree_result;
-      ui->qtree_view_project_setup_image->update();
-    }
-    catch(const boost::property_tree::ptree_error &e) {
-      result = false;
-      if( _flag_im2model_logger ){
-        std::stringstream message;
-        message << "Caught an ptree_error : " << e.what();
-        ApplicationLog::severity_level _log_type = ApplicationLog::error;
-        BOOST_LOG_FUNCTION();
-        im2model_logger->logEvent( _log_type , message.str() );
+    if(result){
+      try{
+        boost::property_tree::ptree project_setup_image_fields_ptree = config.get_child("project_setup_image_fields_ptree");
+        project_setup_image_fields_ptree_result = project_setup_image_fields_model->load_data_from_property_tree( project_setup_image_fields_ptree );
+        result &= project_setup_image_fields_ptree_result;
+        ui->qtree_view_project_setup_image->update();
+      }
+      catch(const boost::property_tree::ptree_error &e) {
+        _flag_project_setted = false;
+        result = false;
+        if( _flag_im2model_logger ){
+          std::stringstream message;
+          message << "Caught an ptree_error : " << e.what();
+          ApplicationLog::severity_level _log_type = ApplicationLog::error;
+          BOOST_LOG_FUNCTION();
+          im2model_logger->logEvent( _log_type , message.str() );
+        }
+      }
+
+      try{
+        boost::property_tree::ptree project_setup_crystalographic_fields_ptree = config.get_child("project_setup_crystalographic_fields_ptree");
+        project_setup_crystalographic_fields_ptree_result = project_setup_crystalographic_fields_model->load_data_from_property_tree( project_setup_crystalographic_fields_ptree );
+        result &= project_setup_crystalographic_fields_ptree_result;
+        ui->qtree_view_project_setup_crystallography->update();
+      }
+      catch(const boost::property_tree::ptree_error &e) {
+        _flag_project_setted = false;
+        result = false;
+        if( _flag_im2model_logger ){
+          std::stringstream message;
+          message << "Caught an ptree_error : " << e.what();
+          ApplicationLog::severity_level _log_type = ApplicationLog::error;
+          BOOST_LOG_FUNCTION();
+          im2model_logger->logEvent( _log_type , message.str() );
+        }
+      }
+
+      try{
+        boost::property_tree::ptree tdmap_simulation_setup_ptree = config.get_child("tdmap_simulation_setup_ptree");
+        tdmap_simulation_setup_ptree_result = tdmap_simulation_setup_model->load_data_from_property_tree( tdmap_simulation_setup_ptree );
+        result &= tdmap_simulation_setup_ptree_result;
+        ui->qtree_view_tdmap_simulation_setup->update();
+      }
+      catch(const boost::property_tree::ptree_error &e) {
+        _flag_project_setted = false;
+        result = false;
+        if( _flag_im2model_logger ){
+          std::stringstream message;
+          message << "Caught an ptree_error : " << e.what();
+          ApplicationLog::severity_level _log_type = ApplicationLog::error;
+          BOOST_LOG_FUNCTION();
+          im2model_logger->logEvent( _log_type , message.str() );
+        }
+      }
+
+      try{
+        boost::property_tree::ptree tdmap_running_configuration_ptree = config.get_child("tdmap_running_configuration_ptree");
+        tdmap_running_configuration_ptree_result = tdmap_running_configuration_model->load_data_from_property_tree( tdmap_running_configuration_ptree );
+        result &= tdmap_running_configuration_ptree_result;
+        ui->qtree_view_tdmap_running_configuration->update();
+      }
+      catch(const boost::property_tree::ptree_error &e) {
+        _flag_project_setted = false;
+        result = false;
+        if( _flag_im2model_logger ){
+          std::stringstream message;
+          message << "Caught an ptree_error : " << e.what();
+          ApplicationLog::severity_level _log_type = ApplicationLog::error;
+          BOOST_LOG_FUNCTION();
+          im2model_logger->logEvent( _log_type , message.str() );
+        }
+      }
+
+      try{
+        boost::property_tree::ptree super_cell_setup_model_ptree = config.get_child("super_cell_setup_model_ptree");
+        super_cell_setup_ptree_result = super_cell_setup_model->load_data_from_property_tree( super_cell_setup_model_ptree );
+        result &= super_cell_setup_ptree_result;
+        ui->qtree_view_supercell_model_edge_detection_setup->update();
+      }
+      catch(const boost::property_tree::ptree_error &e) {
+        _flag_project_setted = false;
+        result = false;
+        if( _flag_im2model_logger ){
+          std::stringstream message;
+          message << "Caught an ptree_error : " << e.what();
+          ApplicationLog::severity_level _log_type = ApplicationLog::error;
+          BOOST_LOG_FUNCTION();
+          im2model_logger->logEvent( _log_type , message.str() );
+        }
       }
     }
-
-    try{
-      boost::property_tree::ptree project_setup_crystalographic_fields_ptree = config.get_child("project_setup_crystalographic_fields_ptree");
-      project_setup_crystalographic_fields_ptree_result = project_setup_crystalographic_fields_model->load_data_from_property_tree( project_setup_crystalographic_fields_ptree );
-      result &= project_setup_crystalographic_fields_ptree_result;
-      ui->qtree_view_project_setup_crystallography->update();
-    }
-    catch(const boost::property_tree::ptree_error &e) {
-      result = false;
-      if( _flag_im2model_logger ){
-        std::stringstream message;
-        message << "Caught an ptree_error : " << e.what();
-        ApplicationLog::severity_level _log_type = ApplicationLog::error;
-        BOOST_LOG_FUNCTION();
-        im2model_logger->logEvent( _log_type , message.str() );
-      }
-    }
-
-    try{
-      boost::property_tree::ptree tdmap_simulation_setup_ptree = config.get_child("tdmap_simulation_setup_ptree");
-      tdmap_simulation_setup_ptree_result = tdmap_simulation_setup_model->load_data_from_property_tree( tdmap_simulation_setup_ptree );
-      result &= tdmap_simulation_setup_ptree_result;
-      ui->qtree_view_tdmap_simulation_setup->update();
-    }
-    catch(const boost::property_tree::ptree_error &e) {
-      result = false;
-      if( _flag_im2model_logger ){
-        std::stringstream message;
-        message << "Caught an ptree_error : " << e.what();
-        ApplicationLog::severity_level _log_type = ApplicationLog::error;
-        BOOST_LOG_FUNCTION();
-        im2model_logger->logEvent( _log_type , message.str() );
-      }
-    }
-
-    try{
-      boost::property_tree::ptree tdmap_running_configuration_ptree = config.get_child("tdmap_running_configuration_ptree");
-      tdmap_running_configuration_ptree_result = tdmap_running_configuration_model->load_data_from_property_tree( tdmap_running_configuration_ptree );
-      result &= tdmap_running_configuration_ptree_result;
-      ui->qtree_view_tdmap_running_configuration->update();
-    }
-    catch(const boost::property_tree::ptree_error &e) {
-      result = false;
-      if( _flag_im2model_logger ){
-        std::stringstream message;
-        message << "Caught an ptree_error : " << e.what();
-        ApplicationLog::severity_level _log_type = ApplicationLog::error;
-        BOOST_LOG_FUNCTION();
-        im2model_logger->logEvent( _log_type , message.str() );
-      }
-    }
-
-    try{
-      boost::property_tree::ptree super_cell_setup_model_ptree = config.get_child("super_cell_setup_model_ptree");
-      super_cell_setup_ptree_result = super_cell_setup_model->load_data_from_property_tree( super_cell_setup_model_ptree );
-      result &= super_cell_setup_ptree_result;
-      ui->qtree_view_supercell_model_edge_detection_setup->update();
-    }
-    catch(const boost::property_tree::ptree_error &e) {
-      result = false;
-      if( _flag_im2model_logger ){
-        std::stringstream message;
-        message << "Caught an ptree_error : " << e.what();
-        ApplicationLog::severity_level _log_type = ApplicationLog::error;
-        BOOST_LOG_FUNCTION();
-        im2model_logger->logEvent( _log_type , message.str() );
-      }
-    }
-  }
 
 #ifndef QT_NO_CURSOR
-  QApplication::restoreOverrideCursor();
+    QApplication::restoreOverrideCursor();
 #endif
 
-  if( result ){
-    _flag_project_setted = true;
-    this->setCurrentFile(fileName);
-    std::stringstream message;
-    message << "Project loaded.";
-    ui->statusBar->showMessage( QString::fromStdString(message.str()), 2000 );
-    if( _flag_im2model_logger ){
-      ApplicationLog::severity_level _log_type = ApplicationLog::normal;
-      BOOST_LOG_FUNCTION();
-      im2model_logger->logEvent( _log_type , message.str() );
+    if( result ){
+      _flag_project_setted = true;
+      this->setCurrentFile(fileName);
+      std::stringstream message;
+      message << "Project loaded.";
+      ui->statusBar->showMessage( QString::fromStdString(message.str()), 2000 );
+      if( _flag_im2model_logger ){
+        ApplicationLog::severity_level _log_type = ApplicationLog::normal;
+        BOOST_LOG_FUNCTION();
+        im2model_logger->logEvent( _log_type , message.str() );
+      }
+      _reset_document_modified_flags();
     }
-    _reset_document_modified_flags();
-  }
-  else{
-    std::stringstream message;
-    message << "Error loading Project. Some variables might not be loaded.";
-    ui->statusBar->showMessage( QString::fromStdString(message.str()) );
-    message << "Per ptree: \n";
-    message << "\tproject_setup_image_fields_ptree_result: " <<  std::boolalpha << project_setup_image_fields_ptree_result;
-    message << "\tproject_setup_crystalographic_fields_ptree_result: " <<  std::boolalpha << project_setup_crystalographic_fields_ptree_result;
-    message << "\ttdmap_simulation_setup_ptree_result: " <<  std::boolalpha << tdmap_simulation_setup_ptree_result;
-    message << "\ttdmap_running_configuration_ptree_result: " <<  std::boolalpha << tdmap_running_configuration_ptree_result;
-    message << "\tsuper_cell_setup_ptree_result: " <<  std::boolalpha << super_cell_setup_ptree_result;
-    if( _flag_im2model_logger ){
-      ApplicationLog::severity_level _log_type = ApplicationLog::error;
-      BOOST_LOG_FUNCTION();
-      im2model_logger->logEvent( _log_type , message.str() );
+    else{
+      _flag_project_setted = false;
+      std::stringstream message;
+      message << "Error loading Project. Some variables might not be loaded.";
+      ui->statusBar->showMessage( QString::fromStdString(message.str()) );
+      message << "Per ptree: \n";
+      message << "\tproject_setup_image_fields_ptree_result: " <<  std::boolalpha << project_setup_image_fields_ptree_result;
+      message << "\tproject_setup_crystalographic_fields_ptree_result: " <<  std::boolalpha << project_setup_crystalographic_fields_ptree_result;
+      message << "\ttdmap_simulation_setup_ptree_result: " <<  std::boolalpha << tdmap_simulation_setup_ptree_result;
+      message << "\ttdmap_running_configuration_ptree_result: " <<  std::boolalpha << tdmap_running_configuration_ptree_result;
+      message << "\tsuper_cell_setup_ptree_result: " <<  std::boolalpha << super_cell_setup_ptree_result;
+      if( _flag_im2model_logger ){
+        ApplicationLog::severity_level _log_type = ApplicationLog::error;
+        BOOST_LOG_FUNCTION();
+        im2model_logger->logEvent( _log_type , message.str() );
+      }
     }
   }
 }
@@ -1581,7 +1610,7 @@ bool MainWindow::saveFile(const QString &fileName ){
   QApplication::restoreOverrideCursor();
 #endif
 
-    _flag_project_setted = true;
+  _flag_project_setted = true;
 
   setCurrentFile(fileName);
   std::stringstream message;
@@ -1867,7 +1896,7 @@ void MainWindow::create_box_options_tab1_crystallography(){
   ////////////////
   QVector<QVariant> box2_option_1_1 = {"CIF",""};
   QVector<bool> box2_option_1_1_edit = {false,true};
-  boost::function<bool(std::string)> box2_function_1_1 ( boost::bind( &TDMap::set_unit_cell_cif_path,_core_td_map, _1 ) );
+  boost::function<bool(std::string)> box2_function_1_1 ( boost::bind( &MainWindow::update_qline_cif_path,this, _1 ) );
   unit_cell_file_cif = new TreeItem ( box2_option_1_1 , box2_function_1_1, box2_option_1_1_edit );
   unit_cell_file_cif->set_variable_name( "unit_cell_file_cif" );
 
@@ -2506,7 +2535,7 @@ void MainWindow::create_box_options_tab2_sim_config(){
   ////////////////
   QVector<QVariant> box3_option_5_3 = {"MTF",""};
   QVector<bool> box3_option_5_3_edit = {false,true};
-  boost::function<bool(std::string)> box3_function_5_3 ( boost::bind( &TDMap::set_mtf_filename,_core_td_map, _1 ) );
+  boost::function<bool(std::string)> box3_function_5_3 ( boost::bind( &MainWindow::update_qline_mtf_path,this, _1 ) );
   _mtf_parameters = new TreeItem ( box3_option_5_3 , box3_function_5_3, box3_option_5_3_edit );
   _mtf_parameters->set_variable_name( "_mtf_parameters" );
 
