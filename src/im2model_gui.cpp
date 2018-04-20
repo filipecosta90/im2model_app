@@ -94,22 +94,16 @@ class Application final : public QApplication {
 
 int main(int argc, char *argv[]){
   qRegisterMetaType<std::string>("std::string");
-
   qRegisterMetaType<cv::Point2i>("cv::Point2i");
-
-  
-  
-  std::cout <<  QDir::currentPath().toStdString() << std::endl;
 
   // to access resources
   Q_INIT_RESOURCE(im2model);
-QDir::setSearchPaths("qrc", QStringList(":/") );
+  QDir::setSearchPaths("qrc", QStringList(":/") );
 
   Application app(argc, argv );
-    app.setOrganizationName("uminho");
-    app.setApplicationName("Im2Model");
+  app.setOrganizationName("uminho");
+  app.setApplicationName("Im2Model");
 
- std::cout << "Im2Model version: " << getIm2ModelVersion() << std::endl;
   // to ease the load process
   QCommandLineParser parser;
   parser.setApplicationDescription(QCoreApplication::applicationName());
@@ -124,11 +118,8 @@ QDir::setSearchPaths("qrc", QStringList(":/") );
     if (!parser.positionalArguments().isEmpty()){
       window.loadFile(parser.positionalArguments().first());
     }
-    //const bool base_setted = window.set_base_dir_path( app_path );
-    //if( base_setted ){
     window.show();
     return app.exec();
-    //}
   }
   app.im2model_logger->logEvent(ApplicationLog::normal, "Application exit");
 

@@ -112,7 +112,7 @@ namespace Ui {
 
 class MainWindow : public QMainWindow {
   Q_OBJECT
-public:
+  public:
     //  MainWindow(QWidget *parent = 0);
     MainWindow( ApplicationLog::ApplicationLog* logger, QWidget *parent = 0 );
 
@@ -134,8 +134,8 @@ public:
     boost::process::ipstream _sim_supercell_wavimg_ostream_buffer;
 
     public slots:
-   // void echo_sc();
-    void update_from_TDMap_sucess();
+      // void echo_sc();
+      void update_from_TDMap_sucess();
     void update_from_TDMap_failure();
     bool _is_initialization_ok();
     void update_tdmap_celslc_started( );
@@ -169,13 +169,13 @@ public:
     void update_from_full_SuperCell_intensity_cols_failure();
     void full_simulation_intensity_columns_SelectionChanged(const QItemSelection &selected, const QItemSelection &deselected);
 
-protected:
+  protected:
     void closeEvent(QCloseEvent *event) override;
     bool _was_document_modified();
     bool _reset_document_modified_flags();
 
     private slots:
-    bool update_qline_image_path( std::string fileName );
+      bool update_qline_image_path( std::string fileName );
     bool update_qline_cif_path( std::string fileName );
     bool update_qline_mtf_path( std::string fileName );
     void update_full_experimental_image();
@@ -221,18 +221,19 @@ protected:
     void on_qpush_compute_full_super_cell_clicked();
     void on_qpush_run_compute_intensity_columns_clicked();
 
-    signals:
+signals:
     void experimental_image_filename_changed();
     void simulated_grid_changed( );
     void super_cell_target_region_changed();
     void force_close();
 
-private:
+  private:
 
     // preferences methods
     bool maybeSetPreferences();
     bool maybeSetProject();
     bool edit_preferences();
+    bool initialize();
 
     // menu methods
     void createActions();
@@ -332,7 +333,7 @@ private:
 
     /* GUI options */
     TreeItem* chem_database_root = nullptr;
-    
+
     TreeItem* experimental_image_root = nullptr;
     TreeItem* experimental_sampling_rate = nullptr;
     TreeItem* experimental_sampling_rate_x = nullptr;

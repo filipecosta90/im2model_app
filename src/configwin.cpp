@@ -23,6 +23,7 @@ MainWindow::MainWindow( ApplicationLog::ApplicationLog* logger , QWidget *parent
   if (_flag_im2model_logger) {
     im2model_logger->logEvent(ApplicationLog::normal, "Setting up UI.");
   }
+
   ui->setupUi(this);
   ui->td_map_splitter->setStretchFactor(0,3);
   ui->td_map_splitter->setStretchFactor(1,7);
@@ -67,13 +68,13 @@ MainWindow::MainWindow( ApplicationLog::ApplicationLog* logger , QWidget *parent
   else{
 
     _core_td_map = new TDMap(
-      _sim_tdmap_celslc_ostream_buffer,
-      _sim_tdmap_msa_ostream_buffer,
-      _sim_tdmap_wavimg_ostream_buffer,
-      _sim_tdmap_simgrid_ostream_buffer,
-      _sim_supercell_celslc_ostream_buffer,
-      _sim_supercell_msa_ostream_buffer,
-      _sim_supercell_wavimg_ostream_buffer );
+        _sim_tdmap_celslc_ostream_buffer,
+        _sim_tdmap_msa_ostream_buffer,
+        _sim_tdmap_wavimg_ostream_buffer,
+        _sim_tdmap_simgrid_ostream_buffer,
+        _sim_supercell_celslc_ostream_buffer,
+        _sim_supercell_msa_ostream_buffer,
+        _sim_supercell_wavimg_ostream_buffer );
 
     SuperCell* tdmap_vis_sim_unit_cell = _core_td_map->get_tdmap_vis_sim_unit_cell();
     SuperCell* tdmap_full_sim_super_cell = _core_td_map->get_tdmap_full_sim_super_cell();
@@ -193,7 +194,7 @@ MainWindow::MainWindow( ApplicationLog::ApplicationLog* logger , QWidget *parent
       connect( _core_td_map, SIGNAL(TDMap_inform_supercell_celslc_n_steps( int )), this, SLOT(update_supercell_celslc_started_with_steps_info( int ) )     );
 
       connect( _core_td_map, SIGNAL(TDMap_at_celslc_step( int )), this, SLOT(update_tdmap_celslc_step( int ) ) );
-      
+
       connect( _core_td_map, SIGNAL(TDMap_ended_supercell_celslc_ssc_single_slice_ended( bool )), this, SLOT(update_supercell_celslc_ssc_single_slice_step( bool ) ) );
       connect( _core_td_map, SIGNAL(TDMap_ended_celslc_ssc_single_slice_ended( bool )), this, SLOT(update_tdmap_celslc_ssc_single_slice_step( bool ) )    );
 
@@ -223,8 +224,15 @@ MainWindow::MainWindow( ApplicationLog::ApplicationLog* logger , QWidget *parent
 
       _reset_document_modified_flags();
       if( _flag_im2model_logger ){
-        im2model_logger->logEvent( ApplicationLog::notification, "Finished initializing App." );
+        im2model_logger->logEvent( ApplicationLog::notification, "Finished initializing App. Launching Open/Create" );
       }
+
+      const bool initialize_result = initialize();
+      if( initialize_result == false ){
+        std::cout << "close" << std::endl;
+        this->close();
+      }
+
     }
   }
 }
@@ -270,7 +278,6 @@ void MainWindow::update_supercell_celslc_ssc_single_slice_step( bool result ){
 }
 
 void MainWindow::update_tdmap_celslc_ssc_single_slice_step( bool result ){
-  std::cout << "CONFIG update_tdmap_celslc_ssc_single_slice_step " << std::endl;
   std::stringstream message;
   _core_td_map_info_celslc_at_step++;
   const int _core_td_map_info_supercell_celslc_step_to_percent = (int) ( ( (float) _core_td_map_info_celslc_at_step  ) / ( (float) _core_td_map_info_celslc_n_steps ) * 25.0f );
@@ -428,17 +435,17 @@ bool MainWindow::_is_initialization_ok(){
 
 bool MainWindow::maybeSetPreferences(){
   const QMessageBox::StandardButton ret
-  = QMessageBox::warning(this, tr("Application"),
-    tr("The saved prefences file is incomplete.\n""To use Im2Model all preferences vars must be setted.\n"
-      "Do you want to open the preferences panel?"),
-    QMessageBox::Yes | QMessageBox::Close);
+    = QMessageBox::warning(this, tr("Application"),
+        tr("The saved prefences file is incomplete.\n""To use Im2Model all preferences vars must be setted.\n"
+          "Do you want to open the preferences panel?"),
+        QMessageBox::Yes | QMessageBox::Close);
   switch (ret) {
     case QMessageBox::Yes:
-    return edit_preferences();
+      return edit_preferences();
     case QMessageBox::Close:
-    return false;
+      return false;
     default:
-    break;
+      break;
   }
   return false;
 }
@@ -508,7 +515,6 @@ MainWindow::~MainWindow(){
     sim_super_cell_worker->abort();
     _sim_tdmap_thread->wait();
     _sim_super_cell_thread->wait();
-    ////qDebug()<<"Deleting thread and worker in Thread "<<this->QObject::thread()->currentThreadId();
     delete _sim_tdmap_thread;
     delete _sim_super_cell_thread;
     delete sim_tdmap_worker;
@@ -563,19 +569,19 @@ void MainWindow::update_simgrid_frame(){
 }
 
 bool MainWindow::copy_external_files_to_project_dir(){
- bool result = false;
- const bool project_setted = maybeSetProject();
- 
- if ( project_setted ){
-  result = _core_td_map->copy_external_files_to_project_dir();
-  if ( result ){
-    image_path->load_data_from_getter_string();
-    unit_cell_file_cif->load_data_from_getter_string();
-    _mtf_parameters->load_data_from_getter_string();
-  }
-}
+  bool result = false;
+  const bool project_setted = maybeSetProject();
 
-return result;
+  if ( project_setted ){
+    result = _core_td_map->copy_external_files_to_project_dir();
+    if ( result ){
+      image_path->load_data_from_getter_string();
+      unit_cell_file_cif->load_data_from_getter_string();
+      _mtf_parameters->load_data_from_getter_string();
+    }
+  }
+
+  return result;
 }
 
 void MainWindow::update_super_cell_target_region(){
@@ -589,20 +595,20 @@ void MainWindow::update_super_cell_target_region_image(){
   if( _core_td_map->get_exp_image_bounds_flag_roi_boundary_image() ){
     const cv::Mat super_cell_target_region_image = _core_td_map->get_exp_image_bounds_roi_boundary_image_visualization();
     if( !super_cell_target_region_image.empty() && super_cell_target_region_image.cols > 0 && super_cell_target_region_image.rows > 0  ){
-     const int full_boundary_polygon_margin_x_px = _core_td_map->get_exp_image_bounds_full_boundary_polygon_margin_x_px();
-     const int full_boundary_polygon_margin_y_px = _core_td_map->get_exp_image_bounds_full_boundary_polygon_margin_y_px();
-     const cv::Point2i centroid_translation_px = _core_td_map->get_super_cell_exp_image_properties_centroid_translation_px();
-     const cv::Point2i top_right_corner_margin ( full_boundary_polygon_margin_x_px, full_boundary_polygon_margin_y_px);
-     ui->qgraphics_super_cell_refinement->setImage( super_cell_target_region_image, 1 , tr("Super-cell experimental image target region"), centroid_translation_px + top_right_corner_margin );
-   }
-   else{
-    if (_flag_im2model_logger) {
-      std::stringstream message;
-      message << " On update_super_cell_target_region_image() mat is empty or has dimensions with 0 value. empty? " << std::boolalpha << super_cell_target_region_image.empty()  << ", width: " << super_cell_target_region_image.cols << ", height: " << super_cell_target_region_image.rows;
-      im2model_logger->logEvent(ApplicationLog::error, message.str());
+      const int full_boundary_polygon_margin_x_px = _core_td_map->get_exp_image_bounds_full_boundary_polygon_margin_x_px();
+      const int full_boundary_polygon_margin_y_px = _core_td_map->get_exp_image_bounds_full_boundary_polygon_margin_y_px();
+      const cv::Point2i centroid_translation_px = _core_td_map->get_super_cell_exp_image_properties_centroid_translation_px();
+      const cv::Point2i top_right_corner_margin ( full_boundary_polygon_margin_x_px, full_boundary_polygon_margin_y_px);
+      ui->qgraphics_super_cell_refinement->setImage( super_cell_target_region_image, 1 , tr("Super-cell experimental image target region"), centroid_translation_px + top_right_corner_margin );
+    }
+    else{
+      if (_flag_im2model_logger) {
+        std::stringstream message;
+        message << " On update_super_cell_target_region_image() mat is empty or has dimensions with 0 value. empty? " << std::boolalpha << super_cell_target_region_image.empty()  << ", width: " << super_cell_target_region_image.cols << ", height: " << super_cell_target_region_image.rows;
+        im2model_logger->logEvent(ApplicationLog::error, message.str());
+      }
     }
   }
-}
 }
 
 void MainWindow::update_super_cell_target_region_shapes(){
@@ -673,17 +679,17 @@ void MainWindow::update_super_cell_experimental_image_intensity_columns(){
   std::cout << " update_super_cell_experimental_image_intensity_columns " << std::endl;
   const int full_boundary_polygon_margin_x_px = _core_td_map->get_exp_image_bounds_full_boundary_polygon_margin_x_px();
   const int full_boundary_polygon_margin_y_px = _core_td_map->get_exp_image_bounds_full_boundary_polygon_margin_y_px();
-  
+
   const int margin_point_px = _core_td_map->get_super_cell_sim_image_properties_ignore_edge_pixels();
   const cv::Point2i top_right_corner_margin ( full_boundary_polygon_margin_x_px, full_boundary_polygon_margin_y_px);
   std::vector<cv::KeyPoint> exp_image_keypoints = _core_td_map->get_super_cell_exp_image_properties_keypoints();
   std::vector<cv::Point2i> exp_image_renderPoints;
 
   for( int keypoint_pos = 0; keypoint_pos < exp_image_keypoints.size(); keypoint_pos++ ){
-   exp_image_renderPoints.push_back( exp_image_keypoints[keypoint_pos].pt );
- }
- ui->qgraphics_super_cell_refinement->addRenderPoints( exp_image_renderPoints , 5, cv::Vec3b(0,255,0), tr("Experimental image intensity columns") , top_right_corner_margin);
- ui->qgraphics_super_cell_refinement->show();
+    exp_image_renderPoints.push_back( exp_image_keypoints[keypoint_pos].pt );
+  }
+  ui->qgraphics_super_cell_refinement->addRenderPoints( exp_image_renderPoints , 5, cv::Vec3b(0,255,0), tr("Experimental image intensity columns") , top_right_corner_margin);
+  ui->qgraphics_super_cell_refinement->show();
 }
 
 //update tab 4
@@ -699,14 +705,14 @@ void MainWindow::update_super_cell_simulated_image_intensity_columns(){
   const std::vector<int> sim_image_intensity_columns_threshold_value = _core_td_map->get_super_cell_sim_image_intensity_columns_threshold_value();
   const std::vector<double> sim_image_intensity_columns_integrate_intensity = _core_td_map->get_super_cell_sim_image_intensity_columns_integrate_intensity();
   const std::vector<double> exp_image_intensity_columns_integrate_intensity = _core_td_map->get_super_cell_exp_image_intensity_columns_integrate_intensity();
-  
+
   for( int keypoint_pos = 0; keypoint_pos < sim_image_intensity_columns_center.size(); keypoint_pos++ ){
     std::vector<cv::Point2i> sim_image_renderPoints;
     std::vector<cv::Vec3b> sim_image_renderPoints_color;
 
     const cv::Point2i delta = sim_image_intensity_columns_projective_2D_coordinate[keypoint_pos];
     const cv::Point2i column_center = sim_image_intensity_columns_center[keypoint_pos];
-    
+
     const int sim_image_intensity_col_mean_statistical = sim_image_intensity_columns_mean_statistical[keypoint_pos];
     const int exp_image_intensity_col_mean_statistical = exp_image_intensity_columns_mean_statistical[keypoint_pos];
     const int sim_image_intensity_col_stddev_statistical = sim_image_intensity_columns_stddev_statistical[keypoint_pos];
@@ -719,7 +725,7 @@ void MainWindow::update_super_cell_simulated_image_intensity_columns(){
     const bool marked_del = sim_image_keypoints_marked_delete[keypoint_pos];
     QString col_status = marked_del ? QString("Marked delete") : QString("OK");
     QVector<QVariant> keypoint_option = {"# " + QString::number( keypoint_pos ), QString::number( column_center.x )  , QString::number( column_center.y ) , QString::number( delta.x ), QString::number( delta.y ) , col_status ,  QString::number( sim_image_integrated_intensity ) ,  QString::number( exp_image_integrated_intensity ),  QString::number( sim_image_intensity_col_mean_statistical ),  QString::number( exp_image_intensity_col_mean_statistical ),  QString::number( sim_image_intensity_col_threshold_value ),  QString::number( sim_image_intensity_col_stddev_statistical ),   QString::number( exp_image_intensity_col_stddev_statistical )};
-    
+
     TreeItem* keypoint_item  = new TreeItem ( keypoint_option );
 
     std::stringstream sstream;
@@ -946,7 +952,7 @@ void MainWindow::newFile(){
 }
 
 void MainWindow::open(){
-  if (maybeSave()) {
+  if ( maybeSave() ) {
     QString fileName = QFileDialog::getOpenFileName(this);
     if (!fileName.isEmpty())
       loadFile(fileName);
@@ -1096,9 +1102,9 @@ bool MainWindow::edit_preferences(){
 
 void MainWindow::about(){
   QMessageBox::about(this, tr("Im2Model"),
-    tr("<b>Im2Model</b> combines transmission electron microscopy, image correlation and matching procedures,"
-      "enabling the determination of a three-dimensional atomic structure based strictly on a single high-resolution experimental image."
-      "Partialy financiated as part of the protocol between UTAustin I Portugal - UTA-P."));
+      tr("<b>Im2Model</b> combines transmission electron microscopy, image correlation and matching procedures,"
+        "enabling the determination of a three-dimensional atomic structure based strictly on a single high-resolution experimental image."
+        "Partialy financiated as part of the protocol between UTAustin I Portugal - UTA-P."));
 }
 
 void MainWindow::documentWasModified(){
@@ -1139,7 +1145,7 @@ void MainWindow::createActions(){
   fileMenu->addSeparator();
 
   const QIcon exitIcon = QIcon::fromTheme("application-exit");
-  QAction *exitAct = fileMenu->addAction(exitIcon, tr("E&xit"), this, &QWidget::close);
+  QAction *exitAct = fileMenu->addAction(exitIcon, tr("E&xit"), this, &QWidget::close );
   exitAct->setShortcuts(QKeySequence::Quit);
   exitAct->setStatusTip(tr("Exit the application"));
 
@@ -1170,7 +1176,7 @@ void MainWindow::createActions(){
   // newAct->setShortcuts(QKeySequence::);
   exportAllIntensityCols->setStatusTip(tr("Export All Intensity Columns data to a CSV"));
   supercellMenu->addAction( exportAllIntensityCols );
-  
+
   QAction *exportMappedIntensityCols = tdmapMenu->addAction( tr("&Export Mapped Intensity Columns data"), this , &MainWindow::export_IntegratedIntensities_onlymapped );
   // newAct->setShortcuts(QKeySequence::);
   exportMappedIntensityCols->setStatusTip(tr("Export only the mapped agains EXP image Intensity Columns data to a CSV"));
@@ -1309,27 +1315,52 @@ void MainWindow::writeSettings(){
   settings.setValue("state.refinement_splitter", ui->refinement_splitter->saveState() );
 }
 
+bool MainWindow::initialize(){
+  bool result = false;
+  QMessageBox msgBox;
+  msgBox.setWindowTitle( tr("Application") );
+  msgBox.setText( tr("In order to proceed you need to either create or open an project.") );
+  QAbstractButton *myCloseButton = msgBox.addButton( tr("Close"), QMessageBox::NoRole );
+  QAbstractButton *myCreateButton = msgBox.addButton( tr("Create"), QMessageBox::YesRole );
+  QAbstractButton *myOpenButton = msgBox.addButton( tr("Open"), QMessageBox::YesRole );
+  //QObject::connect(myCloseButton, SIGNAL(clicked()), this, SLOT(close()));
+
+  msgBox.setIcon(QMessageBox::Question);
+  msgBox.exec();
+  if(msgBox.clickedButton() == myCreateButton){
+    std::cout << "new " << std::endl;
+    this->save();
+    result = true;
+  }
+  if(msgBox.clickedButton() == myOpenButton){
+    std::cout << "open " << std::endl;
+    this->open();
+    result = true;
+  }
+  return result;
+}
+
 bool MainWindow::maybeSave(){
   bool result = false;
   if ( ! _was_document_modified() ){
     return  true;
   }
   const QMessageBox::StandardButton ret
-  = QMessageBox::warning(this, tr("Application"),
-    tr("The document has been modified.\n"
-      "Do you want to save your changes?"),
-    QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
+    = QMessageBox::warning(this, tr("Application"),
+        tr("The document has been modified.\n"
+          "Do you want to save your changes?"),
+        QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
   switch (ret) {
     case QMessageBox::Save:
-    {
-      return save();
-    }
+      {
+        return save();
+      }
     case QMessageBox::Cancel:
-    {
-      return false;
-    }
+      {
+        return false;
+      }
     default:
-    break;
+      break;
   }
   return true;
 }
@@ -1341,26 +1372,26 @@ bool MainWindow::maybeSetProject(){
   }
   else{
     const QMessageBox::StandardButton ret
-    = QMessageBox::warning(this, tr("Application"),
-      tr("To make that action you need to set the project.\n"
-        "Do you want to set the project?"),
-      QMessageBox::Yes  | QMessageBox::Cancel);
+      = QMessageBox::warning(this, tr("Application"),
+          tr("To make that action you need to set the project.\n"
+            "Do you want to set the project?"),
+          QMessageBox::Yes  | QMessageBox::Cancel);
     switch (ret) {
       case QMessageBox::Yes:
-      {
-        result = save();
-        break;
-      }
+        {
+          result = save();
+          break;
+        }
       case QMessageBox::Cancel:
-      {
-        result = false;
-        break;
-      }
+        {
+          result = false;
+          break;
+        }
       default:
-      {
-        result = false;
-        break;
-      }
+        {
+          result = false;
+          break;
+        }
     }
   }
   return result;
@@ -1406,7 +1437,7 @@ void MainWindow::loadFile(const QString &fileName){
       }
     }
 
-  /* check for version */
+    /* check for version */
     try{
       file_version = config.get<std::string>("version");
       if( application_version > file_version ){
@@ -2629,7 +2660,7 @@ void MainWindow::create_box_options_tab2_sim_config(){
   ui->tdmap_table->connect_item_changes_to_invalidate_grid( thickness_range_number_samples, 1 );
   ui->tdmap_table->connect_item_changes_to_invalidate_grid( thickness_range_lower_bound, 1 );
   ui->tdmap_table->connect_item_changes_to_invalidate_grid( thickness_range_upper_bound, 1 );
-  
+
   ui->tdmap_table->connect_item_changes_to_invalidate_grid( defocus_range_number_samples, 1 );
   ui->tdmap_table->connect_item_changes_to_invalidate_grid( defocus_range_upper_bound, 1 );
   ui->tdmap_table->connect_item_changes_to_invalidate_grid( defocus_range_lower_bound, 1 );
@@ -2981,7 +3012,7 @@ void MainWindow::create_box_options_tab3_supercell(){
   connect( _core_td_map, SIGNAL( super_cell_dimensions_c_changed( )), super_cell_dimensions_c, SLOT( load_data_from_getter_double() ) );
   super_cell_dimensions->insertChildren( super_cell_dimensions_c );
 
-////////////////
+  ////////////////
   // Super-Cell Dimensions -- Rect
   ////////////////
   QVector<QVariant> box5_option_2_4_data = {"Selection Rect",""};
@@ -3041,16 +3072,16 @@ void MainWindow::create_box_options_tab4_intensity_peaks(){
 
   QVector<QVariant> common_header = {"Field","Value"};
 
-    /*************************
-     * INTENSITY PEAKS
-     *************************/
+  /*************************
+   * INTENSITY PEAKS
+   *************************/
   intensity_peaks_root = new TreeItem ( common_header );
   intensity_peaks_root->set_variable_name( "intensity_peaks_root" );
   intensity_peaks_model = new TreeModel( intensity_peaks_root );
 
-    ////////////////
-    // Edge detection
-    ////////////////
+  ////////////////
+  // Edge detection
+  ////////////////
 
   int alpha_bottom_limit = 0;
   int alpha_top_limit = 255;
@@ -3076,7 +3107,7 @@ void MainWindow::create_box_options_tab4_intensity_peaks(){
   QVector<bool> box6_option_2_1_1_edit = {false,true};
   intensity_peaks_display_simulated_img_alpha  = new TreeItem ( box6_option_2_1_1 , box6_option_2_1_1_setter, box6_option_2_1_1_edit );
   intensity_peaks_display_simulated_img_alpha->set_fp_data_getter_int_vec( 1, box6_option_2_1_1_getter );
-  
+
   // load the preset data from core constuctor
   intensity_peaks_display_simulated_img_alpha->load_data_from_getter( 1 );
 
@@ -3084,7 +3115,7 @@ void MainWindow::create_box_options_tab4_intensity_peaks(){
   intensity_peaks_display_simulated_img_alpha->set_item_delegate_type( TreeItem::_delegate_SLIDER_INT );
 
   intensity_peaks_display_simulated_img->insertChildren( intensity_peaks_display_simulated_img_alpha );
-  
+
   intensity_peaks_display_simulated_img_alpha->set_slider_int_range_min( alpha_bottom_limit );
   intensity_peaks_display_simulated_img_alpha->set_slider_int_range_max( alpha_top_limit );
   connect( intensity_peaks_display_simulated_img_alpha, SIGNAL(dataChanged(int)), ui->qgraphics_super_cell_refinement->image_widget, SLOT(repaint()) );
@@ -3099,7 +3130,7 @@ void MainWindow::create_box_options_tab4_intensity_peaks(){
   boost::function<int(void)> box6_option_2_1_3_getter ( boost::bind( &CvImageFrameWidget::get_renderPoints_alpha_channels_map, ui->qgraphics_super_cell_refinement , tr("Simulated image intensity columns") ) );
   boost::function<bool(int)> box6_option_2_1_3_setter ( boost::bind( &CvImageFrameWidget::set_renderPoints_alpha_channels_map_group, ui->qgraphics_super_cell_refinement, tr("Simulated image intensity columns"), _1 ) );
   QVector<bool> box6_option_2_1_3_edit = {false,true};
-  
+
   intensity_peaks_display_simulated_img_alpha_channel  = new TreeItem ( box6_option_2_1_3 , box6_option_2_1_3_setter , box6_option_2_1_3_edit );
   intensity_peaks_display_simulated_img_alpha_channel->set_fp_data_getter_int_vec( 1, box6_option_2_1_3_getter );
   intensity_peaks_display_simulated_img_alpha_channel->load_data_from_getter( 1 );
@@ -3144,7 +3175,7 @@ void MainWindow::create_box_options_tab4_intensity_peaks(){
 
   ui->qtree_view_refinement_full_simulation->setModel( intensity_peaks_model );
   ui->qtree_view_refinement_full_simulation->setItemDelegate( _load_file_delegate );
-    //start editing after one click
+  //start editing after one click
   ui->qtree_view_refinement_full_simulation->setEditTriggers( QAbstractItemView::AllEditTriggers );
   ui->qtree_view_refinement_full_simulation->expandAll();
 
@@ -3157,9 +3188,9 @@ void MainWindow::create_box_options_tab4_intensity_columns_listing(){
 
   QVector<QVariant> common_header = {"Intensity column #","SIM x pos", "SIM y pos", "SIM x delta", "SIM y delta", "Status", "SIM Integ. Intensity", "EXP Integ. Intensity", "SIM Column Mean" , "EXP Column Mean" , "Column Threshold Value" , "SIM Column Std. Dev.", "EXP Column Std. Dev." };
 
-    /*************************
-     * INTENSITY PEAKS
-     *************************/
+  /*************************
+   * INTENSITY PEAKS
+   *************************/
   intensity_columns_listing_root = new TreeItem ( common_header );
   intensity_columns_listing_root->set_variable_name( "intensity_columns_listing_root" );
   intensity_columns_listing_model = new TreeModel( intensity_columns_listing_root );
@@ -3169,7 +3200,7 @@ void MainWindow::create_box_options_tab4_intensity_columns_listing(){
   ui->qtree_view_refinement_full_simulation_intensity_columns->setModel( intensity_columns_listing_model );
   ui->qtree_view_refinement_full_simulation_intensity_columns->setItemDelegate( _load_file_delegate );
 
-    //start editing after one click
+  //start editing after one click
   ui->qtree_view_refinement_full_simulation_intensity_columns->setEditTriggers( QAbstractItemView::AllEditTriggers );
   ui->qtree_view_refinement_full_simulation_intensity_columns->expandAll();
   ui->qtree_view_refinement_full_simulation_intensity_columns->setSelectionMode( QAbstractItemView::ExtendedSelection );
@@ -3179,12 +3210,12 @@ void MainWindow::create_box_options_tab4_intensity_columns_listing(){
   }
 
   connect(
-    ui->qtree_view_refinement_full_simulation_intensity_columns->selectionModel(),
-    SIGNAL(selectionChanged(const QItemSelection &, const QItemSelection &)),
-    this,
-    SLOT(full_simulation_intensity_columns_SelectionChanged(const QItemSelection &, const QItemSelection &)),
-    Qt::DirectConnection
-    );
+      ui->qtree_view_refinement_full_simulation_intensity_columns->selectionModel(),
+      SIGNAL(selectionChanged(const QItemSelection &, const QItemSelection &)),
+      this,
+      SLOT(full_simulation_intensity_columns_SelectionChanged(const QItemSelection &, const QItemSelection &)),
+      Qt::DirectConnection
+      );
 }
 
 void MainWindow::full_simulation_intensity_columns_SelectionChanged(const QItemSelection &selected, const QItemSelection &deselected)
@@ -3302,16 +3333,16 @@ void MainWindow::on_qbutton_tdmap_accept_clicked(){
       best_match_pos = _core_td_map->get_simgrid_best_match_position();
       if( best_match_pos != tdmap_current_selection_pos ){
         const QMessageBox::StandardButton ret
-        = QMessageBox::warning(this, tr("Application"),
-          tr("The selected cell differs from the automatic best match position.\n"
-            "Do you want to use the current selected thickness value?"),
-          QMessageBox::Yes | QMessageBox::No);
+          = QMessageBox::warning(this, tr("Application"),
+              tr("The selected cell differs from the automatic best match position.\n"
+                "Do you want to use the current selected thickness value?"),
+              QMessageBox::Yes | QMessageBox::No);
         switch (ret) {
           case QMessageBox::No:
-          accept = false;
-          break;
+            accept = false;
+            break;
           default:
-          break;
+            break;
         }
       }
     }
