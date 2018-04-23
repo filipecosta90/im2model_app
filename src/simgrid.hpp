@@ -126,6 +126,7 @@ public:
 
     SimGrid( boost::process::ipstream& async_io_buffer_out );
     bool export_sim_grid( std::string filename , bool cut_margin = false );
+    bool validate_simulated_grid_position( int row_thickness, int col_defocus );
 
     enum InmageNormalizationMode { LOCAL_NORMALIZATION, GLOBAL_NORMALIZATION, NO_NORMALIZATION };
 

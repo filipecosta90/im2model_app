@@ -132,8 +132,8 @@ class QtSceneSuperCell : public QObject
     explicit QtSceneSuperCell( Qt3DCore::QEntity *rootEntity, Qt3DRender::QCamera *cameraEntity );
     ~QtSceneSuperCell();
     void set_super_cell( SuperCell* cell );
-    bool add_image_layer( cv::Mat layer_image , double width_nm, double height_nm, Qt3DCore::QTransform* transform = nullptr, std::string layer_name = "Image Layer" );
-    bool update_image_layer( cv::Mat layer_image , double width_nm, double height_nm , Qt3DCore::QTransform* transform = nullptr, std::string layer_name = "Image Layer", int layer_number = 1);
+    bool add_image_layer( const cv::Mat& layer_image , double width_nm, double height_nm, Qt3DCore::QTransform* transform = nullptr, std::string layer_name = "Image Layer" );
+    bool update_image_layer( const cv::Mat& layer_image , double width_nm, double height_nm , Qt3DCore::QTransform* transform = nullptr, std::string layer_name = "Image Layer", int layer_number = 1);
     bool enable_image_layer( std::string layer_name, int layer_number, bool enabled );
     bool updateAtomMeshRadius( int distinct_atom_pos, double radius );
     bool get_enable_atom_type( int distinct_atom_pos );

@@ -152,8 +152,8 @@ protected:
   TreeItem* atom_color_root = nullptr;
 
   /* Loggers */
-    ApplicationLog::ApplicationLog* logger = nullptr;
-    bool _flag_logger = false;
+  ApplicationLog::ApplicationLog* logger = nullptr;
+  bool _flag_logger = false;
 
 private:
 

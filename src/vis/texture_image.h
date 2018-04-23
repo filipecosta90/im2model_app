@@ -81,10 +81,13 @@ class TextureImage : public Qt3DRender::QPaintedTextureImage
 public:
     void paint(QPainter* painter);
     void setImage( const cv::Mat& image );
+    
   private:
 
-        QImage _qimage;
+        QImage* _qimage_ptr;
+        std::vector<cv::Mat> matChannels;
         cv::Mat _tmp_original, _tmp_current;
+        cv::Mat_<cv::Vec4b> dst;
         float scaleFactor = 1.0f;
         cv::Size original_size;
         bool _image_set = false;

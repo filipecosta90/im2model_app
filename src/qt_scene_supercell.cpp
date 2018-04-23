@@ -62,9 +62,9 @@ QtSceneSuperCell::QtSceneSuperCell(Qt3DCore::QEntity *rootEntity, Qt3DRender::QC
 
 }
 
-bool QtSceneSuperCell::update_image_layer( cv::Mat layer_image , double width_nm, double height_nm , Qt3DCore::QTransform* transform, std::string layer_name, int layer_number){
+bool QtSceneSuperCell::update_image_layer( const cv::Mat& layer_image , double width_nm, double height_nm , Qt3DCore::QTransform* transform, std::string layer_name, int layer_number){
   bool result = false;
-  if( m_plane_entity_vector.size() == 0 ){
+  if( layer_number > m_plane_entity_vector.size() ){
     result = add_image_layer( layer_image, width_nm, height_nm, transform, layer_name );
     reload_data_from_super_cell();
   }
@@ -77,17 +77,12 @@ bool QtSceneSuperCell::update_image_layer( cv::Mat layer_image , double width_nm
     color.setRgbF(1.0,1.0,1.0,1.0);
     material->setAmbient(color);
 
-    // check if is continous and if not correct 
-// checking for continuity and a clone() acll will solve it.
-    if ( ! layer_image.isContinuous() )
-    { 
-      layer_image = layer_image.clone();
-    }
-
     TextureImage* image = image_vector[layer_number-1];
     image->setImage( layer_image );
+
     image->update();
     material->diffuse()->addTextureImage(image);
+
     result = true;
   }
   return result;
@@ -119,7 +114,7 @@ bool QtSceneSuperCell::get_image_layer_enable_status( int layer_number ){
   return result;
 }
 
-bool QtSceneSuperCell::add_image_layer(  cv::Mat layer_image , double width_nm, double height_nm, Qt3DCore::QTransform* transform, std::string layer_name ){
+bool QtSceneSuperCell::add_image_layer(  const cv::Mat& layer_image , double width_nm, double height_nm, Qt3DCore::QTransform* transform, std::string layer_name ){
 
   enabled_image_layers.push_back( true );
   // add the plane that will contain the image
@@ -130,23 +125,16 @@ bool QtSceneSuperCell::add_image_layer(  cv::Mat layer_image , double width_nm, 
   Qt3DExtras::QPlaneMesh* planeMesh = new Qt3DExtras::QPlaneMesh(planeEntity);
   planeMesh->setWidth( width_nm );
   planeMesh->setHeight( height_nm );
-  planeEntity->addComponent(planeMesh);
+  planeEntity->addComponent( planeMesh );
 
   if( transform ){
     if( _flag_super_cell ){
       const double length_c_Nanometers = super_cell->get_length_c_Nanometers();
       const double center_c_padding_nm = length_c_Nanometers / -2.0f;
-      transform->setTranslation(QVector3D( 0.0f, 0.0f, center_c_padding_nm ));
+      transform->setTranslation( QVector3D( 0.0f, 0.0f, center_c_padding_nm ) );
     }
     planeEntity->addComponent(transform);
     planeTransform_vector.push_back( transform );
-  }
-
-// check if is continous and if not correct 
-// checking for continuity and a clone() acll will solve it.
-  if ( ! layer_image.isContinuous() )
-  { 
-    layer_image = layer_image.clone();
   }
 
   Qt3DExtras::QDiffuseMapMaterial *material = new Qt3DExtras::QDiffuseMapMaterial( planeEntity );
@@ -158,7 +146,7 @@ bool QtSceneSuperCell::add_image_layer(  cv::Mat layer_image , double width_nm, 
   image->setImage( layer_image );
   image->update();
 
-  material->diffuse()->addTextureImage(image);
+  material->diffuse()->addTextureImage( image );
   planeEntity->addComponent(material);
 
   //save for later

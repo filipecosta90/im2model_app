@@ -269,6 +269,7 @@ public:
     int get_simgrid_best_match_thickness_slice();
     double get_simgrid_best_match_thickness_nm();
     double get_simgrid_best_match_defocus_nm();
+    bool validate_simulated_grid_position( int row, int col );
 
     double get_spherical_aberration();
     bool get_spherical_aberration_switch();

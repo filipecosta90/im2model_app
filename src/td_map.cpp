@@ -904,6 +904,12 @@ cv::Mat TDMap::get_simulated_image_in_grid( int x, int y ){
   return _td_map_simgrid->get_simulated_image_in_grid(  x,  y );
 }
 
+bool TDMap::validate_simulated_grid_position( int x, int y ){
+  bool result = false;
+  result = _td_map_simgrid->validate_simulated_grid_position(  x,  y );
+  return result;
+}
+
 cv::Mat TDMap::get_simulated_image_in_grid_visualization( int x, int y ){
   return _td_map_simgrid->get_simulated_image_in_grid_visualization(  x,  y );
 }

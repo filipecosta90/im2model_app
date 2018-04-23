@@ -346,64 +346,6 @@
           <widget class="QWidget" name="layoutWidget">
            <layout class="QVBoxLayout" name="verticalLayout_2">
             <item>
-             <layout class="QVBoxLayout" name="vertical_layout_experimental_image_roi_2">
-              <property name="sizeConstraint">
-               <enum>QLayout::SetMaximumSize</enum>
-              </property>
-              <item>
-               <widget class="QLabel" name="qlabel_roi_experimental_image_2">
-                <property name="font">
-                 <font>
-                  <weight>75</weight>
-                  <bold>true</bold>
-                 </font>
-                </property>
-                <property name="text">
-                 <string>TEM ROI</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="CvImageFrameTableWidget" name="qgraphics_roi_experimental_image_tab2" native="true">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
-                </property>
-                <property name="minimumSize">
-                 <size>
-                  <width>320</width>
-                  <height>320</height>
-                 </size>
-                </property>
-                <property name="sizeIncrement">
-                 <size>
-                  <width>1</width>
-                  <height>1</height>
-                 </size>
-                </property>
-                <property name="baseSize">
-                 <size>
-                  <width>320</width>
-                  <height>320</height>
-                 </size>
-                </property>
-                <property name="autoFillBackground">
-                 <bool>false</bool>
-                </property>
-               </widget>
-              </item>
-             </layout>
-            </item>
-            <item>
-             <widget class="Line" name="line_2">
-              <property name="orientation">
-               <enum>Qt::Horizontal</enum>
-              </property>
-             </widget>
-            </item>
-            <item>
              <layout class="QVBoxLayout" name="vertical_layout_experimental_image_roi_3">
               <property name="sizeConstraint">
                <enum>QLayout::SetMaximumSize</enum>
@@ -1069,12 +1011,6 @@
    <class>TDMap_Table</class>
    <extends>QTableWidget</extends>
    <header location="global">gui_tdmap_table.h</header>
-  </customwidget>
-  <customwidget>
-   <class>CvImageFrameTableWidget</class>
-   <extends>QWidget</extends>
-   <header location="global">cv_image_table_frame.h</header>
-   <container>1</container>
   </customwidget>
   <customwidget>
    <class>UnitCellViewerWindow</class>

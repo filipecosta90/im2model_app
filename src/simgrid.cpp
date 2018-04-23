@@ -78,7 +78,7 @@ bool SimGrid::export_sim_grid( std::string sim_grid_file_name_image , bool cut_m
     sim_grid_height = ( n_rows * slice_samples );
     sim_grid.create ( sim_grid_height, sim_grid_width , CV_8UC1 );
     sim_grid = cv::Mat::zeros(sim_grid_height, sim_grid_width, CV_8UC1);
-      const bool use_global =  (normalization_mode == GLOBAL_NORMALIZATION ) ? true : false;
+    const bool use_global =  (normalization_mode == GLOBAL_NORMALIZATION ) ? true : false;
 
     BaseImage sim_image_exporter;
     int vector_position = 0;
@@ -838,9 +838,20 @@ cv::Mat SimGrid::get_simulated_image_in_grid( int row_thickness, int col_defocus
 return return_mat;
 }
 
+bool SimGrid::validate_simulated_grid_position( int row_thickness, int col_defocus ){
+  bool result = false;
+  if( cleaned_simulated_images_grid.size() > row_thickness ){
+    const std::vector<cv::Mat> simulated_images_row = cleaned_simulated_images_grid.at( row_thickness );
+    if( simulated_images_row.size() > col_defocus ){
+      result = true;
+    }
+  }
+  return result;
+}
+
 cv::Mat SimGrid::get_simulated_image_in_grid_visualization( int row_thickness, int col_defocus ){
   cv::Mat return_mat;
-   const bool use_global = (normalization_mode == GLOBAL_NORMALIZATION ) ? true : false;
+  const bool use_global = (normalization_mode == GLOBAL_NORMALIZATION ) ? true : false;
   if( cleaned_simulated_images_grid.size() > row_thickness ){
     const std::vector<cv::Mat> simulated_images_row = cleaned_simulated_images_grid.at(row_thickness);
     if( simulated_images_row.size() > col_defocus ){

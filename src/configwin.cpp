@@ -68,13 +68,13 @@ MainWindow::MainWindow( ApplicationLog::ApplicationLog* logger , QWidget *parent
   else{
 
     _core_td_map = new TDMap(
-        _sim_tdmap_celslc_ostream_buffer,
-        _sim_tdmap_msa_ostream_buffer,
-        _sim_tdmap_wavimg_ostream_buffer,
-        _sim_tdmap_simgrid_ostream_buffer,
-        _sim_supercell_celslc_ostream_buffer,
-        _sim_supercell_msa_ostream_buffer,
-        _sim_supercell_wavimg_ostream_buffer );
+      _sim_tdmap_celslc_ostream_buffer,
+      _sim_tdmap_msa_ostream_buffer,
+      _sim_tdmap_wavimg_ostream_buffer,
+      _sim_tdmap_simgrid_ostream_buffer,
+      _sim_supercell_celslc_ostream_buffer,
+      _sim_supercell_msa_ostream_buffer,
+      _sim_supercell_wavimg_ostream_buffer );
 
     SuperCell* tdmap_vis_sim_unit_cell = _core_td_map->get_tdmap_vis_sim_unit_cell();
     SuperCell* tdmap_full_sim_super_cell = _core_td_map->get_tdmap_full_sim_super_cell();
@@ -435,17 +435,17 @@ bool MainWindow::_is_initialization_ok(){
 
 bool MainWindow::maybeSetPreferences(){
   const QMessageBox::StandardButton ret
-    = QMessageBox::warning(this, tr("Application"),
-        tr("The saved prefences file is incomplete.\n""To use Im2Model all preferences vars must be setted.\n"
-          "Do you want to open the preferences panel?"),
-        QMessageBox::Yes | QMessageBox::Close);
+  = QMessageBox::warning(this, tr("Application"),
+    tr("The saved prefences file is incomplete.\n""To use Im2Model all preferences vars must be setted.\n"
+      "Do you want to open the preferences panel?"),
+    QMessageBox::Yes | QMessageBox::Close);
   switch (ret) {
     case QMessageBox::Yes:
-      return edit_preferences();
+    return edit_preferences();
     case QMessageBox::Close:
-      return false;
+    return false;
     default:
-      break;
+    break;
   }
   return false;
 }
@@ -459,13 +459,23 @@ void MainWindow::update_tdmap_current_selection(int x,int y){
     message = std::stringstream();
   }
 
-  if(_core_td_map->get_flag_simulated_images_grid()){
+  const double full_image_height_nm = _core_td_map->get_sim_image_properties_roi_ny_size_height_nm();
+  const double full_image_width_nm = _core_td_map->get_sim_image_properties_roi_nx_size_width_nm();
+  std::cout << "full_image_width_nm" << full_image_width_nm << std::endl;
+  std::cout << "full_image_height_nm" << full_image_height_nm << std::endl;
+
+
+  if( _core_td_map->validate_simulated_grid_position( x , y )){
+
     tdmap_current_selection_pos.x = x;
     tdmap_current_selection_pos.y = y;
+
     const cv::Mat _simulated_image = _core_td_map->get_simulated_image_in_grid_visualization(x,y);
     double _simulated_image_match = 0.0f;
+
     const bool correlation_active = _core_td_map->get_run_simgrid_switch();
     QStandardItem *match_item;
+
     if( correlation_active ){
       _simulated_image_match = _core_td_map->get_simulated_image_match_in_grid(x,y);
       match_item = new QStandardItem( QString::number( _simulated_image_match ) );
@@ -481,11 +491,11 @@ void MainWindow::update_tdmap_current_selection(int x,int y){
 
     model->setHeaderData(0, Qt::Horizontal, tr("Parameter"));
     model->setHeaderData(1, Qt::Horizontal, tr("Value"));
-    QStandardItem *label_match_item = new QStandardItem(tr("Match %"));
-    QStandardItem *label_defocus_item = new QStandardItem(tr("Defocus"));
-    QStandardItem *label_thickness_item = new QStandardItem(tr("Thickness"));
+    QStandardItem *label_match_item = new QStandardItem( tr("Match %") );
+    QStandardItem *label_defocus_item = new QStandardItem( tr("Defocus") );
+    QStandardItem *label_thickness_item = new QStandardItem( tr("Thickness") );
     QStandardItem *thickness_item = new QStandardItem( QString::number( _simulated_image_thickness ) );
-    QStandardItem *defocus_item = new QStandardItem( QString::number( _simulated_image_defocus  ) );
+    QStandardItem *defocus_item = new QStandardItem( QString::number( _simulated_image_defocus ) );
     model->setItem(0, 0, label_match_item);
     model->setItem(1, 0, label_thickness_item);
     model->setItem(2, 0, label_defocus_item);
@@ -494,16 +504,18 @@ void MainWindow::update_tdmap_current_selection(int x,int y){
     model->setItem(2, 1, defocus_item);
     ui->qgraphics_tdmap_selection->setModel(model);
 
-    const double full_image_height_nm = _core_td_map->get_sim_image_properties_roi_ny_size_height_nm();
-    const double full_image_width_nm = _core_td_map->get_sim_image_properties_roi_nx_size_width_nm();
-
-    std::cout << "full_image_width_nm" << full_image_width_nm << std::endl;
-    std::cout << "full_image_height_nm" << full_image_height_nm << std::endl;
     Qt3DCore::QTransform* transform = new Qt3DCore::QTransform( );
     transform->setRotation(QQuaternion::fromAxisAndAngle(1,0,0,90));
 
-    ui->qgraphics_tdmap_selection->update_image_layer( _simulated_image , full_image_width_nm ,  full_image_height_nm , transform, "Simulated image layer");
-
+    ui->qgraphics_tdmap_selection->update_image_layer( _simulated_image , full_image_width_nm ,  full_image_height_nm , transform, "Simulated image layer" , 2 );
+  }
+  else{
+    if (_flag_im2model_logger) {
+      std::stringstream message;
+      message << "the current selection (x " <<  x << ", y " << y << " ) does not map to the simgrid bounds";
+      im2model_logger->logEvent(ApplicationLog::error, message.str());
+      message = std::stringstream();
+    }
   }
 }
 
@@ -655,13 +667,28 @@ void MainWindow::update_full_experimental_image(){
 }
 
 void MainWindow::update_roi_experimental_image_frame(){
+
   if( _core_td_map->get_exp_image_properties_flag_roi_image() ){
+
     cv::Mat roi_image = _core_td_map->get_exp_image_properties_roi_image_visualization();
+
+    const double roi_image_height_nm = _core_td_map->get_exp_image_properties_roi_ny_size_height_nm();
+    const double roi_image_width_nm = _core_td_map->get_exp_image_properties_roi_nx_size_width_nm();
+
     ui->qgraphics_roi_experimental_image_tab1->setImage( roi_image );
-    ui->qgraphics_roi_experimental_image_tab2->setImage( roi_image );
+    //ui->qgraphics_roi_experimental_image_tab2->setImage( roi_image );
+
+    std::cout << "roi_image_width_nm " << roi_image_width_nm << std::endl;
+    std::cout << "roi_image_height_nm " << roi_image_height_nm << std::endl;
+
+    Qt3DCore::QTransform* transform = new Qt3DCore::QTransform( );
+    transform->setRotation(QQuaternion::fromAxisAndAngle(1,0,0,90));
+    ui->qgraphics_tdmap_selection->update_image_layer( roi_image , roi_image_width_nm ,  roi_image_height_nm , transform, "Experimental image layer", 1 );
+
     ui->qgraphics_roi_experimental_image_tab1->show();
-    ui->qgraphics_roi_experimental_image_tab2->show();
+    //ui->qgraphics_roi_experimental_image_tab2->show();
   }
+
 }
 
 //update tab 4 ROI experimental image
@@ -1102,9 +1129,9 @@ bool MainWindow::edit_preferences(){
 
 void MainWindow::about(){
   QMessageBox::about(this, tr("Im2Model"),
-      tr("<b>Im2Model</b> combines transmission electron microscopy, image correlation and matching procedures,"
-        "enabling the determination of a three-dimensional atomic structure based strictly on a single high-resolution experimental image."
-        "Partialy financiated as part of the protocol between UTAustin I Portugal - UTA-P."));
+    tr("<b>Im2Model</b> combines transmission electron microscopy, image correlation and matching procedures,"
+      "enabling the determination of a three-dimensional atomic structure based strictly on a single high-resolution experimental image."
+      "Partialy financiated as part of the protocol between UTAustin I Portugal - UTA-P."));
 }
 
 void MainWindow::documentWasModified(){
@@ -1346,21 +1373,21 @@ bool MainWindow::maybeSave(){
     return  true;
   }
   const QMessageBox::StandardButton ret
-    = QMessageBox::warning(this, tr("Application"),
-        tr("The document has been modified.\n"
-          "Do you want to save your changes?"),
-        QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
+  = QMessageBox::warning(this, tr("Application"),
+    tr("The document has been modified.\n"
+      "Do you want to save your changes?"),
+    QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
   switch (ret) {
     case QMessageBox::Save:
-      {
-        return save();
-      }
+    {
+      return save();
+    }
     case QMessageBox::Cancel:
-      {
-        return false;
-      }
+    {
+      return false;
+    }
     default:
-      break;
+    break;
   }
   return true;
 }
@@ -1372,26 +1399,26 @@ bool MainWindow::maybeSetProject(){
   }
   else{
     const QMessageBox::StandardButton ret
-      = QMessageBox::warning(this, tr("Application"),
-          tr("To make that action you need to set the project.\n"
-            "Do you want to set the project?"),
-          QMessageBox::Yes  | QMessageBox::Cancel);
+    = QMessageBox::warning(this, tr("Application"),
+      tr("To make that action you need to set the project.\n"
+        "Do you want to set the project?"),
+      QMessageBox::Yes  | QMessageBox::Cancel);
     switch (ret) {
       case QMessageBox::Yes:
-        {
-          result = save();
-          break;
-        }
+      {
+        result = save();
+        break;
+      }
       case QMessageBox::Cancel:
-        {
-          result = false;
-          break;
-        }
+      {
+        result = false;
+        break;
+      }
       default:
-        {
-          result = false;
-          break;
-        }
+      {
+        result = false;
+        break;
+      }
     }
   }
   return result;
@@ -3210,12 +3237,12 @@ void MainWindow::create_box_options_tab4_intensity_columns_listing(){
   }
 
   connect(
-      ui->qtree_view_refinement_full_simulation_intensity_columns->selectionModel(),
-      SIGNAL(selectionChanged(const QItemSelection &, const QItemSelection &)),
-      this,
-      SLOT(full_simulation_intensity_columns_SelectionChanged(const QItemSelection &, const QItemSelection &)),
-      Qt::DirectConnection
-      );
+    ui->qtree_view_refinement_full_simulation_intensity_columns->selectionModel(),
+    SIGNAL(selectionChanged(const QItemSelection &, const QItemSelection &)),
+    this,
+    SLOT(full_simulation_intensity_columns_SelectionChanged(const QItemSelection &, const QItemSelection &)),
+    Qt::DirectConnection
+    );
 }
 
 void MainWindow::full_simulation_intensity_columns_SelectionChanged(const QItemSelection &selected, const QItemSelection &deselected)
@@ -3333,16 +3360,16 @@ void MainWindow::on_qbutton_tdmap_accept_clicked(){
       best_match_pos = _core_td_map->get_simgrid_best_match_position();
       if( best_match_pos != tdmap_current_selection_pos ){
         const QMessageBox::StandardButton ret
-          = QMessageBox::warning(this, tr("Application"),
-              tr("The selected cell differs from the automatic best match position.\n"
-                "Do you want to use the current selected thickness value?"),
-              QMessageBox::Yes | QMessageBox::No);
+        = QMessageBox::warning(this, tr("Application"),
+          tr("The selected cell differs from the automatic best match position.\n"
+            "Do you want to use the current selected thickness value?"),
+          QMessageBox::Yes | QMessageBox::No);
         switch (ret) {
           case QMessageBox::No:
-            accept = false;
-            break;
+          accept = false;
+          break;
           default:
-            break;
+          break;
         }
       }
     }
