@@ -470,6 +470,8 @@ void MainWindow::update_tdmap_current_selection(int x,int y){
     tdmap_current_selection_pos.x = x;
     tdmap_current_selection_pos.y = y;
 
+    
+
     const cv::Mat _simulated_image = _core_td_map->get_simulated_image_in_grid_visualization(x,y);
     double _simulated_image_match = 0.0f;
 
@@ -478,7 +480,10 @@ void MainWindow::update_tdmap_current_selection(int x,int y){
 
     if( correlation_active ){
       _simulated_image_match = _core_td_map->get_simulated_image_match_in_grid(x,y);
+    const cv::Point2i simulated_match_location = _core_td_map->get_simulated_match_location(x,y);
+    std::cout << "simulated_match_location " << simulated_match_location << std::endl; 
       match_item = new QStandardItem( QString::number( _simulated_image_match ) );
+        //match_item = new QStandardItem( QString::number( _simulated_image_match ) );
     }
     else{
       match_item = new QStandardItem(tr("N/A"));

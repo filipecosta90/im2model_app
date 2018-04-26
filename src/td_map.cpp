@@ -910,6 +910,10 @@ bool TDMap::validate_simulated_grid_position( int x, int y ){
   return result;
 }
 
+cv::Point2i TDMap::get_simulated_match_location( int x, int y ){
+  return _td_map_simgrid->get_simulated_match_location(  x,  y );
+}
+
 cv::Mat TDMap::get_simulated_image_in_grid_visualization( int x, int y ){
   return _td_map_simgrid->get_simulated_image_in_grid_visualization(  x,  y );
 }

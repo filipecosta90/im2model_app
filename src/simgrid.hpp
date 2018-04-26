@@ -98,6 +98,8 @@ private:
 
     //will contain the all the simulated images match percentage
     std::vector<double> simulated_matches;
+    std::vector< cv::Point2i> simulated_matches_location;
+
     std::vector<cv::Point3d> slice_defocus_match_points;
 
     //: normalized correlation, non-normalized correlation and sum-absolute-difference
@@ -105,6 +107,8 @@ private:
 
     cv::Mat match_values_matrix;
     bool _flag_match_values_matrix = false;
+
+
     cv::Mat imregionalmax_match_values_matrix;
     cv::Point2i best_match_Point2i;
     bool _flag_best_match_Point2i = false;
@@ -124,6 +128,7 @@ private:
 
 public:
 
+cv::Point2i get_simulated_match_location( int row_thickness, int col_defocus );
     SimGrid( boost::process::ipstream& async_io_buffer_out );
     bool export_sim_grid( std::string filename , bool cut_margin = false );
     bool validate_simulated_grid_position( int row_thickness, int col_defocus );

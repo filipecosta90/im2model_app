@@ -525,6 +525,16 @@ if( _flag_logger ){
 return status;
 }
 
+cv::Point2i SimGrid::get_simulated_match_location( int row_thickness, int col_defocus ){
+  cv::Point2i result( 0, 0 );
+  const int defocus_samples = sim_crystal_properties->get_defocus_samples();
+  const int array_position = row_thickness * defocus_samples + col_defocus;
+  if( array_position < simulated_matches_location.size() ){
+    result = simulated_matches_location[array_position];
+  }
+  return result;
+}
+
 bool SimGrid::simulate_from_grid(){
   runned_simulation = false;
   if(
@@ -607,8 +617,9 @@ bool SimGrid::simulate_from_grid(){
               matchVal = maxVal;
               match_factor = matchVal * 100.0;
               match_values_matrix.at<float>( thickness, defocus ) =  match_factor ;
-              simulated_matches.push_back(match_factor);
 
+              simulated_matches_location.push_back( maxLoc );
+              simulated_matches.push_back( match_factor );
             } 
             catch ( const std::exception& e ){
               _error_flag = true;
@@ -724,6 +735,7 @@ bool SimGrid::clean_for_re_run(){
   experimental_images_match_location_grid.clear();
 
   simulated_matches.clear();
+  simulated_matches_location.clear();
   slice_defocus_match_points.clear();
 
   match_values_matrix.release();

@@ -261,6 +261,7 @@ public:
     
     cv::Point2i get_simgrid_best_match_position();
     cv::Mat get_simulated_image_in_grid( int row, int col );
+    cv::Point2i get_simulated_match_location( int x, int y );
     cv::Mat get_simulated_image_in_grid_visualization( int row, int col );
     double get_simulated_image_match_in_grid( int row, int col );
     int get_simulated_image_thickness_slice_in_grid( int row, int col );
