@@ -69,6 +69,7 @@ bool QtSceneSuperCell::update_image_layer( const cv::Mat& layer_image , double w
     reload_data_from_super_cell();
   }
   else{
+
     Qt3DExtras::QPlaneMesh* planeMesh = planeMesh_vector[layer_number-1];
     planeMesh->setWidth( width_nm );
     planeMesh->setHeight( height_nm );
@@ -84,6 +85,7 @@ bool QtSceneSuperCell::update_image_layer( const cv::Mat& layer_image , double w
     material->diffuse()->addTextureImage(image);
 
     result = true;
+    
   }
   return result;
 }

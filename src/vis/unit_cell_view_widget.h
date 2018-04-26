@@ -89,7 +89,7 @@ QT_FORWARD_DECLARE_CLASS(QLayout)
 class UnitCellViewerWindow : public QWidget {
   Q_OBJECT
 public:
-  UnitCellViewerWindow(QWidget *parent = 0);
+  UnitCellViewerWindow(QWidget *parent = 0, bool vertical = false  );
   void set_super_cell( SuperCell* , bool bind_orientation = true );
   bool update_image_layer( cv::Mat layer_image , double width_nm, double height_nm , Qt3DCore::QTransform* transform = nullptr, std::string layer_name = "Image Layer", int layer_number = 1);
   bool add_image_layer( cv::Mat layer_image, double width_nm, double height_nm, Qt3DCore::QTransform* transform = nullptr );

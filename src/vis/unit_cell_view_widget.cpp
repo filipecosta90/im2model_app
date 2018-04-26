@@ -9,7 +9,7 @@
 
 #include "unit_cell_view_widget.h"
 
-UnitCellViewerWindow::UnitCellViewerWindow(QWidget *parent) : QWidget(parent) {
+UnitCellViewerWindow::UnitCellViewerWindow(QWidget *parent, bool vertical ) : QWidget(parent) {
 
   toolsLayout = new QBoxLayout(QBoxLayout::TopToBottom,this);
   //set margins to zero so the toolbar touches the widget's edges
@@ -61,8 +61,12 @@ UnitCellViewerWindow::UnitCellViewerWindow(QWidget *parent) : QWidget(parent) {
   atom_info_tree_view = new QTreeView(this);
   /*TreeView delegate*/
   atom_info_tree_view_delegate = new TreeItemFileDelegate(this);
-
-  split2->addWidget(atom_info_tree_view);
+  if( vertical ){
+    split1->addWidget(atom_info_tree_view);
+  }
+  else{
+    split2->addWidget(atom_info_tree_view);
+  }
   split2->setStretchFactor(0,5);
   split2->setStretchFactor(1,5);
   full_layout->addWidget(split2);

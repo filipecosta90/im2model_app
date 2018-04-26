@@ -26,7 +26,7 @@ class CvCellFrameTableWidget : public UnitCellViewerWindow
 {
   Q_OBJECT
 public:
-  explicit CvCellFrameTableWidget(QWidget *parent = 0) : UnitCellViewerWindow(parent){
+  explicit CvCellFrameTableWidget(QWidget *parent = 0) : UnitCellViewerWindow(parent, true){
     table_view = new QTableView;
     //disable editing
     table_view->setEditTriggers(QAbstractItemView::NoEditTriggers);

@@ -58,6 +58,9 @@
 #include <Qt3DExtras/qfirstpersoncameracontroller.h>
 #include <Qt3DExtras/QOrbitCameraController>
 #include <Qt3DExtras/QPhongMaterial>
+#include <Qt3DExtras/QPhongAlphaMaterial>
+
+
 
 #include <QComponent>
 #include <QMetaObject>

@@ -9,10 +9,18 @@ void TextureImage::paint (QPainter* painter)
 
   if( _image_set ){
     bool b = _qimage_ptr->save("test2.png");
+
+
+    painter->save();
+    double dopacity = 10 / 255.0f;
+    painter->setOpacity( dopacity );
+    painter->drawImage( QPoint(0,0), *_qimage_ptr );
+    painter->restore();
+/*
     painter->drawImage( QPoint(0,0), *_qimage_ptr );
     std::cout << " paiting image " << std::endl;
     bool c = _qimage_ptr->save("test3.png");
-    std::cout << " save result 2 " << std::boolalpha << b << std::endl;
+    std::cout << " save result 2 " << std::boolalpha << b << std::endl;*/
   }
 }
 
@@ -48,11 +56,10 @@ void TextureImage::setImage( const cv::Mat& image ){
   //assert( _tmp_original.isContinuous() );
   original_size = image.size();
 
-
   std::cout << "TextureImage::setImage from image with original size " << original_size << std::endl;
 
   
-  cv::split(_tmp_original, matChannels);
+  /*cv::split(_tmp_original, matChannels);
   
   // create alpha channel
   cv::Mat alpha ( _tmp_original.cols, _tmp_original.rows, CV_8UC1, cv::Scalar(255) );
@@ -66,12 +73,13 @@ void TextureImage::setImage( const cv::Mat& image ){
     dst = dst.clone();
   }
   cv::imwrite( "dst.png", dst );
+  */
 
   // Assign OpenCV's image buffer to the QImage. Note that the bytesPerLine parameter
   // (http://qt-project.org/doc/qt-4.8/qimage.html#QImage-6) is 4*width because each pixel
   // has three bytes.
   // QImage(uchar *data, int width, int height, int bytesPerLine, Format format, QImageCleanupFunction cleanupFunction = Q_NULLPTR, void *cleanupInfo = Q_NULLPTR)
-  _qimage_ptr = new QImage(dst.data, dst.cols, dst.rows, dst.cols*4, QImage::Format_RGBA8888);
+  _qimage_ptr = new QImage(_tmp_original.data, _tmp_original.cols, _tmp_original.rows, _tmp_original.cols*3, QImage::Format_RGB888);
   this->setSize( QSize( image.cols, image.rows ) );
   bool b = _qimage_ptr->save("test.png");
   std::cout << " save result " << std::boolalpha << b << std::endl;
