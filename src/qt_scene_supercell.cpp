@@ -80,10 +80,9 @@ bool QtSceneSuperCell::update_image_layer( const cv::Mat& layer_image , double w
 
     TextureImage* image = image_vector[layer_number-1];
     image->setImage( layer_image );
-
     image->update();
-    material->diffuse()->addTextureImage(image);
 
+    material->diffuse()->addTextureImage(image);
     result = true;
     
   }

@@ -568,6 +568,7 @@ void MainWindow::update_tdmap_current_selection(int x,int y){
         cv::imwrite( "_simulated_on_exp_centered.png", _simulated_on_exp_centered );
 
         ui->qgraphics_tdmap_selection->update_image_layer( _simulated_on_exp_centered , _simulated_on_exp_centered_cols_width_nm ,  _simulated_on_exp_centered_rows_height_nm , transform, "Overlaped images layer", 3 );
+        ui->qgraphics_tdmap_selection->update();
       }
     }
 
