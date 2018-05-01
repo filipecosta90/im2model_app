@@ -470,7 +470,8 @@ void MainWindow::update_tdmap_current_selection(int x,int y){
     tdmap_current_selection_pos.x = x;
     tdmap_current_selection_pos.y = y;
 
-    
+    Qt3DCore::QTransform* transform = new Qt3DCore::QTransform( );
+    transform->setRotation(QQuaternion::fromAxisAndAngle(1,0,0,90));
 
     const cv::Mat _simulated_image = _core_td_map->get_simulated_image_in_grid_visualization(x,y);
     double _simulated_image_match = 0.0f;
@@ -480,10 +481,7 @@ void MainWindow::update_tdmap_current_selection(int x,int y){
 
     if( correlation_active ){
       _simulated_image_match = _core_td_map->get_simulated_image_match_in_grid(x,y);
-    const cv::Point2i simulated_match_location = _core_td_map->get_simulated_match_location(x,y);
-    std::cout << "simulated_match_location " << simulated_match_location << std::endl; 
       match_item = new QStandardItem( QString::number( _simulated_image_match ) );
-        //match_item = new QStandardItem( QString::number( _simulated_image_match ) );
     }
     else{
       match_item = new QStandardItem(tr("N/A"));
@@ -509,10 +507,70 @@ void MainWindow::update_tdmap_current_selection(int x,int y){
     model->setItem(2, 1, defocus_item);
     ui->qgraphics_tdmap_selection->setModel(model);
 
-    Qt3DCore::QTransform* transform = new Qt3DCore::QTransform( );
-    transform->setRotation(QQuaternion::fromAxisAndAngle(1,0,0,90));
-
     ui->qgraphics_tdmap_selection->update_image_layer( _simulated_image , full_image_width_nm ,  full_image_height_nm , transform, "Simulated image layer" , 2 );
+
+
+    if( correlation_active ){
+
+      const cv::Point2i simulated_match_location = _core_td_map->get_simulated_match_location(x,y);
+
+      if( _core_td_map->get_exp_image_properties_flag_roi_image() ){
+
+        cv::Mat roi_image = _core_td_map->get_exp_image_properties_roi_image_visualization();
+        cv::Mat roi_image_clone = roi_image.clone();
+
+        _simulated_image.copyTo(roi_image_clone(cv::Rect(simulated_match_location.x,simulated_match_location.y,_simulated_image.cols, _simulated_image.rows)));
+
+        const double roi_image_height_nm = _core_td_map->get_exp_image_properties_roi_ny_size_height_nm();
+        const double roi_image_width_nm = _core_td_map->get_exp_image_properties_roi_nx_size_width_nm();
+
+        // start position x
+        const int right_side_cols = roi_image_clone.cols - _simulated_image.cols - simulated_match_location.x;
+        const int right_side_cols_compensation = ( right_side_cols < simulated_match_location.x ) ? ( simulated_match_location.x - right_side_cols ) : 0;
+        const int left_side_cols_compensation = ( simulated_match_location.x < right_side_cols ) ? ( right_side_cols - simulated_match_location.x ) : 0;
+
+        const int _simulated_on_exp_centered_cols = left_side_cols_compensation + roi_image_clone.cols + right_side_cols_compensation;
+        const double _simulated_on_exp_centered_cols_width_nm = (roi_image_width_nm/roi_image_clone.cols) * _simulated_on_exp_centered_cols;
+
+        std::cout << " roi_image_clone.cols " << roi_image_clone.cols << std::endl; 
+        std::cout << " _simulated_image.cols " << _simulated_image.cols << std::endl; 
+        std::cout << " simulated_match_location.x " << simulated_match_location.x << std::endl; 
+        std::cout << " left_side_cols_compensation " << left_side_cols_compensation << std::endl;
+        std::cout << " right_side_cols " << right_side_cols << std::endl; 
+        std::cout << " right_side_cols_compensation " << right_side_cols_compensation << std::endl;
+        std::cout << " _simulated_on_exp_centered_cols " << _simulated_on_exp_centered_cols << std::endl;
+        std::cout << " _simulated_on_exp_centered_cols_width_nm " << _simulated_on_exp_centered_cols_width_nm << std::endl;
+
+        // start position y
+
+        // start position x
+        const int bottom_side_rows = roi_image_clone.rows - _simulated_image.rows - simulated_match_location.y;
+        const int bottom_side_rows_compensation = ( bottom_side_rows < simulated_match_location.y ) ? ( simulated_match_location.y - bottom_side_rows ) : 0;
+        const int top_side_rows_compensation = ( simulated_match_location.y < bottom_side_rows ) ? ( bottom_side_rows - simulated_match_location.y ) : 0;
+
+        const int _simulated_on_exp_centered_rows = top_side_rows_compensation + roi_image_clone.rows + bottom_side_rows_compensation;
+        const double _simulated_on_exp_centered_rows_height_nm = (roi_image_height_nm/roi_image_clone.rows) * _simulated_on_exp_centered_rows;
+
+        std::cout << " roi_image_clone.rows " << roi_image_clone.rows << std::endl; 
+        std::cout << " _simulated_image.rows " << _simulated_image.rows << std::endl; 
+        std::cout << " simulated_match_location.y " << simulated_match_location.y << std::endl; 
+
+        std::cout << " top_side_rows_compensation " << top_side_rows_compensation << std::endl;
+        std::cout << " bottom_side_rows " << bottom_side_rows << std::endl;
+        std::cout << " bottom_side_rows_compensation " << bottom_side_rows_compensation << std::endl;
+
+        std::cout << " _simulated_on_exp_centered_rows " << _simulated_on_exp_centered_rows << std::endl;
+        std::cout << " _simulated_on_exp_centered_rows_height_nm " << _simulated_on_exp_centered_rows_height_nm << std::endl;
+
+
+        cv::Mat _simulated_on_exp_centered( _simulated_on_exp_centered_rows, _simulated_on_exp_centered_cols , roi_image_clone.type(), cv::Scalar::all( 255 ) );
+        roi_image_clone.copyTo(_simulated_on_exp_centered(cv::Rect( left_side_cols_compensation, top_side_rows_compensation, roi_image_clone.cols, roi_image_clone.rows)));
+        cv::imwrite( "_simulated_on_exp_centered.png", _simulated_on_exp_centered );
+
+        ui->qgraphics_tdmap_selection->update_image_layer( _simulated_on_exp_centered , _simulated_on_exp_centered_cols_width_nm ,  _simulated_on_exp_centered_rows_height_nm , transform, "Overlaped images layer", 3 );
+      }
+    }
+
   }
   else{
     if (_flag_im2model_logger) {

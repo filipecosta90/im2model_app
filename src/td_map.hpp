@@ -226,7 +226,6 @@ public:
     int get_image_correlation_matching_method();
     int get_image_normalization_method();
 
-
     int get_refinement_definition_method(){ return _refinement_definition_method; }
     int get_envelop_parameters_vibrational_damping_method();
     bool get_run_celslc_switch(){ return _run_celslc_switch; }
