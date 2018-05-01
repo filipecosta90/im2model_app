@@ -64,6 +64,7 @@ public slots:
 signals:
     void modified();
     void tdmap_best_match( int x, int y );
+    void export_overlay( int x, int y );
 
     private slots:
       void somethingChanged();

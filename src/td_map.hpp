@@ -514,6 +514,7 @@ public:
     cv::Mat get_exp_image_properties_full_image_visualization();
     cv::Mat get_exp_image_properties_roi_image();
     cv::Mat get_exp_image_properties_roi_image_visualization();
+    cv::Mat get_simulated_on_exp_centered_images_visualization( int x, int y );
     cv::Rect get_exp_image_properties_roi_rectangle();
     double get_exp_image_properties_full_ny_size_height_nm();
     double get_exp_image_properties_full_nx_size_width_nm();

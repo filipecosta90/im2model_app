@@ -21,12 +21,10 @@ CvImageCellWidget::CvImageCellWidget(QWidget *parent ) : QWidget(parent) {
 void CvImageCellWidget::add_onfocus_functor( boost::function<void(QFocusEvent *event)> functor ){
   focus_functor = functor;
   image_widget->add_onfocus_functor( functor );
-     std::cout << " added add_onfocus_functor" << std::endl;
 }
 
 void CvImageCellWidget::focusInEvent ( QFocusEvent * event ) { 
   focus_functor( event );  
-   std::cout << " received focusInEvent" << std::endl;
 }
 
 /* Loggers */

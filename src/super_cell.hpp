@@ -58,10 +58,14 @@
 #include "unit_cell.hpp"
 #include "application_log.hpp"
 #include "cv_polygon.hpp"
+#include "treemodel.h"
 
 class SuperCell : public BaseCell{
   Q_OBJECT
   private:
+      //Atom properties
+  TreeModel *atom_info_fields_model = nullptr;
+
     /** Private Class methods **/
 
     cv::Point2d op_Point2d_padding ( cv::Point2d point, const double padd_x, const double  padd_y );
@@ -117,6 +121,8 @@ class SuperCell : public BaseCell{
     SuperCell();
     SuperCell( UnitCell* cell );
     bool set_base_bin_start_dir_path( boost::filesystem::path base_dir );
+
+    TreeModel *get_atom_info_fields_model(){ return atom_info_fields_model; }
 
     bool update_from_unit_cell();
     bool update_angle_parameters_from_unit_cell();

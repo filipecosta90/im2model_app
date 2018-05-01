@@ -255,6 +255,7 @@ bool QtSceneSuperCell::updateAtomMeshRadius( int distinct_atom_pos, double radiu
   const std::vector<std::string> atom_symbols = super_cell->get_atom_symbols_vec();
 
   if( _flag_super_cell && ( atom_symbols.size() > distinct_atom_pos ) ){
+    local_atom_empirical_radiis[distinct_atom_pos] = (float) radius;
     const std::string atom_symbol = atom_symbols[distinct_atom_pos];
     const QString atomTypeMeshName = atomMeshName + QString::fromStdString( atom_symbol );
     QList<Qt3DExtras::QSphereMesh *> child_meshes = m_rootEntity->findChildren<Qt3DExtras::QSphereMesh *>( atomTypeMeshName );

@@ -63,17 +63,21 @@ UnitCellViewerWindow::UnitCellViewerWindow(QWidget *parent, bool vertical ) : QW
   atom_info_tree_view_delegate = new TreeItemFileDelegate(this);
   if( vertical ){
     split1->addWidget(atom_info_tree_view);
+    split1->setStretchFactor(0,5);
+    split1->setStretchFactor(1,5);
   }
   else{
     split2->addWidget(atom_info_tree_view);
+    split2->setStretchFactor(0,5);
+    split2->setStretchFactor(1,5);
   }
-  split2->setStretchFactor(0,5);
-  split2->setStretchFactor(1,5);
+  
   full_layout->addWidget(split2);
   this->setLayout( full_layout );
 
   init();
   create_standard_atom_options();
+  view_along_c_axis();
 }
 
 /* Loggers */
@@ -129,7 +133,7 @@ bool UnitCellViewerWindow::add_image_layer( cv::Mat layer_image , double width_n
   return result;
 }
 
-void UnitCellViewerWindow::create_standard_atom_options(){
+void UnitCellViewerWindow::create_standard_atom_options( ){
 
   QVector<QVariant> common_header = {"Field","Value"};
   display_root = new TreeItem ( common_header );
@@ -212,6 +216,7 @@ void UnitCellViewerWindow::reload_data_from_super_cell( ){
       TreeItem* atom_item  = new TreeItem  ( box_option , box_function, box_option_edit );
       atom_item->set_fp_data_getter_double_vec( 1, box_function_getter );
       atom_item->load_data_from_getter( 1 );
+      atom_item->set_variable_name( atom_symbol );
       atom_item->set_flag_validatable_double(1,true);
       atom_info_fields_model->insertChildren( atom_item, atom_radius_root );
     }

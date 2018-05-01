@@ -18,20 +18,20 @@ CVImageWidget::CVImageWidget(QWidget *parent ) : QWidget(parent) , scaleFactor(1
 
 void CVImageWidget::MapPosToObject(const QPoint &pos){
   // Handle global position
-  std::cout << "MapPosToObject x "  << pos.x() << " y " << pos.y() << std::endl;
+ // std::cout << "MapPosToObject x "  << pos.x() << " y " << pos.y() << std::endl;
 }
 
 void CVImageWidget::add_onfocus_functor( boost::function<void(QFocusEvent *event)> functor ){
   focus_functor = functor;
   _flag_focus_functor = true;
-     std::cout << " added add_onfocus_functor CVImageWidget" << std::endl;
+//     std::cout << " added add_onfocus_functor CVImageWidget" << std::endl;
 }
 
 void CVImageWidget::focusInEvent ( QFocusEvent * event ) {
   if( _flag_focus_functor ){
       focus_functor( event );  
   }
-   std::cout << " received focusInEvent" << std::endl;
+  // std::cout << " received focusInEvent" << std::endl;
 }
 
 /* Loggers */
@@ -197,6 +197,7 @@ this->setFixedSize( largestImageLayerSize() );
 }
 
 void CVImageWidget::ShowContextMenu(const QPoint &pos){
+  std::cout << " ShowContextMenu " << std::endl;
   // Handle global position
   QPoint globalPos = this->mapToGlobal(pos);
 

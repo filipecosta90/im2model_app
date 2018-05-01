@@ -179,7 +179,7 @@ MainWindow::MainWindow( ApplicationLog::ApplicationLog* logger , QWidget *parent
       // will quit thread after work done
       connect(sim_super_cell_worker, SIGNAL(SuperCell_edge_finished()), _sim_super_cell_thread, SLOT(quit()), Qt::DirectConnection  );
 
-      connect(ui->tdmap_table, SIGNAL(cellClicked(int , int )), this, SLOT( update_tdmap_current_selection(int,int)) );
+      connect(ui->tdmap_table, SIGNAL( cellClicked( int , int )), this, SLOT( update_tdmap_current_selection(int,int)) );
 
       connect(this, SIGNAL(experimental_image_filename_changed()), this, SLOT(update_full_experimental_image())    );
       connect(this, SIGNAL(simulated_grid_changed( )), this, SLOT(update_simgrid_frame( ))  );
@@ -461,9 +461,8 @@ void MainWindow::update_tdmap_current_selection(int x,int y){
 
   const double full_image_height_nm = _core_td_map->get_sim_image_properties_roi_ny_size_height_nm();
   const double full_image_width_nm = _core_td_map->get_sim_image_properties_roi_nx_size_width_nm();
-  std::cout << "full_image_width_nm" << full_image_width_nm << std::endl;
-  std::cout << "full_image_height_nm" << full_image_height_nm << std::endl;
-
+  //std::cout << "full_image_width_nm" << full_image_width_nm << std::endl;
+  //std::cout << "full_image_height_nm" << full_image_height_nm << std::endl;
 
   if( _core_td_map->validate_simulated_grid_position( x , y )){
 

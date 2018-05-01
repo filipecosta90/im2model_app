@@ -257,13 +257,13 @@ std::string TDMap::get_unit_cell_cif_path(){
 }
 
 void TDMap::update_tdmap_celslc_ssc_stage_started( int nsteps ){
-      std::cout << "update_tdmap_celslc_ssc_stage_started" << std::endl;
+  std::cout << "update_tdmap_celslc_ssc_stage_started" << std::endl;
   emit TDMap_started_celslc();
   emit TDMap_inform_celslc_n_steps( nsteps );
 }
 
 void TDMap::update_tdmap_celslc_ssc_single_slice_ended( bool result ){
-    std::cout << "update_tdmap_celslc_ssc_single_slice_ended" << std::endl;
+  std::cout << "update_tdmap_celslc_ssc_single_slice_ended" << std::endl;
 
   emit TDMap_ended_celslc_ssc_single_slice_ended( result );
 }
@@ -590,52 +590,52 @@ bool TDMap::run_tdmap_wavimg(){
 bool TDMap::run_tdmap_simgrid_read(){
   if( check_tdmap_wavimg_output() ){
 
- if( _flag_runned_tdmap_simgrid_read ){
+   if( _flag_runned_tdmap_simgrid_read ){
     _flag_runned_tdmap_simgrid_read = !_td_map_simgrid->clean_for_re_run();
   }
 
-    emit TDMap_started_simgrid();
+  emit TDMap_started_simgrid();
             // 1st step in simgrid
-    bool _grid_ok = false;
-    try {
-      _grid_ok = _td_map_simgrid->read_grid_from_dat_files();
-    } catch ( const std::exception& e ){
-      _grid_ok = false;
-      if( _flag_logger ){
-        std::stringstream message;
-        message << "A standard exception was caught, while running _td_map_simgrid->read_grid_from_dat_files(): " << e.what();
-        ApplicationLog::severity_level _log_type = ApplicationLog::error;
-        BOOST_LOG_FUNCTION();  logger->logEvent( _log_type , message.str() );
-      }
-    }
-            // 2nd step in simgrid
-    bool _margin_ok = false;
-    if( _grid_ok ){
-      _margin_ok = _td_map_simgrid->apply_margin_to_grid();
-    }
-    bool _normalization_ok = false;
-    if( _grid_ok && _margin_ok ){
-      _normalization_ok = _td_map_simgrid->apply_normalization_to_grid();
-    }
-    _flag_runned_tdmap_simgrid_read = _margin_ok && _grid_ok && _normalization_ok;
-
-    emit TDMap_no_simgrid( _flag_runned_tdmap_simgrid_read );
+  bool _grid_ok = false;
+  try {
+    _grid_ok = _td_map_simgrid->read_grid_from_dat_files();
+  } catch ( const std::exception& e ){
+    _grid_ok = false;
     if( _flag_logger ){
       std::stringstream message;
-      message << "emiting TDMap_no_simgrid( " << std::boolalpha << _flag_runned_tdmap_simgrid_read << " ) ";
-      ApplicationLog::severity_level _log_type = ApplicationLog::notification;
+      message << "A standard exception was caught, while running _td_map_simgrid->read_grid_from_dat_files(): " << e.what();
+      ApplicationLog::severity_level _log_type = ApplicationLog::error;
       BOOST_LOG_FUNCTION();  logger->logEvent( _log_type , message.str() );
     }
   }
-  else{
-    if( _flag_logger ){
-        std::stringstream message;
-        message << "check_tdmap_wavimg_output returned false";
-        ApplicationLog::severity_level _log_type = ApplicationLog::error;
-        BOOST_LOG_FUNCTION();  logger->logEvent( _log_type , message.str() );
-      }
+            // 2nd step in simgrid
+  bool _margin_ok = false;
+  if( _grid_ok ){
+    _margin_ok = _td_map_simgrid->apply_margin_to_grid();
   }
-  return _flag_runned_tdmap_simgrid_read;
+  bool _normalization_ok = false;
+  if( _grid_ok && _margin_ok ){
+    _normalization_ok = _td_map_simgrid->apply_normalization_to_grid();
+  }
+  _flag_runned_tdmap_simgrid_read = _margin_ok && _grid_ok && _normalization_ok;
+
+  emit TDMap_no_simgrid( _flag_runned_tdmap_simgrid_read );
+  if( _flag_logger ){
+    std::stringstream message;
+    message << "emiting TDMap_no_simgrid( " << std::boolalpha << _flag_runned_tdmap_simgrid_read << " ) ";
+    ApplicationLog::severity_level _log_type = ApplicationLog::notification;
+    BOOST_LOG_FUNCTION();  logger->logEvent( _log_type , message.str() );
+  }
+}
+else{
+  if( _flag_logger ){
+    std::stringstream message;
+    message << "check_tdmap_wavimg_output returned false";
+    ApplicationLog::severity_level _log_type = ApplicationLog::error;
+    BOOST_LOG_FUNCTION();  logger->logEvent( _log_type , message.str() );
+  }
+}
+return _flag_runned_tdmap_simgrid_read;
 }
 
 bool TDMap::run_tdmap_simgrid(){
@@ -2620,6 +2620,35 @@ cv::Mat TDMap::get_exp_image_properties_full_image_visualization(){
 cv::Mat TDMap::get_exp_image_properties_roi_image(){
   return exp_image_properties->get_roi_image();
 }
+
+cv::Mat TDMap::get_simulated_on_exp_centered_images_visualization(int x, int y ){
+
+  const cv::Mat _simulated_image = get_simulated_image_in_grid_visualization(x,y);
+  const cv::Point2i simulated_match_location = get_simulated_match_location(x,y);
+
+  cv::Mat roi_image = get_exp_image_properties_roi_image_visualization();
+  cv::Mat roi_image_clone = roi_image.clone();
+
+  _simulated_image.copyTo(roi_image_clone(cv::Rect(simulated_match_location.x,simulated_match_location.y,_simulated_image.cols, _simulated_image.rows)));
+
+  // start position x
+  const int right_side_cols = roi_image_clone.cols - _simulated_image.cols - simulated_match_location.x;
+  const int right_side_cols_compensation = ( right_side_cols < simulated_match_location.x ) ? ( simulated_match_location.x - right_side_cols ) : 0;
+  const int left_side_cols_compensation = ( simulated_match_location.x < right_side_cols ) ? ( right_side_cols - simulated_match_location.x ) : 0;
+
+  const int _simulated_on_exp_centered_cols = left_side_cols_compensation + roi_image_clone.cols + right_side_cols_compensation;
+
+  // start position x
+  const int bottom_side_rows = roi_image_clone.rows - _simulated_image.rows - simulated_match_location.y;
+  const int bottom_side_rows_compensation = ( bottom_side_rows < simulated_match_location.y ) ? ( simulated_match_location.y - bottom_side_rows ) : 0;
+  const int top_side_rows_compensation = ( simulated_match_location.y < bottom_side_rows ) ? ( bottom_side_rows - simulated_match_location.y ) : 0;
+
+  const int _simulated_on_exp_centered_rows = top_side_rows_compensation + roi_image_clone.rows + bottom_side_rows_compensation;
+
+  cv::Mat _simulated_on_exp_centered( _simulated_on_exp_centered_rows, _simulated_on_exp_centered_cols , roi_image_clone.type(), cv::Scalar::all( 255 ) );
+  return _simulated_on_exp_centered;
+}
+
 
 cv::Mat TDMap::get_exp_image_properties_roi_image_visualization(){
   return exp_image_properties->get_roi_image_visualization();
