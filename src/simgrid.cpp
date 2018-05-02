@@ -35,6 +35,77 @@ bool SimGrid::set_sim_image_properties ( BaseImage* sim_prop ){
   return true;
 }
 
+bool SimGrid::export_sim_image_in_grid_pos( std::string sim_image_in_grid_pos_file_name_image, int x, int y ){
+// // // // //
+  // visual info
+  // // // // //
+
+  // vars for legend positioning
+  int legend_position_x = 0;
+  const int legend_position_y_bottom_left_line_1 = 20;
+  const int legend_position_y_bottom_left_line_2 = 40;
+  const int legend_position_y_bottom_left_line_3 = 60;
+
+  bool result = false;
+
+  if(
+    _flag_sim_crystal_properties &&
+    _flag_sim_image_properties
+    ){
+    if(
+      _flag_raw_simulated_images_grid &&
+        // BaseCrystal vars
+      sim_crystal_properties->get_flag_slice_samples() &&
+      sim_crystal_properties->get_flag_simulated_params_slice_vec() &&
+      sim_crystal_properties->get_flag_simulated_params_nm_slice_vec() &&
+      sim_crystal_properties->get_flag_defocus_samples() &&
+      sim_crystal_properties->get_flag_simulated_params_nm_defocus_vec() &&
+        // Simulate Image BaseImage vars
+      sim_image_properties->get_flag_full_n_cols_width() &&
+      sim_image_properties->get_flag_full_n_rows_height()
+      ){
+
+      const cv::Mat _simulated_image = get_simulated_image_in_grid_visualization(x,y);
+
+    const double _simulated_image_thickness = get_simulated_image_thickness_nm_in_grid(x,y);
+    const double at_defocus = get_simulated_image_defocus_in_grid(x,y);
+
+    std::stringstream output_legend_line2;
+    output_legend_line2 <<  "T: " << std::fixed << std::setw( 2 ) << std::setprecision( 2 ) << _simulated_image_thickness << "nm";
+    std::string line2_simulated_info = output_legend_line2.str();
+          // line 3
+    std::stringstream output_legend_line3;
+    output_legend_line3 <<  "D: " << at_defocus ;
+    std::string line3_simulated_info = output_legend_line3.str();
+
+
+          // calculate the legend position on the grid
+    legend_position_x = 10;
+    int legend_position_y_bottom_left = 0;
+ // vars for legend positioning
+    const int legend_position_y_bottom_left_line_1 = 20;
+    const int legend_position_y_bottom_left_line_2 = 40;
+
+    putText(_simulated_image, line2_simulated_info , cvPoint(legend_position_x , legend_position_y_bottom_left + legend_position_y_bottom_left_line_1), cv::FONT_HERSHEY_PLAIN, 1, cvScalar(255,255,255), 1, CV_AA);
+    putText(_simulated_image, line3_simulated_info , cvPoint(legend_position_x , legend_position_y_bottom_left + legend_position_y_bottom_left_line_2), cv::FONT_HERSHEY_PLAIN, 1, cvScalar(255,255,255), 1, CV_AA);
+
+    if( sim_grid_switch ){
+      const double match_factor = get_simulated_image_match_in_grid(x,y);
+      std::stringstream matchfactor_output;
+      matchfactor_output <<  "Match % " << std::fixed << std::setw( 2 ) << std::setprecision( 2 ) <<  match_factor ;
+      std::string line5_matchfactor_info = matchfactor_output.str();
+      putText(_simulated_image, line5_matchfactor_info , cvPoint(legend_position_x , legend_position_y_bottom_left + legend_position_y_bottom_left_line_3), cv::FONT_HERSHEY_PLAIN, 1, cvScalar(255,255,255), 1, CV_AA);
+    }
+
+    imwrite(sim_image_in_grid_pos_file_name_image, _simulated_image);
+    result = true;
+  }
+
+}
+return result;
+
+}
+
 bool SimGrid::export_sim_grid( std::string sim_grid_file_name_image , bool cut_margin ){
 
   // // // // //

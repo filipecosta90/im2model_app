@@ -17,21 +17,23 @@ CVImageWidget::CVImageWidget(QWidget *parent ) : QWidget(parent) , scaleFactor(1
 }
 
 void CVImageWidget::MapPosToObject(const QPoint &pos){
-  // Handle global position
- // std::cout << "MapPosToObject x "  << pos.x() << " y " << pos.y() << std::endl;
 }
 
 void CVImageWidget::add_onfocus_functor( boost::function<void(QFocusEvent *event)> functor ){
   focus_functor = functor;
   _flag_focus_functor = true;
-//     std::cout << " added add_onfocus_functor CVImageWidget" << std::endl;
+}
+
+void CVImageWidget::add_qmenu_functor( boost::function<void(void)> functor, std::string action_name ){
+  std::cout << "adding qmenu functor" << std::endl;
+  qmenu_action_names.push_back( action_name );
+  qmenu_functors.push_back( functor );
 }
 
 void CVImageWidget::focusInEvent ( QFocusEvent * event ) {
   if( _flag_focus_functor ){
       focus_functor( event );  
   }
-  // std::cout << " received focusInEvent" << std::endl;
 }
 
 /* Loggers */
@@ -196,13 +198,21 @@ void CVImageWidget::updateImage() {
 this->setFixedSize( largestImageLayerSize() );
 }
 
+
 void CVImageWidget::ShowContextMenu(const QPoint &pos){
-  std::cout << " ShowContextMenu " << std::endl;
   // Handle global position
   QPoint globalPos = this->mapToGlobal(pos);
 
   // Create menu and insert some actions
   QMenu areas_menu;
+
+  for ( int action_functors_pos = 0; action_functors_pos < qmenu_functors.size(); action_functors_pos++ ){
+    std::string qmenu_action_name = qmenu_action_names[action_functors_pos];
+    boost::function<void(void)> qmenu_functor = qmenu_functors[action_functors_pos];
+    QAction *pathAction = new QAction( QString::fromStdString( qmenu_action_name )  );
+    connect( pathAction, &QAction::triggered, [=](){ qmenu_functor(); });
+    areas_menu.addAction( pathAction );
+  }
 
   for( int list_position = 0; list_position < renderAreas.size() ; list_position++ ){
     QString _path_description =renderAreas_description.at(list_position);

@@ -53,6 +53,8 @@ class TDMap_Table : public QTableWidget
 
     /* masking qfocusevent */
     void connect_focus_event( QFocusEvent *event, int row, int col );
+void connect_export_overlay( int row, int col );
+void connect_export_simulated_image( int row, int col );
 
 public slots:
     void selectCurrentRow();
@@ -65,6 +67,7 @@ signals:
     void modified();
     void tdmap_best_match( int x, int y );
     void export_overlay( int x, int y );
+    void export_simulated_image( int x, int y );
 
     private slots:
       void somethingChanged();

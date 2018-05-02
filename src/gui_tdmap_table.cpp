@@ -261,7 +261,11 @@ void TDMap_Table::create_cells(){
 
       //cell_widget->setStyleSheet("background-color:red;");
       boost::function<void(QFocusEvent *event)> cell_function ( boost::bind( &TDMap_Table::connect_focus_event, this, _1, row, col ) );
+      boost::function<void(void)> export_overlay_function ( boost::bind( &TDMap_Table::connect_export_overlay, this, row, col ) );
+      boost::function<void(void)> export_simulated_image_function ( boost::bind( &TDMap_Table::connect_export_simulated_image, this, row, col ) );
       cell_widget->add_onfocus_functor( cell_function );
+      cell_widget->add_qmenu_functor( export_simulated_image_function, "Export simulated image" );
+      cell_widget->add_qmenu_functor( export_overlay_function, "Export SIM|EXP overlay image" );
       this->setCellWidget(row, col, cell_widget);
       this->setItem(row, col, new QTableWidgetItem());//used to find it
     }
@@ -279,11 +283,31 @@ catch (std::exception &ex) {
 }
 }
 
+void TDMap_Table::connect_export_overlay( int row, int col ){
+  if( _flag_logger ){
+    std::stringstream message;
+    message << "connect_export_overlay row " << row << " col " << col;
+    ApplicationLog::severity_level _log_type = ApplicationLog::normal;
+    BOOST_LOG_FUNCTION();
+    logger->logEvent( _log_type , message.str() );
+  }
+  emit export_overlay( row, col );
+}
+
+void TDMap_Table::connect_export_simulated_image( int row, int col ){
+  if( _flag_logger ){
+    std::stringstream message;
+    message << "connect_export_simulated_image row " << row << " col " << col;
+    ApplicationLog::severity_level _log_type = ApplicationLog::normal;
+    BOOST_LOG_FUNCTION();
+    logger->logEvent( _log_type , message.str() );
+  }
+  emit export_simulated_image( row, col );
+}
+
 void TDMap_Table::connect_focus_event( QFocusEvent *event, int row, int col ){
   emit cellClicked( row, col );
   image_delegate->set_selected( row, col );
-  std::cout << "connect_focus_event cell clicked row " << row << " col " << col << std::endl;
-  // force emediate repaint the widget
   this->repaint();
 }
 
@@ -297,7 +321,7 @@ void TDMap_Table::update_cells(){
 
         const bool _calculated_best_match = core_tdmap->get_flag_simgrid_best_match_position();
         if( _calculated_best_match ){
-          std::cout << " _calculated_best_match " << _calculated_best_match << std::endl;
+          //std::cout << " _calculated_best_match " << _calculated_best_match << std::endl;
           best_match_pos = core_tdmap->get_simgrid_best_match_position();
           emit tdmap_best_match( best_match_pos.x, best_match_pos.y );
         }
@@ -314,8 +338,11 @@ void TDMap_Table::update_cells(){
               }
 
               boost::function<void(QFocusEvent *event)> cell_function ( boost::bind( &TDMap_Table::connect_focus_event, this, _1, row, col ) );
+              boost::function<void(void)> export_overlay_function ( boost::bind( &TDMap_Table::connect_export_overlay, this, row, col ) );
+              boost::function<void(void)> export_simulated_image_function ( boost::bind( &TDMap_Table::connect_export_simulated_image, this, row, col ) );
               cell_widget->add_onfocus_functor( cell_function );
-
+              cell_widget->add_qmenu_functor( export_simulated_image_function, "Export simulated image" );
+              cell_widget->add_qmenu_functor( export_overlay_function, "Export SIM|EXP overlay image" );
               cell_widget->setMaximumSize( QSize(ColumnSize, RowSize) );
               cell_widget->set_container_size( ColumnSize, RowSize );
               cv::Mat full_image = simulated_image_row.at(col);

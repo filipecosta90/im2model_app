@@ -42,6 +42,7 @@ public:
      /* Loggers */
     bool set_application_logger( ApplicationLog::ApplicationLog* logger );
     void add_onfocus_functor( boost::function<void(QFocusEvent *event)> );
+void add_qmenu_functor( boost::function<void(void)> functor, std::string action_name );
 
     public slots:
     void startRectangleSelection();
@@ -94,6 +95,9 @@ protected:
 private:
   boost::function<void(QFocusEvent *event)> focus_functor;
   bool _flag_focus_functor = false;
+
+  std::vector< boost::function<void(void)> > qmenu_functors;
+  std::vector<std::string> qmenu_action_names;
 
   QRect mapSelectionRectToOriginalSize();
   QRect mapSelectionStatisticalRectToOriginalSize();

@@ -31,6 +31,7 @@ public:
 /* Loggers */
   bool set_application_logger( ApplicationLog::ApplicationLog* app_logger );
   void add_onfocus_functor( boost::function<void(QFocusEvent *event)> );
+  void add_qmenu_functor( boost::function<void(void)> functor, std::string action_name );
 
   void set_best();
 
@@ -73,6 +74,7 @@ private:
   ApplicationLog::ApplicationLog* logger = nullptr;
   bool _flag_logger = false;
   boost::function<void(QFocusEvent *event)> focus_functor;
+
     // QToolBar *toolbar;
 };
 

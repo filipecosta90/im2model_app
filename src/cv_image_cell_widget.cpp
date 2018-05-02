@@ -23,8 +23,12 @@ void CvImageCellWidget::add_onfocus_functor( boost::function<void(QFocusEvent *e
   image_widget->add_onfocus_functor( functor );
 }
 
+void CvImageCellWidget::add_qmenu_functor( boost::function<void(void)> functor, std::string action_name ){
+  image_widget->add_qmenu_functor( functor, action_name );
+}
+
 void CvImageCellWidget::focusInEvent ( QFocusEvent * event ) { 
-  focus_functor( event );  
+  focus_functor( event );
 }
 
 /* Loggers */

@@ -759,6 +759,10 @@ bool TDMap::export_sim_grid( std::string sim_grid_file_name_image, bool cut_marg
   return _td_map_simgrid->export_sim_grid( sim_grid_file_name_image, cut_margin );
 }
 
+bool TDMap::export_sim_image_in_grid_pos( std::string sim_grid_file_name_image, int x, int y ){
+  return _td_map_simgrid->export_sim_image_in_grid_pos( sim_grid_file_name_image, x, y );
+}
+
 bool TDMap::export_super_cell_simulated_image_intensity_columns_integrated_intensities( std::string filename , bool onlymapped ){
   return sim_image_intensity_columns->export_sim_image_intensity_columns_integrated_intensities_to_csv( filename, onlymapped );
 }

@@ -211,6 +211,7 @@ class MainWindow : public QMainWindow {
     bool export_TDMap_cutted();
     bool export_TDMap_full();
     bool export_TDMap( bool cut_margin = false );
+    bool export_current_simulated_image_selection( int x, int y );
     bool export_IntegratedIntensities_onlymapped();
     bool export_IntegratedIntensities_full();
     bool export_IntegratedIntensities( bool onlymapped = true );

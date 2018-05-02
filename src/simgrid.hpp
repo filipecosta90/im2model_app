@@ -131,6 +131,7 @@ public:
 cv::Point2i get_simulated_match_location( int row_thickness, int col_defocus );
     SimGrid( boost::process::ipstream& async_io_buffer_out );
     bool export_sim_grid( std::string filename , bool cut_margin = false );
+    bool export_sim_image_in_grid_pos( std::string sim_image_in_grid_pos_file_name_image, int x, int y );
     bool validate_simulated_grid_position( int row_thickness, int col_defocus );
 
     enum InmageNormalizationMode { LOCAL_NORMALIZATION, GLOBAL_NORMALIZATION, NO_NORMALIZATION };

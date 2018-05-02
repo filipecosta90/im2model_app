@@ -195,6 +195,9 @@ public:
     /** others **/
 
     bool export_sim_grid( std::string sim_grid_file_name_image , bool cut_margin = false );
+
+    bool export_sim_image_in_grid_pos( std::string sim_grid_file_name_image, int x, int y );
+
     bool export_super_cell_simulated_image_intensity_columns_integrated_intensities( std::string sim_grid_file_name_image , bool onlymapped = true );
 
     /*

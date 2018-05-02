@@ -180,6 +180,8 @@ MainWindow::MainWindow( ApplicationLog::ApplicationLog* logger , QWidget *parent
       connect(sim_super_cell_worker, SIGNAL(SuperCell_edge_finished()), _sim_super_cell_thread, SLOT(quit()), Qt::DirectConnection  );
 
       connect(ui->tdmap_table, SIGNAL( cellClicked( int , int )), this, SLOT( update_tdmap_current_selection(int,int)) );
+      connect(ui->tdmap_table, SIGNAL( export_overlay( int , int )), this, SLOT( update_tdmap_current_selection(int,int)) );
+      connect(ui->tdmap_table, SIGNAL( export_simulated_image( int , int )), this, SLOT( export_current_simulated_image_selection(int,int)) );
 
       connect(this, SIGNAL(experimental_image_filename_changed()), this, SLOT(update_full_experimental_image())    );
       connect(this, SIGNAL(simulated_grid_changed( )), this, SLOT(update_simgrid_frame( ))  );
@@ -1093,6 +1095,38 @@ bool MainWindow::export_TDMap_full( ){
 
 bool MainWindow::export_TDMap_cutted( ){
   return export_TDMap( true );
+}
+
+bool MainWindow::export_current_simulated_image_selection( int x, int y ){
+  bool result = false;
+  if( _core_td_map ){
+    if( _core_td_map->get_flag_raw_simulated_images_grid() ){
+      QFileDialog dialog(this);
+      dialog.setWindowModality(Qt::WindowModal);
+      std::stringstream message;
+      message << "current_simulated_image_selection_row_" << x << "_col_" << y << ".png";
+      boost::filesystem::path base_dir_path = _core_td_map->get_project_dir_path();
+      boost::filesystem::path preset_filename( message.str() );
+      boost::filesystem::path full_path_filename = base_dir_path / preset_filename ;
+      dialog.selectFile( QString::fromStdString( full_path_filename.string() ) );
+
+      dialog.setAcceptMode(QFileDialog::AcceptSave);
+      if (dialog.exec() != QDialog::Accepted){
+        result = false;
+      }
+      else{
+        QString tdmap_filename = dialog.selectedFiles().first();
+        result = _core_td_map->export_sim_image_in_grid_pos(  tdmap_filename.toStdString() , x, y );
+        if( result ){
+          ui->statusBar->showMessage(tr("TDMap correctly current tdmap simulated image to file: " ) + tdmap_filename , 2000);
+        }
+      }
+    }
+  }
+  if( !result ){
+    ui->statusBar->showMessage(tr("Error while exporting current tdmap simulated image") );
+  }
+  return result;
 }
 
 bool MainWindow::export_TDMap( bool cut_margin ){
