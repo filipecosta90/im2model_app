@@ -68,13 +68,13 @@ MainWindow::MainWindow( ApplicationLog::ApplicationLog* logger , QWidget *parent
   else{
 
     _core_td_map = new TDMap(
-      _sim_tdmap_celslc_ostream_buffer,
-      _sim_tdmap_msa_ostream_buffer,
-      _sim_tdmap_wavimg_ostream_buffer,
-      _sim_tdmap_simgrid_ostream_buffer,
-      _sim_supercell_celslc_ostream_buffer,
-      _sim_supercell_msa_ostream_buffer,
-      _sim_supercell_wavimg_ostream_buffer );
+        _sim_tdmap_celslc_ostream_buffer,
+        _sim_tdmap_msa_ostream_buffer,
+        _sim_tdmap_wavimg_ostream_buffer,
+        _sim_tdmap_simgrid_ostream_buffer,
+        _sim_supercell_celslc_ostream_buffer,
+        _sim_supercell_msa_ostream_buffer,
+        _sim_supercell_wavimg_ostream_buffer );
 
     SuperCell* tdmap_vis_sim_unit_cell = _core_td_map->get_tdmap_vis_sim_unit_cell();
     SuperCell* tdmap_full_sim_super_cell = _core_td_map->get_tdmap_full_sim_super_cell();
@@ -180,7 +180,7 @@ MainWindow::MainWindow( ApplicationLog::ApplicationLog* logger , QWidget *parent
       connect(sim_super_cell_worker, SIGNAL(SuperCell_edge_finished()), _sim_super_cell_thread, SLOT(quit()), Qt::DirectConnection  );
 
       connect(ui->tdmap_table, SIGNAL( cellClicked( int , int )), this, SLOT( update_tdmap_current_selection(int,int)) );
-      connect(ui->tdmap_table, SIGNAL( export_overlay( int , int )), this, SLOT( update_tdmap_current_selection(int,int)) );
+      connect(ui->tdmap_table, SIGNAL( export_overlay( int , int )), this, SLOT( export_current_simulated_image_overlay_selection(int,int)) );
       connect(ui->tdmap_table, SIGNAL( export_simulated_image( int , int )), this, SLOT( export_current_simulated_image_selection(int,int)) );
 
       connect(this, SIGNAL(experimental_image_filename_changed()), this, SLOT(update_full_experimental_image())    );
@@ -437,17 +437,17 @@ bool MainWindow::_is_initialization_ok(){
 
 bool MainWindow::maybeSetPreferences(){
   const QMessageBox::StandardButton ret
-  = QMessageBox::warning(this, tr("Application"),
-    tr("The saved prefences file is incomplete.\n""To use Im2Model all preferences vars must be setted.\n"
-      "Do you want to open the preferences panel?"),
-    QMessageBox::Yes | QMessageBox::Close);
+    = QMessageBox::warning(this, tr("Application"),
+        tr("The saved prefences file is incomplete.\n""To use Im2Model all preferences vars must be setted.\n"
+          "Do you want to open the preferences panel?"),
+        QMessageBox::Yes | QMessageBox::Close);
   switch (ret) {
     case QMessageBox::Yes:
-    return edit_preferences();
+      return edit_preferences();
     case QMessageBox::Close:
-    return false;
+      return false;
     default:
-    break;
+      break;
   }
   return false;
 }
@@ -1097,6 +1097,38 @@ bool MainWindow::export_TDMap_cutted( ){
   return export_TDMap( true );
 }
 
+bool MainWindow::export_current_simulated_image_overlay_selection( int x, int y ){
+  bool result = false;
+  if( _core_td_map ){
+    if( _core_td_map->get_flag_raw_simulated_images_grid() ){
+      QFileDialog dialog(this);
+      dialog.setWindowModality(Qt::WindowModal);
+      std::stringstream message;
+      message << "current_simulated_image_selection_overlay_row_" << x << "_col_" << y << ".png";
+      boost::filesystem::path base_dir_path = _core_td_map->get_project_dir_path();
+      boost::filesystem::path preset_filename( message.str() );
+      boost::filesystem::path full_path_filename = base_dir_path / preset_filename ;
+      dialog.selectFile( QString::fromStdString( full_path_filename.string() ) );
+
+      dialog.setAcceptMode(QFileDialog::AcceptSave);
+      if (dialog.exec() != QDialog::Accepted){
+        result = false;
+      }
+      else{
+        QString tdmap_filename = dialog.selectedFiles().first();
+        result = _core_td_map->export_sim_image_overlay_in_grid_pos(  tdmap_filename.toStdString() , x, y );
+        if( result ){
+          ui->statusBar->showMessage(tr("TDMap correctly current tdmap sim|exp overlayed images to file: " ) + tdmap_filename , 2000);
+        }
+      }
+    }
+  }
+  if( !result ){
+    ui->statusBar->showMessage(tr("Error while exporting current tdmap simulated image") );
+  }
+  return result;
+}
+
 bool MainWindow::export_current_simulated_image_selection( int x, int y ){
   bool result = false;
   if( _core_td_map ){
@@ -1226,9 +1258,9 @@ bool MainWindow::edit_preferences(){
 
 void MainWindow::about(){
   QMessageBox::about(this, tr("Im2Model"),
-    tr("<b>Im2Model</b> combines transmission electron microscopy, image correlation and matching procedures,"
-      "enabling the determination of a three-dimensional atomic structure based strictly on a single high-resolution experimental image."
-      "Partialy financiated as part of the protocol between UTAustin I Portugal - UTA-P."));
+      tr("<b>Im2Model</b> combines transmission electron microscopy, image correlation and matching procedures,"
+        "enabling the determination of a three-dimensional atomic structure based strictly on a single high-resolution experimental image."
+        "Partialy financiated as part of the protocol between UTAustin I Portugal - UTA-P."));
 }
 
 void MainWindow::documentWasModified(){
@@ -1470,21 +1502,21 @@ bool MainWindow::maybeSave(){
     return  true;
   }
   const QMessageBox::StandardButton ret
-  = QMessageBox::warning(this, tr("Application"),
-    tr("The document has been modified.\n"
-      "Do you want to save your changes?"),
-    QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
+    = QMessageBox::warning(this, tr("Application"),
+        tr("The document has been modified.\n"
+          "Do you want to save your changes?"),
+        QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
   switch (ret) {
     case QMessageBox::Save:
-    {
-      return save();
-    }
+      {
+        return save();
+      }
     case QMessageBox::Cancel:
-    {
-      return false;
-    }
+      {
+        return false;
+      }
     default:
-    break;
+      break;
   }
   return true;
 }
@@ -1496,26 +1528,26 @@ bool MainWindow::maybeSetProject(){
   }
   else{
     const QMessageBox::StandardButton ret
-    = QMessageBox::warning(this, tr("Application"),
-      tr("To make that action you need to set the project.\n"
-        "Do you want to set the project?"),
-      QMessageBox::Yes  | QMessageBox::Cancel);
+      = QMessageBox::warning(this, tr("Application"),
+          tr("To make that action you need to set the project.\n"
+            "Do you want to set the project?"),
+          QMessageBox::Yes  | QMessageBox::Cancel);
     switch (ret) {
       case QMessageBox::Yes:
-      {
-        result = save();
-        break;
-      }
+        {
+          result = save();
+          break;
+        }
       case QMessageBox::Cancel:
-      {
-        result = false;
-        break;
-      }
+        {
+          result = false;
+          break;
+        }
       default:
-      {
-        result = false;
-        break;
-      }
+        {
+          result = false;
+          break;
+        }
     }
   }
   return result;
@@ -3334,12 +3366,12 @@ void MainWindow::create_box_options_tab4_intensity_columns_listing(){
   }
 
   connect(
-    ui->qtree_view_refinement_full_simulation_intensity_columns->selectionModel(),
-    SIGNAL(selectionChanged(const QItemSelection &, const QItemSelection &)),
-    this,
-    SLOT(full_simulation_intensity_columns_SelectionChanged(const QItemSelection &, const QItemSelection &)),
-    Qt::DirectConnection
-    );
+      ui->qtree_view_refinement_full_simulation_intensity_columns->selectionModel(),
+      SIGNAL(selectionChanged(const QItemSelection &, const QItemSelection &)),
+      this,
+      SLOT(full_simulation_intensity_columns_SelectionChanged(const QItemSelection &, const QItemSelection &)),
+      Qt::DirectConnection
+      );
 }
 
 void MainWindow::full_simulation_intensity_columns_SelectionChanged(const QItemSelection &selected, const QItemSelection &deselected)
@@ -3457,16 +3489,16 @@ void MainWindow::on_qbutton_tdmap_accept_clicked(){
       best_match_pos = _core_td_map->get_simgrid_best_match_position();
       if( best_match_pos != tdmap_current_selection_pos ){
         const QMessageBox::StandardButton ret
-        = QMessageBox::warning(this, tr("Application"),
-          tr("The selected cell differs from the automatic best match position.\n"
-            "Do you want to use the current selected thickness value?"),
-          QMessageBox::Yes | QMessageBox::No);
+          = QMessageBox::warning(this, tr("Application"),
+              tr("The selected cell differs from the automatic best match position.\n"
+                "Do you want to use the current selected thickness value?"),
+              QMessageBox::Yes | QMessageBox::No);
         switch (ret) {
           case QMessageBox::No:
-          accept = false;
-          break;
+            accept = false;
+            break;
           default:
-          break;
+            break;
         }
       }
     }

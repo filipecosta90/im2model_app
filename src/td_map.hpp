@@ -35,7 +35,7 @@
 
 class TDMap  : public QObject {
   Q_OBJECT
-private:
+  private:
 
     //int image_correlation_matching_method = CV_TM_CCOEFF_NORMED;
     //bool _flag_image_correlation_matching_method = true;
@@ -167,7 +167,7 @@ private:
     bool update_emd_fields();
     bool update_full_crysta_a_b_sizes();
 
-public:
+  public:
     enum RefinementPreset { NO_REFINEMENT, MICROSCOPE_CORRECTED, MICROSCOPE_NON_CORRECTED, USER_DEFINED_PRESET };
     enum ExecLogMode {FULL_LOG, DEBUG_MODE, SILENT_MODE, USER_DEFINED_LOG_MODE };
 
@@ -197,6 +197,7 @@ public:
     bool export_sim_grid( std::string sim_grid_file_name_image , bool cut_margin = false );
 
     bool export_sim_image_in_grid_pos( std::string sim_grid_file_name_image, int x, int y );
+    bool export_sim_image_overlay_in_grid_pos( std::string sim_grid_file_name_image, int x, int y );
 
     bool export_super_cell_simulated_image_intensity_columns_integrated_intensities( std::string sim_grid_file_name_image , bool onlymapped = true );
 
@@ -260,7 +261,7 @@ public:
     std::vector< std::vector<cv::Mat> > get_simulated_images_grid_visualization();
     std::string get_export_sim_grid_filename_hint();
     std::string get_export_integrated_intensities_filename_hint();
-    
+
     cv::Point2i get_simgrid_best_match_position();
     cv::Mat get_simulated_image_in_grid( int row, int col );
     cv::Point2i get_simulated_match_location( int x, int y );
@@ -517,7 +518,7 @@ public:
     cv::Mat get_exp_image_properties_full_image_visualization();
     cv::Mat get_exp_image_properties_roi_image();
     cv::Mat get_exp_image_properties_roi_image_visualization();
-    cv::Mat get_simulated_on_exp_centered_images_visualization( int x, int y );
+    cv::Mat get_simulated_on_exp_centered_images_visualization( int x, int y, bool enable_centered_compensation = true );
     cv::Rect get_exp_image_properties_roi_rectangle();
     double get_exp_image_properties_full_ny_size_height_nm();
     double get_exp_image_properties_full_nx_size_width_nm();
@@ -579,9 +580,9 @@ public:
 
     double get_full_boundary_polygon_margin_nm_bottom_limit();
     double get_full_boundary_polygon_margin_nm_top_limit();
-    
+
     public slots:
-    void update_super_cell_sim_image_intensity_columns_changed();
+      void update_super_cell_sim_image_intensity_columns_changed();
     void update_super_cell_exp_image_intensity_columns_changed();
     void update_super_cell_exp_image_centroid_translation_changed( cv::Point2i trans );
     void update_tdmap_celslc_ssc_stage_started( int nsteps );
@@ -592,7 +593,7 @@ public:
     void update_super_cell_celslc_ssc_stage_ended( bool result );
 
 
-    signals:
+signals:
     void supercell_full_experimental_image_intensity_columns_changed();
     void supercell_full_simulated_image_intensity_columns_changed();
     void supercell_full_experimental_image_centroid_translation_changed( );

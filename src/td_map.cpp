@@ -11,14 +11,14 @@
 
 /* base constructor */
 TDMap::TDMap(
-  boost::process::ipstream& ostream_celslc_buffer,
-  boost::process::ipstream& ostream_msa_buffer,
-  boost::process::ipstream& ostream_wavimg_buffer,
-  boost::process::ipstream& ostream_simgrid_buffer,
-  boost::process::ipstream& ostream_supercell_celslc_buffer,
-  boost::process::ipstream& ostream_supercell_msa_buffer,
-  boost::process::ipstream& ostream_supercell_wavimg_buffer
-  , QObject* parent ) : QObject(parent) 
+    boost::process::ipstream& ostream_celslc_buffer,
+    boost::process::ipstream& ostream_msa_buffer,
+    boost::process::ipstream& ostream_wavimg_buffer,
+    boost::process::ipstream& ostream_simgrid_buffer,
+    boost::process::ipstream& ostream_supercell_celslc_buffer,
+    boost::process::ipstream& ostream_supercell_msa_buffer,
+    boost::process::ipstream& ostream_supercell_wavimg_buffer
+    , QObject* parent ) : QObject(parent) 
 {
   /* base unit cell info */
   unit_cell = new UnitCell();
@@ -168,7 +168,7 @@ TDMap::TDMap(
 
   connect( sim_image_intensity_columns, SIGNAL( sim_image_intensity_columns_changed( )), this, SLOT(update_super_cell_sim_image_intensity_columns_changed() )    );
   connect( sim_image_intensity_columns, SIGNAL( exp_image_intensity_columns_changed( )), this, SLOT(update_super_cell_exp_image_intensity_columns_changed() )    );
-  
+
   /////////////
   // only for debug. need to add this options like in im2model command line
   /////////////
@@ -236,17 +236,17 @@ TDMap::TDMap(
 }
 
 TDMap::TDMap( boost::process::ipstream& ostream_celslc_buffer,
-  boost::process::ipstream& ostream_msa_buffer,
-  boost::process::ipstream& ostream_wavimg_buffer,
-  boost::process::ipstream& ostream_simgrid_buffer,
-  boost::process::ipstream& ostream_supercell_celslc_buffer,
-  boost::process::ipstream& ostream_supercell_msa_buffer,
-  boost::process::ipstream& ostream_supercell_wavimg_buffer,
-  ApplicationLog::ApplicationLog* app_logger , 
-  QObject* parent ) :
-TDMap::TDMap( ostream_celslc_buffer, ostream_msa_buffer, ostream_wavimg_buffer, ostream_simgrid_buffer, ostream_supercell_celslc_buffer, ostream_supercell_msa_buffer, ostream_supercell_wavimg_buffer  ,  parent ) {
-  set_application_logger( app_logger );
-}
+    boost::process::ipstream& ostream_msa_buffer,
+    boost::process::ipstream& ostream_wavimg_buffer,
+    boost::process::ipstream& ostream_simgrid_buffer,
+    boost::process::ipstream& ostream_supercell_celslc_buffer,
+    boost::process::ipstream& ostream_supercell_msa_buffer,
+    boost::process::ipstream& ostream_supercell_wavimg_buffer,
+    ApplicationLog::ApplicationLog* app_logger , 
+    QObject* parent ) :
+  TDMap::TDMap( ostream_celslc_buffer, ostream_msa_buffer, ostream_wavimg_buffer, ostream_simgrid_buffer, ostream_supercell_celslc_buffer, ostream_supercell_msa_buffer, ostream_supercell_wavimg_buffer  ,  parent ) {
+    set_application_logger( app_logger );
+  }
 
 std::string TDMap::get_unit_cell_cif_path(){
   std::string result = "";
@@ -361,9 +361,9 @@ bool TDMap::test_run_config(){
   if( _flag_logger ){
     std::stringstream message;
     message << "Testing run configuration for steps{ CELSLC: " << std::boolalpha << _run_celslc_switch
-    << ", MSA: " << std::boolalpha << _run_msa_switch
-    << ", WAVIMG: " << std::boolalpha << _run_wavimg_switch
-    << ", SIMGRID: " << std::boolalpha << _run_simgrid_switch << " }";
+      << ", MSA: " << std::boolalpha << _run_msa_switch
+      << ", WAVIMG: " << std::boolalpha << _run_wavimg_switch
+      << ", SIMGRID: " << std::boolalpha << _run_simgrid_switch << " }";
     BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification , message.str() );
   }
   if( _run_celslc_switch ){
@@ -590,62 +590,62 @@ bool TDMap::run_tdmap_wavimg(){
 bool TDMap::run_tdmap_simgrid_read(){
   if( check_tdmap_wavimg_output() ){
 
-   if( _flag_runned_tdmap_simgrid_read ){
-    _flag_runned_tdmap_simgrid_read = !_td_map_simgrid->clean_for_re_run();
-  }
+    if( _flag_runned_tdmap_simgrid_read ){
+      _flag_runned_tdmap_simgrid_read = !_td_map_simgrid->clean_for_re_run();
+    }
 
-  emit TDMap_started_simgrid();
-            // 1st step in simgrid
-  bool _grid_ok = false;
-  try {
-    _grid_ok = _td_map_simgrid->read_grid_from_dat_files();
-  } catch ( const std::exception& e ){
-    _grid_ok = false;
+    emit TDMap_started_simgrid();
+    // 1st step in simgrid
+    bool _grid_ok = false;
+    try {
+      _grid_ok = _td_map_simgrid->read_grid_from_dat_files();
+    } catch ( const std::exception& e ){
+      _grid_ok = false;
+      if( _flag_logger ){
+        std::stringstream message;
+        message << "A standard exception was caught, while running _td_map_simgrid->read_grid_from_dat_files(): " << e.what();
+        ApplicationLog::severity_level _log_type = ApplicationLog::error;
+        BOOST_LOG_FUNCTION();  logger->logEvent( _log_type , message.str() );
+      }
+    }
+    // 2nd step in simgrid
+    bool _margin_ok = false;
+    if( _grid_ok ){
+      _margin_ok = _td_map_simgrid->apply_margin_to_grid();
+    }
+    bool _normalization_ok = false;
+    if( _grid_ok && _margin_ok ){
+      _normalization_ok = _td_map_simgrid->apply_normalization_to_grid();
+    }
+    _flag_runned_tdmap_simgrid_read = _margin_ok && _grid_ok && _normalization_ok;
+
+    emit TDMap_no_simgrid( _flag_runned_tdmap_simgrid_read );
     if( _flag_logger ){
       std::stringstream message;
-      message << "A standard exception was caught, while running _td_map_simgrid->read_grid_from_dat_files(): " << e.what();
+      message << "emiting TDMap_no_simgrid( " << std::boolalpha << _flag_runned_tdmap_simgrid_read << " ) ";
+      ApplicationLog::severity_level _log_type = ApplicationLog::notification;
+      BOOST_LOG_FUNCTION();  logger->logEvent( _log_type , message.str() );
+    }
+  }
+  else{
+    if( _flag_logger ){
+      std::stringstream message;
+      message << "check_tdmap_wavimg_output returned false";
       ApplicationLog::severity_level _log_type = ApplicationLog::error;
       BOOST_LOG_FUNCTION();  logger->logEvent( _log_type , message.str() );
     }
   }
-            // 2nd step in simgrid
-  bool _margin_ok = false;
-  if( _grid_ok ){
-    _margin_ok = _td_map_simgrid->apply_margin_to_grid();
-  }
-  bool _normalization_ok = false;
-  if( _grid_ok && _margin_ok ){
-    _normalization_ok = _td_map_simgrid->apply_normalization_to_grid();
-  }
-  _flag_runned_tdmap_simgrid_read = _margin_ok && _grid_ok && _normalization_ok;
-
-  emit TDMap_no_simgrid( _flag_runned_tdmap_simgrid_read );
-  if( _flag_logger ){
-    std::stringstream message;
-    message << "emiting TDMap_no_simgrid( " << std::boolalpha << _flag_runned_tdmap_simgrid_read << " ) ";
-    ApplicationLog::severity_level _log_type = ApplicationLog::notification;
-    BOOST_LOG_FUNCTION();  logger->logEvent( _log_type , message.str() );
-  }
-}
-else{
-  if( _flag_logger ){
-    std::stringstream message;
-    message << "check_tdmap_wavimg_output returned false";
-    ApplicationLog::severity_level _log_type = ApplicationLog::error;
-    BOOST_LOG_FUNCTION();  logger->logEvent( _log_type , message.str() );
-  }
-}
-return _flag_runned_tdmap_simgrid_read;
+  return _flag_runned_tdmap_simgrid_read;
 }
 
 bool TDMap::run_tdmap_simgrid(){
   bool _simgrid_stage_ok = false;
-  
+
   emit TDMap_started_simgrid();
-        // 1st step in simgrid
+  // 1st step in simgrid
   _simgrid_stage_ok &= run_tdmap_simgrid_read();
 
-          // 3rd step in simgrid
+  // 3rd step in simgrid
   if( _flag_runned_tdmap_simgrid_read ){
     try {
       _flag_runned_tdmap_simgrid_correlate = _td_map_simgrid->simulate_from_grid();
@@ -702,16 +702,16 @@ bool TDMap::run_tdmap(){
         BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification , message.str() );
       }     
     }
-    
+
     //WAVIMG
-      //if run wavimg flag is true, the prm and dat files should be produced
+    //if run wavimg flag is true, the prm and dat files should be produced
     if ( _run_wavimg_switch ){
       bool _wavimg_stage_ok = run_tdmap_wavimg();
       if( _wavimg_stage_ok ){
         _wavimg_stage_ok &= run_tdmap_simgrid_read();
       }
       _simulation_status &= _wavimg_stage_ok; 
-      
+
       if( _flag_logger ){
         std::stringstream message;
         message << "_wavimg_stage_ok: " << std::boolalpha << _wavimg_stage_ok << " _simulation_status: " << std::boolalpha << _simulation_status;
@@ -721,38 +721,38 @@ bool TDMap::run_tdmap(){
 
     //SIMGRID
     if( _run_simgrid_switch ){
-     const bool _simgrid_stage_ok = run_tdmap_simgrid();
-     _simulation_status &= _simgrid_stage_ok; 
-     if( _flag_logger ){
+      const bool _simgrid_stage_ok = run_tdmap_simgrid();
+      _simulation_status &= _simgrid_stage_ok; 
+      if( _flag_logger ){
+        std::stringstream message;
+        message << "_simgrid_stage_ok: " << std::boolalpha << _simgrid_stage_ok << " _simulation_status: " << std::boolalpha << _simulation_status;
+        BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification , message.str() );
+      }
+    }
+
+    if( _flag_logger ){
       std::stringstream message;
-      message << "_simgrid_stage_ok: " << std::boolalpha << _simgrid_stage_ok << " _simulation_status: " << std::boolalpha << _simulation_status;
+      message << "_simulation_status result: " << std::boolalpha << _simulation_status;
       BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification , message.str() );
+    }
+
+  }
+  else{
+    if( _flag_logger ){
+      std::stringstream message;
+      message << "TDMap vars are not correcly setted up. _vars_setted_up: " << std::boolalpha << _vars_setted_up ;
+      BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::error , message.str() );
     }
   }
 
   if( _flag_logger ){
     std::stringstream message;
-    message << "_simulation_status result: " << std::boolalpha << _simulation_status;
-    BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification , message.str() );
+    message << "final TDMap::run_tdmap( ) result: " << std::boolalpha << _simulation_status;
+    ApplicationLog::severity_level _log_type = _simulation_status ? ApplicationLog::notification : ApplicationLog::error;
+    BOOST_LOG_FUNCTION();  logger->logEvent( _log_type , message.str() );
   }
 
-}
-else{
-  if( _flag_logger ){
-    std::stringstream message;
-    message << "TDMap vars are not correcly setted up. _vars_setted_up: " << std::boolalpha << _vars_setted_up ;
-    BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::error , message.str() );
-  }
-}
-
-if( _flag_logger ){
-  std::stringstream message;
-  message << "final TDMap::run_tdmap( ) result: " << std::boolalpha << _simulation_status;
-  ApplicationLog::severity_level _log_type = _simulation_status ? ApplicationLog::notification : ApplicationLog::error;
-  BOOST_LOG_FUNCTION();  logger->logEvent( _log_type , message.str() );
-}
-
-return _simulation_status;
+  return _simulation_status;
 }
 
 bool TDMap::export_sim_grid( std::string sim_grid_file_name_image, bool cut_margin ){
@@ -762,6 +762,43 @@ bool TDMap::export_sim_grid( std::string sim_grid_file_name_image, bool cut_marg
 bool TDMap::export_sim_image_in_grid_pos( std::string sim_grid_file_name_image, int x, int y ){
   return _td_map_simgrid->export_sim_image_in_grid_pos( sim_grid_file_name_image, x, y );
 }
+
+bool TDMap::export_sim_image_overlay_in_grid_pos( std::string sim_grid_file_name_image, int x, int y ){
+  bool result = false;
+  cv::Mat simulated_on_exp_centered_image = get_simulated_on_exp_centered_images_visualization( x, y, false );
+
+
+  const double _simulated_image_thickness = get_simulated_image_thickness_nm_in_grid(x,y);
+  const double _simulated_image_defocus = get_simulated_image_defocus_in_grid(x,y);
+
+  // vars for legend positioning
+  int legend_position_x = 0;
+  int legend_position_y_bottom_left = 0;
+  const int legend_position_y_bottom_left_line_1 = 20;
+  const int legend_position_y_bottom_left_line_2 = 40;
+  const int legend_position_y_bottom_left_line_3 = 60;
+  std::stringstream output_legend_line2;
+  output_legend_line2 <<  "T: " << std::fixed << std::setw( 2 ) << std::setprecision( 2 ) << _simulated_image_thickness << " nm";
+  std::string line2_simulated_info = output_legend_line2.str();
+  // line 3
+  std::stringstream output_legend_line3;
+  output_legend_line3 <<  "D: " << _simulated_image_defocus ;
+  std::string line3_simulated_info = output_legend_line3.str();
+
+  const double match_factor = get_simulated_image_match_in_grid(x,y);
+  std::stringstream matchfactor_output;
+  matchfactor_output <<  "Match % " << std::fixed << std::setw( 2 ) << std::setprecision( 2 ) <<  match_factor ;
+  std::string line5_matchfactor_info = matchfactor_output.str();
+
+  putText(simulated_on_exp_centered_image, line2_simulated_info , cvPoint(legend_position_x , legend_position_y_bottom_left + legend_position_y_bottom_left_line_1), cv::FONT_HERSHEY_PLAIN, 1, cvScalar(255,255,255), 1, CV_AA);
+  putText(simulated_on_exp_centered_image, line3_simulated_info , cvPoint(legend_position_x , legend_position_y_bottom_left + legend_position_y_bottom_left_line_2), cv::FONT_HERSHEY_PLAIN, 1, cvScalar(255,255,255), 1, CV_AA);
+  putText(simulated_on_exp_centered_image, line5_matchfactor_info , cvPoint(legend_position_x , legend_position_y_bottom_left + legend_position_y_bottom_left_line_3), cv::FONT_HERSHEY_PLAIN, 1, cvScalar(255,255,255), 1, CV_AA);
+
+  cv::imwrite( sim_grid_file_name_image, simulated_on_exp_centered_image );
+  result = true;
+  return result;
+}
+
 
 bool TDMap::export_super_cell_simulated_image_intensity_columns_integrated_intensities( std::string filename , bool onlymapped ){
   return sim_image_intensity_columns->export_sim_image_intensity_columns_integrated_intensities_to_csv( filename, onlymapped );
@@ -1198,8 +1235,6 @@ bool TDMap::set_super_cell_size_a( std::string size_a ){
     // get the length + margin from the supercell
     // in the future separated this so we can dinamically change nm margin and it updates image size
     const double cell_length_a_nm = tdmap_roi_sim_super_cell->get_length_a_Nanometers();
-    std::cout << " setting _super_cell_size_a " << _super_cell_size_a << std::endl;
-    std::cout << " setting cell_length_a_nm " << cell_length_a_nm << std::endl;
     const bool image_result = sim_image_properties->set_full_nm_size_cols_a( cell_length_a_nm );
     result = cell_result & image_result;
   }
@@ -1469,7 +1504,6 @@ bool TDMap::set_sim_image_intensity_columns( IntensityColumns* int_cols ){
 }
 
 bool TDMap::update_emd_fields(){
-  std::cout << " inside update_emd_fields "  << std::endl;
   bool result = false;
   if( exp_image_properties->get_image_extension() == ".emd" ){
     result = true;
@@ -1626,7 +1660,7 @@ boost::filesystem::path TDMap::make_path_relative_to_project_dir( boost::filesys
 
 bool TDMap::set_unit_cell_cif_path( std::string cif_filename ){
   bool result = false;
-  
+
   try {
 
     if( _flag_logger ){
@@ -1827,607 +1861,607 @@ bool TDMap::set_thickness_user_estimated_nm( std::string s_estimated ){
       const bool wavimg_result =  _tdmap_wavimg_parameters->set_sampling_rate_experimental_y_nm_per_pixel( s_rate_y );
       result = imagecrystal_result & celslc_result & msa_result & wavimg_result;
       */}
-    catch(boost::bad_lexical_cast&  ex) {
+  catch(boost::bad_lexical_cast&  ex) {
     // pass it up
+    boost::throw_exception( ex );
+  }
+  return result;
+}
+
+bool TDMap::auto_calculate_thickness_range_lower_upper_nm(  ){
+  bool result = false;
+  try {
+    /*  const bool imagecrystal_result =  _core_image_crystal_ptr->set_sampling_rate_experimental_y_nm_per_pixel( s_rate_y );
+        const bool celslc_result = _tdmap_celslc_parameters->set_sampling_rate_experimental_y_nm_per_pixel( s_rate_y );
+        const bool msa_result = _tdmap_msa_parameters->set_sampling_rate_experimental_y_nm_per_pixel( s_rate_y );
+        const bool wavimg_result =  _tdmap_wavimg_parameters->set_sampling_rate_experimental_y_nm_per_pixel( s_rate_y );
+        result = imagecrystal_result & celslc_result & msa_result & wavimg_result;
+        */}
+    catch(boost::bad_lexical_cast&  ex) {
+      // pass it up
       boost::throw_exception( ex );
     }
-    return result;
-  }
+  return result;
+}
 
-  bool TDMap::auto_calculate_thickness_range_lower_upper_nm(  ){
-    bool result = false;
-    try {
+bool TDMap::auto_calculate_thickness_lower_upper_nm(  ){
+  bool result = false;
+  try {
     /*  const bool imagecrystal_result =  _core_image_crystal_ptr->set_sampling_rate_experimental_y_nm_per_pixel( s_rate_y );
         const bool celslc_result = _tdmap_celslc_parameters->set_sampling_rate_experimental_y_nm_per_pixel( s_rate_y );
         const bool msa_result = _tdmap_msa_parameters->set_sampling_rate_experimental_y_nm_per_pixel( s_rate_y );
         const bool wavimg_result =  _tdmap_wavimg_parameters->set_sampling_rate_experimental_y_nm_per_pixel( s_rate_y );
         result = imagecrystal_result & celslc_result & msa_result & wavimg_result;
         */}
-      catch(boost::bad_lexical_cast&  ex) {
+    catch(boost::bad_lexical_cast&  ex) {
       // pass it up
-        boost::throw_exception( ex );
-      }
-      return result;
+      boost::throw_exception( ex );
     }
+  return result;
+}
 
-    bool TDMap::auto_calculate_thickness_lower_upper_nm(  ){
-      bool result = false;
-      try {
-    /*  const bool imagecrystal_result =  _core_image_crystal_ptr->set_sampling_rate_experimental_y_nm_per_pixel( s_rate_y );
-        const bool celslc_result = _tdmap_celslc_parameters->set_sampling_rate_experimental_y_nm_per_pixel( s_rate_y );
-        const bool msa_result = _tdmap_msa_parameters->set_sampling_rate_experimental_y_nm_per_pixel( s_rate_y );
-        const bool wavimg_result =  _tdmap_wavimg_parameters->set_sampling_rate_experimental_y_nm_per_pixel( s_rate_y );
-        result = imagecrystal_result & celslc_result & msa_result & wavimg_result;
-        */}
-        catch(boost::bad_lexical_cast&  ex) {
-      // pass it up
-          boost::throw_exception( ex );
-        }
-        return result;
-      }
-
-      bool TDMap::set_slice_samples( std::string s_samples ){
-        bool result = false;
-        try {
-          const double samples = boost::lexical_cast<double>( s_samples );
-          result = sim_crystal_properties->set_slice_samples( samples );
-        }
-        catch(boost::bad_lexical_cast&  ex) {
+bool TDMap::set_slice_samples( std::string s_samples ){
+  bool result = false;
+  try {
+    const double samples = boost::lexical_cast<double>( s_samples );
+    result = sim_crystal_properties->set_slice_samples( samples );
+  }
+  catch(boost::bad_lexical_cast&  ex) {
     // pass it up
-          boost::throw_exception( ex );
-        }
-        return result;
-      }
+    boost::throw_exception( ex );
+  }
+  return result;
+}
 
-      bool TDMap::set_nm_lower_bound( std::string s_l_bound ){
-        bool result = false;
-        try {
-          const double l_bound = boost::lexical_cast<double>( s_l_bound );
-          result = sim_crystal_properties->set_nm_lower_bound( l_bound );
-        }
-        catch(boost::bad_lexical_cast&  ex) {
+bool TDMap::set_nm_lower_bound( std::string s_l_bound ){
+  bool result = false;
+  try {
+    const double l_bound = boost::lexical_cast<double>( s_l_bound );
+    result = sim_crystal_properties->set_nm_lower_bound( l_bound );
+  }
+  catch(boost::bad_lexical_cast&  ex) {
     // pass it up
-          boost::throw_exception( ex );
-        }
-        return result;
-      }
+    boost::throw_exception( ex );
+  }
+  return result;
+}
 
-      bool TDMap::set_nm_upper_bound( std::string s_upper_bound ){
-        bool result = false;
-        try {
-          const double upper_bound = boost::lexical_cast<double>( s_upper_bound );
-          result = sim_crystal_properties->set_nm_upper_bound( upper_bound );
-          if( result ){
-            result &= set_super_cell_size_c( s_upper_bound );
-          }
-        }
-        catch(boost::bad_lexical_cast&  ex) {
+bool TDMap::set_nm_upper_bound( std::string s_upper_bound ){
+  bool result = false;
+  try {
+    const double upper_bound = boost::lexical_cast<double>( s_upper_bound );
+    result = sim_crystal_properties->set_nm_upper_bound( upper_bound );
+    if( result ){
+      result &= set_super_cell_size_c( s_upper_bound );
+    }
+  }
+  catch(boost::bad_lexical_cast&  ex) {
     // pass it up
-          boost::throw_exception( ex );
-        }
-        return result;
-      }
+    boost::throw_exception( ex );
+  }
+  return result;
+}
 
-      bool TDMap::set_defocus_user_estimated_nm( std::string s_estimated ){
-        bool result = false;
-        try {
-          const double estimated = boost::lexical_cast<double>( s_estimated );
+bool TDMap::set_defocus_user_estimated_nm( std::string s_estimated ){
+  bool result = false;
+  try {
+    const double estimated = boost::lexical_cast<double>( s_estimated );
     /*const bool imagecrystal_result =  _core_image_crystal_ptr->set_sampling_rate_experimental_y_nm_per_pixel( s_rate_y );
       const bool celslc_result = _tdmap_celslc_parameters->set_sampling_rate_experimental_y_nm_per_pixel( s_rate_y );
       const bool msa_result = _tdmap_msa_parameters->set_sampling_rate_experimental_y_nm_per_pixel( s_rate_y );
       const bool wavimg_result =  _tdmap_wavimg_parameters->set_sampling_rate_experimental_y_nm_per_pixel( s_rate_y );
       result = imagecrystal_result & celslc_result & msa_result & wavimg_result;
       */}
-          catch(boost::bad_lexical_cast&  ex) {
+  catch(boost::bad_lexical_cast&  ex) {
     // pass it up
-            boost::throw_exception( ex );
-          }
-          return result;
-        }
+    boost::throw_exception( ex );
+  }
+  return result;
+}
 
-        bool TDMap::set_defocus_samples( std::string s_samples ){
-          bool result = false;
-          try {
-            const int samples = boost::lexical_cast<int>( s_samples );
-            result = sim_crystal_properties->set_defocus_samples( samples );
-          }
-          catch(boost::bad_lexical_cast&  ex) {
+bool TDMap::set_defocus_samples( std::string s_samples ){
+  bool result = false;
+  try {
+    const int samples = boost::lexical_cast<int>( s_samples );
+    result = sim_crystal_properties->set_defocus_samples( samples );
+  }
+  catch(boost::bad_lexical_cast&  ex) {
     // pass it up
-            boost::throw_exception( ex );
-          }
-          return result;
-        }
+    boost::throw_exception( ex );
+  }
+  return result;
+}
 
-        bool TDMap::set_defocus_lower_bound( std::string l_upper_bound ){
-          bool result = false;
-          try {
-            const double lower_bound = boost::lexical_cast<double>( l_upper_bound );
-            result = sim_crystal_properties->set_defocus_lower_bound( lower_bound );
-          }
-          catch(boost::bad_lexical_cast&  ex) {
+bool TDMap::set_defocus_lower_bound( std::string l_upper_bound ){
+  bool result = false;
+  try {
+    const double lower_bound = boost::lexical_cast<double>( l_upper_bound );
+    result = sim_crystal_properties->set_defocus_lower_bound( lower_bound );
+  }
+  catch(boost::bad_lexical_cast&  ex) {
     // pass it up
-            boost::throw_exception( ex );
-          }
-          return result;
-        }
+    boost::throw_exception( ex );
+  }
+  return result;
+}
 
-        bool TDMap::set_defocus_upper_bound( std::string s_upper_bound ){
-          bool result = false;
-          try {
-            const double upper_bound = boost::lexical_cast<double>( s_upper_bound );
-            result = sim_crystal_properties->set_defocus_upper_bound( upper_bound );
-          }
-          catch(boost::bad_lexical_cast&  ex) {
+bool TDMap::set_defocus_upper_bound( std::string s_upper_bound ){
+  bool result = false;
+  try {
+    const double upper_bound = boost::lexical_cast<double>( s_upper_bound );
+    result = sim_crystal_properties->set_defocus_upper_bound( upper_bound );
+  }
+  catch(boost::bad_lexical_cast&  ex) {
     // pass it up
-            boost::throw_exception( ex );
-          }
-          return result;
-        }
+    boost::throw_exception( ex );
+  }
+  return result;
+}
 
-        bool TDMap::set_accelaration_voltage_kv( std::string accelaration_voltage ){
-          bool result = false;
-          try {
-            const double _ht_accelaration_voltage = boost::lexical_cast<double>( accelaration_voltage );
-            result = sim_crystal_properties->set_ht_accelaration_voltage_KV( _ht_accelaration_voltage );
-            result &= supercell_sim_crystal_properties->set_ht_accelaration_voltage_KV( _ht_accelaration_voltage );
-          }
-          catch(boost::bad_lexical_cast&  ex) {
+bool TDMap::set_accelaration_voltage_kv( std::string accelaration_voltage ){
+  bool result = false;
+  try {
+    const double _ht_accelaration_voltage = boost::lexical_cast<double>( accelaration_voltage );
+    result = sim_crystal_properties->set_ht_accelaration_voltage_KV( _ht_accelaration_voltage );
+    result &= supercell_sim_crystal_properties->set_ht_accelaration_voltage_KV( _ht_accelaration_voltage );
+  }
+  catch(boost::bad_lexical_cast&  ex) {
     // pass it up
-            boost::throw_exception( ex );
-          }
-          return result;
-        }
+    boost::throw_exception( ex );
+  }
+  return result;
+}
 
-        bool TDMap::set_refinement_definition_method ( int method ){
-          _refinement_definition_method = method;
-          _flag_refinement_definition_method = true;
-          return _flag_refinement_definition_method;
-        }
+bool TDMap::set_refinement_definition_method ( int method ){
+  _refinement_definition_method = method;
+  _flag_refinement_definition_method = true;
+  return _flag_refinement_definition_method;
+}
 
-        bool TDMap::set_envelop_parameters_vibrational_damping_method ( int method ){
-          bool result = false;
-          if( _tdmap_wavimg_parameters != nullptr ){
-            _tdmap_wavimg_parameters->set_simulation_image_spread_envelope_switch( method );
-            _supercell_wavimg_parameters->set_simulation_image_spread_envelope_switch( method );
-            result = true;
-          }
-          return result;
-        }
+bool TDMap::set_envelop_parameters_vibrational_damping_method ( int method ){
+  bool result = false;
+  if( _tdmap_wavimg_parameters != nullptr ){
+    _tdmap_wavimg_parameters->set_simulation_image_spread_envelope_switch( method );
+    _supercell_wavimg_parameters->set_simulation_image_spread_envelope_switch( method );
+    result = true;
+  }
+  return result;
+}
 
-        bool TDMap::set_envelop_parameters_vibrational_damping_isotropic_one_rms_amplitude( double amplitude ){
-          bool result = false;
-          if( _tdmap_wavimg_parameters != nullptr ){
-            _tdmap_wavimg_parameters->set_isotropic_one_rms_amplitude( amplitude );
-            _supercell_wavimg_parameters->set_isotropic_one_rms_amplitude( amplitude );
-            result = true;
-          }
-          return result;
-        }
+bool TDMap::set_envelop_parameters_vibrational_damping_isotropic_one_rms_amplitude( double amplitude ){
+  bool result = false;
+  if( _tdmap_wavimg_parameters != nullptr ){
+    _tdmap_wavimg_parameters->set_isotropic_one_rms_amplitude( amplitude );
+    _supercell_wavimg_parameters->set_isotropic_one_rms_amplitude( amplitude );
+    result = true;
+  }
+  return result;
+}
 
-        bool TDMap::set_envelop_parameters_vibrational_damping_anisotropic_second_rms_amplitude( double amplitude ){
-          bool result = false;
-          if( _tdmap_wavimg_parameters != nullptr ){
-            _tdmap_wavimg_parameters->set_anisotropic_second_rms_amplitude( amplitude );
-            _supercell_wavimg_parameters->set_anisotropic_second_rms_amplitude( amplitude );
-            result = true;
-          }
-          return result;
-        }
+bool TDMap::set_envelop_parameters_vibrational_damping_anisotropic_second_rms_amplitude( double amplitude ){
+  bool result = false;
+  if( _tdmap_wavimg_parameters != nullptr ){
+    _tdmap_wavimg_parameters->set_anisotropic_second_rms_amplitude( amplitude );
+    _supercell_wavimg_parameters->set_anisotropic_second_rms_amplitude( amplitude );
+    result = true;
+  }
+  return result;
+}
 
-        bool TDMap::set_envelop_parameters_vibrational_damping_azimuth_orientation_angle( double angle ){
-          bool result = false;
-          if( _tdmap_wavimg_parameters != nullptr ){
-            _tdmap_wavimg_parameters->set_azimuth_orientation_angle( angle );
-            _supercell_wavimg_parameters->set_azimuth_orientation_angle( angle );
-            result = true;
-          }
-          return result;
-        }
+bool TDMap::set_envelop_parameters_vibrational_damping_azimuth_orientation_angle( double angle ){
+  bool result = false;
+  if( _tdmap_wavimg_parameters != nullptr ){
+    _tdmap_wavimg_parameters->set_azimuth_orientation_angle( angle );
+    _supercell_wavimg_parameters->set_azimuth_orientation_angle( angle );
+    result = true;
+  }
+  return result;
+}
 
-        int TDMap::get_unit_cell_display_expand_factor_a(){
-          int result = tdmap_vis_sim_unit_cell->get_expand_factor_a( );
-          return result;
-        }
+int TDMap::get_unit_cell_display_expand_factor_a(){
+  int result = tdmap_vis_sim_unit_cell->get_expand_factor_a( );
+  return result;
+}
 
-        int TDMap::get_unit_cell_display_expand_factor_b(){
-          int result = tdmap_vis_sim_unit_cell->get_expand_factor_b( );
-          return result;
-        }
+int TDMap::get_unit_cell_display_expand_factor_b(){
+  int result = tdmap_vis_sim_unit_cell->get_expand_factor_b( );
+  return result;
+}
 
-        int TDMap::get_unit_cell_display_expand_factor_c(){
-          int result = tdmap_vis_sim_unit_cell->get_expand_factor_c( );
-          return result;
-        }
+int TDMap::get_unit_cell_display_expand_factor_c(){
+  int result = tdmap_vis_sim_unit_cell->get_expand_factor_c( );
+  return result;
+}
 
-        int TDMap::get_envelop_parameters_vibrational_damping_method(){
-          int result = WAVIMG_prm::EnvelopeVibrationalDamping::Deactivated;
-          if( _tdmap_wavimg_parameters != nullptr ){
-            result = _tdmap_wavimg_parameters->get_simulation_image_spread_envelope_switch( );
-          }
-          return result;
-        }
+int TDMap::get_envelop_parameters_vibrational_damping_method(){
+  int result = WAVIMG_prm::EnvelopeVibrationalDamping::Deactivated;
+  if( _tdmap_wavimg_parameters != nullptr ){
+    result = _tdmap_wavimg_parameters->get_simulation_image_spread_envelope_switch( );
+  }
+  return result;
+}
 
-        std::string TDMap::get_mtf_filename( ){
-          std::string result = "";
-          if( _flag_mtf_filename ){
-            result = _tdmap_wavimg_parameters->get_mtf_filename( );
-          }
-          return result;
-        }
+std::string TDMap::get_mtf_filename( ){
+  std::string result = "";
+  if( _flag_mtf_filename ){
+    result = _tdmap_wavimg_parameters->get_mtf_filename( );
+  }
+  return result;
+}
 
 
-        bool TDMap::set_mtf_filename( std::string file_name ){
+bool TDMap::set_mtf_filename( std::string file_name ){
 
-          bool result = _tdmap_wavimg_parameters->set_mtf_filename( file_name );
-          result &= _supercell_wavimg_parameters->set_mtf_filename( file_name );
+  bool result = _tdmap_wavimg_parameters->set_mtf_filename( file_name );
+  result &= _supercell_wavimg_parameters->set_mtf_filename( file_name );
 
-          if( result ){
-            _flag_mtf_filename = true;
-            _tdmap_wavimg_parameters->set_mtf_simulation_switch( true );
-            _supercell_wavimg_parameters->set_mtf_simulation_switch( true );
-          }
-          return result;
-        }
+  if( result ){
+    _flag_mtf_filename = true;
+    _tdmap_wavimg_parameters->set_mtf_simulation_switch( true );
+    _supercell_wavimg_parameters->set_mtf_simulation_switch( true );
+  }
+  return result;
+}
 
-        bool TDMap::set_spherical_aberration ( std::string _string_cs ){
-          bool result = false;
-          try {
-            const double _cs = boost::lexical_cast<double>( _string_cs );
-            _tdmap_wavimg_parameters->set_aberration_definition( WAVIMG_prm::AberrationDefinition::SphericalAberration , 2 , 0.0f );
-            _supercell_wavimg_parameters->set_aberration_definition( WAVIMG_prm::AberrationDefinition::SphericalAberration , 2 , 0.0f );
-            result = _tdmap_wavimg_parameters->set_aberration_definition( WAVIMG_prm::AberrationDefinition::SphericalAberration , 1 , _cs );
-            result &= _supercell_wavimg_parameters->set_aberration_definition( WAVIMG_prm::AberrationDefinition::SphericalAberration , 1 , _cs );
-          }
-          catch(boost::bad_lexical_cast&  ex) {
+bool TDMap::set_spherical_aberration ( std::string _string_cs ){
+  bool result = false;
+  try {
+    const double _cs = boost::lexical_cast<double>( _string_cs );
+    _tdmap_wavimg_parameters->set_aberration_definition( WAVIMG_prm::AberrationDefinition::SphericalAberration , 2 , 0.0f );
+    _supercell_wavimg_parameters->set_aberration_definition( WAVIMG_prm::AberrationDefinition::SphericalAberration , 2 , 0.0f );
+    result = _tdmap_wavimg_parameters->set_aberration_definition( WAVIMG_prm::AberrationDefinition::SphericalAberration , 1 , _cs );
+    result &= _supercell_wavimg_parameters->set_aberration_definition( WAVIMG_prm::AberrationDefinition::SphericalAberration , 1 , _cs );
+  }
+  catch(boost::bad_lexical_cast&  ex) {
     // pass it up
-            boost::throw_exception( ex );
-          }
-          return result;
-        }
+    boost::throw_exception( ex );
+  }
+  return result;
+}
 
-        bool TDMap::set_spherical_aberration_switch( bool cs_switch ){
-          const bool step2_result = _tdmap_wavimg_parameters->set_aberration_definition_switch( WAVIMG_prm::AberrationDefinition::SphericalAberration, cs_switch );
-          const bool step4_result = _supercell_wavimg_parameters->set_aberration_definition_switch( WAVIMG_prm::AberrationDefinition::SphericalAberration, cs_switch );
-          return step2_result && step4_result;
-        }
+bool TDMap::set_spherical_aberration_switch( bool cs_switch ){
+  const bool step2_result = _tdmap_wavimg_parameters->set_aberration_definition_switch( WAVIMG_prm::AberrationDefinition::SphericalAberration, cs_switch );
+  const bool step4_result = _supercell_wavimg_parameters->set_aberration_definition_switch( WAVIMG_prm::AberrationDefinition::SphericalAberration, cs_switch );
+  return step2_result && step4_result;
+}
 
-        bool TDMap::set_partial_temporal_coherence_switch( bool tc_switch ){
-          const bool step2_result = _tdmap_wavimg_parameters->set_partial_temporal_coherence_switch( tc_switch );
-          const bool step4_result = _supercell_wavimg_parameters->set_partial_temporal_coherence_switch( tc_switch );
-          return step2_result && step4_result;
-        }
+bool TDMap::set_partial_temporal_coherence_switch( bool tc_switch ){
+  const bool step2_result = _tdmap_wavimg_parameters->set_partial_temporal_coherence_switch( tc_switch );
+  const bool step4_result = _supercell_wavimg_parameters->set_partial_temporal_coherence_switch( tc_switch );
+  return step2_result && step4_result;
+}
 
-        bool TDMap::set_partial_temporal_coherence_focus_spread ( std::string _string_fs ){
-          bool result = false;
-          try {
-            const double _fs = boost::lexical_cast<double>( _string_fs );
-            result = _tdmap_wavimg_parameters->set_partial_temporal_coherence_focus_spread( _fs );
-            result &= _supercell_wavimg_parameters->set_partial_temporal_coherence_focus_spread( _fs );
-          }
-          catch(boost::bad_lexical_cast&  ex) {
+bool TDMap::set_partial_temporal_coherence_focus_spread ( std::string _string_fs ){
+  bool result = false;
+  try {
+    const double _fs = boost::lexical_cast<double>( _string_fs );
+    result = _tdmap_wavimg_parameters->set_partial_temporal_coherence_focus_spread( _fs );
+    result &= _supercell_wavimg_parameters->set_partial_temporal_coherence_focus_spread( _fs );
+  }
+  catch(boost::bad_lexical_cast&  ex) {
     // pass it up
-            boost::throw_exception( ex );
-          }
-          return result;
-        }
+    boost::throw_exception( ex );
+  }
+  return result;
+}
 
-        bool TDMap::set_partial_spatial_coherence_switch( bool sc_switch ){
-          const bool step2_result = _tdmap_wavimg_parameters->set_partial_spatial_coherence_switch( sc_switch );
-          const bool step4_result = _supercell_wavimg_parameters->set_partial_spatial_coherence_switch( sc_switch );
-          return step2_result && step4_result;
-        }
+bool TDMap::set_partial_spatial_coherence_switch( bool sc_switch ){
+  const bool step2_result = _tdmap_wavimg_parameters->set_partial_spatial_coherence_switch( sc_switch );
+  const bool step4_result = _supercell_wavimg_parameters->set_partial_spatial_coherence_switch( sc_switch );
+  return step2_result && step4_result;
+}
 
-        bool TDMap::set_partial_spatial_coherence_semi_convergence_angle ( std::string _string_ca ){
-          bool result = false;
-          try {
-            const double _ca = boost::lexical_cast<double>( _string_ca );
-            const bool step2_result = _tdmap_wavimg_parameters->set_partial_spatial_coherence_semi_convergence_angle( _ca );
-            const bool step4_result = _supercell_wavimg_parameters->set_partial_spatial_coherence_semi_convergence_angle( _ca );
-            result = step2_result && step4_result;
-          }
-          catch(boost::bad_lexical_cast&  ex) {
+bool TDMap::set_partial_spatial_coherence_semi_convergence_angle ( std::string _string_ca ){
+  bool result = false;
+  try {
+    const double _ca = boost::lexical_cast<double>( _string_ca );
+    const bool step2_result = _tdmap_wavimg_parameters->set_partial_spatial_coherence_semi_convergence_angle( _ca );
+    const bool step4_result = _supercell_wavimg_parameters->set_partial_spatial_coherence_semi_convergence_angle( _ca );
+    result = step2_result && step4_result;
+  }
+  catch(boost::bad_lexical_cast&  ex) {
     // pass it up
-            boost::throw_exception( ex );
-          }
-          return result;
-        }
+    boost::throw_exception( ex );
+  }
+  return result;
+}
 
-        bool TDMap::set_mtf_switch( bool value ){
-          const bool step2_result = _tdmap_wavimg_parameters->set_mtf_simulation_switch( value );
-          const bool step4_result = _supercell_wavimg_parameters->set_mtf_simulation_switch( value );
-          const bool result = step2_result && step4_result;
-          return result;
-        }
+bool TDMap::set_mtf_switch( bool value ){
+  const bool step2_result = _tdmap_wavimg_parameters->set_mtf_simulation_switch( value );
+  const bool step4_result = _supercell_wavimg_parameters->set_mtf_simulation_switch( value );
+  const bool result = step2_result && step4_result;
+  return result;
+}
 
-        bool TDMap::set_full_supercell_defocus( double defocus ){
-          bool result = false;
-          result = _supercell_wavimg_parameters->set_aberration_definition( WAVIMG_prm::AberrationDefinition::Defocus , 1 , defocus );
-          result &= _supercell_wavimg_parameters->set_aberration_definition( WAVIMG_prm::AberrationDefinition::Defocus , 2 , 0.0f );
-          result &= _supercell_wavimg_parameters->set_aberration_definition_switch( WAVIMG_prm::AberrationDefinition::Defocus , true );
-          if( _flag_logger ){
-            std::stringstream message;
-            message << "set_full_supercell_defocus value " << defocus << ", result: " << std::boolalpha << result;
-            ApplicationLog::severity_level _log_type = result ? ApplicationLog::notification : ApplicationLog::error;
-            BOOST_LOG_FUNCTION();  logger->logEvent( _log_type , message.str() );
-          }
-          return result;
-        }
+bool TDMap::set_full_supercell_defocus( double defocus ){
+  bool result = false;
+  result = _supercell_wavimg_parameters->set_aberration_definition( WAVIMG_prm::AberrationDefinition::Defocus , 1 , defocus );
+  result &= _supercell_wavimg_parameters->set_aberration_definition( WAVIMG_prm::AberrationDefinition::Defocus , 2 , 0.0f );
+  result &= _supercell_wavimg_parameters->set_aberration_definition_switch( WAVIMG_prm::AberrationDefinition::Defocus , true );
+  if( _flag_logger ){
+    std::stringstream message;
+    message << "set_full_supercell_defocus value " << defocus << ", result: " << std::boolalpha << result;
+    ApplicationLog::severity_level _log_type = result ? ApplicationLog::notification : ApplicationLog::error;
+    BOOST_LOG_FUNCTION();  logger->logEvent( _log_type , message.str() );
+  }
+  return result;
+}
 
-        int TDMap::get_image_correlation_matching_method(){
-          return _td_map_simgrid->get_image_correlation_matching_method();
-        }
+int TDMap::get_image_correlation_matching_method(){
+  return _td_map_simgrid->get_image_correlation_matching_method();
+}
 
-        int TDMap::get_image_normalization_method(){
-          return _td_map_simgrid->get_image_normalization_method();
-        }
+int TDMap::get_image_normalization_method(){
+  return _td_map_simgrid->get_image_normalization_method();
+}
 
-        bool TDMap::set_image_correlation_matching_method( int method ){
-          return _td_map_simgrid->set_image_correlation_matching_method( method );
-        }
+bool TDMap::set_image_correlation_matching_method( int method ){
+  return _td_map_simgrid->set_image_correlation_matching_method( method );
+}
 
-        bool TDMap::set_image_normalization_method( int method ){
-          return _td_map_simgrid->set_image_normalization_method( method );
-        }
+bool TDMap::set_image_normalization_method( int method ){
+  return _td_map_simgrid->set_image_normalization_method( method );
+}
 
-        bool TDMap::set_exec_log_level( int level ){
-          _exec_log_level = level;
-          return true;
-        }
+bool TDMap::set_exec_log_level( int level ){
+  _exec_log_level = level;
+  return true;
+}
 
-        bool TDMap::set_run_celslc_switch( bool value ){
-          _run_celslc_switch = value;
-          return true;
-        }
+bool TDMap::set_run_celslc_switch( bool value ){
+  _run_celslc_switch = value;
+  return true;
+}
 
-        bool TDMap::set_run_msa_switch( bool value ){
-          _run_msa_switch = value;
-          return true;
-        }
+bool TDMap::set_run_msa_switch( bool value ){
+  _run_msa_switch = value;
+  return true;
+}
 
-        bool TDMap::set_run_wavimg_switch( bool value ){
-          _run_wavimg_switch = value;
-          return true;
-        }
+bool TDMap::set_run_wavimg_switch( bool value ){
+  _run_wavimg_switch = value;
+  return true;
+}
 
-        bool TDMap::set_run_simgrid_switch( bool value ){
-          _run_simgrid_switch = value;
-          return true;
-        }
+bool TDMap::set_run_simgrid_switch( bool value ){
+  _run_simgrid_switch = value;
+  return true;
+}
 
-        bool TDMap::set_full_boundary_polygon_margin_nm( std::string s_margin ){
-          bool result = false;
-          try {
-            const double margin = boost::lexical_cast<double>( s_margin );
-            result = exp_image_bounds->set_full_boundary_polygon_margin_x_nm( margin );
-            result &= exp_image_bounds->set_full_boundary_polygon_margin_y_nm( margin );
-          }
-          catch(boost::bad_lexical_cast&  ex) {
+bool TDMap::set_full_boundary_polygon_margin_nm( std::string s_margin ){
+  bool result = false;
+  try {
+    const double margin = boost::lexical_cast<double>( s_margin );
+    result = exp_image_bounds->set_full_boundary_polygon_margin_x_nm( margin );
+    result &= exp_image_bounds->set_full_boundary_polygon_margin_y_nm( margin );
+  }
+  catch(boost::bad_lexical_cast&  ex) {
     // pass it up
-            boost::throw_exception( ex );
-          }
-          return result;
-        }
+    boost::throw_exception( ex );
+  }
+  return result;
+}
 
-        bool TDMap::accept_tdmap_best_match_position(){
-          bool result = false;
-          if(
-            _td_map_simgrid->get_flag_simgrid_best_match_thickness_nm() &&
-            _td_map_simgrid->get_flag_simgrid_best_match_defocus_nm()
-            ){
-            const double match_thickness = _td_map_simgrid->get_simgrid_best_match_thickness_nm();
-          const double match_defocus_nm = _td_map_simgrid->get_simgrid_best_match_defocus_nm();
+bool TDMap::accept_tdmap_best_match_position(){
+  bool result = false;
+  if(
+      _td_map_simgrid->get_flag_simgrid_best_match_thickness_nm() &&
+      _td_map_simgrid->get_flag_simgrid_best_match_defocus_nm()
+    ){
+    const double match_thickness = _td_map_simgrid->get_simgrid_best_match_thickness_nm();
+    const double match_defocus_nm = _td_map_simgrid->get_simgrid_best_match_defocus_nm();
     // supercell
-          const bool set_result = tdmap_full_sim_super_cell->set_length_c_Nanometers( match_thickness );
+    const bool set_result = tdmap_full_sim_super_cell->set_length_c_Nanometers( match_thickness );
     // crystal
-          const bool supercell_set_result = supercell_sim_crystal_properties->set_nm_upper_bound( match_thickness );
-          const bool super_cell_samples_result = supercell_sim_crystal_properties->set_slice_samples( 1 );
+    const bool supercell_set_result = supercell_sim_crystal_properties->set_nm_upper_bound( match_thickness );
+    const bool super_cell_samples_result = supercell_sim_crystal_properties->set_slice_samples( 1 );
     // wavimg
-          const bool wavimg_result = set_full_supercell_defocus( match_defocus_nm );
-          const bool super_cell_result = set_result && supercell_set_result && super_cell_samples_result && wavimg_result;
+    const bool wavimg_result = set_full_supercell_defocus( match_defocus_nm );
+    const bool super_cell_result = set_result && supercell_set_result && super_cell_samples_result && wavimg_result;
 
-          if( _flag_logger ){
-            std::stringstream message;
-            message << "accept_tdmap_best_match_position with thickness " << match_thickness << " and defocus " << match_defocus_nm << ", super_cell_result: " << std::boolalpha << super_cell_result;
-            ApplicationLog::severity_level _log_type = super_cell_result ? ApplicationLog::notification : ApplicationLog::error;
-            BOOST_LOG_FUNCTION();  logger->logEvent( _log_type , message.str() );
-          }
+    if( _flag_logger ){
+      std::stringstream message;
+      message << "accept_tdmap_best_match_position with thickness " << match_thickness << " and defocus " << match_defocus_nm << ", super_cell_result: " << std::boolalpha << super_cell_result;
+      ApplicationLog::severity_level _log_type = super_cell_result ? ApplicationLog::notification : ApplicationLog::error;
+      BOOST_LOG_FUNCTION();  logger->logEvent( _log_type , message.str() );
+    }
 
-          if( super_cell_result ){
-            emit super_cell_dimensions_c_changed();
-            result = true;
-          }
-        }
-        return result;
-      }
+    if( super_cell_result ){
+      emit super_cell_dimensions_c_changed();
+      result = true;
+    }
+  }
+  return result;
+}
 
-      bool TDMap::accept_tdmap_best_match_position( int row, int col ){
-        bool result = false;
-        if( _td_map_simgrid->get_flag_simgrid_best_match_thickness_nm() ){
-          const double match_thickness = _td_map_simgrid->get_simulated_image_thickness_nm_in_grid(  row,  col );
-          const double match_defocus_nm = _td_map_simgrid->get_simulated_image_defocus_in_grid(  row,  col );
+bool TDMap::accept_tdmap_best_match_position( int row, int col ){
+  bool result = false;
+  if( _td_map_simgrid->get_flag_simgrid_best_match_thickness_nm() ){
+    const double match_thickness = _td_map_simgrid->get_simulated_image_thickness_nm_in_grid(  row,  col );
+    const double match_defocus_nm = _td_map_simgrid->get_simulated_image_defocus_in_grid(  row,  col );
     // supercell
-          const bool set_result = tdmap_full_sim_super_cell->set_length_c_Nanometers( match_thickness );
+    const bool set_result = tdmap_full_sim_super_cell->set_length_c_Nanometers( match_thickness );
     // crystal
-          const bool supercell_set_result = supercell_sim_crystal_properties->set_nm_upper_bound( match_thickness );
-          const bool super_cell_samples_result = supercell_sim_crystal_properties->set_slice_samples( 1 );
+    const bool supercell_set_result = supercell_sim_crystal_properties->set_nm_upper_bound( match_thickness );
+    const bool super_cell_samples_result = supercell_sim_crystal_properties->set_slice_samples( 1 );
     // wavimg
-          const bool wavimg_result = set_full_supercell_defocus( match_defocus_nm );
-          const bool super_cell_result = set_result && supercell_set_result && super_cell_samples_result && wavimg_result;
+    const bool wavimg_result = set_full_supercell_defocus( match_defocus_nm );
+    const bool super_cell_result = set_result && supercell_set_result && super_cell_samples_result && wavimg_result;
 
-          if( _flag_logger ){
-            std::stringstream message;
-            message << "accept_tdmap_best_match_position( "<< row << " , " << col << " ) with thickness " << match_thickness << " and defocus " << match_defocus_nm << ", super_cell_result: " << std::boolalpha << super_cell_result;
-            ApplicationLog::severity_level _log_type = super_cell_result ? ApplicationLog::notification : ApplicationLog::error;
-            BOOST_LOG_FUNCTION();  logger->logEvent( _log_type , message.str() );
-          }
+    if( _flag_logger ){
+      std::stringstream message;
+      message << "accept_tdmap_best_match_position( "<< row << " , " << col << " ) with thickness " << match_thickness << " and defocus " << match_defocus_nm << ", super_cell_result: " << std::boolalpha << super_cell_result;
+      ApplicationLog::severity_level _log_type = super_cell_result ? ApplicationLog::notification : ApplicationLog::error;
+      BOOST_LOG_FUNCTION();  logger->logEvent( _log_type , message.str() );
+    }
 
-          if( super_cell_result ){
-            emit super_cell_dimensions_c_changed();
-            result = true;
-          }
-        }
-        return result;
+    if( super_cell_result ){
+      emit super_cell_dimensions_c_changed();
+      result = true;
+    }
+  }
+  return result;
+}
+
+bool TDMap::compute_full_super_cell(){
+  bool result = false;
+  if( tdmap_full_sim_super_cell->get_flag_length() ){
+    emit TDMap_started_supercell_celslc();
+    const bool unit_cell_update = tdmap_full_sim_super_cell->update_from_unit_cell();
+    std::cout << " unit_cell_update result " << std::boolalpha << unit_cell_update << std::endl;
+    if( unit_cell_update ){
+      const bool cel_generation = tdmap_full_sim_super_cell->generate_super_cell_file();
+      tdmap_full_sim_super_cell->get_atom_positions_cols_vec();
+      tdmap_full_sim_super_cell->save_atom_positions_cols_vec_keys();
+      std::cout << " cel_generation result " << std::boolalpha << cel_generation << std::endl;
+      const bool xyz_export = tdmap_full_sim_super_cell->generate_xyz_file();
+      std::cout << " xyz_export result " << std::boolalpha << xyz_export << std::endl;
+      const bool super_cell_result = unit_cell_update && cel_generation && xyz_export;
+      std::cout << " super_cell_result " << std::boolalpha << super_cell_result << std::endl;
+      if( super_cell_result ){
+        _flag_runned_supercell_celslc = _supercell_celslc_parameters->call_boost_bin( true );
+        std::cout << " _flag_runned_supercell_celslc " << std::boolalpha << _flag_runned_supercell_celslc << std::endl;
+      }
+    }
+    emit TDMap_ended_supercell_celslc( _flag_runned_supercell_celslc );
+
+
+    const bool prm_status = _supercell_msa_parameters->produce_prm();
+    emit TDMap_started_supercell_msa();
+    if( prm_status ){
+      _flag_runned_supercell_msa = _supercell_msa_parameters->call_bin();
+    }
+    emit TDMap_ended_supercell_msa( _flag_runned_supercell_msa );
+    std::cout << " _flag_runned_supercell_msa " << std::boolalpha << _flag_runned_supercell_msa << std::endl;
+
+    if( _flag_logger ){
+      std::stringstream message;
+      message << "_flag_runned_supercell_msa: " << std::boolalpha << _flag_runned_supercell_msa;
+      if( _flag_runned_supercell_msa ){
+        BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification , message.str() );
+      }
+      else{
+        BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::error , message.str() );
+      }
+    }
+    emit TDMap_started_supercell_wavimg();
+    const bool wavimg_prm_status = _supercell_wavimg_parameters->produce_prm();
+    if( wavimg_prm_status ){
+      _flag_runned_supercell_wavimg = _supercell_wavimg_parameters->call_bin();
+    }
+    emit TDMap_ended_supercell_wavimg( _flag_runned_supercell_wavimg );
+    std::cout << " _flag_runned_supercell_wavimg " << std::boolalpha << _flag_runned_supercell_wavimg << std::endl;
+    if( !_flag_runned_supercell_wavimg ){
+      _tdmap_wavimg_parameters->print_var_state();
+    }
+    if( _flag_logger ){
+      std::stringstream message;
+      message << "_flag_runned_supercell_wavimg: " << std::boolalpha << _flag_runned_supercell_wavimg;
+      ApplicationLog::severity_level _log_type = _flag_runned_supercell_wavimg ? ApplicationLog::notification : ApplicationLog::error;
+      BOOST_LOG_FUNCTION();  logger->logEvent( _log_type , message.str() );
+    }
+    if( _flag_runned_supercell_wavimg ){
+      emit TDMap_started_supercell_read_simulated_image();
+      _flag_read_simulated_supercell_image = sim_image_intensity_columns->read_simulated_image_from_dat_file();
+
+      if( _flag_read_simulated_supercell_image ){
+        emit supercell_roi_simulated_image_changed();
       }
 
-      bool TDMap::compute_full_super_cell(){
-        bool result = false;
-        if( tdmap_full_sim_super_cell->get_flag_length() ){
-          emit TDMap_started_supercell_celslc();
-          const bool unit_cell_update = tdmap_full_sim_super_cell->update_from_unit_cell();
-          std::cout << " unit_cell_update result " << std::boolalpha << unit_cell_update << std::endl;
-          if( unit_cell_update ){
-            const bool cel_generation = tdmap_full_sim_super_cell->generate_super_cell_file();
-            tdmap_full_sim_super_cell->get_atom_positions_cols_vec();
-            tdmap_full_sim_super_cell->save_atom_positions_cols_vec_keys();
-            std::cout << " cel_generation result " << std::boolalpha << cel_generation << std::endl;
-            const bool xyz_export = tdmap_full_sim_super_cell->generate_xyz_file();
-            std::cout << " xyz_export result " << std::boolalpha << xyz_export << std::endl;
-            const bool super_cell_result = unit_cell_update && cel_generation && xyz_export;
-            std::cout << " super_cell_result " << std::boolalpha << super_cell_result << std::endl;
-            if( super_cell_result ){
-              _flag_runned_supercell_celslc = _supercell_celslc_parameters->call_boost_bin( true );
-              std::cout << " _flag_runned_supercell_celslc " << std::boolalpha << _flag_runned_supercell_celslc << std::endl;
-            }
-          }
-          emit TDMap_ended_supercell_celslc( _flag_runned_supercell_celslc );
+      emit TDMap_ended_supercell_read_simulated_image( _flag_read_simulated_supercell_image );
+      std::cout << "read_simulated_image_from_dat_file: " << std::boolalpha << _flag_read_simulated_supercell_image << std::endl;
 
+      compute_full_super_cell_intensity_cols();
 
-          const bool prm_status = _supercell_msa_parameters->produce_prm();
-          emit TDMap_started_supercell_msa();
-          if( prm_status ){
-            _flag_runned_supercell_msa = _supercell_msa_parameters->call_bin();
-          }
-          emit TDMap_ended_supercell_msa( _flag_runned_supercell_msa );
-          std::cout << " _flag_runned_supercell_msa " << std::boolalpha << _flag_runned_supercell_msa << std::endl;
-
-          if( _flag_logger ){
-            std::stringstream message;
-            message << "_flag_runned_supercell_msa: " << std::boolalpha << _flag_runned_supercell_msa;
-            if( _flag_runned_supercell_msa ){
-              BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification , message.str() );
-            }
-            else{
-              BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::error , message.str() );
-            }
-          }
-          emit TDMap_started_supercell_wavimg();
-          const bool wavimg_prm_status = _supercell_wavimg_parameters->produce_prm();
-          if( wavimg_prm_status ){
-            _flag_runned_supercell_wavimg = _supercell_wavimg_parameters->call_bin();
-          }
-          emit TDMap_ended_supercell_wavimg( _flag_runned_supercell_wavimg );
-          std::cout << " _flag_runned_supercell_wavimg " << std::boolalpha << _flag_runned_supercell_wavimg << std::endl;
-          if( !_flag_runned_supercell_wavimg ){
-            _tdmap_wavimg_parameters->print_var_state();
-          }
-          if( _flag_logger ){
-            std::stringstream message;
-            message << "_flag_runned_supercell_wavimg: " << std::boolalpha << _flag_runned_supercell_wavimg;
-            ApplicationLog::severity_level _log_type = _flag_runned_supercell_wavimg ? ApplicationLog::notification : ApplicationLog::error;
-            BOOST_LOG_FUNCTION();  logger->logEvent( _log_type , message.str() );
-          }
-          if( _flag_runned_supercell_wavimg ){
-            emit TDMap_started_supercell_read_simulated_image();
-            _flag_read_simulated_supercell_image = sim_image_intensity_columns->read_simulated_image_from_dat_file();
-            
-            if( _flag_read_simulated_supercell_image ){
-              emit supercell_roi_simulated_image_changed();
-            }
-
-            emit TDMap_ended_supercell_read_simulated_image( _flag_read_simulated_supercell_image );
-            std::cout << "read_simulated_image_from_dat_file: " << std::boolalpha << _flag_read_simulated_supercell_image << std::endl;
-
-            compute_full_super_cell_intensity_cols();
-
-            if( _flag_logger ){
-              std::stringstream message;
-              message << "_flag_read_simulated_supercell_image: " << std::boolalpha << _flag_read_simulated_supercell_image;
-              ApplicationLog::severity_level _log_type = _flag_read_simulated_supercell_image ? ApplicationLog::notification : ApplicationLog::error;
-              BOOST_LOG_FUNCTION();  logger->logEvent( _log_type , message.str() );
-            }
-          }
-          result = _flag_runned_supercell_celslc && _flag_runned_supercell_msa && _flag_runned_supercell_wavimg && _flag_read_simulated_supercell_image;
-        }
-        return result;
+      if( _flag_logger ){
+        std::stringstream message;
+        message << "_flag_read_simulated_supercell_image: " << std::boolalpha << _flag_read_simulated_supercell_image;
+        ApplicationLog::severity_level _log_type = _flag_read_simulated_supercell_image ? ApplicationLog::notification : ApplicationLog::error;
+        BOOST_LOG_FUNCTION();  logger->logEvent( _log_type , message.str() );
       }
+    }
+    result = _flag_runned_supercell_celslc && _flag_runned_supercell_msa && _flag_runned_supercell_wavimg && _flag_read_simulated_supercell_image;
+  }
+  return result;
+}
 
-      bool TDMap::compute_full_super_cell_intensity_cols(){
-        bool result = false;
-        emit TDMap_started_supercell_segmentate_image();
-        _flag_read_simulated_supercell_image = sim_image_intensity_columns->segmentate_sim_image();
-        std::cout << " compute_full_super_cell_intensity_cols segmentate_sim_image " << std::boolalpha << _flag_read_simulated_supercell_image << std::endl;
+bool TDMap::compute_full_super_cell_intensity_cols(){
+  bool result = false;
+  emit TDMap_started_supercell_segmentate_image();
+  _flag_read_simulated_supercell_image = sim_image_intensity_columns->segmentate_sim_image();
+  std::cout << " compute_full_super_cell_intensity_cols segmentate_sim_image " << std::boolalpha << _flag_read_simulated_supercell_image << std::endl;
 
-        _flag_read_simulated_supercell_image &= sim_image_intensity_columns->feature_match();
-        std::cout << " compute_full_super_cell_intensity_cols feature_match " << std::boolalpha << _flag_read_simulated_supercell_image << std::endl;
+  _flag_read_simulated_supercell_image &= sim_image_intensity_columns->feature_match();
+  std::cout << " compute_full_super_cell_intensity_cols feature_match " << std::boolalpha << _flag_read_simulated_supercell_image << std::endl;
 
-        _flag_read_simulated_supercell_image &= sim_image_intensity_columns->map_sim_intensity_cols_to_exp_image();
-        std::cout << " compute_full_super_cell_intensity_cols map_sim_intensity_cols_to_exp_image " << std::boolalpha << _flag_read_simulated_supercell_image << std::endl;
+  _flag_read_simulated_supercell_image &= sim_image_intensity_columns->map_sim_intensity_cols_to_exp_image();
+  std::cout << " compute_full_super_cell_intensity_cols map_sim_intensity_cols_to_exp_image " << std::boolalpha << _flag_read_simulated_supercell_image << std::endl;
 
-        emit TDMap_ended_supercell_segmentate_image( _flag_read_simulated_supercell_image );
-        if( _flag_logger ){
-          std::stringstream message;
-          message << "_flag_read_simulated_supercell_image: " << std::boolalpha << _flag_read_simulated_supercell_image;
-          ApplicationLog::severity_level _log_type = _flag_read_simulated_supercell_image ? ApplicationLog::notification : ApplicationLog::error;
-          BOOST_LOG_FUNCTION();  logger->logEvent( _log_type , message.str() );
-        }
-        result = _flag_read_simulated_supercell_image;
-        return result;
-      }
+  emit TDMap_ended_supercell_segmentate_image( _flag_read_simulated_supercell_image );
+  if( _flag_logger ){
+    std::stringstream message;
+    message << "_flag_read_simulated_supercell_image: " << std::boolalpha << _flag_read_simulated_supercell_image;
+    ApplicationLog::severity_level _log_type = _flag_read_simulated_supercell_image ? ApplicationLog::notification : ApplicationLog::error;
+    BOOST_LOG_FUNCTION();  logger->logEvent( _log_type , message.str() );
+  }
+  result = _flag_read_simulated_supercell_image;
+  return result;
+}
 
-      std::string TDMap::get_project_filename_with_path(){
-        return project_filename_with_path.string();
-      }
+std::string TDMap::get_project_filename_with_path(){
+  return project_filename_with_path.string();
+}
 
 /* gui flag getters */
 
-      bool TDMap::get_exp_image_properties_flag_full_image(){
-        return exp_image_properties->get_flag_full_image();
-      }
+bool TDMap::get_exp_image_properties_flag_full_image(){
+  return exp_image_properties->get_flag_full_image();
+}
 
-      bool TDMap::get_exp_image_properties_flag_full_n_rows_height_nm(){
-        return exp_image_properties->get_flag_full_n_rows_height_nm();
-      }
+bool TDMap::get_exp_image_properties_flag_full_n_rows_height_nm(){
+  return exp_image_properties->get_flag_full_n_rows_height_nm();
+}
 
-      bool TDMap::get_exp_image_properties_flag_full_n_cols_width_nm(){
-        return exp_image_properties->get_flag_full_n_cols_width_nm();
-      }
+bool TDMap::get_exp_image_properties_flag_full_n_cols_width_nm(){
+  return exp_image_properties->get_flag_full_n_cols_width_nm();
+}
 
-      int TDMap::get_exp_image_properties_full_n_cols_width(){
-        return exp_image_properties->get_full_n_cols_width();
-      }
+int TDMap::get_exp_image_properties_full_n_cols_width(){
+  return exp_image_properties->get_full_n_cols_width();
+}
 
-      int TDMap::get_exp_image_properties_full_n_rows_height(){
-        return exp_image_properties->get_full_n_rows_height();
-      }
+int TDMap::get_exp_image_properties_full_n_rows_height(){
+  return exp_image_properties->get_full_n_rows_height();
+}
 
-      double TDMap::get_full_boundary_polygon_margin_nm(){
-        return exp_image_bounds->get_full_boundary_polygon_margin_x_nm();
-      }
+double TDMap::get_full_boundary_polygon_margin_nm(){
+  return exp_image_bounds->get_full_boundary_polygon_margin_x_nm();
+}
 
-      int TDMap::get_full_boundary_polygon_margin_px(){
-        return exp_image_bounds->get_full_boundary_polygon_margin_x_px();
-      }
+int TDMap::get_full_boundary_polygon_margin_px(){
+  return exp_image_bounds->get_full_boundary_polygon_margin_x_px();
+}
 
-      double TDMap::get_exp_image_properties_sampling_rate_nm_per_pixel_bottom_limit(){
-        return 1.e-10;
-      }
+double TDMap::get_exp_image_properties_sampling_rate_nm_per_pixel_bottom_limit(){
+  return 1.e-10;
+}
 
-      double TDMap::get_exp_image_properties_sampling_rate_nm_per_pixel_top_limit(){
-        return 1.0f;
-      }
+double TDMap::get_exp_image_properties_sampling_rate_nm_per_pixel_top_limit(){
+  return 1.0f;
+}
 
-      int TDMap::get_experimental_roi_dimensions_width_bottom_limit(){
-        int bot_limit = 0;
-        if( sim_image_properties->get_flag_full_n_cols_width() ){
-          bot_limit = sim_image_properties->get_full_n_cols_width();
-        }
-        return bot_limit;
-      }
+int TDMap::get_experimental_roi_dimensions_width_bottom_limit(){
+  int bot_limit = 0;
+  if( sim_image_properties->get_flag_full_n_cols_width() ){
+    bot_limit = sim_image_properties->get_full_n_cols_width();
+  }
+  return bot_limit;
+}
 
-      int TDMap::get_experimental_roi_dimensions_width_top_limit(){
-        const int _center_y = exp_image_properties->get_roi_center_y();
-        const int _dim_y = exp_image_properties->get_full_n_cols_width();
-        const int top_half = _dim_y - _center_y;
+int TDMap::get_experimental_roi_dimensions_width_top_limit(){
+  const int _center_y = exp_image_properties->get_roi_center_y();
+  const int _dim_y = exp_image_properties->get_full_n_cols_width();
+  const int top_half = _dim_y - _center_y;
   const int bot_half = _center_y - 0; // just to explain the tought
   // use the smaller half
   const int limit_top = 2 * ( top_half < bot_half ? top_half : bot_half );
@@ -2625,7 +2659,7 @@ cv::Mat TDMap::get_exp_image_properties_roi_image(){
   return exp_image_properties->get_roi_image();
 }
 
-cv::Mat TDMap::get_simulated_on_exp_centered_images_visualization(int x, int y ){
+cv::Mat TDMap::get_simulated_on_exp_centered_images_visualization( int x, int y, bool enable_centered_compensation ){
 
   const cv::Mat _simulated_image = get_simulated_image_in_grid_visualization(x,y);
   const cv::Point2i simulated_match_location = get_simulated_match_location(x,y);
@@ -2637,19 +2671,20 @@ cv::Mat TDMap::get_simulated_on_exp_centered_images_visualization(int x, int y )
 
   // start position x
   const int right_side_cols = roi_image_clone.cols - _simulated_image.cols - simulated_match_location.x;
-  const int right_side_cols_compensation = ( right_side_cols < simulated_match_location.x ) ? ( simulated_match_location.x - right_side_cols ) : 0;
-  const int left_side_cols_compensation = ( simulated_match_location.x < right_side_cols ) ? ( right_side_cols - simulated_match_location.x ) : 0;
+  const int right_side_cols_compensation = enable_centered_compensation ? ( ( right_side_cols < simulated_match_location.x ) ? ( simulated_match_location.x - right_side_cols ) : 0 ) : 0;
+  const int left_side_cols_compensation = enable_centered_compensation ? ( ( simulated_match_location.x < right_side_cols ) ? ( right_side_cols - simulated_match_location.x ) : 0 ) : 0;
 
   const int _simulated_on_exp_centered_cols = left_side_cols_compensation + roi_image_clone.cols + right_side_cols_compensation;
 
   // start position x
   const int bottom_side_rows = roi_image_clone.rows - _simulated_image.rows - simulated_match_location.y;
-  const int bottom_side_rows_compensation = ( bottom_side_rows < simulated_match_location.y ) ? ( simulated_match_location.y - bottom_side_rows ) : 0;
-  const int top_side_rows_compensation = ( simulated_match_location.y < bottom_side_rows ) ? ( bottom_side_rows - simulated_match_location.y ) : 0;
+  const int bottom_side_rows_compensation = enable_centered_compensation ? ( ( bottom_side_rows < simulated_match_location.y ) ? ( simulated_match_location.y - bottom_side_rows ) : 0 ) : 0;
+  const int top_side_rows_compensation = enable_centered_compensation ? ( ( simulated_match_location.y < bottom_side_rows ) ? ( bottom_side_rows - simulated_match_location.y ) : 0 ) : 0;
 
   const int _simulated_on_exp_centered_rows = top_side_rows_compensation + roi_image_clone.rows + bottom_side_rows_compensation;
 
   cv::Mat _simulated_on_exp_centered( _simulated_on_exp_centered_rows, _simulated_on_exp_centered_cols , roi_image_clone.type(), cv::Scalar::all( 255 ) );
+  roi_image_clone.copyTo(_simulated_on_exp_centered(cv::Rect( left_side_cols_compensation, top_side_rows_compensation, roi_image_clone.cols, roi_image_clone.rows)));
   return _simulated_on_exp_centered;
 }
 
@@ -2808,37 +2843,37 @@ bool TDMap::set_full_sim_super_cell_length_c_nm( double full_crystal_c_size ){
 bool TDMap::update_full_crysta_a_b_sizes(){
   bool result = false;
   if(
-    exp_image_bounds->get_flag_boundary_polygon_length_x_nm() &&
-    exp_image_bounds->get_flag_boundary_polygon_length_y_nm()
+      exp_image_bounds->get_flag_boundary_polygon_length_x_nm() &&
+      exp_image_bounds->get_flag_boundary_polygon_length_y_nm()
     ){
     const double full_crystal_a_size = exp_image_bounds->get_boundary_polygon_length_x_nm();
-  const double full_crystal_b_size = exp_image_bounds->get_boundary_polygon_length_y_nm();
-  //const int ignore_edge_pixels = exp_image_bounds->get_full_boundary_polygon_margin_y_px();
-  
-  const bool a_result = tdmap_full_sim_super_cell->set_length_a_Nanometers( full_crystal_a_size );
-  const bool b_result = tdmap_full_sim_super_cell->set_length_b_Nanometers( full_crystal_b_size );
+    const double full_crystal_b_size = exp_image_bounds->get_boundary_polygon_length_y_nm();
+    //const int ignore_edge_pixels = exp_image_bounds->get_full_boundary_polygon_margin_y_px();
 
-  const double cell_length_a_nm = tdmap_full_sim_super_cell->get_length_a_Nanometers();
-  std::cout << " setting full_sim_super_cell_length_a " << full_crystal_a_size << std::endl;
-  std::cout << " setting full_sim_super_cell_length_a " << cell_length_a_nm << std::endl;
-  const bool image_result_a = supercell_sim_image_properties->set_full_nm_size_cols_a( cell_length_a_nm );
-  const double cell_length_b_nm = tdmap_full_sim_super_cell->get_length_b_Nanometers();
-  std::cout << " setting full_sim_super_cell_length_b " << full_crystal_b_size << std::endl;
-  std::cout << " setting full_sim_super_cell_length_b " << cell_length_b_nm << std::endl;
-  const bool image_result_b = supercell_sim_image_properties->set_full_nm_size_rows_b( cell_length_b_nm );
+    const bool a_result = tdmap_full_sim_super_cell->set_length_a_Nanometers( full_crystal_a_size );
+    const bool b_result = tdmap_full_sim_super_cell->set_length_b_Nanometers( full_crystal_b_size );
 
-  //const bool image_ignore_pixels_result = supercell_sim_image_properties->set_ignore_edge_pixels( ignore_edge_pixels );
-  //std::cout << "image_ignore_pixels_result " << image_ignore_pixels_result << " ignore_edge_pixels " << ignore_edge_pixels << std::endl;
+    const double cell_length_a_nm = tdmap_full_sim_super_cell->get_length_a_Nanometers();
+    std::cout << " setting full_sim_super_cell_length_a " << full_crystal_a_size << std::endl;
+    std::cout << " setting full_sim_super_cell_length_a " << cell_length_a_nm << std::endl;
+    const bool image_result_a = supercell_sim_image_properties->set_full_nm_size_cols_a( cell_length_a_nm );
+    const double cell_length_b_nm = tdmap_full_sim_super_cell->get_length_b_Nanometers();
+    std::cout << " setting full_sim_super_cell_length_b " << full_crystal_b_size << std::endl;
+    std::cout << " setting full_sim_super_cell_length_b " << cell_length_b_nm << std::endl;
+    const bool image_result_b = supercell_sim_image_properties->set_full_nm_size_rows_b( cell_length_b_nm );
 
-  const bool super_cell_result = a_result && b_result && image_result_a && image_result_b;
-  std::cout << "full_crystal_a_size " << full_crystal_a_size << " full_crystal_b_size " << full_crystal_b_size << " super_cell_result " << std::boolalpha << super_cell_result << std::endl;
-  if( super_cell_result ){
-    emit super_cell_dimensions_b_changed();
-    emit super_cell_dimensions_a_changed();
-    result = true;
+    //const bool image_ignore_pixels_result = supercell_sim_image_properties->set_ignore_edge_pixels( ignore_edge_pixels );
+    //std::cout << "image_ignore_pixels_result " << image_ignore_pixels_result << " ignore_edge_pixels " << ignore_edge_pixels << std::endl;
+
+    const bool super_cell_result = a_result && b_result && image_result_a && image_result_b;
+    std::cout << "full_crystal_a_size " << full_crystal_a_size << " full_crystal_b_size " << full_crystal_b_size << " super_cell_result " << std::boolalpha << super_cell_result << std::endl;
+    if( super_cell_result ){
+      emit super_cell_dimensions_b_changed();
+      emit super_cell_dimensions_a_changed();
+      result = true;
+    }
   }
-}
-return result;
+  return result;
 }
 
 bool TDMap::set_exp_image_bounds_roi_boundary_rect( cv::Rect roi_boundary_rect ){
@@ -2854,19 +2889,19 @@ bool TDMap::set_exp_image_properties_roi_rectangle_statistical( cv::Rect roi_rec
   bool result = false;
   result = supercell_exp_image_properties->set_roi_rectangle_statistical( roi_rectangle_statistical );
   if(
-    result &&
-    supercell_exp_image_properties->get_flag_mean_image_statistical() &&
-    supercell_exp_image_properties->get_flag_stddev_image_statistical()
+      result &&
+      supercell_exp_image_properties->get_flag_mean_image_statistical() &&
+      supercell_exp_image_properties->get_flag_stddev_image_statistical()
     ){
 
     cv::Scalar mean = supercell_exp_image_properties->get_mean_image_statistical();
-  supercell_sim_image_properties->set_mean_image_statistical(mean);
-  emit exp_image_properties_noise_carbon_statistical_mean_changed();
-  cv::Scalar stddev = supercell_exp_image_properties->get_stddev_image_statistical();
-  supercell_sim_image_properties->set_stddev_image_statistical(stddev);
-  emit exp_image_properties_noise_carbon_statistical_stddev_changed();
-}
-return result;
+    supercell_sim_image_properties->set_mean_image_statistical(mean);
+    emit exp_image_properties_noise_carbon_statistical_mean_changed();
+    cv::Scalar stddev = supercell_exp_image_properties->get_stddev_image_statistical();
+    supercell_sim_image_properties->set_stddev_image_statistical(stddev);
+    emit exp_image_properties_noise_carbon_statistical_stddev_changed();
+  }
+  return result;
 }
 
 int TDMap::get_exp_image_properties_roi_rectangle_statistical_mean(){
