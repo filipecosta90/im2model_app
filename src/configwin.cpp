@@ -2189,8 +2189,6 @@ void MainWindow::create_box_options_tab1_crystallography(){
   zone_axis_u->set_variable_name( "zone_axis_u" );
   boost::function<double(void)> box2_function_3_1_getter ( boost::bind( &TDMap::get_zone_axis_u, _core_td_map ) );
   zone_axis_u->set_fp_data_getter_int_vec( 1, box2_function_3_1_getter );
-  // load the preset data from core constuctor
-  //zone_axis_u->load_data_from_getter( 1 );
   zone_axis->insertChildren( zone_axis_u );
 
   /*group options*/
@@ -2198,6 +2196,10 @@ void MainWindow::create_box_options_tab1_crystallography(){
 
   /* validators */
   zone_axis_u->set_flag_validatable_double(1,true);
+
+  // load the preset data from core constuctor
+  zone_axis_u->load_data_from_getter( 1 );
+
   ////////////////
   // Projection direction k
   ////////////////
@@ -2208,8 +2210,6 @@ void MainWindow::create_box_options_tab1_crystallography(){
   zone_axis_v->set_variable_name( "zone_axis_v" );
   boost::function<double(void)> box2_function_3_2_getter ( boost::bind( &TDMap::get_zone_axis_v, _core_td_map ) );
   zone_axis_v->set_fp_data_getter_int_vec( 1, box2_function_3_2_getter );
-  // load the preset data from core constuctor
-  //zone_axis_v->load_data_from_getter( 1 );
   zone_axis->insertChildren( zone_axis_v );
 
   /*group options*/
@@ -2217,6 +2217,9 @@ void MainWindow::create_box_options_tab1_crystallography(){
 
   /* validators */
   zone_axis_v->set_flag_validatable_double(1,true);
+
+  // load the preset data from core constuctor
+  zone_axis_v->load_data_from_getter( 1 );
 
   ////////////////
   // Projection direction l
@@ -2228,8 +2231,7 @@ void MainWindow::create_box_options_tab1_crystallography(){
   zone_axis_w->set_variable_name( "zone_axis_w" );
   boost::function<double(void)> box2_function_3_3_getter ( boost::bind( &TDMap::get_zone_axis_w, _core_td_map ) );
   zone_axis_w->set_fp_data_getter_int_vec( 1, box2_function_3_3_getter );
-  // load the preset data from core constuctor
-  //zone_axis_w->load_data_from_getter( 1 );
+  
   zone_axis->insertChildren( zone_axis_w );
 
   /*group options*/
@@ -2237,6 +2239,9 @@ void MainWindow::create_box_options_tab1_crystallography(){
 
   /* validators */
   zone_axis_w->set_flag_validatable_double(1,true);
+
+  // load the preset data from core constuctor
+  zone_axis_w->load_data_from_getter( 1 );
 
   ////////////////
   // Projected y axis
@@ -2256,8 +2261,6 @@ void MainWindow::create_box_options_tab1_crystallography(){
   upward_vector_u->set_variable_name( "upward_vector_u" );
   boost::function<double(void)> box2_function_2_1_getter ( boost::bind( &TDMap::get_upward_vector_u, _core_td_map ) );
   upward_vector_u->set_fp_data_getter_int_vec( 1, box2_function_2_1_getter );
-  // load the preset data from core constuctor
-  //upward_vector_u->load_data_from_getter( 1 );
   upward_vector->insertChildren( upward_vector_u );
 
   /*group options*/
@@ -2265,6 +2268,9 @@ void MainWindow::create_box_options_tab1_crystallography(){
 
   /* validators */
   upward_vector_u->set_flag_validatable_double(1,true);
+
+  // load the preset data from core constuctor
+  upward_vector_u->load_data_from_getter( 1 );
 
   ////////////////
   //Projected y axis v
@@ -2276,8 +2282,6 @@ void MainWindow::create_box_options_tab1_crystallography(){
   upward_vector_v->set_variable_name( "upward_vector_v" );
   boost::function<double(void)> box2_function_2_2_getter ( boost::bind( &TDMap::get_upward_vector_v, _core_td_map ) );
   upward_vector_v->set_fp_data_getter_int_vec( 1, box2_function_2_2_getter );
-  // load the preset data from core constuctor
-  //upward_vector_v->load_data_from_getter( 1 );
   upward_vector->insertChildren( upward_vector_v );
 
   /*group options*/
@@ -2285,6 +2289,9 @@ void MainWindow::create_box_options_tab1_crystallography(){
 
   /* validators */
   upward_vector_v->set_flag_validatable_double(1,true);
+
+  // load the preset data from core constuctor
+  upward_vector_v->load_data_from_getter( 1 );
 
   ////////////////
   //Projected y axis w
@@ -2296,8 +2303,6 @@ void MainWindow::create_box_options_tab1_crystallography(){
   upward_vector_w->set_variable_name( "upward_vector_w" );
   boost::function<double(void)> box2_function_2_3_getter ( boost::bind( &TDMap::get_upward_vector_w, _core_td_map ) );
   upward_vector_w->set_fp_data_getter_int_vec( 1, box2_function_2_3_getter );
-  // load the preset data from core constuctor
-  //upward_vector_w->load_data_from_getter( 1 );
   upward_vector->insertChildren( upward_vector_w );
 
   /*group options*/
@@ -2305,6 +2310,9 @@ void MainWindow::create_box_options_tab1_crystallography(){
 
   /* validators */
   upward_vector_w->set_flag_validatable_double(1,true);
+
+  // load the preset data from core constuctor
+  upward_vector_w->load_data_from_getter( 1 );
 
   ////////////////
   // Orientation

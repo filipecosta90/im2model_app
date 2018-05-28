@@ -1,0 +1,215 @@
+#------------------------------------------------------------------------------
+#$Date: 2016-02-18 14:25:00 +0200 (Thu, 18 Feb 2016) $
+#$Revision: 176728 $
+#$URL: svn://www.crystallography.net/cod/cif/8/10/29/8102968.cif $
+#------------------------------------------------------------------------------
+#
+# This file is available in the Crystallography Open Database (COD),
+# http://www.crystallography.net/
+#
+# All data on this site have been placed in the public domain by the
+# contributors.
+#
+data_8102968
+loop_
+_publ_author_name
+'Tragl, Sonja'
+'Meyer, Hans-J\"urgen'
+_publ_section_title
+;
+Crystal structure of niobium pentabromide, NbBr~5~, a triclinic phase
+;
+_journal_issue                   3
+_journal_name_full
+'Zeitschrift f\"ur Kristallographie - New Crystal Structures'
+_journal_page_first              161
+_journal_page_last               162
+_journal_volume                  222
+_journal_year                    2007
+_chemical_formula_structural     NbBr5
+_chemical_formula_sum            'Br5 Nb'
+_chemical_formula_weight         492.46
+_chemical_name_systematic        'niobium pentabromide'
+_space_group_IT_number           2
+_symmetry_cell_setting           triclinic
+_symmetry_space_group_name_Hall  '-P 1'
+_symmetry_space_group_name_H-M   'P -1'
+_atom_sites_solution_hydrogens   geom
+_atom_sites_solution_primary     direct
+_atom_sites_solution_secondary   difmap
+_audit_creation_method           SHELXL-97
+_cell_angle_alpha                108.84(2)
+_cell_angle_beta                 90.89(2)
+_cell_angle_gamma                116.16(2)
+_cell_formula_units_Z            2
+_cell_length_a                   6.4609(12)
+_cell_length_b                   7.0308(14)
+_cell_length_c                   9.5840(17)
+_cell_measurement_reflns_used    2000
+_cell_measurement_temperature    215(2)
+_cell_measurement_theta_max      25.86
+_cell_measurement_theta_min      2.29
+_cell_volume                     363.38(15)
+_computing_cell_refinement       'Stoe IPDS Software'
+_computing_data_collection       'Stoe IPDS Software'
+_computing_data_reduction        'Stoe IPDS Software'
+_computing_molecular_graphics    'Diamond 2.1c'
+_computing_structure_refinement  'SHELXL-97 (Sheldrick, 1997)'
+_computing_structure_solution    'SHELXS-97 (Sheldrick, 1990)'
+_diffrn_ambient_temperature      215(2)
+_diffrn_measured_fraction_theta_full 0.932
+_diffrn_measured_fraction_theta_max 0.932
+_diffrn_measurement_device_type  'Stoe IPDS 1'
+_diffrn_measurement_method       phi
+_diffrn_radiation_monochromator  graphite
+_diffrn_radiation_source         'fine-focus sealed tube'
+_diffrn_radiation_type           MoK\a
+_diffrn_radiation_wavelength     0.71073
+_diffrn_reflns_av_R_equivalents  0.0527
+_diffrn_reflns_av_sigmaI/netI    0.0399
+_diffrn_reflns_limit_h_max       7
+_diffrn_reflns_limit_h_min       -7
+_diffrn_reflns_limit_k_max       8
+_diffrn_reflns_limit_k_min       -8
+_diffrn_reflns_limit_l_max       11
+_diffrn_reflns_limit_l_min       -11
+_diffrn_reflns_number            4301
+_diffrn_reflns_theta_full        25.86
+_diffrn_reflns_theta_max         25.86
+_diffrn_reflns_theta_min         2.29
+_exptl_absorpt_coefficient_mu    29.022
+_exptl_absorpt_correction_T_max  0.0939
+_exptl_absorpt_correction_T_min  0.0152
+_exptl_absorpt_correction_type   numerical
+_exptl_absorpt_process_details   X-Red/X-Shape
+_exptl_crystal_colour            black
+_exptl_crystal_density_diffrn    4.501
+_exptl_crystal_density_method    'not measured'
+_exptl_crystal_description       block
+_exptl_crystal_F_000             432
+_exptl_crystal_size_max          0.40
+_exptl_crystal_size_mid          0.26
+_exptl_crystal_size_min          0.12
+_refine_diff_density_max         1.310
+_refine_diff_density_min         -1.202
+_refine_diff_density_rms         0.305
+_refine_ls_extinction_method     none
+_refine_ls_goodness_of_fit_ref   1.007
+_refine_ls_hydrogen_treatment    mixed
+_refine_ls_matrix_type           full
+_refine_ls_number_parameters     55
+_refine_ls_number_reflns         1310
+_refine_ls_number_restraints     0
+_refine_ls_restrained_S_all      1.007
+_refine_ls_R_factor_all          0.0444
+_refine_ls_R_factor_gt           0.0360
+_refine_ls_shift/su_max          0.004
+_refine_ls_shift/su_mean         0.001
+_refine_ls_structure_factor_coef Fsqd
+_refine_ls_weighting_details
+'calc w=1/[\s^2^(Fo^2^)+(0.0524P)^2^+0.0000P] where P=(Fo^2^+2Fc^2^)/3'
+_refine_ls_weighting_scheme      calc
+_refine_ls_wR_factor_gt          0.0842
+_refine_ls_wR_factor_ref         0.0862
+_reflns_number_gt                1078
+_reflns_number_total             1310
+_reflns_threshold_expression     >2sigma(I)
+_cod_data_source_file            409917.cff
+_cod_data_source_block           nbBr5
+_cod_original_cell_volume        363.38(12)
+_cod_original_sg_symbol_H-M      P-1
+_cod_database_code               8102968
+loop_
+_symmetry_equiv_pos_as_xyz
+'x, y, z'
+'-x, -y, -z'
+loop_
+_atom_site_label
+_atom_site_type_symbol
+_atom_site_fract_x
+_atom_site_fract_y
+_atom_site_fract_z
+_atom_site_U_iso_or_equiv
+_atom_site_adp_type
+_atom_site_occupancy
+_atom_site_symmetry_multiplicity
+_atom_site_Wyckoff_symbol
+_atom_site_calc_flag
+_atom_site_refinement_flags
+_atom_site_disorder_assembly
+_atom_site_disorder_group
+Nb1 Nb 0.89344(13) 0.77745(11) 0.27635(7) 0.0177(2) Uani 1 2 i d . . .
+Br1 Br 0.24790(14) 1.18731(12) 0.45515(8) 0.0200(2) Uani 1 2 i d . . .
+Br2 Br 0.12329(15) 0.61827(13) 0.35255(9) 0.0260(2) Uani 1 2 i d . . .
+Br3 Br 0.69257(16) 0.99432(13) 0.25183(9) 0.0259(2) Uani 1 2 i d . . .
+Br4 Br 0.54584(15) 0.41557(13) 0.16637(9) 0.0277(2) Uani 1 2 i d . . .
+Br5 Br 0.07785(15) 0.81505(14) 0.06369(9) 0.0270(2) Uani 1 2 i d . . .
+loop_
+_atom_site_aniso_label
+_atom_site_aniso_U_11
+_atom_site_aniso_U_22
+_atom_site_aniso_U_33
+_atom_site_aniso_U_23
+_atom_site_aniso_U_13
+_atom_site_aniso_U_12
+Nb1 0.0199(4) 0.0164(3) 0.0143(3) 0.0030(2) 0.0022(3) 0.0084(3)
+Br1 0.0198(4) 0.0188(4) 0.0162(3) 0.0043(3) 0.0043(3) 0.0060(3)
+Br2 0.0291(5) 0.0264(4) 0.0277(4) 0.0097(3) 0.0055(4) 0.0175(4)
+Br3 0.0280(5) 0.0271(4) 0.0269(4) 0.0098(3) 0.0037(4) 0.0166(4)
+Br4 0.0249(5) 0.0206(4) 0.0266(4) 0.0043(3) 0.0005(3) 0.0047(3)
+Br5 0.0324(5) 0.0291(4) 0.0209(4) 0.0096(3) 0.0107(3) 0.0151(4)
+loop_
+_atom_type_symbol
+_atom_type_description
+_atom_type_scat_dispersion_real
+_atom_type_scat_dispersion_imag
+_atom_type_scat_source
+Nb Nb -2.0727 0.6215 'International Tables Vol C Tables 4.2.6.8 and 6.1.1.4'
+Br Br -0.2901 2.4595 'International Tables Vol C Tables 4.2.6.8 and 6.1.1.4'
+loop_
+_geom_angle_atom_site_label_1
+_geom_angle_atom_site_label_2
+_geom_angle_atom_site_label_3
+_geom_angle
+_geom_angle_site_symmetry_1
+_geom_angle_site_symmetry_3
+_geom_angle_publ_flag
+Br4 Nb1 Br5 102.35(4) . 1_655 ?
+Br4 Nb1 Br2 94.21(4) . 1_655 ?
+Br5 Nb1 Br2 93.57(4) 1_655 1_655 ?
+Br4 Nb1 Br3 93.56(4) . . ?
+Br5 Nb1 Br3 93.17(4) 1_655 . ?
+Br2 Nb1 Br3 168.39(4) 1_655 . ?
+Br4 Nb1 Br1 167.72(4) . 1_655 ?
+Br5 Nb1 Br1 89.92(4) 1_655 1_655 ?
+Br2 Nb1 Br1 85.28(4) 1_655 1_655 ?
+Br3 Nb1 Br1 85.30(4) . 1_655 ?
+Br4 Nb1 Br1 88.22(4) . 2_676 ?
+Br5 Nb1 Br1 169.41(4) 1_655 2_676 ?
+Br2 Nb1 Br1 86.06(4) 1_655 2_676 ?
+Br3 Nb1 Br1 85.58(4) . 2_676 ?
+Br1 Nb1 Br1 79.50(4) 1_655 2_676 ?
+Br4 Nb1 Nb1 127.93(4) . 2_776 ?
+Br5 Nb1 Nb1 129.71(4) 1_655 2_776 ?
+Br2 Nb1 Nb1 84.36(4) 1_655 2_776 ?
+Br3 Nb1 Nb1 84.06(3) . 2_776 ?
+Br1 Nb1 Nb1 39.79(3) 1_655 2_776 ?
+Br1 Nb1 Nb1 39.71(2) 2_676 2_776 ?
+Nb1 Br1 Nb1 100.50(4) 1_455 2_676 ?
+loop_
+_geom_bond_atom_site_label_1
+_geom_bond_atom_site_label_2
+_geom_bond_distance
+_geom_bond_site_symmetry_2
+_geom_bond_publ_flag
+Nb1 Br4 2.4050(15) . ?
+Nb1 Br5 2.4061(11) 1_655 ?
+Nb1 Br2 2.4394(12) 1_655 ?
+Nb1 Br3 2.4559(12) . ?
+Nb1 Br1 2.7120(16) 1_655 ?
+Nb1 Br1 2.7163(10) 2_676 ?
+Nb1 Nb1 4.1736(19) 2_776 ?
+Br1 Nb1 2.7120(16) 1_455 ?
+Br1 Nb1 2.7163(10) 2_676 ?
+Br2 Nb1 2.4394(12) 1_455 ?
+Br5 Nb1 2.4061(11) 1_455 ?

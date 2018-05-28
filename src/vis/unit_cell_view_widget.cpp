@@ -61,10 +61,11 @@ UnitCellViewerWindow::UnitCellViewerWindow(QWidget *parent, bool vertical ) : QW
   atom_info_tree_view = new QTreeView(this);
   /*TreeView delegate*/
   atom_info_tree_view_delegate = new TreeItemFileDelegate(this);
+
   if( vertical ){
     split1->addWidget(atom_info_tree_view);
-    split1->setStretchFactor(0,5);
-    split1->setStretchFactor(1,5);
+    split1->setStretchFactor(0,4);
+    //split1->setStretchFactor(1,5);
   }
   else{
     split2->addWidget(atom_info_tree_view);

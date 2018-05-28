@@ -24,7 +24,7 @@ inline double sind(double theta) {
 }
 
 BaseCell::BaseCell(){
-  orientation_matrix = cv::Mat::zeros( 3, 3, cv::DataType<double>::type );
+  orientation_matrix = cv::Mat::eye( 3, 3, cv::DataType<double>::type );
   inverse_orientation_matrix = orientation_matrix.inv();
   chem_database = Chem_Database();
   update_cell_shape();

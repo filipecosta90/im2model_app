@@ -283,29 +283,29 @@ protected:
   CellShape cell_shape;
 
     /** reciprocal-lattice (Miller) indices  **/
-  cv::Point3d vector_t = cv::Point3d( 0.0f, 0.0f, 0.0f );
+  cv::Point3d vector_t = cv::Point3d( 0.0f, 0.0f, 1.0f );
 
     /** Upward vector **/
     // projected z-axis:
-  cv::Point3d upward_vector = cv::Point3d( 0.0f, 0.0f, 0.0f );
+  cv::Point3d upward_vector = cv::Point3d( 0.0f, 1.0f, 0.0f );
   double upward_vector_u = 0.0f;
-  double upward_vector_v = 0.0f;
+  double upward_vector_v = 1.0f;
   double upward_vector_w = 0.0f;
-  bool _flag_upward_vector_u = false;
-  bool _flag_upward_vector_v = false;
-  bool _flag_upward_vector_w = false;
-  bool _flag_upward_vector = false;
+  bool _flag_upward_vector_u = true;
+  bool _flag_upward_vector_v = true;
+  bool _flag_upward_vector_w = true;
+  bool _flag_upward_vector = true;
 
     /** Zone Axis / Lattice vector **/
     // projected y-axis
-  cv::Point3d  zone_axis = cv::Point3d( 0.0f, 0.0f, 0.0f );
+  cv::Point3d  zone_axis = cv::Point3d( 0.0f, 0.0f, 1.0f );
   double zone_axis_u = 0.0f;
   double zone_axis_v = 0.0f;
-  double zone_axis_w = 0.0f;
-  bool _flag_zone_axis_u = false;
-  bool _flag_zone_axis_v = false;
-  bool _flag_zone_axis_w = false;
-  bool _flag_zone_axis = false;
+  double zone_axis_w = 1.0f;
+  bool _flag_zone_axis_u = true;
+  bool _flag_zone_axis_v = true;
+  bool _flag_zone_axis_w = true;
+  bool _flag_zone_axis = true;
 
   std::map< cv::Point3d, std::vector< std::vector<cv::Point3d> > , cmpPoint3dOnlyByXY > atom_positions_cols;
   std::vector< std::vector<cv::Point3d> > atom_positions;
@@ -345,7 +345,7 @@ protected:
   cv::Rect ignore_cel_margin_rectangle;
 
     /** Orientation **/
-  cv::Mat orientation_matrix;
+  cv::Mat orientation_matrix ;
   bool _flag_orientation_matrix = true;
   cv::Mat3d inverse_orientation_matrix;
   bool _flag_inverse_orientation_matrix = false;

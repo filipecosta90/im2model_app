@@ -5,6 +5,9 @@
 %define api.namespace {MC}
 %define parser_class_name {MC_Parser}
 
+/* increase usefulness of error messages */
+%define parse.error verbose
+
 %code requires{
    namespace MC {
       class MC_Driver;
@@ -130,5 +133,5 @@ DatablockName : DATABLOCK
 void
 MC::MC_Parser::error( const location_type &l, const std::string &err_message )
 {
-   std::cerr << "Error: " << err_message << " at " << l << "\n";
+    //throw parser::syntax_error(l, err_message);
 }

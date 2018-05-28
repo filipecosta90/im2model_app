@@ -21,11 +21,21 @@ using token = MC::MC_Parser::token;
 
 %}
 
+
+ /*
+    c++                 generate C++ parser class
+    8bit                don't fail on 8-bit input characters
+    warn                warn about inconsistencies
+    nodefault           don't create default echo-all rule
+    noyywrap            don't use yywrap() function
+ */
+
 %option debug
 %option nodefault
 %option yyclass="MC::MC_Scanner"
 %option noyywrap
 %option c++
+%option 8bit
 
 CR      \r
 LF      \n
