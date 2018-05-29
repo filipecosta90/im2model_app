@@ -276,6 +276,7 @@ signals:
     // tab 1
     TreeModel *project_setup_image_fields_model;
     TreeModel *project_setup_crystalographic_fields_model;
+    TreeModel *atom_info_fields_model;
 
     // tab 2
     TreeModel *tdmap_simulation_setup_model;

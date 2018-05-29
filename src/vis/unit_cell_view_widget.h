@@ -97,6 +97,8 @@ public:
         /* Loggers */
   bool set_application_logger( ApplicationLog::ApplicationLog* logger );
 
+  TreeModel* get_atom_info_fields_model(){ return atom_info_fields_model; }
+
   public slots:
   void init();
   void update_lightEntity_view_vector(const QVector3D &viewVector);

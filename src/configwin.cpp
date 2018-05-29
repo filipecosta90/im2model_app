@@ -68,13 +68,13 @@ MainWindow::MainWindow( ApplicationLog::ApplicationLog* logger , QWidget *parent
   else{
 
     _core_td_map = new TDMap(
-        _sim_tdmap_celslc_ostream_buffer,
-        _sim_tdmap_msa_ostream_buffer,
-        _sim_tdmap_wavimg_ostream_buffer,
-        _sim_tdmap_simgrid_ostream_buffer,
-        _sim_supercell_celslc_ostream_buffer,
-        _sim_supercell_msa_ostream_buffer,
-        _sim_supercell_wavimg_ostream_buffer );
+      _sim_tdmap_celslc_ostream_buffer,
+      _sim_tdmap_msa_ostream_buffer,
+      _sim_tdmap_wavimg_ostream_buffer,
+      _sim_tdmap_simgrid_ostream_buffer,
+      _sim_supercell_celslc_ostream_buffer,
+      _sim_supercell_msa_ostream_buffer,
+      _sim_supercell_wavimg_ostream_buffer );
 
     SuperCell* tdmap_vis_sim_unit_cell = _core_td_map->get_tdmap_vis_sim_unit_cell();
     SuperCell* tdmap_full_sim_super_cell = _core_td_map->get_tdmap_full_sim_super_cell();
@@ -437,17 +437,17 @@ bool MainWindow::_is_initialization_ok(){
 
 bool MainWindow::maybeSetPreferences(){
   const QMessageBox::StandardButton ret
-    = QMessageBox::warning(this, tr("Application"),
-        tr("The saved prefences file is incomplete.\n""To use Im2Model all preferences vars must be setted.\n"
-          "Do you want to open the preferences panel?"),
-        QMessageBox::Yes | QMessageBox::Close);
+  = QMessageBox::warning(this, tr("Application"),
+    tr("The saved prefences file is incomplete.\n""To use Im2Model all preferences vars must be setted.\n"
+      "Do you want to open the preferences panel?"),
+    QMessageBox::Yes | QMessageBox::Close);
   switch (ret) {
     case QMessageBox::Yes:
-      return edit_preferences();
+    return edit_preferences();
     case QMessageBox::Close:
-      return false;
+    return false;
     default:
-      break;
+    break;
   }
   return false;
 }
@@ -1258,9 +1258,9 @@ bool MainWindow::edit_preferences(){
 
 void MainWindow::about(){
   QMessageBox::about(this, tr("Im2Model"),
-      tr("<b>Im2Model</b> combines transmission electron microscopy, image correlation and matching procedures,"
-        "enabling the determination of a three-dimensional atomic structure based strictly on a single high-resolution experimental image."
-        "Partialy financiated as part of the protocol between UTAustin I Portugal - UTA-P."));
+    tr("<b>Im2Model</b> combines transmission electron microscopy, image correlation and matching procedures,"
+      "enabling the determination of a three-dimensional atomic structure based strictly on a single high-resolution experimental image."
+      "Partialy financiated as part of the protocol between UTAustin I Portugal - UTA-P."));
 }
 
 void MainWindow::documentWasModified(){
@@ -1502,21 +1502,21 @@ bool MainWindow::maybeSave(){
     return  true;
   }
   const QMessageBox::StandardButton ret
-    = QMessageBox::warning(this, tr("Application"),
-        tr("The document has been modified.\n"
-          "Do you want to save your changes?"),
-        QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
+  = QMessageBox::warning(this, tr("Application"),
+    tr("The document has been modified.\n"
+      "Do you want to save your changes?"),
+    QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
   switch (ret) {
     case QMessageBox::Save:
-      {
-        return save();
-      }
+    {
+      return save();
+    }
     case QMessageBox::Cancel:
-      {
-        return false;
-      }
+    {
+      return false;
+    }
     default:
-      break;
+    break;
   }
   return true;
 }
@@ -1528,26 +1528,26 @@ bool MainWindow::maybeSetProject(){
   }
   else{
     const QMessageBox::StandardButton ret
-      = QMessageBox::warning(this, tr("Application"),
-          tr("To make that action you need to set the project.\n"
-            "Do you want to set the project?"),
-          QMessageBox::Yes  | QMessageBox::Cancel);
+    = QMessageBox::warning(this, tr("Application"),
+      tr("To make that action you need to set the project.\n"
+        "Do you want to set the project?"),
+      QMessageBox::Yes  | QMessageBox::Cancel);
     switch (ret) {
       case QMessageBox::Yes:
-        {
-          result = save();
-          break;
-        }
+      {
+        result = save();
+        break;
+      }
       case QMessageBox::Cancel:
-        {
-          result = false;
-          break;
-        }
+      {
+        result = false;
+        break;
+      }
       default:
-        {
-          result = false;
-          break;
-        }
+      {
+        result = false;
+        break;
+      }
     }
   }
   return result;
@@ -1623,9 +1623,11 @@ void MainWindow::loadFile(const QString &fileName){
 
     bool project_setup_image_fields_ptree_result = false;
     bool project_setup_crystalographic_fields_ptree_result = false;
+    bool atom_info_fields_model_ptree_result = false;
     bool tdmap_simulation_setup_ptree_result = false;
     bool tdmap_running_configuration_ptree_result = false;
     bool super_cell_setup_ptree_result = false;
+
 
     if(result){
       try{
@@ -1717,6 +1719,26 @@ void MainWindow::loadFile(const QString &fileName){
           im2model_logger->logEvent( _log_type , message.str() );
         }
       }
+
+      try{
+        atom_info_fields_model = ui->qwidget_qt_scene_view_roi_tdmap_super_cell->get_atom_info_fields_model( );
+        boost::property_tree::ptree atom_info_fields_model_ptree = config.get_child("atom_info_fields_model_ptree");
+        atom_info_fields_model_ptree_result = atom_info_fields_model->load_data_from_property_tree( atom_info_fields_model_ptree );
+        //result &= atom_info_fields_model_ptree_result;
+        ui->qwidget_qt_scene_view_roi_tdmap_super_cell->update();
+      }
+      catch(const boost::property_tree::ptree_error &e) {
+        _flag_project_setted = false;
+        result = false;
+        if( _flag_im2model_logger ){
+          std::stringstream message;
+          message << "Caught an ptree_error : " << e.what();
+          ApplicationLog::severity_level _log_type = ApplicationLog::error;
+          BOOST_LOG_FUNCTION();
+          im2model_logger->logEvent( _log_type , message.str() );
+        }
+      }
+
     }
 
 #ifndef QT_NO_CURSOR
@@ -1770,6 +1792,8 @@ bool MainWindow::saveFile(const QString &fileName ){
     im2model_logger->add_sync( filename_path.parent_path() );
   }
 
+  atom_info_fields_model = ui->qwidget_qt_scene_view_roi_tdmap_super_cell->get_atom_info_fields_model( );
+
   // The first parameter in the constructor is the character used for indentation, whilst the second is the indentation length.
   boost::property_tree::xml_writer_settings<std::string> pt_settings(' ', 4);
   boost::property_tree::ptree *project_setup_image_fields_ptree = project_setup_image_fields_model->save_data_into_property_tree();
@@ -1778,10 +1802,13 @@ bool MainWindow::saveFile(const QString &fileName ){
   boost::property_tree::ptree *tdmap_running_configuration_ptree = tdmap_running_configuration_model->save_data_into_property_tree();
   boost::property_tree::ptree *super_cell_setup_model_ptree = super_cell_setup_model->save_data_into_property_tree();
   boost::property_tree::ptree *intensity_peaks_model_ptree = intensity_peaks_model->save_data_into_property_tree();
+  boost::property_tree::ptree *atom_info_fields_model_ptree = atom_info_fields_model->save_data_into_property_tree();
+  
   //boost::property_tree::ptree *chem_database_model_ptree = chem_database_model->save_data_into_property_tree();
 
   boost::property_tree::ptree *config = new boost::property_tree::ptree();
   config->put( "version", application_version );
+  config->add_child( "atom_info_fields_model_ptree", *atom_info_fields_model_ptree);
   config->add_child( "project_setup_image_fields_ptree", *project_setup_image_fields_ptree);
   config->add_child( "project_setup_crystalographic_fields_ptree", *project_setup_crystalographic_fields_ptree);
   config->add_child( "tdmap_simulation_setup_ptree", *tdmap_simulation_setup_ptree);
@@ -3374,12 +3401,12 @@ void MainWindow::create_box_options_tab4_intensity_columns_listing(){
   }
 
   connect(
-      ui->qtree_view_refinement_full_simulation_intensity_columns->selectionModel(),
-      SIGNAL(selectionChanged(const QItemSelection &, const QItemSelection &)),
-      this,
-      SLOT(full_simulation_intensity_columns_SelectionChanged(const QItemSelection &, const QItemSelection &)),
-      Qt::DirectConnection
-      );
+    ui->qtree_view_refinement_full_simulation_intensity_columns->selectionModel(),
+    SIGNAL(selectionChanged(const QItemSelection &, const QItemSelection &)),
+    this,
+    SLOT(full_simulation_intensity_columns_SelectionChanged(const QItemSelection &, const QItemSelection &)),
+    Qt::DirectConnection
+    );
 }
 
 void MainWindow::full_simulation_intensity_columns_SelectionChanged(const QItemSelection &selected, const QItemSelection &deselected)
@@ -3497,16 +3524,16 @@ void MainWindow::on_qbutton_tdmap_accept_clicked(){
       best_match_pos = _core_td_map->get_simgrid_best_match_position();
       if( best_match_pos != tdmap_current_selection_pos ){
         const QMessageBox::StandardButton ret
-          = QMessageBox::warning(this, tr("Application"),
-              tr("The selected cell differs from the automatic best match position.\n"
-                "Do you want to use the current selected thickness value?"),
-              QMessageBox::Yes | QMessageBox::No);
+        = QMessageBox::warning(this, tr("Application"),
+          tr("The selected cell differs from the automatic best match position.\n"
+            "Do you want to use the current selected thickness value?"),
+          QMessageBox::Yes | QMessageBox::No);
         switch (ret) {
           case QMessageBox::No:
-            accept = false;
-            break;
+          accept = false;
+          break;
           default:
-            break;
+          break;
         }
       }
     }

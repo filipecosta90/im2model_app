@@ -153,6 +153,8 @@ void UnitCellViewerWindow::create_standard_atom_options( ){
 
   QVector<QVariant> box1_option_1_2 = {"Helper Arrows",""};
   TreeItem* display_arrows_item = new TreeItem ( box1_option_1_2 );
+    display_arrows_item->set_variable_name( "display_arrows_item" );
+
   boost::function<bool(bool)> box1_option_1_2_check_setter ( boost::bind( &QtSceneSuperCell::enable_helper_arrows, qt_scene_super_cell, _1 ) );
   boost::function<bool(void)> box1_option_1_2_check_getter ( boost::bind( &QtSceneSuperCell::get_helper_arrows_enable_status, qt_scene_super_cell ) );
   display_arrows_item->set_fp_check_setter( 0, box1_option_1_2_check_setter );
@@ -204,6 +206,11 @@ void UnitCellViewerWindow::reload_data_from_super_cell( ){
       boost::function<bool(bool)> box_option_check_setter ( boost::bind( &QtSceneSuperCell::enable_atom_type, qt_scene_super_cell, distinct_atom_pos, _1 ) );
       boost::function<bool(void)> box_option_check_getter ( boost::bind( &QtSceneSuperCell::get_enable_atom_type, qt_scene_super_cell, distinct_atom_pos ) );
       TreeItem* display_atom_item = new TreeItem ( box_option );
+      
+      std::stringstream variable_name;
+      message << "display_atom_item_" << atom_symbol;
+      display_atom_item->set_variable_name( message.str() );
+
       display_atom_item->set_fp_check_setter( 0, box_option_check_setter );
       display_atom_item->set_fp_check_getter( 0, box_option_check_getter );
       display_atom_item->load_check_status_from_getter( 0 );
