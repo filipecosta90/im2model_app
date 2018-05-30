@@ -9,6 +9,9 @@
 
 #include "td_map.hpp"
 
+using namespace std;
+using namespace boost;
+
 /* base constructor */
 TDMap::TDMap(
   boost::process::ipstream& ostream_celslc_buffer,
@@ -845,6 +848,49 @@ double TDMap::get_upward_vector_w(){
 
 cv::Mat TDMap::get_orientation_matrix(){
   return tdmap_roi_sim_super_cell->get_orientation_matrix();
+}
+
+bool TDMap::set_orientation_matrix_string( std::string new_matrix ){
+  bool result = false;
+  erase_all(new_matrix, " ");
+  erase_all(new_matrix, "[");
+  erase_all(new_matrix, "]");
+  erase_all(new_matrix, "\n");
+  vector< string > SplitVec; 
+  split( SplitVec, new_matrix, is_any_of(",;"), token_compress_on );
+
+
+  if( SplitVec.size() == 9 ){
+    cv::Mat matrix = tdmap_roi_sim_super_cell->get_orientation_matrix();
+    for(int row=0; row<matrix.rows; row++){
+      for(int col=0; col<matrix.cols; col++){
+        const std::string pos_value_string = SplitVec[row*matrix.rows + col];
+        std::cout << "pos_value_string |" << pos_value_string << "|" << std::endl;
+        try {
+          const double pos_value_double = boost::lexical_cast<double>( pos_value_string );
+          matrix.at<double>(row,col) = pos_value_double;
+        }
+        catch(boost::bad_lexical_cast&  ex) {
+    // pass it up
+          boost::throw_exception( ex );
+        }
+      }
+    }
+
+    bool unit_cell_result = unit_cell->set_orientation_matrix( matrix );
+    unit_cell_result &= tdmap_roi_sim_super_cell->orientate_atoms_from_matrix( false );
+
+    result = tdmap_roi_sim_super_cell->set_orientation_matrix( matrix );
+    result &= tdmap_roi_sim_super_cell->orientate_atoms_from_matrix( false );
+
+    // just for visualization purposes
+    tdmap_vis_sim_unit_cell->set_orientation_matrix( matrix );
+    tdmap_vis_sim_unit_cell->orientate_atoms_from_matrix( false );
+    tdmap_vis_sim_unit_cell->update_from_unit_cell( false );
+    
+  }
+
+  return result;
 }
 
 std::string TDMap::get_orientation_matrix_string(){

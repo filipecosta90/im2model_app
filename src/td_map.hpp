@@ -32,6 +32,7 @@
 #include "unit_cell.hpp"
 #include "intensity_columns.hpp"
 #include "application_log.hpp"
+#include <boost/algorithm/string.hpp>
 
 class TDMap  : public QObject {
   Q_OBJECT
@@ -424,6 +425,7 @@ class TDMap  : public QObject {
     bool set_unit_cell_display_expand_factor_a( std::string );
     bool set_unit_cell_display_expand_factor_b( std::string );
     bool set_unit_cell_display_expand_factor_c( std::string );
+    bool set_orientation_matrix_string( std::string new_matrix );
     bool set_thickness_user_estimated_nm( std::string );
     bool auto_calculate_thickness_range_lower_upper_nm();
     bool auto_calculate_thickness_lower_upper_nm();

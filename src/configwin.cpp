@@ -2346,8 +2346,8 @@ void MainWindow::create_box_options_tab1_crystallography(){
   ////////////////
   QVector<QVariant> box2_option_4 = {"Orientation matrix",""};
   QVector<bool> box2_option_4_edit = {false,true};
-
-  orientation_matrix  = new TreeItem (  box2_option_4, box2_option_4_edit );
+  boost::function<bool(std::string)>  box2_function_4 ( boost::bind( &TDMap::set_orientation_matrix_string,_core_td_map, _1 ) );
+  orientation_matrix  = new TreeItem (  box2_option_4, box2_function_4, box2_option_4_edit );
   orientation_matrix->set_variable_name( "orientation_matrix" );
   crystallography_root->insertChildren( orientation_matrix );
 

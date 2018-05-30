@@ -206,10 +206,10 @@ void UnitCellViewerWindow::reload_data_from_super_cell( ){
       boost::function<bool(bool)> box_option_check_setter ( boost::bind( &QtSceneSuperCell::enable_atom_type, qt_scene_super_cell, distinct_atom_pos, _1 ) );
       boost::function<bool(void)> box_option_check_getter ( boost::bind( &QtSceneSuperCell::get_enable_atom_type, qt_scene_super_cell, distinct_atom_pos ) );
       TreeItem* display_atom_item = new TreeItem ( box_option );
-      
+
       std::stringstream variable_name;
-      message << "display_atom_item_" << atom_symbol;
-      display_atom_item->set_variable_name( message.str() );
+      variable_name << "display_atom_item_" << atom_symbol;
+      display_atom_item->set_variable_name( variable_name.str() );
 
       display_atom_item->set_fp_check_setter( 0, box_option_check_setter );
       display_atom_item->set_fp_check_getter( 0, box_option_check_getter );

@@ -157,7 +157,7 @@ public:
 
   void form_matrix_from_miller_indices();
   void form_matrix_from_lattice_parameters();
-
+  bool set_orientation_matrix( cv::Mat );
   cv::Mat get_orientation_matrix(){ return orientation_matrix; }
   cv::Mat get_inverse_orientation_matrix(){ return inverse_orientation_matrix; }
 

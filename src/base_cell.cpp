@@ -100,7 +100,7 @@ bool BaseCell::set_base_bin_start_dir_path( boost::filesystem::path path ){
   if( _flag_logger ){
     std::stringstream message;
     message << "BaseBim baseDirPath: " << path.string();
-   BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification, message.str() );
+    BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification, message.str() );
   }
   
   return true;
@@ -109,10 +109,10 @@ bool BaseCell::set_base_bin_start_dir_path( boost::filesystem::path path ){
 std::string BaseCell::get_cif_path_full( ){
   std::string result = "";
   if ( _flag_cif_path ) {
- boost::filesystem::path full_path = base_bin_start_dir_path / boost::filesystem::path( cif_path );
-    result = full_path.string();
-  }
-  return result;
+   boost::filesystem::path full_path = base_bin_start_dir_path / boost::filesystem::path( cif_path );
+   result = full_path.string();
+ }
+ return result;
 }
 
 std::string BaseCell::get_cif_path( ){
@@ -364,7 +364,7 @@ void BaseCell::form_matrix_from_lattice_parameters(){
     _flag_angle_beta &&
     _flag_angle_gamma
     ){
-  cv::Point3d vector_a_factor;
+    cv::Point3d vector_a_factor;
   cv::Point3d vector_a_Ang;
   vector_a_factor.x = sin( deg2rad(angle_beta) );
   vector_a_Ang.x = length_a_Angstroms * vector_a_factor.x ;
@@ -568,6 +568,17 @@ void BaseCell::form_matrix_from_miller_indices(){
 }
 }
 
+bool BaseCell::set_orientation_matrix( cv::Mat new_orientation ){
+  bool result = false;
+  orientation_matrix = new_orientation;
+  inverse_orientation_matrix = orientation_matrix.inv();
+  _flag_orientation_matrix = true;
+  _flag_inverse_orientation_matrix = true;
+  emit orientation_matrix_changed();
+  result = true;
+  return result;
+}
+
 void BaseCell::print_var_state(){
   if( _flag_logger ){
     std::stringstream message;
@@ -605,9 +616,9 @@ std::ostream& BaseCell::output(std::ostream& stream) const {
   << "\t" << "angle_beta : "  << angle_beta << "\n"
   << "\t" << "angle_gamma : "  << angle_gamma << "\n"
     /** reciprocal-lattice (Miller) indices  **/
-    << "\t" << "_flag_lattice_mapping_matrix : "  << std::boolalpha << _flag_lattice_mapping_matrix_Nanometers << "\n"
-    << "\t" << "_flag_lattice_mapping_matrix_Nanometers : "  << std::boolalpha << _flag_lattice_mapping_matrix_Nanometers << "\n"
-    << "\t" << "lattice_mapping_matrix : "  << std::boolalpha << lattice_mapping_matrix_Nanometers << "\n"
+  << "\t" << "_flag_lattice_mapping_matrix : "  << std::boolalpha << _flag_lattice_mapping_matrix_Nanometers << "\n"
+  << "\t" << "_flag_lattice_mapping_matrix_Nanometers : "  << std::boolalpha << _flag_lattice_mapping_matrix_Nanometers << "\n"
+  << "\t" << "lattice_mapping_matrix : "  << std::boolalpha << lattice_mapping_matrix_Nanometers << "\n"
   << "\t" << "vector_t : "  << vector_t << "\n"
     // projected z-axis:
   << "\t" << "upward_vector : "  << upward_vector << "\n"

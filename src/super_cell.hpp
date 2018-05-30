@@ -124,12 +124,12 @@ class SuperCell : public BaseCell{
 
     TreeModel *get_atom_info_fields_model(){ return atom_info_fields_model; }
 
-    bool update_from_unit_cell();
+    bool update_from_unit_cell( bool create_orientation_matrix = true );
     bool update_angle_parameters_from_unit_cell();
     bool calculate_expand_factor();
     bool create_atoms_from_unit_cell();
     bool create_fractional_positions_atoms();
-    bool orientate_atoms_from_matrix();
+    bool orientate_atoms_from_matrix( bool create_matrix = true );
     bool remove_z_out_of_range_atoms();
     bool remove_xy_out_of_range_atoms();
     bool remove_xy_out_of_range_atoms_from_image_bounds();
