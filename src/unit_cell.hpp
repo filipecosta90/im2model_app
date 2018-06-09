@@ -68,7 +68,7 @@ class UnitCell : public BaseCell {
   protected:
 
   public:
-    UnitCell();
+    UnitCell( Chem_Database *chem_db );
     bool parse_cif();
 
     bool get_flag_parsed_cif(){ return _flag_parsed_cif; }

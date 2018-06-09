@@ -17,8 +17,7 @@
 #include "chem_database.hpp"             // for Chem_Database
 #include "symbcalc.hpp"                  // for symbCalc
 
-UnitCell::UnitCell() {
-
+UnitCell::UnitCell( Chem_Database* chem_db ) : BaseCell( chem_db ) {
 }
 
 void UnitCell::add_symmetry_equiv_pos_as_xyz(std::string xyz){
@@ -323,7 +322,7 @@ bool UnitCell::create_atoms_from_site_and_symetry(){
     std::string atom_site_type_symbol = atoms_site_type_symbols[atom_site_pos];
     const double atom_occupancy = atoms_site_occupancy[atom_site_pos];
     const double debye_waller_factor = 0.01f;
-    Atom_Info atom_info = chem_database.get_atom_info( atom_site_type_symbol );
+    Atom_Info atom_info = chem_database->get_atom_info( atom_site_type_symbol );
     double atom_radious = atom_info.empiricalRadius_Nanometers();
     std::string atom_type_symbol = atom_info.symbol();
     cv::Vec4d cpk_color = atom_info.cpkColor();

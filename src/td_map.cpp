@@ -23,8 +23,10 @@ TDMap::TDMap(
   boost::process::ipstream& ostream_supercell_wavimg_buffer
   , QObject* parent ) : QObject(parent) 
 {
+
+  chem_database = new Chem_Database();
   /* base unit cell info */
-  unit_cell = new UnitCell();
+  unit_cell = new UnitCell( chem_database );
 
   /* *
    * SuperCell

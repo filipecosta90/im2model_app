@@ -118,7 +118,7 @@ class SuperCell : public BaseCell{
   protected:
 
   public:
-    SuperCell();
+    SuperCell( Chem_Database *chem_db );
     SuperCell( UnitCell* cell );
     bool set_base_bin_start_dir_path( boost::filesystem::path base_dir );
 

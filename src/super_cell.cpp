@@ -9,10 +9,10 @@
 
 #include "super_cell.hpp"
 
-SuperCell::SuperCell(){
+SuperCell::SuperCell( Chem_Database *chem_db ) : BaseCell( chem_db ){
 }
 
-SuperCell::SuperCell( UnitCell* cell ){
+SuperCell::SuperCell( UnitCell* cell ) : BaseCell( cell->get_chem_database() ){
   unit_cell = cell;
   _flag_unit_cell = true;
 }

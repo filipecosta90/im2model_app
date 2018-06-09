@@ -82,7 +82,7 @@ public:
     TRICLINIC = 1
   };
 
-  BaseCell();
+  BaseCell( Chem_Database *chem_db );
 
     //others
   void extract_space_group();
@@ -115,6 +115,7 @@ public:
   bool set_base_bin_start_dir_path( boost::filesystem::path base_dir );
 
     //getters
+  Chem_Database* get_chem_database(){ return chem_database; }
   std::string get_cif_path();
   std::string get_cif_path_full();
   bool get_flag_cif_path(){ return _flag_cif_path; }
@@ -366,7 +367,7 @@ protected:
   int height_px = 0;
 
     /** Chem Database **/
-  Chem_Database chem_database;
+  Chem_Database* chem_database;
 
   bool update_volume();
   bool update_cell_shape();

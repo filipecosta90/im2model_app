@@ -23,10 +23,10 @@ inline double sind(double theta) {
   return sin(deg2rad(theta));
 }
 
-BaseCell::BaseCell(){
+BaseCell::BaseCell( Chem_Database *chem_db ){
   orientation_matrix = cv::Mat::eye( 3, 3, cv::DataType<double>::type );
   inverse_orientation_matrix = orientation_matrix.inv();
-  chem_database = Chem_Database();
+  chem_database = chem_db;
   update_cell_shape();
 }
 

@@ -33,6 +33,8 @@
 #include "intensity_columns.hpp"
 #include "application_log.hpp"
 #include <boost/algorithm/string.hpp>
+#include "chem_database.hpp"         // for Chem_Database
+
 
 class TDMap  : public QObject {
   Q_OBJECT
@@ -55,6 +57,12 @@ class TDMap  : public QObject {
     bool _flag_parse_cif = false;
     bool _flag_mtf_filename = false;
     bool _flag_experimental_image_properties_path = false;
+
+    /////////////////////////
+    // Chem database wrapper
+    /////////////////////////
+
+  Chem_Database* chem_database;
 
     /////////////////////////
     // Dr Probe PRM wrappers
