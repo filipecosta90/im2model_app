@@ -141,3 +141,9 @@ cv::Vec4d Atom_Info::rasmolColor() {
   cv::Vec4d Color(r,g,b,a);
   return Color;
 }
+
+    bool Atom_Info::set_empiricalRadius_Nanometers( double  empiricalRadius_Nanometers ){
+      mEmpiricalRadius_Picometers = empiricalRadius_Nanometers * 1000;
+      return true;
+    }
+

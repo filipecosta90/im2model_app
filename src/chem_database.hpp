@@ -43,7 +43,7 @@
 #include <utility>        // for pair
 
 class Chem_Database{
-  private:
+private:
     std::map<std::string,Atom_Info> elements_database = {
       // type_name, type_symbol, atomic_num, atomic_mass, melting_pt, boiling_pt, electroneg, electron_aff, valence, calculated_r, empirical_r, covalent_r, vdw_r, cpk_color, rasmol_color
       { "H", Atom_Info::Atom_Info( "Hydrogen",    "H",   1, 1.00794,      14.01, 20.28,2.20,   72.8,   1, 53,  25,  37,  120, 0xFFFFFF, 0xFFFFFF ) }
@@ -165,11 +165,14 @@ class Chem_Database{
       ,{ "Uus", Atom_Info::Atom_Info( "Ununseptium", "Uus", 117, 293,          -1,   -1,      -1, -1,    -1,  -1,  -1,  -1,  -1, 0xF00024, 0xFA1691 ) }
       ,{ "Uuo", Atom_Info::Atom_Info( "Ununoctium",  "Uuo", 118, 294,          -1,   -1,      -1, -1,     6,  -1,  -1,  -1,  -1, 0xF00024, 0xFA1691 ) }
       ,{ "-", Atom_Info::Atom_Info( "Unknown",       "-",  -1,  -1,          -1,   -1,      -1, -1,    -1,  -1,  -1,  -1,  -1, 0xFA1691, 0xFA1691 ) }
-    };
-  public:
+};
+
+public:
     Chem_Database();
     Atom_Info get_atom_info( std::string type_symbol );
     int size();
+    bool set_atom_info_empiricalRadius_Nanometers( std::string atom_site_type_symbol, double radius );
+
 };
 
 #endif

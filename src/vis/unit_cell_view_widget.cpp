@@ -93,6 +93,8 @@ void UnitCellViewerWindow::set_super_cell( SuperCell* cell , bool bind_orientati
   super_cell = cell;
   qt_scene_super_cell->set_super_cell( super_cell );
   QObject::connect( super_cell, SIGNAL(atom_positions_changed()), this, SLOT(reload_data_from_super_cell()));
+    QObject::connect( super_cell, SIGNAL(atom_empirical_radiis_changed()), this, SLOT(reload_data_from_super_cell()));
+
   QObject::connect( super_cell, SIGNAL(atom_positions_changed()), this, SLOT(update_m_cameraEntity_centerDistance()));
   //std::cout << "UnitCellViewerWindow::set_super_cell with bind orientation" << std::boolalpha << bind_orientation << std::endl;
   if( bind_orientation ){
@@ -186,6 +188,7 @@ void UnitCellViewerWindow::create_standard_atom_options( ){
   }
 
 }
+
 
 void UnitCellViewerWindow::reload_data_from_super_cell( ){
   if( _flag_super_cell ){

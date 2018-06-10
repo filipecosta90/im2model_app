@@ -74,7 +74,8 @@ bool SuperCell::update_from_unit_cell( bool create_orientation_matrix ){
       std::cout << " expand_result result " << std::boolalpha << expand_result << std::endl;
 
       if( !_flag_auto_calculate_expand_factor ){
-        update_length_parameters_from_expand_factor();
+        const bool update_from_expand = update_length_parameters_from_expand_factor();
+              std::cout << " update_from_expand result " << std::boolalpha << update_from_expand << std::endl;
       }
 
       if( angle_result && expand_result ){
@@ -340,6 +341,11 @@ bool SuperCell::create_atoms_from_unit_cell(){
       ){
       /* method */
       const std::vector< std::vector<cv::Point3d> > unit_cell_atoms = unit_cell->get_atom_positions_vec();
+// clone the atom symbols, occupancies and debye_waller factors
+    atom_symbols = std::vector<std::string>( unit_cell->get_atom_symbols_vec() );
+    atom_occupancies = std::vector<double>( unit_cell->get_atom_occupancies_vec() );
+    atom_debye_waller_factors = std::vector<double>( unit_cell->get_atom_debye_waller_factors_vec() );
+
     const double unit_cell_a_nm = unit_cell->get_length_a_Nanometers();
     const double unit_cell_b_nm = unit_cell->get_length_b_Nanometers();
     const double unit_cell_c_nm = unit_cell->get_length_c_Nanometers();
@@ -355,13 +361,7 @@ bool SuperCell::create_atoms_from_unit_cell(){
     const double center_b_padding_nm = center_abc_padding_nm.y;
     const double center_c_padding_nm = center_abc_padding_nm.z;
 
-    atom_positions.reserve(  unit_cell_atoms.size() );
-    atom_symbols = unit_cell->get_atom_symbols_vec();
-    atom_debye_waller_factors = unit_cell->get_atom_debye_waller_factors_vec();
-    atom_cpk_rgba_colors = unit_cell->get_atom_cpk_rgba_colors_vec();
-    atom_occupancies = unit_cell->get_atom_occupancies_vec();
-    atom_empirical_radiis = unit_cell->get_atom_empirical_radiis_vec();
-    atoms = unit_cell->get_atoms_vec();
+    atom_positions.reserve( unit_cell_atoms.size() );
 
     std::vector<cv::Point3d> expand_points;
     const int total_expand_points = expand_factor_c * expand_factor_b * expand_factor_a;
@@ -415,7 +415,7 @@ return result;
 }
 
 bool SuperCell::orientate_atoms_from_matrix( bool create_matrix ){
-  std::cout <<  "### orientate_atoms_from_matrix" << std::endl;
+  //std::cout <<  "### orientate_atoms_from_matrix" << std::endl;
   bool result = false;
   if( _flag_unit_cell ){
     if( create_matrix ){
@@ -645,11 +645,15 @@ bool SuperCell::generate_super_cell_file(){
   <<  fractional_norm_a_atom_pos << " " << fractional_norm_b_atom_pos << " " << fractional_norm_c_atom_pos
   <<  " "  << angle_alpha << " " << angle_beta << " " << angle_gamma <<  std::endl;
 
+  const std::vector<double> atom_debye_waller_factors = get_atom_debye_waller_factors_vec();
+
+
   for ( size_t pos = 0; pos < atom_fractional_cell_coordinates.size() ; pos++ ){
       // lets apply the remove clause
     const std::string atom_symbol = atom_symbols[pos];
     const double atom_site_occupancy = atom_occupancies[pos];
     const double atom_debye_waller_factor = atom_debye_waller_factors[pos];
+
     for ( size_t atom_pos = 0; atom_pos < atom_fractional_cell_coordinates[pos].size() ; atom_pos++ ){
         /** print **/
       const cv::Point3d fractional = atom_fractional_cell_coordinates[pos][atom_pos];

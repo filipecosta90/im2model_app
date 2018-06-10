@@ -158,6 +158,7 @@ class QtSceneSuperCell : public QObject
 
     public slots:
       void reload_data_from_super_cell();
+      void reloadAtomMeshRadiusVisual();
 
   private:
     Qt3DRender::QCamera *cameraEntity;
@@ -187,8 +188,6 @@ class QtSceneSuperCell : public QObject
     bool _flag_super_cell = false;
 
     // vis
-    std::vector<cv::Vec4d> local_atom_cpk_rgba_colors;
-    std::vector<double> local_atom_empirical_radiis;
     std::vector<bool> enabled_atom_types;
     std::vector<bool> enabled_image_layers;
 

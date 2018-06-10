@@ -17,7 +17,7 @@
 //! Encapsulates information regarding an atom type.
 class Atom_Info
 {
-  public:
+public:
     //! Constructor.
     Atom_Info(
         std::string type_name,
@@ -74,6 +74,7 @@ class Atom_Info
     //! Returns the atom's empirical radius in Angstroms
     double empiricalRadius_Angstroms();
     double empiricalRadius_Nanometers();
+    bool set_empiricalRadius_Nanometers( double );
 
     //! Returns the atom's covalent radius in Angstroms
     double covalentRadius();
@@ -88,7 +89,7 @@ class Atom_Info
     //! Returns the atom's RasMol color
     cv::Vec4d rasmolColor();
 
-  private:
+private:
 
     /** CIF compliant with field atom_type_symbol
       The code used to identify the atom species (singular or plural) representing this atom type. Normally this code is the element symbol. The code may be composed of any character except an underscore with the additional proviso that digits designate an oxidation state and must be followed by a + or - character.

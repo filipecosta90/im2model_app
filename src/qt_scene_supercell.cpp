@@ -92,8 +92,10 @@ bool QtSceneSuperCell::update_image_layer( const cv::Mat& layer_image , double w
 double QtSceneSuperCell::get_local_atom_empirical_radiis(int distinct_atom_pos){
   double value = 0.0f;
   if( _flag_super_cell ){
-    if( local_atom_empirical_radiis.size() > distinct_atom_pos ){
-      value = local_atom_empirical_radiis[distinct_atom_pos];
+    std::vector<double> atom_empirical_radiis = super_cell->get_atom_empirical_radiis_vec();
+    if( atom_empirical_radiis.size() > distinct_atom_pos ){
+      value = atom_empirical_radiis[distinct_atom_pos];
+      std::cout << "get_local_atom_empirical_radiis " << value << std::endl;
     }
   }
   return value;
@@ -250,34 +252,46 @@ bool QtSceneSuperCell::get_helper_arrows_enable_status(){
   return result;
 }
 
+void QtSceneSuperCell::reloadAtomMeshRadiusVisual(){
+  const std::vector<std::string> atom_symbols = super_cell->get_atom_symbols_vec();
+      const std::vector<double> local_atom_empirical_radiis = super_cell->get_atom_empirical_radiis_vec();
+
+  for( int distinct_atom_pos = 0; distinct_atom_pos < atom_symbols.size(); distinct_atom_pos++ ){
+    const std::string atom_symbol = atom_symbols[distinct_atom_pos];
+    std::cout << " reloadAtomMeshRadiusVisual " << atom_symbol << std::endl;
+    const QString atomTypeMeshName = atomMeshName + QString::fromStdString( atom_symbol );
+    QList<Qt3DExtras::QSphereMesh *> child_meshes = m_rootEntity->findChildren<Qt3DExtras::QSphereMesh *>( atomTypeMeshName );
+    Q_FOREACH (Qt3DExtras::QSphereMesh *sphereMesh, child_meshes) {
+      sphereMesh->setRadius( (float) local_atom_empirical_radiis[distinct_atom_pos] );
+    }
+  }
+}
+
 bool QtSceneSuperCell::updateAtomMeshRadius( int distinct_atom_pos, double radius ){
   bool result = false;
   const std::vector<std::string> atom_symbols = super_cell->get_atom_symbols_vec();
 
   if( _flag_super_cell && ( atom_symbols.size() > distinct_atom_pos ) ){
-    local_atom_empirical_radiis[distinct_atom_pos] = (float) radius;
-    const std::string atom_symbol = atom_symbols[distinct_atom_pos];
-    const QString atomTypeMeshName = atomMeshName + QString::fromStdString( atom_symbol );
-    QList<Qt3DExtras::QSphereMesh *> child_meshes = m_rootEntity->findChildren<Qt3DExtras::QSphereMesh *>( atomTypeMeshName );
-    Q_FOREACH (Qt3DExtras::QSphereMesh *sphereMesh, child_meshes) {
-      sphereMesh->setRadius( (float) radius );
-    }
+    super_cell->set_atom_empirical_radiis_vec( distinct_atom_pos, radius );
     result = true;
+    reloadAtomMeshRadiusVisual();
   }
   return result;
 }
+
 void QtSceneSuperCell::load_visual_data(){
-  local_atom_cpk_rgba_colors = super_cell->get_atom_cpk_rgba_colors_vec();
-  local_atom_empirical_radiis = super_cell->get_atom_empirical_radiis_vec();
 }
 
 void QtSceneSuperCell::reload_data_from_super_cell(){
   if( _flag_super_cell ){
+    // load supercell const data
     const std::vector< std::vector<cv::Point3d> > atom_positions_vec = super_cell->get_atom_positions_vec();
-    std::vector<std::string> atom_symbols = super_cell->get_atom_symbols_vec();
-    if( atom_symbols.size() != local_atom_cpk_rgba_colors.size() ){
-      load_visual_data();
-    }
+    const std::vector<std::string> atom_symbols = super_cell->get_atom_symbols_vec();
+    const std::vector<cv::Vec4d> local_atom_cpk_rgba_colors = super_cell->get_atom_cpk_rgba_colors_vec();
+    const std::vector<double> local_atom_empirical_radiis = super_cell->get_atom_empirical_radiis_vec();
+
+    std::cout << " local_atom_cpk_rgba_colors" << local_atom_cpk_rgba_colors.size() << std::endl;
+    std::cout << " local_atom_empirical_radiis" << local_atom_empirical_radiis.size() << std::endl;
 
     if( atom_positions_vec.size() != enabled_atom_types.size() ){
       enabled_atom_types.clear();

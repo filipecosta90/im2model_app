@@ -310,9 +310,9 @@ bool UnitCell::create_atoms_from_site_and_symetry(){
   atom_positions.reserve( distinct_atom_types );
   atom_symbols.reserve( distinct_atom_types );
   atom_occupancies.reserve( distinct_atom_types );
-  atom_debye_waller_factors.reserve( distinct_atom_types );
-  atom_empirical_radiis.reserve( distinct_atom_types );
-  atom_cpk_rgba_colors.reserve( distinct_atom_types );
+  //atom_debye_waller_factors.reserve( distinct_atom_types );
+  //atom_empirical_radiis.reserve( distinct_atom_types );
+  //atom_cpk_rgba_colors.reserve( distinct_atom_types );
 
   for( int atom_site_pos = 0 ; atom_site_pos < atoms_site_type_symbols.size(); atom_site_pos++ ) {
     atom_positions.push_back(std::vector<cv::Point3d>(  ));
@@ -321,18 +321,8 @@ bool UnitCell::create_atoms_from_site_and_symetry(){
     const double fract_z = atoms_site_fract_z[atom_site_pos];
     std::string atom_site_type_symbol = atoms_site_type_symbols[atom_site_pos];
     const double atom_occupancy = atoms_site_occupancy[atom_site_pos];
-    const double debye_waller_factor = 0.01f;
-    Atom_Info atom_info = chem_database->get_atom_info( atom_site_type_symbol );
-    double atom_radious = atom_info.empiricalRadius_Nanometers();
-    std::string atom_type_symbol = atom_info.symbol();
-    cv::Vec4d cpk_color = atom_info.cpkColor();
-
-    atom_symbols.push_back( atom_type_symbol );
-    atom_occupancies.push_back(atom_occupancy);
-    atom_debye_waller_factors.push_back(debye_waller_factor);
-    atom_empirical_radiis.push_back(atom_radious);
-      //_atom_cpk_colors
-    atom_cpk_rgba_colors.push_back(cpk_color);
+    atom_symbols.push_back( atom_site_type_symbol );
+    atom_occupancies.push_back( atom_occupancy );
 
     for( int value_list_pos = 0; value_list_pos < symmetry_equiv_pos_as_x.size(); value_list_pos++ ) {
       std::string symetry_x = symmetry_equiv_pos_as_x[value_list_pos];

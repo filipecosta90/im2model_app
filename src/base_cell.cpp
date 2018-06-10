@@ -82,13 +82,9 @@ bool BaseCell::clear_atom_positions(){
   std::vector< std::vector<cv::Point3d> >().swap(atom_positions);
   _flag_atom_positions = false;
   atom_symbols.clear();
-  atom_debye_waller_factors.clear();
-  atom_cpk_rgba_colors.clear();
-  atom_empirical_radiis.clear();
   atom_occupancies.clear();
   /** .cel **/
   atom_fractional_cell_coordinates.clear();
-  atoms.clear();
   return true;
 }
 
@@ -592,6 +588,71 @@ std::ostream& operator<<(std::ostream& stream, const BaseCell& var) {
   return stream;
 }
 
+
+std::vector<std::string> BaseCell::get_atom_symbols_vec(){ 
+  return atom_symbols;
+}
+
+std::vector<cv::Vec4d> BaseCell::get_atom_cpk_rgba_colors_vec( ){ 
+  std::vector<cv::Vec4d> atom_cpk_rgba_colors;
+  const int distinct_atom_types = atom_symbols.size();
+  atom_cpk_rgba_colors.reserve( distinct_atom_types );
+
+  for( int atom_site_pos = 0 ; atom_site_pos < atom_symbols.size(); atom_site_pos++ ) {
+   std::string atom_site_type_symbol = atom_symbols[atom_site_pos];
+   Atom_Info atom_info = chem_database->get_atom_info( atom_site_type_symbol );
+   cv::Vec4d cpk_color = atom_info.cpkColor();
+   atom_cpk_rgba_colors.push_back(cpk_color);
+ }
+
+ return atom_cpk_rgba_colors;
+}
+
+std::vector<double> BaseCell::get_atom_empirical_radiis_vec(){ 
+  std::vector<double> atom_empirical_radiis;
+  const int distinct_atom_types = atom_symbols.size();
+  atom_empirical_radiis.reserve( distinct_atom_types );
+
+  for( int atom_site_pos = 0 ; atom_site_pos < atom_symbols.size(); atom_site_pos++ ) {
+   std::string atom_site_type_symbol = atom_symbols[atom_site_pos];
+   Atom_Info atom_info = chem_database->get_atom_info( atom_site_type_symbol );
+   double atom_radious = atom_info.empiricalRadius_Nanometers();
+   atom_empirical_radiis.push_back( atom_radious );
+ }
+ return atom_empirical_radiis;
+}
+
+bool BaseCell::set_atom_empirical_radiis_vec( int distinct_atom_pos, double radius ){
+  bool result = false;
+  if( atom_symbols.size() >= distinct_atom_pos ){
+    std::string atom_site_type_symbol = atom_symbols[distinct_atom_pos];
+    result = chem_database->set_atom_info_empiricalRadius_Nanometers( atom_site_type_symbol, radius );
+    if( result ){
+      // force the visual update
+      std::cout << " #### emiting atom_empirical_radiis_changed " << std::endl;
+      emit atom_empirical_radiis_changed();
+    }
+  }
+  return result;
+}
+
+std::vector<double> BaseCell::get_atom_occupancies_vec(){ 
+ return atom_occupancies;
+}
+
+
+std::vector<double> BaseCell::get_atom_debye_waller_factors_vec(){ 
+  std::vector<double> atom_debye_waller_factors;
+  const int distinct_atom_types = atom_symbols.size();
+  atom_debye_waller_factors.reserve( distinct_atom_types );
+  for( int atom_site_pos = 0 ; atom_site_pos < atom_symbols.size(); atom_site_pos++ ) {
+    const double debye_waller_factor = 0.01f;
+    atom_debye_waller_factors.push_back( debye_waller_factor );
+  }
+  return atom_debye_waller_factors;
+}  
+
+
 std::ostream& BaseCell::output(std::ostream& stream) const {
   stream << "BaseCell vars:\n"
   << "\t" << "cif_path : "  << cif_path << "\n"
@@ -640,14 +701,9 @@ std::ostream& BaseCell::output(std::ostream& stream) const {
   << "\t\t" << "_flag_zone_axis_w : " << std::boolalpha << _flag_zone_axis_w << "\n"
   << "\t\t" << "_flag_zone_axis : " << std::boolalpha << _flag_zone_axis << "\n"
   << "\t" << "#### VECTORS: \n"
-  << "\t" << "atoms.size() : "  << atoms.size() << "\n"
   << "\t" << "atom_positions.size() : "  << atom_positions.size() << "\n"
-  //<< "\t" << "get_atom_positions_vec_size : "  << tget_atom_positions_vec_size() << "\n"
   << "\t\t" << "_flag_atom_positions : " << std::boolalpha << _flag_atom_positions << "\n"
   << "\t" << "atom_symbols.size() : "  << atom_symbols.size() << "\n"
-  << "\t" << "atom_debye_waller_factors.size() : "  << atom_debye_waller_factors.size() << "\n"
-  << "\t" << "atom_cpk_rgba_colors.size() : "  << atom_cpk_rgba_colors.size() << "\n"
-  << "\t" << "atom_empirical_radiis.size() : "  << atom_empirical_radiis.size() << "\n"
   << "\t" << "atom_fractional_cell_coordinates.size() : "  << atom_fractional_cell_coordinates.size() << "\n"
   << "\t\t" << "_flag_atom_fractional_cell_coordinates : " << std::boolalpha << _flag_atom_fractional_cell_coordinates << "\n"
     /** .cel **/

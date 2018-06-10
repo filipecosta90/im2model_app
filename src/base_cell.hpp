@@ -84,11 +84,11 @@ public:
 
   BaseCell( Chem_Database *chem_db );
 
-    //others
+  //others
   void extract_space_group();
   bool clear_atom_positions();
 
-    //setters
+  //setters
   bool set_cif_path( std::string path );
   bool set_cel_filename( std::string filename );
   bool set_xyz_filename( std::string filename );
@@ -113,8 +113,9 @@ public:
   bool set_zone_axis_v( double v );
   bool set_zone_axis_w( double w );
   bool set_base_bin_start_dir_path( boost::filesystem::path base_dir );
+  bool set_atom_empirical_radiis_vec( int distinct_atom_pos, double radius );
 
-    //getters
+  //getters
   Chem_Database* get_chem_database(){ return chem_database; }
   std::string get_cif_path();
   std::string get_cif_path_full();
@@ -204,12 +205,11 @@ public:
   std::map<cv::Point3d, std::vector< std::vector<cv::Point3d> > , cmpPoint3dOnlyByXY> get_atom_positions_cols_vec();
   int get_atom_positions_vec_size();
   int get_atom_fractional_cell_coordinates_vec_size();
-  std::vector<std::string> get_atom_symbols_vec(){ return atom_symbols; }
-  std::vector<cv::Vec4d> get_atom_cpk_rgba_colors_vec( ){ return atom_cpk_rgba_colors; }
-  std::vector<double> get_atom_empirical_radiis_vec(){ return atom_empirical_radiis; }
-  std::vector<double> get_atom_occupancies_vec(){ return atom_occupancies; }
-  std::vector<double> get_atom_debye_waller_factors_vec(){ return atom_debye_waller_factors; }
-  std::vector<Atom> get_atoms_vec(){ return atoms;}
+  std::vector<std::string> get_atom_symbols_vec();
+  std::vector<cv::Vec4d> get_atom_cpk_rgba_colors_vec( );
+  std::vector<double> get_atom_empirical_radiis_vec();
+  std::vector<double> get_atom_occupancies_vec();
+  std::vector<double> get_atom_debye_waller_factors_vec();
   bool get_flag_base_bin_start_dir_path(){ return _flag_base_bin_start_dir_path; }
 
   int get_nx_px(){ return cel_nx_px; }
@@ -223,6 +223,7 @@ public:
 
   signals:
   void atom_positions_changed();
+  void atom_empirical_radiis_changed();
   void atom_orientation_changed();
   void orientation_matrix_changed();
   void upward_vector_changed();
@@ -313,10 +314,10 @@ protected:
   std::vector<std::string> atom_symbols;
   bool _flag_atom_positions = false;
   std::vector<double> atom_debye_waller_factors;
-  std::vector<cv::Vec4d> atom_cpk_rgba_colors;
+  //std::vector<cv::Vec4d> atom_cpk_rgba_colors;
   std::vector<double> atom_occupancies;
-  std::vector<double> atom_empirical_radiis;
-  std::vector<Atom> atoms;
+  //std::vector<double> atom_empirical_radiis;
+  //std::vector<Atom> atoms;
 
     /** .cel **/
   std::vector< std::vector<cv::Point3d> > atom_fractional_cell_coordinates;
