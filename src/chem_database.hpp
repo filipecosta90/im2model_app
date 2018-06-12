@@ -42,7 +42,12 @@
 #include <string>         // for operator<, allocator, basic_string<>::iterator
 #include <utility>        // for pair
 
-class Chem_Database{
+#include <QMainWindow>
+#include <QtWidgets>
+#include <QObject>
+
+class Chem_Database : public QObject {
+  Q_OBJECT
 private:
     std::map<std::string,Atom_Info> elements_database = {
       // type_name, type_symbol, atomic_num, atomic_mass, melting_pt, boiling_pt, electroneg, electron_aff, valence, calculated_r, empirical_r, covalent_r, vdw_r, cpk_color, rasmol_color
@@ -172,6 +177,9 @@ public:
     Atom_Info get_atom_info( std::string type_symbol );
     int size();
     bool set_atom_info_empiricalRadius_Nanometers( std::string atom_site_type_symbol, double radius );
+
+  signals:
+  void atom_empirical_radiis_changed();
 
 };
 

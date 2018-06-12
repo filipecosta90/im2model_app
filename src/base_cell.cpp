@@ -27,6 +27,7 @@ BaseCell::BaseCell( Chem_Database *chem_db ){
   orientation_matrix = cv::Mat::eye( 3, 3, cv::DataType<double>::type );
   inverse_orientation_matrix = orientation_matrix.inv();
   chem_database = chem_db;
+   QObject::connect( chem_database, SIGNAL(atom_empirical_radiis_changed()), this, SLOT(emit_atom_empirical_radiis_changed()));
   update_cell_shape();
 }
 
@@ -44,6 +45,10 @@ bool BaseCell::update_cell_shape() {
     }
   }
   return result;
+}
+
+void BaseCell::emit_atom_empirical_radiis_changed(){ 
+  emit atom_empirical_radiis_changed();
 }
 
 bool BaseCell::update_volume(){
@@ -627,11 +632,6 @@ bool BaseCell::set_atom_empirical_radiis_vec( int distinct_atom_pos, double radi
   if( atom_symbols.size() >= distinct_atom_pos ){
     std::string atom_site_type_symbol = atom_symbols[distinct_atom_pos];
     result = chem_database->set_atom_info_empiricalRadius_Nanometers( atom_site_type_symbol, radius );
-    if( result ){
-      // force the visual update
-      std::cout << " #### emiting atom_empirical_radiis_changed " << std::endl;
-      emit atom_empirical_radiis_changed();
-    }
   }
   return result;
 }

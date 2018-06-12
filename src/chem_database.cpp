@@ -54,6 +54,11 @@ bool Chem_Database::set_atom_info_empiricalRadius_Nanometers( std::string atom_s
     element.set_empiricalRadius_Nanometers( radius );
     Atom_itt->second = element;
     result = true;
+    if( result ){
+      // force the visual update
+      std::cout << " #### emiting atom_empirical_radiis_changed " << std::endl;
+      emit atom_empirical_radiis_changed();
+    }
   }
 
   return result;

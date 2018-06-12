@@ -221,9 +221,14 @@ public:
     // friend std::ostream& operator<< (std::ostream& stream, const SuperCell::SuperCell& image);
   virtual std::ostream& output(std::ostream& stream) const;
 
+    public slots:
+
+  void emit_atom_empirical_radiis_changed();
+
   signals:
   void atom_positions_changed();
   void atom_empirical_radiis_changed();
+
   void atom_orientation_changed();
   void orientation_matrix_changed();
   void upward_vector_changed();
