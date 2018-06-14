@@ -16,7 +16,7 @@
 #include "base_bin.hpp"
 
 class UnitCell : public BaseCell {
-  private:
+private:
 
     bool populate_cell( std::map<std::string,std::string> non_looped_items  );
     bool populate_symetry_equiv_pos_as_xyz( std::map<std::string,std::vector<std::string>> looped_items );
@@ -65,13 +65,15 @@ class UnitCell : public BaseCell {
     ApplicationLog::ApplicationLog* logger = nullptr;
     bool _flag_logger = false;
 
-  protected:
+protected:
 
-  public:
+public:
     UnitCell( Chem_Database *chem_db );
     bool parse_cif();
 
     bool get_flag_parsed_cif(){ return _flag_parsed_cif; }
+
+    bool clear_parsed_cif();
 
     /* Loggers */
     bool set_application_logger( ApplicationLog::ApplicationLog* logger );

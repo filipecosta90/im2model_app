@@ -319,10 +319,7 @@ protected:
   std::vector<std::string> atom_symbols;
   bool _flag_atom_positions = false;
   std::vector<double> atom_debye_waller_factors;
-  //std::vector<cv::Vec4d> atom_cpk_rgba_colors;
   std::vector<double> atom_occupancies;
-  //std::vector<double> atom_empirical_radiis;
-  //std::vector<Atom> atoms;
 
     /** .cel **/
   std::vector< std::vector<cv::Point3d> > atom_fractional_cell_coordinates;

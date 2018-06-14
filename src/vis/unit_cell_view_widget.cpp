@@ -93,7 +93,7 @@ void UnitCellViewerWindow::set_super_cell( SuperCell* cell , bool bind_orientati
   super_cell = cell;
   qt_scene_super_cell->set_super_cell( super_cell );
   QObject::connect( super_cell, SIGNAL(atom_positions_changed()), this, SLOT(reload_data_from_super_cell()));
-    QObject::connect( super_cell, SIGNAL(atom_empirical_radiis_changed()), this, SLOT(reload_data_from_super_cell()));
+    QObject::connect( super_cell, SIGNAL(atom_empirical_radiis_changed()), this, SLOT(reload_visual_data_from_super_cell()));
 
   QObject::connect( super_cell, SIGNAL(atom_positions_changed()), this, SLOT(update_m_cameraEntity_centerDistance()));
   //std::cout << "UnitCellViewerWindow::set_super_cell with bind orientation" << std::boolalpha << bind_orientation << std::endl;
@@ -186,9 +186,18 @@ void UnitCellViewerWindow::create_standard_atom_options( ){
   for (int column = 0; column < atom_info_fields_model->columnCount(); ++column){
     atom_info_tree_view->resizeColumnToContents(column);
   }
-
 }
 
+void UnitCellViewerWindow::reload_visual_data_from_super_cell(){
+if( _flag_super_cell ){
+    qt_scene_super_cell->reloadAtomMeshRadiusVisual();
+
+    for( int distinct_atom_pos = 0; distinct_atom_pos < atom_radius_items.size(); distinct_atom_pos++ ){
+      TreeItem* atom_item  = atom_radius_items[distinct_atom_pos];
+      atom_item->load_data_from_getter( 1 );
+    }
+  }
+}
 
 void UnitCellViewerWindow::reload_data_from_super_cell( ){
   if( _flag_super_cell ){
@@ -197,6 +206,8 @@ void UnitCellViewerWindow::reload_data_from_super_cell( ){
 
     model_display_root->removeAllChildren();
     atom_radius_root->removeAllChildren();
+    atom_radius_items.clear();
+
 
     for( int distinct_atom_pos = 0; distinct_atom_pos < atom_symbols.size(); distinct_atom_pos++ ){
 
@@ -230,6 +241,7 @@ void UnitCellViewerWindow::reload_data_from_super_cell( ){
       atom_item->set_variable_name( atom_symbol );
       atom_item->set_flag_validatable_double(1,true);
       atom_info_fields_model->insertChildren( atom_item, atom_radius_root );
+      atom_radius_items.push_back(atom_item);
     }
   }
   atom_info_tree_view->expandAll();

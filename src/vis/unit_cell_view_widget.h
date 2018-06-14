@@ -115,6 +115,7 @@ public:
   void view_along_c_axis();
   void fit_model();
   void reload_data_from_super_cell();
+  void reload_visual_data_from_super_cell();
 
 protected:
 
@@ -151,6 +152,7 @@ protected:
   TreeItem* model_display_root = nullptr;
   TreeItem* atom_properties_root = nullptr;
   TreeItem* atom_radius_root = nullptr;
+  std::vector<TreeItem*> atom_radius_items;
   TreeItem* atom_color_root = nullptr;
 
   /* Loggers */

@@ -20,6 +20,31 @@
 UnitCell::UnitCell( Chem_Database* chem_db ) : BaseCell( chem_db ) {
 }
 
+bool UnitCell::clear_parsed_cif(){
+ _flag_parsed_cif = false;
+
+ symmetry_equiv_pos_as_xyz.clear();
+ symmetry_equiv_pos_as_x.clear();
+ symmetry_equiv_pos_as_y.clear();
+ symmetry_equiv_pos_as_z.clear();
+
+    /* start Atom site */
+    // each distinct atom has one distinct position in the vector
+ atoms_site_labels.clear();
+ atoms_site_type_symbols.clear();
+ atoms_site_symetry_multiplicities.clear();
+ atoms_site_Wyckoff_symbols.clear();
+ symetry_atom_positions.clear();
+ atom_site_occupancy.clear();
+ atoms_site_fract_x.clear();
+ atoms_site_fract_y.clear();
+ atoms_site_fract_z.clear();
+ atoms_site_occupancy.clear();
+
+ return true;
+}
+
+
 void UnitCell::add_symmetry_equiv_pos_as_xyz(std::string xyz){
   symmetry_equiv_pos_as_xyz.push_back(xyz);
 }
@@ -57,6 +82,9 @@ void UnitCell::add_atom_site_occupancy( double occupancy ){
 }
 
 bool UnitCell::parse_cif(){
+  if( _flag_parsed_cif == true ){
+    clear_parsed_cif();
+  }
   bool result = false;
   if( _flag_cif_path ){
     std::string full_path = get_cif_path_full();
@@ -68,9 +96,9 @@ bool UnitCell::parse_cif(){
 
     const bool parse_result = cif_driver.parse( full_path.c_str() );
     if( parse_result ){
-         std::map<std::string,std::string> non_looped_items = cif_driver.get_cif_non_looped_items();
+     std::map<std::string,std::string> non_looped_items = cif_driver.get_cif_non_looped_items();
 
-    if( _flag_logger ){
+     if( _flag_logger ){
       std::stringstream message;
       message << "going to populate cell " << non_looped_items.size();
       BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::normal , message.str() );
@@ -117,9 +145,9 @@ bool UnitCell::parse_cif(){
     }
 
     result = _flag_parsed_cif;
-    }  
-  }
-  return result;
+  }  
+}
+return result;
 }
 
 bool UnitCell::populate_cell( std::map<std::string,std::string> non_looped_items ){
@@ -396,7 +424,7 @@ bool UnitCell::set_application_logger( ApplicationLog::ApplicationLog* app_logge
   logger = app_logger;
   _flag_logger = true;
   cif_driver.set_application_logger(app_logger);
- BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification, "Application logger setted for UnitCell class." );
+  BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification, "Application logger setted for UnitCell class." );
   return true;
 }
 

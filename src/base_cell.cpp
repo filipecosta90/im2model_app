@@ -88,6 +88,7 @@ bool BaseCell::clear_atom_positions(){
   _flag_atom_positions = false;
   atom_symbols.clear();
   atom_occupancies.clear();
+  atom_debye_waller_factors.clear();
   /** .cel **/
   atom_fractional_cell_coordinates.clear();
   return true;
