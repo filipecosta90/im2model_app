@@ -37,6 +37,7 @@ void CellViewerWindow::set_super_cell( SuperCell* cell , bool bind_orientation )
   super_cell = cell;
   qt_scene_super_cell->set_super_cell( super_cell );
   QObject::connect( super_cell, SIGNAL(atom_positions_changed()), qt_scene_super_cell, SLOT(reload_data_from_super_cell()));
+    QObject::connect( super_cell, SIGNAL(atom_orientation_changed()), qt_scene_super_cell, SLOT(reload_data_from_super_cell()));
   QObject::connect( super_cell, SIGNAL(atom_empirical_radiis_changed()), qt_scene_super_cell, SLOT(reloadAtomMeshRadiusVisual()));
 
   QObject::connect( super_cell, SIGNAL(atom_positions_changed()), this, SLOT(update_m_cameraEntity_centerDistance()));

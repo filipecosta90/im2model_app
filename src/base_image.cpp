@@ -556,7 +556,7 @@ bool BaseImage::set_full_image( cv::Mat image ){
       std::stringstream message;
       message  << "set_full_image. type: " << type2str(full_image.type()); 
       BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification , message.str() );
-      print_var_state();
+      //print_var_state();
     }
     cv::minMaxLoc(full_image, &full_image_min_intensity_detected, &full_image_max_intensity_detected);
     _flag_full_image_min_intensity_detected = true;
@@ -565,7 +565,7 @@ bool BaseImage::set_full_image( cv::Mat image ){
       std::stringstream message;
       message << "min " << full_image_min_intensity_detected << " max " << full_image_max_intensity_detected; 
       BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification , message.str() );
-      print_var_state();
+      //print_var_state();
     }
     result  = true;
     const int calc_full_n_rows_height = full_image.rows;
@@ -577,7 +577,7 @@ bool BaseImage::set_full_image( cv::Mat image ){
       std::stringstream message;
       message << "emitting full_image_changed with mat info: " << print_cv_mat_information( full_image ); 
       BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification , message.str() );
-      print_var_state();
+      //print_var_state();
     }
     emit full_image_changed();
     // debug

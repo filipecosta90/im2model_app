@@ -33,14 +33,40 @@ private:
     std::vector<std::string> symmetry_equiv_pos_as_y;
     std::vector<std::string> symmetry_equiv_pos_as_z;
 
-    /* start Atom site */
+    /* start Atom site 
+
+    The _atom_site_label is a unique identifier for a particular site
+    in the crystal. This code is made up of a sequence of up to seven
+    components, _atom_site_label_component_0 to *_6, which may be
+    specified as separate data items. Component 0 usually matches one
+    of the specified _atom_type_symbol codes. This is not mandatory
+    if an _atom_site_type_symbol item is included in the atom-site
+    list. The _atom_site_type_symbol always takes precedence over
+    an _atom_site_label in the identification of the atom type. The
+    label components 1 to 6 are optional, and normally only
+    components 0 and 1 are used. Note that components 0 and 1 are
+    concatenated, while all other components, if specified, are
+    separated by an underscore. Underscores are
+    only used if higher-order components exist. If an intermediate
+    component is not used, it may be omitted provided the underscore
+    separators are inserted. For example, the label 'C233__ggg' is
+    acceptable and represents the components C, 233, '' and ggg.
+    Different labels may have a different number of components.
+
+    */
     // each distinct atom has one distinct position in the vector
     std::vector<std::string> atoms_site_labels;
     std::vector<std::string> atoms_site_type_symbols;
     std::vector<std::string> atoms_site_symetry_multiplicities;
+    /*
+    The Wyckoff symbol (letter) as listed in the space-group tables
+    of International Tables for Crystallography Vol. A (2002).
+    */
     std::vector<std::string> atoms_site_Wyckoff_symbols;
     std::vector<cv::Point3d> symetry_atom_positions;
     std::vector<double> atom_site_occupancy;
+    
+    // Atom-site coordinates as fractions of the _cell_length_ values
     std::vector<double> atoms_site_fract_x;
     std::vector<double> atoms_site_fract_y;
     std::vector<double> atoms_site_fract_z;

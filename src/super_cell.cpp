@@ -82,6 +82,7 @@ bool SuperCell::update_from_unit_cell( bool create_orientation_matrix ){
         const bool create_result = create_atoms_from_unit_cell();
         std::cout << " create_result result " << std::boolalpha << create_result << std::endl;
         if( create_result ){
+          std::cout << " _flag_enable_orientation " << _flag_enable_orientation << std::endl;
           const bool orientate_result = _flag_enable_orientation ? orientate_atoms_from_matrix( create_orientation_matrix ) : true ;
           std::cout << " orientate_result result " << std::boolalpha << orientate_result << std::endl;
           if( orientate_result ){
@@ -171,10 +172,6 @@ bool SuperCell::calculate_expand_factor(){
     const double r_a = a_min_size_nm / 2.0f;
     const double r_b = b_min_size_nm / 2.0f;
     const double r_c = c_min_size_nm / 2.0f;
-
-    std::cout << "r_a " << r_a << " a_min_size_nm" << a_min_size_nm / 2.0f<< std::endl;
-    std::cout << "r_b " << r_b << " b_min_size_nm" << b_min_size_nm / 2.0f<< std::endl;
-    std::cout << "r_c " << r_c << " c_min_size_nm" << c_min_size_nm / 2.0f<< std::endl;
 
     _a = cv::Point3d( -r_a, -r_b, -r_c );
     _b = cv::Point3d( r_a, -r_b, -r_c );
@@ -298,9 +295,10 @@ bool SuperCell::update_length_parameters_from_expand_factor(){
       const double super_cell_length_a_Nanometers = expand_factor_a * unit_cell->get_length_a_Nanometers();
     const double super_cell_length_b_Nanometers = expand_factor_b * unit_cell->get_length_b_Nanometers();
     const double super_cell_length_c_Nanometers = expand_factor_c * unit_cell->get_length_c_Nanometers();
-    BaseCell::set_length_a_Nanometers( super_cell_length_a_Nanometers );
-    BaseCell::set_length_b_Nanometers( super_cell_length_b_Nanometers );
-    BaseCell::set_length_c_Nanometers( super_cell_length_c_Nanometers );
+    
+    set_length_a_Nanometers( super_cell_length_a_Nanometers );
+    set_length_b_Nanometers( super_cell_length_b_Nanometers );
+    set_length_c_Nanometers( super_cell_length_c_Nanometers );
     const double super_cell_volume = ( expand_factor_a * expand_factor_b * expand_factor_c ) * unit_cell->get_volume_Nanometers();
     result = true;
   }
@@ -392,6 +390,7 @@ bool SuperCell::create_atoms_from_unit_cell(){
     }
     _flag_atom_positions = true;
     result = true;
+    std::cout << "emitting atom_positions_changed" << std::endl;
     emit atom_positions_changed();
   }
   else{
@@ -430,6 +429,7 @@ bool SuperCell::orientate_atoms_from_matrix( bool create_matrix ){
         std::transform( atom_positions[pos].begin(), atom_positions[pos].end(), atom_positions[pos].begin() , functor );
       }
       result = true;
+      std::cout <<  " atom_orientation_changed " << std::endl;
       emit atom_orientation_changed();
     }
     else{
@@ -755,6 +755,7 @@ bool SuperCell::set_expand_factor_abc( int factor_a, int factor_b, int factor_c 
   _flag_expand_factor_b = true;
   _flag_expand_factor_c = true;
   _flag_expand_factor = true;
+  update_length_parameters_from_expand_factor();
   return true;
 }
 
@@ -763,6 +764,7 @@ bool SuperCell::set_expand_factor_a( int factor_a ){
   _flag_expand_factor_a = true;
   _flag_expand_factor = _flag_expand_factor_a && _flag_expand_factor_b && _flag_expand_factor_c;
   if(_flag_expand_factor){
+    update_length_parameters_from_expand_factor();
     update_from_unit_cell();
   }
   return true;
@@ -773,6 +775,7 @@ bool SuperCell::set_expand_factor_b( int factor_b ){
   _flag_expand_factor_b = true;
   _flag_expand_factor = _flag_expand_factor_a && _flag_expand_factor_b && _flag_expand_factor_c;
   if(_flag_expand_factor){
+    update_length_parameters_from_expand_factor();
     update_from_unit_cell();
   }
   return true;
@@ -783,6 +786,7 @@ bool SuperCell::set_expand_factor_c( int factor_c ){
   _flag_expand_factor_c = true;
   _flag_expand_factor = _flag_expand_factor_a && _flag_expand_factor_b && _flag_expand_factor_c;
   if(_flag_expand_factor){
+    update_length_parameters_from_expand_factor();
     update_from_unit_cell();
   }
   return true;

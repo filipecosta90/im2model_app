@@ -92,9 +92,10 @@ bool UnitCellViewerWindow::set_application_logger( ApplicationLog::ApplicationLo
 void UnitCellViewerWindow::set_super_cell( SuperCell* cell , bool bind_orientation ){
   super_cell = cell;
   qt_scene_super_cell->set_super_cell( super_cell );
+  
   QObject::connect( super_cell, SIGNAL(atom_positions_changed()), this, SLOT(reload_data_from_super_cell()));
-    QObject::connect( super_cell, SIGNAL(atom_empirical_radiis_changed()), this, SLOT(reload_visual_data_from_super_cell()));
-
+  QObject::connect( super_cell, SIGNAL(atom_orientation_changed()), this, SLOT(reload_data_from_super_cell()));
+  QObject::connect( super_cell, SIGNAL(atom_empirical_radiis_changed()), this, SLOT(reload_visual_data_from_super_cell()));
   QObject::connect( super_cell, SIGNAL(atom_positions_changed()), this, SLOT(update_m_cameraEntity_centerDistance()));
   //std::cout << "UnitCellViewerWindow::set_super_cell with bind orientation" << std::boolalpha << bind_orientation << std::endl;
   if( bind_orientation ){
@@ -155,7 +156,7 @@ void UnitCellViewerWindow::create_standard_atom_options( ){
 
   QVector<QVariant> box1_option_1_2 = {"Helper Arrows",""};
   TreeItem* display_arrows_item = new TreeItem ( box1_option_1_2 );
-    display_arrows_item->set_variable_name( "display_arrows_item" );
+  display_arrows_item->set_variable_name( "display_arrows_item" );
 
   boost::function<bool(bool)> box1_option_1_2_check_setter ( boost::bind( &QtSceneSuperCell::enable_helper_arrows, qt_scene_super_cell, _1 ) );
   boost::function<bool(void)> box1_option_1_2_check_getter ( boost::bind( &QtSceneSuperCell::get_helper_arrows_enable_status, qt_scene_super_cell ) );
@@ -189,7 +190,7 @@ void UnitCellViewerWindow::create_standard_atom_options( ){
 }
 
 void UnitCellViewerWindow::reload_visual_data_from_super_cell(){
-if( _flag_super_cell ){
+  if( _flag_super_cell ){
     qt_scene_super_cell->reloadAtomMeshRadiusVisual();
 
     for( int distinct_atom_pos = 0; distinct_atom_pos < atom_radius_items.size(); distinct_atom_pos++ ){
