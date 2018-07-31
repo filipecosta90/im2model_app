@@ -1710,39 +1710,143 @@ boost::filesystem::path TDMap::make_path_relative_to_project_dir( boost::filesys
 bool TDMap::set_unit_cell_cif_path( std::string cif_filename ){
   bool result = false;
 
-  try {
+  if( _flag_logger ){
+    std::stringstream message;
+    message << "setting cif path to " << cif_filename;
+    ApplicationLog::severity_level _log_type = ApplicationLog::notification;
+    BOOST_LOG_FUNCTION();  logger->logEvent( _log_type , message.str() );
+  }
 
-    if( _flag_logger ){
-      std::stringstream message;
-      message << "setting cif path to " << cif_filename;
-      ApplicationLog::severity_level _log_type = ApplicationLog::notification;
-      BOOST_LOG_FUNCTION();  logger->logEvent( _log_type , message.str() );
+
+    // regex pattern
+  std::string pattern = "https?:\/\/";
+
+  // Construct regex object
+  std::regex url_regex(pattern);
+
+  bool parse_result = false;
+
+  // parse via api
+  if (std::regex_search(cif_filename, url_regex) == true) {
+
+    QNetworkRequest request( QUrl("http://localhost:5000/api/cif/fetch" ) );
+    request.setHeader( QNetworkRequest::ContentTypeHeader, "application/json" );
+    QJsonObject body;
+    body.insert("url", QString::fromStdString( cif_filename ) );
+    QNetworkAccessManager nam;
+    QNetworkReply *reply = nam.post(request, QJsonDocument(body).toJson());
+    while(!reply->isFinished())
+    {
+      qApp->processEvents();
+
     }
+    QByteArray response_data = reply->readAll();
+    QJsonDocument json = QJsonDocument::fromJson(response_data);
+    QString json_string = json.toJson();
 
-    result = unit_cell->set_cif_path( cif_filename );
-    //_flag_cif_path = true;
-    // in case of the dimensions being already setted up
-    if( result ){
+    std::stringstream ss;
+    ss << json_string.toStdString();
 
-      const bool parse_result = unit_cell->parse_cif();
-      if( _flag_logger ){
-        std::stringstream message;
-        message << "parse result " << std::boolalpha << parse_result;
-        ApplicationLog::severity_level _log_type = parse_result ? ApplicationLog::notification : ApplicationLog::error;
-        BOOST_LOG_FUNCTION();  logger->logEvent( _log_type , message.str() );
+    boost::property_tree::ptree pt;
+    boost::property_tree::read_json(ss, pt);
+
+    std::map<std::string,std::vector<std::string>> looped_items;
+    std::map<std::string, std::string> non_looped_items;
+
+    std::vector<std::string> _atom_site_fract_x;
+    std::vector<std::string> _atom_site_fract_y;
+    std::vector<std::string> _atom_site_fract_z;
+    std::vector<std::string> _atom_site_occupancy;
+    std::vector<std::string> _symmetry_equiv_pos_as_xyz;
+    std::vector<std::string> _chemical_symbols;
+
+    BOOST_FOREACH(boost::property_tree::ptree::value_type &v, pt.get_child("data._atom_site_fract_x"))
+    {
+      _atom_site_fract_x.push_back( v.second.data() );
+    }
+    looped_items.insert(std::map<std::string, std::vector<std::string>>::value_type("_atom_site_fract_x", _atom_site_fract_x));
+
+    BOOST_FOREACH(boost::property_tree::ptree::value_type &v, pt.get_child("data._atom_site_fract_y"))
+    {
+      _atom_site_fract_y.push_back( v.second.data() );
+    }
+    looped_items.insert(std::map<std::string, std::vector<std::string>>::value_type("_atom_site_fract_y", _atom_site_fract_y));
+
+    BOOST_FOREACH(boost::property_tree::ptree::value_type &v, pt.get_child("data._atom_site_fract_z"))
+    {
+      _atom_site_fract_z.push_back( v.second.data() );
+    }
+    looped_items.insert(std::map<std::string, std::vector<std::string>>::value_type("_atom_site_fract_z", _atom_site_fract_z));
+
+
+    BOOST_FOREACH(boost::property_tree::ptree::value_type &v, pt.get_child("data._atom_site_occupancy"))
+    {
+      _atom_site_occupancy.push_back( v.second.data() );
+    }
+    looped_items.insert(std::map<std::string, std::vector<std::string>>::value_type("_atom_site_occupancy", _atom_site_occupancy));
+
+    BOOST_FOREACH(boost::property_tree::ptree::value_type &v, pt.get_child("data._symmetry_equiv_pos_as_xyz"))
+    {
+      _symmetry_equiv_pos_as_xyz.push_back( v.second.data() );
+    }
+    looped_items.insert(std::map<std::string, std::vector<std::string>>::value_type("_symmetry_equiv_pos_as_xyz", _symmetry_equiv_pos_as_xyz));
+
+    BOOST_FOREACH(boost::property_tree::ptree::value_type &v, pt.get_child("data._chemical_symbols"))
+    {
+      _chemical_symbols.push_back( v.second.data() );
+    }
+    looped_items.insert(std::map<std::string, std::vector<std::string>>::value_type("_atom_site_type_symbol", _chemical_symbols));
+
+        // Read values
+    std::string _cell_length_a = pt.get<std::string>("data._cell_length_a", "");
+    std::string _cell_length_b = pt.get<std::string>("data._cell_length_b", "");
+    std::string _cell_length_c = pt.get<std::string>("data._cell_length_c", "");
+    std::string _cell_angle_alpha = pt.get<std::string>("data._cell_angle_alpha", "");
+    std::string _cell_angle_beta = pt.get<std::string>("data._cell_angle_beta", "");
+    std::string _cell_angle_gamma = pt.get<std::string>("data._cell_angle_gamma", "");
+    std::string _cell_volume = pt.get<std::string>("data._cell_volume", "");
+
+    non_looped_items.insert(std::map<std::string, std::string>::value_type("_cell_length_a", _cell_length_a));
+    non_looped_items.insert(std::map<std::string, std::string>::value_type("_cell_length_b", _cell_length_b));
+    non_looped_items.insert(std::map<std::string, std::string>::value_type("_cell_length_c", _cell_length_c));
+    non_looped_items.insert(std::map<std::string, std::string>::value_type("_cell_angle_alpha", _cell_angle_alpha));
+    non_looped_items.insert(std::map<std::string, std::string>::value_type("_cell_angle_beta", _cell_angle_beta));
+    non_looped_items.insert(std::map<std::string, std::string>::value_type("_cell_angle_gamma", _cell_angle_gamma));
+    non_looped_items.insert(std::map<std::string, std::string>::value_type("_cell_volume", _cell_volume));
+
+    bool set_looped_items_result = unit_cell->set_looped_items( looped_items );
+    bool set_non_looped_items_result = unit_cell->set_non_looped_items( non_looped_items );
+    parse_result = true;
+
+  } else {
+    // local cif
+    try {
+
+      if( result ){
+
+        parse_result = unit_cell->parse_cif();
       }
-
-      if( parse_result ){
-        _flag_parse_cif = true;
-        tdmap_roi_sim_super_cell->update_from_unit_cell();
-        // just for visualization purposes
-        tdmap_vis_sim_unit_cell->update_from_unit_cell();
-      }
+    }
+    catch(boost::bad_lexical_cast&  ex) {
+    // pass it up
+      boost::throw_exception( ex );
     }
   }
-  catch(boost::bad_lexical_cast&  ex) {
-    // pass it up
-    boost::throw_exception( ex );
+
+  if( _flag_logger ){
+    std::stringstream message;
+    message << "parse result " << std::boolalpha << parse_result;
+    ApplicationLog::severity_level _log_type = parse_result ? ApplicationLog::notification : ApplicationLog::error;
+    BOOST_LOG_FUNCTION();  logger->logEvent( _log_type , message.str() );
+  }
+  
+  if( parse_result ){
+    result = unit_cell->populate_unit_cell();
+    //result = unit_cell->set_cif_path( cif_filename );
+    _flag_parse_cif = true;
+    tdmap_roi_sim_super_cell->update_from_unit_cell();
+        // just for visualization purposes
+    tdmap_vis_sim_unit_cell->update_from_unit_cell();
   }
   return result;
 }

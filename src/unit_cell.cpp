@@ -20,8 +20,21 @@
 UnitCell::UnitCell( Chem_Database* chem_db ) : BaseCell( chem_db ) {
 }
 
+bool UnitCell::set_looped_items( std::map<std::string,std::vector<std::string>> looped ){
+  looped_items = looped;
+  return true;
+}
+
+bool UnitCell::set_non_looped_items( std::map<std::string,std::string> non_looped ){
+  non_looped_items = non_looped;
+  return true;
+}
+
 bool UnitCell::clear_parsed_cif(){
  _flag_parsed_cif = false;
+
+ non_looped_items.clear();
+ looped_items.clear();
 
  symmetry_equiv_pos_as_xyz.clear();
  symmetry_equiv_pos_as_x.clear();
@@ -81,7 +94,7 @@ void UnitCell::add_atom_site_occupancy( double occupancy ){
   atoms_site_occupancy.push_back( occupancy );
 }
 
-bool UnitCell::parse_cif(){
+bool UnitCell::parse_cif( ){
   if( _flag_parsed_cif == true ){
     clear_parsed_cif();
   }
@@ -94,59 +107,76 @@ bool UnitCell::parse_cif(){
       BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::normal , message.str() );
     }
 
+
+
     const bool parse_result = cif_driver.parse( full_path.c_str() );
     if( parse_result ){
-     std::map<std::string,std::string> non_looped_items = cif_driver.get_cif_non_looped_items();
+     non_looped_items = cif_driver.get_cif_non_looped_items();
+     looped_items = cif_driver.get_cif_looped_items();
 
      if( _flag_logger ){
       std::stringstream message;
-      message << "going to populate cell " << non_looped_items.size();
+      message <<  "parse_cif result " << std::boolalpha << parse_result;
       BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::normal , message.str() );
     }
 
-    const bool populate_cell_result = populate_cell( non_looped_items );
-    if( _flag_logger ){
-      std::stringstream message;
-      message <<  "populate_cell_result " << std::boolalpha << populate_cell_result;
-      BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::normal , message.str() );
-    }
-    std::cout  << std::endl;
-    std::map<std::string,std::vector<std::string>> looped_items = cif_driver.get_cif_looped_items();
-    const bool populate_atom_result = populate_atom_site( looped_items );
-
-    if( _flag_logger ){
-      std::stringstream message;
-      message <<  "populate_atom_result " << std::boolalpha << populate_atom_result;
-      BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::normal , message.str() );
-    }
-
-    const bool populate_symetry_result = populate_symetry_equiv_pos_as_xyz( looped_items );
-
-    if( _flag_logger ){
-      std::stringstream message;
-      message <<  "populate_symetry_result " << std::boolalpha << populate_symetry_result;
-      BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::normal , message.str() );
-    }
-
-    const bool create_atoms_result = create_atoms_from_site_and_symetry();
-
-    if( _flag_logger ){
-      std::stringstream message;
-      message <<  "create_atoms_result " << std::boolalpha << create_atoms_result;
-      BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::normal , message.str() );
-    }
-
-    _flag_parsed_cif = populate_cell_result && populate_atom_result && populate_symetry_result && create_atoms_result;
-
-    if( _flag_logger ){
-      std::stringstream message;
-      message <<  "parse_cif result " << std::boolalpha << _flag_parsed_cif;
-      BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::normal , message.str() );
-    }
-
-    result = _flag_parsed_cif;
+    result = parse_result;
   }  
 }
+return result;
+}
+
+bool UnitCell::populate_unit_cell( ){
+
+  bool result = false;
+
+  if( _flag_logger ){
+    std::stringstream message;
+    message << "going to populate cell non_looped_items.size() " << non_looped_items.size() <<
+    " looped_items.size() " << looped_items.size();
+    BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::normal , message.str() );
+  }
+
+  const bool populate_cell_result = populate_cell( non_looped_items );
+  if( _flag_logger ){
+    std::stringstream message;
+    message <<  "populate_cell_result " << std::boolalpha << populate_cell_result;
+    BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::normal , message.str() );
+  }
+
+  const bool populate_atom_result = populate_atom_site( looped_items );
+
+  if( _flag_logger ){
+    std::stringstream message;
+    message <<  "populate_atom_site_result " << std::boolalpha << populate_atom_result;
+    BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::normal , message.str() );
+  }
+
+  const bool populate_symetry_result = populate_symetry_equiv_pos_as_xyz( looped_items );
+
+  if( _flag_logger ){
+    std::stringstream message;
+    message <<  "populate_symetry_result " << std::boolalpha << populate_symetry_result;
+    BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::normal , message.str() );
+  }
+
+  const bool create_atoms_result = create_atoms_from_site_and_symetry();
+
+  if( _flag_logger ){
+    std::stringstream message;
+    message <<  "create_atoms_result " << std::boolalpha << create_atoms_result;
+    BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::normal , message.str() );
+  }
+
+  _flag_parsed_cif = populate_cell_result && populate_atom_result && populate_symetry_result && create_atoms_result;
+
+  if( _flag_logger ){
+    std::stringstream message;
+    message <<  "parse_cif result " << std::boolalpha << _flag_parsed_cif;
+    BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::normal , message.str() );
+  }
+
+  result = _flag_parsed_cif;
 return result;
 }
 
@@ -310,7 +340,7 @@ bool UnitCell::populate_symetry_equiv_pos_as_xyz( std::map<std::string,std::vect
         [](char x){return std::isspace(x);}
         ),
       symetry_xyz.end());
-      std::vector<std::string> symetry_vec = split( symetry_xyz, ",");
+      std::vector<std::string> symetry_vec = split( symetry_xyz, "," );
       add_symmetry_equiv_pos_as_x( symetry_vec[0]);
       add_symmetry_equiv_pos_as_y( symetry_vec[1]);
       add_symmetry_equiv_pos_as_z( symetry_vec[2]);

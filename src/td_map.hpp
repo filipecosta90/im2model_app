@@ -34,6 +34,16 @@
 #include "application_log.hpp"
 #include <boost/algorithm/string.hpp>
 #include "chem_database.hpp"         // for Chem_Database
+#include <regex> //require c++11
+#include <boost/property_tree/ptree.hpp>
+#include <boost/property_tree/json_parser.hpp>
+#include <boost/foreach.hpp>
+#include <cassert>
+#include <exception>
+#include <iostream>
+#include <sstream>
+#include <string>
+#include <QtNetwork>
 
 
 class TDMap  : public QObject {
