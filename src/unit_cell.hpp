@@ -25,6 +25,8 @@ private:
 
     MC::MC_Driver cif_driver;
     bool _flag_parsed_cif = false;
+    std::map<std::string,std::string> non_looped_items;
+    std::map<std::string,std::vector<std::string>> looped_items;
 
     /* symetry */
     std::string _symmetry_space_group_name_H_M;
@@ -96,8 +98,11 @@ protected:
 public:
     UnitCell( Chem_Database *chem_db );
     bool parse_cif();
+    bool populate_unit_cell( );
 
     bool get_flag_parsed_cif(){ return _flag_parsed_cif; }
+    bool set_looped_items( std::map<std::string,std::vector<std::string>> looped_items );
+    bool set_non_looped_items( std::map<std::string,std::string> non_looped_items );
 
     bool clear_parsed_cif();
 

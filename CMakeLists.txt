@@ -375,7 +375,7 @@ else(build_cli)
   qt5_use_modules( ${PROJECT_NAME} Core Gui Widgets 3DCore 3DExtras 3DRender 3DInput 3DLogic 3DQuick QuickWidgets 3DQuickRender Qml )
 
   #include qt5 dirs
-  foreach(module Core Gui Widgets 3DCore 3DExtras 3DRender 3DInput 3DLogic 3DQuick 3DQuickRender Qml QuickWidgets )
+  foreach(module Core Gui Widgets Network 3DCore 3DExtras 3DRender 3DInput 3DLogic 3DQuick 3DQuickRender Qml QuickWidgets )
     set(qt_module Qt${module})
     set(qt5_module Qt5${module})
     find_package(${qt5_module})
@@ -395,6 +395,7 @@ else(build_cli)
     Qt5::Core
     Qt5::Gui
     Qt5::Widgets
+    #Qt5::network
     Qt5::QuickWidgets
     Qt5::3DCore
     Qt5::3DExtras
