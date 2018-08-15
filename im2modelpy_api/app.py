@@ -16,7 +16,6 @@ from ase import Atoms
 
 def prepare_cif_json( cell ):
 	data = {}
-
 	a, b, c, alpha, beta, gamma = cell.get_cell_lengths_and_angles()
 
 	data["_cell_length_a"] = a
@@ -48,14 +47,12 @@ def prepare_cif_json( cell ):
 	return data
 
 global apiVersion 
-apiVersion = "0.0.1"
+apiVersion = "0.0.1.1"
 
 app = Flask(__name__)
 app.config['JSONIFY_PRETTYPRINT_REGULAR'] = False
 
 app.debug = True
-
-#app.add_url_rule('/graphql', view_func=GraphQLView.as_view('graphql', schema=schema, graphiql=True, context={'session': db_session}))
 
 @app.route('/upload')
 def upload():
@@ -86,13 +83,10 @@ def fetch_file():
 		with open( base_filename_with_ext ,'wb') as output:
 			output.write( cif_file.read() )
 
-
 		cell = ase.io.read( base_filename_with_ext ) 
 		os.remove( base_filename_with_ext )
 		data = prepare_cif_json( cell )
 		status = True
-
-		#ase.io.write('cell.png', cell )
 
 	except ValueError as e:
 		print( e )
@@ -134,6 +128,7 @@ def upload_file():
 		f = request.files['file']
 		f.save(secure_filename(f.filename))
 		cell = ase.io.read( f.filename )
+		os.remove( f.filename )
 		data = prepare_cif_json( cell )
 		status = True
 
