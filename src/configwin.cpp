@@ -107,6 +107,7 @@ MainWindow::MainWindow( ApplicationLog::ApplicationLog* logger , QWidget *parent
     status &= _core_td_map->set_dr_probe_celslc_execname( _dr_probe_celslc_bin.toStdString() );
     status &= _core_td_map->set_dr_probe_msa_execname( _dr_probe_msa_bin.toStdString() );
     status &= _core_td_map->set_dr_probe_wavimg_execname( _dr_probe_wavimg_bin.toStdString() );
+    status &= _core_td_map->set_im2model_api_url( im2model_api_url.toStdString() );
 
     create_3d_widgets( this , tdmap_vis_sim_unit_cell, tdmap_full_sim_super_cell );
 
@@ -1244,12 +1245,14 @@ bool MainWindow::edit_preferences(){
   dialog.set_dr_probe_celslc_bin( _dr_probe_celslc_bin.toStdString() );
   dialog.set_dr_probe_msa_bin( _dr_probe_msa_bin.toStdString() );
   dialog.set_dr_probe_wavimg_bin( _dr_probe_wavimg_bin.toStdString() );
+  dialog.set_im2model_api_url( im2model_api_url.toStdString() );
   dialog.produce_settings_panel();
   dialog.exec();
   if ( dialog._is_save_preferences() ){
     _dr_probe_celslc_bin = dialog.get_dr_probe_celslc_bin();
     _dr_probe_msa_bin = dialog.get_dr_probe_msa_bin();
     _dr_probe_wavimg_bin = dialog.get_dr_probe_wavimg_bin();
+    im2model_api_url = dialog.get_im2model_api_url();
     writeSettings();
     result = checkSettings();
   }
@@ -1365,6 +1368,7 @@ bool MainWindow::checkSettings(){
   bool _temp_flag_dr_probe_celslc_bin = _flag_dr_probe_celslc_bin;
   bool _temp_flag_dr_probe_msa_bin = _flag_dr_probe_msa_bin;
   bool _temp_flag_dr_probe_wavimg_bin = _flag_dr_probe_wavimg_bin;
+  bool _temp_flag_im2model_api_url = _flag_im2model_api_url;
 
   if (_flag_im2model_logger) {
     std::stringstream message;
@@ -1385,6 +1389,8 @@ bool MainWindow::checkSettings(){
   _temp_flag_dr_probe_celslc_bin &= (_dr_probe_celslc_bin == QString("")) ? false : true;
   _temp_flag_dr_probe_msa_bin &= (_dr_probe_msa_bin == QString("")) ? false : true;
   _temp_flag_dr_probe_wavimg_bin &= (_dr_probe_wavimg_bin == QString("")) ? false : true;
+  _temp_flag_im2model_api_url &= (im2model_api_url == QString("")) ? false : true;
+
 
   if (_temp_flag_dr_probe_celslc_bin) {
     boost::filesystem::path full_path_filename(_dr_probe_celslc_bin.toStdString());
@@ -1418,6 +1424,8 @@ bool MainWindow::checkSettings(){
   status &= _temp_flag_dr_probe_celslc_bin;
   status &= _temp_flag_dr_probe_msa_bin;
   status &= _temp_flag_dr_probe_wavimg_bin;
+  status &= _temp_flag_im2model_api_url;
+
 
   if (_flag_im2model_logger) {
     std::stringstream message;
@@ -1428,6 +1436,9 @@ bool MainWindow::checkSettings(){
     im2model_logger->logEvent(ApplicationLog::notification, message.str());
     message = std::stringstream();
     message << "wavimg path: " <<  _dr_probe_wavimg_bin.toStdString() << "_flag_dr_probe_wavimg_bin: " << _temp_flag_dr_probe_wavimg_bin;
+    im2model_logger->logEvent(ApplicationLog::notification, message.str());
+    message = std::stringstream();
+    message << "im2model_api_url: " <<  im2model_api_url.toStdString() << "_flag_im2model_api_url: " << _flag_im2model_api_url;
     im2model_logger->logEvent(ApplicationLog::notification, message.str());
   }
   return status;
@@ -1441,11 +1452,13 @@ bool MainWindow::readSettings(){
   _flag_dr_probe_celslc_bin =  (settings.childKeys().contains("celslc", Qt::CaseInsensitive)) ? true : false;
   _flag_dr_probe_msa_bin =  (settings.childKeys().contains("msa", Qt::CaseInsensitive)) ? true : false;
   _flag_dr_probe_wavimg_bin =  (settings.childKeys().contains("wavimg", Qt::CaseInsensitive)) ? true : false;
+  _flag_im2model_api_url =  (settings.childKeys().contains("im2model_api_url", Qt::CaseInsensitive)) ? true : false;
 
   _q_settings_fileName = settings.fileName();
   _dr_probe_celslc_bin = settings.value("celslc","").toString();
   _dr_probe_msa_bin = settings.value("msa","").toString();
   _dr_probe_wavimg_bin = settings.value("wavimg","").toString();
+  im2model_api_url = settings.value("im2model_api_url","").toString();
   settings.endGroup();
   restoreGeometry(settings.value("geometry.main_window").toByteArray());
   ui->td_map_splitter->restoreGeometry( settings.value("geometry.tdmap_splitter").toByteArray() );
@@ -1460,6 +1473,7 @@ void MainWindow::writeSettings(){
   settings.setValue("celslc",_dr_probe_celslc_bin);
   settings.setValue("msa",_dr_probe_msa_bin);
   settings.setValue("wavimg",_dr_probe_wavimg_bin);
+  settings.setValue("im2model_api_url",im2model_api_url);
   settings.endGroup();
   settings.setValue("geometry.main_window", saveGeometry() );
   settings.setValue("windowState", saveState() );

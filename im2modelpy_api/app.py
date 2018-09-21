@@ -123,6 +123,7 @@ def fetch_file():
 def upload_file():
 	status = None
 	result = None
+	print(request.__dict__)
 
 	if request.method == 'POST':
 		f = request.files['file']

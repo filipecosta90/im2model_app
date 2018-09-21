@@ -317,10 +317,12 @@ signals:
     QString _dr_probe_celslc_bin;
     QString _dr_probe_msa_bin;
     QString _dr_probe_wavimg_bin;
+    QString im2model_api_url;
     bool _flag_dr_probe_bin_path = false;
     bool _flag_dr_probe_celslc_bin = false;
     bool _flag_dr_probe_msa_bin = false;
     bool _flag_dr_probe_wavimg_bin = false;
+    bool _flag_im2model_api_url = false;
 
     bool _settings_ok = false;
     bool _failed_initialization = false;

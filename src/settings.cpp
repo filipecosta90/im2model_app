@@ -54,6 +54,17 @@ bool Settings::set_dr_probe_wavimg_bin( std::string bin ){
   return true;
 }
 
+
+bool Settings::set_im2model_api_url( std::string url ){
+  im2model_api_url  = QString::fromStdString(url);
+  return true;
+}
+
+
+QString Settings::get_im2model_api_url(){
+  return im2model_api_url;
+}
+
 QString Settings::get_dr_probe_bin_path(){
   return _dr_probe_bin_path;
 }
@@ -95,6 +106,7 @@ void Settings::produce_settings_panel(){
   TreeItem* preferences_dr_probe = new TreeItem ( preferences_option_1  );
   preferences_root->insertChildren( preferences_dr_probe );
 
+
   QVector<QVariant> preferences_option_1_2 = {"celslc execname",_dr_probe_celslc_bin};
   QVector<bool> preferences_option_1_2_edit = {false,true};
   boost::function<bool(std::string)> preferences_option_function_1_2 ( boost::bind( &Settings::set_dr_probe_celslc_bin, this, _1 ) );
@@ -115,6 +127,12 @@ void Settings::produce_settings_panel(){
   _preferences_dr_probe_wavimg = new TreeItem ( preferences_option_1_4 , preferences_option_function_1_4,  preferences_option_1_4_edit  );
   _preferences_dr_probe_wavimg->set_item_delegate_type( TreeItem::_delegate_FILE );
   preferences_dr_probe->insertChildren( _preferences_dr_probe_wavimg );
+
+  QVector<QVariant> preferences_option_1_5 = {"im2model-api url", im2model_api_url };
+  QVector<bool> preferences_option_1_5_edit = {false,true};
+  boost::function<bool(std::string)> preferences_option_function_1_5 ( boost::bind( &Settings::set_im2model_api_url, this, _1 ) );
+  _preferences_im2model_api_url = new TreeItem ( preferences_option_1_5 , preferences_option_function_1_5,  preferences_option_1_5_edit  );
+  preferences_dr_probe->insertChildren( _preferences_im2model_api_url );
 
   project_preferences_model = new TreeModel( preferences_root );
 

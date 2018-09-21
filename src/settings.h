@@ -52,18 +52,20 @@ class Settings : public QDialog
 {
   Q_OBJECT
 
-  public:
+public:
     bool _is_save_preferences();
     bool set_q_settings_fileName( std::string filename );
     bool set_dr_probe_bin_path( std::string path );
     bool set_dr_probe_celslc_bin( std::string bin );
     bool set_dr_probe_msa_bin( std::string bin );
     bool set_dr_probe_wavimg_bin( std::string bin );
+    bool set_im2model_api_url( std::string url );
 
     QString get_dr_probe_bin_path( );
     QString get_dr_probe_celslc_bin( );
     QString get_dr_probe_msa_bin( );
     QString get_dr_probe_wavimg_bin( );
+    QString get_im2model_api_url();
 
     explicit Settings(QWidget *parent = 0);
     void produce_settings_panel();
@@ -71,15 +73,17 @@ class Settings : public QDialog
     ~Settings();
 
     private slots:
-      void on_buttonBox_accepted();
+    void on_buttonBox_accepted();
 
-  private:
+private:
 
     Ui::Settings *ui;
     QString _dr_probe_bin_path;
     QString _dr_probe_celslc_bin;
     QString _dr_probe_msa_bin;
     QString _dr_probe_wavimg_bin;
+    QString im2model_api_url;
+
     QString _q_settings_fileName;
 
     // project preferences model
@@ -88,6 +92,7 @@ class Settings : public QDialog
     TreeItem* _preferences_dr_probe_msa;
     TreeItem* _preferences_dr_probe_wavimg;
     TreeItem* _preferences_dr_probe_path;
+    TreeItem* _preferences_im2model_api_url;
     bool _save_preferences = false;
 
     /* Delegates */

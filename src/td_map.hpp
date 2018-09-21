@@ -48,7 +48,7 @@
 
 class TDMap  : public QObject {
   Q_OBJECT
-  private:
+private:
 
     //int image_correlation_matching_method = CV_TM_CCOEFF_NORMED;
     //bool _flag_image_correlation_matching_method = true;
@@ -62,6 +62,7 @@ class TDMap  : public QObject {
     boost::filesystem::path project_dir_path;
     boost::filesystem::path project_filename_with_path;
     std::string project_filename;
+    std::string im2model_api_url;
     bool _flag_project_dir_path = false;
 
     bool _flag_parse_cif = false;
@@ -72,7 +73,7 @@ class TDMap  : public QObject {
     // Chem database wrapper
     /////////////////////////
 
-  Chem_Database* chem_database;
+    Chem_Database* chem_database;
 
     /////////////////////////
     // Dr Probe PRM wrappers
@@ -186,7 +187,7 @@ class TDMap  : public QObject {
     bool update_emd_fields();
     bool update_full_crysta_a_b_sizes();
 
-  public:
+public:
     enum RefinementPreset { NO_REFINEMENT, MICROSCOPE_CORRECTED, MICROSCOPE_NON_CORRECTED, USER_DEFINED_PRESET };
     enum ExecLogMode {FULL_LOG, DEBUG_MODE, SILENT_MODE, USER_DEFINED_LOG_MODE };
 
@@ -428,6 +429,7 @@ class TDMap  : public QObject {
     bool set_dr_probe_celslc_execname( std::string celslc_execname );
     bool set_dr_probe_msa_execname( std::string msa_execname );
     bool set_dr_probe_wavimg_execname( std::string wavimg_execname );
+    bool set_im2model_api_url( std::string url );
 
     // gui setters
     bool set_nx_size_width( std::string );
@@ -602,7 +604,7 @@ class TDMap  : public QObject {
     double get_full_boundary_polygon_margin_nm_top_limit();
 
     public slots:
-      void update_super_cell_sim_image_intensity_columns_changed();
+    void update_super_cell_sim_image_intensity_columns_changed();
     void update_super_cell_exp_image_intensity_columns_changed();
     void update_super_cell_exp_image_centroid_translation_changed( cv::Point2i trans );
     void update_tdmap_celslc_ssc_stage_started( int nsteps );
@@ -613,7 +615,7 @@ class TDMap  : public QObject {
     void update_super_cell_celslc_ssc_stage_ended( bool result );
 
 
-signals:
+    signals:
     void supercell_full_experimental_image_intensity_columns_changed();
     void supercell_full_simulated_image_intensity_columns_changed();
     void supercell_full_experimental_image_centroid_translation_changed( );
