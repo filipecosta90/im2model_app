@@ -14,7 +14,7 @@ bool MainWindow::create_3d_widgets( QMainWindow *parent , SuperCell* tdmap_vis_s
   return true;
 }
 
-MainWindow::MainWindow( ApplicationLog::ApplicationLog* logger , QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow) {
+MainWindow::MainWindow( ApplicationLog::ApplicationLog* logger, std::string version, QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow) {
 
   im2model_logger = logger;
   _flag_im2model_logger = true;
@@ -75,6 +75,8 @@ MainWindow::MainWindow( ApplicationLog::ApplicationLog* logger , QWidget *parent
       _sim_supercell_celslc_ostream_buffer,
       _sim_supercell_msa_ostream_buffer,
       _sim_supercell_wavimg_ostream_buffer );
+
+    _core_td_map->set_application_version(version);
 
     SuperCell* tdmap_vis_sim_unit_cell = _core_td_map->get_tdmap_vis_sim_unit_cell();
     SuperCell* tdmap_full_sim_super_cell = _core_td_map->get_tdmap_full_sim_super_cell();
@@ -242,6 +244,9 @@ MainWindow::MainWindow( ApplicationLog::ApplicationLog* logger , QWidget *parent
 
 void MainWindow::setApplicationVersion( std::string app_version ){
   application_version = app_version;
+  if ( _core_td_map ){
+    _core_td_map->set_application_version( app_version );
+  }
   _flag_application_version = true;
 }
 
@@ -1077,7 +1082,7 @@ bool MainWindow::saveAs()
     QString folder_path = dialog.selectedFiles().first();
     result = _core_td_map->set_project_dir_path( folder_path.toStdString() );
     if( result ){
-      _load_file_delegate->set_base_dir_path( folder_path.toStdString(), true );
+      //_load_file_delegate->set_base_dir_path( folder_path.toStdString(), false );
       std::string project_filename_with_path = _core_td_map->get_project_filename_with_path();
       QString qt_project_filename_with_path = QString::fromStdString( project_filename_with_path );
       result = saveFile( qt_project_filename_with_path );
@@ -1576,7 +1581,7 @@ void MainWindow::loadFile(const QString &fileName){
   boost::property_tree::ptree config;
   boost::filesystem::path filename_path ( fileName.toStdString() );
 
-  _load_file_delegate->set_base_dir_path( filename_path.parent_path().string(), true );
+  //_load_file_delegate->set_base_dir_path( filename_path.parent_path().string(), false );
 
   if ( _flag_im2model_logger ){
     im2model_logger->add_sync( filename_path.parent_path() );
@@ -1800,7 +1805,7 @@ bool MainWindow::saveFile(const QString &fileName ){
 
   // The first parameter in the constructor is the character used for indentation, whilst the second is the indentation length.
   boost::filesystem::path filename_path ( fileName.toStdString() );
-  _load_file_delegate->set_base_dir_path( filename_path.parent_path().string(), true );
+  //_load_file_delegate->set_base_dir_path( filename_path.parent_path().string(), false );
 
   if ( _flag_im2model_logger ){
     im2model_logger->add_sync( filename_path.parent_path() );
@@ -2122,7 +2127,7 @@ void MainWindow::create_box_options_tab1_crystallography(){
   ////////////////
   // Unit-cell file CIF
   ////////////////
-  QVector<QVariant> box2_option_1_1 = {"CIF",""};
+  QVector<QVariant> box2_option_1_1 = {"Unit-Cell",""};
   QVector<bool> box2_option_1_1_edit = {false,true};
   boost::function<bool(std::string)> box2_function_1_1 ( boost::bind( &MainWindow::update_qline_cif_path,this, _1 ) );
   unit_cell_file_cif = new TreeItem ( box2_option_1_1 , box2_function_1_1, box2_option_1_1_edit );
@@ -2130,6 +2135,7 @@ void MainWindow::create_box_options_tab1_crystallography(){
 
   boost::function<std::string(void)> box2_function_1_1_getter ( boost::bind( &TDMap::get_unit_cell_cif_path, _core_td_map ) );
   unit_cell_file_cif->set_fp_data_getter_string_vec( 1, box2_function_1_1_getter );
+  connect( _core_td_map, SIGNAL( unit_cell_changed( )), unit_cell_file_cif, SLOT( load_data_from_getter_string() ) );
 
   unit_cell_file_cif->set_item_delegate_type( TreeItem::_delegate_FILE );
   unit_cell_file->insertChildren( unit_cell_file_cif );

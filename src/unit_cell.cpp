@@ -25,6 +25,80 @@ bool UnitCell::set_looped_items( std::map<std::string,std::vector<std::string>> 
   return true;
 }
 
+bool UnitCell::parse_cell_json( std::string json_string ){
+
+  std::stringstream ss;
+  ss << json_string;
+
+  boost::property_tree::ptree pt;
+  boost::property_tree::read_json(ss, pt);
+
+  std::vector<std::string> _atom_site_fract_x;
+  std::vector<std::string> _atom_site_fract_y;
+  std::vector<std::string> _atom_site_fract_z;
+  std::vector<std::string> _atom_site_occupancy;
+  std::vector<std::string> _symmetry_equiv_pos_as_xyz;
+  std::vector<std::string> _chemical_symbols;
+
+  BOOST_FOREACH(boost::property_tree::ptree::value_type &v, pt.get_child("data._atom_site_fract_x"))
+  {
+    _atom_site_fract_x.push_back( v.second.data() );
+  }
+  looped_items.insert(std::map<std::string, std::vector<std::string>>::value_type("_atom_site_fract_x", _atom_site_fract_x));
+
+  BOOST_FOREACH(boost::property_tree::ptree::value_type &v, pt.get_child("data._atom_site_fract_y"))
+  {
+    _atom_site_fract_y.push_back( v.second.data() );
+  }
+  looped_items.insert(std::map<std::string, std::vector<std::string>>::value_type("_atom_site_fract_y", _atom_site_fract_y));
+
+  BOOST_FOREACH(boost::property_tree::ptree::value_type &v, pt.get_child("data._atom_site_fract_z"))
+  {
+    _atom_site_fract_z.push_back( v.second.data() );
+  }
+  looped_items.insert(std::map<std::string, std::vector<std::string>>::value_type("_atom_site_fract_z", _atom_site_fract_z));
+
+
+  BOOST_FOREACH(boost::property_tree::ptree::value_type &v, pt.get_child("data._atom_site_occupancy"))
+  {
+    _atom_site_occupancy.push_back( v.second.data() );
+  }
+  looped_items.insert(std::map<std::string, std::vector<std::string>>::value_type("_atom_site_occupancy", _atom_site_occupancy));
+
+  BOOST_FOREACH(boost::property_tree::ptree::value_type &v, pt.get_child("data._symmetry_equiv_pos_as_xyz"))
+  {
+    _symmetry_equiv_pos_as_xyz.push_back( v.second.data() );
+  }
+  looped_items.insert(std::map<std::string, std::vector<std::string>>::value_type("_symmetry_equiv_pos_as_xyz", _symmetry_equiv_pos_as_xyz));
+
+  BOOST_FOREACH(boost::property_tree::ptree::value_type &v, pt.get_child("data._chemical_symbols"))
+  {
+    _chemical_symbols.push_back( v.second.data() );
+  }
+  looped_items.insert(std::map<std::string, std::vector<std::string>>::value_type("_atom_site_type_symbol", _chemical_symbols));
+
+    // Read values
+  std::string _cell_length_a = pt.get<std::string>("data._cell_length_a", "");
+  std::string _cell_length_b = pt.get<std::string>("data._cell_length_b", "");
+  std::string _cell_length_c = pt.get<std::string>("data._cell_length_c", "");
+  std::string _cell_angle_alpha = pt.get<std::string>("data._cell_angle_alpha", "");
+  std::string _cell_angle_beta = pt.get<std::string>("data._cell_angle_beta", "");
+  std::string _cell_angle_gamma = pt.get<std::string>("data._cell_angle_gamma", "");
+  std::string _cell_volume = pt.get<std::string>("data._cell_volume", "");
+
+  non_looped_items.insert(std::map<std::string, std::string>::value_type("_cell_length_a", _cell_length_a));
+  non_looped_items.insert(std::map<std::string, std::string>::value_type("_cell_length_b", _cell_length_b));
+  non_looped_items.insert(std::map<std::string, std::string>::value_type("_cell_length_c", _cell_length_c));
+  non_looped_items.insert(std::map<std::string, std::string>::value_type("_cell_angle_alpha", _cell_angle_alpha));
+  non_looped_items.insert(std::map<std::string, std::string>::value_type("_cell_angle_beta", _cell_angle_beta));
+  non_looped_items.insert(std::map<std::string, std::string>::value_type("_cell_angle_gamma", _cell_angle_gamma));
+  non_looped_items.insert(std::map<std::string, std::string>::value_type("_cell_volume", _cell_volume));
+
+  std::string _cell_link = pt.get<std::string>("links.cell.unitcell", "");
+  cell_link = _cell_link;
+  return true;
+}
+
 bool UnitCell::set_non_looped_items( std::map<std::string,std::string> non_looped ){
   non_looped_items = non_looped;
   return true;
@@ -107,8 +181,6 @@ bool UnitCell::parse_cif( ){
       BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::normal , message.str() );
     }
 
-
-
     const bool parse_result = cif_driver.parse( full_path.c_str() );
     if( parse_result ){
      non_looped_items = cif_driver.get_cif_non_looped_items();
@@ -177,7 +249,7 @@ bool UnitCell::populate_unit_cell( ){
   }
 
   result = _flag_parsed_cif;
-return result;
+  return result;
 }
 
 bool UnitCell::populate_cell( std::map<std::string,std::string> non_looped_items ){
@@ -341,9 +413,9 @@ bool UnitCell::populate_symetry_equiv_pos_as_xyz( std::map<std::string,std::vect
         ),
       symetry_xyz.end());
       std::vector<std::string> symetry_vec = split( symetry_xyz, "," );
-      add_symmetry_equiv_pos_as_x( symetry_vec[0]);
-      add_symmetry_equiv_pos_as_y( symetry_vec[1]);
-      add_symmetry_equiv_pos_as_z( symetry_vec[2]);
+      add_symmetry_equiv_pos_as_x( symetry_vec[0] );
+      add_symmetry_equiv_pos_as_y( symetry_vec[1] );
+      add_symmetry_equiv_pos_as_z( symetry_vec[2] );
     }
   }
   return true;

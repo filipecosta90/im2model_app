@@ -114,7 +114,7 @@ class MainWindow : public QMainWindow {
   Q_OBJECT
   public:
     //  MainWindow(QWidget *parent = 0);
-    MainWindow( ApplicationLog::ApplicationLog* logger, QWidget *parent = 0 );
+    MainWindow( ApplicationLog::ApplicationLog* logger, std::string version, QWidget *parent = 0 );
 
     bool set_dr_probe_path( QString path );
     void setApplicationVersion( std::string app_version );

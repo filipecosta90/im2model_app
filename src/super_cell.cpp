@@ -53,7 +53,7 @@ bool SuperCell::clean_for_re_run(){
 
 bool SuperCell::update_from_unit_cell( bool create_orientation_matrix ){
   bool result = false;
-  std::cout << " update_from_unit_cell" << std::endl;
+  
   if( _flag_unit_cell ){
     if( _flag_zone_axis && _flag_upward_vector && !_flag_orientation_matrix ){
       form_matrix_from_miller_indices();
@@ -65,6 +65,8 @@ bool SuperCell::update_from_unit_cell( bool create_orientation_matrix ){
       if( _flag_atom_positions ){
         clean_for_re_run();
       }
+
+      emit start_update_atoms();
       std::cout << " update_from_unit_cell $$" << std::endl;
       const bool angle_result = true; //update_angle_parameters_from_unit_cell();
       std::cout << " angle_result result " << std::boolalpha << angle_result << std::endl;
@@ -75,7 +77,7 @@ bool SuperCell::update_from_unit_cell( bool create_orientation_matrix ){
 
       if( !_flag_auto_calculate_expand_factor ){
         const bool update_from_expand = update_length_parameters_from_expand_factor();
-              std::cout << " update_from_expand result " << std::boolalpha << update_from_expand << std::endl;
+        std::cout << " update_from_expand result " << std::boolalpha << update_from_expand << std::endl;
       }
 
       if( angle_result && expand_result ){
@@ -103,10 +105,9 @@ bool SuperCell::update_from_unit_cell( bool create_orientation_matrix ){
               }
             }
           }
-          std::cout << " update_from_unit_cell result " << std::boolalpha << result << std::endl;
-          if( result ){
-            std::cout << " $$$$ SIZE " << get_atom_positions_vec_size() << std::endl;
-          }
+          const int new_atom_size = result ? get_atom_positions_vec_size() : -1 ;
+          std::cout << " $$$$ SIZE " << new_atom_size << std::endl;
+          emit end_update_atoms( new_atom_size );
         }
       }
     }
