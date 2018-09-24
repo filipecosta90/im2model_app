@@ -111,7 +111,7 @@ int main(int argc, char *argv[]){
   parser.addVersionOption();
   parser.addPositionalArgument("file", "The file to open.");
   parser.process(app);
-  MainWindow window( app.im2model_logger );
+  MainWindow window( app.im2model_logger, getIm2ModelVersion() );
   window.setApplicationVersion( getIm2ModelVersion() );
 
   if( window._is_initialization_ok() ){

@@ -114,12 +114,12 @@ class SuperCell : public BaseCell{
     bool _flag_enable_orientation = true;
 
     bool update_length_parameters_from_expand_factor();
-    bool clean_for_re_run();
   protected:
 
   public:
     SuperCell( Chem_Database *chem_db );
     SuperCell( UnitCell* cell );
+    bool clean_for_re_run();
     bool set_base_bin_start_dir_path( boost::filesystem::path base_dir );
 
     TreeModel *get_atom_info_fields_model(){ return atom_info_fields_model; }

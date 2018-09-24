@@ -14,7 +14,7 @@ bool MainWindow::create_3d_widgets( QMainWindow *parent , SuperCell* tdmap_vis_s
   return true;
 }
 
-MainWindow::MainWindow( ApplicationLog::ApplicationLog* logger , QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow) {
+MainWindow::MainWindow( ApplicationLog::ApplicationLog* logger, std::string version, QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow) {
 
   im2model_logger = logger;
   _flag_im2model_logger = true;
@@ -76,6 +76,8 @@ MainWindow::MainWindow( ApplicationLog::ApplicationLog* logger , QWidget *parent
       _sim_supercell_msa_ostream_buffer,
       _sim_supercell_wavimg_ostream_buffer );
 
+    _core_td_map->set_application_version(version);
+
     SuperCell* tdmap_vis_sim_unit_cell = _core_td_map->get_tdmap_vis_sim_unit_cell();
     SuperCell* tdmap_full_sim_super_cell = _core_td_map->get_tdmap_full_sim_super_cell();
 
@@ -107,6 +109,7 @@ MainWindow::MainWindow( ApplicationLog::ApplicationLog* logger , QWidget *parent
     status &= _core_td_map->set_dr_probe_celslc_execname( _dr_probe_celslc_bin.toStdString() );
     status &= _core_td_map->set_dr_probe_msa_execname( _dr_probe_msa_bin.toStdString() );
     status &= _core_td_map->set_dr_probe_wavimg_execname( _dr_probe_wavimg_bin.toStdString() );
+    status &= _core_td_map->set_im2model_api_url( im2model_api_url.toStdString() );
 
     create_3d_widgets( this , tdmap_vis_sim_unit_cell, tdmap_full_sim_super_cell );
 
@@ -241,6 +244,9 @@ MainWindow::MainWindow( ApplicationLog::ApplicationLog* logger , QWidget *parent
 
 void MainWindow::setApplicationVersion( std::string app_version ){
   application_version = app_version;
+  if ( _core_td_map ){
+    _core_td_map->set_application_version( app_version );
+  }
   _flag_application_version = true;
 }
 
@@ -1076,7 +1082,7 @@ bool MainWindow::saveAs()
     QString folder_path = dialog.selectedFiles().first();
     result = _core_td_map->set_project_dir_path( folder_path.toStdString() );
     if( result ){
-      _load_file_delegate->set_base_dir_path( folder_path.toStdString(), true );
+      //_load_file_delegate->set_base_dir_path( folder_path.toStdString(), false );
       std::string project_filename_with_path = _core_td_map->get_project_filename_with_path();
       QString qt_project_filename_with_path = QString::fromStdString( project_filename_with_path );
       result = saveFile( qt_project_filename_with_path );
@@ -1244,12 +1250,14 @@ bool MainWindow::edit_preferences(){
   dialog.set_dr_probe_celslc_bin( _dr_probe_celslc_bin.toStdString() );
   dialog.set_dr_probe_msa_bin( _dr_probe_msa_bin.toStdString() );
   dialog.set_dr_probe_wavimg_bin( _dr_probe_wavimg_bin.toStdString() );
+  dialog.set_im2model_api_url( im2model_api_url.toStdString() );
   dialog.produce_settings_panel();
   dialog.exec();
   if ( dialog._is_save_preferences() ){
     _dr_probe_celslc_bin = dialog.get_dr_probe_celslc_bin();
     _dr_probe_msa_bin = dialog.get_dr_probe_msa_bin();
     _dr_probe_wavimg_bin = dialog.get_dr_probe_wavimg_bin();
+    im2model_api_url = dialog.get_im2model_api_url();
     writeSettings();
     result = checkSettings();
   }
@@ -1365,6 +1373,7 @@ bool MainWindow::checkSettings(){
   bool _temp_flag_dr_probe_celslc_bin = _flag_dr_probe_celslc_bin;
   bool _temp_flag_dr_probe_msa_bin = _flag_dr_probe_msa_bin;
   bool _temp_flag_dr_probe_wavimg_bin = _flag_dr_probe_wavimg_bin;
+  bool _temp_flag_im2model_api_url = _flag_im2model_api_url;
 
   if (_flag_im2model_logger) {
     std::stringstream message;
@@ -1385,6 +1394,8 @@ bool MainWindow::checkSettings(){
   _temp_flag_dr_probe_celslc_bin &= (_dr_probe_celslc_bin == QString("")) ? false : true;
   _temp_flag_dr_probe_msa_bin &= (_dr_probe_msa_bin == QString("")) ? false : true;
   _temp_flag_dr_probe_wavimg_bin &= (_dr_probe_wavimg_bin == QString("")) ? false : true;
+  _temp_flag_im2model_api_url &= (im2model_api_url == QString("")) ? false : true;
+
 
   if (_temp_flag_dr_probe_celslc_bin) {
     boost::filesystem::path full_path_filename(_dr_probe_celslc_bin.toStdString());
@@ -1418,6 +1429,8 @@ bool MainWindow::checkSettings(){
   status &= _temp_flag_dr_probe_celslc_bin;
   status &= _temp_flag_dr_probe_msa_bin;
   status &= _temp_flag_dr_probe_wavimg_bin;
+  status &= _temp_flag_im2model_api_url;
+
 
   if (_flag_im2model_logger) {
     std::stringstream message;
@@ -1428,6 +1441,9 @@ bool MainWindow::checkSettings(){
     im2model_logger->logEvent(ApplicationLog::notification, message.str());
     message = std::stringstream();
     message << "wavimg path: " <<  _dr_probe_wavimg_bin.toStdString() << "_flag_dr_probe_wavimg_bin: " << _temp_flag_dr_probe_wavimg_bin;
+    im2model_logger->logEvent(ApplicationLog::notification, message.str());
+    message = std::stringstream();
+    message << "im2model_api_url: " <<  im2model_api_url.toStdString() << "_flag_im2model_api_url: " << _flag_im2model_api_url;
     im2model_logger->logEvent(ApplicationLog::notification, message.str());
   }
   return status;
@@ -1441,11 +1457,13 @@ bool MainWindow::readSettings(){
   _flag_dr_probe_celslc_bin =  (settings.childKeys().contains("celslc", Qt::CaseInsensitive)) ? true : false;
   _flag_dr_probe_msa_bin =  (settings.childKeys().contains("msa", Qt::CaseInsensitive)) ? true : false;
   _flag_dr_probe_wavimg_bin =  (settings.childKeys().contains("wavimg", Qt::CaseInsensitive)) ? true : false;
+  _flag_im2model_api_url =  (settings.childKeys().contains("im2model_api_url", Qt::CaseInsensitive)) ? true : false;
 
   _q_settings_fileName = settings.fileName();
   _dr_probe_celslc_bin = settings.value("celslc","").toString();
   _dr_probe_msa_bin = settings.value("msa","").toString();
   _dr_probe_wavimg_bin = settings.value("wavimg","").toString();
+  im2model_api_url = settings.value("im2model_api_url","").toString();
   settings.endGroup();
   restoreGeometry(settings.value("geometry.main_window").toByteArray());
   ui->td_map_splitter->restoreGeometry( settings.value("geometry.tdmap_splitter").toByteArray() );
@@ -1460,6 +1478,7 @@ void MainWindow::writeSettings(){
   settings.setValue("celslc",_dr_probe_celslc_bin);
   settings.setValue("msa",_dr_probe_msa_bin);
   settings.setValue("wavimg",_dr_probe_wavimg_bin);
+  settings.setValue("im2model_api_url",im2model_api_url);
   settings.endGroup();
   settings.setValue("geometry.main_window", saveGeometry() );
   settings.setValue("windowState", saveState() );
@@ -1562,7 +1581,7 @@ void MainWindow::loadFile(const QString &fileName){
   boost::property_tree::ptree config;
   boost::filesystem::path filename_path ( fileName.toStdString() );
 
-  _load_file_delegate->set_base_dir_path( filename_path.parent_path().string(), true );
+  //_load_file_delegate->set_base_dir_path( filename_path.parent_path().string(), false );
 
   if ( _flag_im2model_logger ){
     im2model_logger->add_sync( filename_path.parent_path() );
@@ -1786,7 +1805,7 @@ bool MainWindow::saveFile(const QString &fileName ){
 
   // The first parameter in the constructor is the character used for indentation, whilst the second is the indentation length.
   boost::filesystem::path filename_path ( fileName.toStdString() );
-  _load_file_delegate->set_base_dir_path( filename_path.parent_path().string(), true );
+  //_load_file_delegate->set_base_dir_path( filename_path.parent_path().string(), false );
 
   if ( _flag_im2model_logger ){
     im2model_logger->add_sync( filename_path.parent_path() );
@@ -2108,7 +2127,7 @@ void MainWindow::create_box_options_tab1_crystallography(){
   ////////////////
   // Unit-cell file CIF
   ////////////////
-  QVector<QVariant> box2_option_1_1 = {"CIF",""};
+  QVector<QVariant> box2_option_1_1 = {"Unit-Cell",""};
   QVector<bool> box2_option_1_1_edit = {false,true};
   boost::function<bool(std::string)> box2_function_1_1 ( boost::bind( &MainWindow::update_qline_cif_path,this, _1 ) );
   unit_cell_file_cif = new TreeItem ( box2_option_1_1 , box2_function_1_1, box2_option_1_1_edit );
@@ -2116,6 +2135,7 @@ void MainWindow::create_box_options_tab1_crystallography(){
 
   boost::function<std::string(void)> box2_function_1_1_getter ( boost::bind( &TDMap::get_unit_cell_cif_path, _core_td_map ) );
   unit_cell_file_cif->set_fp_data_getter_string_vec( 1, box2_function_1_1_getter );
+  connect( _core_td_map, SIGNAL( unit_cell_changed( )), unit_cell_file_cif, SLOT( load_data_from_getter_string() ) );
 
   unit_cell_file_cif->set_item_delegate_type( TreeItem::_delegate_FILE );
   unit_cell_file->insertChildren( unit_cell_file_cif );

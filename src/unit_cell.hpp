@@ -14,6 +14,9 @@
 
 #include "base_cell.hpp"
 #include "base_bin.hpp"
+#include <boost/property_tree/ptree.hpp>
+#include <boost/property_tree/json_parser.hpp>
+#include <boost/foreach.hpp>
 
 class UnitCell : public BaseCell {
 private:
@@ -22,6 +25,7 @@ private:
     bool populate_symetry_equiv_pos_as_xyz( std::map<std::string,std::vector<std::string>> looped_items );
     bool populate_atom_site( std::map<std::string,std::vector<std::string>> looped_items );
     bool create_atoms_from_site_and_symetry();
+
 
     MC::MC_Driver cif_driver;
     bool _flag_parsed_cif = false;
@@ -97,6 +101,7 @@ protected:
 
 public:
     UnitCell( Chem_Database *chem_db );
+    bool parse_cell_json( std::string );
     bool parse_cif();
     bool populate_unit_cell( );
 

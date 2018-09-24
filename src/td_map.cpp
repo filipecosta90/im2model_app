@@ -39,11 +39,21 @@ TDMap::TDMap(
   tdmap_vis_sim_unit_cell->set_flag_auto_calculate_expand_factor( false );
   tdmap_vis_sim_unit_cell->set_expand_factor_abc( 4, 4, 4 );
   tdmap_vis_sim_unit_cell->set_flag_enable_orientation( true );
+  connect( tdmap_vis_sim_unit_cell, SIGNAL( start_update_atoms( )), this, SLOT( emit_start_update_atoms(  ) ) );
+  connect( tdmap_vis_sim_unit_cell, SIGNAL( end_update_atoms( int )), this, SLOT( emit_end_update_atoms( int ) ) );
 
   tdmap_roi_sim_super_cell = new SuperCell( unit_cell );
-  tdmap_full_sim_super_cell = new SuperCell( unit_cell );
-  final_full_sim_super_cell = new SuperCell( unit_cell );
+  connect( tdmap_roi_sim_super_cell, SIGNAL( start_update_atoms( )), this, SLOT( emit_start_update_atoms(  ) ) );
+  connect( tdmap_roi_sim_super_cell, SIGNAL( end_update_atoms( int )), this, SLOT( emit_end_update_atoms( int ) ) );
 
+  tdmap_full_sim_super_cell = new SuperCell( unit_cell );
+  connect( tdmap_full_sim_super_cell, SIGNAL( start_update_atoms( )), this, SLOT( emit_start_update_atoms(  ) ) );
+  connect( tdmap_full_sim_super_cell, SIGNAL( end_update_atoms( int )), this, SLOT( emit_end_update_atoms( int ) ) );
+
+  final_full_sim_super_cell = new SuperCell( unit_cell );
+  connect( final_full_sim_super_cell, SIGNAL( start_update_atoms( ) ), this, SLOT( emit_start_update_atoms(  ) ) );
+  connect( final_full_sim_super_cell, SIGNAL( end_update_atoms( int )), this, SLOT( emit_end_update_atoms( int ) ) );
+  
   tdmap_roi_sim_super_cell->set_angle_alpha(90.0f);
   tdmap_full_sim_super_cell->set_angle_alpha(90.0f);
   final_full_sim_super_cell->set_angle_alpha(90.0f);
@@ -253,6 +263,10 @@ TDMap::TDMap( ostream_celslc_buffer, ostream_msa_buffer, ostream_wavimg_buffer, 
   set_application_logger( app_logger );
 }
 
+bool TDMap::set_application_version( std::string app_version ){
+
+}
+
 std::string TDMap::get_unit_cell_cif_path(){
   std::string result = "";
   if( unit_cell != nullptr ){
@@ -302,6 +316,16 @@ void TDMap::update_super_cell_exp_image_intensity_columns_changed(){
 void TDMap::update_super_cell_exp_image_centroid_translation_changed( cv::Point2i trans ){
   emit supercell_full_experimental_image_centroid_translation_changed();
 }
+
+
+void TDMap::emit_start_update_atoms(  ){
+  emit start_update_atoms( );
+}
+
+void TDMap::emit_end_update_atoms( int n_atoms ){
+  emit end_update_atoms( n_atoms );
+}
+
 
 bool TDMap::test_clean_run_env(){
 
@@ -873,7 +897,7 @@ bool TDMap::set_orientation_matrix_string( std::string new_matrix ){
           matrix.at<double>(row,col) = pos_value_double;
         }
         catch(boost::bad_lexical_cast&  ex) {
-    // pass it up
+          // pass it up
           boost::throw_exception( ex );
         }
       }
@@ -889,7 +913,7 @@ bool TDMap::set_orientation_matrix_string( std::string new_matrix ){
     tdmap_vis_sim_unit_cell->set_orientation_matrix( matrix );
     tdmap_vis_sim_unit_cell->orientate_atoms_from_matrix( false );
     tdmap_vis_sim_unit_cell->update_from_unit_cell( false );
-    
+
   }
 
   return result;
@@ -1418,6 +1442,12 @@ bool TDMap::set_application_logger( ApplicationLog::ApplicationLog* app_logger )
   return true;
 }
 
+bool TDMap::set_im2model_api_url( std::string url ){
+  bool result = true; 
+  im2model_api_url = url;
+  return result;
+}
+
 bool TDMap::set_dr_probe_celslc_execname( std::string celslc_execname ){
   const bool step2_result = _tdmap_celslc_parameters->set_bin_execname(celslc_execname);
   const bool step4_result = _supercell_celslc_parameters->set_bin_execname(celslc_execname);
@@ -1468,7 +1498,7 @@ bool TDMap::copy_external_files_to_project_dir(){
       BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::notification , message.str() );
     }
   }
-
+/*
   if( _flag_parse_cif ){
     std::string cif_path = unit_cell->get_cif_path_full();
     boost::filesystem::path project_external_path_cif ( cif_path );
@@ -1488,7 +1518,7 @@ bool TDMap::copy_external_files_to_project_dir(){
         BOOST_LOG_FUNCTION();  logger->logEvent( ApplicationLog::error , message.str() );
       }
     }
-  }
+  }*/
   if( _flag_experimental_image_properties_path ){
 
     std::string image_path = exp_image_properties->get_full_image_path_full_string();
@@ -1707,8 +1737,69 @@ boost::filesystem::path TDMap::make_path_relative_to_project_dir( boost::filesys
   return relativePath;
 }
 
+void TDMap::uploadFinished(QNetworkReply *reply){
+  bool result = false;
+  int statusCode = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
+  if( statusCode >= 200 && statusCode <300 ){
+
+    // where we will have the response 
+    QByteArray response_data = reply->readAll();
+    QJsonDocument json = QJsonDocument::fromJson(response_data);
+    QString json_string = json.toJson();
+
+    const bool parse_result = unit_cell->parse_cell_json( json_string.toStdString() );
+
+    if( _flag_logger ){
+      std::stringstream message;
+      message << "parse result " << std::boolalpha << parse_result;
+      ApplicationLog::severity_level _log_type = parse_result ? ApplicationLog::notification : ApplicationLog::error;
+      BOOST_LOG_FUNCTION();  logger->logEvent( _log_type , message.str() );
+    }
+
+    if( parse_result ){
+      const std::string cell_link = unit_cell->get_cell_link();
+      std::cout << "cell_link" << cell_link << std::endl;
+
+      // update the link to the api
+      emit unit_cell_changed();
+
+      result = unit_cell->populate_unit_cell();
+      _flag_parse_cif = true;
+      tdmap_roi_sim_super_cell->update_from_unit_cell();
+    // just for visualization purposes
+      tdmap_vis_sim_unit_cell->update_from_unit_cell();
+    }
+    reply->deleteLater();   // delete object of reply
+  }
+  else{
+    if( _flag_logger ){
+      std::stringstream message;
+      message << "upload finished with error code: " << statusCode;
+      ApplicationLog::severity_level _log_type = ApplicationLog::error;
+      BOOST_LOG_FUNCTION();  logger->logEvent( _log_type , message.str() );
+    }
+  }
+}
+
+
+void TDMap::uploadProgress( qint64 bytesSent, qint64 bytesTotal ){
+  std::cout << " bytesSent " << bytesSent << " bytesTotal " << bytesTotal << std::endl;
+}
+
 bool TDMap::set_unit_cell_cif_path( std::string cif_filename ){
   bool result = false;
+  // clean for re-run
+  unit_cell->clear_parsed_cif();
+  tdmap_roi_sim_super_cell->clean_for_re_run();
+  tdmap_vis_sim_unit_cell->clean_for_re_run();
+
+  QNetworkAccessManager *nam = new QNetworkAccessManager(this);
+  connect(nam, &QNetworkAccessManager::finished, this, &TDMap::uploadFinished);
+
+  // You must save the file on the heap
+  // If you create a file object on the stack, the program will crash.
+  QFile *m_file;
+  QNetworkReply *reply;
 
   if( _flag_logger ){
     std::stringstream message;
@@ -1717,138 +1808,79 @@ bool TDMap::set_unit_cell_cif_path( std::string cif_filename ){
     BOOST_LOG_FUNCTION();  logger->logEvent( _log_type , message.str() );
   }
 
-
-    // regex pattern
+  std::stringstream UserAgentString;
+  UserAgentString << "im2model/" << app_version;
+  // regex pattern
   std::string pattern = "https?:\/\/";
+  std::stringstream api_url;
+  api_url << im2model_api_url;
 
   // Construct regex object
   std::regex url_regex(pattern);
 
-  bool parse_result = false;
-
-  // parse via api
+  // parse via api fetch
   if (std::regex_search(cif_filename, url_regex) == true) {
-
-    QNetworkRequest request( QUrl("http://localhost:5000/api/cif/fetch" ) );
+    api_url << "/api/cells/unitcells/cif/fetch";
+    QNetworkRequest request( QUrl( QString::fromStdString( api_url.str() )  ) );
     request.setHeader( QNetworkRequest::ContentTypeHeader, "application/json" );
+    request.setHeader( QNetworkRequest::UserAgentHeader, QString::fromStdString( UserAgentString.str() ) );
+    request.setAttribute(QNetworkRequest::FollowRedirectsAttribute, true);
+
     QJsonObject body;
     body.insert("url", QString::fromStdString( cif_filename ) );
-    QNetworkAccessManager nam;
-    QNetworkReply *reply = nam.post(request, QJsonDocument(body).toJson());
-    while(!reply->isFinished())
+    reply = nam->post(request, QJsonDocument(body).toJson());
+    connect(reply, SIGNAL(error(QNetworkReply::NetworkError)), this, SLOT(onError(QNetworkReply::NetworkError)));
+    result = true;
+  } 
+  // parse via api upload
+  else {
+    result = unit_cell->set_cif_path( cif_filename );
+    m_file = new QFile( QString::fromStdString( cif_filename ) );
+
+
+//By default, QFile assumes binary, i.e. it doesn't perform any conversion on the bytes stored in the file.
+    if (  m_file->open( QIODevice::ReadOnly ) )
     {
-      qApp->processEvents();
 
+       // Read the file and transform the output to a QByteArray
+   // QByteArray ba = m_file->readAll();
+
+      // Start upload
+      api_url << "/api/cells/unitcells/cif/upload";
+      QNetworkRequest request( QUrl( QString::fromStdString( api_url.str() )  ) );
+      request.setHeader( QNetworkRequest::UserAgentHeader, QString::fromStdString( UserAgentString.str() ) );
+      request.setAttribute(QNetworkRequest::FollowRedirectsAttribute, true);
+      QHttpMultiPart *multiPart = new QHttpMultiPart(QHttpMultiPart::FormDataType);
+      QHttpPart imagePart;
+      imagePart.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant("form-data; name=\"file\"; filename=\""+m_file->fileName()+"\"" ) ); 
+      imagePart.setBodyDevice(m_file);
+      multiPart->append(imagePart);
+
+      // Start upload
+      reply = nam->post( request, multiPart );
+      //multiPart->setParent(reply);
+      // And connect to the progress upload signal
+      connect(reply, &QNetworkReply::uploadProgress, this, &TDMap::uploadProgress);
+      connect(reply, SIGNAL(error(QNetworkReply::NetworkError)), this, SLOT(onError(QNetworkReply::NetworkError)));
+
+      result = true;
     }
-    QByteArray response_data = reply->readAll();
-    QJsonDocument json = QJsonDocument::fromJson(response_data);
-    QString json_string = json.toJson();
-
-    std::stringstream ss;
-    ss << json_string.toStdString();
-
-    boost::property_tree::ptree pt;
-    boost::property_tree::read_json(ss, pt);
-
-    std::map<std::string,std::vector<std::string>> looped_items;
-    std::map<std::string, std::string> non_looped_items;
-
-    std::vector<std::string> _atom_site_fract_x;
-    std::vector<std::string> _atom_site_fract_y;
-    std::vector<std::string> _atom_site_fract_z;
-    std::vector<std::string> _atom_site_occupancy;
-    std::vector<std::string> _symmetry_equiv_pos_as_xyz;
-    std::vector<std::string> _chemical_symbols;
-
-    BOOST_FOREACH(boost::property_tree::ptree::value_type &v, pt.get_child("data._atom_site_fract_x"))
-    {
-      _atom_site_fract_x.push_back( v.second.data() );
-    }
-    looped_items.insert(std::map<std::string, std::vector<std::string>>::value_type("_atom_site_fract_x", _atom_site_fract_x));
-
-    BOOST_FOREACH(boost::property_tree::ptree::value_type &v, pt.get_child("data._atom_site_fract_y"))
-    {
-      _atom_site_fract_y.push_back( v.second.data() );
-    }
-    looped_items.insert(std::map<std::string, std::vector<std::string>>::value_type("_atom_site_fract_y", _atom_site_fract_y));
-
-    BOOST_FOREACH(boost::property_tree::ptree::value_type &v, pt.get_child("data._atom_site_fract_z"))
-    {
-      _atom_site_fract_z.push_back( v.second.data() );
-    }
-    looped_items.insert(std::map<std::string, std::vector<std::string>>::value_type("_atom_site_fract_z", _atom_site_fract_z));
-
-
-    BOOST_FOREACH(boost::property_tree::ptree::value_type &v, pt.get_child("data._atom_site_occupancy"))
-    {
-      _atom_site_occupancy.push_back( v.second.data() );
-    }
-    looped_items.insert(std::map<std::string, std::vector<std::string>>::value_type("_atom_site_occupancy", _atom_site_occupancy));
-
-    BOOST_FOREACH(boost::property_tree::ptree::value_type &v, pt.get_child("data._symmetry_equiv_pos_as_xyz"))
-    {
-      _symmetry_equiv_pos_as_xyz.push_back( v.second.data() );
-    }
-    looped_items.insert(std::map<std::string, std::vector<std::string>>::value_type("_symmetry_equiv_pos_as_xyz", _symmetry_equiv_pos_as_xyz));
-
-    BOOST_FOREACH(boost::property_tree::ptree::value_type &v, pt.get_child("data._chemical_symbols"))
-    {
-      _chemical_symbols.push_back( v.second.data() );
-    }
-    looped_items.insert(std::map<std::string, std::vector<std::string>>::value_type("_atom_site_type_symbol", _chemical_symbols));
-
-        // Read values
-    std::string _cell_length_a = pt.get<std::string>("data._cell_length_a", "");
-    std::string _cell_length_b = pt.get<std::string>("data._cell_length_b", "");
-    std::string _cell_length_c = pt.get<std::string>("data._cell_length_c", "");
-    std::string _cell_angle_alpha = pt.get<std::string>("data._cell_angle_alpha", "");
-    std::string _cell_angle_beta = pt.get<std::string>("data._cell_angle_beta", "");
-    std::string _cell_angle_gamma = pt.get<std::string>("data._cell_angle_gamma", "");
-    std::string _cell_volume = pt.get<std::string>("data._cell_volume", "");
-
-    non_looped_items.insert(std::map<std::string, std::string>::value_type("_cell_length_a", _cell_length_a));
-    non_looped_items.insert(std::map<std::string, std::string>::value_type("_cell_length_b", _cell_length_b));
-    non_looped_items.insert(std::map<std::string, std::string>::value_type("_cell_length_c", _cell_length_c));
-    non_looped_items.insert(std::map<std::string, std::string>::value_type("_cell_angle_alpha", _cell_angle_alpha));
-    non_looped_items.insert(std::map<std::string, std::string>::value_type("_cell_angle_beta", _cell_angle_beta));
-    non_looped_items.insert(std::map<std::string, std::string>::value_type("_cell_angle_gamma", _cell_angle_gamma));
-    non_looped_items.insert(std::map<std::string, std::string>::value_type("_cell_volume", _cell_volume));
-
-    bool set_looped_items_result = unit_cell->set_looped_items( looped_items );
-    bool set_non_looped_items_result = unit_cell->set_non_looped_items( non_looped_items );
-    parse_result = true;
-
-  } else {
-    // local cif
-    try {
-
-      if( result ){
-
-        parse_result = unit_cell->parse_cif();
+    else{
+      if( _flag_logger ){
+        std::stringstream message;
+        message << "error opening file " << cif_filename;
+        ApplicationLog::severity_level _log_type = ApplicationLog::error;
+        BOOST_LOG_FUNCTION();  logger->logEvent( _log_type , message.str() );
       }
     }
-    catch(boost::bad_lexical_cast&  ex) {
-    // pass it up
-      boost::throw_exception( ex );
-    }
-  }
-
-  if( _flag_logger ){
-    std::stringstream message;
-    message << "parse result " << std::boolalpha << parse_result;
-    ApplicationLog::severity_level _log_type = parse_result ? ApplicationLog::notification : ApplicationLog::error;
-    BOOST_LOG_FUNCTION();  logger->logEvent( _log_type , message.str() );
-  }
-  
-  if( parse_result ){
-    result = unit_cell->populate_unit_cell();
-    //result = unit_cell->set_cif_path( cif_filename );
-    _flag_parse_cif = true;
-    tdmap_roi_sim_super_cell->update_from_unit_cell();
-        // just for visualization purposes
-    tdmap_vis_sim_unit_cell->update_from_unit_cell();
   }
   return result;
+}
+
+void TDMap::onError(QNetworkReply::NetworkError err)
+{
+  qDebug() << " SOME ERROR!";
+  qDebug() << err;
 }
 
 bool TDMap::set_zone_axis_u( std::string s_za_u ){
@@ -2741,12 +2773,12 @@ double TDMap::get_tdmap_cell_dimensions_b_bottom_limit(){
 }
 
 double TDMap::get_tdmap_cell_dimensions_b_top_limit(){
- double result = 1000.0f;
+  double result = 1000.0f;
 
- if(  exp_image_properties->get_flag_roi_image() ){
-  result = exp_image_properties->get_roi_n_rows_height_nm() - ( 2 * sim_image_properties->get_ignore_edge_nm() );
-}
-return result;
+  if(  exp_image_properties->get_flag_roi_image() ){
+    result = exp_image_properties->get_roi_n_rows_height_nm() - ( 2 * sim_image_properties->get_ignore_edge_nm() );
+  }
+  return result;
 }
 
 

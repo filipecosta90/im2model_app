@@ -118,6 +118,7 @@ public:
   //getters
   Chem_Database* get_chem_database(){ return chem_database; }
   std::string get_cif_path();
+  std::string get_cell_link(){ return cell_link; }
   std::string get_cif_path_full();
   bool get_flag_cif_path(){ return _flag_cif_path; }
   bool get_flag_cif_format(){ return _flag_cif_format; }
@@ -226,6 +227,8 @@ public:
   void emit_atom_empirical_radiis_changed();
 
   signals:
+  void start_update_atoms();
+  void end_update_atoms( int n_atoms );
   void atom_positions_changed();
   void atom_empirical_radiis_changed();
 
@@ -246,6 +249,8 @@ protected:
   std::string cif_path;
   bool _flag_cif_path = false;
   bool _flag_cif_format = false;
+
+  std::string cell_link;
 
   std::string cel_filename;
   std::string cel_path;

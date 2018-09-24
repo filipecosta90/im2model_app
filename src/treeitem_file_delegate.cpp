@@ -508,6 +508,7 @@ void TreeItemFileDelegate::get_filename_slot( QWidget *editor ) const {
     if ( use_base_dir_for_relative ){
       boost::filesystem::path childPath ( fileName.toStdString() );
       boost::filesystem::path relativePath = boost::filesystem::relative( childPath, base_dir_path );
+      std::cout << "TreeItemFileDelegate use_base_dir_for_relative " << std::endl;
       std::cout << "project_dir_path " << base_dir_path << std::endl;
       std::cout << "childPath " << childPath << std::endl;
       std::cout << "relativePath " << relativePath << std::endl;
