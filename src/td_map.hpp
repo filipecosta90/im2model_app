@@ -619,15 +619,17 @@ public:
 
     private slots:
    void uploadFinished(QNetworkReply *reply);  // Upload finish slot
-    void uploadProgress(qint64 bytesSent, qint64 bytesTotal);  // Upload progress slot
+    void receiveUploadProgress(qint64 bytesSent, qint64 bytesTotal);  // Upload progress slot
     void onError(QNetworkReply::NetworkError err);
     void emit_start_update_atoms( );
     void emit_end_update_atoms( int n_atoms );
 
     signals:
+    void uploadProgress( qint64 bytesSent, qint64 bytesTotal );
     void start_update_atoms( );
     void end_update_atoms( int n_atoms );
     void unit_cell_changed();
+    void uploadError(QNetworkReply::NetworkError err);
 
     void supercell_full_experimental_image_intensity_columns_changed();
     void supercell_full_simulated_image_intensity_columns_changed();

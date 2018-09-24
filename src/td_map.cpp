@@ -319,10 +319,12 @@ void TDMap::update_super_cell_exp_image_centroid_translation_changed( cv::Point2
 
 
 void TDMap::emit_start_update_atoms(  ){
+    std::cout << " start_update_atoms " << std::endl;
   emit start_update_atoms( );
 }
 
 void TDMap::emit_end_update_atoms( int n_atoms ){
+  std::cout << " emit_end_update_atoms " << std::endl;
   emit end_update_atoms( n_atoms );
 }
 
@@ -1782,7 +1784,8 @@ void TDMap::uploadFinished(QNetworkReply *reply){
 }
 
 
-void TDMap::uploadProgress( qint64 bytesSent, qint64 bytesTotal ){
+void TDMap::receiveUploadProgress( qint64 bytesSent, qint64 bytesTotal ){
+  emit uploadProgress( bytesSent, bytesTotal );
   std::cout << " bytesSent " << bytesSent << " bytesTotal " << bytesTotal << std::endl;
 }
 
@@ -1860,7 +1863,7 @@ bool TDMap::set_unit_cell_cif_path( std::string cif_filename ){
       reply = nam->post( request, multiPart );
       //multiPart->setParent(reply);
       // And connect to the progress upload signal
-      connect(reply, &QNetworkReply::uploadProgress, this, &TDMap::uploadProgress);
+      connect(reply, &QNetworkReply::uploadProgress, this, &TDMap::receiveUploadProgress);
       connect(reply, SIGNAL(error(QNetworkReply::NetworkError)), this, SLOT(onError(QNetworkReply::NetworkError)));
 
       result = true;
@@ -1879,7 +1882,13 @@ bool TDMap::set_unit_cell_cif_path( std::string cif_filename ){
 
 void TDMap::onError(QNetworkReply::NetworkError err)
 {
-  qDebug() << " SOME ERROR!";
+  emit uploadError( err );
+  if( _flag_logger ){
+        std::stringstream message;
+        message << "error upload file ";
+        ApplicationLog::severity_level _log_type = ApplicationLog::error;
+        BOOST_LOG_FUNCTION();  logger->logEvent( _log_type , message.str() );
+      }
   qDebug() << err;
 }
 

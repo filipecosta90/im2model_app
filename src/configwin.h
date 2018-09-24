@@ -112,7 +112,7 @@ namespace Ui {
 
 class MainWindow : public QMainWindow {
   Q_OBJECT
-  public:
+public:
     //  MainWindow(QWidget *parent = 0);
     MainWindow( ApplicationLog::ApplicationLog* logger, std::string version, QWidget *parent = 0 );
 
@@ -135,7 +135,7 @@ class MainWindow : public QMainWindow {
 
     public slots:
       // void echo_sc();
-      void update_from_TDMap_sucess();
+    void update_from_TDMap_sucess();
     void update_from_TDMap_failure();
     bool _is_initialization_ok();
     void update_tdmap_celslc_started( );
@@ -144,7 +144,11 @@ class MainWindow : public QMainWindow {
     void update_supercell_celslc_started_with_steps_info( int n_steps );
     void update_supercell_celslc_ssc_single_slice_step( bool step_result );
     void update_tdmap_celslc_ssc_single_slice_step( bool step_result );
+    void update_tdmap_uploadError( QNetworkReply::NetworkError err );
 
+    void update_tdmap_uploadProgess( qint64 bytesSent, qint64 bytesTotal );
+    void update_tdmap_start_update_atoms( );
+    void update_tdmap_end_update_atoms( int n_atoms );
     void update_supercell_celslc_started( );
     void update_tdmap_celslc_ended( bool result );
     void update_supercell_celslc_ended( bool result );
@@ -169,13 +173,13 @@ class MainWindow : public QMainWindow {
     void update_from_full_SuperCell_intensity_cols_failure();
     void full_simulation_intensity_columns_SelectionChanged(const QItemSelection &selected, const QItemSelection &deselected);
 
-  protected:
+protected:
     void closeEvent(QCloseEvent *event) override;
     bool _was_document_modified();
     bool _reset_document_modified_flags();
 
     private slots:
-      bool update_qline_image_path( std::string fileName );
+    bool update_qline_image_path( std::string fileName );
     bool update_qline_cif_path( std::string fileName );
     bool update_qline_mtf_path( std::string fileName );
     void update_full_experimental_image();
@@ -223,13 +227,13 @@ class MainWindow : public QMainWindow {
     void on_qpush_compute_full_super_cell_clicked();
     void on_qpush_run_compute_intensity_columns_clicked();
 
-signals:
+    signals:
     void experimental_image_filename_changed();
     void simulated_grid_changed( );
     void super_cell_target_region_changed();
     void force_close();
 
-  private:
+private:
 
     // preferences methods
     bool maybeSetPreferences();

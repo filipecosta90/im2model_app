@@ -72,7 +72,6 @@ def get_cells_unitcells_data( id, cellsDBPath ):
 	if result_binary:
 		decompressed_result = zlib.decompress(result_binary[0])
 		result = json.loads(decompressed_result.decode('utf-8'))
-		print( result )
 	sqlite3_conn.close()
 	return result
 	
@@ -123,7 +122,6 @@ def upload():
 def fetch_file():
 	global apiVersion
 	global cellsDBPath
-	print( request.headers )
 	data_dict = json.loads( request.data )
 	url_param = data_dict["url"]
 	unitcell_link = None
@@ -134,7 +132,7 @@ def fetch_file():
 		self_url = urllib.parse.urlparse( request.host_url )
 		if base_url.netloc == self_url.netloc:
 			return redirect(url_param, code=301)
-			
+
 		base = os.path.basename( base_url.path )
 		base_filename = os.path.splitext(base)[0]
 		base_extension = os.path.splitext(base)[1]
@@ -229,7 +227,6 @@ def upload_file():
 	status = None
 	result = None
 	unitcell_link = None
-	print( request.headers )
 
 	if request.method == 'POST':
 		if 'file' in request.files:

@@ -227,6 +227,14 @@ MainWindow::MainWindow( ApplicationLog::ApplicationLog* logger, std::string vers
       connect( _core_td_map, SIGNAL(supercell_full_simulated_image_intensity_columns_changed( )), this, SLOT(update_super_cell_simulated_image_intensity_columns() ) );
       connect( _core_td_map, SIGNAL(supercell_full_experimental_image_centroid_translation_changed( )), this, SLOT(update_super_cell_target_region()) );
 
+      connect( _core_td_map, SIGNAL(start_update_atoms( )), this, SLOT( update_tdmap_start_update_atoms( )) );
+      connect( _core_td_map, SIGNAL(end_update_atoms( int )), this, SLOT(update_tdmap_end_update_atoms( int )) );
+
+      connect( _core_td_map, SIGNAL(start_update_atoms( )), this, SLOT( update_tdmap_start_update_atoms( )) );
+      connect( _core_td_map, SIGNAL(end_update_atoms( int )), this, SLOT(update_tdmap_end_update_atoms( int )) );
+      connect( _core_td_map, SIGNAL(uploadProgress( qint64, qint64 )), this, SLOT(update_tdmap_uploadProgess( qint64, qint64 ))  );
+      connect( _core_td_map, SIGNAL(uploadError( QNetworkReply::NetworkError )), this, SLOT(update_tdmap_uploadError( QNetworkReply::NetworkError ))  );
+
       _reset_document_modified_flags();
       if( _flag_im2model_logger ){
         im2model_logger->logEvent( ApplicationLog::notification, "Finished initializing App. Launching Open/Create" );
@@ -237,10 +245,27 @@ MainWindow::MainWindow( ApplicationLog::ApplicationLog* logger, std::string vers
         std::cout << "close" << std::endl;
         this->close();
       }
-
     }
   }
 }
+
+void MainWindow::update_tdmap_uploadError( QNetworkReply::NetworkError err ){
+updateProgressBar(0,0,100, true);
+  std::stringstream message;
+ message << "Upload error  " << err << " .";
+ std::cout << message.str() << std::endl;
+ ui->statusBar->showMessage(QString::fromStdString(message.str()), 5000);
+}
+
+void MainWindow::update_tdmap_uploadProgess( qint64 bytesSent, qint64 bytesTotal ){
+ const int percent = (int) (( static_cast<double>(bytesSent)  * 100) /  static_cast<double>(bytesTotal) );
+ updateProgressBar(0,  percent,100);
+ std::stringstream message;
+ message << "Uploaded  " << bytesSent << " bytes of " <<  bytesTotal << " .";
+ std::cout << message.str() << std::endl;
+ ui->statusBar->showMessage(QString::fromStdString(message.str()), 2000);
+}
+
 
 void MainWindow::setApplicationVersion( std::string app_version ){
   application_version = app_version;
@@ -259,6 +284,20 @@ void MainWindow::update_tdmap_celslc_started( ){
   ui->qgraphics_tdmap_selection->set_super_cell( tdmap_roi_sim_super_cell , false );
   ui->qgraphics_tdmap_selection->view_along_c_axis();
   ui->qgraphics_tdmap_selection->reload_data_from_super_cell();
+}
+
+void MainWindow::update_tdmap_start_update_atoms( ){
+  std::cout << "update_tdmap_start_update_atoms " << std::endl;
+  updateProgressBar(0,0,100);
+  ui->statusBar->showMessage(QString::fromStdString( "Super-Cell is updating atoms." ), 5000);
+}
+
+void MainWindow::update_tdmap_end_update_atoms( int n_atoms ){
+  updateProgressBar(0,100,100);
+  std::stringstream message;
+  message << "Super-Cell updated with " << n_atoms << " atoms.";
+  std::cout << message.str() << std::endl;
+  ui->statusBar->showMessage(QString::fromStdString(message.str()), 5000);
 }
 
 void MainWindow::update_tdmap_celslc_started_with_steps_info( int n_steps ){
