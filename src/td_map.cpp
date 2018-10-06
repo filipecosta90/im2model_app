@@ -264,7 +264,7 @@ TDMap::TDMap( ostream_celslc_buffer, ostream_msa_buffer, ostream_wavimg_buffer, 
 }
 
 bool TDMap::set_application_version( std::string app_version ){
-
+  app_version = app_version;
 }
 
 std::string TDMap::get_unit_cell_cif_path(){

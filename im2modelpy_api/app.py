@@ -16,33 +16,72 @@ from ase import Atoms
 import zlib
 import sqlite3
 import ntpath
+import numpy as np
+from matplotlib import pyplot as plt
 
+from dat import *
 
 #### globals ####
 global cellsDBPath
+global cellsDBSchema
 cellsDBPath = "data/cellsdb.sqlite3"
+cellsDBSchema = '''create table if not exists unitcells(
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        result BLOB );'''
+
+global datsDBPath
+global datsDBSchema
+datsDBPath = "data/datsdb.sqlite3"
+datsDBSchema = '''create table if not exists dats(
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        result BLOB,
+        dats_conf_id INTEGER,
+        dats_conf_key TEXT,
+        simgrids_conf_id INTEGER,
+        simgrids_pos_row INTEGER,
+        simgrids_pos_col INTEGER
+        );'''
+
+global dats_conf_DBPath
+global dats_conf_DBSchema
+dats_conf_DBPath = "data/simgridsdb.sqlite3"
+dats_conf_DBSchema = '''create table if not exists simgrids(
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        rows integer,
+        cols integer
+        );'''
+
+global tdmapsDBPath
+global tdmapsDBSchema
+tdmapsDBPath = "data/tdmapsdb.sqlite3"
+tdmapsDBSchema = '''create table if not exists tdmaps(
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        exp_setup_conf_id integer,
+        cells_conf_id integer, 
+        slices_conf_id integer, 
+        waves_conf_id integer, 
+        dats_conf_id integer,
+        simgrids_conf_id integer
+        );'''
 
 global apiVersion 
-apiVersion = "0.0.1.1"
+apiVersion = "0.0.1.2"
 
 UPLOAD_FOLDER = './uploads'
 #### globals ####
 
-def create_or_open_cells_db(db_file):
+def create_or_open_db(db_file, db_schema):
     db_exists = os.path.exists(db_file)
     connection = sqlite3.connect(db_file)
     if db_exists is False:
-        sql = '''create table if not exists unitcells(
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        result BLOB );'''
-        connection.execute(sql)
+        connection.execute(db_schema)
     return connection
 
 #backgroud save_cells_unitcells_data job
-def save_cells_unitcells_data( id, cell_json, cellsDBPath ):
+def save_cells_unitcells_data( id, cell_json, cellsDBPath, cellsDBSchema):
 	inserted_key = None
 	compressed_result = zlib.compress( json.dumps(cell_json).encode('utf-8') )
-	sqlite3_conn = create_or_open_cells_db(cellsDBPath)
+	sqlite3_conn = create_or_open_db(cellsDBPath, cellsDBSchema)
 	sql = '''insert into unitcells ( id, result ) VALUES( ?, ? );'''
 	if id is None:
 		id_key = None
@@ -61,10 +100,10 @@ def save_cells_unitcells_data( id, cell_json, cellsDBPath ):
 	return inserted_key
 
 #backgroud save_cells_unitcells_data job
-def get_cells_unitcells_data( id, cellsDBPath ):
+def get_cells_unitcells_data( id, cellsDBPath, cellsDBSchema ):
 	result = None
 	inserted_key = None
-	sqlite3_conn = create_or_open_cells_db(cellsDBPath)
+	sqlite3_conn = create_or_open_db(cellsDBPath, cellsDBSchema)
 	cur = sqlite3_conn.cursor()
 	sql = "SELECT result FROM unitcells WHERE id = {0}".format(id)
 	cur.execute(sql)
@@ -72,6 +111,45 @@ def get_cells_unitcells_data( id, cellsDBPath ):
 	if result_binary:
 		decompressed_result = zlib.decompress(result_binary[0])
 		result = json.loads(decompressed_result.decode('utf-8'))
+	sqlite3_conn.close()
+	return result
+
+#backgroud save_cells_unitcells_data job
+def save_tdmaps_setup_data( id, tdmap_setup_json, tdmapsDBPath, tdmapsDBSchema):
+	inserted_key = None
+	sqlite3_conn = create_or_open_db(tdmapsDBPath, tdmapsDBSchema)
+	sql = '''insert into tdmaps ( id ) VALUES( ? );'''
+	id_key = None
+	sqlite3_conn.execute( sql,[ id_key ] )
+	sqlite3_conn.commit()
+	cur = sqlite3_conn.cursor()
+	sql_select = "SELECT last_insert_rowid();"
+	cur.execute(sql_select)
+	result_string = cur.fetchone()
+	if result_string:
+		inserted_key = result_string[0]
+
+	sqlite3_conn.close()
+	return inserted_key	
+
+def get_tdmaps_data( id, tdmapsDBPath, tdmapsDBSchema ):
+	result = None
+	inserted_key = None
+	sqlite3_conn = create_or_open_db(tdmapsDBPath, tdmapsDBPath)
+	cur = sqlite3_conn.cursor()
+	sql = "SELECT id , exp_setup_conf_id, cells_conf_id, slices_conf_id, waves_conf_id, dats_conf_id, simgrids_conf_id FROM tdmaps WHERE id = {0}".format(id)
+	cur.execute(sql)
+	result_binary = cur.fetchone()
+	if result_binary:
+		result = { 
+		'id': result_binary[0],
+		'exp_setup_conf_id': result_binary[1],
+		'cells_conf_id': result_binary[2],
+		'slices_conf_id': result_binary[3],
+		'waves_conf_id': result_binary[4],
+		'dats_conf_id': result_binary[5],
+		'simgrids_conf_id': result_binary[6]
+		 }
 	sqlite3_conn.close()
 	return result
 	
@@ -107,6 +185,10 @@ def prepare_cif_json( cell ):
 
 	return data
 
+########################################################################
+######################## end of background jobs ########################
+########################################################################
+
 app = Flask(__name__)
 app.config['JSONIFY_PRETTYPRINT_REGULAR'] = False
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
@@ -118,10 +200,87 @@ def upload():
     return render_template('upload_cif.html')
 
 
+@app.route('/api/tdmaps/<string:tdmapid>', methods = ['GET'])
+def api_tdmaps_get(tdmapid):
+	global apiVersion
+	global tdmapsDBPath
+	global tdmapsDBSchema
+	status = None
+	result = None
+	data = get_tdmaps_data(tdmapid, tdmapsDBPath, tdmapsDBSchema)
+	if data is None:
+		result = {
+		        "apiVersion": apiVersion,
+		        "params": request.args,
+		        "method": request.method,
+		        "took": 0,
+		        "error" : {
+		            "code": 404,
+		            "message": "Something went wrong.",
+		            "url": request.url,
+		            },
+		        }
+		return_code = 404
+	else:
+		tdmap_link = "{0}api/tdmaps/{1}".format( request.host_url, tdmapid )
+		result = {
+		        "apiVersion": apiVersion,
+		        "params": request.args,
+		        "method": request.method,
+		        "took": 0,
+		        "data" : data,
+		        "links" : { "tdmap" : { "self" : tdmap_link } },  
+		        }
+		return_code = 200
+
+	return jsonpify(result), return_code
+
+@app.route('/api/tdmaps/setup', methods = ['POST'])
+def api_tdmaps_setup():
+	global apiVersion
+	global tdmapsDBPath
+	global tdmapsDBSchema
+	status = None
+	data_dict = None 
+	if len(request.data) > 0:
+		data_dict = json.loads( request.data )
+	data = {}
+	inserted_tdmap_id = save_tdmaps_setup_data(None, data_dict, tdmapsDBPath, tdmapsDBSchema)
+	tdmap_link = "{0}api/tdmaps/{1}".format( request.host_url, inserted_tdmap_id )
+	status = True
+	data = { 'id' : inserted_tdmap_id }
+
+	if status is None:
+		result = {
+		        "apiVersion": apiVersion,
+		        "params": request.args,
+		        "method": request.method,
+		        "took": 0,
+		        "error" : {
+		            "code": 404,
+		            "message": "Something went wrong.",
+		            "url": request.url,
+		            }, 
+		        }
+		return_code = 404
+	else:
+		result = {
+		        "apiVersion": apiVersion,
+		        "params": request.args,
+		        "method": request.method,
+		        "took": 0,
+		        "data" : data, 
+		        "links" : { "tdmap" : { "self" : tdmap_link } }, 
+		        }
+		return_code = 200
+
+	return jsonpify(result), return_code
+
 @app.route('/api/cells/unitcells/cif/fetch', methods = ['POST'])
 def fetch_file():
 	global apiVersion
 	global cellsDBPath
+	global cellsDBSchema
 	data_dict = json.loads( request.data )
 	url_param = data_dict["url"]
 	unitcell_link = None
@@ -149,7 +308,7 @@ def fetch_file():
 		os.remove( base_filename_with_ext )
 
 		data = prepare_cif_json( cell )
-		inserted_cell_id = save_cells_unitcells_data(None, data, cellsDBPath)
+		inserted_cell_id = save_cells_unitcells_data(None, data, cellsDBPath, cellsDBSchema)
 		unitcell_link = "{0}api/cells/unitcells/{1}".format( request.host_url, inserted_cell_id )
 		status = True
 
@@ -188,9 +347,10 @@ def fetch_file():
 def api_cells_unitcells_get(cellid):
 	global apiVersion
 	global cellsDBPath
+	global cellsDBSchema
 	status = None
 	result = None
-	data = get_cells_unitcells_data(cellid,cellsDBPath)
+	data = get_cells_unitcells_data(cellid,cellsDBPath, cellsDBSchema)
 
 	if data is None:
 		result = {
@@ -224,6 +384,7 @@ def api_cells_unitcells_get(cellid):
 def upload_file():
 	global apiVersion
 	global cellsDBPath
+	global cellsDBSchema
 	status = None
 	result = None
 	unitcell_link = None
@@ -238,7 +399,7 @@ def upload_file():
 			cell = ase.io.read( filepath )
 			os.remove( filepath )
 			data = prepare_cif_json( cell )
-			inserted_cell_id = save_cells_unitcells_data(None, data, cellsDBPath)
+			inserted_cell_id = save_cells_unitcells_data(None, data, cellsDBPath, cellsDBSchema)
 			unitcell_link = "{0}api/cells/unitcells/{1}".format( request.host_url, inserted_cell_id )
 			status = True
 
@@ -270,4 +431,4 @@ def upload_file():
 
 
 if __name__ == "__main__":
-    app.run( host='0.0.0.0', threaded=True )
+	app.run( host='0.0.0.0', threaded=True )
