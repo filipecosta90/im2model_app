@@ -444,6 +444,8 @@ private:
     TreeItem* super_cell_sim_image_intensity_columns = nullptr;
 
     /* simulation outputs */
+    TreeItem* tdmap_url;
+    TreeItem* tdmap_id;
     TreeItem* _multislice_phase_granting_output;
     TreeItem* _electron_diffraction_patterns_output;
     TreeItem* _image_intensity_distribuitions_output;

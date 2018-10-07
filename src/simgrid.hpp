@@ -75,6 +75,9 @@ private:
     BaseImage* sim_image_properties = nullptr;
     bool _flag_sim_image_properties = false;
 
+    std::string tdmap_api_id;
+    std::string simgrid_api_id;
+
     /***********
       simulation grid vars
      ***********/
@@ -135,6 +138,12 @@ cv::Point2i get_simulated_match_location( int row_thickness, int col_defocus );
     bool validate_simulated_grid_position( int row_thickness, int col_defocus );
 
     enum InmageNormalizationMode { LOCAL_NORMALIZATION, GLOBAL_NORMALIZATION, NO_NORMALIZATION };
+
+    bool set_tdmap_api_id( std::string );
+    std::string get_tdmap_api_id(){ return tdmap_api_id; }
+
+    bool set_simgrid_api_id( std::string );
+    std::string get_simgrid_api_id(){ return simgrid_api_id; }
 
     /** getters **/
     int get_simgrid_best_match_thickness_slice(){ return simgrid_best_match_thickness_slice; }

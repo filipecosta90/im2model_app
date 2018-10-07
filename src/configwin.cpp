@@ -250,11 +250,11 @@ MainWindow::MainWindow( ApplicationLog::ApplicationLog* logger, std::string vers
 }
 
 void MainWindow::update_tdmap_uploadError( QNetworkReply::NetworkError err ){
-updateProgressBar(0,0,100, true);
+  updateProgressBar(0,0,100, true);
   std::stringstream message;
- message << "Upload error  " << err << " .";
- std::cout << message.str() << std::endl;
- ui->statusBar->showMessage(QString::fromStdString(message.str()), 5000);
+  message << "Upload error  " << err << " .";
+  std::cout << message.str() << std::endl;
+  ui->statusBar->showMessage(QString::fromStdString(message.str()), 5000);
 }
 
 void MainWindow::update_tdmap_uploadProgess( qint64 bytesSent, qint64 bytesTotal ){
@@ -1084,8 +1084,12 @@ void MainWindow::closeEvent(QCloseEvent *event){
 
 void MainWindow::newFile(){
   if (maybeSave()) {
+  // request tdmap identifier to api
+    
     //setCurrentFile(QString());
   }
+  //const bool api_status = _core_td_map->request_api_tdmap_setup_id();
+  //std::cout << " api_status " << api_status << std::endl;
 }
 
 void MainWindow::open(){
@@ -2937,6 +2941,48 @@ void MainWindow::create_box_options_tab2_run_config(){
 
   tdmap_running_configuration_model = new TreeModel( running_configuration_root );
 
+   ////////////////
+  // api tdmap configuration
+  ////////////////
+  QVector<QVariant> box4_option_0_1 = {"tdmap url",""};
+  QVector<bool> box4_option_0_1_edit = {false,true};
+  boost::function<bool(std::string)> box4_function_0_1_setter ( boost::bind( &TDMap::set_tdmap_url, _core_td_map, _1 ) );
+  boost::function<std::string(void)> box4_function_0_1_getter ( boost::bind( &TDMap::get_tdmap_url, _core_td_map ) );
+  boost::function<bool(void)> box4_option_0_1_check_getter ( boost::bind( &TDMap::get_tdmap_url_switch, _core_td_map  ) );
+  boost::function<bool(bool)> box4_option_0_1_check_setter ( boost::bind( &TDMap::set_tdmap_url_switch, _core_td_map, _1 ) );
+  tdmap_url = new TreeItem ( box4_option_0_1 , box4_function_0_1_setter, box4_option_0_1_edit );
+  tdmap_url->set_variable_name( "tdmap_url" );
+  tdmap_url->set_fp_data_getter_string_vec( 1, box4_function_0_1_getter );
+  tdmap_url->load_data_from_getter( 1 );
+  connect( _core_td_map, SIGNAL( api_tdmap_url_changed( )), tdmap_url, SLOT( load_data_from_getter_string() ) );
+
+  /*group options*/
+  tdmap_url->set_fp_check_setter( 0, box4_option_0_1_check_setter );
+  tdmap_url->set_fp_check_getter( 0, box4_option_0_1_check_getter );
+  tdmap_url->load_check_status_from_getter( 0 );
+
+  running_configuration_root->insertChildren( tdmap_url );
+
+   ////////////////
+  // api tdmap id configuration
+  ////////////////
+  QVector<QVariant> box4_option_0_2 = {"tdmap api id",""};
+  QVector<bool> box4_option_0_2_edit = {false,true};
+  boost::function<bool(std::string)> box4_function_0_2_setter ( boost::bind( &TDMap::set_tdmap_id, _core_td_map, _1 ) );
+  boost::function<std::string(void)> box4_function_0_2_getter ( boost::bind( &TDMap::get_tdmap_id, _core_td_map ) );
+  tdmap_id = new TreeItem ( box4_option_0_2 , box4_function_0_2_setter, box4_option_0_2_edit );
+  tdmap_id->set_variable_name( "tdmap_id" );
+  tdmap_id->set_fp_data_getter_string_vec( 1, box4_function_0_2_getter );
+  tdmap_id->load_data_from_getter( 1 );
+  connect( _core_td_map, SIGNAL( api_tdmap_url_changed( )), tdmap_id, SLOT( load_data_from_getter_string() ) );
+
+  /*group options*/
+  tdmap_id->set_fp_check_setter( 0, box4_option_0_1_check_setter );
+  tdmap_id->set_fp_check_getter( 0, box4_option_0_1_check_getter );
+  tdmap_id->load_check_status_from_getter( 0 );
+
+  running_configuration_root->insertChildren( tdmap_id );
+
   ////////////////
   // Log level
   ////////////////
@@ -3562,6 +3608,7 @@ void MainWindow::on_qpush_test_tdmap_clicked(){
 void MainWindow::on_qpush_run_tdmap_clicked(){
   const bool project_ok = maybeSetProject();
   if ( project_ok ){
+    _core_td_map->validate_tdmap_url();
     bool status = false;
     updateProgressBar(0,0,100);
     ui->statusBar->showMessage(tr("Requesting a TD-Map worker thread."), 2000);

@@ -319,7 +319,7 @@ void TDMap::update_super_cell_exp_image_centroid_translation_changed( cv::Point2
 
 
 void TDMap::emit_start_update_atoms(  ){
-    std::cout << " start_update_atoms " << std::endl;
+  std::cout << " start_update_atoms " << std::endl;
   emit start_update_atoms( );
 }
 
@@ -1739,6 +1739,54 @@ boost::filesystem::path TDMap::make_path_relative_to_project_dir( boost::filesys
   return relativePath;
 }
 
+bool TDMap::set_tdmap_id( std::string id ){
+  tdmap_id = id;
+  return true;
+}
+
+bool TDMap::set_tdmap_url( std::string url ){
+  tdmap_url = url;
+  return true;
+}
+
+bool TDMap::set_tdmap_url_switch( bool value ){
+  _tdmap_url_switch = value;
+  return true;
+}
+
+void TDMap::request_api_tdmap_setup_id_finished(QNetworkReply *reply){
+  int statusCode = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
+  if( statusCode >= 200 && statusCode <300 ){
+
+    // where we will have the response 
+    QByteArray response_data = reply->readAll();
+    QJsonDocument json = QJsonDocument::fromJson(response_data);
+    QString json_string = json.toJson();
+
+    std::stringstream ss;
+    ss << json_string.toStdString();
+
+    boost::property_tree::ptree pt;
+    boost::property_tree::read_json(ss, pt);
+
+    // Read values
+    tdmap_id = pt.get<std::string>("data.id", "");
+    tdmap_url = pt.get<std::string>("links.tdmap.self", "");
+    emit api_tdmap_url_changed();
+
+    reply->deleteLater();   // delete object of reply
+  }
+  else{
+    if( _flag_logger ){
+      std::stringstream message;
+      message << "request_api_tdmap_setup_id_finished finished with error code: " << statusCode;
+      ApplicationLog::severity_level _log_type = ApplicationLog::error;
+      BOOST_LOG_FUNCTION();  logger->logEvent( _log_type , message.str() );
+    }
+  }
+}
+
+
 void TDMap::uploadFinished(QNetworkReply *reply){
   bool result = false;
   int statusCode = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
@@ -1787,6 +1835,50 @@ void TDMap::uploadFinished(QNetworkReply *reply){
 void TDMap::receiveUploadProgress( qint64 bytesSent, qint64 bytesTotal ){
   emit uploadProgress( bytesSent, bytesTotal );
   std::cout << " bytesSent " << bytesSent << " bytesTotal " << bytesTotal << std::endl;
+}
+
+void TDMap::validate_tdmap_url(){
+  if( tdmap_url.length() == 0 ){
+    std::cout << "######## request_api_tdmap_setup_id " << std::endl;
+    request_api_tdmap_setup_id();
+  }
+}
+
+bool TDMap::request_api_tdmap_setup_id( ){
+  bool result = false;
+  QNetworkAccessManager *nam = new QNetworkAccessManager(this);
+  connect(nam, &QNetworkAccessManager::finished, this, &TDMap::request_api_tdmap_setup_id_finished);
+
+  // You must save the file on the heap
+  // If you create a file object on the stack, the program will crash.
+  QFile *m_file;
+  QNetworkReply *reply;
+
+  std::stringstream UserAgentString;
+  UserAgentString << "im2model/" << app_version;
+
+  std::stringstream api_url;
+  api_url << im2model_api_url << "/api/tdmaps/setup";
+  std::cout << api_url.str() << std::endl;
+
+  if( _flag_logger ){
+    std::stringstream message;
+    message << "requesting api tdmap setup id " << api_url.str();
+    ApplicationLog::severity_level _log_type = ApplicationLog::notification;
+    BOOST_LOG_FUNCTION();  logger->logEvent( _log_type , message.str() );
+  }
+
+  QNetworkRequest request( QUrl( QString::fromStdString( api_url.str() )  ) );
+  request.setHeader( QNetworkRequest::ContentTypeHeader, "application/json" );
+  request.setHeader( QNetworkRequest::UserAgentHeader, QString::fromStdString( UserAgentString.str() ) );
+  request.setAttribute(QNetworkRequest::FollowRedirectsAttribute, true);
+
+  QJsonObject body;
+  reply = nam->post(request, QJsonDocument(body).toJson());
+
+  connect(reply, SIGNAL(error(QNetworkReply::NetworkError)), this, SLOT(onError(QNetworkReply::NetworkError)));
+  result = true;
+  return result;
 }
 
 bool TDMap::set_unit_cell_cif_path( std::string cif_filename ){
@@ -1884,11 +1976,11 @@ void TDMap::onError(QNetworkReply::NetworkError err)
 {
   emit uploadError( err );
   if( _flag_logger ){
-        std::stringstream message;
-        message << "error upload file ";
-        ApplicationLog::severity_level _log_type = ApplicationLog::error;
-        BOOST_LOG_FUNCTION();  logger->logEvent( _log_type , message.str() );
-      }
+    std::stringstream message;
+    message << "error upload file ";
+    ApplicationLog::severity_level _log_type = ApplicationLog::error;
+    BOOST_LOG_FUNCTION();  logger->logEvent( _log_type , message.str() );
+  }
   qDebug() << err;
 }
 
