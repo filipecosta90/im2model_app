@@ -1,5 +1,0 @@
-Werkzeug==0.14.1
-Flask_Jsonpify==1.5.0
-numpy==1.14.3
-ase==3.16.2
-Flask==0.10.1

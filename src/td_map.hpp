@@ -70,6 +70,12 @@ private:
     bool _flag_mtf_filename = false;
     bool _flag_experimental_image_properties_path = false;
 
+    /////////////////////////
+    // API retrived data
+    /////////////////////////
+    std::string tdmap_id;
+    std::string tdmap_url;
+    bool _tdmap_url_switch = true;
 
     /////////////////////////
     // Chem database wrapper
@@ -439,6 +445,7 @@ public:
     bool set_ny_size_height( std::string );
     boost::filesystem::path make_path_relative_to_project_dir( boost::filesystem::path  childPath );
     bool set_unit_cell_cif_path( std::string cif_path );
+    bool request_api_tdmap_setup_id();
     bool set_zone_axis_u( std::string );
     bool set_zone_axis_v( std::string );
     bool set_zone_axis_w( std::string );
@@ -489,6 +496,13 @@ public:
     bool accept_tdmap_best_match_position(int row, int col);
     bool compute_full_super_cell();
     bool compute_full_super_cell_intensity_cols();
+    bool set_tdmap_url( std::string );
+    bool set_tdmap_id( std::string );
+    std::string get_tdmap_url( ){ return tdmap_url; }
+    std::string get_tdmap_id( ){ return tdmap_id; }
+    bool get_tdmap_url_switch( ){ return _tdmap_url_switch; }
+    void validate_tdmap_url();
+    bool set_tdmap_url_switch( bool );
 
     /* gui flag getters */
     bool get_exp_image_properties_flag_full_image();
@@ -618,16 +632,19 @@ public:
     void update_super_cell_celslc_ssc_stage_ended( bool result );
 
     private slots:
+    void request_api_tdmap_setup_id_finished(QNetworkReply *reply); // tdmap setup finish slot
    void uploadFinished(QNetworkReply *reply);  // Upload finish slot
-    void uploadProgress(qint64 bytesSent, qint64 bytesTotal);  // Upload progress slot
+    void receiveUploadProgress(qint64 bytesSent, qint64 bytesTotal);  // Upload progress slot
     void onError(QNetworkReply::NetworkError err);
     void emit_start_update_atoms( );
     void emit_end_update_atoms( int n_atoms );
 
     signals:
+    void uploadProgress( qint64 bytesSent, qint64 bytesTotal );
     void start_update_atoms( );
     void end_update_atoms( int n_atoms );
     void unit_cell_changed();
+    void uploadError(QNetworkReply::NetworkError err);
 
     void supercell_full_experimental_image_intensity_columns_changed();
     void supercell_full_simulated_image_intensity_columns_changed();
@@ -641,6 +658,7 @@ public:
     void super_cell_dimensions_c_changed();
     void exp_image_properties_noise_carbon_statistical_mean_changed();
     void exp_image_properties_noise_carbon_statistical_stddev_changed();
+    void api_tdmap_url_changed();
 
     void TDMap_started_celslc( );
     void TDMap_started_supercell_celslc( );
