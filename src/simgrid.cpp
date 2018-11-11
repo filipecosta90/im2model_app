@@ -353,7 +353,6 @@ bool SimGrid::read_grid_from_dat_files(){
             cv::Mat raw_simulated_image = sim_image_properties->get_full_image();
             raw_simulated_images_row.push_back( raw_simulated_image );
           }
-
           result &= _mmap_ok;
         }
         raw_simulated_images_grid.push_back( raw_simulated_images_row );
